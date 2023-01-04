@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.topic.tree;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -23,6 +24,7 @@ import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class MatchingNodeSubscriptions {
@@ -125,7 +127,7 @@ class MatchingNodeSubscriptions {
 
         assert subscribersBuilder != null || subscriberNamesBuilder != null;
 
-        getAllSubscriptionStream().filter(itemFilter)
+        getAllSubscriptionsStream().filter(itemFilter)
                 .forEach(subscriber -> {
                     if (subscribersBuilder != null) {
                         subscribersBuilder.add(subscriber);
@@ -144,14 +146,14 @@ class MatchingNodeSubscriptions {
     }
 
     @ReadOnly
-    public @NotNull Stream<SubscriberWithQoS> getSharedSubscriptionStream() {
+    public @NotNull Stream<SubscriberWithQoS> getSharedSubscriptionsStream() {
         return sharedSubscribersMap.values()
                 .stream()
                 .flatMap(subscriptionGroup -> subscriptionGroup.getSubscriptionsInfos().stream());
     }
 
     @ReadOnly
-    public @Nullable Stream<SubscriberWithQoS> getNonSharedSubscriptionStream() {
+    public @Nullable Stream<SubscriberWithQoS> getNonSharedSubscriptionsStream() {
         if (nonSharedSubscribersMap == null && nonSharedSubscribersArray == null) {
             return null;
         }
@@ -163,13 +165,19 @@ class MatchingNodeSubscriptions {
     }
 
     @ReadOnly
-    private @NotNull Stream<SubscriberWithQoS> getAllSubscriptionStream() {
-        final Stream<SubscriberWithQoS> sharedSubscriptionStream = getSharedSubscriptionStream();
-        final Stream<SubscriberWithQoS> nonSharedSubscriptionStream = getNonSharedSubscriptionStream();
+    private @NotNull Stream<SubscriberWithQoS> getAllSubscriptionsStream() {
+        final Stream<SubscriberWithQoS> sharedSubscriptionStream = getSharedSubscriptionsStream();
+        final Stream<SubscriberWithQoS> nonSharedSubscriptionStream = getNonSharedSubscriptionsStream();
         if (nonSharedSubscriptionStream == null) {
             return sharedSubscriptionStream;
         }
         return Stream.concat(sharedSubscriptionStream, nonSharedSubscriptionStream);
+    }
+
+    @VisibleForTesting
+    @ReadOnly
+    public @NotNull Set<SubscriberWithQoS> getSubscribers() {
+        return getAllSubscriptionsStream().collect(Collectors.toSet());
     }
 
     @ReadOnly

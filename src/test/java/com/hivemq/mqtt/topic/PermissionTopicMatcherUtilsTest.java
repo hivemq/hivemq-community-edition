@@ -23,7 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("NullabilityAnnotations")
-public class PermissionTopicMatcherTest {
+public class PermissionTopicMatcherUtilsTest {
 
     private @NotNull String actual = "my/test/topic/for/the/unit/test";
 
@@ -124,7 +124,7 @@ public class PermissionTopicMatcherTest {
 
         final String stripedActualTopic = StringUtils.stripEnd(actualTopic, "/");
         final String[] splitActualTopic = StringUtils.splitPreserveAllTokens(stripedActualTopic, "/");
-        return PermissionTopicMatcher.matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard,
+        return PermissionTopicMatcherUtils.matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard,
                 endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
     }
 }

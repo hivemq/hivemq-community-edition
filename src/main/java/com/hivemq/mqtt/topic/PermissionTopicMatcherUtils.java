@@ -19,9 +19,9 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import static java.lang.Math.min;
 
-public final class PermissionTopicMatcher {
+public final class PermissionTopicMatcherUtils {
 
-    private PermissionTopicMatcher() {
+    private PermissionTopicMatcherUtils() {
     }
 
     public static boolean matches(

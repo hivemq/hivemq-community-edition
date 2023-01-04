@@ -26,7 +26,7 @@ import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.InvalidTopicException;
-import com.hivemq.mqtt.topic.PermissionTopicMatcher;
+import com.hivemq.mqtt.topic.PermissionTopicMatcherUtils;
 import com.hivemq.util.Topics;
 import org.apache.commons.lang3.StringUtils;
 
@@ -241,7 +241,7 @@ public final class DefaultPermissionsEvaluator {
         try {
             if (topicPermission instanceof InternalTopicPermission) {
                 final InternalTopicPermission internalTopicPermission = (InternalTopicPermission) topicPermission;
-                return PermissionTopicMatcher.matches(StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
+                return PermissionTopicMatcherUtils.matches(StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
                         ((InternalTopicPermission) topicPermission).getSplitTopic(),
                         !internalTopicPermission.containsWildcardCharacter(),
                         internalTopicPermission.endsWithWildcard(), internalTopicPermission.isRootWildcard(),
