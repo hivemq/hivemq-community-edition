@@ -22,8 +22,6 @@ import static java.lang.Math.min;
 
 /**
  * An implementation of a topic matcher which tokenizes topics to match wildcards.
- *
- * @author Dominik Obermaier
  */
 public class TokenizedTopicMatcher implements TopicMatcher {
 
@@ -67,9 +65,9 @@ public class TokenizedTopicMatcher implements TopicMatcher {
             final String t = topic[i];
 
             if (!sub.equals(t)) {
-                if (sub.equals("#")) {
+                if ("#".equals(sub)) {
                     return true;
-                } else if (sub.equals("+")) {
+                } else if ("+".equals(sub)) {
                     //Matches Topic Level wildcard, so we can just ignore
 
                 } else {
@@ -81,6 +79,6 @@ public class TokenizedTopicMatcher implements TopicMatcher {
         //If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a wildcard,
         //everything is alright.
         return subscription.length == topic.length ||
-                (subscription.length - topic.length == 1 && (subscription[subscription.length - 1].equals("#")));
+                (subscription.length - topic.length == 1 && ("#".equals(subscription[subscription.length - 1])));
     }
 }
