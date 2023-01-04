@@ -88,6 +88,7 @@ public class PermissionTopicMatcher implements TopicMatcher {
         //If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a wildcard,
         //everything is alright.
         return splitPermissionTopic.length == splitActualTopic.length ||
-                (splitPermissionTopic.length - splitActualTopic.length == 1 && (splitPermissionTopic[splitPermissionTopic.length - 1].equals("#")));
+                (splitPermissionTopic.length - splitActualTopic.length == 1 &&
+                        ("#".equals(splitPermissionTopic[splitPermissionTopic.length - 1])));
     }
 }
