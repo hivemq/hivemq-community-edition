@@ -73,26 +73,26 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
 
     public void addFlags(final @NotNull SubscriptionFlag... subscriptionFlags) {
         for (final SubscriptionFlag flag : subscriptionFlags) {
-            flags = Bytes.setBit(flags, flag.flagIndex);
+            flags = Bytes.setBit(flags, flag.getFlagIndex());
         }
     }
 
     public void removeFlags(final @NotNull SubscriptionFlag... subscriptionFlags) {
         for (final SubscriptionFlag flag : subscriptionFlags) {
-            flags = Bytes.unsetBit(flags, flag.flagIndex);
+            flags = Bytes.unsetBit(flags, flag.getFlagIndex());
         }
     }
 
     public boolean isSharedSubscription() {
-        return Bytes.isBitSet(flags, SubscriptionFlag.SHARED_SUBSCRIPTION.flagIndex);
+        return Bytes.isBitSet(flags, SubscriptionFlag.SHARED_SUBSCRIPTION.getFlagIndex());
     }
 
     public boolean isRetainAsPublished() {
-        return Bytes.isBitSet(flags, SubscriptionFlag.RETAIN_AS_PUBLISHED.flagIndex);
+        return Bytes.isBitSet(flags, SubscriptionFlag.RETAIN_AS_PUBLISHED.getFlagIndex());
     }
 
     public boolean isNoLocal() {
-        return Bytes.isBitSet(flags, SubscriptionFlag.NO_LOCAL.flagIndex);
+        return Bytes.isBitSet(flags, SubscriptionFlag.NO_LOCAL.getFlagIndex());
     }
 
     @Nullable
