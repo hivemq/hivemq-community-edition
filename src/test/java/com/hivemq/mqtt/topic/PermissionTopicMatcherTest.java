@@ -15,117 +15,116 @@
  */
 package com.hivemq.mqtt.topic;
 
-import org.junit.Before;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Christoph Schäbel
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class PermissionTopicMatcherTest {
 
-    private String actual;
-    private PermissionTopicMatcher topicMatcher;
-
-    @Before
-    public void setUp() throws Exception {
-
-        actual = "my/test/topic/for/the/unit/test";
-
-        topicMatcher = new PermissionTopicMatcher();
-
-    }
+    private @NotNull String actual = "my/test/topic/for/the/unit/test";
 
     @Test
     public void testMatchesWithoutWildcards() throws Exception {
 
-        assertTrue(topicMatcher.matches(actual, actual));
-        assertTrue(topicMatcher.matches(actual + "/", actual));
-        assertTrue(topicMatcher.matches(actual, actual + "/"));
-        assertTrue(topicMatcher.matches(actual + "/", actual + "/"));
+        assertTrue(matches(actual, actual));
+        assertTrue(matches(actual + "/", actual));
+        assertTrue(matches(actual, actual + "/"));
+        assertTrue(matches(actual + "/", actual + "/"));
 
-        assertFalse(topicMatcher.matches(actual + "/getCacheImpl", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/unit", actual));
+        assertFalse(matches(actual + "/getCacheImpl", actual));
+        assertFalse(matches("my/test/topic/for/the/unit", actual));
 
-        assertFalse(topicMatcher.matches(actual.toUpperCase(), actual));
-
+        assertFalse(matches(actual.toUpperCase(), actual));
     }
 
     @Test
     public void testMatchesWithLevelWildcards() throws Exception {
 
-        assertTrue(topicMatcher.matches("my/test/topic/for/the/+/test", actual));
-        assertTrue(topicMatcher.matches("my/+/topic/+/the/+/test", actual));
-        assertTrue(topicMatcher.matches("+/+/+/+/+/+/test", actual));
-        assertTrue(topicMatcher.matches("my/test/topic/for/the/unit/+", actual));
-        assertTrue(topicMatcher.matches("my/test/topic/for/the/unit/+/", actual));
+        assertTrue(matches("my/test/topic/for/the/+/test", actual));
+        assertTrue(matches("my/+/topic/+/the/+/test", actual));
+        assertTrue(matches("+/+/+/+/+/+/test", actual));
+        assertTrue(matches("my/test/topic/for/the/unit/+", actual));
+        assertTrue(matches("my/test/topic/for/the/unit/+/", actual));
 
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/+/nottest", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/a/+/test", actual));
+        assertFalse(matches("my/test/topic/for/the/+/nottest", actual));
+        assertFalse(matches("my/test/topic/for/a/+/test", actual));
 
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/+/test/toolong", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/+/unit", actual));
+        assertFalse(matches("my/test/topic/for/the/+/test/toolong", actual));
+        assertFalse(matches("my/test/topic/for/+/unit", actual));
 
-        assertFalse(topicMatcher.matches(actual + "/+", actual));
+        assertFalse(matches(actual + "/+", actual));
 
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/unit/t+", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/unit/+t", actual));
+        assertFalse(matches("my/test/topic/for/the/unit/t+", actual));
+        assertFalse(matches("my/test/topic/for/the/unit/+t", actual));
 
     }
 
     @Test
     public void testMatchesWithWildcard() throws Exception {
 
-        assertTrue(topicMatcher.matches("my/test/topic/for/the/#", actual));
-        assertTrue(topicMatcher.matches("my/test/topic/#", actual));
-        assertTrue(topicMatcher.matches("#", actual));
-        assertTrue(topicMatcher.matches("#/", actual));
-        assertTrue(topicMatcher.matches("+/#", actual));
-        assertTrue(topicMatcher.matches(actual + "/#", actual));
+        assertTrue(matches("my/test/topic/for/the/#", actual));
+        assertTrue(matches("my/test/topic/#", actual));
+        assertTrue(matches("#", actual));
+        assertTrue(matches("#/", actual));
+        assertTrue(matches("+/#", actual));
+        assertTrue(matches(actual + "/#", actual));
 
-        assertTrue(topicMatcher.matches("my/+/topic/for/the/#", actual));
-        assertTrue(topicMatcher.matches("+/+/topic/for/the/#", actual));
-        assertTrue(topicMatcher.matches("+/+/topic/+/+/#", actual));
+        assertTrue(matches("my/+/topic/for/the/#", actual));
+        assertTrue(matches("+/+/topic/for/the/#", actual));
+        assertTrue(matches("+/+/topic/+/+/#", actual));
 
+        assertFalse(matches("a/test/topic/#", actual));
+        assertFalse(matches("a/#", actual));
+        assertFalse(matches("+/+/topic/+/a/#", actual));
 
-        assertFalse(topicMatcher.matches("a/test/topic/#", actual));
-        assertFalse(topicMatcher.matches("a/#", actual));
-        assertFalse(topicMatcher.matches("+/+/topic/+/a/#", actual));
+        assertFalse(matches("my/test/topic/for/the#", actual));
+        assertFalse(matches("my/test/topic/for/#the", actual));
+        assertFalse(matches(actual + "#", actual));
 
-        assertFalse(topicMatcher.matches("my/test/topic/for/the#", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/#the", actual));
-        assertFalse(topicMatcher.matches(actual + "#", actual));
+        assertFalse(matches("/" + actual, actual));
+        assertFalse(matches("/#", actual));
 
-        assertFalse(topicMatcher.matches("/" + actual, actual));
-        assertFalse(topicMatcher.matches("/#", actual));
+        assertFalse(matches("my/test/topic/for/the/unit/test/toolong/#", actual));
+        assertFalse(matches("my/test/topic/for/the/unit/toolong/#", actual));
+        assertFalse(matches("my/test/topic/for/the/unit/t+/#", actual));
 
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/unit/test/toolong/#", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/unit/toolong/#", actual));
-        assertFalse(topicMatcher.matches("my/test/topic/for/the/unit/t+/#", actual));
+        assertTrue(matches("my/test/topic/for/the/unit/+/#", actual));
+        assertTrue(matches("my/test/topic/for/the/unit/test/#", actual));
 
-        assertTrue(topicMatcher.matches("my/test/topic/for/the/unit/+/#", actual));
-        assertTrue(topicMatcher.matches("my/test/topic/for/the/unit/test/#", actual));
-
-        assertFalse(topicMatcher.matches("my/#/test/topic", "my/test/topic"));
+        assertFalse(matches("my/#/test/topic", "my/test/topic"));
 
     }
 
     @Test
     public void test_invalid_wildcard_handling() throws Exception {
 
+        assertFalse(matches("my/t#", "my/t"));
 
-        assertFalse(topicMatcher.matches("my/t#", "my/t"));
+        assertFalse(matches("my/#t", "my/t"));
+        assertFalse(matches("my/t#t", "my/ttt"));
 
-        assertFalse(topicMatcher.matches("my/#t", "my/t"));
-        assertFalse(topicMatcher.matches("my/t#t", "my/ttt"));
-
-
-        assertFalse(topicMatcher.matches("my/t+", "my/t"));
-        assertFalse(topicMatcher.matches("my/+t", "my/t"));
-        assertFalse(topicMatcher.matches("my/t+t", "my/ttt"));
+        assertFalse(matches("my/t+", "my/t"));
+        assertFalse(matches("my/+t", "my/t"));
+        assertFalse(matches("my/t+t", "my/ttt"));
     }
 
+    private boolean matches(
+            final @NotNull String permissionTopic,
+            final @NotNull String actualTopic) throws InvalidTopicException {
+
+        final String stripedPermissionTopic = StringUtils.stripEnd(permissionTopic, "/");
+        final String[] splitPermissionTopic = StringUtils.splitPreserveAllTokens(stripedPermissionTopic, "/");
+        final boolean nonWildCard = StringUtils.containsNone(stripedPermissionTopic, "#+");
+        final boolean rootWildCard = stripedPermissionTopic.contains("#");
+        final boolean endsWithWildCard = StringUtils.endsWith(stripedPermissionTopic, "/#");
+
+        final String stripedActualTopic = StringUtils.stripEnd(actualTopic, "/");
+        final String[] splitActualTopic = StringUtils.splitPreserveAllTokens(stripedActualTopic, "/");
+        return PermissionTopicMatcher.matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard,
+                endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
+    }
 }

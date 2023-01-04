@@ -16,26 +16,12 @@
 package com.hivemq.mqtt.topic;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.apache.commons.lang3.StringUtils;
 
 import static java.lang.Math.min;
 
-public class PermissionTopicMatcher implements TopicMatcher {
+public final class PermissionTopicMatcher {
 
-    @Override
-    public boolean matches(
-            final @NotNull String permissionTopic,
-            final @NotNull String actualTopic) throws InvalidTopicException {
-
-        final String stripedPermissionTopic = StringUtils.stripEnd(permissionTopic, "/");
-        final String[] splitPermissionTopic = StringUtils.splitPreserveAllTokens(stripedPermissionTopic, "/");
-        final boolean nonWildCard = StringUtils.containsNone(stripedPermissionTopic, "#+");
-        final boolean rootWildCard = stripedPermissionTopic.contains("#");
-        final boolean endsWithWildCard = StringUtils.endsWith(stripedPermissionTopic, "/#");
-
-        final String stripedActualTopic = StringUtils.stripEnd(actualTopic, "/");
-        final String[] splitActualTopic = StringUtils.splitPreserveAllTokens(stripedActualTopic, "/");
-        return matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard, endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
+    private PermissionTopicMatcher() {
     }
 
     public static boolean matches(
