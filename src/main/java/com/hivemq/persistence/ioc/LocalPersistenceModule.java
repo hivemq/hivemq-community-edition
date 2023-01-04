@@ -21,7 +21,6 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl;
@@ -79,7 +78,7 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
                 .in(LazySingleton.class);
 
         /* Topic Tree */
-        bind(LocalTopicTree.class).to(TopicTreeImpl.class).in(Singleton.class);
+        bind(LocalTopicTree.class).to(LocalTopicTree.class).in(Singleton.class);
 
         /* QoS Handling */
         bind(IncomingMessageFlowPersistence.class).to(IncomingMessageFlowPersistenceImpl.class);

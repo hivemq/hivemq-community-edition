@@ -39,32 +39,32 @@ import static org.junit.Assert.*;
 @SuppressWarnings("NullabilityAnnotations")
 public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
-    private TopicTreeImpl topicTree;
+    private LocalTopicTree topicTree;
 
     private static final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
     private static final byte nonSharedFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
 
     @Before
     public void setUp() {
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
     }
 
     @Test
     public void test_empty_topic_tree_get_subscribers() {
         final Set<String> any = topicTree.getSubscribersWithFilter("any", getMatchAllFilter());
-        assertEquals(true, any.isEmpty());
+        assertTrue(any.isEmpty());
     }
 
     @Test
     public void test_empty_topic_tree_get_subscribers_wildcard() {
         final Set<String> any = topicTree.getSubscribersWithFilter("topic/#", getMatchAllFilter());
-        assertEquals(true, any.isEmpty());
+        assertTrue(any.isEmpty());
     }
 
     @Test
     public void test_empty_topic_tree_get_subscribers_root_wildcard() {
         final Set<String> any = topicTree.getSubscribersWithFilter("#", getMatchAllFilter());
-        assertEquals(true, any.isEmpty());
+        assertTrue(any.isEmpty());
     }
 
 
@@ -73,7 +73,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         final Set<String> subscribers = topicTree.getSubscribersWithFilter("anothertopic", getMatchAllFilter());
-        assertEquals(true, subscribers.isEmpty());
+        assertTrue(subscribers.isEmpty());
     }
 
 
@@ -262,7 +262,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void test_same_subscriber_for_same_topic_with_subscriber_map() {
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 0, null);
@@ -275,7 +275,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void test_root_level_wildcard_multiple_subscribers_with_wildcard_with_subscriber_map() {
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -437,7 +437,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
 
     @Test
     public void test_normal_and_shared_subscription_with_map() {
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTree.addTopic("client1", new Topic("topic", QoS.AT_LEAST_ONCE), nonSharedFlag, null);
         topicTree.addTopic("client1", new Topic("topic", QoS.AT_LEAST_ONCE), sharedFlag, "name");

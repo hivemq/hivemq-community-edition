@@ -41,7 +41,6 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
@@ -95,7 +94,7 @@ public class NettyModuleTest {
                 bind(InternalPublishService.class).toInstance(mock(InternalPublishService.class));
                 bind(PublishPollService.class).toInstance(mock(PublishPollService.class));
                 bind(ServerInformation.class).toInstance(mock(ServerInformation.class));
-                bind(LocalTopicTree.class).toInstance(mock(TopicTreeImpl.class));
+                bind(LocalTopicTree.class).toInstance(mock(LocalTopicTree.class));
                 bind(SharedSubscriptionService.class).toInstance(mock(SharedSubscriptionService.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
                 bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));

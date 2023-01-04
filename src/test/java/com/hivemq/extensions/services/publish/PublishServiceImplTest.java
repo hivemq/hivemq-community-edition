@@ -37,7 +37,7 @@ import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.mqtt.services.PublishDistributor;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriptionFlag;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
+import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -72,7 +72,7 @@ public class PublishServiceImplTest {
     PublishDistributor publishDistributor;
 
     @Mock
-    TopicTreeImpl topicTree;
+    LocalTopicTree topicTree;
 
     private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
