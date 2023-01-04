@@ -835,14 +835,14 @@ public class LocalTopicTree {
          *
          * @param matchingNodeSubscriptions subscriptions that are stored within the topic tree node.
          */
-        void acceptNonRootState(final @NotNull MatchingNodeSubscriptions matchingNodeSubscriptions);
+        void acceptNonRootState(@NotNull MatchingNodeSubscriptions matchingNodeSubscriptions);
 
         /**
          * Processes the subscription information of the root wildcard subscriptions, i.e. subscriptions to the # topic filter.
          *
          * @param rootWildcardSubscriptions root wildcard subscriptions of the topic tree.
          */
-        void acceptRootState(final @NotNull List<SubscriberWithQoS> rootWildcardSubscriptions);
+        void acceptRootState(@NotNull List<SubscriberWithQoS> rootWildcardSubscriptions);
     }
 
     /**
@@ -907,7 +907,7 @@ public class LocalTopicTree {
         @Override
         public void acceptNonRootState(final @NotNull MatchingNodeSubscriptions matchingNodeSubscriptions) {
 
-            final Stream<SubscriberWithQoS> nonSharedSubscriptions = matchingNodeSubscriptions.getNonSharedSubscriptionStream();
+            final Stream<SubscriberWithQoS> nonSharedSubscriptions = matchingNodeSubscriptions.getNonSharedSubscriptionsStream();
             if (nonSharedSubscriptions != null) {
                 nonSharedSubscriptions
                         .filter(subscriberWithQoS -> subscriberWithQoS.getSubscriber().equals(client))
@@ -922,7 +922,7 @@ public class LocalTopicTree {
             //
             // Note: if the non-shared subscriptions are found later on,
             // they will override the shared subscriptions (see getMatchingSubscriber method)!
-            matchingNodeSubscriptions.getSharedSubscriptionStream()
+            matchingNodeSubscriptions.getSharedSubscriptionsStream()
                     .filter(subscriberWithQoS -> subscriberWithQoS.getSubscriber().equals(client))
                     .forEach(subscriberWithQoS -> {
                         if (sharedSubscriber == null || sharedSubscriber.getQos() < subscriberWithQoS.getQos()) {
