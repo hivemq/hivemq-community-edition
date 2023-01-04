@@ -684,10 +684,10 @@ public class LocalTopicTree {
         }
     }
 
-    private @NotNull ImmutableSet<String> createDistinctSubscriberIds(
+    private static @NotNull ImmutableSet<String> createDistinctSubscriberIds(
             final ImmutableSet<SubscriberWithQoS> subscriptionsByFilters) {
 
-        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        final ImmutableSet.Builder<String> builder = ImmutableSet.builderWithExpectedSize(subscriptionsByFilters.size());
         for (final SubscriberWithQoS subscription : subscriptionsByFilters) {
             builder.add(subscription.getSubscriber());
         }
