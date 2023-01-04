@@ -47,7 +47,11 @@ class MatchingNodeSubscriptions {
      * This grouping improves the retrieval for shared subscriptions' groups and topic filters
      * in case of massive subscriptions in the same group to the same topic filter.
      */
-    @Nullable Map<String, SubscriptionGroup> sharedSubscribersMap;
+    @NotNull Map<String, SubscriptionGroup> sharedSubscribersMap;
+
+    MatchingNodeSubscriptions() {
+        sharedSubscribersMap = Map.of();
+    }
 
     /**
      * Attempts to add the subscription information and updates the counters based on how the addition went and
@@ -120,18 +124,16 @@ class MatchingNodeSubscriptions {
             final @Nullable ImmutableSet.Builder<String> subscriberNamesBuilder) {
 
         assert subscribersBuilder != null || subscriberNamesBuilder != null;
-        final Stream<SubscriberWithQoS> subscriptions = getAllSubscriptions();
 
-        if (subscriptions != null) {
-            subscriptions.filter(itemFilter)
-                    .forEach(subscriber -> {
-                        if (subscribersBuilder != null) {
-                            subscribersBuilder.add(subscriber);
-                        } else {
-                            subscriberNamesBuilder.add(subscriber.getSubscriber());
-                        }
-                    });
-        }
+        getAllSubscriptions()
+                .filter(itemFilter)
+                .forEach(subscriber -> {
+                    if (subscribersBuilder != null) {
+                        subscribersBuilder.add(subscriber);
+                    } else {
+                        subscriberNamesBuilder.add(subscriber.getSubscriber());
+                    }
+                });
     }
 
     @ReadOnly
@@ -139,34 +141,11 @@ class MatchingNodeSubscriptions {
         final int nonSharedSubscribersCount = nonSharedSubscribersMap != null ?
                 nonSharedSubscribersMap.size() : countArraySize(nonSharedSubscribersArray);
 
-        return sharedSubscribersMap == null ?
-                nonSharedSubscribersCount : nonSharedSubscribersCount + sharedSubscribersMap.size();
+        return nonSharedSubscribersCount + sharedSubscribersMap.size();
     }
 
     @ReadOnly
-    public @NotNull Set<SubscriberWithQoS> getSubscribers() {
-        final ImmutableSet.Builder<SubscriberWithQoS> subscribers = new ImmutableSet.Builder<>();
-
-        if (sharedSubscribersMap != null) {
-            for (final SubscriptionGroup group : sharedSubscribersMap.values()) {
-                subscribers.addAll(group.getSubscriptionsInfos());
-            }
-        }
-
-        if (nonSharedSubscribersMap != null) {
-            subscribers.addAll(nonSharedSubscribersMap.values());
-        } else if (nonSharedSubscribersArray != null) {
-            subscribers.addAll(Arrays.asList(nonSharedSubscribersArray));
-        }
-
-        return subscribers.build();
-    }
-
-    @ReadOnly
-    public @Nullable Stream<SubscriberWithQoS> getSharedSubscriptions() {
-        if (sharedSubscribersMap == null) {
-            return null;
-        }
+    public @NotNull Stream<SubscriberWithQoS> getSharedSubscriptions() {
         return sharedSubscribersMap.values()
                 .stream()
                 .flatMap(subscriptionGroup -> subscriptionGroup.getSubscriptionsInfos().stream());
@@ -185,17 +164,9 @@ class MatchingNodeSubscriptions {
     }
 
     @ReadOnly
-    private @Nullable Stream<SubscriberWithQoS> getAllSubscriptions() {
+    private @NotNull Stream<SubscriberWithQoS> getAllSubscriptions() {
         final Stream<SubscriberWithQoS> sharedSubscriptions = getSharedSubscriptions();
         final Stream<SubscriberWithQoS> nonSharedSubscriptions = getNonSharedSubscriptions();
-
-        if (sharedSubscriptions == null && nonSharedSubscriptions == null) {
-            return null;
-        }
-
-        if (sharedSubscriptions == null) {
-            return nonSharedSubscriptions;
-        }
 
         if (nonSharedSubscriptions == null) {
             return sharedSubscriptions;
@@ -206,9 +177,9 @@ class MatchingNodeSubscriptions {
 
     @ReadOnly
     public boolean isEmpty() {
-        return (nonSharedSubscribersMap == null || nonSharedSubscribersMap.isEmpty())
-                && (nonSharedSubscribersArray == null || isEmptyArray(nonSharedSubscribersArray))
-                && (sharedSubscribersMap == null || sharedSubscribersMap.isEmpty());
+        return (nonSharedSubscribersMap == null || nonSharedSubscribersMap.isEmpty()) &&
+                (nonSharedSubscribersArray == null || isEmptyArray(nonSharedSubscribersArray)) &&
+                sharedSubscribersMap.isEmpty();
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -265,7 +236,7 @@ class MatchingNodeSubscriptions {
             final int subscriberMapCreationThreshold) {
 
         if (subscriberToAdd.isSharedSubscription() && subscriberToAdd.getSharedName() != null) {
-            if (sharedSubscribersMap == null) {
+            if (sharedSubscribersMap.isEmpty()) {
                 sharedSubscribersMap = new HashMap<>(subscriberMapCreationThreshold);
             }
             final SubscriberWithQoS prev = sharedSubscribersMap
@@ -347,15 +318,13 @@ class MatchingNodeSubscriptions {
 
         SubscriberWithQoS remove = null;
         if (sharedName != null && topicFilter != null) { // shared subscription removal
-            if (sharedSubscribersMap != null) {
-                final String sharedSubscriptionKey = sharedSubscriptionKey(sharedName, topicFilter);
-                final SubscriptionGroup group = sharedSubscribersMap.get(sharedSubscriptionKey);
-                if (group != null) {
-                    remove = group.remove(subscriber);
+            final String sharedSubscriptionKey = sharedSubscriptionKey(sharedName, topicFilter);
+            final SubscriptionGroup group = sharedSubscribersMap.get(sharedSubscriptionKey);
+            if (group != null) {
+                remove = group.remove(subscriber);
 
-                    if (group.size() == 0) {
-                        sharedSubscribersMap.remove(sharedSubscriptionKey);
-                    }
+                if (group.size() == 0) {
+                    sharedSubscribersMap.remove(sharedSubscriptionKey);
                 }
             }
         } else { // non-shared subscription removal
@@ -401,16 +370,5 @@ class MatchingNodeSubscriptions {
             }
         }
         return count;
-    }
-
-    private static void addEntriesToBuilder(
-            final @NotNull ImmutableSet.Builder<SubscriberWithQoS> builder,
-            final @Nullable SubscriberWithQoS @NotNull [] subscribers) {
-
-        for (final SubscriberWithQoS subscriber : subscribers) {
-            if (subscriber != null) {
-                builder.add(subscriber);
-            }
-        }
     }
 }
