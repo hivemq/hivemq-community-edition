@@ -867,9 +867,8 @@ public class LocalTopicTree {
 
         @Override
         public void acceptNonRootState(final @NotNull MatchingNodeSubscriptions matchingNodeSubscriptions) {
-            if (matchingNodeSubscriptions.sharedSubscribersMap != null) {
-                sharedSubscriptionsBuilder.addAll(matchingNodeSubscriptions.sharedSubscribersMap.keySet());
-            }
+
+            sharedSubscriptionsBuilder.addAll(matchingNodeSubscriptions.sharedSubscribersMap.keySet());
 
             if (matchingNodeSubscriptions.nonSharedSubscribersMap != null) {
                 subscribersBuilder.addAll(matchingNodeSubscriptions.nonSharedSubscribersMap.values());
@@ -927,18 +926,13 @@ public class LocalTopicTree {
             //
             // Note: if the non-shared subscriptions are found later on,
             // they will override the shared subscriptions (see getMatchingSubscriber method)!
-            if (!nonSharedSubscriberFound) {
-                final Stream<SubscriberWithQoS> sharedSubscriptions = matchingNodeSubscriptions.getSharedSubscriptions();
-                if (sharedSubscriptions != null) {
-                    sharedSubscriptions
-                            .filter(subscriberWithQoS -> subscriberWithQoS.getSubscriber().equals(client))
-                            .forEach(subscriberWithQoS -> {
-                                if (sharedSubscriber == null || sharedSubscriber.getQos() < subscriberWithQoS.getQos()) {
-                                    sharedSubscriber = new SubscriberWithIdentifiers(subscriberWithQoS);
-                                }
-                            });
-                }
-            }
+            matchingNodeSubscriptions.getSharedSubscriptions()
+                    .filter(subscriberWithQoS -> subscriberWithQoS.getSubscriber().equals(client))
+                    .forEach(subscriberWithQoS -> {
+                        if (sharedSubscriber == null || sharedSubscriber.getQos() < subscriberWithQoS.getQos()) {
+                            sharedSubscriber = new SubscriberWithIdentifiers(subscriberWithQoS);
+                        }
+                    });
         }
 
         @Override
