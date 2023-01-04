@@ -37,15 +37,15 @@ public class NodeTest {
 
     @Test
     public void addChildNodeIfAbsent_whenTwoChildrenAreAddedToNode_thenTwoChildrenArePresentInTheNode() {
-        node.addChildNodeIfAbsent(new TopicTreeNode("first"), 1);
-        node.addChildNodeIfAbsent(new TopicTreeNode("second"), 1);
+        node.addChildNodeIfAbsent("first", 1);
+        node.addChildNodeIfAbsent("second", 1);
         assertEquals(2, LocalTopicTree.getChildrenCount(node));
     }
 
     @Test
     public void addChildNodeIfAbsent_whenOneOfTwoChildIsNulled_thenOneChildRemains() {
-        node.addChildNodeIfAbsent(new TopicTreeNode("first"), 1);
-        node.addChildNodeIfAbsent(new TopicTreeNode("second"), 1);
+        node.addChildNodeIfAbsent("first", 1);
+        node.addChildNodeIfAbsent("second", 1);
         assertNotNull(node.getChildren());
         assertEquals(2, node.getChildren().length);
         node.getChildren()[0] = null;
