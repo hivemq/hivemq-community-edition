@@ -21,23 +21,11 @@ package com.hivemq.mqtt.topic;
  * Please note that since HiveMQ 3.0 this is a {@link RuntimeException}. Prior to HiveMQ 3.0
  * this was a checked Exception.
  *
- * @author Dominik Obermaier
  * @since 1.4
  */
 public class InvalidTopicException extends RuntimeException {
 
-    public InvalidTopicException() {
-    }
-
     public InvalidTopicException(final String message) {
         super(message);
-    }
-
-    public InvalidTopicException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
-
-    public InvalidTopicException(final Throwable cause) {
-        super(cause);
     }
 }
