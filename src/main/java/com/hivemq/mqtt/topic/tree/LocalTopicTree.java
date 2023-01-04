@@ -146,8 +146,7 @@ public class LocalTopicTree {
             return node.wildcardSubscriptions.addSubscriber(subscriber, topicFilter, counters, mapCreationThreshold);
         }
 
-        final TopicTreeNode newNode = new TopicTreeNode(content);
-        final TopicTreeNode subNode = node.addChildNodeIfAbsent(newNode, mapCreationThreshold);
+        final TopicTreeNode subNode = node.addChildNodeIfAbsent(content, mapCreationThreshold);
 
         if (i + 1 == contents.length) {
             return subNode.exactSubscriptions.addSubscriber(subscriber, topicFilter, counters, mapCreationThreshold);

@@ -53,7 +53,9 @@ class TopicTreeNode {
         exactSubscriptions = new MatchingNodeSubscriptions();
     }
 
-    public @NotNull TopicTreeNode addChildNodeIfAbsent(final @NotNull TopicTreeNode node, final int indexMapCreationThreshold) {
+    public @NotNull TopicTreeNode addChildNodeIfAbsent(
+            final @NotNull String childNodeTopicPart,
+            final int indexMapCreationThreshold) {
 
         if (children != null) {
 
@@ -66,7 +68,7 @@ class TopicTreeNode {
                 for (final TopicTreeNode child : children) {
                     if (child != null) {
                         childrenMap.put(child.getTopicPart(), child);
-                        if (child.getTopicPart().equals(node.getTopicPart())) {
+                        if (child.getTopicPart().equals(childNodeTopicPart)) {
                             existingNode = child;
                         }
                     }
@@ -75,39 +77,42 @@ class TopicTreeNode {
                 if (existingNode != null) {
                     return existingNode;
                 }
-                childrenMap.put(node.getTopicPart(), node);
+                final TopicTreeNode childNode = new TopicTreeNode(childNodeTopicPart);
+                childrenMap.put(childNode.getTopicPart(), childNode);
             } else {
 
                 //check if the node already exists
                 for (final TopicTreeNode child : children) {
                     if (child != null) {
-                        if (child.getTopicPart().equals(node.getTopicPart())) {
+                        if (child.getTopicPart().equals(childNodeTopicPart)) {
                             return child;
                         }
                     }
                 }
 
+                final TopicTreeNode childNode = new TopicTreeNode(childNodeTopicPart);
                 final int emptySlotIndex = Arrays.asList(children).indexOf(null);
                 if (emptySlotIndex >= 0) {
-                    children[emptySlotIndex] = node;
+                    children[emptySlotIndex] = childNode;
                 } else {
                     final TopicTreeNode[] newChildren = new TopicTreeNode[children.length + 1];
                     System.arraycopy(children, 0, newChildren, 0, children.length);
-                    newChildren[newChildren.length - 1] = node;
+                    newChildren[newChildren.length - 1] = childNode;
                     children = newChildren;
                 }
+                return childNode;
             }
         } else if (childrenMap != null) {
-
-            final TopicTreeNode previousValue = childrenMap.putIfAbsent(node.getTopicPart(), node);
-            if (previousValue != null) {
-                return previousValue;
-            }
+            return childrenMap.computeIfAbsent(childNodeTopicPart, TopicTreeNode::new);
         } else {
-            children = new TopicTreeNode[]{node};
+            final TopicTreeNode childNode = new TopicTreeNode(childNodeTopicPart);
+            children = new TopicTreeNode[]{childNode};
+            return childNode;
         }
 
-        return node;
+        // This should never be called.
+        assert false;
+        return new TopicTreeNode(childNodeTopicPart);
     }
 
     /**
