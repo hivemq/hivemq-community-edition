@@ -123,7 +123,6 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
-        lazyInitializeQos1AlreadySentPacketIds();
 
         if (!(msg instanceof PUBLISH || msg instanceof PUBACK || msg instanceof PUBREL)) {
             super.write(ctx, msg, promise);
@@ -131,6 +130,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         }
 
         if (msg instanceof PUBACK) {
+            lazyInitializeQos1AlreadySentPacketIds();
             final PUBACK puback = (PUBACK) msg;
             final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
             final int messageId = puback.getPacketIdentifier();
@@ -187,7 +187,6 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void handlePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client) throws Exception {
-        lazyInitializeQos1AlreadySentPacketIds();
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
             incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
             // QoS 1 or 2 duplicate delivery handling
@@ -210,6 +209,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void firstPublishForMessageIdReceived(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client, final int messageId) throws Exception {
+        lazyInitializeQos1AlreadySentPacketIds();
         persistence.addOrReplace(client, messageId, publish);
         incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
         qos1AlreadySentPacketIds.add(ShortPacketIdEncodingUtils.encode(messageId));
@@ -265,7 +265,6 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     private void handlePubrel(final ChannelHandlerContext ctx, final PUBREL pubrel) {
-        lazyInitializeQos1AlreadySentPacketIds();
         final String client = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
 
         final int messageId = pubrel.getPacketIdentifier();
@@ -324,7 +323,9 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         public void operationComplete(final ChannelFuture future) {
             if (future.isSuccess()) {
                 UNACKNOWLEDGED_PUBLISHES_COUNTER.decrementAndGet();
-                qos1AlreadySentPacketIds.remove(ShortPacketIdEncodingUtils.encode(messageId));
+                if (qos1AlreadySentPacketIds != null) {
+                    qos1AlreadySentPacketIds.remove(ShortPacketIdEncodingUtils.encode(messageId));
+                }
                 persistence.remove(client, messageId);
                 log.trace("Client '{}' completed a PUBLISH flow with QoS 1 or 2 for packet identifier '{}'", client, messageId);
             }
