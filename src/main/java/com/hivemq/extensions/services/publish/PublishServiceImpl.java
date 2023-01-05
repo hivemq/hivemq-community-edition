@@ -38,7 +38,6 @@ import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.mqtt.services.PublishDistributor;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
-import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.Bytes;
 
 import javax.inject.Inject;

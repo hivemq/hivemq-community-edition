@@ -16,38 +16,35 @@
 package com.hivemq.mqtt.topic;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.apache.commons.lang3.StringUtils;
 
 import static java.lang.Math.min;
 
-public class PermissionTopicMatcher implements TopicMatcher {
+public final class PermissionTopicMatcherUtils {
 
-    @Override
-    public boolean matches(@NotNull final String permissionTopic, @NotNull final String actualTopic) throws InvalidTopicException {
-        final String stripedPermissionTopic = StringUtils.stripEnd(permissionTopic, "/");
-        final String[] splitPermissionTopic = StringUtils.splitPreserveAllTokens(stripedPermissionTopic, "/");
-        final boolean nonWildCard = StringUtils.containsNone(stripedPermissionTopic, "#+");
-        final boolean rootWildCard = stripedPermissionTopic.contains("#");
-        final boolean endsWithWildCard = StringUtils.endsWith(stripedPermissionTopic, "/#");
-
-        final String stripedActualTopic = StringUtils.stripEnd(actualTopic, "/");
-        final String[] splitActualTopic = StringUtils.splitPreserveAllTokens(stripedActualTopic, "/");
-        return matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard, endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
+    private PermissionTopicMatcherUtils() {
     }
 
-    public boolean matches(@NotNull final String permissionTopic, @NotNull final String[] splitPermissionTopic,
-                           final boolean nonWildCard, final boolean endsWithWildCard, final boolean rootWildCard,
-                           @NotNull final String actualTopic, @NotNull final String[] splitActualTopic) throws InvalidTopicException {
-        if (nonWildCard) {
+    public static boolean matches(
+            final @NotNull String permissionTopic,
+            final @NotNull String[] splitPermissionTopic,
+            final boolean nonWildCard,
+            final boolean endsWithWildCard,
+            final boolean rootWildCard,
+            final @NotNull String actualTopic,
+            final @NotNull String[] splitActualTopic) throws InvalidTopicException {
 
+        if (nonWildCard) {
             return permissionTopic.equals(actualTopic);
         }
         return matchesWildcards(permissionTopic, splitPermissionTopic, endsWithWildCard, rootWildCard, splitActualTopic);
     }
 
-    private static boolean matchesWildcards(@NotNull final String permissionTopic, @NotNull final String[] splitPermissionTopic,
-                                            final boolean endsWithWildCard, final boolean rootWildCard,
-                                            @NotNull final String[] splitActualTopic) {
+    private static boolean matchesWildcards(
+            final @NotNull String permissionTopic,
+            final @NotNull String @NotNull [] splitPermissionTopic,
+            final boolean endsWithWildCard,
+            final boolean rootWildCard,
+            final @NotNull String @NotNull [] splitActualTopic) {
 
         if (rootWildCard) {
             if (!endsWithWildCard && permissionTopic.length() > 1) {
@@ -77,6 +74,7 @@ public class PermissionTopicMatcher implements TopicMatcher {
         //If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a wildcard,
         //everything is alright.
         return splitPermissionTopic.length == splitActualTopic.length ||
-                (splitPermissionTopic.length - splitActualTopic.length == 1 && (splitPermissionTopic[splitPermissionTopic.length - 1].equals("#")));
+                (splitPermissionTopic.length - splitActualTopic.length == 1 &&
+                        ("#".equals(splitPermissionTopic[splitPermissionTopic.length - 1])));
     }
 }

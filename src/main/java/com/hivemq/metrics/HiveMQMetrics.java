@@ -137,13 +137,6 @@ public class HiveMQMetrics {
             HiveMQMetric.gaugeValue("com.hivemq.persistence.retained-messages.in-memory.total-size");
 
     /**
-     * represents a {@link Gauge}, which measures the approximate memory usage of the payload persistence if
-     * the memory persistence is used.
-     */
-    public static final HiveMQMetric<Gauge<Number>> PAYLOAD_MEMORY_PERSISTENCE_TOTAL_SIZE =
-            HiveMQMetric.gaugeValue("com.hivemq.persistence.payload.in-memory.total-size");
-
-    /**
      * represents a {@link Gauge}, which measures the approximate memory usage of the subscription persistence if
      * the memory persistence is used.
      */

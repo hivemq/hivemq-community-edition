@@ -20,7 +20,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 /**
  * A topic matcher which is useful if you want to match topics manually if they match to specific wildcard topics
  *
- * @author Dominik Obermaier
  * @since 1.4
  */
 public interface TopicMatcher {
@@ -31,8 +30,8 @@ public interface TopicMatcher {
      *
      * @param topicSubscription the subscription. May contain wildcards
      * @param actualTopic       the actual topic. <b>Must not contain wildcards</b>
-     * @return <code>true</code> if a topic matches a specific subscription, <code>false</code> otherwise
+     * @return {@code true} if a topic matches a specific subscription, {@code false} otherwise
      * @throws InvalidTopicException if the topic was invalid
      */
-    boolean matches(@NotNull final String topicSubscription, @NotNull final String actualTopic) throws InvalidTopicException;
+    boolean matches(@NotNull String topicSubscription, @NotNull String actualTopic) throws InvalidTopicException;
 }

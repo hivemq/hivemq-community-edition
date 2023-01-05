@@ -35,7 +35,7 @@ import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
@@ -244,7 +244,7 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_poll_shared_publishes() throws NoMessageIdAvailableException {
         final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1),
                 new SubscriberWithQoS("client2", 2, flags, 2)));
@@ -281,7 +281,7 @@ public class PublishPollServiceImplTest {
 
     @Test
     public void test_poll_shared_publishes_messages_in_flight() throws NoMessageIdAvailableException {
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);
@@ -299,7 +299,7 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_poll_shared_publishes_messages_qos0_in_flight() throws NoMessageIdAvailableException {
         final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
-        final byte flags = SubscriptionFlags.getDefaultFlags(true, false, false);
+        final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
         when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet.of(
                 new SubscriberWithQoS("client1", 2, flags, 1)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);

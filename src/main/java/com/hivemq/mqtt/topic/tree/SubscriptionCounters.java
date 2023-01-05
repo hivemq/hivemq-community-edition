@@ -16,18 +16,17 @@
 package com.hivemq.mqtt.topic.tree;
 
 import com.codahale.metrics.Counter;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-import java.util.concurrent.atomic.AtomicInteger;
+public class SubscriptionCounters {
 
-/**
- * @author Dominik Obermaier
- */
-public class SegmentRootNode extends Node {
+    private final @NotNull Counter subscriptionCounter;
 
-    public SegmentRootNode(final String topicPart, final int indexMapCreationThreshold,
-                           final int subscriberMapCreationThreshold,
-                           final Counter subscriptionCounter) {
+    public SubscriptionCounters(final @NotNull Counter subscriptionCounter) {
+        this.subscriptionCounter = subscriptionCounter;
+    }
 
-        super(topicPart, indexMapCreationThreshold, subscriberMapCreationThreshold, subscriptionCounter, new AtomicInteger());
+    public @NotNull Counter getSubscriptionCounter() {
+        return subscriptionCounter;
     }
 }

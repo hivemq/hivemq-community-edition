@@ -19,23 +19,23 @@ import com.google.common.collect.ImmutableSet;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 
-/**
- * @author Till Seeberger
- */
 public class TopicSubscribers {
 
     private final @NotNull ImmutableSet<SubscriberWithIdentifiers> subscriber;
     private final @NotNull ImmutableSet<String> sharedSubscriptions;
 
-    public TopicSubscribers(final @NotNull ImmutableSet<SubscriberWithIdentifiers> subscriber,
-                            final @NotNull ImmutableSet<String> sharedSubscriptions) {
+    public TopicSubscribers(
+            final @NotNull ImmutableSet<SubscriberWithIdentifiers> subscriber,
+            final @NotNull ImmutableSet<String> sharedSubscriptions) {
         this.subscriber = subscriber;
         this.sharedSubscriptions = sharedSubscriptions;
     }
 
-    @NotNull
-    public ImmutableSet<SubscriberWithIdentifiers> getSubscribers() { return subscriber; }
+    public @NotNull ImmutableSet<SubscriberWithIdentifiers> getSubscribers() {
+        return subscriber;
+    }
 
-    @NotNull
-    public ImmutableSet<String> getSharedSubscriptions() { return sharedSubscriptions; }
+    public @NotNull ImmutableSet<String> getSharedSubscriptions() {
+        return sharedSubscriptions;
+    }
 }

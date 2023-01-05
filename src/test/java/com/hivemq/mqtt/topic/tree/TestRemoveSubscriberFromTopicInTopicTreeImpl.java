@@ -28,24 +28,21 @@ import static com.hivemq.configuration.service.InternalConfigurations.TOPIC_TREE
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
-/**
- * @author Dominik Obermaier
- */
 @SuppressWarnings("Duplicates")
 public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
 
-    private TopicTreeImpl topicTree;
+    private LocalTopicTree topicTree;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         TOPIC_TREE_MAP_CREATION_THRESHOLD.set(1);
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
     }
 
     @Test
-    public void test_remove_from_empty_tree() throws Exception {
+    public void test_remove_from_empty_tree() {
         topicTree.removeSubscriber("subscriber", "topic", null);
 
         assertEquals(0, topicTree.segments.size());
@@ -57,7 +54,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
      */
 
     @Test
-    public void test_remove_subscriber_with_one_level_subscription() throws Exception {
+    public void test_remove_subscriber_with_one_level_subscription() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         topicTree.removeSubscriber("subscriber", "topic", null);
@@ -67,7 +64,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_subscriber_add_and_remove_again() throws Exception {
+    public void test_remove_subscriber_add_and_remove_again() {
         topicTree.addTopic("subscriber", new Topic("topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         topicTree.removeSubscriber("subscriber", "topic", null);
@@ -79,7 +76,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_subscriber_with_one_level_wildcard_subscription() throws Exception {
+    public void test_remove_subscriber_with_one_level_wildcard_subscription() {
         topicTree.addTopic("subscriber", new Topic("+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         topicTree.removeSubscriber("subscriber", "+", null);
@@ -89,44 +86,43 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_second_subscriber_with_one_level_wildcard_subscription() throws Exception {
+    public void test_remove_second_subscriber_with_one_level_wildcard_subscription() {
         topicTree.addTopic("subscriber", new Topic("+", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("+", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Node firstNode = topicTree.segments.get("+");
-        assertEquals(2, NodeUtils.getExactSubscriberCount(firstNode));
+        final TopicTreeNode firstNode = topicTree.segments.get("+");
+        assertEquals(2, firstNode.exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber2", "+", null);
 
+        assertEquals(1, firstNode.exactSubscriptions.getSubscriberCount());
 
-        assertEquals(1, NodeUtils.getExactSubscriberCount(firstNode));
-
-        assertThat(NodeUtils.getExactSubscribers(firstNode), hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
+        assertThat(firstNode.exactSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
     }
 
     @Test
-    public void test_remove_second_subscriber_with_first_level_wildcard_subscription() throws Exception {
+    public void test_remove_second_subscriber_with_first_level_wildcard_subscription() {
         topicTree.addTopic("subscriber", new Topic("level0/#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("level0/#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
-        final Node firstNode = topicTree.segments.get("level0");
-        assertEquals(2, NodeUtils.getWildcardSubscriberCount(firstNode));
+        final TopicTreeNode firstNode = topicTree.segments.get("level0");
+        assertEquals(2, firstNode.wildcardSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber2", "level0/#", null);
 
-        assertEquals(1, NodeUtils.getWildcardSubscriberCount(firstNode));
+        assertEquals(1, firstNode.wildcardSubscriptions.getSubscriberCount());
 
-        assertThat(NodeUtils.getWildcardSubscribers(firstNode), hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
+        assertThat(firstNode.wildcardSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
     }
 
     @Test
-    public void test_remove_subscriber_subscription_multiple_levels_children_get_deleted() throws Exception {
+    public void test_remove_subscriber_subscription_multiple_levels_children_get_deleted() {
         topicTree.addTopic("subscriber", new Topic("my/topic/subscription", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, NodeUtils.getExactSubscriberCount(topicTree.segments.get("my").getChildren()[0].getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber", "my/topic/subscription", null);
 
@@ -135,31 +131,31 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_dont_remove_subscriber_subscription_multiple_levels_if_no_match() throws Exception {
+    public void test_dont_remove_subscriber_subscription_multiple_levels_if_no_match() {
         topicTree.addTopic("subscriber", new Topic("my/topic/subscription", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, NodeUtils.getExactSubscriberCount(topicTree.segments.get("my").getChildren()[0].getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber", "my/topic/subscription/test", null);
 
         //Nothing should happen
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, NodeUtils.getExactSubscriberCount(topicTree.segments.get("my").getChildren()[0].getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
     }
 
     @Test
-    public void test_remove_subscription_multiple_levels_children_get_deleted_only_if_not_other_subscribers_available() throws Exception {
+    public void test_remove_subscription_multiple_levels_children_get_deleted_only_if_not_other_subscribers_available() {
         topicTree.addTopic("subscriber", new Topic("my/topic", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("my/second", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         assertEquals(1, topicTree.segments.size());
-        assertEquals(2, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getExactSubscriberCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(2, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber", "my/topic", null);
 
@@ -168,23 +164,23 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         //The reference for the first subnode was deleted because there are no subscribers left on this path
         assertNull(topicTree.segments.get("my").getChildren()[0]);
         //The second node still has a subscriber
-        assertThat(NodeUtils.getExactSubscribers(topicTree.segments.get("my").getChildren()[1]), hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
+        assertThat(topicTree.segments.get("my").getChildren()[1].exactSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
     }
 
     @Test
-    public void test_remove_subscription_multiple_levels_subscriber_does_not_exist() throws Exception {
+    public void test_remove_subscription_multiple_levels_subscriber_does_not_exist() {
         topicTree.addTopic("subscriber", new Topic("my/topic", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getExactSubscriberCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber2", "my/topic", null);
 
         //Nothing changed
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getExactSubscriberCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].exactSubscriptions.getSubscriberCount());
     }
 
 
@@ -193,7 +189,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
      */
 
     @Test
-    public void test_remove_subscriber_with_root_wildcard_subscription() throws Exception {
+    public void test_remove_subscriber_with_root_wildcard_subscription() {
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         topicTree.removeSubscriber("subscriber", "#", null);
@@ -202,7 +198,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_second_subscriber_with_root_wildcard_subscription() throws Exception {
+    public void test_remove_second_subscriber_with_root_wildcard_subscription() {
         topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
@@ -214,42 +210,42 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_wildcard_subscription_multiple_levels_children_get_deleted_only_if_not_other_subscribers_available() throws Exception {
+    public void test_remove_wildcard_subscription_multiple_levels_children_get_deleted_only_if_not_other_subscribers_available() {
         topicTree.addTopic("subscriber", new Topic("my/topic/#", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("my/second/#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         assertEquals(1, topicTree.segments.size());
-        assertEquals(2, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getWildcardSubscriberCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(2, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].wildcardSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber", "my/topic/#", null);
 
         //The root node children are not deleted because there are subscribers left
         assertEquals(1, topicTree.segments.size());
         //The reference for the first subnode was deleted because there are no subscribers left on this path
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
         //The second node still has a subscriber
-        assertThat(NodeUtils.getWildcardSubscribers(topicTree.segments.get("my").getChildren()[1]), hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
+        assertThat(topicTree.segments.get("my").getChildren()[1].wildcardSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
     }
 
     @Test
-    public void test_remove_wildcard_subscription_multiple_levels_subscriber_does_not_exist() throws Exception {
+    public void test_remove_wildcard_subscription_multiple_levels_subscriber_does_not_exist() {
         topicTree.addTopic("subscriber", new Topic("my/topic/#", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getWildcardSubscriberCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].wildcardSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber2", "my/topic/#", null);
 
         //Nothing changed
         assertEquals(1, topicTree.segments.size());
-        assertEquals(1, NodeUtils.getChildrenCount(topicTree.segments.get("my")));
-        assertEquals(1, NodeUtils.getWildcardSubscriberCount(topicTree.segments.get("my").getChildren()[0]));
+        assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
+        assertEquals(1, topicTree.segments.get("my").getChildren()[0].wildcardSubscriptions.getSubscriberCount());
     }
 
     @Test
-    public void test_reuse_array_index_after_remove() throws Exception {
+    public void test_reuse_array_index_after_remove() {
         topicTree.addTopic("subscriber", new Topic("topic/t", QoS.AT_MOST_ONCE), (byte) 0, null);
 
         topicTree.removeSubscriber("subscriber", "topic/t", null);
@@ -260,7 +256,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_node_using_index_map() throws Exception {
+    public void test_remove_node_using_index_map() {
         topicTree.addTopic("subscriber", new Topic("topic/topic1", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic/topic2", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber", new Topic("topic/topic3", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -273,7 +269,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_from_index_map() throws Exception {
+    public void test_remove_from_index_map() {
         topicTree.addTopic("subscriber1", new Topic("topic/topic1", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("topic/topic1", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("topic/topic2", QoS.AT_MOST_ONCE), (byte) 0, null);
@@ -291,7 +287,7 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
     }
 
     @Test
-    public void test_remove_multi_level_topic_from_index_map() throws Exception {
+    public void test_remove_multi_level_topic_from_index_map() {
         topicTree.addTopic("subscriber1", new Topic("topic/topic1/part1", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber2", new Topic("topic/topic1/part1", QoS.AT_MOST_ONCE), (byte) 0, null);
         topicTree.addTopic("subscriber3", new Topic("topic/topic1/part2", QoS.AT_MOST_ONCE), (byte) 0, null);

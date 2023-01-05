@@ -24,7 +24,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.InternalPublishServiceImpl;
 import com.hivemq.mqtt.services.PublishDistributor;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicSubscribers;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
@@ -48,9 +48,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Christoph Schäbel
- */
 @SuppressWarnings("unchecked")
 public class InternalPublishServiceImplTest {
 
@@ -131,7 +128,7 @@ public class InternalPublishServiceImplTest {
     @Test(timeout = 20000)
     public void test_no_local() {
 
-        final byte noLocalFlag = SubscriptionFlags.getDefaultFlags(false, false, true);
+        final byte noLocalFlag = SubscriptionFlag.getDefaultFlags(false, false, true);
         final SubscriberWithIdentifiers sub1 = new SubscriberWithIdentifiers("sub1", 1, noLocalFlag, null);
         final SubscriberWithIdentifiers sub2 = new SubscriberWithIdentifiers("sub2", 1, (byte) 0, null);
 

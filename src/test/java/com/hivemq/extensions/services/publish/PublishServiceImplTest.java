@@ -36,8 +36,8 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.InternalPublishService;
 import com.hivemq.mqtt.services.PublishDistributor;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
-import com.hivemq.mqtt.topic.SubscriptionFlags;
-import com.hivemq.mqtt.topic.tree.TopicTreeImpl;
+import com.hivemq.mqtt.topic.SubscriptionFlag;
+import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -72,7 +72,7 @@ public class PublishServiceImplTest {
     PublishDistributor publishDistributor;
 
     @Mock
-    TopicTreeImpl topicTree;
+    LocalTopicTree topicTree;
 
     private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
@@ -141,7 +141,7 @@ public class PublishServiceImplTest {
 
     @Test(timeout = 10000)
     public void test_publish_to_client() throws Exception {
-        final byte subscriptionFlags = SubscriptionFlags.getDefaultFlags(false, false, false);
+        final byte subscriptionFlags = SubscriptionFlag.getDefaultFlags(false, false, false);
         final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
         when(topicTree.findSubscriber("client", "topic")).thenReturn(
                 new SubscriberWithIdentifiers("client", 1, subscriptionFlags, null));

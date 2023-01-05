@@ -24,82 +24,82 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Christoph Schäbel
  */
 public class TopicTreeImplExistingSubscriptionTest {
 
-    private TopicTreeImpl topicTree;
+    private LocalTopicTree topicTree;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         InternalConfigurations.TOPIC_TREE_MAP_CREATION_THRESHOLD.set(1);
-        topicTree = new TopicTreeImpl(new MetricsHolder(new MetricRegistry()));
+        topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
     }
 
     @Test
     public void test_existing_root_wildcard() {
 
-        assertEquals(false, topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(true, topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(true, topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
 
     }
 
     @Test
     public void test_existing_wildcard() {
 
-        assertEquals(false, topicTree.addTopic("client", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("topic/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("topic/#", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(true, topicTree.addTopic("client2", new Topic("topic/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client2", new Topic("topic/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(true, topicTree.addTopic("client", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("a/", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("a/", QoS.EXACTLY_ONCE), (byte) 0, null));
     }
 
     @Test
     public void test_existing_plus_wildcard() {
 
-        assertEquals(false, topicTree.addTopic("client", new Topic("+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("topic/+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("topic/+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(false, topicTree.addTopic("client2", new Topic("topic/+/b", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(true, topicTree.addTopic("client2", new Topic("topic/+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("topic/+/b", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client2", new Topic("topic/+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(true, topicTree.addTopic("client", new Topic("+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("b/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("b/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client", new Topic("+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("b/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("b/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
     }
 
     @Test
     public void test_existing_no_wildcard() {
 
-        assertEquals(false, topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("topic/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("topic/a", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(true, topicTree.addTopic("client2", new Topic("topic/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("topic/+/b", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client2", new Topic("topic/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("topic/+/b", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("a/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client2", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
 
-        assertEquals(true, topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("b/a", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("b/#", QoS.EXACTLY_ONCE), (byte) 0, null));
-        assertEquals(false, topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertTrue(topicTree.addTopic("client", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("+/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("b/a", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("b/#", QoS.EXACTLY_ONCE), (byte) 0, null));
+        assertFalse(topicTree.addTopic("client", new Topic("#", QoS.EXACTLY_ONCE), (byte) 0, null));
     }
 
 }

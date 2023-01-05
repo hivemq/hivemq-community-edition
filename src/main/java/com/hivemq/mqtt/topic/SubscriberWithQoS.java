@@ -27,27 +27,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This represents a subscriber (client ID) with a Quality of Service Level
- *
- * @author Dominik Obermaier
  */
 @Immutable
 public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
 
     private final @NotNull String subscriber;
     private final int qos;
-    private final byte flags;
     private final @Nullable String sharedName;
     private final @Nullable Integer subscriptionIdentifier;
-
     // The topic filter is only present for shared subscription
     private final @Nullable String topicFilter;
 
-    public SubscriberWithQoS(final @NotNull String subscriber, final int qos, final byte flags, final @Nullable Integer subscriptionIdentifier) {
+    private byte flags;
+
+    public SubscriberWithQoS(
+            final @NotNull String subscriber,
+            final int qos,
+            final byte flags,
+            final @Nullable Integer subscriptionIdentifier) {
+
         this(subscriber, qos, flags, null, subscriptionIdentifier, null);
     }
 
-    public SubscriberWithQoS(final @NotNull String subscriber, final int qos, final byte flags, final @Nullable String sharedName,
-                             final @Nullable Integer subscriptionIdentifier, final @Nullable String topicFilter) {
+    public SubscriberWithQoS(
+            final @NotNull String subscriber,
+            final int qos,
+            final byte flags,
+            final @Nullable String sharedName,
+            final @Nullable Integer subscriptionIdentifier,
+            final @Nullable String topicFilter) {
 
         checkNotNull(subscriber, "Subscriber must not be null");
         checkArgument((qos <= 2 && qos >= 0), "Quality of Service level must be between 0 and 2");
@@ -73,16 +81,28 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
         return flags;
     }
 
+    public void addFlags(final @NotNull SubscriptionFlag... subscriptionFlags) {
+        for (final SubscriptionFlag flag : subscriptionFlags) {
+            flags = Bytes.setBit(flags, flag.getFlagIndex());
+        }
+    }
+
+    public void removeFlags(final @NotNull SubscriptionFlag... subscriptionFlags) {
+        for (final SubscriptionFlag flag : subscriptionFlags) {
+            flags = Bytes.unsetBit(flags, flag.getFlagIndex());
+        }
+    }
+
     public boolean isSharedSubscription() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.SHARED_SUBSCRIPTION);
+        return Bytes.isBitSet(flags, SubscriptionFlag.SHARED_SUBSCRIPTION.getFlagIndex());
     }
 
     public boolean isRetainAsPublished() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.RETAIN_AS_PUBLISHED);
+        return Bytes.isBitSet(flags, SubscriptionFlag.RETAIN_AS_PUBLISHED.getFlagIndex());
     }
 
     public boolean isNoLocal() {
-        return Bytes.isBitSet(flags, SubscriptionFlags.NO_LOCAL);
+        return Bytes.isBitSet(flags, SubscriptionFlag.NO_LOCAL.getFlagIndex());
     }
 
     @Nullable
