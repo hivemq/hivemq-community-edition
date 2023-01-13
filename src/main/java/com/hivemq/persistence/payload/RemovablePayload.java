@@ -16,6 +16,9 @@
 package com.hivemq.persistence.payload;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Lukas Brandl
@@ -26,9 +29,12 @@ public class RemovablePayload {
     private final long id;
     private final long timestamp;
 
+    final AtomicBoolean inProgress;
+
     public RemovablePayload(final long id, final long timestamp) {
         this.id = id;
         this.timestamp = timestamp;
+        this.inProgress = new AtomicBoolean();
     }
 
     public long getId() {
