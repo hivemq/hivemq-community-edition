@@ -39,11 +39,12 @@ import com.hivemq.migration.Migrations;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.statistics.UsageStatistics;
-import com.hivemq.util.TemporaryFileUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -140,7 +141,7 @@ public class HiveMQServer {
 
         //ungraceful shutdown does not delete tmp folders, so we clean them up on broker start
         log.trace("Cleaning up temporary folders");
-        TemporaryFileUtils.deleteTmpFolder(systemInformation.getDataFolder());
+        deleteTmpFolder(systemInformation.getDataFolder());
 
         //must happen before persistence injector bootstrap as it creates the persistence folder.
         log.trace("Checking for migrations");
@@ -264,6 +265,20 @@ public class HiveMQServer {
 
     public @Nullable Injector getInjector() {
         return injector;
+    }
+
+    private static void deleteTmpFolder(final @NotNull File dataFolder) {
+        final String tmpFolder = dataFolder.getPath() + File.separator + "tmp";
+        try {
+            //ungraceful shutdown does not delete tmp folders, so we clean them up on broker start
+            FileUtils.deleteDirectory(new File(tmpFolder));
+        } catch (IOException e) {
+            //No error because it's not business breaking
+            log.warn("The temporary folder could not be deleted ({}).", tmpFolder);
+            if (log.isDebugEnabled()) {
+                log.debug("Original Exception: ", e);
+            }
+        }
     }
 
     /**
