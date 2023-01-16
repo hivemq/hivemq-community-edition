@@ -561,7 +561,7 @@ public class ClientConnection {
         return inetAddress.map(InetAddress::getHostAddress);
     }
 
-    private @NotNull Optional<InetAddress> getChannelAddress() {
+    public @NotNull Optional<InetAddress> getChannelAddress() {
         final Optional<SocketAddress> socketAddress = Optional.ofNullable(channel.remoteAddress());
         if (socketAddress.isPresent()) {
             final SocketAddress sockAddress = socketAddress.get();

@@ -16,12 +16,12 @@
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.base.Preconditions;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.*;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extensions.ExtensionInformationUtil;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 
 import java.net.InetAddress;
@@ -38,10 +38,13 @@ public class ConnectionInformationImpl implements ConnectionInformation {
     private final @Nullable Listener listener;
     private final @Nullable ClientTlsInformation tlsInformation;
 
-    public ConnectionInformationImpl(final @NotNull Channel channel) {
+    public ConnectionInformationImpl(final @NotNull ClientConnection clientConnection) {
+        Preconditions.checkNotNull(clientConnection);
+
+        final Channel channel = clientConnection.getChannel();
         Preconditions.checkNotNull(channel);
         mqttVersion = ExtensionInformationUtil.mqttVersionFromChannel(channel);
-        inetAddress = ChannelUtils.getChannelAddress(channel).orElse(null);
+        inetAddress = clientConnection.getChannelAddress().orElse(null);
         listener = ExtensionInformationUtil.getListenerFromChannel(channel);
         tlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         connectionAttributeStore = new ConnectionAttributeStoreImpl(channel);

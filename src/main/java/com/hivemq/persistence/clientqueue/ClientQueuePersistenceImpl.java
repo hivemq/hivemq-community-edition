@@ -39,7 +39,6 @@ import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.payload.PayloadPersistenceException;
-import com.hivemq.util.ChannelUtils;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -157,7 +156,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
             return;
         }
 
-        if (ChannelUtils.messagesInFlight(clientConnection.getChannel())) {
+        if (clientConnection.isMessagesInFlight()) {
             return;
         }
         clientConnection.getChannel().eventLoop().submit(() -> publishPollService.pollNewMessages(client, clientConnection.getChannel()));

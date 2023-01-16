@@ -26,7 +26,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.security.exception.SslException;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -136,9 +135,10 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     @Override
     public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) throws Exception {
         if (cause instanceof SslException) {
+            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
             log.error(
                     "{}. Disconnecting client {} ", cause.getMessage(),
-                    ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"));
+                    clientConnection.getChannelIP().orElse("UNKNOWN"));
             log.debug("Original exception:", cause);
             //We need to close the channel because the initialization wasn't successful
             channelDependencies.getMqttServerDisconnector().logAndClose(ctx.channel(),

@@ -25,7 +25,6 @@ import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
-import com.hivemq.util.ChannelUtils;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -215,8 +214,9 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
         @Override
         public void onFailure(final @NotNull Throwable throwable) {
+            final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
             Exceptions.rethrowError("Unable to send retained messages on topic " + subscription.getTopic() +
-                    " to client " + ChannelUtils.getClientId(channel) + ".", throwable);
+                    " to client " + clientConnection.getClientId() + ".", throwable);
             channel.disconnect();
         }
     }

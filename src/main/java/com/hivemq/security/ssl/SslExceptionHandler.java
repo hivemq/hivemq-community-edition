@@ -19,7 +19,6 @@ import com.google.inject.Inject;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.NotSslRecordException;
@@ -83,11 +82,12 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);
 
-            final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            final String clientId = clientConnection.getClientId();
             if (clientId != null) {
                 log.debug("SSL message transmission for client {} failed: {}", clientId, rootCause.getMessage());
             } else {
-                log.debug("SSL message transmission failed for client with IP {}: {}", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), rootCause.getMessage());
+                log.debug("SSL message transmission failed for client with IP {}: {}", clientConnection.getChannelIP().orElse("UNKNOWN"), rootCause.getMessage());
             }
             log.trace("Original Exception", rootCause);
         }
@@ -98,11 +98,12 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);
 
-            final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            final String clientId = clientConnection.getClientId();
             if (clientId != null) {
                 log.debug("SSL Handshake for client {} failed: {}", clientId, rootCause.getMessage());
             } else {
-                log.debug("SSL Handshake failed for client with IP {}: {}", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), rootCause.getMessage());
+                log.debug("SSL Handshake failed for client with IP {}: {}", clientConnection.getChannelIP().orElse("UNKNOWN"), rootCause.getMessage());
             }
             log.trace("Original Exception", rootCause);
         }
@@ -113,7 +114,8 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
 
         if (cause instanceof NotSslRecordException) {
             if (log.isDebugEnabled()) {
-                log.debug("Client {} sent data which is not SSL/TLS to a SSL/TLS listener. Disconnecting client.", ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"));
+                final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+                log.debug("Client {} sent data which is not SSL/TLS to a SSL/TLS listener. Disconnecting client.", clientConnection.getChannelIP().orElse("UNKNOWN"));
                 log.trace("Original Exception:", cause);
             }
             //Just in case the client wasn't disconnected already

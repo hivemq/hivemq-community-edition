@@ -40,7 +40,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 @Singleton
 public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
@@ -109,7 +108,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            log.debug(logMessage, getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
+            log.debug(logMessage, clientConnection.getChannelIP().orElse("UNKNOWN"));
         }
 
         if (eventLogMessage != null && !eventLogMessage.isEmpty()) {

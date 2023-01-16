@@ -43,8 +43,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.ByteBuffer;
 
-import static com.hivemq.util.ChannelUtils.getChannelIP;
-
 @Singleton
 public class MqttConnackerImpl implements MqttConnacker {
 
@@ -134,7 +132,8 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            log.debug(logMessage, getChannelIP(channel).orElse("UNKNOWN"));
+            final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            log.debug(logMessage, clientConnection.getChannelIP().orElse("UNKNOWN"));
         }
 
         if (eventLogMessage != null && !eventLogMessage.isEmpty()) {
