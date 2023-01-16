@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.DisconnectSource.EXTENSION;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 @LazySingleton
@@ -98,7 +97,7 @@ public class ClientServiceImpl implements ClientService {
             return CompletableFuture.completedFuture(Optional.empty());
         }
         return CompletableFuture.completedFuture(Optional.of(
-                new SessionInformationImpl(clientId, session.getSessionExpiryInterval(), session.isConnected())));
+                new SessionInformationImpl(clientId, session.getSessionExpiryIntervalSec(), session.isConnected())));
     }
 
     @NotNull
@@ -229,7 +228,7 @@ public class ClientServiceImpl implements ClientService {
 
         @Override
         protected @NotNull Collection<SessionInformation> transform(final @NotNull Map<String, ClientSession> stringClientSessionMap) {
-            return stringClientSessionMap.entrySet().stream().map(entry -> new SessionInformationImpl(entry.getKey(), entry.getValue().getSessionExpiryInterval(), entry.getValue().isConnected())).collect(Collectors.toUnmodifiableList());
+            return stringClientSessionMap.entrySet().stream().map(entry -> new SessionInformationImpl(entry.getKey(), entry.getValue().getSessionExpiryIntervalSec(), entry.getValue().isConnected())).collect(Collectors.toUnmodifiableList());
         }
     }
 }

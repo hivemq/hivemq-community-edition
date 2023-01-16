@@ -273,11 +273,11 @@ public class ClientSessionXodusLocalPersistenceTest {
         final String clientid = "myClient";
         persistence.put(clientid, new ClientSession(false, SESSION_EXPIRY_MAX), 123L, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession clientSession = persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
+        assertEquals(clientSession.getSessionExpiryIntervalSec(), SESSION_EXPIRY_MAX);
 
         persistence.setSessionExpiryInterval(clientid, 12345, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession updatedClientSession = persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        assertEquals(12345, updatedClientSession.getSessionExpiryInterval());
+        assertEquals(12345, updatedClientSession.getSessionExpiryIntervalSec());
     }
 
     @Test(expected = NullPointerException.class)
@@ -291,7 +291,7 @@ public class ClientSessionXodusLocalPersistenceTest {
 
         persistence.put(clientid, new ClientSession(false, SESSION_EXPIRY_MAX), 123L, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession clientSession = persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
+        assertEquals(clientSession.getSessionExpiryIntervalSec(), SESSION_EXPIRY_MAX);
 
         persistence.setSessionExpiryInterval(clientid, -1, BucketUtils.getBucket(clientid, BUCKET_COUNT));
     }
