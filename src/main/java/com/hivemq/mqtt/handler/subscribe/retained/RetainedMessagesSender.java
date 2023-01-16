@@ -36,7 +36,6 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.PublishUtil;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +162,7 @@ public class RetainedMessagesSender {
                 // Topics and retained messages have the same order
                 final Topic subscribedTopic = subscribedTopics[i];
 
-                final QoS qos = PublishUtil.getMinQoS(subscribedTopic.getQoS(), retainedMessage.getQos());
+                final QoS qos = QoS.getMinQoS(subscribedTopic.getQoS(), retainedMessage.getQos());
 
                 final ImmutableIntArray subscriptionIdentifiers;
 

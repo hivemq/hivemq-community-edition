@@ -30,7 +30,6 @@ import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import com.hivemq.util.PublishUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.ExodusException;
@@ -246,7 +245,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                     return null;
                 }
 
-                if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
+                if (message.hasExpired()) {
                     return null;
                 }
                 message.setMessage(payload);
@@ -320,7 +319,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                 if (cursor.getNext()) {
                     do {
                         final RetainedMessage message = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
-                        if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
+                        if (message.hasExpired()) {
                             cursor.deleteCurrent();
                             payloadPersistence.decrementReferenceCounter(message.getPublishId());
                             retainMessageCounter.decrementAndGet();
@@ -371,7 +370,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence 
                     final RetainedMessage deserializedMessage = serializer.deserializeValue(byteIterableToBytes(cursor.getValue()));
 
                     // ignore messages with exceeded message expiry interval
-                    if (PublishUtil.checkExpiry(deserializedMessage.getTimestamp(), deserializedMessage.getMessageExpiryInterval())) {
+                    if (deserializedMessage.hasExpired()) {
                         hasNext = cursor.getNext();
                         continue;
                     }

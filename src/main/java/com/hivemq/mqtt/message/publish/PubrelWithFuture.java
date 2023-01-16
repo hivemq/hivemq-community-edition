@@ -30,7 +30,7 @@ public class PubrelWithFuture extends PUBREL {
 
     public PubrelWithFuture(@NotNull final PUBREL pubrel, @NotNull final SettableFuture<PublishStatus> future) {
         super(pubrel.getPacketIdentifier(), pubrel.getReasonCode(), pubrel.getReasonString(), pubrel.getUserProperties(),
-                pubrel.getPublishTimestamp(), pubrel.getExpiryInterval());
+                pubrel.getPublishTimestamp(), pubrel.getMessageExpiryInterval());
         this.future = future;
     }
 

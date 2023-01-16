@@ -24,7 +24,6 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -200,7 +199,7 @@ public class MessageExpiryHandlerTest {
         InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED = true;
 
         final PUBREL pubrel = new PUBREL(1);
-        pubrel.setExpiryInterval(0L);
+        pubrel.setMessageExpiryInterval(0L);
         pubrel.setPublishTimestamp(System.currentTimeMillis());
         final CountDownLatch droppedEventFiredLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
@@ -215,7 +214,7 @@ public class MessageExpiryHandlerTest {
 
         channel.writeOutbound(pubrel);
         assertTrue(droppedEventFiredLatch.await(5, TimeUnit.SECONDS));
-        assertEquals(0L, pubrel.getExpiryInterval().longValue());
+        assertEquals(0L, pubrel.getMessageExpiryInterval().longValue());
 
     }
 
@@ -223,7 +222,7 @@ public class MessageExpiryHandlerTest {
     public void test_pubrel_dont_expired() throws InterruptedException {
         InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
         final PUBREL pubrel = new PUBREL(1);
-        pubrel.setExpiryInterval(0L);
+        pubrel.setMessageExpiryInterval(0L);
         pubrel.setPublishTimestamp(System.currentTimeMillis());
         final CountDownLatch droppedEventFiredLatch = new CountDownLatch(1);
 
@@ -239,6 +238,6 @@ public class MessageExpiryHandlerTest {
 
         channel.writeOutbound(pubrel);
         assertFalse(droppedEventFiredLatch.await(50, TimeUnit.MILLISECONDS));
-        assertEquals(0L, pubrel.getExpiryInterval().longValue());
+        assertEquals(0L, pubrel.getMessageExpiryInterval().longValue());
     }
 }
