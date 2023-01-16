@@ -74,7 +74,7 @@ public class HiveMQNettyBootstrapTest {
     }
 
     @Test
-    public void test_server_bootstrap_no_listeners() {
+    public void bootstrapServer_whenNoListenersProvided_thenSuccessfulBootstrap() {
 
         when(listenerConfigurationService.getTcpListeners()).thenReturn(Lists.newArrayList());
         when(listenerConfigurationService.getTlsTcpListeners()).thenReturn(Lists.newArrayList());
@@ -85,7 +85,7 @@ public class HiveMQNettyBootstrapTest {
     }
 
     @Test
-    public void test_server_bootstrap_tcp() throws Exception {
+    public void bootstrapServer_whenTCPListenerProvided_thenSuccessfulBootstrap() throws Exception {
 
         setupTcpListener(randomPort);
 
@@ -98,9 +98,8 @@ public class HiveMQNettyBootstrapTest {
         assertTrue(listenableFuture.get().get(0).isSuccessful());
     }
 
-
     @Test
-    public void test_server_bootstrap_tls_tcp() throws Exception {
+    public void bootstrapServer_whenTCPListenerWithTLSProvided_thenSuccessfulBootstrap() throws Exception {
         setupTlsTcpListener(randomPort);
 
         final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap.bootstrapServer();
@@ -112,9 +111,8 @@ public class HiveMQNettyBootstrapTest {
         assertTrue(listenableFuture.get().get(0).isSuccessful());
     }
 
-
     @Test
-    public void test_server_bootstrap_websocket() throws Exception {
+    public void bootstrapServer_whenWebsocketListenerProvided_thenSuccessfulBootstrap() throws Exception {
         setupWebsocketListener(randomPort);
 
         final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap.bootstrapServer();
@@ -126,9 +124,8 @@ public class HiveMQNettyBootstrapTest {
         assertTrue(listenableFuture.get().get(0).isSuccessful());
     }
 
-
     @Test
-    public void test_server_bootstrap_tls_websocket() throws Exception {
+    public void bootstrapServer_whenWebsocketListenerWithTLSProvided_thenSuccessfulBootstrap() throws Exception {
         setupTlsWebsocketListener(randomPort);
 
         final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap.bootstrapServer();
@@ -141,7 +138,7 @@ public class HiveMQNettyBootstrapTest {
     }
 
     @Test
-    public void test_server_bootstrap_combined() throws Exception {
+    public void bootstrapServer_whenDifferentListenersProvided_thenSuccessfulBootstrap() throws Exception {
 
         setupTcpListener(randomPort);
         setupTlsTcpListener(randomPort + 1);
@@ -163,24 +160,20 @@ public class HiveMQNettyBootstrapTest {
     private TlsWebsocketListener createTlsWebsocketListener(final int givenPort) {
         final Tls tls = createDefaultTLS();
         final String bindAddress = "0.0.0.0";
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder()
-                .bindAddress(bindAddress).port(givenPort).tls(tls).build();
 
-        return tlsWebsocketListener;
+        return new TlsWebsocketListener.Builder()
+                .bindAddress(bindAddress).port(givenPort).tls(tls).build();
     }
 
     private TcpListener createTcpListener(final int givenPort) {
-        final TcpListener tcpListener = new TcpListener(givenPort, "0.0.0.0");
-
-        return tcpListener;
+        return new TcpListener(givenPort, "127.0.0.1");
     }
 
     private TlsTcpListener createTlsTcpListener(final int givenPort) {
         final Tls tls = createDefaultTLS();
         final String bindAddress = "0.0.0.0";
 
-        final TlsTcpListener tlsTcpListener = new TlsTcpListener(givenPort, bindAddress, tls);
-        return tlsTcpListener;
+        return new TlsTcpListener(givenPort, bindAddress, tls);
     }
 
     private WebsocketListener createWebsocketListener(final int givenPort) {
@@ -211,6 +204,4 @@ public class HiveMQNettyBootstrapTest {
         final List<WebsocketListener> websocketListeners = Lists.newArrayList(createWebsocketListener(givenPort));
         when(listenerConfigurationService.getWebsocketListeners()).thenReturn(websocketListeners);
     }
-
-
 }
