@@ -38,7 +38,11 @@ import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -230,6 +234,20 @@ public class ClientConnection {
             return 0;
         }
         return inFlightMessageCount.get();
+    }
+
+    public int decrementInFlightCount() {
+        if (inFlightMessageCount == null) {
+            return 0;
+        }
+        return inFlightMessageCount.decrementAndGet();
+    }
+
+    public int incrementInFlightCount() {
+        if (inFlightMessageCount == null) {
+            inFlightMessageCount = new AtomicInteger();
+        }
+        return inFlightMessageCount.incrementAndGet();
     }
 
     /**
@@ -535,5 +553,24 @@ public class ClientConnection {
             return defaultMaxInflightWindow;
         }
         return Math.min(clientReceiveMaximum, defaultMaxInflightWindow);
+    }
+
+    public @NotNull Optional<String> getChannelIP() {
+        final Optional<InetAddress> inetAddress = getChannelAddress();
+
+        return inetAddress.map(InetAddress::getHostAddress);
+    }
+
+    private @NotNull Optional<InetAddress> getChannelAddress() {
+        final Optional<SocketAddress> socketAddress = Optional.ofNullable(channel.remoteAddress());
+        if (socketAddress.isPresent()) {
+            final SocketAddress sockAddress = socketAddress.get();
+            //If this is not an InetAddress, we're treating this as if there's no address
+            if (sockAddress instanceof InetSocketAddress) {
+                return Optional.ofNullable(((InetSocketAddress) sockAddress).getAddress());
+            }
+        }
+
+        return Optional.empty();
     }
 }

@@ -20,7 +20,6 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +102,7 @@ public class EventLog {
     public void clientConnected(@NotNull final Channel channel) {
         final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
-        final String ip = ChannelUtils.getChannelIP(channel).orElse(null);
+        final String ip = clientConnection.getChannelIP().orElse(null);
         final Boolean cleanStart = clientConnection.isCleanStart();
         final Long sessionExpiry = clientConnection.getClientSessionExpiryInterval();
 
@@ -121,7 +120,7 @@ public class EventLog {
             final @NotNull ClientConnection clientConnection, final @Nullable String reason) {
 
         final String clientId = clientConnection.getClientId();
-        final String ip = ChannelUtils.getChannelIP(clientConnection.getChannel()).orElse(null);
+        final String ip = clientConnection.getChannelIP().orElse(null);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected gracefully.", clientId);
@@ -141,7 +140,7 @@ public class EventLog {
      */
     public void clientDisconnectedUngracefully(final @NotNull ClientConnection clientConnection) {
         final String clientId = clientConnection.getClientId();
-        final String ip = ChannelUtils.getChannelIP(clientConnection.getChannel()).orElse(null);
+        final String ip = clientConnection.getChannelIP().orElse(null);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected ungracefully.", clientId);
@@ -158,7 +157,7 @@ public class EventLog {
     public void clientWasDisconnected(@NotNull final Channel channel, @NotNull final String reason) {
         final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
-        final String ip = ChannelUtils.getChannelIP(channel).orElse(null);
+        final String ip = clientConnection.getChannelIP().orElse(null);
         if (log.isTraceEnabled()) {
             log.trace("Client {} was disconnected.", clientId);
         }
@@ -172,8 +171,9 @@ public class EventLog {
      * @param reasonCode of the AUTH packet.
      */
     public void clientAuthentication(@NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
-        final String clientId = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
-        final String ip = ChannelUtils.getChannelIP(channel).orElse(null);
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final String clientId = clientConnection.getClientId();
+        final String ip = clientConnection.getChannelIP().orElse(null);
         if (received) {
             logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
         } else {
