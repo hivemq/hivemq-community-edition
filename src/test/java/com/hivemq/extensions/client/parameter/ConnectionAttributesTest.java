@@ -21,7 +21,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.services.exception.LimitExceededException;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
@@ -49,7 +48,7 @@ public class ConnectionAttributesTest {
         connectionAttributes = new ConnectionAttributes(1000);
         channel = mock(Channel.class);
         clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 
     @Test

@@ -38,7 +38,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.mqtt.services.InternalPublishService;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.ChannelHandlerContext;
@@ -78,7 +77,7 @@ public class IncomingPublishService {
                                @NotNull final PUBLISH publish,
                                @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
 
         final int maxQos = mqttConfigurationService.maximumQos().getQosNumber();
@@ -128,7 +127,7 @@ public class IncomingPublishService {
 
     private void authorizePublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish, @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         if (authorizerResult != null && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
@@ -166,7 +165,7 @@ public class IncomingPublishService {
     private void finishUnauthorizedPublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish,
                                            @Nullable final AckReasonCode reasonCode, @Nullable final String reasonString) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         clientConnection.setIncomingPublishesDefaultFailedSkipRest(true);
 

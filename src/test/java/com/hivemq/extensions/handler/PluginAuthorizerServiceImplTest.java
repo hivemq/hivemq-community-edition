@@ -44,7 +44,7 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -100,8 +100,8 @@ public class PluginAuthorizerServiceImplTest {
 
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, publishFlushHandler);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final Map<String, HiveMQExtension> pluginMap = new HashMap<>();
@@ -138,7 +138,7 @@ public class PluginAuthorizerServiceImplTest {
     public void test_subscribe_client_id_null() {
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
 
         assertNull(channel.readOutbound());
@@ -148,7 +148,7 @@ public class PluginAuthorizerServiceImplTest {
     public void test_publish_client_id_null() {
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
         assertNull(channel.readOutbound());
@@ -158,7 +158,7 @@ public class PluginAuthorizerServiceImplTest {
     public void test_will_client_id_null() {
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
 
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
 
@@ -170,7 +170,7 @@ public class PluginAuthorizerServiceImplTest {
     public void test_publish_skip_all() {
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesSkipRest(true);
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
         assertNull(channel.readOutbound());
@@ -292,7 +292,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
     }
@@ -318,7 +318,7 @@ public class PluginAuthorizerServiceImplTest {
         channel.runScheduledPendingTasks();
 
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getPublishAuthorizersMap().size());
     }
@@ -335,13 +335,13 @@ public class PluginAuthorizerServiceImplTest {
 
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesSkipRest(true);
 
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
 
         await().pollInterval(Duration.ofMillis(100)).until(() -> {
             final ClientAuthorizers extensionClientAuthorizers =
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                    channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
             assertNotNull(extensionClientAuthorizers);
             if (extensionClientAuthorizers.getPublishAuthorizersMap().size() != 1) {
                 channel.runPendingTasks();
@@ -355,7 +355,7 @@ public class PluginAuthorizerServiceImplTest {
         assertFalse(authorizeLatch2.await(0, TimeUnit.SECONDS));
 
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getPublishAuthorizersMap().size());
     }
@@ -376,7 +376,7 @@ public class PluginAuthorizerServiceImplTest {
 
         await().pollInterval(Duration.ofMillis(100)).until(() -> {
             final ClientAuthorizers extensionClientAuthorizers =
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                    channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
             assertNotNull(extensionClientAuthorizers);
             if (extensionClientAuthorizers.getPublishAuthorizersMap().size() != 2) {
                 channel.runPendingTasks();
@@ -387,7 +387,7 @@ public class PluginAuthorizerServiceImplTest {
         });
 
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getPublishAuthorizersMap().size());
     }
@@ -411,7 +411,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
     }
@@ -432,7 +432,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
     }
@@ -454,7 +454,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
 
@@ -485,7 +485,7 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
 
         final ClientAuthorizers extensionClientAuthorizers =
-                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientAuthorizers();
+                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
 

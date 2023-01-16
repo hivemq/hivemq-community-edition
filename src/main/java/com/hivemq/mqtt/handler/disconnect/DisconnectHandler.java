@@ -29,8 +29,6 @@ import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.connection.ConnectionPersistence;
-import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Checkpoints;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandler;
@@ -77,7 +75,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     protected void channelRead0(
             final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT msg) throws Exception {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         clientConnection.proposeClientState(ClientState.DISCONNECTING);
 
@@ -105,7 +103,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     @Override
     public void channelInactive(final @NotNull ChannelHandlerContext ctx) throws Exception {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event when we can set this state.

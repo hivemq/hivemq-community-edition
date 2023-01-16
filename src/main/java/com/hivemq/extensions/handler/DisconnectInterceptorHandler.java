@@ -40,7 +40,6 @@ import com.hivemq.extensions.packets.disconnect.DisconnectPacketImpl;
 import com.hivemq.extensions.packets.disconnect.ModifiableInboundDisconnectPacketImpl;
 import com.hivemq.extensions.packets.disconnect.ModifiableOutboundDisconnectPacketImpl;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -84,7 +83,7 @@ public class DisconnectInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -141,7 +140,7 @@ public class DisconnectInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;

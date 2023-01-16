@@ -36,15 +36,18 @@ import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author Daniel Krüger
- */
 public class ClientConnection {
+
+    /**
+     * The name of the {@link Channel} attribute which the client connection information is stored in.
+     */
+    public static final AttributeKey<ClientConnection> CHANNEL_ATTRIBUTE_NAME = AttributeKey.valueOf("Client.Connection");
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;

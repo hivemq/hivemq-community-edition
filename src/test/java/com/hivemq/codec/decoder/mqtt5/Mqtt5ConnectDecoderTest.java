@@ -27,7 +27,6 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -172,9 +171,9 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals("test2", willUserProperties.get(2).getName());
         assertEquals("value", willUserProperties.get(2).getValue());
 
-        assertNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectKeepAlive());
-        assertEquals("username", channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthUsername());
-        assertEquals("pass", new String(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPassword(), StandardCharsets.UTF_8));
+        assertNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectKeepAlive());
+        assertEquals("username", channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthUsername());
+        assertEquals("pass", new String(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthPassword(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -214,7 +213,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals(DEFAULT_RESPONSE_INFORMATION_REQUESTED, connect.isResponseInformationRequested());
         assertEquals(DEFAULT_PROBLEM_INFORMATION_REQUESTED, connect.isProblemInformationRequested());
 
-        assertNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getTopicAliasMapping());
+        assertNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getTopicAliasMapping());
     }
 
     @Test
@@ -1350,7 +1349,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         final CONNECT connect = decodeInternal(encoded);
 
         assertEquals(44, connect.getClientIdentifier().length());
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned());
+        assertTrue(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isClientIdAssigned());
     }
 
     @Test
@@ -1360,7 +1359,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.securityConfiguration().setAllowServerAssignedClientId(false);
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
@@ -1414,7 +1413,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         final CONNECT connect = decodeInternal(encoded);
 
         assertEquals("huhu", connect.getClientIdentifier());
-        assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned());
+        assertFalse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isClientIdAssigned());
     }
 
     @Test
@@ -2100,7 +2099,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setMaxMessageExpiryInterval(100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved

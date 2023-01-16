@@ -18,11 +18,11 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
             channel.eventLoop().schedule(() -> {
                 if (log.isTraceEnabled()) {
                     log.trace("Retrying retained message for client '{}' on topic '{}'.",
-                            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(), subscription.getTopic());
+                            channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId(), subscription.getTopic());
                 }
                 final ListenableFuture<Void> sentFuture =
                         retainedMessagesSender.writeRetainedMessages(channel, subscription);
@@ -79,7 +79,7 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
 
         } else {
             Exceptions.rethrowError("Unable to send retained message on topic " + subscription.getTopic() +
-                    " to client " + channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId() + ".", throwable);
+                    " to client " + channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId() + ".", throwable);
         }
     }
 }

@@ -19,7 +19,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
@@ -42,7 +41,7 @@ public class Mqtt3PublishEncoderTest {
         channel = new EmbeddedChannel(new TestMessageEncoder());
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
         clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 
     @Test

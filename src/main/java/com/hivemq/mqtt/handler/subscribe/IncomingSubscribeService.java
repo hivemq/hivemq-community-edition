@@ -140,7 +140,7 @@ public class IncomingSubscribeService {
             final @NotNull String[] reasonStrings,
             final boolean authorizersPresent) {
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         for (int i = 0; i < msg.getTopics().size(); i++) {
@@ -222,7 +222,7 @@ public class IncomingSubscribeService {
             final @Nullable Mqtt5SubAckReasonCode[] providedCodes,
             final @Nullable String reasonString) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         downgradeSharedSubscriptions(msg);
 
@@ -384,7 +384,7 @@ public class IncomingSubscribeService {
     }
 
     private void handleInsufficientPermissionsV31(final @NotNull ChannelHandlerContext ctx, final @NotNull Topic topic) {
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         log.debug("MQTT v3.1 Client '{}' (IP: {}) is not authorized to subscribe to topic '{}' with QoS '{}'. Disconnecting client.",
                 clientConnection.getClientId(), ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), topic.getTopic(), topic.getQoS().getQosNumber());
         mqttServerDisconnector.disconnect(

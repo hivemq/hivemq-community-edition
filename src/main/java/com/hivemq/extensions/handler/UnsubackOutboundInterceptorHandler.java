@@ -34,7 +34,6 @@ import com.hivemq.extensions.interceptor.unsuback.parameter.UnsubackOutboundOutp
 import com.hivemq.extensions.packets.unsuback.ModifiableUnsubackPacketImpl;
 import com.hivemq.extensions.packets.unsuback.UnsubackPacketImpl;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -80,7 +79,7 @@ public class UnsubackOutboundInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;

@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
@@ -23,7 +24,6 @@ import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.*;
 import org.slf4j.Logger;
@@ -109,7 +109,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
     private static void suspendRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
             log.trace("Suspending read operations for MQTT client with id {} and IP {}",
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(),
+                    channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId(),
                     ChannelUtils.getChannelIP(channel).orElse("UNKNOWN"));
         }
         channel.config().setAutoRead(false);
@@ -118,7 +118,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
     private static void resumeRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
             log.trace("Restarting read operations for MQTT client with id {} and IP {}",
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(),
+                    channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId(),
                     ChannelUtils.getChannelIP(channel).orElse("UNKNOWN"));
         }
         channel.config().setAutoRead(true);

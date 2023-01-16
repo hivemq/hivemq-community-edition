@@ -60,11 +60,11 @@ public final class ChannelUtils {
      * Fetches the clientId from the channel attributes of the passed channel
      */
     public static String getClientId(final @NotNull Channel channel) {
-        return channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        return channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
     }
 
     public static boolean messagesInFlight(@NotNull final Channel channel) {
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final boolean inFlightMessagesSent = clientConnection.isInFlightMessagesSent();
         if (!inFlightMessagesSent) {
             return true;
@@ -77,7 +77,7 @@ public final class ChannelUtils {
     }
 
     public static int maxInflightWindow(@NotNull final Channel channel) {
-        final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum();
+        final Integer clientReceiveMaximum = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientReceiveMaximum();
         final int max = InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES;
         if (clientReceiveMaximum == null) {
             return max;

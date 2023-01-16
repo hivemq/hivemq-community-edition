@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.handler.tasks;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.Authorizer;
@@ -25,7 +26,7 @@ import com.hivemq.extensions.auth.parameter.PublishAuthorizerInputImpl;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.client.ClientAuthorizers;
 import com.hivemq.extensions.executor.task.PluginInOutTask;
-import com.hivemq.util.ChannelAttributes;
+
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
@@ -71,7 +72,7 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
         }
 
         output.authorizerPresent();
-        if (channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest()) {
+        if (channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isIncomingPublishesSkipRest()) {
             //client already disconnected by authorizer, no more processing of any messages allowed.
             output.forceFailedAuthorization();
         } else {

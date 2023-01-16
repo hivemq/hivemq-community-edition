@@ -21,7 +21,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionAttributeStore;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -61,7 +60,7 @@ public class ConnectionAttributeStoreImplTest {
 
         //noinspection unchecked
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(clientConnectionAttribute);
         when(clientConnectionAttribute.get()).thenReturn(clientConnection);
     }
 

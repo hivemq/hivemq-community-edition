@@ -41,7 +41,6 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
@@ -125,7 +124,7 @@ public class PublishPollServiceImplTest {
         when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(clientConnectionAttribute);
         when(clientConnectionAttribute.get()).thenReturn(clientConnection);
 
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);

@@ -18,13 +18,13 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.handler.subscribe.IncomingSubscribeService;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
@@ -191,7 +191,7 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
             //Attention, this set is immutable, so we need a fresh mutable collection
             final Queue<String> topics = new ConcurrentLinkedQueue<>(retainedMessageTopics);
 
-            final Integer clientReceiveMaximum = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientReceiveMaximum();
+            final Integer clientReceiveMaximum = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientReceiveMaximum();
 
             int concurrentMessages = clientReceiveMaximum == null ? CONCURRENT_MESSAGES :
                     Math.min(clientReceiveMaximum, CONCURRENT_MESSAGES);

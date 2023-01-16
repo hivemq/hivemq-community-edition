@@ -37,7 +37,6 @@ import com.hivemq.extensions.interceptor.pubcomp.parameter.PubcompOutboundOutput
 import com.hivemq.extensions.packets.pubcomp.ModifiablePubcompPacketImpl;
 import com.hivemq.extensions.packets.pubcomp.PubcompPacketImpl;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -80,7 +79,7 @@ public class PubcompInterceptorHandler {
 
     public void handleInboundPubcomp(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBCOMP pubcomp) {
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -132,7 +131,7 @@ public class PubcompInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;

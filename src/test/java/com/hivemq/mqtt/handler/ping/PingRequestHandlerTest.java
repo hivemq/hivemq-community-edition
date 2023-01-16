@@ -18,7 +18,6 @@ package com.hivemq.mqtt.handler.ping;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -46,7 +45,7 @@ public class PingRequestHandlerTest {
     public void test_pingreq() throws Exception {
 
         final EmbeddedChannel channel = new EmbeddedChannel(new PingRequestHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         channel.writeInbound(new PINGREQ());
 

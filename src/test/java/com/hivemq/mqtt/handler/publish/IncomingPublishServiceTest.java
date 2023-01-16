@@ -39,7 +39,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.mqtt.services.InternalPublishService;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -93,7 +93,7 @@ public class IncomingPublishServiceTest {
         setupHandlerAndChannel();
 
         ctx = channel.pipeline().context(CheckUserEventTriggeredOnSuper.class);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(new ModifiableDefaultPermissionsImpl());
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(new ModifiableDefaultPermissionsImpl());
     }
 
     private void setupHandlerAndChannel() {
@@ -106,15 +106,15 @@ public class IncomingPublishServiceTest {
         final CheckUserEventTriggeredOnSuper triggeredUserEvents = new CheckUserEventTriggeredOnSuper();
 
         channel = new EmbeddedChannel(triggeredUserEvents);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientid");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(1000L);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("clientid");
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend(1000L);
     }
 
     @Test
     public void test_publishes_skipped() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesSkipRest(true);
         incomingPublishService.processPublish(ctx, TestMessageUtil.createMqtt5Publish(), null);
 
         verify(mqttServerDisconnector, never()).disconnect(
@@ -128,7 +128,7 @@ public class IncomingPublishServiceTest {
     @Test
     public void test_publish_size_too_big() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(5L);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend(5L);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         final PUBLISH publish =
@@ -142,7 +142,7 @@ public class IncomingPublishServiceTest {
     @Test
     public void test_publish_size_ok() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(5L);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend(5L);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_MOST_ONCE);
 
@@ -203,7 +203,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -385,7 +385,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -405,7 +405,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -438,7 +438,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -458,7 +458,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -477,7 +477,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -497,7 +497,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -522,7 +522,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -542,7 +542,7 @@ public class IncomingPublishServiceTest {
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "#").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         incomingPublishService.processPublish(ctx, publish, null);
 
@@ -766,7 +766,7 @@ public class IncomingPublishServiceTest {
     @Test
     public void test_default_not_authorized() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesDefaultFailedSkipRest(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesDefaultFailedSkipRest(true);
 
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish();
         incomingPublishService.processPublish(

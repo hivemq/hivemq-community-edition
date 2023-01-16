@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import com.google.common.util.concurrent.*;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -35,7 +36,6 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.PublishUtil;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -99,7 +99,7 @@ public class RetainedMessagesSender {
             return Futures.immediateFuture(null);
         }
 
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final String clientId = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
         final ImmutableList.Builder<ListenableFuture<RetainedMessage>> retainedMessageFutures = ImmutableList.builder();
         for (final Topic topic : subscribedTopics) {
             retainedMessageFutures.add(retainedMessagePersistence.get(topic.getTopic()));
@@ -224,7 +224,7 @@ public class RetainedMessagesSender {
                 resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
                 return;
             }
-            final Long queueLimit = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getQueueSizeMaximum();
+            final Long queueLimit = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getQueueSizeMaximum();
             futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true,
                     Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages)));
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
@@ -246,7 +246,7 @@ public class RetainedMessagesSender {
 
                     payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
                     if (qos0Publish.getPacketIdentifier() != 0) {
-                        final MessageIDPool messageIDPool = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getMessageIDPool();
+                        final MessageIDPool messageIDPool = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getMessageIDPool();
                         messageIDPool.returnId(qos0Publish.getPacketIdentifier());
                     }
                 }

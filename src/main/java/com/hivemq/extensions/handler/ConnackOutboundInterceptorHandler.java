@@ -41,7 +41,6 @@ import com.hivemq.extensions.packets.connack.ModifiableConnackPacketImpl;
 import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.connack.CONNACK;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -97,7 +96,7 @@ public class ConnackOutboundInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             ctx.write(connack, promise);
@@ -199,7 +198,7 @@ public class ConnackOutboundInterceptorHandler {
         @Override
         public void run() {
             if (outputHolder.get().isPrevent()) {
-                final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+                final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
                 clientConnection.proposeClientState(ClientState.DISCONNECTING);
 
                 eventLog.clientWasDisconnected(

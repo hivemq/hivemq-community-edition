@@ -22,7 +22,6 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
 
@@ -40,7 +39,7 @@ public class AuthenticationFailedInputImplTest {
     public void test_construction_null_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client", null, null, null);
         assertEquals(input, input.get());
@@ -55,7 +54,7 @@ public class AuthenticationFailedInputImplTest {
     public void test_construction_with_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final AuthenticationFailedInputImpl input =
                 new AuthenticationFailedInputImpl(channel, "client", DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD,
@@ -75,7 +74,7 @@ public class AuthenticationFailedInputImplTest {
     public void test_construction_client_id_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         new AuthenticationFailedInputImpl(channel, null, null, null, null);
     }

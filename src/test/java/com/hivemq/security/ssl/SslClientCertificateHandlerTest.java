@@ -19,7 +19,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -69,7 +68,7 @@ public class SslClientCertificateHandlerTest {
         when(sslEngine.getSession()).thenReturn(sslSession);
 
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }
@@ -88,7 +87,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenReturn(new Certificate[0]);
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        assertNotNull(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthCertificate());
+        assertNotNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthCertificate());
 
     }
 

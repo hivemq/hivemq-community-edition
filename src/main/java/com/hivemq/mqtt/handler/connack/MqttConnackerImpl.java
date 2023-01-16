@@ -31,7 +31,6 @@ import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ThreadPreConditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -107,7 +106,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
         ThreadPreConditions.inNettyChildEventloop();
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         final ClientState oldClientState = clientConnection.getClientState();
         clientConnection.proposeClientState(ClientState.DISCONNECTING);

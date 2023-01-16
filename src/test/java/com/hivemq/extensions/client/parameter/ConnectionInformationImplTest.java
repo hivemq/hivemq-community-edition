@@ -28,7 +28,6 @@ import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.security.auth.SslClientCertificate;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class ConnectionInformationImplTest {
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 
     @Test(expected = NullPointerException.class)

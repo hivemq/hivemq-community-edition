@@ -20,7 +20,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.DefaultEventLoop;
 import org.junit.Before;
@@ -53,7 +52,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         clientConnection = new ClientConnection(channel, null);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
         when(channel.eventLoop()).thenReturn(new DefaultEventLoop(Executors.newSingleThreadExecutor()));
     }
 

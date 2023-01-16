@@ -23,7 +23,7 @@ import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -77,7 +77,7 @@ public class PublishStatusFutureCallbackTest {
         queueId = "queueId";
         publish = TestMessageUtil.createMqtt5Publish();
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
         client = "client";
 
         when(publishPollService.removeMessageFromSharedQueue(anyString(), anyString())).thenReturn(Futures.immediateFuture(null));
@@ -108,7 +108,7 @@ public class PublishStatusFutureCallbackTest {
     @Test
     public void test_on_success_qos_0_no_new_messages_available() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(1000));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessages(new AtomicInteger(1000));
         publish = TestMessageUtil.getDefaultPublishBuilder(payloadPersistence).withQoS(QoS.AT_MOST_ONCE).withOnwardQos(QoS.AT_MOST_ONCE).build();
         publishStatusFutureCallback = new PublishStatusFutureCallback(payloadPersistence, publishPollService, sharedSubscription, queueId, publish, messageIDPool, channel, client);
         publishStatusFutureCallback.onSuccess(PublishStatus.DELIVERED);

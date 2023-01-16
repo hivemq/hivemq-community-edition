@@ -30,7 +30,6 @@ import com.hivemq.extensions.client.parameter.ConnectionInformationImpl;
 import com.hivemq.extensions.client.parameter.ListenerImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.security.auth.SslClientCertificate;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ public class ExtensionInformationUtil {
     private static final Logger log = LoggerFactory.getLogger(ExtensionInformationUtil.class);
 
     public static @NotNull ClientInformation getAndSetClientInformation(@NotNull final Channel channel, @NotNull final String clientId) {
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         if (clientConnection.getExtensionClientInformation() == null) {
             clientConnection.setExtensionClientInformation(new ClientInformationImpl(clientId));
         }
@@ -55,7 +54,7 @@ public class ExtensionInformationUtil {
     }
 
     public static @NotNull ConnectionInformation getAndSetConnectionInformation(@NotNull final Channel channel) {
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         if (clientConnection.getExtensionConnectionInformation() == null) {
             clientConnection.setExtensionConnectionInformation(new ConnectionInformationImpl(channel));
         }
@@ -65,7 +64,7 @@ public class ExtensionInformationUtil {
     public static @NotNull MqttVersion mqttVersionFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
-        final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+        final ProtocolVersion protocolVersion = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getProtocolVersion();
         Preconditions.checkNotNull(protocolVersion, "protocol version must never be null");
 
         return mqttVersionFromProtocolVersion(protocolVersion);
@@ -86,7 +85,7 @@ public class ExtensionInformationUtil {
     public static @Nullable Listener getListenerFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
-        final com.hivemq.configuration.service.entity.Listener hiveMQListener = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectedListener();
+        final com.hivemq.configuration.service.entity.Listener hiveMQListener = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectedListener();
         if (hiveMQListener == null) {
             return null;
         }
@@ -112,7 +111,7 @@ public class ExtensionInformationUtil {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         try {
             final String cipher = clientConnection.getAuthCipherSuite();
             final String protocol = clientConnection.getAuthProtocol();

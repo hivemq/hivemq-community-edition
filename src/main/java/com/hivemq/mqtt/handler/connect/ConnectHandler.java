@@ -171,7 +171,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             return;
         }
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         clientConnection.setDisconnectFuture(SettableFuture.create());
         clientConnection.setClientReceiveMaximum(connect.getReceiveMaximum());
         //Set max packet size to send to channel
@@ -285,7 +285,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
 
     private boolean checkClientId(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
 
-        final Boolean assigned = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().isClientIdAssigned();
+        final Boolean assigned = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isClientIdAssigned();
 
         if (assigned != null && assigned) {
             return true;
@@ -391,7 +391,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
                                      @NotNull final Channel channel) {
         msg.setReceiveMaximum(clientSettings.getClientReceiveMaximum());
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         clientConnection.setClientReceiveMaximum(clientSettings.getClientReceiveMaximum());
         clientConnection.setQueueSizeMaximum(clientSettings.getQueueSizeMaximum());
     }
@@ -408,7 +408,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
 
     private void afterPublishAuthorizer(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg, @NotNull final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         if (authorizerResult.isAuthorizerPresent() && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
@@ -444,7 +444,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
 
     private boolean isWillNotAuthorized(@NotNull final ChannelHandlerContext ctx, @NotNull final CONNECT msg) {
         if (msg.getWillPublish() != null) {
-            final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+            final ModifiableDefaultPermissions permissions = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthPermissions();
             if (!DefaultPermissionsEvaluator.checkWillPublish(permissions, msg.getWillPublish())) {
 
                 //will is not authorized, disconnect client
@@ -489,7 +489,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
     @VisibleForTesting
     void afterTakeover(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg) {
 
-        final Long queueSizeMaximum = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getQueueSizeMaximum();
+        final Long queueSizeMaximum = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getQueueSizeMaximum();
         final long sessionExpiryInterval =
                 msg.getSessionExpiryInterval() > configuredSessionExpiryInterval ?
                         configuredSessionExpiryInterval : msg.getSessionExpiryInterval();
@@ -526,7 +526,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
 
     private void sendConnackSuccess(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT msg, final boolean sessionPresent) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         final ChannelFuture connackSent;
 
@@ -568,7 +568,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             builder.withSessionExpiryInterval(sessionExpiryInterval);
         }
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         //when client identifier assigned, send it in CONNACK
         final boolean clientIdAssigned = clientConnection.isClientIdAssigned();

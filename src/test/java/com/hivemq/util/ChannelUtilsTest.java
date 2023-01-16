@@ -63,7 +63,7 @@ public class ChannelUtilsTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         clientConnection.setInFlightMessagesSent(true);
         assertFalse(ChannelUtils.messagesInFlight(channel));

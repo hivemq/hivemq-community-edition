@@ -31,7 +31,6 @@ import com.hivemq.extensions.executor.task.PluginInTask;
 import com.hivemq.extensions.executor.task.PluginInTaskContext;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -144,7 +143,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private void fireOnServerDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull OnServerDisconnectEvent disconnectEvent) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -173,7 +172,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private void fireOnClientDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull OnClientDisconnectEvent disconnectEvent) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -203,7 +202,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private void fireOnAuthFailed(final @NotNull ChannelHandlerContext ctx, final @NotNull OnAuthFailedEvent authFailedEvent) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -232,7 +231,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private void fireOnAuthSuccess(final @NotNull ChannelHandlerContext ctx) {
 
-        final String clientId = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
+        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -286,7 +285,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     @NotNull
     private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         if (clientConnection.getExtensionClientEventListeners() == null) {
             clientConnection.setExtensionClientEventListeners(new ClientEventListeners(hiveMQExtensions));
         }

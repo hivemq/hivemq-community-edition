@@ -26,7 +26,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.MessageBarrier;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.security.exception.SslException;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -73,7 +72,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
         final ClientConnection clientConnection = new ClientConnection(ch, publishFlushHandler);
-        ch.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        ch.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         clientConnection.setConnectedListener(listener);
 

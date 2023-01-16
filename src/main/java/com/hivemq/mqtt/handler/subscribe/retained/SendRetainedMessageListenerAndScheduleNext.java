@@ -18,10 +18,10 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.subscribe.Topic;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -106,7 +106,7 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
                 channel.eventLoop().schedule(() -> {
                     if (log.isTraceEnabled()) {
                         log.trace("Retrying retained message for client '{}' on topic '{}'.",
-                                channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(), subscription.getTopic());
+                                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId(), subscription.getTopic());
                     }
                     send();
                 }, 1, TimeUnit.SECONDS);
@@ -114,7 +114,7 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
 
         } else {
             Exceptions.rethrowError("Unable to send retained message for subscription " + subscription.getTopic() +
-                    " to client " + channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId() + ".", throwable);
+                    " to client " + channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId() + ".", throwable);
             channel.disconnect();
         }
     }
