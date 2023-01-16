@@ -17,7 +17,6 @@ package com.hivemq.diagnostic.data;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.util.MacAddressFormatter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.net.InetAddress;
@@ -26,10 +25,12 @@ import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
 
-/**
- * @author Dominik Obermaier
- */
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 class NetworkInterfaceInformation extends AbstractInformation {
+
+    private static final int ADDRESS_LENGTH = 6;
 
     public String getNetworkInterfaceInformation() {
         try {
@@ -50,14 +51,13 @@ class NetworkInterfaceInformation extends AbstractInformation {
     private StringBuilder addInterfaceInformation(final StringBuilder stringBuilder, final NetworkInterface networkInterface) throws SocketException {
         stringBuilder.append(String.format("┌[%s]\n", networkInterface.getName()));
         addNetworkInformation(stringBuilder, "Display Name", networkInterface.getDisplayName());
-        addNetworkInformation(stringBuilder, "MAC Address", getMacaddress(networkInterface));
+        addNetworkInformation(stringBuilder, "MAC Address", getMacAddress(networkInterface));
         addNetworkInformation(stringBuilder, "MTU", getMTU(networkInterface));
         addNetworkInformation(stringBuilder, "Is Loopback?", getIsLoopback(networkInterface));
         addNetworkInformation(stringBuilder, "Is P2P?", getIsP2P(networkInterface));
         addNetworkInformation(stringBuilder, "Is Up?", getIsUp(networkInterface));
         addNetworkInformation(stringBuilder, "Is Virtual?", getIsVirtual(networkInterface));
         addNetworkInformation(stringBuilder, "Supports Multicast?", getSupportsMulticast(networkInterface));
-
 
         stringBuilder.append(String.format("└─[%s]\n", "Inet Addresses"));
 
@@ -75,7 +75,6 @@ class NetworkInterfaceInformation extends AbstractInformation {
     @VisibleForTesting
     String getIsLoopback(final @NotNull NetworkInterface networkInterface) {
         try {
-
             return String.valueOf(networkInterface.isLoopback());
         } catch (final Exception e) {
             return "Could not determine if interface is loopback interface";
@@ -134,17 +133,40 @@ class NetworkInterfaceInformation extends AbstractInformation {
 
     @NotNull
     @VisibleForTesting
-    String getMacaddress(final @NotNull NetworkInterface networkInterface) {
+    String getMacAddress(final @NotNull NetworkInterface networkInterface) {
         try {
             final byte[] hardwareAddress = networkInterface.getHardwareAddress();
             if (hardwareAddress != null && hardwareAddress.length == 6) {
-                return MacAddressFormatter.format(hardwareAddress);
+                return formatMACAddress(hardwareAddress);
             } else {
                 return "Could not determine MAC Address";
             }
         } catch (final Exception e) {
             return "Could not determine MAC Address";
         }
+    }
+
+    /**
+     * Formats the addresses in a format like 'C8-29-0A-52-62-66'.
+     * <p>
+     * So every MAC address consists of uppercase letters and dashes between each byte.
+     *
+     * @param hardwareAddress the hardware address as byte array.
+     * @return the formatted MAC address
+     * @throws NullPointerException     if you pass <code>null</code>
+     * @throws IllegalArgumentException if the byte array is not exactly 6 bytes long
+     */
+    @VisibleForTesting
+    public static String formatMACAddress(final byte[] hardwareAddress) {
+
+        checkNotNull(hardwareAddress);
+        checkArgument(hardwareAddress.length == ADDRESS_LENGTH, "Hardware address must be of length %s but was %s", ADDRESS_LENGTH, hardwareAddress.length);
+
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hardwareAddress.length; i++) {
+            sb.append(String.format("%02X%s", hardwareAddress[i], (i < hardwareAddress.length - 1) ? "-" : ""));
+        }
+        return sb.toString();
     }
 
     private StringBuilder addNetworkInformation(final StringBuilder infoBuilder, final String key, final String value) {

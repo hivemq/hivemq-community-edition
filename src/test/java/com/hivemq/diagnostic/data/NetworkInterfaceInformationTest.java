@@ -17,16 +17,11 @@ package com.hivemq.diagnostic.data;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import java.net.NetworkInterface;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
-/**
- * @author Florian Limpöck
- * @since 4.1.0
- */
 @SuppressWarnings("NullabilityAnnotations")
 public class NetworkInterfaceInformationTest {
 
@@ -36,43 +31,85 @@ public class NetworkInterfaceInformationTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         networkInterface = NetworkInterface.getByName("Does_Not_Exist");
         networkInterfaceInformation = new NetworkInterfaceInformation();
     }
 
     @Test
-    public void test_getIsLoopback_failed() {
-        assertNotNull(networkInterfaceInformation.getIsLoopback(networkInterface));
+    public void getIsLoopback_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getIsLoopback(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine if interface is loopback interface", networkInterfaceInfo);
     }
 
     @Test
-    public void test_getIsP2P_failed() {
-        assertNotNull(networkInterfaceInformation.getIsP2P(networkInterface));
+    public void getIsP2P_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getIsP2P(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine if interface is P2P interface", networkInterfaceInfo);
     }
 
     @Test
-    public void test_getIsUp_failed() {
-        assertNotNull(networkInterfaceInformation.getIsUp(networkInterface));
+    public void getIsUp_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getIsUp(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine if interface is up", networkInterfaceInfo);
     }
 
     @Test
-    public void test_getIsVirtual_failed() {
-        assertNotNull(networkInterfaceInformation.getIsVirtual(networkInterface));
+    public void getIsVirtual_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getIsVirtual(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine if interface is virtual", networkInterfaceInfo);
     }
 
     @Test
-    public void test_getSupportsMulticast_failed() {
-        assertNotNull(networkInterfaceInformation.getSupportsMulticast(networkInterface));
+    public void getSupportsMulticast_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getSupportsMulticast(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine if interface supports multicast", networkInterfaceInfo);
     }
 
     @Test
-    public void test_getMTU_failed() {
-        assertNotNull(networkInterfaceInformation.getMTU(networkInterface));
+    public void getMTU_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getMTU(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine MTU", networkInterfaceInfo);
     }
 
     @Test
-    public void test_getMacaddress_failed() {
-        assertNotNull(networkInterfaceInformation.getMacaddress(networkInterface));
+    public void getMacAddress_whenUsingNameOfNonExistentInterface_thenErrorLineIsReturned() {
+        final String networkInterfaceInfo = networkInterfaceInformation.getMacAddress(networkInterface);
+        assertNotNull(networkInterfaceInfo);
+        assertEquals("Could not determine MAC Address", networkInterfaceInfo);
+    }
+
+    @Test
+    public void formatMACAddress_whenGivenBytes_thenMACAddressIsCorrectlyFormatted() {
+        final byte[] bytes = new byte[]{-56, 42, 20, 83, 98, 102};
+
+        final String macString = NetworkInterfaceInformation.formatMACAddress(bytes);
+
+        assertEquals("C8-2A-14-53-62-66", macString);
+    }
+
+    @Test
+    public void formatMACAddress_whenEmptyByteArray_thenIllegalArgumentExceptionThrown() {
+        assertThrows(IllegalArgumentException.class, () -> NetworkInterfaceInformation.formatMACAddress(new byte[0]));
+    }
+
+    @Test
+    public void formatMACAddress_whenByteArrayIsShorterThanMACLength_thenIllegalArgumentExceptionThrown() {
+        assertThrows(IllegalArgumentException.class, () -> NetworkInterfaceInformation.formatMACAddress(new byte[5]));
+    }
+
+    @Test
+    public void formatMACAddress_whenByteArrayIsLongerThanMACLength_thenIllegalArgumentExceptionThrown() {
+        assertThrows(IllegalArgumentException.class, () -> NetworkInterfaceInformation.formatMACAddress(new byte[7]));
+    }
+
+    @Test
+    public void formatMACAddress_whenNullPassedAsArgument_thenNullPointerExceptionThrown() {
+        assertThrows(NullPointerException.class, () -> NetworkInterfaceInformation.formatMACAddress(null));
     }
 }
