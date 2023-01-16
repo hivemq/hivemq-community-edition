@@ -29,7 +29,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import com.hivemq.util.PhysicalMemoryUtil;
 import org.rocksdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
-        this.memtableSize = PhysicalMemoryUtil.physicalMemory() /
+        this.memtableSize = physicalMemory() /
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get() /
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];

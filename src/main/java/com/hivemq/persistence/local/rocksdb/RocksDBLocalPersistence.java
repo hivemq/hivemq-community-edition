@@ -23,11 +23,12 @@ import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import com.hivemq.util.PhysicalMemoryUtil;
 import org.rocksdb.*;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -97,8 +98,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         final Logger logger = getLogger();
         try {
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
-            final long memtableSize = PhysicalMemoryUtil.physicalMemory() / memtableSizePortion / bucketCount;
-            final LRUCache cache = new LRUCache(PhysicalMemoryUtil.physicalMemory() / blockCacheSizePortion / bucketCount);
+            final long memtableSize = physicalMemory() / memtableSizePortion / bucketCount;
+            final LRUCache cache = new LRUCache(physicalMemory() / blockCacheSizePortion / bucketCount);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);
             tableConfig.setBlockSize(blockSize);
@@ -138,8 +139,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         final Logger logger = getLogger();
 
         try {
-            final long memtableSize = PhysicalMemoryUtil.physicalMemory() / memtableSizePortion / bucketCount;
-            final long blockCacheMaxSize = PhysicalMemoryUtil.physicalMemory() / blockCacheSizePortion;
+            final long memtableSize = physicalMemory() / memtableSizePortion / bucketCount;
+            final long blockCacheMaxSize = physicalMemory() / blockCacheSizePortion;
             final LRUCache cache = new LRUCache(blockCacheMaxSize);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);
@@ -186,6 +187,23 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
 
         init();
 
+    }
+
+    protected static long physicalMemory() {
+        final long heap = Runtime.getRuntime().maxMemory();
+        try {
+            final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+            if (!(operatingSystemMXBean instanceof com.sun.management.OperatingSystemMXBean)) {
+                return (long) (heap * 1.5);
+            }
+            final long physicalMemory = ((com.sun.management.OperatingSystemMXBean) operatingSystemMXBean).getTotalPhysicalMemorySize();
+            if (physicalMemory > 0) {
+                return physicalMemory;
+            }
+            return (long) (heap * 1.5);
+        } catch (final Exception e) {
+            return (long) (heap * 1.5);
+        }
     }
 
     /**
