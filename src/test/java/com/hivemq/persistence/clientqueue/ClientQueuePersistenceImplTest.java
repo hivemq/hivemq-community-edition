@@ -128,7 +128,7 @@ public class ClientQueuePersistenceImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessages(new AtomicInteger(0));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -145,7 +145,7 @@ public class ClientQueuePersistenceImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessages(new AtomicInteger(0));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
         channel.close();
 
@@ -162,7 +162,7 @@ public class ClientQueuePersistenceImplTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessages(new AtomicInteger(0));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -179,7 +179,7 @@ public class ClientQueuePersistenceImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessages(new AtomicInteger(10));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(10));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);

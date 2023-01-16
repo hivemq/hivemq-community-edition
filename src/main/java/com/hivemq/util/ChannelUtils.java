@@ -69,7 +69,7 @@ public final class ChannelUtils {
         if (!inFlightMessagesSent) {
             return true;
         }
-        final AtomicInteger inFlightMessages = clientConnection.getInFlightMessages();
+        final AtomicInteger inFlightMessages = clientConnection.getInFlightMessageCount();
         if (inFlightMessages == null) {
             return false;
         }

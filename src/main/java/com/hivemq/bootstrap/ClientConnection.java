@@ -58,7 +58,7 @@ public class ClientConnection {
     private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable Listener connectedListener;
     private @Nullable CONNECT connectMessage;
-    private @Nullable AtomicInteger inFlightMessages;
+    private @Nullable AtomicInteger inFlightMessageCount;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Integer connectKeepAlive;
     private @Nullable Long queueSizeMaximum;
@@ -186,12 +186,12 @@ public class ClientConnection {
     /**
      * The amount of messages that have been polled but not yet delivered.
      */
-    public @Nullable AtomicInteger getInFlightMessages() {
-        return inFlightMessages;
+    public @Nullable AtomicInteger getInFlightMessageCount() {
+        return inFlightMessageCount;
     }
 
-    public void setInFlightMessages(final @Nullable AtomicInteger inFlightMessages) {
-        this.inFlightMessages = inFlightMessages;
+    public void setInFlightMessageCount(final @Nullable AtomicInteger inFlightMessageCount) {
+        this.inFlightMessageCount = inFlightMessageCount;
     }
 
     public @Nullable Integer getClientReceiveMaximum() {
@@ -220,6 +220,16 @@ public class ClientConnection {
 
     public @NotNull MessageIDPool getMessageIDPool() {
         return messageIDPool;
+    }
+
+    /**
+     * The amount of messages that have been polled but not yet delivered.
+     */
+    public int inFlightMessageCount() {
+        if (inFlightMessageCount == null) {
+            return 0;
+        }
+        return inFlightMessageCount.get();
     }
 
     /**
@@ -375,6 +385,10 @@ public class ClientConnection {
 
     public void setInFlightMessagesSent(final boolean inFlightMessagesSent) {
         this.inFlightMessagesSent = inFlightMessagesSent;
+    }
+
+    public boolean isMessagesInFlight() {
+        return !inFlightMessagesSent || inFlightMessageCount() > 0;
     }
 
     public @Nullable SslClientCertificate getAuthCertificate() {

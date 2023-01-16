@@ -113,7 +113,7 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
     }
 
     private void checkForNewMessages() {
-        final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessages();
+        final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessageCount();
         if (inFlightMessages != null && inFlightMessages.decrementAndGet() > 0) {
             return;
         }

@@ -46,7 +46,6 @@ import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.payload.PayloadPersistenceException;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.ChannelUtils;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -266,10 +265,10 @@ public class PublishPollServiceImpl implements PublishPollService {
 
     private AtomicInteger inFlightMessageCount(final @NotNull Channel channel) {
         final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        if (clientConnection.getInFlightMessages() == null) {
-            clientConnection.setInFlightMessages(new AtomicInteger(0));
+        if (clientConnection.getInFlightMessageCount() == null) {
+            clientConnection.setInFlightMessageCount(new AtomicInteger(0));
         }
-        return clientConnection.getInFlightMessages();
+        return clientConnection.getInFlightMessageCount();
     }
 
     @Override
@@ -300,7 +299,8 @@ public class PublishPollServiceImpl implements PublishPollService {
                                              final boolean retainAsPublished,
                                              final @Nullable Integer subscriptionIdentifier,
                                              final @NotNull Channel channel) {
-        if (ChannelUtils.messagesInFlight(channel)) {
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        if (clientConnection.isMessagesInFlight()) {
             return;
         }
 
@@ -312,7 +312,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 if (publishes.isEmpty()) {
                     return;
                 }
-                final MessageIDPool messageIDPool = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getMessageIDPool();
+                final MessageIDPool messageIDPool = clientConnection.getMessageIDPool();
                 final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
                 for (int i = 0, publishesSize = publishes.size(); i < publishesSize; i++) {
@@ -362,7 +362,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
                     }
                 }
-                channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getPublishFlushHandler().sendPublishes(publishesToSend);
+                clientConnection.getPublishFlushHandler().sendPublishes(publishesToSend);
             }
 
             @Override
@@ -443,7 +443,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 FutureUtils.addExceptionLogger(future);
             }
 
-            final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessages();
+            final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessageCount();
             if (inFlightMessages != null && inFlightMessages.decrementAndGet() > 0) {
                 return;
             }
@@ -454,7 +454,7 @@ public class PublishPollServiceImpl implements PublishPollService {
         public void onFailure(final Throwable t) {
             Exceptions.rethrowError("Pubrel delivery failed", t);
             messageIDPool.returnId(message.getPacketIdentifier());
-            final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessages();
+            final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessageCount();
             if (inFlightMessages != null) {
                 inFlightMessages.decrementAndGet();
             }

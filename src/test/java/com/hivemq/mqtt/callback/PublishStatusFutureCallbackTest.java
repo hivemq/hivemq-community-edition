@@ -108,7 +108,7 @@ public class PublishStatusFutureCallbackTest {
     @Test
     public void test_on_success_qos_0_no_new_messages_available() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessages(new AtomicInteger(1000));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(1000));
         publish = TestMessageUtil.getDefaultPublishBuilder(payloadPersistence).withQoS(QoS.AT_MOST_ONCE).withOnwardQos(QoS.AT_MOST_ONCE).build();
         publishStatusFutureCallback = new PublishStatusFutureCallback(payloadPersistence, publishPollService, sharedSubscription, queueId, publish, messageIDPool, channel, client);
         publishStatusFutureCallback.onSuccess(PublishStatus.DELIVERED);

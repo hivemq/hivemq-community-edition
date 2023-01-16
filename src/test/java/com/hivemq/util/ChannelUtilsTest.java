@@ -68,10 +68,10 @@ public class ChannelUtilsTest {
         clientConnection.setInFlightMessagesSent(true);
         assertFalse(ChannelUtils.messagesInFlight(channel));
 
-        clientConnection.setInFlightMessages(new AtomicInteger(1));
+        clientConnection.setInFlightMessageCount(new AtomicInteger(1));
         assertTrue(ChannelUtils.messagesInFlight(channel));
 
-        clientConnection.setInFlightMessages(new AtomicInteger(0));
+        clientConnection.setInFlightMessageCount(new AtomicInteger(0));
         assertFalse(ChannelUtils.messagesInFlight(channel));
     }
 }
