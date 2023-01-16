@@ -408,9 +408,11 @@ public class PublishPollServiceImpl implements PublishPollService {
     }
 
     private int pollMessageLimit(final @NotNull Channel channel) {
-        final int min = InternalConfigurations.PUBLISH_POLL_BATCH_SIZE;
-        final int inflightWindow = ChannelUtils.maxInflightWindow(channel);
-        return Math.max(min, inflightWindow);
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final int maxInflightWindow = (clientConnection == null)
+                ? InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES
+                : clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
+        return Math.max(InternalConfigurations.PUBLISH_POLL_BATCH_SIZE, maxInflightWindow);
     }
 
     private class PubrelResendCallback implements FutureCallback<PublishStatus> {

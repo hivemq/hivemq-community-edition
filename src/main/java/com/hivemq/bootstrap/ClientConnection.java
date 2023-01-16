@@ -515,4 +515,11 @@ public class ClientConnection {
     public void setExtensionClientAuthenticators(final @Nullable ClientAuthenticators extensionClientAuthenticators) {
         this.extensionClientAuthenticators = extensionClientAuthenticators;
     }
+
+    public int getMaxInflightWindow(final int defaultMaxInflightWindow) {
+        if (clientReceiveMaximum == null) {
+            return defaultMaxInflightWindow;
+        }
+        return Math.min(clientReceiveMaximum, defaultMaxInflightWindow);
+    }
 }
