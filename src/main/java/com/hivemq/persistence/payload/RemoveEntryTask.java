@@ -61,7 +61,6 @@ public class RemoveEntryTask implements Runnable {
             final long startTime = System.currentTimeMillis();
             while (removablePayload != null) {
                 if (System.currentTimeMillis() - removablePayload.getTimestamp() > removeDelay
-                // TODO: Replace inProgress guard to avoid BucketLock contention with an overhauled structure. #11000
                 && removablePayload.inProgress.compareAndSet(false, true)) {
                     final long payloadId = removablePayload.getId();
                     bucketLock.accessBucketByPaloadId(removablePayload.getId(), () -> {
