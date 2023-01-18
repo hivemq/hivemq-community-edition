@@ -422,6 +422,11 @@ public class InternalConfigurations {
     public static final int CLEANUP_JOB_PARALLELISM = 1;
 
     /**
+     * The timeout for a cleanup job task.
+     */
+    public static final int CLEANUP_JOB_TASK_TIMEOUT_SEC = 300;
+
+    /**
      * set to true to close all client connections at netty-event-loop shutdown
      */
     public static final boolean NETTY_SHUTDOWN_LEGACY = false;

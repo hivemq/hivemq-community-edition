@@ -82,6 +82,7 @@ public class ScheduledCleanUpService {
     private int persistenceIndex = 0;
     private final int persistenceBucketCount;
     private final int cleanUpJobSchedule;
+    private final int cleanUpTaskTimeoutSec;
 
     @Inject
     public ScheduledCleanUpService(final @NotNull @Persistence ListeningScheduledExecutorService scheduledExecutorService,
@@ -97,6 +98,7 @@ public class ScheduledCleanUpService {
         this.clientQueuePersistence = clientQueuePersistence;
         this.persistenceBucketCount = PERSISTENCE_BUCKET_COUNT.get();
         this.cleanUpJobSchedule = INTERVAL_BETWEEN_CLEANUP_JOBS_SEC.get();
+        this.cleanUpTaskTimeoutSec = CLEANUP_JOB_TASK_TIMEOUT_SEC;
     }
 
     @PostConstruct
@@ -112,7 +114,12 @@ public class ScheduledCleanUpService {
             return;
         }
         final ListenableScheduledFuture<Void> schedule = scheduledExecutorService.schedule(
-                new CleanUpTask(this, bucketIndex, persistenceIndex),
+                new CleanUpTask(
+                        this,
+                        scheduledExecutorService,
+                        cleanUpTaskTimeoutSec,
+                        bucketIndex,
+                        persistenceIndex),
                 cleanUpJobSchedule,
                 TimeUnit.SECONDS);
         persistenceIndex = (persistenceIndex + 1) % NUMBER_OF_PERSISTENCES;
@@ -141,15 +148,24 @@ public class ScheduledCleanUpService {
 
     @VisibleForTesting
     static final class CleanUpTask implements Callable<Void> {
+
         private final @NotNull ScheduledCleanUpService scheduledCleanUpService;
+        private final @NotNull ListeningScheduledExecutorService scheduledExecutorService;
+        private final int cleanUpTaskTimeoutSec;
         private final int bucketIndex;
         private final int persistenceIndex;
 
+        @VisibleForTesting
         CleanUpTask(@NotNull final ScheduledCleanUpService scheduledCleanUpService,
+                    final @NotNull ListeningScheduledExecutorService scheduledExecutorService,
+                    final int cleanUpTaskTimeoutSec,
                     final int bucketIndex,
                     final int persistenceIndex) {
             checkNotNull(scheduledCleanUpService, "Clean up service must not be null");
+            checkNotNull(scheduledExecutorService, "Executor service must not be null");
             this.scheduledCleanUpService = scheduledCleanUpService;
+            this.scheduledExecutorService = scheduledExecutorService;
+            this.cleanUpTaskTimeoutSec = cleanUpTaskTimeoutSec;
             this.bucketIndex = bucketIndex;
             this.persistenceIndex = persistenceIndex;
         }
@@ -171,6 +187,13 @@ public class ScheduledCleanUpService {
                         scheduledCleanUpService.scheduleCleanUpTask();
                     }
                 }, MoreExecutors.directExecutor());
+                // We don't need to add a callback to deal with the TimeoutException of the future returned here because
+                // the wrapped future will receive a call to onFailure with a CancellationException, leading to the
+                // scheduling of the next CleanUpTask.
+                // Note that the "cancelled" CleanUpTask is expected to continue running because the implementation
+                // currently doesn't react to a set thread interrupt flag. But we expect this to be a rare case and want
+                // to ensure the progress of other cleanup procedures despite the potential additional load.
+                Futures.withTimeout(future, cleanUpTaskTimeoutSec, TimeUnit.SECONDS, scheduledExecutorService);
             } catch (final Throwable throwable) {
                 log.error("Exception in clean up job ", throwable);
                 scheduledCleanUpService.scheduleCleanUpTask();
