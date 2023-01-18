@@ -171,8 +171,8 @@ public class ScheduledCleanUpService {
                         scheduledCleanUpService.scheduleCleanUpTask();
                     }
                 }, MoreExecutors.directExecutor());
-            } catch (final Exception e) {
-                log.error("Exception in clean up job ", e);
+            } catch (final Throwable throwable) {
+                log.error("Exception in clean up job ", throwable);
                 scheduledCleanUpService.scheduleCleanUpTask();
             }
             return null;
