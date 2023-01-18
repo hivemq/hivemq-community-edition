@@ -97,12 +97,12 @@ public class PluginInitializerHandlerTest {
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
+        channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, publishFlushHandler);
         clientConnection.setConnectMessage(mock(CONNECT.class));
         clientConnection.setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
-        channel = new EmbeddedChannel();
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         when(channelHandlerContext.channel()).thenReturn(channel);

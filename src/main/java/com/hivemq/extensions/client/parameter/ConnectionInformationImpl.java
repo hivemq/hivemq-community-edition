@@ -51,9 +51,8 @@ public class ConnectionInformationImpl implements ConnectionInformation {
 
     }
 
-    @NotNull
     @Override
-    public MqttVersion getMqttVersion() {
+    public @NotNull MqttVersion getMqttVersion() {
         return mqttVersion;
     }
 
