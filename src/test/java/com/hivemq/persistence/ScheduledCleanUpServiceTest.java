@@ -108,10 +108,12 @@ public class ScheduledCleanUpServiceTest {
     }
 
     @Test
-    public void cleanUpTask_whenAnExceptionIsThrown_thenTheNextCleanUpTaskIsScheduled() {
-            final ScheduledCleanUpService scheduledCleanUpService = mock(ScheduledCleanUpService.class);
-            when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenThrow(new RuntimeException("expected"));
-            final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(scheduledCleanUpService, 0, 0);
+    public void cleanUpTask_whenAThrowableIsThrown_thenTheNextCleanUpTaskIsScheduled() {
+        final ScheduledCleanUpService scheduledCleanUpService = mock(ScheduledCleanUpService.class);
+        when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenAnswer(invocation -> {
+            throw new Throwable();
+        });
+        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(scheduledCleanUpService, 0, 0);
         task.call();
         verify(scheduledCleanUpService).scheduleCleanUpTask();
     }
