@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -183,7 +184,14 @@ public class ScheduledCleanUpService {
 
                     @Override
                     public void onFailure(final Throwable throwable) {
-                        log.error("Exception during cleanup.", throwable);
+                        // We expect CancellationExceptions only for timeouts. We don't want to spam the log with
+                        // messages that suggest to a customer that something is wrong because the task is actually
+                        // still running, but we're going to schedule the next one to ensure progress.
+                        if (throwable instanceof CancellationException) {
+                            log.debug("Cleanup was cancelled (timeout).", throwable);
+                        } else {
+                            log.error("Exception during cleanup.", throwable);
+                        }
                         scheduledCleanUpService.scheduleCleanUpTask();
                     }
                 }, MoreExecutors.directExecutor());
