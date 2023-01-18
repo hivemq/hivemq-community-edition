@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.*;
 import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
@@ -103,16 +104,17 @@ public class ScheduledCleanUpService {
         for (int i = 0; i < CLEANUP_JOB_PARALLELISM; i++) {
             scheduleCleanUpTask();
         }
-
     }
 
     @VisibleForTesting
     synchronized void scheduleCleanUpTask() {
-
         if (scheduledExecutorService.isShutdown()) {
             return;
         }
-        final ListenableScheduledFuture<Void> schedule = scheduledExecutorService.schedule(new CleanUpTask(this, bucketIndex, persistenceIndex), cleanUpJobSchedule, TimeUnit.SECONDS);
+        final ListenableScheduledFuture<Void> schedule = scheduledExecutorService.schedule(
+                new CleanUpTask(this, bucketIndex, persistenceIndex),
+                cleanUpJobSchedule,
+                TimeUnit.SECONDS);
         persistenceIndex = (persistenceIndex + 1) % NUMBER_OF_PERSISTENCES;
         if (persistenceIndex == 0) {
             bucketIndex = (bucketIndex + 1) % persistenceBucketCount;
@@ -122,7 +124,6 @@ public class ScheduledCleanUpService {
     }
 
     public ListenableFuture<Void> cleanUp(final int bucketIndex, final int persistenceIndex) {
-
         switch (persistenceIndex) {
             case CLIENT_SESSION_PERSISTENCE_INDEX:
                 return clientSessionPersistence.cleanUp(bucketIndex);
@@ -138,7 +139,8 @@ public class ScheduledCleanUpService {
         }
     }
 
-    public static final class CleanUpTask implements Callable<Void> {
+    @VisibleForTesting
+    static final class CleanUpTask implements Callable<Void> {
         private final @NotNull ScheduledCleanUpService scheduledCleanUpService;
         private final int bucketIndex;
         private final int persistenceIndex;
@@ -159,8 +161,8 @@ public class ScheduledCleanUpService {
                 Futures.addCallback(future, new FutureCallback<>() {
 
                     @Override
-                    public void onSuccess(final Void aVoid) {
-                        scheduledCleanUpService.scheduleCleanUpTask();
+                    public void onSuccess(final @Nullable Void aVoid) {
+                            scheduledCleanUpService.scheduleCleanUpTask();
                     }
 
                     @Override
