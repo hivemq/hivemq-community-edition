@@ -383,7 +383,7 @@ public class InternalConfigurations {
     public static final AtomicInteger MQTT_EVENT_EXECUTOR_THREAD_COUNT = new AtomicInteger(AVAILABLE_PROCESSORS_TIMES_TWO);
 
     /**
-     * The amount of clean up job tasks that are processed at the same time, in each schedule interval
+     * The amount of cleanup job tasks that are processed at the same time, in each schedule interval
      */
     public static final AtomicBoolean ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED = new AtomicBoolean(true);
 
