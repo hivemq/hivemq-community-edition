@@ -15,25 +15,26 @@
  */
 package com.hivemq.bootstrap.netty;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.CorruptedFrameException;
+import io.netty.util.Attribute;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.TestChannelAttribute;
 
 import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
-/**
- * @author Christoph Schäbel
- */
 public class ExceptionHandlerTest {
 
     @Mock
@@ -48,6 +49,9 @@ public class ExceptionHandlerTest {
     @Mock
     MqttServerDisconnector mqttServerDisconnector;
 
+    @Mock
+    ClientConnection clientConnection;
+
     private ExceptionHandler handler;
 
     @Before
@@ -56,6 +60,8 @@ public class ExceptionHandlerTest {
 
         when(ctx.pipeline()).thenReturn(pipeline);
         when(channel.pipeline()).thenReturn(pipeline);
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(clientConnection.getChannelIP()).thenReturn(Optional.of("0.0.0.0"));
         when(ctx.channel()).thenReturn(channel);
 
         handler = new ExceptionHandler(mqttServerDisconnector);

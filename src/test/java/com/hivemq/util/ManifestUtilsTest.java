@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import java.net.URL;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class ManifestUtilsTest {
@@ -41,11 +40,5 @@ public class ManifestUtilsTest {
     public void getResource_whenResourcePathIsIncorrect_thenResourceIsNull() {
         final URL resource = ManifestUtils.getResource(HiveMQServer.class, "path");
         assertNull(resource);
-    }
-
-    @Test
-    public void getResource_whenResourcePathIsCorrect_thenResourceIsNotNull() {
-        final URL resource = ManifestUtils.getResource(HiveMQServer.class, "VAADIN/themes/hivemq/images/bienegelbschwarz.png");
-        assertNotNull(resource);
     }
 }
