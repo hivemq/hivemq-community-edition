@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -23,14 +24,17 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
+import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.hivemq.persistence.ScheduledCleanUpService.*;
 import static org.junit.Assert.assertEquals;
@@ -113,8 +117,38 @@ public class ScheduledCleanUpServiceTest {
         when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenAnswer(invocation -> {
             throw new Throwable();
         });
-        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(scheduledCleanUpService, 0, 0);
+        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(
+                scheduledCleanUpService,
+                scheduledExecutorService,
+                Integer.MAX_VALUE,
+                0,
+                0);
         task.call();
         verify(scheduledCleanUpService).scheduleCleanUpTask();
+    }
+    @Test
+    public void cleanUpTask_whenHittingTheTimeout_thenTheNextCleanUpTaskIsScheduled() {
+        final Duration timeout = Duration.ofSeconds(30);
+        final ScheduledCleanUpService scheduledCleanUpService = mock(ScheduledCleanUpService.class);
+        final AtomicBoolean scheduledNextTask = new AtomicBoolean();
+        doAnswer(invocation -> {
+            scheduledNextTask.set(true);
+            return null;
+        }).when(scheduledCleanUpService).scheduleCleanUpTask();
+        when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenReturn(Futures.submit(
+                () -> {
+                    // Because the actual tasks likely ignore being interrupted, just wait here and never terminate
+                    // until we verified that the next task was scheduled;
+                    Awaitility.waitAtMost(timeout).until(scheduledNextTask::get);
+                },
+                Executors.newSingleThreadScheduledExecutor()));
+        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(
+                scheduledCleanUpService,
+                scheduledExecutorService,
+                1,
+                1,
+                1);
+        task.call();
+        Awaitility.waitAtMost(timeout).until(scheduledNextTask::get);
     }
 }
