@@ -52,9 +52,6 @@ public class PublishPayloadPersistenceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        InternalConfigurations.PAYLOAD_CACHE_DURATION_MSEC.set(1000L);
-        InternalConfigurations.PAYLOAD_CACHE_SIZE.set(1000);
-        InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS.set(1);
         InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.set(10000);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
 
@@ -77,8 +74,6 @@ public class PublishPayloadPersistenceImplTest {
 
         assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
         assertEquals(2, (long)persistence.getReferenceCountersAsMap().get(234L));
-        assertNotNull(persistence.payloadCache.getIfPresent(123L));
-        assertNotNull(persistence.payloadCache.getIfPresent(234L));
     }
 
     @Test
@@ -89,25 +84,6 @@ public class PublishPayloadPersistenceImplTest {
 
 
         assertEquals(3, (long)persistence.getReferenceCountersAsMap().get(123L));
-        assertNotNull(persistence.payloadCache.getIfPresent(123L));
-        assertEquals(1, persistence.payloadCache.size());
-    }
-
-    @Test
-    public void get_from_cache() throws Exception {
-        final byte[] payload = "payload".getBytes();
-        persistence.add(payload, 1, 123);
-
-        final long hash = hashFunction.hashBytes(payload);
-
-        assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
-        assertNotNull(persistence.payloadCache.getIfPresent(123L));
-        assertEquals(1, persistence.payloadCache.size());
-
-        final byte[] result = persistence.get(123);
-
-        verify(localPersistence, never()).get(anyLong());
-        assertTrue(Arrays.equals(payload, result));
     }
 
     @Test
@@ -116,11 +92,8 @@ public class PublishPayloadPersistenceImplTest {
         persistence.add(payload, 1, 123);
 
         when(localPersistence.get(123)).thenReturn(payload);
-        persistence.payloadCache.invalidate(123L);
 
         assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
-        assertNull(persistence.payloadCache.getIfPresent(123L));
-        assertEquals(0, persistence.payloadCache.size());
 
         final byte[] result = persistence.get(123);
 
@@ -158,14 +131,12 @@ public class PublishPayloadPersistenceImplTest {
         persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
         assertEquals(1L, (long)persistence.getReferenceCountersAsMap().get(0L));
-        assertEquals(0, persistence.removablePayloads.size());
     }
 
     @Test
     public void decrement_reference_count_to_zero() throws Exception {
         persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(1, persistence.removablePayloads.size());
     }
 
     @Test
@@ -173,14 +144,12 @@ public class PublishPayloadPersistenceImplTest {
         persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(1, persistence.removablePayloads.size());
     }
 
     @Test
     public void decrement_reference_count_null() throws Exception {
         persistence.decrementReferenceCounter(0L);
         assertNull(persistence.getReferenceCountersAsMap().get(0L));
-        assertEquals(0, persistence.removablePayloads.size());
     }
 
     @Test
