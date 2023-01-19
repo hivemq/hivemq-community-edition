@@ -16,7 +16,6 @@
 package com.hivemq.persistence.payload;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -27,7 +26,7 @@ import java.util.concurrent.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doAnswer;
 
 /**
  * @author Lukas Brandl
@@ -94,21 +93,30 @@ public class RemoveEntryTaskTest {
         assertEquals(0, referenceCounterRegistry.size());
     }
 
-    @Test(timeout = 5000)
-    public void run_whenAThrowableIsThrownDuringRemoval_continues() {
+    @Test
+    public void run_whenAThrowableIsThrownDuringRemoval_thenDontReThrow() {
+        final RemoveEntryTask task = createWithThrowableDuringRun(new Throwable());
+        task.run();
+        assertEquals(1, removablePayloads.size());
+        assertEquals(1, referenceCounterRegistry.size());
+    }
+
+    @Test(expected = Error.class)
+    public void run_whenAnErrorIsThrownDuringRemoval_thenReThrow() {
+        final RemoveEntryTask task = createWithThrowableDuringRun(new Error());
+        task.run();
+        assertEquals(1, removablePayloads.size());
+        assertEquals(1, referenceCounterRegistry.size());
+    }
+
+    private @NotNull RemoveEntryTask createWithThrowableDuringRun(final @NotNull Throwable throwable) {
+        // Cover duplicate adds, too.
         removablePayloads.add(new RemovablePayload(1, System.currentTimeMillis() - 100L));
         removablePayloads.add(new RemovablePayload(1, System.currentTimeMillis() - 100L));
         referenceCounterRegistry.getAndIncrementBy(1L,0);
-        doThrow(new RuntimeException("expected")).doNothing().when(localPersistence).remove(anyLong());
-        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        final RemoveEntryTask task = new RemoveEntryTask(localPersistence, bucketLock, removablePayloads, 10L, referenceCounterRegistry, 10000);
-        executorService.scheduleAtFixedRate(task, 10, 10, TimeUnit.MILLISECONDS);
-
-        Awaitility.waitAtMost(30, TimeUnit.SECONDS)
-                  .until(() -> removablePayloads.size() > 0 || referenceCounterRegistry.size() > 0);
-
-        assertEquals(0, removablePayloads.size());
-        assertEquals(0, referenceCounterRegistry.size());
-        executorService.shutdown();
+        doAnswer(invocation -> {
+            throw throwable;
+        }).when(localPersistence).remove(anyLong());
+        return new RemoveEntryTask(localPersistence, bucketLock, removablePayloads, 10L, referenceCounterRegistry, 10000);
     }
 }
