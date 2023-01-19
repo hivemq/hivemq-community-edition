@@ -44,8 +44,7 @@ import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.UNK
 public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence {
 
     @VisibleForTesting
-    static final Logger log = LoggerFactory.getLogger(PublishPayloadPersistenceImpl.class);
-
+    static final @NotNull Logger log = LoggerFactory.getLogger(PublishPayloadPersistenceImpl.class);
 
     private final @NotNull PublishPayloadLocalPersistence localPersistence;
     private final @NotNull ListeningScheduledExecutorService scheduledExecutorService;
@@ -54,17 +53,14 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     private final @NotNull BucketLock bucketLock;
 
-    final Queue<RemovablePayload> removablePayloads = new LinkedTransferQueue<>();
+    private final @NotNull Queue<RemovablePayload> removablePayloads = new LinkedTransferQueue<>();
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
 
-
     private @Nullable ListenableScheduledFuture<?> removeTaskFuture;
-
 
     @Inject
     PublishPayloadPersistenceImpl(final @NotNull PublishPayloadLocalPersistence localPersistence,
                                   final @NotNull @PayloadPersistence ListeningScheduledExecutorService scheduledExecutorService) {
-
         this.localPersistence = localPersistence;
         this.scheduledExecutorService = scheduledExecutorService;
 
@@ -82,8 +78,9 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         final long taskSchedule = removeSchedule * cleanupThreadCount;
         for (int i = 0; i < cleanupThreadCount; i++) {
             final long initialSchedule = removeSchedule * i;
-            // We schedule an amount of tasks equal to the amount of clean up threads. The rate is a configured value multiplied by the thread count.
-            // Therefore all threads in the pool should be running simultaneously on high load.
+            // We schedule an amount of tasks to be equal to the amount of cleanup threads.
+            // The rate is a configured value multiplied by the thread count.
+            // Therefore, all threads in the pool should be running simultaneously on high load.
             if (!scheduledExecutorService.isShutdown()) {
                 removeTaskFuture = scheduledExecutorService.scheduleAtFixedRate(
                         new RemoveEntryTask(localPersistence, bucketLock, removablePayloads, removeDelay,
@@ -91,7 +88,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             }
         }
     }
-
 
     public boolean add(final byte @NotNull [] payload, final long referenceCount, final long payloadId) {
         checkNotNull(payload, "Payload must not be null");
@@ -103,16 +99,13 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         return true;
     }
 
-
     /**
      * {@inheritDoc}
      */
     //this method is not allowed to return null
     @Override
     public byte @NotNull [] get(final long id) {
-
         final byte[] payload = getPayloadOrNull(id);
-
         if (payload == null) {
             throw new PayloadPersistenceException(id);
         }
@@ -134,10 +127,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     @Override
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
         // Since this method is only called during bootstrap, it is not performance critical.
-        // Therefore locking is not an issue here.
-        bucketLock.accessBucketByPaloadId(payloadId, () -> {
-            payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1);
-        });
+        // Therefore, locking is not an issue here.
+        bucketLock.accessBucketByPaloadId(payloadId, () -> payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1));
     }
 
     /**

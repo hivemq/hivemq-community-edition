@@ -17,7 +17,7 @@ package com.hivemq.persistence.payload;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hivemq.configuration.service.InternalConfigurations;
-import net.openhft.hashing.LongHashFunction;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.LogbackCapturingAppender;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -35,18 +34,16 @@ import static org.mockito.Mockito.*;
 /**
  * @author Lukas Brandl
  */
+@SuppressWarnings("ConstantConditions")
 public class PublishPayloadPersistenceImplTest {
 
     @Mock
-    PublishPayloadLocalPersistence localPersistence;
+    private @NotNull PublishPayloadLocalPersistence localPersistence;
+    
     @Mock
-    ListeningScheduledExecutorService scheduledExecutorService;
+    private @NotNull ListeningScheduledExecutorService scheduledExecutorService;
 
-    private final LongHashFunction hashFunction = LongHashFunction.xx();
-
-    PublishPayloadPersistenceImpl persistence;
-
-    private LogbackCapturingAppender logCapture;
+    private @NotNull PublishPayloadPersistenceImpl persistence;
 
     @Before
     public void setUp() throws Exception {
@@ -57,7 +54,7 @@ public class PublishPayloadPersistenceImplTest {
 
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
         persistence.init();
-        logCapture = LogbackCapturingAppender.Factory.weaveInto(PublishPayloadPersistenceImpl.log);
+        LogbackCapturingAppender.Factory.weaveInto(PublishPayloadPersistenceImpl.log);
     }
 
     @After
@@ -66,100 +63,93 @@ public class PublishPayloadPersistenceImplTest {
     }
 
     @Test
-    public void add_new_entries() throws Exception {
+    public void add_forNewPayloadIds_setsReferenceCounters() {
         final byte[] payload1 = "payload1".getBytes();
         final byte[] payload2 = "payload2".getBytes();
         persistence.add(payload1, 1, 123);
         persistence.add(payload2, 2, 234);
 
-        assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
-        assertEquals(2, (long)persistence.getReferenceCountersAsMap().get(234L));
+        assertEquals(1, persistence.getReferenceCountersAsMap().get(123L).intValue());
+        assertEquals(2, persistence.getReferenceCountersAsMap().get(234L).intValue());
     }
 
     @Test
-    public void add_existent_entry() throws Exception {
+    public void add_forTheSamePayloadId_increasesReferenceCounter() {
         final byte[] payload = "payload".getBytes();
         persistence.add(payload, 1, 123);
         persistence.add(payload, 2, 123);
 
-
-        assertEquals(3, (long)persistence.getReferenceCountersAsMap().get(123L));
+        assertEquals(3, persistence.getReferenceCountersAsMap().get(123L).intValue());
     }
 
     @Test
-    public void get_from_local_persistence() throws Exception {
+    public void get_readsFromLocalPersistence() {
         final byte[] payload = "payload".getBytes();
         persistence.add(payload, 1, 123);
-
         when(localPersistence.get(123)).thenReturn(payload);
-
-        assertEquals(1, (long)persistence.getReferenceCountersAsMap().get(123L));
-
+        assertEquals(1, persistence.getReferenceCountersAsMap().get(123L).intValue());
         final byte[] result = persistence.get(123);
 
         verify(localPersistence, times(1)).get(anyLong());
-        assertTrue(Arrays.equals(payload, result));
+        assertArrayEquals(payload, result);
     }
 
     @Test(expected = PayloadPersistenceException.class)
-    public void get_from_local_persistence_null_payload() throws Exception {
+    public void get_forExistingPayloadId_throwsPayloadPersistenceException() {
         persistence.get(1);
     }
 
     @Test
-    public void get_from_local_persistence_retained_message_null_payload() throws Exception {
+    public void getPayloadOrNull_forNonExistingPayloadId_returnsNull() {
         final byte[] bytes = persistence.getPayloadOrNull(1);
         assertNull(bytes);
     }
 
     @Test
-    public void increment_new_reference_count() throws Exception {
+    public void incrementReferenceCounter_forNewPayloadId_setsReferenceCounter() {
         persistence.incrementReferenceCounterOnBootstrap(0L);
-        assertEquals(1L, (long)persistence.getReferenceCountersAsMap().get(0L));
+        assertEquals(1, persistence.getReferenceCountersAsMap().get(0L).intValue());
     }
 
     @Test
-    public void increment_existing_reference_count() throws Exception {
+    public void incrementReferenceCounter_forExistingPayloadId_incrementsReferenceCounter() {
         persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.incrementReferenceCounterOnBootstrap(0L);
-        assertEquals(2L, (long)persistence.getReferenceCountersAsMap().get(0L));
+        assertEquals(2, persistence.getReferenceCountersAsMap().get(0L).intValue());
     }
 
     @Test
-    public void decrement_reference_count() throws Exception {
+    public void decrementReferenceCounter_forExistingPayloadId_decrementsReferenceCounter() {
         persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.incrementReferenceCounterOnBootstrap(0L);
         persistence.decrementReferenceCounter(0L);
-        assertEquals(1L, (long)persistence.getReferenceCountersAsMap().get(0L));
+        assertEquals(1, persistence.getReferenceCountersAsMap().get(0L).intValue());
     }
 
     @Test
-    public void decrement_reference_count_to_zero() throws Exception {
+    public void decrementReferenceCounter_forExistingPayloadId_decrementsReferenceCounterToZero() {
         persistence.incrementReferenceCounterOnBootstrap(0L);
-        persistence.decrementReferenceCounter(0L);
-    }
-
-    @Test
-    public void decrement_reference_count_already_zero() throws Exception {
-        persistence.incrementReferenceCounterOnBootstrap(0L);
-        persistence.decrementReferenceCounter(0L);
         persistence.decrementReferenceCounter(0L);
     }
 
     @Test
-    public void decrement_reference_count_null() throws Exception {
+    public void decrementReferenceCounter_forExistingPayloadId_decrementsReferenceCounterMaxToZero() {
+        persistence.incrementReferenceCounterOnBootstrap(0L);
+        persistence.decrementReferenceCounter(0L);
+        persistence.decrementReferenceCounter(0L);
+    }
+
+    @Test
+    public void decrementReferenceCounter_forNonExistingPayloadId_createsNoReferenceCount() {
         persistence.decrementReferenceCounter(0L);
         assertNull(persistence.getReferenceCountersAsMap().get(0L));
     }
 
     @Test
-    public void init_persistence() throws Exception {
-
+    public void init_schedulesPayloadCleanup() {
         InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.set(250);
         InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.set(4);
-
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
-
         persistence.init();
 
         verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(0L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
@@ -167,5 +157,4 @@ public class PublishPayloadPersistenceImplTest {
         verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(500L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
         verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(750L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
     }
-
 }
