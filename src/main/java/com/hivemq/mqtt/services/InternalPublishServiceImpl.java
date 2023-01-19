@@ -137,6 +137,11 @@ public class InternalPublishServiceImpl implements InternalPublishService {
         final ImmutableSet<String> sharedSubscriptions = topicSubscribers.getSharedSubscriptions();
 
         if (subscribers.isEmpty() && sharedSubscriptions.isEmpty()) {
+
+            if (log.isTraceEnabled()) {
+                log.trace("No matching normal/shared subscriber found for PUBLISH with topic '{}'", publish.getTopic());
+            }
+
             return Futures.immediateFuture(PublishReturnCode.NO_MATCHING_SUBSCRIBERS);
         }
 
