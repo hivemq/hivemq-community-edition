@@ -25,21 +25,22 @@ import java.util.Queue;
 /**
  * @author Lukas Brandl
  */
-public class RemoveEntryTask implements Runnable {
+class RemoveEntryTask implements Runnable {
 
-    private final PublishPayloadLocalPersistence localPersistence;
-    private final BucketLock bucketLock;
-    private final Queue<RemovablePayload> removablePayloads;
+    private final @NotNull PublishPayloadLocalPersistence localPersistence;
+    private final @NotNull BucketLock bucketLock;
+    private final @NotNull Queue<RemovablePayload> removablePayloads;
     private final long removeDelay;
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
     private final long taskMaxDuration;
 
-    public RemoveEntryTask(final PublishPayloadLocalPersistence localPersistence,
-                           final BucketLock bucketLock,
-                           final Queue<RemovablePayload> removablePayloads,
-                           final long removeDelay,
-                           final PayloadReferenceCounterRegistry payloadReferenceCounterRegistry,
-                           final long taskMaxDuration) {
+    RemoveEntryTask(
+            final @NotNull PublishPayloadLocalPersistence localPersistence,
+            final @NotNull BucketLock bucketLock,
+            final @NotNull Queue<RemovablePayload> removablePayloads,
+            final long removeDelay,
+            final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry,
+            final long taskMaxDuration) {
         this.localPersistence = localPersistence;
         this.bucketLock = bucketLock;
         this.removablePayloads = removablePayloads;
@@ -60,9 +61,9 @@ public class RemoveEntryTask implements Runnable {
                     final long payloadId = removablePayload.getId();
                     bucketLock.accessBucketByPaloadId(removablePayload.getId(), () -> {
                         final int referenceCount = payloadReferenceCounterRegistry.get(payloadId);
-                        //The reference count can be UNKNOWN_PAYLOAD, if it was marked as removable twice.
-                        //Which is possible if a payload marked as removable and we receive the same payload again and mark it as removable again,
-                        //before the cleanup is able to remove the payload.
+                        // The reference count can be UNKNOWN_PAYLOAD, if it was marked as removable twice.
+                        // This is possible if a payload is marked as removable, and we receive the same payload again
+                        // and mark it as removable again before the cleanup is able to remove the payload.
                         if (referenceCount == 0) {
                             localPersistence.remove(payloadId);
                             payloadReferenceCounterRegistry.remove(payloadId);
