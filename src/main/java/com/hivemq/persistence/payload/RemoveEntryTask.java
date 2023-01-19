@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence.payload;
 
-import com.google.common.cache.Cache;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.Exceptions;
 
@@ -28,7 +27,6 @@ import java.util.Queue;
  */
 public class RemoveEntryTask implements Runnable {
 
-    private final Cache<Long, byte[]> payloadCache;
     private final PublishPayloadLocalPersistence localPersistence;
     private final BucketLock bucketLock;
     private final Queue<RemovablePayload> removablePayloads;
@@ -36,15 +34,12 @@ public class RemoveEntryTask implements Runnable {
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
     private final long taskMaxDuration;
 
-    public RemoveEntryTask(final Cache<Long, byte[]> payloadCache,
-                           final PublishPayloadLocalPersistence localPersistence,
+    public RemoveEntryTask(final PublishPayloadLocalPersistence localPersistence,
                            final BucketLock bucketLock,
                            final Queue<RemovablePayload> removablePayloads,
                            final long removeDelay,
                            final PayloadReferenceCounterRegistry payloadReferenceCounterRegistry,
                            final long taskMaxDuration) {
-
-        this.payloadCache = payloadCache;
         this.localPersistence = localPersistence;
         this.bucketLock = bucketLock;
         this.removablePayloads = removablePayloads;
@@ -69,7 +64,6 @@ public class RemoveEntryTask implements Runnable {
                         //Which is possible if a payload marked as removable and we receive the same payload again and mark it as removable again,
                         //before the cleanup is able to remove the payload.
                         if (referenceCount == 0) {
-                            payloadCache.invalidate(payloadId);
                             localPersistence.remove(payloadId);
                             payloadReferenceCounterRegistry.remove(payloadId);
                         }

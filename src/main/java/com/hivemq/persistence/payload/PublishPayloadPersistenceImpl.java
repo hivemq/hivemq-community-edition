@@ -16,8 +16,6 @@
 package com.hivemq.persistence.payload;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
@@ -56,7 +54,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     private final @NotNull BucketLock bucketLock;
 
-    @NotNull Cache<Long, byte[]> payloadCache;
     final Queue<RemovablePayload> removablePayloads = new LinkedTransferQueue<>();
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
 
@@ -71,11 +68,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         this.localPersistence = localPersistence;
         this.scheduledExecutorService = scheduledExecutorService;
 
-        payloadCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(InternalConfigurations.PAYLOAD_CACHE_DURATION_MSEC.get(), TimeUnit.MILLISECONDS)
-                .maximumSize(InternalConfigurations.PAYLOAD_CACHE_SIZE.get())
-                .concurrencyLevel(InternalConfigurations.PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS.get())
-                .build();
         removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
         int bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         bucketLock = new BucketLock(bucketLockCount);
@@ -94,7 +86,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             // Therefore all threads in the pool should be running simultaneously on high load.
             if (!scheduledExecutorService.isShutdown()) {
                 removeTaskFuture = scheduledExecutorService.scheduleAtFixedRate(
-                        new RemoveEntryTask(payloadCache, localPersistence, bucketLock, removablePayloads, removeDelay,
+                        new RemoveEntryTask(localPersistence, bucketLock, removablePayloads, removeDelay,
                                 payloadReferenceCounterRegistry, taskSchedule), initialSchedule, taskSchedule, TimeUnit.MILLISECONDS);
             }
         }
@@ -107,7 +99,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == UNKNOWN_PAYLOAD) {
                 localPersistence.put(payloadId, payload);
             }
-            payloadCache.put(payloadId, payload);
         });
         return true;
     }
@@ -133,28 +124,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      */
     //this method is allowed to return null
     @Override
-    public byte @Nullable [] getPayloadOrNull(final long id) {
-        final byte[] cachedPayload = payloadCache.getIfPresent(id);
-        // We don't need to lock here.
-        // In case of a lost update issue, we would just overwrite the cache entry with the same payload.
-        if (cachedPayload != null) {
-            return cachedPayload;
-        }
-        final byte[] payload = localPersistence.get(id);
-        if (payload == null) {
-            return null;
-        }
-        /*
-            We have the guarantee that there is no other entry with the same id because the id is monotonically
-            increasing due to the AtomicLong nature. In worst case we do the same put N times instead of only once,
-            this doesn't do any harm.
-         */
-        payloadCache.put(id, payload);
-        /*
-            In worst case we overwrite a newer value in the lookup table which means we kill
-            the optimization. No harm is done in this case since we "just" lose performance.
-         */
-        return payload;
+    public @Nullable byte @NotNull [] getPayloadOrNull(final long id) {
+        return localPersistence.get(id);
     }
 
     /**

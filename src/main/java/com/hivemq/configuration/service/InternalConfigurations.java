@@ -216,21 +216,6 @@ public class InternalConfigurations {
      **************************/
 
     /**
-     * The time that entries are cached in memory by the payload persistence.
-     */
-    public static final AtomicLong PAYLOAD_CACHE_DURATION_MSEC = new AtomicLong(10000);
-
-    /**
-     * The maximum amount of entries that are cached in memory by the payload persistence.
-     */
-    public static final AtomicInteger PAYLOAD_CACHE_SIZE = new AtomicInteger(10000);
-
-    /**
-     * The maximum amount of threads that can access the cache at the same time.
-     */
-    public static final AtomicInteger PAYLOAD_CACHE_CONCURRENCY_LEVEL_THREADS = new AtomicInteger(16);
-
-    /**
      * An interval of time between two consecutively executed payload cleanups for payloads that are not referenced anymore.
      */
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC = new AtomicInteger(250);
