@@ -22,7 +22,6 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -49,7 +48,7 @@ public class Mqtt3SubackEncoderTest {
     @Test
     public void test_mqtt_3_1_return_codes() throws Exception {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2));
         channel.writeOutbound(suback);
@@ -73,7 +72,7 @@ public class Mqtt3SubackEncoderTest {
     @Test
     public void test_mqtt_3_1_return_codes_huge_size() throws Exception {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final List<Mqtt5SubAckReasonCode> objects = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -101,7 +100,7 @@ public class Mqtt3SubackEncoderTest {
     @Test
     public void test_mqtt_3_1_1_return_codes() throws Exception {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR));
         channel.writeOutbound(suback);
@@ -125,7 +124,7 @@ public class Mqtt3SubackEncoderTest {
     @Test
     public void test_mqtt_5_suback_for_mqtt_3() throws Exception {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR), "reason-string", Mqtt5UserProperties.of(MqttUserProperty.of("user", "prop")));
         channel.writeOutbound(suback);
@@ -149,7 +148,7 @@ public class Mqtt3SubackEncoderTest {
     @Test
     public void test_invalid_mqtt_3_1_client_failure_code() throws Exception {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         try {
             channel.writeOutbound(new SUBACK(10, UNSPECIFIED_ERROR));
@@ -165,7 +164,7 @@ public class Mqtt3SubackEncoderTest {
     @Test
     public void test_invalid_send_wrong_byte() throws Exception {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         try {
             channel.writeOutbound(new SUBACK(10, Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR));

@@ -78,11 +78,11 @@ public class PendingWillMessages {
         if (session.getWillPublish() == null) {
             return;
         }
-        if (sessionWill.getDelayInterval() == 0 || session.getSessionExpiryInterval() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
+        if (sessionWill.getDelayInterval() == 0 || session.getSessionExpiryIntervalSec() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
             sendWill(clientId, publishFromWill(sessionWill));
             return;
         }
-        pendingWills.put(clientId, new PendingWill(Math.min(sessionWill.getDelayInterval(), session.getSessionExpiryInterval()), System.currentTimeMillis()));
+        pendingWills.put(clientId, new PendingWill(Math.min(sessionWill.getDelayInterval(), session.getSessionExpiryIntervalSec()), System.currentTimeMillis()));
     }
 
     public void sendWillIfPending(final @NotNull String clientId) {

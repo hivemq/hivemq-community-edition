@@ -36,15 +36,22 @@ import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
+import io.netty.util.AttributeKey;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author Daniel Krüger
- */
 public class ClientConnection {
+
+    /**
+     * The name of the {@link Channel} attribute which the client connection information is stored in.
+     */
+    public static final AttributeKey<ClientConnection> CHANNEL_ATTRIBUTE_NAME = AttributeKey.valueOf("Client.Connection");
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
@@ -55,7 +62,7 @@ public class ClientConnection {
     private @Nullable ModifiableDefaultPermissions authPermissions;
     private @Nullable Listener connectedListener;
     private @Nullable CONNECT connectMessage;
-    private @Nullable AtomicInteger inFlightMessages;
+    private @Nullable AtomicInteger inFlightMessageCount;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Integer connectKeepAlive;
     private @Nullable Long queueSizeMaximum;
@@ -183,12 +190,12 @@ public class ClientConnection {
     /**
      * The amount of messages that have been polled but not yet delivered.
      */
-    public @Nullable AtomicInteger getInFlightMessages() {
-        return inFlightMessages;
+    public @Nullable AtomicInteger getInFlightMessageCount() {
+        return inFlightMessageCount;
     }
 
-    public void setInFlightMessages(final @Nullable AtomicInteger inFlightMessages) {
-        this.inFlightMessages = inFlightMessages;
+    public void setInFlightMessageCount(final @Nullable AtomicInteger inFlightMessageCount) {
+        this.inFlightMessageCount = inFlightMessageCount;
     }
 
     public @Nullable Integer getClientReceiveMaximum() {
@@ -217,6 +224,30 @@ public class ClientConnection {
 
     public @NotNull MessageIDPool getMessageIDPool() {
         return messageIDPool;
+    }
+
+    /**
+     * The amount of messages that have been polled but not yet delivered.
+     */
+    public int inFlightMessageCount() {
+        if (inFlightMessageCount == null) {
+            return 0;
+        }
+        return inFlightMessageCount.get();
+    }
+
+    public int decrementInFlightCount() {
+        if (inFlightMessageCount == null) {
+            return 0;
+        }
+        return inFlightMessageCount.decrementAndGet();
+    }
+
+    public int incrementInFlightCount() {
+        if (inFlightMessageCount == null) {
+            inFlightMessageCount = new AtomicInteger();
+        }
+        return inFlightMessageCount.incrementAndGet();
     }
 
     /**
@@ -374,6 +405,10 @@ public class ClientConnection {
         this.inFlightMessagesSent = inFlightMessagesSent;
     }
 
+    public boolean isMessagesInFlight() {
+        return !inFlightMessagesSent || inFlightMessageCount() > 0;
+    }
+
     public @Nullable SslClientCertificate getAuthCertificate() {
         return authCertificate;
     }
@@ -511,5 +546,31 @@ public class ClientConnection {
 
     public void setExtensionClientAuthenticators(final @Nullable ClientAuthenticators extensionClientAuthenticators) {
         this.extensionClientAuthenticators = extensionClientAuthenticators;
+    }
+
+    public int getMaxInflightWindow(final int defaultMaxInflightWindow) {
+        if (clientReceiveMaximum == null) {
+            return defaultMaxInflightWindow;
+        }
+        return Math.min(clientReceiveMaximum, defaultMaxInflightWindow);
+    }
+
+    public @NotNull Optional<String> getChannelIP() {
+        final Optional<InetAddress> inetAddress = getChannelAddress();
+
+        return inetAddress.map(InetAddress::getHostAddress);
+    }
+
+    public @NotNull Optional<InetAddress> getChannelAddress() {
+        final Optional<SocketAddress> socketAddress = Optional.ofNullable(channel.remoteAddress());
+        if (socketAddress.isPresent()) {
+            final SocketAddress sockAddress = socketAddress.get();
+            //If this is not an InetAddress, we're treating this as if there's no address
+            if (sockAddress instanceof InetSocketAddress) {
+                return Optional.ofNullable(((InetSocketAddress) sockAddress).getAddress());
+            }
+        }
+
+        return Optional.empty();
     }
 }

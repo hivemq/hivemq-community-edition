@@ -17,7 +17,6 @@ package com.hivemq.extensions.events.client.parameters;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.ProtocolVersion;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
 import util.TestMessageUtil;
@@ -40,7 +39,7 @@ public class ConnectionStartInputImplTest {
     public void test_construction_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ConnectionStartInputImpl input = new ConnectionStartInputImpl(TestMessageUtil.createFullMqtt5Connect(), channel);
         assertEquals(input, input.get());

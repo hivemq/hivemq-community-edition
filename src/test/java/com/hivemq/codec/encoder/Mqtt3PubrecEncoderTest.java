@@ -18,7 +18,6 @@ package com.hivemq.codec.encoder;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.codec.encoder.mqtt3.Mqtt3PubrecEncoder;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -37,7 +36,7 @@ public class Mqtt3PubrecEncoderTest {
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
         clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 
     @Test

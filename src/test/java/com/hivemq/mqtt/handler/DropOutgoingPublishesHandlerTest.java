@@ -27,7 +27,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -73,7 +72,7 @@ public class DropOutgoingPublishesHandlerTest {
         when(ctx.channel()).thenReturn(channel);
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setClientId("clientId");
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
         InternalConfigurations.NOT_WRITABLE_QUEUE_SIZE.set(0);
         handler = new DropOutgoingPublishesHandler(publishPayloadPersistence, messageDroppedService);
     }

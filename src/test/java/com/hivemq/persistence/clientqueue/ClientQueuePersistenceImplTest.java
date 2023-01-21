@@ -33,7 +33,7 @@ import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
@@ -126,9 +126,9 @@ public class ClientQueuePersistenceImplTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -143,9 +143,9 @@ public class ClientQueuePersistenceImplTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
         channel.close();
 
@@ -161,8 +161,8 @@ public class ClientQueuePersistenceImplTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(0));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -177,9 +177,9 @@ public class ClientQueuePersistenceImplTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessagesSent(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setInFlightMessages(new AtomicInteger(10));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(10));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);

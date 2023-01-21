@@ -30,10 +30,12 @@ import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import com.hivemq.util.PublishUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ExodusException;
-import org.rocksdb.*;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksIterator;
+import org.rocksdb.WriteBatch;
+import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -251,7 +253,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 }
             }
 
-            if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
+            if (message.hasExpired()) {
                 return null;
             }
             message.setMessage(payload);
@@ -321,7 +323,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
             while (iterator.isValid()) {
                 final String topic = serializer.deserializeKey(iterator.key());
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
-                if (PublishUtil.checkExpiry(message.getTimestamp(), message.getMessageExpiryInterval())) {
+                if (message.hasExpired()) {
                     writeBatch.delete(iterator.key());
                     payloadPersistence.decrementReferenceCounter(message.getPublishId());
                     retainMessageCounter.decrementAndGet();
@@ -368,7 +370,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 final RetainedMessage deserializedMessage = serializer.deserializeValue(iterator.value());
 
                 // ignore messages with exceeded message expiry interval
-                if (PublishUtil.checkExpiry(deserializedMessage.getTimestamp(), deserializedMessage.getMessageExpiryInterval())) {
+                if (deserializedMessage.hasExpired()) {
                     iterator.next();
                     continue;
                 }

@@ -22,7 +22,6 @@ import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -48,12 +47,12 @@ public class AbstractMqtt5EncoderTest {
         testMessageEncoder = new TestMessageEncoder();
         channel = new EmbeddedChannel(testMessageEncoder);
         clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientId");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("clientId");
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
 
     }
 

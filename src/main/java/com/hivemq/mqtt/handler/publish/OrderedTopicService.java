@@ -17,13 +17,13 @@ package com.hivemq.mqtt.handler.publish;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.publish.PubrelWithFuture;
-import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -61,7 +61,6 @@ public class OrderedTopicService {
     private final @NotNull AtomicBoolean closedAlready = new AtomicBoolean(false);
     private final @NotNull Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
 
-
     public void messageFlowComplete(final @NotNull ChannelHandlerContext ctx, final int packetId) {
         final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.get(packetId);
 
@@ -79,7 +78,10 @@ public class OrderedTopicService {
             return;
         }
 
-        final int maxInflightWindow = ChannelUtils.maxInflightWindow(ctx.channel());
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final int maxInflightWindow = (clientConnection == null)
+                ? InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES
+                : clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
 
         do {
             final QueuedMessage poll = queue.poll();
@@ -109,8 +111,17 @@ public class OrderedTopicService {
             future = publishWithFuture.getFuture();
         }
 
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        if (clientConnection == null) {
+            return false;
+        }
+
+        final String clientId = clientConnection.getClientId();
+        if (clientId == null) {
+            return false;
+        }
+
         final PUBLISH publish = (PUBLISH) msg;
-        final String clientId = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId();
         final int qosNumber = publish.getQoS().getQosNumber();
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}", clientId, publish.getQoS().getQosNumber(), publish.getPacketIdentifier());
@@ -134,8 +145,7 @@ public class OrderedTopicService {
         }
 
 
-        final int maxInflightWindow = ChannelUtils.maxInflightWindow(channel);
-        if (unacknowledgedMessages.size() >= maxInflightWindow) {
+        if (unacknowledgedMessages.size() >= clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES)) {
             queueMessage(promise, publish, clientId);
             return true;
         } else {

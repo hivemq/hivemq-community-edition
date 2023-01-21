@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -28,7 +29,6 @@ import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServi
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.connection.ConnectionPersistence;
-import com.hivemq.util.Validators;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class HiveMQNettyBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQNettyBootstrap.class);
@@ -50,6 +52,9 @@ public class HiveMQNettyBootstrap {
     private final @NotNull ChannelInitializerFactory channelInitializerFactory;
     private final @NotNull ConnectionPersistence connectionPersistence;
     private final @NotNull NettyConfiguration nettyConfiguration;
+
+    public static final ClientWriteBufferProperties DEFAULT_WRITE_BUFFER_PROPERTIES =
+            new ClientWriteBufferProperties(64 * 1024, 32 * 1024);
 
     @Inject
     HiveMQNettyBootstrap(
@@ -216,13 +221,34 @@ public class HiveMQNettyBootstrap {
         final int writeBufferHigh = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD_BYTES;
         final int writeBufferLow = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD_BYTES;
 
-        final ClientWriteBufferProperties properties =
-                Validators.validateWriteBufferProperties(new ClientWriteBufferProperties(writeBufferHigh,
-                        writeBufferLow));
+        final ClientWriteBufferProperties properties = validateWriteBufferProperties(new ClientWriteBufferProperties(writeBufferHigh, writeBufferLow));
 
         //it is assumed that the ClientWriteBufferProperties that the listener returns was validated by Validators.validateWriteBufferProperties()
-        b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
-                new WriteBufferWaterMark(properties.getLowThreshold(), properties.getHighThreshold()));
+        b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(properties.getLowThresholdBytes(), properties.getHighThresholdBytes()));
+    }
+
+    @VisibleForTesting
+    public static @NotNull ClientWriteBufferProperties validateWriteBufferProperties(
+            @NotNull final ClientWriteBufferProperties writeBufferProperties) {
+
+        checkNotNull(writeBufferProperties, "writeBufferProperties must not be null");
+
+        if (validateWriteBufferThresholds(writeBufferProperties.getHighThresholdBytes(), writeBufferProperties.getLowThresholdBytes())) {
+            return writeBufferProperties;
+        }
+        return DEFAULT_WRITE_BUFFER_PROPERTIES;
+    }
+
+    private static boolean validateWriteBufferThresholds(final int high, final int low) {
+        if (low <= 0) {
+            log.warn("write-buffer low-threshold must be greater than zero");
+            return false;
+        }
+        if (high < low) {
+            log.warn("write-buffer high-threshold must be greater than write-buffer low-threshold");
+            return false;
+        }
+        return true;
     }
 
     @Immutable

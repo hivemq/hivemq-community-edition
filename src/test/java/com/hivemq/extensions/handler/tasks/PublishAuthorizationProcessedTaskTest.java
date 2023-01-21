@@ -31,7 +31,6 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -62,7 +61,7 @@ public class PublishAuthorizationProcessedTaskTest {
 
         channel = new EmbeddedChannel(new DummyHandler());
         clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         final ChannelHandlerContext ctx = channel.pipeline().context(DummyHandler.class);
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);
         task = new PublishAuthorizationProcessedTask(publish, ctx, mqtt5ServerDisconnector, incomingPublishService);

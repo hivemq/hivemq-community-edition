@@ -37,7 +37,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
@@ -84,8 +83,8 @@ public class PublishFlowHandlerTest {
                 mock(DropOutgoingPublishesHandler.class)));
         final ClientConnection clientConnection = spy(new ClientConnection(channel, null));
         when(clientConnection.getMessageIDPool()).thenReturn(pool);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(CLIENT_ID);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(CLIENT_ID);
     }
 
     @After
@@ -349,7 +348,7 @@ public class PublishFlowHandlerTest {
 
     @Test
     public void test_delete_everything_after_client_disconnects_on_clean_session() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT);
 
         channel.finish();
 
@@ -358,7 +357,7 @@ public class PublishFlowHandlerTest {
 
     @Test
     public void test_dont_delete_anything_after_client_disconnects_on_persistent_session() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientSessionExpiryInterval(500L);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(500L);
 
         channel.finish();
 
@@ -573,7 +572,7 @@ public class PublishFlowHandlerTest {
     @Test(timeout = 5000)
     public void test_qos1_send_puback_queued_messages_multiple_pubacks() throws Exception {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(3);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(3);
 
         final PUBLISH publish = createPublish("topic", 1, QoS.AT_LEAST_ONCE);
         final PUBLISH publish2 = createPublish("topic", 2, QoS.AT_LEAST_ONCE);
@@ -758,7 +757,7 @@ public class PublishFlowHandlerTest {
     @Test(timeout = 5000)
     public void test_max_inflight_window() throws Exception {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientReceiveMaximum(50);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(50);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 3;
 
 

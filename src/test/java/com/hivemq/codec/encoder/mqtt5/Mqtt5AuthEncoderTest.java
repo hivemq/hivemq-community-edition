@@ -15,11 +15,11 @@
  */
 package com.hivemq.codec.encoder.mqtt5;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -272,7 +272,7 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_user_properties_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header

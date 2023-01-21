@@ -18,10 +18,44 @@ package com.hivemq.mqtt.message;
 import org.junit.Test;
 import util.EnumTestUtil;
 
+import static com.hivemq.mqtt.message.QoS.*;
+import static org.junit.Assert.assertEquals;
+
 public class QoSTest {
 
     @Test
-    public void test_all_value_of() {
+    public void valueOf_whenCreated_thenHasCorrectQosValue() {
         EnumTestUtil.assertAllValueOfWithFallback(QoS.class, QoS::getQosNumber, QoS::valueOf, null);
+    }
+
+    @Test
+    public void getMinQoS_whenBothQosEqual_thenResultIsEitherOfInputs() {
+        final QoS result = QoS.getMinQoS(AT_LEAST_ONCE, AT_LEAST_ONCE);
+
+        assertEquals(AT_LEAST_ONCE, result);
+    }
+
+    @Test
+    public void getMinQoS_whenTheSecondQosIsSmaller_thenTheSecondQosIsReturned() {
+        final QoS result = QoS.getMinQoS(AT_LEAST_ONCE, AT_MOST_ONCE);
+        assertEquals(AT_MOST_ONCE, result);
+
+        final QoS result2 = QoS.getMinQoS(EXACTLY_ONCE, AT_LEAST_ONCE);
+        assertEquals(AT_LEAST_ONCE, result2);
+
+        final QoS result3 = QoS.getMinQoS(EXACTLY_ONCE, AT_MOST_ONCE);
+        assertEquals(AT_MOST_ONCE, result3);
+    }
+
+    @Test
+    public void getMinQoS_whenTheFirstQosIsSmaller_thenTheFirstQosIsReturned() {
+        final QoS result = QoS.getMinQoS(AT_MOST_ONCE, AT_LEAST_ONCE);
+        assertEquals(AT_MOST_ONCE, result);
+
+        final QoS result2 = QoS.getMinQoS(AT_LEAST_ONCE, EXACTLY_ONCE);
+        assertEquals(AT_LEAST_ONCE, result2);
+
+        final QoS result3 = QoS.getMinQoS(AT_MOST_ONCE, EXACTLY_ONCE);
+        assertEquals(AT_MOST_ONCE, result3);
     }
 }

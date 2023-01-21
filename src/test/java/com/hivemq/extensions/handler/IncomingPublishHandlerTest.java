@@ -54,7 +54,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -110,8 +110,8 @@ public class IncomingPublishHandlerTest {
 
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, publishFlushHandler);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("test_client");
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
 
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
 
@@ -157,7 +157,7 @@ public class IncomingPublishHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_publish_client_id_not_set() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 
@@ -166,7 +166,7 @@ public class IncomingPublishHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_publish_skip_incoming_publishes() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setIncomingPublishesSkipRest(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesSkipRest(true);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 
@@ -185,7 +185,7 @@ public class IncomingPublishHandlerTest {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 
@@ -201,7 +201,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -230,7 +230,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -259,7 +259,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -290,7 +290,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -319,7 +319,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -348,7 +348,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -376,7 +376,7 @@ public class IncomingPublishHandlerTest {
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -403,7 +403,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -429,7 +429,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -455,7 +455,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -485,7 +485,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -516,7 +516,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(3));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -547,7 +547,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(4));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CountDownLatch pubackLatch = new CountDownLatch(1);
@@ -589,7 +589,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(4));
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setExtensionClientContext(clientContext);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch pubackLatch = new CountDownLatch(1);

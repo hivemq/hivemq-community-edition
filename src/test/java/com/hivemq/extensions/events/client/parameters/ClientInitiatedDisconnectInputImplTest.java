@@ -21,7 +21,6 @@ import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
 
@@ -44,7 +43,7 @@ public class ClientInitiatedDisconnectInputImplTest {
     public void test_construction_values_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client", channel, null, null, null, false);
         assertEquals(Optional.empty(), disconnectInput.getReasonCode());
@@ -60,7 +59,7 @@ public class ClientInitiatedDisconnectInputImplTest {
     public void test_construction_values_set() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ClientInitiatedDisconnectInputImpl disconnectInput =
                 new ClientInitiatedDisconnectInputImpl("client", channel, DisconnectedReasonCode.NORMAL_DISCONNECTION,

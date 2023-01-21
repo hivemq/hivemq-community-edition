@@ -36,7 +36,6 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.clientqueue.ClientQueueLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ObjectMemoryEstimation;
-import com.hivemq.util.PublishUtil;
 import com.hivemq.util.Strings;
 import com.hivemq.util.ThreadPreConditions;
 import org.slf4j.Logger;
@@ -294,7 +293,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 continue;
             }
 
-            if (PublishUtil.checkExpiry(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
+            if (publishWithRetained.hasExpired()) {
                 iterator.remove();
                 payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
                 if (publishWithRetained.retained) {
@@ -317,7 +316,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
             // poll a qos 0 message
             final PUBLISH qos0Publish = pollQos0Message(messages);
-            if ((qos0Publish != null) && !PublishUtil.checkExpiry(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
+            if ((qos0Publish != null) && !qos0Publish.hasExpired()) {
                 publishes.add(qos0Publish);
                 messageCount++;
                 bytes += qos0Publish.getEstimatedSizeInMemory();
@@ -340,7 +339,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             if (qos0Publish == null) {
                 break;
             }
-            if (!PublishUtil.checkExpiry(qos0Publish.getTimestamp(), qos0Publish.getMessageExpiryInterval())) {
+            if (!qos0Publish.hasExpired()) {
                 publishes.add(qos0Publish);
                 qos0MessagesFound++;
                 qos0Bytes += qos0Publish.getEstimatedSizeInMemory();
@@ -444,12 +443,12 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     retained = publish.retained;
                     payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     increaseMessagesMemory(-publish.getEstimatedSize());
-                    pubrel.setExpiryInterval(publish.getMessageExpiryInterval());
+                    pubrel.setMessageExpiryInterval(publish.getMessageExpiryInterval());
                     pubrel.setPublishTimestamp(publish.getTimestamp());
                     replacedId = publish.getUniqueId();
                 } else if (messageWithID instanceof PubrelWithRetained) {
                     final PubrelWithRetained pubrelWithRetained = (PubrelWithRetained) messageWithID;
-                    pubrel.setExpiryInterval(pubrelWithRetained.getExpiryInterval());
+                    pubrel.setMessageExpiryInterval(pubrelWithRetained.getMessageExpiryInterval());
                     pubrel.setPublishTimestamp(pubrelWithRetained.getPublishTimestamp());
                     retained = pubrelWithRetained.retained;
                 }
@@ -806,7 +805,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final Iterator<PublishWithRetained> iterator = messages.qos0Messages.iterator();
         while (iterator.hasNext()) {
             final PublishWithRetained publishWithRetained = iterator.next();
-            if (PublishUtil.checkExpiry(publishWithRetained.getTimestamp(), publishWithRetained.getMessageExpiryInterval())) {
+            if (publishWithRetained.hasExpired()) {
                 increaseQos0MessagesMemory(-publishWithRetained.getEstimatedSize());
                 increaseClientQos0MessagesMemory(messages, -publishWithRetained.getEstimatedSize());
                 increaseMessagesMemory(-publishWithRetained.getEstimatedSize());
@@ -823,10 +822,10 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
                     continue;
                 }
-                if (pubrel.getExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
+                if (pubrel.getMessageExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
                     continue;
                 }
-                if (!PublishUtil.checkExpiry(pubrel.getPublishTimestamp(), pubrel.getExpiryInterval())) {
+                if (!pubrel.hasExpired()) {
                     continue;
                 }
                 if (pubrel.retained) {
@@ -839,7 +838,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 final PublishWithRetained publish = (PublishWithRetained) messageWithID;
                 final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_MESSAGES_ENABLED;
                 final boolean isInflight = publish.getQoS() == QoS.EXACTLY_ONCE && publish.getPacketIdentifier() > 0;
-                final boolean drop = PublishUtil.checkExpiry(publish) && (!isInflight || expireInflight);
+                final boolean drop = publish.hasExpired() && (!isInflight || expireInflight);
                 if (drop) {
                     payloadPersistence.decrementReferenceCounter(publish.getPublishId());
                     if (publish.retained) {
@@ -879,7 +878,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                     pubrel.getReasonString(),
                     pubrel.getUserProperties(),
                     pubrel.getPublishTimestamp(),
-                    pubrel.getExpiryInterval());
+                    pubrel.getMessageExpiryInterval());
             this.retained = retained;
         }
 

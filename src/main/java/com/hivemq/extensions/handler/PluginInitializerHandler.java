@@ -42,7 +42,6 @@ import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -121,7 +120,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @NotNull ChannelPromise promise) {
 
         final Map<String, ClientInitializer> pluginInitializerMap = initializers.getClientInitializerMap();
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         //No initializer set through any extension
         if (pluginInitializerMap.isEmpty() && msg != null) {
@@ -198,7 +197,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @Nullable CONNACK msg,
             final @NotNull ChannelPromise promise) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         final CONNECT connect = clientConnection.getConnectMessage();
         if (connect == null || connect.getWillPublish() == null) {
@@ -290,7 +289,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         public void finishInitializer() {
             try {
                 if (counter.incrementAndGet() == initializerSize) {
-                    final ClientConnection clientConnection = channelHandlerContext.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+                    final ClientConnection clientConnection = channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
                     //update the clients context when all initializers are initialized.
                     clientConnection.setExtensionClientContext(clientContext);
                     clientConnection.setAuthPermissions(clientContext.getDefaultPermissions());

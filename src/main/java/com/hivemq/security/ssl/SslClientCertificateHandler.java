@@ -15,12 +15,12 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.security.auth.SslClientCertificate;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -71,7 +71,7 @@ public class SslClientCertificateHandler extends ChannelInboundHandlerAdapter {
             final SSLSession session = sslHandler.engine().getSession();
             final Certificate[] peerCertificates = session.getPeerCertificates();
             final SslClientCertificate sslClientCertificate = new SslClientCertificateImpl(peerCertificates);
-            channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthCertificate(sslClientCertificate);
+            channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthCertificate(sslClientCertificate);
 
         } catch (final SSLPeerUnverifiedException e) {
             handleSslPeerUnverifiedException(channel, e);

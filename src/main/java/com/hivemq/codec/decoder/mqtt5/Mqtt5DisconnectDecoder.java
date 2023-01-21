@@ -37,7 +37,6 @@ import javax.inject.Inject;
 
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 @LazySingleton
 public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
@@ -119,7 +118,7 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
                     if (sessionExpiryInterval > maxSessionExpiryInterval) {
                         if (log.isDebugEnabled()) {
                             log.debug("A client (IP: {}) sent a DISCONNECT with a session expiry interval of ('{}'), which is larger than configured maximum of '{}'",
-                                    getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"),
+                                    clientConnection.getChannelIP().orElse("UNKNOWN"),
                                     sessionExpiryInterval,
                                     maxSessionExpiryInterval);
                         }

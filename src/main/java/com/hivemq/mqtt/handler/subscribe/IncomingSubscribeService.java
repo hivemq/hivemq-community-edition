@@ -140,7 +140,7 @@ public class IncomingSubscribeService {
             final @NotNull String[] reasonStrings,
             final boolean authorizersPresent) {
 
-        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getAuthPermissions();
+        final ModifiableDefaultPermissions permissions = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthPermissions();
         final ModifiableDefaultPermissionsImpl defaultPermissions = (ModifiableDefaultPermissionsImpl) permissions;
 
         for (int i = 0; i < msg.getTopics().size(); i++) {
@@ -188,13 +188,14 @@ public class IncomingSubscribeService {
      * @return <code>true</code> if only valid subscriptions are contained, <code>false</code> otherwise
      */
     private boolean hasOnlyValidSubscriptions(final ChannelHandlerContext ctx, final SUBSCRIBE msg) {
-        log.trace("Checking SUBSCRIBE message of client '{}' if topics are valid", ChannelUtils.getClientId(ctx.channel()));
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        log.trace("Checking SUBSCRIBE message of client '{}' if topics are valid", clientConnection.getClientId());
 
         final int maxTopicLength = restrictionsConfigurationService.maxTopicLength();
         for (final Topic topic : msg.getTopics()) {
             final String topicString = topic.getTopic();
             if (!Topics.isValidToSubscribe(topicString)) {
-                final String logMessage = "Disconnecting client '" + ChannelUtils.getClientId(ctx.channel()) + "'  (IP: {}) because it sent an invalid subscription: '" + topic.getTopic() + "'";
+                final String logMessage = "Disconnecting client '" + clientConnection.getClientId() + "'  (IP: {}) because it sent an invalid subscription: '" + topic.getTopic() + "'";
                 mqttServerDisconnector.disconnect(
                         ctx.channel(),
                         logMessage,
@@ -203,7 +204,7 @@ public class IncomingSubscribeService {
                         ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
                 return false;
             } else if (topicString.length() > maxTopicLength) {
-                final String logMessage = "Disconnecting client '" + ChannelUtils.getClientId(ctx.channel()) + "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '" + topic.getTopic() + "'";
+                final String logMessage = "Disconnecting client '" + clientConnection.getClientId() + "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '" + topic.getTopic() + "'";
                 mqttServerDisconnector.disconnect(
                         ctx.channel(),
                         logMessage,
@@ -222,7 +223,7 @@ public class IncomingSubscribeService {
             final @Nullable Mqtt5SubAckReasonCode[] providedCodes,
             final @Nullable String reasonString) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         downgradeSharedSubscriptions(msg);
 
@@ -384,9 +385,9 @@ public class IncomingSubscribeService {
     }
 
     private void handleInsufficientPermissionsV31(final @NotNull ChannelHandlerContext ctx, final @NotNull Topic topic) {
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         log.debug("MQTT v3.1 Client '{}' (IP: {}) is not authorized to subscribe to topic '{}' with QoS '{}'. Disconnecting client.",
-                clientConnection.getClientId(), ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), topic.getTopic(), topic.getQoS().getQosNumber());
+                clientConnection.getClientId(), clientConnection.getChannelIP().orElse("UNKNOWN"), topic.getTopic(), topic.getQoS().getQosNumber());
         mqttServerDisconnector.disconnect(
                 ctx.channel(),
                 null, //already logged

@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.Message;
@@ -23,16 +24,11 @@ import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * A message barrier which blocks (or queues) messages if they are sent before the connection was approved
@@ -108,18 +104,28 @@ public class MessageBarrier extends ChannelDuplexHandler {
 
     private static void suspendRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
+            final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            final Optional<String> channelIP = (clientConnection == null)
+                    ? Optional.empty()
+                    : clientConnection.getChannelIP();
+
             log.trace("Suspending read operations for MQTT client with id {} and IP {}",
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(),
-                    ChannelUtils.getChannelIP(channel).orElse("UNKNOWN"));
+                    clientConnection.getClientId(),
+                    channelIP.orElse("UNKNOWN"));
         }
         channel.config().setAutoRead(false);
     }
 
     private static void resumeRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
+            final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            final Optional<String> channelIP = (clientConnection == null)
+                    ? Optional.empty()
+                    : clientConnection.getChannelIP();
+
             log.trace("Restarting read operations for MQTT client with id {} and IP {}",
-                    channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getClientId(),
-                    ChannelUtils.getChannelIP(channel).orElse("UNKNOWN"));
+                    clientConnection.getClientId(),
+                    channelIP.orElse("UNKNOWN"));
         }
         channel.config().setAutoRead(true);
     }

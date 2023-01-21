@@ -31,7 +31,6 @@ import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ThreadPreConditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -43,8 +42,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.ByteBuffer;
-
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 @Singleton
 public class MqttConnackerImpl implements MqttConnacker {
@@ -107,7 +104,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
         ThreadPreConditions.inNettyChildEventloop();
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         final ClientState oldClientState = clientConnection.getClientState();
         clientConnection.proposeClientState(ClientState.DISCONNECTING);
@@ -135,7 +132,8 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            log.debug(logMessage, getChannelIP(channel).orElse("UNKNOWN"));
+            final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            log.debug(logMessage, clientConnection.getChannelIP().orElse("UNKNOWN"));
         }
 
         if (eventLogMessage != null && !eventLogMessage.isEmpty()) {

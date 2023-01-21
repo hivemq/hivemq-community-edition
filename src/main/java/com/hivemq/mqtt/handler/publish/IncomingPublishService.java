@@ -38,8 +38,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.mqtt.services.InternalPublishService;
-import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -78,13 +76,13 @@ public class IncomingPublishService {
                                @NotNull final PUBLISH publish,
                                @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
 
         final int maxQos = mqttConfigurationService.maximumQos().getQosNumber();
         final int qos = publish.getQoS().getQosNumber();
         if (qos > maxQos) {
-            final String clientId = ChannelUtils.getClientId(ctx.channel());
+            final String clientId = clientConnection.getClientId();
             mqttServerDisconnector.disconnect(ctx.channel(),
                     "Client '" + clientId + "' (IP: {}) sent a PUBLISH with QoS exceeding the maximum configured QoS." +
                             " Got QoS " + publish.getQoS() + ", maximum: " + mqttConfigurationService.maximumQos() + ". Disconnecting client.",
@@ -98,7 +96,7 @@ public class IncomingPublishService {
         final String topic = publish.getTopic();
         final int maxTopicLength = restrictionsConfigurationService.maxTopicLength();
         if (topic.length() > maxTopicLength) {
-            final String clientId = ChannelUtils.getClientId(ctx.channel());
+            final String clientId = clientConnection.getClientId();
             final String logMessage = "Client '" + clientId + "' (IP: {}) sent a PUBLISH with a topic that exceeds the maximum configured length of '" + maxTopicLength + "' . Disconnecting client.";
             mqttServerDisconnector.disconnect(ctx.channel(),
                     logMessage,
@@ -111,7 +109,7 @@ public class IncomingPublishService {
         if (ProtocolVersion.MQTTv3_1 == protocolVersion || ProtocolVersion.MQTTv3_1_1 == protocolVersion) {
             final Long maxPublishSize = clientConnection.getMaxPacketSizeSend();
             if (!isMessageSizeAllowed(maxPublishSize, publish)) {
-                final String clientId = ChannelUtils.getClientId(ctx.channel());
+                final String clientId = clientConnection.getClientId();
                 final String logMessage = "Client '" + clientId + "' (IP: {}) sent a PUBLISH with " + publish.getPayload().length + " bytes payload its max allowed size is " + maxPublishSize + " bytes. Disconnecting client.";
                 final String reason = "Sent PUBLISH with a payload that is bigger than the allowed message size";
                 mqttServerDisconnector.disconnect(ctx.channel(),
@@ -128,7 +126,7 @@ public class IncomingPublishService {
 
     private void authorizePublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish, @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         if (authorizerResult != null && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
@@ -166,7 +164,7 @@ public class IncomingPublishService {
     private void finishUnauthorizedPublish(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBLISH publish,
                                            @Nullable final AckReasonCode reasonCode, @Nullable final String reasonString) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
 
         clientConnection.setIncomingPublishesDefaultFailedSkipRest(true);
 
@@ -181,7 +179,7 @@ public class IncomingPublishService {
         //MQTT 3.x.x -> disconnect (without publish answer packet)
         if (clientConnection.getProtocolVersion() != ProtocolVersion.MQTTv5) {
 
-            final String clientId = ChannelUtils.getClientId(ctx.channel());
+            final String clientId = clientConnection.getClientId();
             mqttServerDisconnector.disconnect(ctx.channel(),
                     "Client '" + clientId + "' (IP: {}) is not authorized to publish on topic '" + publish.getTopic()
                             + "' with QoS '" + publish.getQoS().getQosNumber() + "' and retain '" + publish.isRetain()
@@ -212,7 +210,7 @@ public class IncomingPublishService {
                 break;
         }
 
-        final String clientId = ChannelUtils.getClientId(ctx.channel());
+        final String clientId = clientConnection.getClientId();
         mqttServerDisconnector.disconnect(ctx.channel(),
                 "Client '" + clientId + "' (IP: {}) is not authorized to publish on topic '" + publish.getTopic()
                         + "' with QoS '" + publish.getQoS().getQosNumber() + "' and retain '" + publish.isRetain()
@@ -225,7 +223,8 @@ public class IncomingPublishService {
 
     private void publishMessage(final ChannelHandlerContext ctx, @NotNull final PUBLISH publish) {
 
-        final String clientId = ChannelUtils.getClientId(ctx.channel());
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final String clientId = clientConnection.getClientId();
         final ListenableFuture<PublishReturnCode> publishFinishedFuture = publishService.publish(publish, ctx.channel().eventLoop(), clientId);
         Futures.addCallback(publishFinishedFuture, new FutureCallback<>() {
             @Override

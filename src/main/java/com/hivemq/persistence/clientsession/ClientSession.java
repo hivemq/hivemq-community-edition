@@ -23,14 +23,11 @@ import com.hivemq.util.ObjectMemoryEstimation;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 
-/**
- * @author Lukas Brandl
- */
 public class ClientSession implements Sizable {
 
     private final @Nullable Long queueLimit;
     private boolean connected;
-    private long sessionExpiryInterval;
+    private long sessionExpiryIntervalSec;
     private int inMemorySize = SIZE_NOT_CALCULATED;
     private @Nullable ClientSessionWill willPublish;
 
@@ -40,16 +37,16 @@ public class ClientSession implements Sizable {
 
     public ClientSession(
             final boolean connected,
-            final long sessionExpiryInterval,
+            final long sessionExpiryIntervalSec,
             final @Nullable ClientSessionWill willPublish,
             final @Nullable Long queueLimit) {
 
         Preconditions.checkArgument(
-                sessionExpiryInterval >= SESSION_EXPIRE_ON_DISCONNECT,
+                sessionExpiryIntervalSec >= SESSION_EXPIRE_ON_DISCONNECT,
                 "Session expiry interval must never be less than zero");
 
         this.connected = connected;
-        this.sessionExpiryInterval = sessionExpiryInterval;
+        this.sessionExpiryIntervalSec = sessionExpiryIntervalSec;
         this.willPublish = willPublish;
         this.queueLimit = queueLimit;
     }
@@ -62,12 +59,12 @@ public class ClientSession implements Sizable {
         this.connected = connected;
     }
 
-    public long getSessionExpiryInterval() {
-        return sessionExpiryInterval;
+    public long getSessionExpiryIntervalSec() {
+        return sessionExpiryIntervalSec;
     }
 
-    public void setSessionExpiryInterval(final long sessionExpiryInterval) {
-        this.sessionExpiryInterval = sessionExpiryInterval;
+    public void setSessionExpiryIntervalSec(final long sessionExpiryIntervalSec) {
+        this.sessionExpiryIntervalSec = sessionExpiryIntervalSec;
     }
 
     public @Nullable ClientSessionWill getWillPublish() {
@@ -85,13 +82,13 @@ public class ClientSession implements Sizable {
     public @NotNull ClientSession deepCopy() {
         return new ClientSession(
                 connected,
-                sessionExpiryInterval,
+                sessionExpiryIntervalSec,
                 willPublish != null ? willPublish.deepCopy() : null,
                 queueLimit);
     }
 
     public @NotNull ClientSession copyWithoutWill() {
-        return new ClientSession(connected, sessionExpiryInterval, null, queueLimit);
+        return new ClientSession(connected, sessionExpiryIntervalSec, null, queueLimit);
     }
 
     @Override
@@ -117,5 +114,13 @@ public class ClientSession implements Sizable {
         inMemorySize = size;
 
         return inMemorySize;
+    }
+
+    public boolean isExpired(final long timeSinceDisconnectMsec) {
+        if (connected) {
+            return false;
+        }
+
+        return timeSinceDisconnectMsec / 1000 >= sessionExpiryIntervalSec;
     }
 }

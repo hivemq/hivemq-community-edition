@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
+import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageType;
@@ -319,6 +320,23 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
 
     public @Nullable PublishPayloadPersistence getPersistence() {
         return persistence;
+    }
+
+    public long getRemainingExpiry() {
+        if (isExpiryDisabled()) {
+            return PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
+        }
+        final long waitingSeconds = (System.currentTimeMillis() - timestamp) / 1000;
+        return Math.max(0, messageExpiryInterval - waitingSeconds);
+    }
+
+    public boolean isExpiryDisabled() {
+        return (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED) ||
+                (messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET);
+    }
+
+    public boolean hasExpired() {
+        return getRemainingExpiry() == 0;
     }
 
     @Override

@@ -19,7 +19,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.packets.connect.ConnectPacket;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,8 +43,8 @@ public class AuthConnectInputTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectReceivedTimestamp(12345L);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setConnectReceivedTimestamp(12345L);
 
         connect = new CONNECT.Mqtt5Builder()
                 .withClientIdentifier("client")

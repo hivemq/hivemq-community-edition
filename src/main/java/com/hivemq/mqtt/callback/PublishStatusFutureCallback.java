@@ -17,6 +17,7 @@ package com.hivemq.mqtt.callback;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.pool.MessageIDPool;
@@ -24,7 +25,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +113,7 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
     }
 
     private void checkForNewMessages() {
-        final AtomicInteger inFlightMessages = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getInFlightMessages();
+        final AtomicInteger inFlightMessages = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getInFlightMessageCount();
         if (inFlightMessages != null && inFlightMessages.decrementAndGet() > 0) {
             return;
         }

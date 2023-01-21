@@ -17,11 +17,11 @@ package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Bytes;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Before;
@@ -77,7 +77,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_and_user_properties_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -136,7 +136,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -237,7 +237,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_propertyLengthExceeded_omitReasonString() {
 
         final int maxPacketSize = 130;
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend((long) maxPacketSize);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) maxPacketSize);
 
         final int maxUserPropertiesCount = maxPacketSize / userPropertyBytes;
         final Mqtt5UserProperties maxUserProperties = getUserProperties(maxUserPropertiesCount);

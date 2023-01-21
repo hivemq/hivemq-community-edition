@@ -106,7 +106,7 @@ public class ClientSessionPersistenceSerializer {
 
         Bytes.copyLongToByteArray(timestamp, bytes, 0);
         cursor += 8;
-        Bytes.copyLongToByteArray(clientSession.getSessionExpiryInterval(), bytes, cursor);
+        Bytes.copyLongToByteArray(clientSession.getSessionExpiryIntervalSec(), bytes, cursor);
         cursor += 8;
 
         byte flags = (byte) 0b0000_0000;

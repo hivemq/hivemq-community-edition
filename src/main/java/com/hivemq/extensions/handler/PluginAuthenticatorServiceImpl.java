@@ -48,7 +48,6 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -303,7 +302,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private @NotNull ModifiableClientSettingsImpl getSettingsFromChannel(final @NotNull Channel channel) {
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final Integer receiveMax = clientConnection.getClientReceiveMaximum();
         Preconditions.checkNotNull(receiveMax, "Receive maximum must not be null here");
         final Long queueSizeMaximum = clientConnection.getQueueSizeMaximum();
@@ -311,7 +310,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private @NotNull ClientAuthenticators getClientAuthenticators(final @NotNull ChannelHandlerContext ctx) {
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         if (clientConnection.getExtensionClientAuthenticators() == null) {
             clientConnection.setExtensionClientAuthenticators(new ClientAuthenticatorsImpl(priorityComparator));
         }

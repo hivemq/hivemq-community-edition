@@ -45,7 +45,7 @@ import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
-import com.hivemq.util.ChannelAttributes;
+
 import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
@@ -97,13 +97,13 @@ public class PluginInitializerHandlerTest {
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
+        channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, publishFlushHandler);
         clientConnection.setConnectMessage(mock(CONNECT.class));
         clientConnection.setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
-        channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         when(channelHandlerContext.channel()).thenReturn(channel);
         when(channelHandlerContext.pipeline()).thenReturn(channelPipeline);
@@ -149,7 +149,7 @@ public class PluginInitializerHandlerTest {
         verify(initializers, times(1)).getClientInitializerMap();
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
-        assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
+        assertFalse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isPreventLwt());
         assertNull(clientConnection.getConnectMessage());
     }
 
@@ -171,7 +171,7 @@ public class PluginInitializerHandlerTest {
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
 
         channelHandlerContext.channel()
-                .attr(ChannelAttributes.CLIENT_CONNECTION)
+                .attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
                 .get()
                 .setAuthPermissions(new ModifiableDefaultPermissionsImpl());
 
@@ -205,13 +205,13 @@ public class PluginInitializerHandlerTest {
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("test-client").withWillPublish(willPublish).build();
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(connect);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setConnectMessage(connect);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "topic").type(TopicPermission.PermissionType.DENY).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
 
@@ -224,7 +224,7 @@ public class PluginInitializerHandlerTest {
                 eq(true));
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
+        assertTrue(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isPreventLwt());
         assertNull(clientConnection.getConnectMessage());
     }
 
@@ -241,13 +241,13 @@ public class PluginInitializerHandlerTest {
         final CONNECT connect =
                 new CONNECT.Mqtt5Builder().withClientIdentifier("test-client").withWillPublish(willPublish).build();
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setConnectMessage(connect);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setConnectMessage(connect);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
                 "topic").type(TopicPermission.PermissionType.ALLOW).build());
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(permissions);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
 
@@ -257,7 +257,7 @@ public class PluginInitializerHandlerTest {
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
-        assertFalse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isPreventLwt());
+        assertFalse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isPreventLwt());
         assertNull(clientConnection.getConnectMessage());
     }
 

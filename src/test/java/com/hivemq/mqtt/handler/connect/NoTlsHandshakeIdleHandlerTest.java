@@ -18,7 +18,6 @@ package com.hivemq.mqtt.handler.connect;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -58,7 +57,7 @@ public class NoTlsHandshakeIdleHandlerTest {
             }
         };
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
         channel.pipeline().addLast(handler);
         channel.pipeline().addLast(eventAdapter);
     }

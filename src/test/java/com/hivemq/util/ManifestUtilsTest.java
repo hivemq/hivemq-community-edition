@@ -22,36 +22,23 @@ import java.net.URL;
 
 import static org.junit.Assert.assertNull;
 
-/**
- * @author Florian Limpöck
- */
-public class ResourceUtilsTest {
+public class ManifestUtilsTest {
 
     @Test
-    public void get_resource_null() throws Exception {
-
-        final URL resource = ResourceUtils.getResource(HiveMQServer.class, null);
-
+    public void getResource_whenResourcePathIsNull_thenResourceIsNull() {
+        final URL resource = ManifestUtils.getResource(HiveMQServer.class, null);
         assertNull(resource);
-
     }
 
     @Test
-    public void get_resource_clazz_null() throws Exception {
-
-        final URL resource = ResourceUtils.getResource(null, "path");
-
+    public void getResource_whenClazzIsNull_thenResourceIsNull() {
+        final URL resource = ManifestUtils.getResource(null, "path");
         assertNull(resource);
-
     }
 
     @Test
-    public void get_resource_url_empty() throws Exception {
-
-        final URL resource = ResourceUtils.getResource(HiveMQServer.class, "path");
-
+    public void getResource_whenResourcePathIsIncorrect_thenResourceIsNull() {
+        final URL resource = ManifestUtils.getResource(HiveMQServer.class, "path");
         assertNull(resource);
-
     }
-
 }

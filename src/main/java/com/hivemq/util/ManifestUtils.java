@@ -15,23 +15,24 @@
  */
 package com.hivemq.util;
 
+import com.google.common.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import static com.hivemq.util.ResourceUtils.getResource;
-
-/**
- * @author Christoph Schäbel
- * @author Lukas Brandl
- */
 public class ManifestUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(ManifestUtils.class);
+
     public static String getValueFromManifest(final Class clazz, final String name) {
-
         try {
-
             final URL resource = getResource(clazz, "META-INF/MANIFEST.MF");
 
             if (resource == null) {
@@ -43,6 +44,52 @@ public class ManifestUtils {
             final Attributes attributes = manifest.getMainAttributes();
             return attributes.getValue(name);
         } catch (final IOException e) {
+            return null;
+        }
+    }
+
+    @VisibleForTesting
+    public static URL getResource(final Class clazz, final String resourcePath) {
+
+        try {
+
+            if (clazz == null || resourcePath == null) {
+                return null;
+            }
+
+            final ClassLoader cl = clazz.getClassLoader();
+            final Enumeration<URL> resources = cl.getResources(resourcePath);
+            final List<URL> urls = new ArrayList<>();
+            // There could be multiple jar file (windows service for example)
+            while (resources.hasMoreElements()) {
+                urls.add(resources.nextElement());
+            }
+            if (urls.isEmpty()) {
+                // There is no Resource
+                return null;
+            }
+            URL url = null;
+            if (urls.size() == 1) {
+                // There is only one jar file
+                url = urls.get(0);
+            } else {
+                for (final URL currentUrl : urls) {
+                    if (currentUrl.getPath().contains("hivemq.jar")) {
+                        // If there are multiple jar files, we pick the one that contains the substring "hivemq.jar"
+                        url = currentUrl;
+                        break;
+                    }
+                }
+                if (url == null) {
+                    // If non of the urls contains the substring "hivemq.jar" we return the first one
+                    url = urls.get(0);
+                }
+            }
+
+            return url;
+        } catch (final IOException e) {
+            log.warn("Could not read resource " + resourcePath);
+            log.debug("Original exception: ", e);
             return null;
         }
     }

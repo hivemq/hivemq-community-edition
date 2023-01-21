@@ -29,7 +29,6 @@ import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Checkpoints;
 import com.hivemq.util.ThreadPreConditions;
 import io.netty.channel.Channel;
@@ -41,7 +40,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.util.ChannelUtils.getChannelIP;
 
 @Singleton
 public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
@@ -73,7 +71,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         Preconditions.checkNotNull(channel, "Channel must never be null");
         ThreadPreConditions.inNettyChildEventloop();
 
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final ClientState oldClientState = clientConnection.getClientState();
         clientConnection.proposeClientState(ClientState.DISCONNECTING);
 
@@ -110,7 +108,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            log.debug(logMessage, getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
+            log.debug(logMessage, clientConnection.getChannelIP().orElse("UNKNOWN"));
         }
 
         if (eventLogMessage != null && !eventLogMessage.isEmpty()) {

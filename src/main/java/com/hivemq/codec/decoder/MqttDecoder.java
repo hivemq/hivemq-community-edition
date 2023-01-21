@@ -23,8 +23,6 @@ import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hivemq.util.ChannelUtils.getChannelIP;
-
 public abstract class MqttDecoder<T extends Message> {
 
     private static final Logger log = LoggerFactory.getLogger(MqttDecoder.class);
@@ -56,7 +54,7 @@ public abstract class MqttDecoder<T extends Message> {
         if (topic == null || topic.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.",
-                        getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
+                        clientConnection.getChannelIP().orElse("UNKNOWN"));
             }
             return true;
         }
@@ -65,7 +63,7 @@ public abstract class MqttDecoder<T extends Message> {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). " +
                                 "This is not allowed. Disconnecting client.",
-                        getChannelIP(clientConnection.getChannel()).orElse("UNKNOWN"));
+                        clientConnection.getChannelIP().orElse("UNKNOWN"));
             }
             return true;
         }

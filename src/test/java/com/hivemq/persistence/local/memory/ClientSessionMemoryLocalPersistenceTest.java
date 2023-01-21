@@ -139,7 +139,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         assertEquals(125L, persistence.getTimestamp("clientid").longValue());
         assertEquals(1, persistence.getSessionsCount());
-        assertEquals(500L, session.getSessionExpiryInterval());
+        assertEquals(500L, session.getSessionExpiryIntervalSec());
         assertTrue(memoryGauge.getValue() > 0);
     }
 
@@ -168,7 +168,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         assertEquals(125L, persistence.getTimestamp("clientid").longValue());
         assertEquals(1, persistence.getSessionsCount());
-        assertEquals(500L, session.getSessionExpiryInterval());
+        assertEquals(500L, session.getSessionExpiryIntervalSec());
         assertTrue(memoryGauge.getValue() > 0);
     }
 
@@ -269,7 +269,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertEquals(321L, persistence.getTimestamp("clientid").longValue());
 
         assertFalse(persistence.getSession("clientid2", false).isConnected());
-        assertEquals(SESSION_EXPIRE_ON_DISCONNECT, persistence.getSession("clientid2", false).getSessionExpiryInterval());
+        assertEquals(SESSION_EXPIRE_ON_DISCONNECT, persistence.getSession("clientid2", false).getSessionExpiryIntervalSec());
         assertEquals(4321L, persistence.getTimestamp("clientid2").longValue());
     }
 
@@ -398,12 +398,12 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession clientSession =
                 persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        Assert.assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
+        Assert.assertEquals(clientSession.getSessionExpiryIntervalSec(), SESSION_EXPIRY_MAX);
 
         persistence.setSessionExpiryInterval(clientid, 12345, BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession updatedClientSession =
                 persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        Assert.assertEquals(12345, updatedClientSession.getSessionExpiryInterval());
+        Assert.assertEquals(12345, updatedClientSession.getSessionExpiryIntervalSec());
     }
 
     @Test(expected = NullPointerException.class)
@@ -421,7 +421,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 BucketUtils.getBucket(clientid, BUCKET_COUNT));
         final ClientSession clientSession =
                 persistence.getSession(clientid, BucketUtils.getBucket(clientid, BUCKET_COUNT));
-        Assert.assertEquals(clientSession.getSessionExpiryInterval(), SESSION_EXPIRY_MAX);
+        Assert.assertEquals(clientSession.getSessionExpiryIntervalSec(), SESSION_EXPIRY_MAX);
 
         persistence.setSessionExpiryInterval(clientid, -1, BucketUtils.getBucket(clientid, BUCKET_COUNT));
     }

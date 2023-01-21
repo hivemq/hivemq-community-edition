@@ -19,7 +19,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class PublishAuthorizerInputImplTest {
     public void before() {
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, null);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 

@@ -21,7 +21,6 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
 import com.hivemq.util.Strings;
 import io.netty.buffer.ByteBuf;
@@ -59,7 +58,7 @@ public class Mqtt311ConnectDecoderValidationsTest {
         MockitoAnnotations.initMocks(this);
 
         clientConnection = new ClientConnection(channel, null);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(new ClientConnection(channel, null)));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(new ClientConnection(channel, null)));
 
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

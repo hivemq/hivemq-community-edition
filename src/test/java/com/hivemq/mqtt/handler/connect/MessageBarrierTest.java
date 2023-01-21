@@ -26,7 +26,6 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -57,7 +56,7 @@ public class MessageBarrierTest {
 
         messageBarrier = new MessageBarrier(mqttServerDisconnector);
         channel = new EmbeddedChannel(new DummyHandler());
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
         channel.pipeline().addFirst(MQTT_MESSAGE_BARRIER, messageBarrier);
     }
 

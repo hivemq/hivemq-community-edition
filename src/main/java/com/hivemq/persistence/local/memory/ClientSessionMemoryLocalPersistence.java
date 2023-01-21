@@ -36,7 +36,6 @@ import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.ClientSessions;
 import com.hivemq.util.ObjectMemoryEstimation;
 import com.hivemq.util.ThreadPreConditions;
 import org.slf4j.Logger;
@@ -146,8 +145,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
         final ClientSession clientSession = storedSession.getObject().deepCopy();
 
-        if (checkExpired &&
-                ClientSessions.isExpired(clientSession, System.currentTimeMillis() - storedSession.getTimestamp())) {
+        if (checkExpired && clientSession.isExpired(System.currentTimeMillis() - storedSession.getTimestamp())) {
             return null;
         }
         if (includeWill) {
@@ -257,7 +255,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             }
 
             if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
-                newSession.setSessionExpiryInterval(sessionExpiryInterval);
+                newSession.setSessionExpiryIntervalSec(sessionExpiryInterval);
             }
 
             if (newSession.isConnected() && !isPersistent(newSession)) {
@@ -320,9 +318,9 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             final long timestamp = storedEntry.getTimestamp();
             final ClientSession clientSession = storedEntry.getObject();
 
-            final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
+            final long sessionExpiryInterval = clientSession.getSessionExpiryIntervalSec();
 
-            if (ClientSessions.isExpired(clientSession, currentTimeMillis - timestamp)) {
+            if (clientSession.isExpired(currentTimeMillis - timestamp)) {
 
                 if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
                     sessionsCount.decrementAndGet();
@@ -345,10 +343,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         return bucket.entrySet()
                 .stream()
                 .filter(entry -> !entry.getValue().getObject().isConnected())
-                .filter(entry -> entry.getValue().getObject().getSessionExpiryInterval() > 0)
-                .filter(entry -> !ClientSessions.isExpired(
-                        entry.getValue().getObject(),
-                        currentTimeMillis - entry.getValue().getTimestamp()))
+                .filter(entry -> entry.getValue().getObject().getSessionExpiryIntervalSec() > 0)
+                .filter(entry -> !entry.getValue().getObject().isExpired(currentTimeMillis - entry.getValue().getTimestamp()))
                 .map(Map.Entry::getKey)
                 .collect(ImmutableSet.toImmutableSet());
     }
@@ -386,7 +382,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 throw NoSessionException.INSTANCE;
             }
 
-            clientSession.setSessionExpiryInterval(sessionExpiryInterval);
+            clientSession.setSessionExpiryIntervalSec(sessionExpiryInterval);
 
             return new PersistenceEntry<>(clientSession, storedSession.getTimestamp());
         });
@@ -409,7 +405,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                     final ClientSessionWill willPublish = storedSession.getObject().getWillPublish();
 
                     return new PendingWillMessages.PendingWill(Math.min(willPublish.getDelayInterval(),
-                            storedSession.getObject().getSessionExpiryInterval()),
+                            storedSession.getObject().getSessionExpiryIntervalSec()),
                             willPublish.getDelayInterval());
                 }));
     }
@@ -462,8 +458,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                         .stream()
                         .filter(entry -> {
                             final PersistenceEntry<ClientSession> value = entry.getValue();
-                            return !ClientSessions.isExpired(value.getObject(),
-                                    currentTimeMillis - value.getTimestamp());
+                            return !value.getObject().isExpired(currentTimeMillis - value.getTimestamp());
                         })
                         .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
                                 entry -> entry.getValue().getObject().copyWithoutWill()));
@@ -514,6 +509,6 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     }
 
     private static boolean isPersistent(final @NotNull ClientSession clientSession) {
-        return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
+        return clientSession.getSessionExpiryIntervalSec() > SESSION_EXPIRE_ON_DISCONNECT;
     }
 }

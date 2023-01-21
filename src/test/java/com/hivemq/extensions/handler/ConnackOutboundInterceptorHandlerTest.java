@@ -39,7 +39,6 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -91,10 +90,10 @@ public class ConnackOutboundInterceptorHandlerTest {
         channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, publishFlushHandler);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("client");
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestResponseInformation(true);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestResponseInformation(true);
 
         when(extension.getId()).thenReturn("extension");
 
@@ -124,7 +123,7 @@ public class ConnackOutboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId(null);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
 
         final CONNACK initial = testConnack();
         channel.writeOutbound(initial);

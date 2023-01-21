@@ -24,7 +24,6 @@ import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -63,7 +62,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     @Override
     void succeedAuthentication(final @NotNull ConnectAuthOutput output) {
         super.succeedAuthentication(output);
-        final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         clientConnection.setAuthData(output.getAuthenticationData());
         clientConnection.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()));
         connectHandler.connectSuccessfulAuthenticated(ctx, clientConnection, connect, output.getClientSettings());
@@ -84,7 +83,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     @Override
     void undecidedAuthentication(final @NotNull ConnectAuthOutput output) {
         if (initial) {
-            final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
             connectHandler.connectSuccessfulUndecided(ctx, clientConnection, connect, output.getClientSettings());
         } else {
             connacker.connackError(

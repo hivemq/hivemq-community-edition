@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.handler;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -45,7 +46,6 @@ import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -120,7 +120,7 @@ public class IncomingPublishHandler {
     public void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String clientId) {
         final Channel channel = ctx.channel();
 
-        final ClientContextImpl clientContext = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getExtensionClientContext();
+        final ClientContextImpl clientContext = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getExtensionClientContext();
         if (clientContext == null) {
             ctx.executor().execute(() -> authorizerService.authorizePublish(ctx, publish));
             return;
@@ -227,7 +227,7 @@ public class IncomingPublishHandler {
             final Channel channel = ctx.channel();
             final String clientId = getIdentifier();
 
-            final ProtocolVersion protocolVersion = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+            final ProtocolVersion protocolVersion = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getProtocolVersion();
             //MQTT 3
             if (protocolVersion != ProtocolVersion.MQTTv5) {
                 if (output.getReasonCode() != AckReasonCode.SUCCESS) {

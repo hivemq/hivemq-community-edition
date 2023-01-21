@@ -16,11 +16,11 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -100,7 +100,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(false);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         // MQTT v5.0 Spec §3.4.2.2
         final byte[] expected = {
@@ -121,7 +121,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -145,7 +145,7 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_and_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header

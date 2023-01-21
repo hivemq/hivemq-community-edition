@@ -27,9 +27,7 @@ import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.PublishTopicTree;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
-import com.hivemq.util.PublishUtil;
 import com.hivemq.util.ThreadPreConditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,7 +127,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             return null;
         }
 
-        if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+        if (retainedMessage.hasExpired()) {
             return null;
         }
         final RetainedMessage copy = retainedMessage.copyWithoutPayload();
@@ -176,7 +174,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             }
             final RetainedMessage retainedMessage = entry.getValue();
             final String topic = entry.getKey();
-            if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+            if (retainedMessage.hasExpired()) {
                 currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
                 topicTrees[bucketIndex].remove(topic);
                 return true;
@@ -198,7 +196,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
                     final RetainedMessage retainedMessage = entry.getValue();
 
                     // ignore messages with exceeded message expiry interval
-                    if (PublishUtil.checkExpiry(retainedMessage.getTimestamp(), retainedMessage.getMessageExpiryInterval())) {
+                    if (retainedMessage.hasExpired()) {
                         return null;
                     }
 

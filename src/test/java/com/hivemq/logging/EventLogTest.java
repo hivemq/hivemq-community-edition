@@ -17,7 +17,6 @@ package com.hivemq.logging;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import org.junit.After;
@@ -76,7 +75,7 @@ public class EventLogTest {
         clientConnection.setClientId(clientId);
 
         final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(clientConnectionAttribute);
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(clientConnectionAttribute);
         when(clientConnectionAttribute.get()).thenReturn(clientConnection);
 
         logMessageBuffer = new StringBuffer();

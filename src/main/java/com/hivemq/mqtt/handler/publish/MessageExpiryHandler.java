@@ -15,8 +15,8 @@
  */
 package com.hivemq.mqtt.handler.publish;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.event.PubrelDroppedEvent;
 import com.hivemq.mqtt.message.QoS;
@@ -63,7 +63,7 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
             final PUBREL pubrel = (PUBREL) msg;
             checkAndSetPubrelExpiry(pubrel);
             final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED;
-            final boolean drop = (pubrel.getExpiryInterval() != null) && (pubrel.getExpiryInterval() == 0) && expireInflight;
+            final boolean drop = (pubrel.getMessageExpiryInterval() != null) && (pubrel.getMessageExpiryInterval() == 0) && expireInflight;
             if (drop) {
                 ctx.fireUserEventTriggered(new PubrelDroppedEvent(pubrel));
                 return;
@@ -82,13 +82,13 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
     }
 
     private void checkAndSetPubrelExpiry(final @NotNull PUBREL message) {
-        if (message.getExpiryInterval() == null || message.getPublishTimestamp() == null) {
+        if (message.getMessageExpiryInterval() == null || message.getPublishTimestamp() == null) {
             return;
         }
-        if (message.getExpiryInterval() != MAX_EXPIRY_INTERVAL_DEFAULT) {
+        if (message.getMessageExpiryInterval() != MAX_EXPIRY_INTERVAL_DEFAULT) {
             final long waitingInSeconds = (System.currentTimeMillis() - message.getPublishTimestamp()) / 1000;
-            final long remainingInterval = Math.max(0, message.getExpiryInterval() - waitingInSeconds);
-            message.setExpiryInterval(remainingInterval);
+            final long remainingInterval = Math.max(0, message.getMessageExpiryInterval() - waitingInSeconds);
+            message.setMessageExpiryInterval(remainingInterval);
         }
     }
 

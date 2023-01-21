@@ -39,7 +39,6 @@ import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.util.FutureUtils;
-import com.hivemq.util.ClientSessions;
 import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +125,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             }
 
             final ListenableFuture<Void> removeQos0Future = clientQueuePersistence.removeAllQos0Messages(client, false);
-            if (disconnectSession.getSessionExpiryInterval() == SESSION_EXPIRE_ON_DISCONNECT) {
+            if (disconnectSession.getSessionExpiryIntervalSec() == SESSION_EXPIRE_ON_DISCONNECT) {
                 final ListenableFuture<Void> removeSubFuture = subscriptionPersistence.removeAll(client);
                 resultFuture.setFuture(Futures.transform(Futures.allAsList(removeQos0Future, removeSubFuture),
                         voids -> null, MoreExecutors.directExecutor()));
@@ -190,10 +189,10 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                     cleanupFuture = cleanClientData(client);
                 } else {
                     final boolean expired = previousTimestamp != null &&
-                            ClientSessions.isExpired(previousClientSession, System.currentTimeMillis() - previousTimestamp);
+                            previousClientSession.isExpired(System.currentTimeMillis() - previousTimestamp);
                     if (expired) {
                         // timestamp in milliseconds + session expiry in seconds * 1000 = milliseconds
-                        eventLog.clientSessionExpired(previousTimestamp + previousClientSession.getSessionExpiryInterval() * 1000, client);
+                        eventLog.clientSessionExpired(previousTimestamp + previousClientSession.getSessionExpiryIntervalSec() * 1000, client);
                         cleanupFuture = cleanClientData(client);
                     } else {
                         cleanupFuture = Futures.immediateFuture(null);
@@ -238,8 +237,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             return Futures.immediateFuture(false);
         }
         clientConnection.setPreventLwt(preventLwtMessage);
-        if (session.getSessionExpiryInterval() != SESSION_EXPIRY_NOT_SET) {
-            clientConnection.setClientSessionExpiryInterval(session.getSessionExpiryInterval());
+        if (session.getSessionExpiryIntervalSec() != SESSION_EXPIRY_NOT_SET) {
+            clientConnection.setClientSessionExpiryInterval(session.getSessionExpiryIntervalSec());
         }
 
         final String logMessage = String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);
@@ -353,7 +352,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         if (session == null) {
             return null;
         }
-        return session.getSessionExpiryInterval();
+        return session.getSessionExpiryIntervalSec();
     }
 
     @Override
@@ -455,7 +454,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
     }
 
     private static boolean isExistent(final @Nullable ClientSession clientSession) {
-        return (clientSession != null) && (clientSession.getSessionExpiryInterval() > 0 || clientSession.isConnected());
+        return (clientSession != null) && (clientSession.getSessionExpiryIntervalSec() > 0 || clientSession.isConnected());
     }
 
     public enum DisconnectSource {

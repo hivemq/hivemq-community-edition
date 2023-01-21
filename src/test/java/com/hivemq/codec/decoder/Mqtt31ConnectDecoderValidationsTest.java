@@ -22,7 +22,6 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
 import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Strings;
@@ -72,7 +71,7 @@ public class Mqtt31ConnectDecoderValidationsTest {
                 new HivemqId());
 
         clientConnection = new ClientConnection(channel, null);
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 
     @Test

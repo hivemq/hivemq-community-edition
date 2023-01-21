@@ -39,7 +39,6 @@ import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-import com.hivemq.util.ClientSessions;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ByteIterable;
@@ -235,7 +234,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 clientSession = serializer.deserializeValueWithoutWill(bytes);
             }
 
-            if (checkExpired && ClientSessions.isExpired(clientSession, System.currentTimeMillis() - serializer.deserializeTimestamp(bytes))) {
+            if (checkExpired && clientSession.isExpired(System.currentTimeMillis() - serializer.deserializeTimestamp(bytes))) {
                 return null;
             }
 
@@ -338,7 +337,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(byteIterable));
 
             if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
-                clientSession.setSessionExpiryInterval(sessionExpiryInterval);
+                clientSession.setSessionExpiryIntervalSec(sessionExpiryInterval);
             }
 
             if (clientSession.isConnected() && !persistent(clientSession)) {
@@ -429,7 +428,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     final ClientSession clientSession = serializer.deserializeValueWithoutWill(valueBytes);
                     final long timestamp = serializer.deserializeTimestamp(valueBytes);
 
-                    final boolean expired = ClientSessions.isExpired(clientSession, System.currentTimeMillis() - timestamp);
+                    final boolean expired = clientSession.isExpired(System.currentTimeMillis() - timestamp);
                     if (expired) {
                         continue;
                     }
@@ -509,7 +508,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 throw NoSessionException.INSTANCE;
             }
 
-            clientSession.setSessionExpiryInterval(sessionExpiryInterval);
+            clientSession.setSessionExpiryIntervalSec(sessionExpiryInterval);
 
             bucket.getStore().put(txn, key,
                     bytesToByteIterable(serializer.serializeValue(clientSession, System.currentTimeMillis())));
@@ -534,12 +533,11 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     final ClientSession clientSession = serializer.deserializeValue(valueBytes);
                     final long timestamp = serializer.deserializeTimestamp(valueBytes);
 
-                    final long sessionExpiryInterval = clientSession.getSessionExpiryInterval();
+                    final long sessionExpiryInterval = clientSession.getSessionExpiryIntervalSec();
                     final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
 
-                    // Expired is true if the persistent date for the client has to be removed
-                    final boolean expired = ClientSessions.isExpired(clientSession, timeSinceDisconnect);
-                    if (expired) {
+                    // Expired is true if the persistent data for the client has to be removed
+                    if (clientSession.isExpired(timeSinceDisconnect)) {
                         if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
                             sessionsCount.decrementAndGet();
                         }
@@ -570,10 +568,10 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     final byte[] valueBytes = byteIterableToBytes(cursor.getValue());
                     final ClientSession clientSession = serializer.deserializeValue(valueBytes);
                     final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                    if (!clientSession.isConnected() && clientSession.getSessionExpiryInterval() > 0) {
+                    if (!clientSession.isConnected() && clientSession.getSessionExpiryIntervalSec() > 0) {
                         final long timestamp = serializer.deserializeTimestamp(valueBytes);
                         final long timeSinceDisconnect = System.currentTimeMillis() - timestamp;
-                        final long sessionExpiryIntervalInMillis = clientSession.getSessionExpiryInterval() * 1000L;
+                        final long sessionExpiryIntervalInMillis = clientSession.getSessionExpiryIntervalSec() * 1000L;
                         // We don't remove expired client sessions here, since this method is often called for all buckets at once.
                         // Handling the TTL in the cleanup job will result in a more evenly distributed CPU usage.
                         if (timeSinceDisconnect < sessionExpiryIntervalInMillis) {
@@ -609,7 +607,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     }
                     final ClientSessionWill willPublish = clientSession.getWillPublish();
                     resultMap.put(clientId, new PendingWillMessages.PendingWill(
-                            Math.min(willPublish.getDelayInterval(), clientSession.getSessionExpiryInterval()),
+                            Math.min(willPublish.getDelayInterval(), clientSession.getSessionExpiryIntervalSec()),
                             timestamp));
                 }
             }
@@ -635,7 +633,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     }
 
     private static boolean persistent(final @NotNull ClientSession clientSession) {
-        return clientSession.getSessionExpiryInterval() > SESSION_EXPIRE_ON_DISCONNECT;
+        return clientSession.getSessionExpiryIntervalSec() > SESSION_EXPIRE_ON_DISCONNECT;
     }
 
     private class AddWillReference implements Runnable {

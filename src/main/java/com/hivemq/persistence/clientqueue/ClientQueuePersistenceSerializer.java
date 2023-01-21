@@ -172,7 +172,7 @@ public class ClientQueuePersistenceSerializer {
 
     @NotNull
     ByteIterable serializePubRel(@NotNull final PUBREL pubrel, final boolean retained) {
-        return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier(), retained, pubrel.getExpiryInterval(),
+        return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier(), retained, pubrel.getMessageExpiryInterval(),
                 pubrel.getPublishTimestamp()));
     }
 
@@ -189,7 +189,7 @@ public class ClientQueuePersistenceSerializer {
             final PUBREL pubrel = new PUBREL(packetId);
             if (serializedValue.getLength() >= Short.BYTES + 1 + Long.BYTES * 2) {
                 final long expiry = Bytes.readLong(bytes, Short.BYTES + 1);
-                pubrel.setExpiryInterval(expiry);
+                pubrel.setMessageExpiryInterval(expiry);
                 final long timestamp = Bytes.readLong(bytes, Short.BYTES + 1 + Long.BYTES);
                 pubrel.setPublishTimestamp(timestamp);
             }

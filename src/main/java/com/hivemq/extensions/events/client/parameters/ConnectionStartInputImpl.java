@@ -17,6 +17,7 @@ package com.hivemq.extensions.events.client.parameters;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
@@ -27,7 +28,6 @@ import com.hivemq.extensions.ExtensionInformationUtil;
 import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.packets.connect.ConnectPacketImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 
 import java.util.Objects;
@@ -50,7 +50,7 @@ public class ConnectionStartInputImpl implements ConnectionStartInput, PluginTas
         this.connect = connect;
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
         this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
-        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().getConnectReceivedTimestamp(),
+        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectReceivedTimestamp(),
                 System.currentTimeMillis());
     }
 

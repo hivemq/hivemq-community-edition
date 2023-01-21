@@ -24,7 +24,6 @@ import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.ClientIds;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -67,7 +66,7 @@ public class Mqtt31ConnectDecoderTest {
         clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         clientConnection.setClientId("clientId");
-        when(channel.attr(ChannelAttributes.CLIENT_CONNECTION)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
 
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

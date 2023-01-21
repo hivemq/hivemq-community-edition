@@ -31,7 +31,6 @@ import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.connection.ConnectionPersistenceImpl;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
@@ -143,7 +142,7 @@ public class ClientSessionPersistenceImplTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION);
@@ -159,7 +158,7 @@ public class ClientSessionPersistenceImplTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).set(clientConnection);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
         final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION, Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, "reason-string");

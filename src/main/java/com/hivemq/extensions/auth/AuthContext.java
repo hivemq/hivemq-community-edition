@@ -15,13 +15,12 @@
  */
 package com.hivemq.extensions.auth;
 
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
-import com.hivemq.util.ChannelAttributes;
-import com.hivemq.util.ChannelUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -119,8 +118,9 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             });
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
+                final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
                 log.error("Execution of authentication was rejected for client with IP {}.",
-                        ChannelUtils.getChannelIP(ctx.channel()).orElse("UNKNOWN"), ex);
+                        clientConnection.getChannelIP().orElse("UNKNOWN"), ex);
             }
         }
     }
@@ -137,7 +137,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             if (future.isSuccess()) {
                 final ScheduledFuture<?> timeoutFuture =
                         ctx.executor().schedule(this::onTimeout, output.getTimeout(), TimeUnit.SECONDS);
-                ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthFuture(timeoutFuture);
+                ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthFuture(timeoutFuture);
             } else if (future.channel().isActive()) {
                 onSendException(future.cause());
             }
@@ -145,7 +145,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     }
 
     void succeedAuthentication(final @NotNull T output) {
-        ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().setAuthPermissions(output.getDefaultPermissions());
+        ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(output.getDefaultPermissions());
     }
 
     abstract void failAuthentication(@NotNull T output);

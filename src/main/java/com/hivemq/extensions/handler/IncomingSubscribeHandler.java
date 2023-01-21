@@ -41,7 +41,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
@@ -98,7 +97,7 @@ public class IncomingSubscribeHandler {
      */
     public void interceptOrDelegate(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE subscribe) {
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -207,7 +206,7 @@ public class IncomingSubscribeHandler {
 
         private void prevent(final @NotNull SubscribeInboundOutputImpl output) {
             final int size = output.getSubscribePacket().getSubscriptions().size();
-            final ProtocolVersion version = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get().getProtocolVersion();
+            final ProtocolVersion version = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getProtocolVersion();
             final List<Mqtt5SubAckReasonCode> reasonCodesBuilder = new ArrayList<>(size);
 
             // MQTT 3.1 does not support SUBACK failure codes

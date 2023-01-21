@@ -83,4 +83,12 @@ public enum QoS {
     public static @NotNull QoS from(final @NotNull Qos qos) {
         return LOOKUP[qos.ordinal()];
     }
+
+    public static @NotNull QoS getMinQoS(final @NotNull QoS qosFirst, final @NotNull QoS qosSecond) {
+        if (qosFirst.getQosNumber() < qosSecond.getQosNumber()) {
+            return qosFirst;
+        }
+
+        return qosSecond;
+    }
 }

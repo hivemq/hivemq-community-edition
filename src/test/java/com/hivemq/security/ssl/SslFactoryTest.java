@@ -16,13 +16,13 @@
 package com.hivemq.security.ssl;
 
 import ch.qos.logback.classic.Logger;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
-import com.hivemq.util.DefaultSslEngineUtil;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslContext;
@@ -37,8 +37,12 @@ import org.slf4j.LoggerFactory;
 import util.LogbackCapturingAppender;
 import util.TestKeyStoreGenerator;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 import java.io.File;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +67,6 @@ public class SslFactoryTest {
     private @NotNull SslFactory sslFactory;
 
     private @NotNull TestKeyStoreGenerator testKeyStoreGenerator;
-    private final DefaultSslEngineUtil defaultSslEngineUtil = new DefaultSslEngineUtil();
 
     private @NotNull LogbackCapturingAppender logCapture;
 
@@ -178,7 +181,7 @@ public class SslFactoryTest {
 
         final List<String> cipherSuites = new ArrayList<>();
 
-        final List<String> supportedCipherSuites = defaultSslEngineUtil.getSupportedCipherSuites();
+        final List<String> supportedCipherSuites = getSupportedCipherSuites();
 
         final String chosenCipher = supportedCipherSuites.get(supportedCipherSuites.size() - 1);
 
@@ -213,7 +216,7 @@ public class SslFactoryTest {
 
         final List<String> protocols = new ArrayList<>();
 
-        final List<String> supportedProtocols = defaultSslEngineUtil.getSupportedProtocols();
+        final List<String> supportedProtocols = getSupportedProtocols();
 
         final String chosenProtocol = supportedProtocols.get(supportedProtocols.size() - 1);
 
@@ -567,5 +570,37 @@ public class SslFactoryTest {
 
         assertEquals(engineDefaultPreferServerCipherSuites, sslParameters1.getUseCipherSuitesOrder());
         assertEquals(!engineDefaultPreferServerCipherSuites, sslParameters2.getUseCipherSuitesOrder());
+    }
+
+    private List<String> getSupportedCipherSuites() throws SslException {
+
+        try {
+            final SSLEngine engine = getDefaultSslEngine();
+
+            return ImmutableList.copyOf(engine.getSupportedCipherSuites());
+
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            throw new SslException("Not able to get list of supported cipher suites from JVM", e);
+        }
+    }
+
+    private List<String> getSupportedProtocols() throws SslException {
+
+        try {
+            final SSLEngine engine = getDefaultSslEngine();
+
+            return ImmutableList.copyOf(engine.getSupportedProtocols());
+
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            throw new SslException("Not able to get list of supported protocols from JVM", e);
+        }
+    }
+
+    private SSLEngine getDefaultSslEngine() throws NoSuchAlgorithmException, KeyManagementException {
+
+        final SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+
+        return context.createSSLEngine();
     }
 }

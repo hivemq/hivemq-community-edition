@@ -44,7 +44,6 @@ import com.hivemq.extensions.services.interceptor.Interceptors;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import com.hivemq.util.ChannelAttributes;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.ReasonStrings;
 import io.netty.channel.Channel;
@@ -100,7 +99,7 @@ public class ConnectInboundInterceptorHandler {
 
     public void handleInboundConnect(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ChannelAttributes.CLIENT_CONNECTION).get();
+        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -214,7 +213,7 @@ public class ConnectInboundInterceptorHandler {
                         reasonString);
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
-                final ClientConnection clientConnection = ctx.channel().attr(ChannelAttributes.CLIENT_CONNECTION).get();
+                final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
                 clientConnection.setClientId(connect.getClientIdentifier());
                 clientConnection.setExtensionClientInformation(new ClientInformationImpl(connect.getClientIdentifier()));
                 clientConnection.setCleanStart(connect.isCleanStart());

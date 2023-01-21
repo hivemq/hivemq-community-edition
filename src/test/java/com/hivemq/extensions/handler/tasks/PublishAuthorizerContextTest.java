@@ -26,7 +26,6 @@ import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import com.hivemq.extensions.executor.PluginOutputAsyncerImpl;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -52,7 +51,7 @@ public class PublishAuthorizerContextTest {
     @Before
     public void before() {
         channel = new EmbeddedChannel();
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION)
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
                 .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
         when(ctx.channel()).thenReturn(channel);
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
@@ -107,7 +106,7 @@ public class PublishAuthorizerContextTest {
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertTrue(result.isCompleted());
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest());
+        assertTrue(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isIncomingPublishesSkipRest());
     }
 
     @Test(timeout = 5000)
@@ -119,7 +118,7 @@ public class PublishAuthorizerContextTest {
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(DISCONNECT, result.getAuthorizationState());
         assertTrue(result.isCompleted());
-        assertTrue(channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().isIncomingPublishesSkipRest());
+        assertTrue(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isIncomingPublishesSkipRest());
     }
 
     @Test(timeout = 5000)

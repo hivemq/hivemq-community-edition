@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.message.publish;
 
+import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
@@ -31,11 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 public class PUBLISHTest {
@@ -180,7 +180,7 @@ public class PUBLISHTest {
     }
 
     @Test
-    public void test_estimated_size_min() throws InterruptedException {
+    public void test_estimated_size_min() {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
@@ -195,7 +195,7 @@ public class PUBLISHTest {
     }
 
     @Test
-    public void test_estimated_size_without_payload() throws InterruptedException {
+    public void test_estimated_size_without_payload() {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
@@ -211,7 +211,7 @@ public class PUBLISHTest {
     }
 
     @Test
-    public void test_estimated_size_very_large() throws InterruptedException {
+    public void test_estimated_size_very_large() {
 
         final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
                 .withQoS(QoS.AT_MOST_ONCE)
@@ -227,6 +227,43 @@ public class PUBLISHTest {
         final long estimatedSize = ((1024 * 1024 * 5) * 2) + 54 + 24 + (130_038 * 2) + 12_777_790 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()); // 23_523_857 bytes + UniqueID Bytes
         assertEquals(estimatedSize, publishMqtt5.getEstimatedSizeInMemory());
 
+    }
+
+    @Test
+    public void hasExpired_whenExpiryIntervalSinceCreationElapsed_thenMessageExpired() {
+        final PUBLISH publish1 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 2000, 1);
+        assertTrue(publish1.hasExpired());
+
+        final PUBLISH publish2 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 10000, 10);
+        assertTrue(publish2.hasExpired());
+
+        final PUBLISH publish3 = createPublishWithTimestampAndExpiry(System.currentTimeMillis(), 0);
+        assertTrue(publish3.hasExpired());
+    }
+
+    @Test
+    public void hasExpired_whenExpiryIntervalSinceCreationDidNotElapse_thenMessageIsNotExpired() {
+        final PUBLISH publish1 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 2, 1);
+        assertFalse(publish1.hasExpired());
+
+        final PUBLISH publish2 = createPublishWithTimestampAndExpiry(System.currentTimeMillis(), 1);
+        assertFalse(publish2.hasExpired());
+
+        final PUBLISH publish3 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 100000000, MqttConfigurationDefaults.TTL_DISABLED);
+        assertFalse(publish3.hasExpired());
+    }
+
+    private PUBLISH createPublishWithTimestampAndExpiry(final long timestampMsec, final long messageExpiryIntervalSec) {
+        return new PUBLISHFactory.Mqtt5Builder()
+                .withHivemqId("hivemqId")
+                .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
+                .withPayload(new byte[0])
+                .withTopic("topic")
+                .withUserProperties(Mqtt5UserProperties.of())
+                .withTimestamp(timestampMsec)
+                .withMessageExpiryInterval(messageExpiryIntervalSec)
+                .build();
     }
 
     private Mqtt5UserProperties getManyProperties() {

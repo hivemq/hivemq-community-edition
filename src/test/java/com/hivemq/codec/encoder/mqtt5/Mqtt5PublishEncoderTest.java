@@ -16,13 +16,13 @@
 package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
+import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
-import com.hivemq.util.ChannelAttributes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Before;
@@ -56,7 +56,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_encode_all() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setMaxPacketSizeSend(200L);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend(200L);
 
         final byte[] expected = {
                 // fixed header
@@ -501,7 +501,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_encode_userProperties_request_problem_information_false() {
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setRequestProblemInformation(false);
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -713,7 +713,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                         Mqtt5PayloadFormatIndicator.UNSPECIFIED, null, null, correlationData, userProperties,
                         -1, false, true, null);
 
-        channel.attr(ChannelAttributes.CLIENT_CONNECTION).get().setClientId("clientid");
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("clientid");
         channel.writeOutbound(publish);
         final ByteBuf buf = channel.readOutbound();
         assertEquals(0, buf.readableBytes());
