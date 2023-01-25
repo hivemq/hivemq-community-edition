@@ -33,7 +33,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.persistence.CleanUpService.*;
+import static com.hivemq.persistence.ScheduledCleanUpService.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.*;
  * @author Lukas Brandl
  */
 @SuppressWarnings({"unchecked", "NullabilityAnnotations"})
-public class CleanUpServiceTest {
+public class ScheduledCleanUpServiceTest {
 
     private final ListeningScheduledExecutorService scheduledExecutorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
 
@@ -61,12 +61,12 @@ public class CleanUpServiceTest {
     @Mock
     private ClientQueuePersistence clientQueuePersistence;
 
-    private CleanUpService cleanUpService;
+    private ScheduledCleanUpService scheduledCleanUpService;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        cleanUpService = new CleanUpService(scheduledExecutorService, clientSessionPersistence,
+        scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService, clientSessionPersistence,
                 subscriptionPersistence, retainedMessagePersistence, clientQueuePersistence);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
@@ -75,50 +75,50 @@ public class CleanUpServiceTest {
     @Test
     public void test_clean_up() throws Exception {
 
-        cleanUpService.cleanUp(0, CleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX);
-        verify(clientSessionPersistence).cleanUp(eq(CleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX));
+        scheduledCleanUpService.cleanUp(0, ScheduledCleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX);
+        verify(clientSessionPersistence).cleanUp(eq(ScheduledCleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX));
 
-        cleanUpService.cleanUp(1, SUBSCRIPTION_PERSISTENCE_INDEX);
+        scheduledCleanUpService.cleanUp(1, SUBSCRIPTION_PERSISTENCE_INDEX);
         verify(subscriptionPersistence).cleanUp(eq(SUBSCRIPTION_PERSISTENCE_INDEX));
 
-        cleanUpService.cleanUp(2, RETAINED_MESSAGES_PERSISTENCE_INDEX);
+        scheduledCleanUpService.cleanUp(2, RETAINED_MESSAGES_PERSISTENCE_INDEX);
         verify(retainedMessagePersistence).cleanUp(eq(RETAINED_MESSAGES_PERSISTENCE_INDEX));
 
-        cleanUpService.cleanUp(3, CLIENT_QUEUE_PERSISTENCE_INDEX);
+        scheduledCleanUpService.cleanUp(3, CLIENT_QUEUE_PERSISTENCE_INDEX);
         verify(clientQueuePersistence).cleanUp(eq(CLIENT_QUEUE_PERSISTENCE_INDEX));
     }
 
     @Test
     public void test_schedule_clean_up() throws Exception {
         final ListeningScheduledExecutorService scheduledExecutorService = mock(ListeningScheduledExecutorService.class);
-        cleanUpService = new CleanUpService(scheduledExecutorService, clientSessionPersistence,
+        scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService, clientSessionPersistence,
                 subscriptionPersistence, retainedMessagePersistence, clientQueuePersistence);
 
-        final ArgumentCaptor<CleanUpService.CleanUpTask> argumentCaptor = ArgumentCaptor.forClass(CleanUpService.CleanUpTask.class);
+        final ArgumentCaptor<ScheduledCleanUpService.CleanUpTask> argumentCaptor = ArgumentCaptor.forClass(ScheduledCleanUpService.CleanUpTask.class);
         when(scheduledExecutorService.schedule(argumentCaptor.capture(), anyLong(), any(TimeUnit.class))).thenReturn(mock(ListenableScheduledFuture.class));
 
 
         for (int bucketIndex = 0; bucketIndex < 64; bucketIndex++) {
-            for (int persistenceIndex = 0; persistenceIndex < CleanUpService.NUMBER_OF_PERSISTENCES; persistenceIndex++) {
-                cleanUpService.scheduleCleanUpTask();
-                final CleanUpService.CleanUpTask value = argumentCaptor.getValue();
+            for (int persistenceIndex = 0; persistenceIndex < ScheduledCleanUpService.NUMBER_OF_PERSISTENCES; persistenceIndex++) {
+                scheduledCleanUpService.scheduleCleanUpTask();
+                final ScheduledCleanUpService.CleanUpTask value = argumentCaptor.getValue();
                 assertEquals(bucketIndex, value.getBucketIndex());
                 assertEquals(persistenceIndex, value.getPersistenceIndex());
             }
         }
 
-        cleanUpService.scheduleCleanUpTask();
-        final CleanUpService.CleanUpTask value = argumentCaptor.getValue();
+        scheduledCleanUpService.scheduleCleanUpTask();
+        final ScheduledCleanUpService.CleanUpTask value = argumentCaptor.getValue();
         assertEquals(0, value.getBucketIndex());
         assertEquals(0, value.getPersistenceIndex());
     }
 
     @Test
     public void test_cleanup_task_rescheduled_in_case_of_exception() throws Exception {
-        final CleanUpService cleanUpService = mock(CleanUpService.class);
-        when(cleanUpService.cleanUp(anyInt(), anyInt())).thenThrow(new RuntimeException("expected"));
-        final CleanUpService.CleanUpTask task = new CleanUpService.CleanUpTask(cleanUpService, 0, 0);
+        final ScheduledCleanUpService scheduledCleanUpService = mock(ScheduledCleanUpService.class);
+        when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenThrow(new RuntimeException("expected"));
+        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(scheduledCleanUpService, 0, 0);
         task.call();
-        verify(cleanUpService).scheduleCleanUpTask();
+        verify(scheduledCleanUpService).scheduleCleanUpTask();
     }
 }

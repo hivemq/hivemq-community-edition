@@ -88,7 +88,7 @@ public class PersistenceModule extends SingletonModule<Class<PersistenceModule>>
 
         bind(TopicTreeStartup.class).asEagerSingleton();
 
-        bind(CleanUpService.class).asEagerSingleton();
+        bind(ScheduledCleanUpService.class).asEagerSingleton();
 
         requestStaticInjection(FutureUtils.class);
     }
