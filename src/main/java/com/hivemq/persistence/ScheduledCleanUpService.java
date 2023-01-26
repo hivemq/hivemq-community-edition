@@ -44,7 +44,7 @@ import static com.hivemq.configuration.service.InternalConfigurations.*;
  * @author Lukas Brandl
  */
 @Singleton
-public class CleanUpService {
+public class ScheduledCleanUpService {
 
     static final int NUMBER_OF_PERSISTENCES = 4;
 
@@ -69,7 +69,7 @@ public class CleanUpService {
     public static final int CLIENT_QUEUE_PERSISTENCE_INDEX = 3;
 
 
-    private static final Logger log = LoggerFactory.getLogger(CleanUpService.class);
+    private static final Logger log = LoggerFactory.getLogger(ScheduledCleanUpService.class);
 
     private final @NotNull ListeningScheduledExecutorService scheduledExecutorService;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
@@ -83,11 +83,11 @@ public class CleanUpService {
     private final int cleanUpJobSchedule;
 
     @Inject
-    public CleanUpService(final @NotNull @Persistence ListeningScheduledExecutorService scheduledExecutorService,
-                          final @NotNull ClientSessionPersistence clientSessionPersistence,
-                          final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
-                          final @NotNull RetainedMessagePersistence retainedMessagePersistence,
-                          final @NotNull ClientQueuePersistence clientQueuePersistence) {
+    public ScheduledCleanUpService(final @NotNull @Persistence ListeningScheduledExecutorService scheduledExecutorService,
+                                   final @NotNull ClientSessionPersistence clientSessionPersistence,
+                                   final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
+                                   final @NotNull RetainedMessagePersistence retainedMessagePersistence,
+                                   final @NotNull ClientQueuePersistence clientQueuePersistence) {
 
         this.scheduledExecutorService = scheduledExecutorService;
         this.clientSessionPersistence = clientSessionPersistence;
@@ -139,15 +139,15 @@ public class CleanUpService {
     }
 
     public static final class CleanUpTask implements Callable<Void> {
-        private final @NotNull CleanUpService cleanUpService;
+        private final @NotNull ScheduledCleanUpService scheduledCleanUpService;
         private final int bucketIndex;
         private final int persistenceIndex;
 
-        CleanUpTask(@NotNull final CleanUpService cleanUpService,
+        CleanUpTask(@NotNull final ScheduledCleanUpService scheduledCleanUpService,
                     final int bucketIndex,
                     final int persistenceIndex) {
-            checkNotNull(cleanUpService, "Clean up service must not be null");
-            this.cleanUpService = cleanUpService;
+            checkNotNull(scheduledCleanUpService, "Clean up service must not be null");
+            this.scheduledCleanUpService = scheduledCleanUpService;
             this.bucketIndex = bucketIndex;
             this.persistenceIndex = persistenceIndex;
         }
@@ -155,23 +155,23 @@ public class CleanUpService {
         @Override
         public Void call() {
             try {
-                final ListenableFuture<Void> future = cleanUpService.cleanUp(bucketIndex, persistenceIndex);
+                final ListenableFuture<Void> future = scheduledCleanUpService.cleanUp(bucketIndex, persistenceIndex);
                 Futures.addCallback(future, new FutureCallback<>() {
 
                     @Override
                     public void onSuccess(final Void aVoid) {
-                        cleanUpService.scheduleCleanUpTask();
+                        scheduledCleanUpService.scheduleCleanUpTask();
                     }
 
                     @Override
                     public void onFailure(final Throwable throwable) {
                         log.error("Exception during cleanup.", throwable);
-                        cleanUpService.scheduleCleanUpTask();
+                        scheduledCleanUpService.scheduleCleanUpTask();
                     }
                 }, MoreExecutors.directExecutor());
             } catch (final Exception e) {
                 log.error("Exception in clean up job ", e);
-                cleanUpService.scheduleCleanUpTask();
+                scheduledCleanUpService.scheduleCleanUpTask();
             }
             return null;
         }
