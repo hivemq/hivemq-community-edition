@@ -15,6 +15,7 @@
  */
 package com.hivemq.mqtt.message.pool;
 
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
@@ -66,7 +67,7 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
             if (circularTicker > MAX_MESSAGE_ID) {
                 circularTicker = 1;
             }
-            shiftedCircularTicker = shiftToSignedShort(circularTicker);
+            shiftedCircularTicker = encodeAsShort(circularTicker);
         } while (usedMessageIds.contains(shiftedCircularTicker));
 
         usedMessageIds.add(shiftedCircularTicker);
@@ -81,7 +82,7 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         checkArgument(id > MIN_MESSAGE_ID);
         checkArgument(id <= MAX_MESSAGE_ID);
 
-        final short shiftedId = shiftToSignedShort(id);
+        final short shiftedId = encodeAsShort(id);
 
         if (usedMessageIds.contains(shiftedId)) {
             return takeNextId();
@@ -105,7 +106,7 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         checkArgument(id > MIN_MESSAGE_ID, "MessageID must be larger than 0");
         checkArgument(id <= MAX_MESSAGE_ID, "MessageID must be smaller than 65536");
 
-        final boolean removed = usedMessageIds.remove(shiftToSignedShort(id));
+        final boolean removed = usedMessageIds.remove(encodeAsShort(id));
 
         if (!removed) {
             log.trace("Tried to return message id {} although it was already returned. This is could mean a DUP was acked", id);
@@ -126,13 +127,13 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         final List<Integer> idList = Ints.asList(ids);
         Collections.sort(idList);
         circularTicker = idList.get(idList.size() - 1);
-        idList.forEach(id -> usedMessageIds.add(shiftToSignedShort(id)));
+        idList.forEach(id -> usedMessageIds.add(encodeAsShort(id)));
     }
 
-    private static short shiftToSignedShort(final int intIdInUnsignedShortRange) {
+    private static short encodeAsShort(final int intIdInUnsignedShortRange) {
         // Don't assert using the min/max constants in case anyone ever decides to change them. :)
-        assert intIdInUnsignedShortRange >= 0 : "Outside unsigned short range: " + intIdInUnsignedShortRange;
-        assert intIdInUnsignedShortRange <= 65535 : "Outside unsigned short range: " + intIdInUnsignedShortRange;
-        return (short) (intIdInUnsignedShortRange + Short.MIN_VALUE);
+        Preconditions.checkArgument(intIdInUnsignedShortRange >= 0);
+        Preconditions.checkArgument(intIdInUnsignedShortRange <= 65535);
+        return (short) intIdInUnsignedShortRange;
     }
 }
