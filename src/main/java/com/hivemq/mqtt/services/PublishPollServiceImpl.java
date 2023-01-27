@@ -153,8 +153,8 @@ public class PublishPollServiceImpl implements PublishPollService {
             public void onSuccess(final ImmutableList<PUBLISH> publishes) {
                 // Return unused ID's
                 int usedIds = 0;
-                for (int i = 0; i < publishes.size(); i++) {
-                    if (publishes.get(i).getQoS() != QoS.AT_MOST_ONCE) {
+                for (final PUBLISH publish : publishes) {
+                    if (publish.getQoS() != QoS.AT_MOST_ONCE) {
                         usedIds++;
                     }
                 }
@@ -162,10 +162,12 @@ public class PublishPollServiceImpl implements PublishPollService {
                     messageIDPool.returnId(messageIds.get(i));
                 }
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
-                final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
-                for (int i = 0, publishesSize = publishes.size(); i < publishesSize; i++) {
-                    final PUBLISH publish = publishes.get(i);
-                    inFlightMessages.incrementAndGet();
+                final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
+                // Add all messages to the in-flight count before sending them out.
+                // Avoids polling messages again if the counter falls to 0 due to in-flight messages finishing
+                // concurrently while we're still sending others here.
+                inFlightMessageCount.addAndGet(publishes.size());
+                for (final PUBLISH publish : publishes) {
                     try {
                         final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
                         Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
@@ -178,7 +180,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         if (publish.getQoS().getQosNumber() > 0) {
                             removeMessageFromQueue(client, publish.getPacketIdentifier());
                         }
-                        inFlightMessages.decrementAndGet();
+                        inFlightMessageCount.decrementAndGet();
                         messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
                     }
                 }
@@ -208,11 +210,14 @@ public class PublishPollServiceImpl implements PublishPollService {
                     return;
                 }
 
-                final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(messages.size());
+                final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
+                // Add all messages to the in-flight count before sending them out.
+                // Avoids polling messages again if the counter falls to 0 due to in-flight messages finishing
+                // concurrently while we're still sending others here.
+                inFlightMessageCount.addAndGet(messages.size());
                 for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                     final MessageWithID message = messages.get(i);
-                    inFlightMessageCount.incrementAndGet();
                     final MessageIDPool messageIDPool = clientConnection.getMessageIDPool();
                     try {
                         final int packetId = messageIDPool.takeIfAvailable(message.getPacketIdentifier());
@@ -313,17 +318,20 @@ public class PublishPollServiceImpl implements PublishPollService {
                     return;
                 }
                 final MessageIDPool messageIDPool = clientConnection.getMessageIDPool();
-                final AtomicInteger inFlightMessages = inFlightMessageCount(channel);
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
-                for (int i = 0, publishesSize = publishes.size(); i < publishesSize; i++) {
-                    PUBLISH publish = publishes.get(i);
+                final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
+                // Add all messages to the in-flight count before sending them out.
+                // Avoids polling messages again if the counter falls to 0 due to in-flight messages finishing
+                // concurrently while we're still sending others here.
+                inFlightMessageCount.addAndGet(publishes.size());
+                for (final PUBLISH publish : publishes) {
+                    final PUBLISH publishToSend;
                     try {
-                        inFlightMessages.incrementAndGet();
                         if (publish.getOnwardQoS().getQosNumber() > 0 && qos == 0) {
                             // In case the messages gets downgraded to qos 0, it can be removed.
                             removeMessageFromSharedQueue(sharedSubscription, publish.getUniqueId());
                         }
-                        // We can't sent the qos when the message is queue, because we don't know the which client is will be sent
+                        // We can't send the qos when the message is queue, because we don't know the which client is will be sent
                         final QoS minQos = QoS.valueOf(Math.min(qos, publish.getOnwardQoS().getQosNumber()));
                         // There can only be one subscription ID for this message, because there are no overlapping shared subscriptions
                         final ImmutableIntArray subscriptionIdentifiers = subscriptionIdentifier != null ?
@@ -332,7 +340,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         if (checkNotNull(minQos).getQosNumber() > 0) {
                             packetId = messageIDPool.takeNextId();
                         }
-                        publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
+                        publishToSend = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
                                 .withPacketIdentifier(packetId)
                                 .withQoS(minQos)
                                 .withOnwardQos(minQos)
@@ -343,23 +351,23 @@ public class PublishPollServiceImpl implements PublishPollService {
                         // This should never happen if the limit for the poll message limit is set correctly
                         log.error("No message id available for client: " + client + ", shared subscription " + sharedSubscription, e);
                         messageDroppedService.queueFullShared(sharedSubscription, publish.getTopic(), publish.getQoS().getQosNumber());
-                        inFlightMessages.decrementAndGet();
+                        inFlightMessageCount.decrementAndGet();
                         return;
                     }
                     try {
                         final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
                         Futures.addCallback(publishFuture, new PublishStatusFutureCallback(payloadPersistence,
-                                PublishPollServiceImpl.this, true, sharedSubscription, publish, messageIDPool, channel, client), MoreExecutors.directExecutor());
-                        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, publishFuture, false, payloadPersistence);
+                                PublishPollServiceImpl.this, true, sharedSubscription, publishToSend, messageIDPool, channel, client), MoreExecutors.directExecutor());
+                        final PublishWithFuture publishWithFuture = new PublishWithFuture(publishToSend, publishFuture, false, payloadPersistence);
                         publishesToSend.add(publishWithFuture);
                     } catch (final PayloadPersistenceException e) {
                         // We don't prevent other messages form being published in case on reference is missing
-                        log.error("Payload reference error for publish on topic: " + publish.getTopic(), e);
-                        if (publish.getQoS().getQosNumber() > 0) {
-                            removeMessageFromSharedQueue(sharedSubscription, publish.getUniqueId());
+                        log.error("Payload reference error for publish on topic: " + publishToSend.getTopic(), e);
+                        if (publishToSend.getQoS().getQosNumber() > 0) {
+                            removeMessageFromSharedQueue(sharedSubscription, publishToSend.getUniqueId());
                         }
-                        inFlightMessages.decrementAndGet();
-                        messageDroppedService.failed(client, publish.getTopic(), publish.getQoS().getQosNumber());
+                        inFlightMessageCount.decrementAndGet();
+                        messageDroppedService.failed(client, publishToSend.getTopic(), publishToSend.getQoS().getQosNumber());
                     }
                 }
                 clientConnection.getPublishFlushHandler().sendPublishes(publishesToSend);
