@@ -217,7 +217,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                     try {
                         final int packetId = messageIDPool.takeIfAvailable(message.getPacketIdentifier());
                         if (message.getPacketIdentifier() != packetId) {
-                            // This should never happen but we need to make sure the packet ID is returned in case this is the result of a retry.
+                            // This should never happen, but we need to make sure the packet ID is returned in case this is the result of a retry.
                             messageIDPool.returnId(packetId);
                         }
                     } catch (final NoMessageIdAvailableException e) {
@@ -247,7 +247,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         }
                     } else if (message instanceof PUBREL) {
                         // We don't care if the message is delivered successfully here.
-                        // If the client disconnects before we receive a PUBCOMP we will retry anyways.
+                        // If the client disconnects before we receive a PUBCOMP we will retry anyway.
                         final SettableFuture<PublishStatus> settableFuture = SettableFuture.create();
                         channel.writeAndFlush(new PubrelWithFuture((PUBREL) message, settableFuture));
                         Futures.addCallback(settableFuture, new PubrelResendCallback(client, message, messageIDPool, channel), MoreExecutors.directExecutor());
@@ -329,7 +329,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         final ImmutableIntArray subscriptionIdentifiers = subscriptionIdentifier != null ?
                                 ImmutableIntArray.of(subscriptionIdentifier) : ImmutableIntArray.of();
                         int packetId = 0;
-                        if (minQos.getQosNumber() > 0) {
+                        if (checkNotNull(minQos).getQosNumber() > 0) {
                             packetId = messageIDPool.takeNextId();
                         }
                         publish = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)

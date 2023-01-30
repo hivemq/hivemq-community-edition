@@ -15,6 +15,7 @@
  */
 package com.hivemq.bootstrap;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
@@ -31,15 +32,15 @@ import static org.mockito.Mockito.when;
 
 public class ClientConnectionTest {
 
-    ClientConnection clientConnection;
-
-    final Channel channel = mock(Channel.class);
-    final ChannelPipeline pipeline = mock(ChannelPipeline.class);
-    final PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
+    private @NotNull Channel channel;
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() {
+        channel = mock(Channel.class);
+        final ChannelPipeline pipeline = mock(ChannelPipeline.class);
         when(channel.pipeline()).thenReturn(pipeline);
+        final PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
         clientConnection = new ClientConnection(channel, publishFlushHandler);
     }
 
