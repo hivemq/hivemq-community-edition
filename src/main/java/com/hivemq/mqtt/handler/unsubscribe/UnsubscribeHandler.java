@@ -41,18 +41,12 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
 
-/**
- * The Unsubscribe handler which is responsible for handling unsubscription of MQTT clients
- *
- * @author Florian Limpoeck
- * @author Dominik Obermaier
- */
 @Singleton
 @ChannelHandler.Sharable
 public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE> {
-
 
     private static final Logger log = LoggerFactory.getLogger(UnsubscribeHandler.class);
 
@@ -60,20 +54,21 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
 
     @Inject
-    public UnsubscribeHandler(final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
-                              final @NotNull SharedSubscriptionService sharedSubscriptionService) {
+    public UnsubscribeHandler(
+            final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
+            final @NotNull SharedSubscriptionService sharedSubscriptionService) {
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
         this.sharedSubscriptionService = sharedSubscriptionService;
     }
 
-
     @Override
-    protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final UNSUBSCRIBE msg) throws Exception {
-
+    protected void channelRead0(
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull UNSUBSCRIBE msg) throws Exception {
         SubscribeMessageBarrier.addToPipeline(ctx);
 
         final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final String clientId = clientConnection.getClientId();
+        final String clientId = checkNotNull(clientConnection.getClientId());
         final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
 
@@ -104,7 +99,8 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
                 for (final String topic : msg.getTopics()) {
                     final SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic);
                     if (sharedSubscription != null) {
-                        sharedSubscriptionService.invalidateSharedSubscriberCache(sharedSubscription.getShareName() + "/" + sharedSubscription.getTopicFilter());
+                        sharedSubscriptionService.invalidateSharedSubscriberCache(
+                                sharedSubscription.getShareName() + "/" + sharedSubscription.getTopicFilter());
                         sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
                     }
                 }

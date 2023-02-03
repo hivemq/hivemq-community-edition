@@ -51,105 +51,99 @@ import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertNotNull;
 
-/**
- * @author Florian Limpöck
- * @since 4.1.0
- */
-@SuppressWarnings("NullabilityAnnotations")
 public class ChannelDependenciesTest {
 
-    private ChannelDependencies channelDependencies;
+    @Mock
+    private @NotNull NoConnectIdleHandler noConnectIdleHandler;
 
     @Mock
-    private NoConnectIdleHandler noConnectIdleHandler;
+    private @NotNull ConnectHandler connectHandler;
 
     @Mock
-    private ConnectHandler connectHandler;
+    private @NotNull DisconnectHandler disconnectHandler;
 
     @Mock
-    private DisconnectHandler disconnectHandler;
+    private @NotNull SubscribeHandler subscribeHandler;
 
     @Mock
-    private SubscribeHandler subscribeHandler;
+    private @NotNull UnsubscribeHandler unsubscribeHandler;
 
     @Mock
-    private UnsubscribeHandler unsubscribeHandler;
+    private @NotNull ChannelGroup channelGroup;
 
     @Mock
-    private ChannelGroup channelGroup;
+    private @NotNull FullConfigurationService fullConfigurationService;
 
     @Mock
-    private FullConfigurationService fullConfigurationService;
+    private @NotNull GlobalTrafficShapingHandler globalTrafficShapingHandler;
 
     @Mock
-    private GlobalTrafficShapingHandler globalTrafficShapingHandler;
+    private @NotNull MetricsHolder metricsHolder;
 
     @Mock
-    private MetricsHolder metricsHolder;
+    private @NotNull ExceptionHandler exceptionHandler;
 
     @Mock
-    private ExceptionHandler exceptionHandler;
+    private @NotNull PingRequestHandler pingRequestHandler;
 
     @Mock
-    private PingRequestHandler pingRequestHandler;
+    private @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
 
     @Mock
-    private RestrictionsConfigurationService restrictionsConfigurationService;
+    private @NotNull MqttConnectDecoder mqttConnectDecoder;
 
     @Mock
-    private MqttConnectDecoder mqttConnectDecoder;
+    private @NotNull EncoderFactory encoderFactory;
 
     @Mock
-    private EncoderFactory encoderFactory;
+    private @NotNull EventLog eventLog;
 
     @Mock
-    private EventLog eventLog;
+    private @NotNull SslParameterHandler sslParameterHandler;
 
     @Mock
-    private SslParameterHandler sslParameterHandler;
+    private @NotNull MqttDecoders mqttDecoders;
 
     @Mock
-    private MqttDecoders mqttDecoders;
+    private @NotNull AuthHandler authHandler;
 
     @Mock
-    private AuthHandler authHandler;
+    private @NotNull PluginInitializerHandler pluginInitializerHandler;
 
     @Mock
-    private PluginInitializerHandler pluginInitializerHandler;
+    private @NotNull ClientLifecycleEventHandler clientLifecycleEventHandler;
 
     @Mock
-    private ClientLifecycleEventHandler clientLifecycleEventHandler;
+    private @NotNull AuthInProgressMessageHandler authInProgressMessageHandler;
 
     @Mock
-    private AuthInProgressMessageHandler authInProgressMessageHandler;
+    private @NotNull MessageExpiryHandler messageExpiryHandler;
 
     @Mock
-    private MessageExpiryHandler messageExpiryHandler;
+    private @NotNull IncomingPublishHandler incomingPublishHandler;
 
     @Mock
-    private IncomingPublishHandler incomingPublishHandler;
+    private @NotNull IncomingSubscribeHandler incomingSubscribeHandler;
 
     @Mock
-    private IncomingSubscribeHandler incomingSubscribeHandler;
+    private @NotNull ConnectionLimiterHandler connectionLimiterHandler;
 
     @Mock
-    private ConnectionLimiterHandler connectionLimiterHandler;
+    private @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Mock
-    private MqttServerDisconnector mqttServerDisconnector;
+    private @NotNull InterceptorHandler interceptorHandler;
 
     @Mock
-    private InterceptorHandler interceptorHandler;
+    private @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
 
     @Mock
-    private GlobalMQTTMessageCounter globalMQTTMessageCounter;
+    private @NotNull ShutdownHooks shutdownHooks;
 
-    @Mock
-    private ShutdownHooks shutdownHooks;
+    private @NotNull ChannelDependencies channelDependencies;
 
     @Before
     public void setUp() throws Exception {
-
         MockitoAnnotations.initMocks(this);
 
         channelDependencies = new ChannelDependencies(
@@ -185,8 +179,7 @@ public class ChannelDependenciesTest {
     }
 
     @Test
-    public void test_all_provided() {
-
+    public void getters_returnAllHandlers() {
         assertNotNull(channelDependencies.getNoConnectIdleHandler());
         assertNotNull(channelDependencies.getConnectHandler());
         assertNotNull(channelDependencies.getDisconnectHandler());
