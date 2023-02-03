@@ -50,10 +50,6 @@ import io.netty.handler.traffic.GlobalTrafficShapingHandler;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-/**
- * @author Christoph Schäbel
- * @author Dominik Obermaier
- */
 public class ChannelDependencies {
 
     private final @NotNull NoConnectIdleHandler noConnectIdleHandler;
