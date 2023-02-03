@@ -32,12 +32,14 @@ import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.Exceptions;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
 
@@ -47,6 +49,8 @@ import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl
  * @author Florian Limpoeck
  * @author Dominik Obermaier
  */
+@Singleton
+@ChannelHandler.Sharable
 public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE> {
 
 

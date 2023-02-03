@@ -61,7 +61,7 @@ public class ChannelDependencies {
     private final @NotNull ConnectionLimiterHandler connectionLimiterHandler;
     private final @NotNull DisconnectHandler disconnectHandler;
     private final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider;
-    private final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider;
+    private final @NotNull UnsubscribeHandler unsubscribeHandler;
     private final @NotNull ChannelGroup channelGroup;
     private final @NotNull FullConfigurationService fullConfigurationService;
     private final @NotNull GlobalTrafficShapingHandler globalTrafficShapingHandler;
@@ -94,7 +94,7 @@ public class ChannelDependencies {
             final @NotNull ConnectionLimiterHandler connectionLimiterHandler,
             final @NotNull DisconnectHandler disconnectHandler,
             final @NotNull Provider<SubscribeHandler> subscribeHandlerProvider,
-            final @NotNull Provider<UnsubscribeHandler> unsubscribeHandlerProvider,
+            final @NotNull UnsubscribeHandler unsubscribeHandler,
             final @NotNull ChannelGroup channelGroup,
             final @NotNull FullConfigurationService fullConfigurationService,
             final @NotNull GlobalTrafficShapingHandler globalTrafficShapingHandler,
@@ -124,7 +124,7 @@ public class ChannelDependencies {
         this.connectionLimiterHandler = connectionLimiterHandler;
         this.disconnectHandler = disconnectHandler;
         this.subscribeHandlerProvider = subscribeHandlerProvider;
-        this.unsubscribeHandlerProvider = unsubscribeHandlerProvider;
+        this.unsubscribeHandler = unsubscribeHandler;
         this.channelGroup = channelGroup;
         this.fullConfigurationService = fullConfigurationService;
         this.globalTrafficShapingHandler = globalTrafficShapingHandler;
@@ -177,7 +177,7 @@ public class ChannelDependencies {
 
     @NotNull
     public UnsubscribeHandler getUnsubscribeHandler() {
-        return unsubscribeHandlerProvider.get();
+        return unsubscribeHandler;
     }
 
     @NotNull
