@@ -158,7 +158,7 @@ public class ChannelDependenciesTest {
                 connectionLimiterHandler,
                 disconnectHandler,
                 () -> subscribeHandler,
-                () -> unsubscribeHandler,
+                unsubscribeHandler,
                 channelGroup,
                 fullConfigurationService,
                 globalTrafficShapingHandler,
