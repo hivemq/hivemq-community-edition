@@ -73,7 +73,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
         connacker.connackError(
                 ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
-                ReasonStrings.AUTH_FAILED,
+                output.getReasonString(),
                 output.getReasonCode(),
                 output.getReasonString(),
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
