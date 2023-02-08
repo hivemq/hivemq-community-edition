@@ -29,6 +29,7 @@ import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -47,18 +48,15 @@ public class SharedSubscriptionService {
     private static final int TOPIC_INDEX = 3;
 
     private final @NotNull LocalTopicTree topicTree;
-    private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence;
 
     private @Nullable Cache<String, ImmutableSet<SubscriberWithQoS>> sharedSubscriberCache;
     private @Nullable Cache<String, ImmutableSet<Topic>> sharedSubscriptionCache;
 
     @Inject
     public SharedSubscriptionService(
-            final @NotNull LocalTopicTree topicTree,
-            final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence) {
+            final @NotNull LocalTopicTree topicTree) {
 
         this.topicTree = topicTree;
-        this.subscriptionPersistence = subscriptionPersistence;
     }
 
     /**
@@ -156,12 +154,12 @@ public class SharedSubscriptionService {
      * @param client of which the subscriptions are requested.
      * @return a set of subscriptions
      */
-    public @NotNull ImmutableSet<Topic> getSharedSubscriptions(final @NotNull String client) throws ExecutionException {
+    public @NotNull ImmutableSet<Topic> getSharedSubscriptions(final @NotNull String client, final @NotNull Callable cacheUpdater) throws ExecutionException {
         //calling this method before post construct will return an empty set
         if (sharedSubscriptionCache == null) {
             return ImmutableSet.of();
         }
-        return sharedSubscriptionCache.get(client, () -> subscriptionPersistence.getSharedSubscriptions(client));
+        return sharedSubscriptionCache.get(client, cacheUpdater);
     }
 
     /**

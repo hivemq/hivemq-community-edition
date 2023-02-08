@@ -55,7 +55,7 @@ public class SharedSubscriptionServiceTest {
         InternalConfigurations.SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.set(1);
         InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.set(1);
 
-        service = new SharedSubscriptionService(topicTree, subscriptionPersistence);
+        service = new SharedSubscriptionService(topicTree);
     }
 
 
@@ -142,8 +142,8 @@ public class SharedSubscriptionServiceTest {
         final ImmutableSet<Topic> topics1 = ImmutableSet.of();
 
         when(subscriptionPersistence.getSharedSubscriptions("client")).thenReturn(topics1);
-        final ImmutableSet<Topic> topics2 = service.getSharedSubscriptions("client");
-        final ImmutableSet<Topic> topics3 = service.getSharedSubscriptions("client");
+        final ImmutableSet<Topic> topics2 = service.getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
+        final ImmutableSet<Topic> topics3 = service.getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
 
         verify(subscriptionPersistence, times(1)).getSharedSubscriptions("client");
         assertSame(topics1, topics2);
