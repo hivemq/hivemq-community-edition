@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.ModifiableSubscription;
 import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extensions.services.builder.PluginBuilderUtil;
-import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl;
+import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.util.Topics;
 
 /**
@@ -83,7 +83,7 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
             Preconditions.checkArgument(
                     configurationService.mqttConfiguration().sharedSubscriptionsEnabled(),
                     "Shared subscriptions not allowed");
-            final SharedSubscriptionServiceImpl.SharedSubscription sharedSubscription =
+            final SharedSubscriptionService.SharedSubscription sharedSubscription =
                     Topics.checkForSharedSubscription(topicFilter);
             if (sharedSubscription != null) {
                 Preconditions.checkArgument(

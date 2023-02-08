@@ -84,7 +84,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.*;
+import util.CollectUserEventsHandler;
+import util.DummyHandler;
+import util.TestConfigurationBootstrap;
+import util.TestMqttDecoder;
 
 import javax.inject.Provider;
 import java.util.Map;

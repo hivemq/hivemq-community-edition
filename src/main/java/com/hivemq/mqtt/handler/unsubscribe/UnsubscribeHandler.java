@@ -15,12 +15,12 @@
  */
 package com.hivemq.mqtt.handler.unsubscribe;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connect.SubscribeMessageBarrier;
@@ -30,7 +30,6 @@ import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
-import com.hivemq.persistence.util.FutureUtils;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,9 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
+import static com.hivemq.bootstrap.ClientConnection.CHANNEL_ATTRIBUTE_NAME;
 
 @Singleton
 @ChannelHandler.Sharable
@@ -67,70 +67,110 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
             final @NotNull UNSUBSCRIBE msg) throws Exception {
         SubscribeMessageBarrier.addToPipeline(ctx);
 
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ctx.channel().attr(CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = checkNotNull(clientConnection.getClientId());
-        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
-        final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
 
-        final Mqtt5UnsubAckReasonCode[] reasonCodes = new Mqtt5UnsubAckReasonCode[msg.getTopics().size()];
+        final UnsubscribeOperationCompletionCallback unsubscribeOperationCompletionCallback =
+                new UnsubscribeOperationCompletionCallback(
+                        ctx,
+                        sharedSubscriptionService,
+                        clientConnection.getProtocolVersion(),
+                        clientId,
+                        msg.getTopics(),
+                        msg.getPacketIdentifier());
 
-        final ListenableFuture<Void> future;
-        if (batch(msg)) {
-            future = clientSessionSubscriptionPersistence.removeSubscriptions(clientId, ImmutableSet.copyOf(msg.getTopics()));
-            for (int i = 0; i < msg.getTopics().size(); i++) {
-                reasonCodes[i] = Mqtt5UnsubAckReasonCode.SUCCESS;
+        if (msg.getTopics().size() == 1) { // Single unsubscribe.
+            final String topic = msg.getTopics().get(0);
+            final ListenableFuture<Void> future = clientSessionSubscriptionPersistence.remove(clientId, topic);
+
+            future.addListener(() -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("Unsubscribed from topic [{}] for client [{}]", topic, clientId);
+                }
+            }, MoreExecutors.directExecutor());
+
+            Futures.addCallback(future, unsubscribeOperationCompletionCallback, ctx.executor());
+
+            if (log.isTraceEnabled()) {
+                log.trace("Applied all unsubscriptions for client [{}]", clientId);
             }
-        } else {
-            for (int i = 0; i < msg.getTopics().size(); i++) {
-                final String topic = msg.getTopics().get(i);
-                builder.add(clientSessionSubscriptionPersistence.remove(clientId, topic));
-                reasonCodes[i] = Mqtt5UnsubAckReasonCode.SUCCESS;
+
+            return;
+        }
+
+        // Batch unsubscribe. The decoded UNSUBSCRIBE message is guaranteed to have at least one topic filter.
+        final ListenableFuture<Void> future = clientSessionSubscriptionPersistence.removeSubscriptions(clientId, ImmutableSet.copyOf(msg.getTopics()));
+
+        future.addListener(() -> msg.getTopics().forEach(topic -> {
+            if (log.isTraceEnabled()) {
                 log.trace("Unsubscribed from topic [{}] for client [{}]", topic, clientId);
             }
-            future = FutureUtils.voidFutureFromList(builder.build());
+        }), MoreExecutors.directExecutor());
+
+        Futures.addCallback(future, unsubscribeOperationCompletionCallback, ctx.executor());
+
+        if (log.isTraceEnabled()) {
+            log.trace("Applied all unsubscriptions for client [{}]", clientId);
         }
-        log.trace("Applied all unsubscriptions for client [{}]", clientId);
-
-
-        Futures.addCallback(future, new FutureCallback<>() {
-            @Override
-            public void onSuccess(@NotNull final Void aVoid) {
-
-                for (final String topic : msg.getTopics()) {
-                    final SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic);
-                    if (sharedSubscription != null) {
-                        sharedSubscriptionService.invalidateSharedSubscriberCache(
-                                sharedSubscription.getShareName() + "/" + sharedSubscription.getTopicFilter());
-                        sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
-                    }
-                }
-
-                if (ProtocolVersion.MQTTv5 == protocolVersion) {
-                    ctx.writeAndFlush(new UNSUBACK(msg.getPacketIdentifier(), reasonCodes));
-                } else {
-                    ctx.writeAndFlush(new UNSUBACK(msg.getPacketIdentifier()));
-                }
-            }
-
-            @Override
-            public void onFailure(@NotNull final Throwable throwable) {
-
-                //DON'T ACK for MQTT 3
-                if (ProtocolVersion.MQTTv5 == protocolVersion) {
-                    for (int i = 0; i < msg.getTopics().size(); i++) {
-                        reasonCodes[i] = Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR;
-                    }
-                    ctx.writeAndFlush(new UNSUBACK(msg.getPacketIdentifier(), reasonCodes));
-                }
-
-                Exceptions.rethrowError("Unable to unsubscribe client " + clientId + ".", throwable);
-            }
-        }, ctx.executor());
-
     }
 
-    @VisibleForTesting
-    boolean batch(@NotNull final UNSUBSCRIBE msg) {
-        return msg.getTopics().size() >= 2;
+    private static class UnsubscribeOperationCompletionCallback implements FutureCallback<Void> {
+
+        private final @NotNull ChannelHandlerContext ctx;
+        private final @NotNull SharedSubscriptionService sharedSubscriptionService;
+        private final @NotNull ProtocolVersion protocolVersion;
+        private final @NotNull String clientId;
+        private final @NotNull ImmutableList<String> topicFilters;
+        private final int packetIdentifier;
+
+        UnsubscribeOperationCompletionCallback(
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull SharedSubscriptionService sharedSubscriptionService,
+                final @NotNull ProtocolVersion protocolVersion,
+                final @NotNull String clientId,
+                final @NotNull ImmutableList<String> topicFilters,
+                final int packetIdentifier) {
+            this.ctx = ctx;
+            this.sharedSubscriptionService = sharedSubscriptionService;
+            this.protocolVersion = protocolVersion;
+            this.clientId = clientId;
+            this.topicFilters = topicFilters;
+            this.packetIdentifier = packetIdentifier;
+        }
+
+        @Override
+        public void onSuccess(final @NotNull Void aVoid) {
+            // We only need to invalidate the caches for the node at which the client is connected,
+            // since this node decides which client will receive messages for the shared subscriptions
+            for (final String topicFilter : topicFilters) {
+                final SharedSubscriptionService.SharedSubscription sharedSubscription =
+                        SharedSubscriptionService.checkForSharedSubscription(topicFilter);
+                if (sharedSubscription != null) {
+                    sharedSubscriptionService.invalidateSharedSubscriberCache(
+                            sharedSubscription.getShareName() + "/" + sharedSubscription.getTopicFilter());
+                    sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
+                }
+            }
+
+            if (ProtocolVersion.MQTTv5 == protocolVersion) {
+                final Mqtt5UnsubAckReasonCode[] reasonCodes = new Mqtt5UnsubAckReasonCode[topicFilters.size()];
+                Arrays.fill(reasonCodes, Mqtt5UnsubAckReasonCode.SUCCESS);
+                ctx.writeAndFlush(new UNSUBACK(packetIdentifier, reasonCodes));
+            } else {
+                ctx.writeAndFlush(new UNSUBACK(packetIdentifier));
+            }
+        }
+
+        @Override
+        public void onFailure(final @NotNull Throwable throwable) {
+            //DON'T ACK for MQTT 3
+            if (ProtocolVersion.MQTTv5 == protocolVersion) {
+                final Mqtt5UnsubAckReasonCode[] reasonCodes = new Mqtt5UnsubAckReasonCode[topicFilters.size()];
+                Arrays.fill(reasonCodes, Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR);
+                ctx.writeAndFlush(new UNSUBACK(packetIdentifier, reasonCodes));
+            }
+
+            Exceptions.rethrowError("Unable to unsubscribe client " + clientId + ".", throwable);
+        }
     }
 }

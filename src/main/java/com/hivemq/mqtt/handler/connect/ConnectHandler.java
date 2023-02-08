@@ -57,9 +57,11 @@ import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.connection.ConnectionPersistence;
-import com.hivemq.util.*;
+import com.hivemq.util.Bytes;
+import com.hivemq.util.Exceptions;
+import com.hivemq.util.ReasonStrings;
+import com.hivemq.util.Topics;
 import io.netty.channel.*;
-import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

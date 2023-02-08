@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
+import static com.hivemq.persistence.clientsession.SharedSubscriptionService.SharedSubscription;
 
 public final class DefaultPermissionsEvaluator {
 

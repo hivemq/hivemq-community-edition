@@ -34,13 +34,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -219,17 +217,5 @@ public class UnsubscribeHandlerTest {
         assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().get(2));
 
         verify(clientSessionSubscriptionPersistence).removeSubscriptions(eq("myTestClient"), any(ImmutableSet.class));
-    }
-
-    @Test
-    public void batch_forOneTopic_returnsFalse() {
-        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Collections.singletonList("topic1"), 1);
-        assertFalse(unsubscribeHandler.batch(unsubscribe));
-    }
-
-    @Test
-    public void batch_forAtLeastTwoTopics_returnsTrue() {
-        final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Arrays.asList("topic1", "topic2"), 1);
-        assertTrue(unsubscribeHandler.batch(unsubscribe));
     }
 }

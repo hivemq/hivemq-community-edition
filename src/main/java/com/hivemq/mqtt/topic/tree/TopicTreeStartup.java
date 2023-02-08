@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 import java.util.Set;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
-import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
+import static com.hivemq.persistence.clientsession.SharedSubscriptionService.SharedSubscription;
 
 /**
  * This class is responsible for adding all topic information to the topic tree on application startup.

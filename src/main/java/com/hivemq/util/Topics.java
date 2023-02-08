@@ -16,7 +16,8 @@
 package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.persistence.clientsession.SharedSubscriptionService.SharedSubscription;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
