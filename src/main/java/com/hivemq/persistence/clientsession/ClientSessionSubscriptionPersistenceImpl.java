@@ -116,7 +116,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
 
             final boolean subscriberExisted;
             //parse topic for shared flag
-            final SharedSubscriptionService.SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
             final ListenableFuture<Void> persistFuture;
             if (sharedSubscription == null) {
                 //not a shared subscription
@@ -198,7 +198,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             final long timestamp = System.currentTimeMillis();
 
             //parse topic for shared flag
-            final SharedSubscriptionService.SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic);
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(topic);
             if (sharedSubscription == null) {
                 //not a shared subscription
                 topicTree.removeSubscriber(client, topic, null);
@@ -233,7 +233,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
             final Set<TopicFilter> subscriptions = new HashSet<>();
             for (final Topic topic : topics) {
                 final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                        sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+                        SharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
                 if (sharedSubscription == null) {
                     subscriptions.add(new TopicFilter(topic.getTopic(), null));
                 } else {
@@ -280,7 +280,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         for (final Topic topic : topics) {
 
             //parse topic for shared flag
-            final SharedSubscriptionService.SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
             if (sharedSubscription == null) {
                 //not a shared subscription
                 subscriptions.add(new Subscription(topic, SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null));
@@ -373,7 +373,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         final ImmutableSet.Builder<TopicFilter> topicsToRemoveBuilder = new ImmutableSet.Builder<>();
 
         for (final String topic : topics) {
-            final SharedSubscriptionService.SharedSubscription sharedSubscription = sharedSubscriptionService.checkForSharedSubscription(topic);
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(topic);
             if (sharedSubscription == null) {
                 topicsToRemoveBuilder.add(new TopicFilter(topic, null));
             } else {
@@ -419,7 +419,7 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         final ImmutableSet<Topic> subscriptions = getSubscriptions(client);
         final ImmutableSet.Builder<Topic> sharedSubscriptions = ImmutableSet.builder();
         for (final Topic subscription : subscriptions) {
-            final boolean isSharedSubscription = sharedSubscriptionService.checkForSharedSubscription(subscription.getTopic()) != null;
+            final boolean isSharedSubscription = SharedSubscriptionService.checkForSharedSubscription(subscription.getTopic()) != null;
             if (isSharedSubscription) {
                 sharedSubscriptions.add(subscription);
             }

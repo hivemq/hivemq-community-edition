@@ -41,6 +41,7 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
+import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.payload.PayloadPersistenceException;
@@ -73,6 +74,7 @@ public class PublishPollServiceImpl implements PublishPollService {
     private final @NotNull MessageDroppedService messageDroppedService;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
     private final @NotNull SingleWriterService singleWriterService;
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
 
     @Inject
     public PublishPollServiceImpl(
@@ -81,13 +83,15 @@ public class PublishPollServiceImpl implements PublishPollService {
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SharedSubscriptionService sharedSubscriptionService,
-            final @NotNull SingleWriterService singleWriterService) {
+            final @NotNull SingleWriterService singleWriterService,
+            final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence) {
         this.clientQueuePersistence = clientQueuePersistence;
         this.connectionPersistence = connectionPersistence;
         this.payloadPersistence = payloadPersistence;
         this.messageDroppedService = messageDroppedService;
         this.sharedSubscriptionService = sharedSubscriptionService;
         this.singleWriterService = singleWriterService;
+        this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
     }
 
     @Override
@@ -104,7 +108,8 @@ public class PublishPollServiceImpl implements PublishPollService {
                 return;
             }
             try {
-                final ImmutableSet<Topic> topics = sharedSubscriptionService.getSharedSubscriptions(client);
+                final ImmutableSet<Topic> topics = sharedSubscriptionService.getSharedSubscriptions(client,
+                        () -> clientSessionSubscriptionPersistence.getSharedSubscriptions(client));
                 if (topics.isEmpty()) {
                     clientConnection.setNoSharedSubscription(true);
                     return;

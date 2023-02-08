@@ -115,10 +115,8 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_add_subscriptions_shared() throws Exception {
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 360));
 
-        final Topic topic1 = new Topic("topic1", QoS.AT_MOST_ONCE);
-        final Topic topic2 = new Topic("topic2", QoS.AT_MOST_ONCE);
-        when(sharedSubscriptionService.checkForSharedSubscription("topic1")).thenReturn(new SharedSubscriptionService.SharedSubscription("topic1", "group"));
-        when(sharedSubscriptionService.checkForSharedSubscription("topic2")).thenReturn(new SharedSubscriptionService.SharedSubscription("topic2", "group"));
+        final Topic topic1 = new Topic("$share/name/topic1", QoS.AT_MOST_ONCE);
+        final Topic topic2 = new Topic("$share/name/topic2", QoS.AT_MOST_ONCE);
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
         verify(topicTree, times(2)).addTopic(eq("client"), any(Topic.class), anyByte(), anyString());
         verify(localPersistence).addSubscriptions(eq("client"), any(ImmutableSet.class), anyLong(), anyInt());
@@ -192,9 +190,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     @Test(timeout = 60000)
     public void test_remove_shared_subscriptions() throws ExecutionException, InterruptedException {
 
-        when(sharedSubscriptionService.checkForSharedSubscription("$share/group/topic1")).thenReturn(new SharedSubscriptionService.SharedSubscription("topic1", "group"));
-        when(sharedSubscriptionService.checkForSharedSubscription("$share/group/topic2")).thenReturn(new SharedSubscriptionService.SharedSubscription("topic2", "group"));
-
         persistence.removeSubscriptions("client", ImmutableSet.of("$share/group/topic1", "$share/group/topic2")).get();
 
         verify(topicTree, times(2)).removeSubscriber(eq("client"), anyString(), anyString());
@@ -245,7 +240,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_addSubscription_shared() throws Exception {
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
-        when(sharedSubscriptionService.checkForSharedSubscription(anyString())).thenReturn(new SharedSubscriptionService.SharedSubscription("topic/1", "group1"));
 
         final Topic topicShared = new Topic("topic/1", QoS.AT_LEAST_ONCE);
 
@@ -260,7 +254,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_get_shared_subscription() throws ExecutionException, InterruptedException {
 
         when(localPersistence.getSubscriptions("client")).thenReturn(ImmutableSet.of(new Topic("$share/group/topic", QoS.AT_LEAST_ONCE)));
-        when(sharedSubscriptionService.checkForSharedSubscription("$share/group/topic")).thenReturn(new SharedSubscriptionService.SharedSubscription("topic", "group"));
 
         final ImmutableSet<Topic> subscriptions = persistence.getSharedSubscriptions("client");
         assertEquals(1, subscriptions.size());
@@ -271,8 +264,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_addSubscription_shared_qos2() throws Exception {
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
-        when(sharedSubscriptionService.checkForSharedSubscription(anyString())).thenReturn(
-                new SharedSubscriptionService.SharedSubscription("topic/1", "group1"));
 
         final Topic expectedTopicTree = new Topic("topic/1", QoS.AT_LEAST_ONCE);
         final Topic expectedLocal = new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE);

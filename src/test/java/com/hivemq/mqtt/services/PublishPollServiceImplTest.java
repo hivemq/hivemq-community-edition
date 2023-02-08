@@ -38,6 +38,7 @@ import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
+import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
@@ -86,6 +87,7 @@ public class PublishPollServiceImplTest {
         final MessageDroppedService messageDroppedService = mock(MessageDroppedService.class);
         sharedSubscriptionService = mock(SharedSubscriptionService.class);
         publishFlushHandler = mock(PublishFlushHandler.class);
+        final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock(ClientSessionSubscriptionPersistence.class);
 
         when(channel.pipeline()).thenReturn(pipeline);
 
@@ -107,7 +109,7 @@ public class PublishPollServiceImplTest {
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
 
         publishPollService = new PublishPollServiceImpl(clientQueuePersistence, connectionPersistence,
-                publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, singleWriterService);
+                publishPayloadPersistence, messageDroppedService, sharedSubscriptionService, singleWriterService, clientSessionSubscriptionPersistence);
     }
 
     @After
