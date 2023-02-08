@@ -20,7 +20,6 @@ import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl;
@@ -73,7 +72,6 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
         bind(ClientSessionPersistence.class).toProvider(ClientSessionPersistenceProvider.class).in(LazySingleton.class);
 
         /* Client Session Sub */
-        bind(SharedSubscriptionService.class).to(SharedSubscriptionServiceImpl.class).in(LazySingleton.class);
         bind(ClientSessionSubscriptionPersistence.class).toProvider(ClientSessionSubscriptionPersistenceProvider.class)
                 .in(LazySingleton.class);
 

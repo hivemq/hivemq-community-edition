@@ -35,7 +35,7 @@ import com.hivemq.persistence.AbstractPersistence;
 import com.hivemq.persistence.ProducerQueues;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientsession.ClientSession;
-import com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl;
+import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.payload.PayloadPersistenceException;
@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
 
 @LazySingleton
 public class ClientQueuePersistenceImpl extends AbstractPersistence implements ClientQueuePersistence {
@@ -282,8 +281,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         return singleWriter.submit(bucketIndex, (bucketIndex1) -> {
             final ImmutableSet<String> sharedQueues = localPersistence.cleanUp(bucketIndex1);
             for (final String sharedQueue : sharedQueues) {
-                final SharedSubscription sharedSubscription =
-                        SharedSubscriptionServiceImpl.splitTopicAndGroup(sharedQueue);
+                final SharedSubscriptionService.SharedSubscription sharedSubscription =
+                        SharedSubscriptionService.splitTopicAndGroup(sharedQueue);
                 final ImmutableSet<SubscriberWithQoS> sharedSubscriber =
                         topicTree.getSharedSubscriber(
                                 sharedSubscription.getShareName(),

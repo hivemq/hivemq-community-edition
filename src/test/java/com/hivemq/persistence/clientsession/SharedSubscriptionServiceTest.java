@@ -29,7 +29,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.ExecutionException;
 
-import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.splitTopicAndGroup;
+import static com.hivemq.persistence.clientsession.SharedSubscriptionService.splitTopicAndGroup;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -46,7 +46,7 @@ public class SharedSubscriptionServiceTest {
     @Mock
     ClientSessionSubscriptionPersistence subscriptionPersistence;
 
-    private SharedSubscriptionServiceImpl service;
+    private SharedSubscriptionService service;
 
     @Before
     public void setUp() throws Exception {
@@ -55,7 +55,7 @@ public class SharedSubscriptionServiceTest {
         InternalConfigurations.SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.set(1);
         InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.set(1);
 
-        service = new SharedSubscriptionServiceImpl(topicTree, subscriptionPersistence);
+        service = new SharedSubscriptionService(topicTree, subscriptionPersistence);
     }
 
 
@@ -67,7 +67,7 @@ public class SharedSubscriptionServiceTest {
         final String topic = "topic";
         final String subtopic = "/subtopic";
 
-        SharedSubscriptionServiceImpl.SharedSubscription sharedSubscription;
+        SharedSubscriptionService.SharedSubscription sharedSubscription;
 
         sharedSubscription = service.checkForSharedSubscription(share + oldDelimiter + group + oldDelimiter + topic + subtopic);
         assertNotNull(sharedSubscription);
@@ -106,15 +106,15 @@ public class SharedSubscriptionServiceTest {
 
     @Test
     public void test_split_shared_subscriptions() {
-        final SharedSubscriptionServiceImpl.SharedSubscription sharedSubscription1 = splitTopicAndGroup("group/topic/a");
+        final SharedSubscriptionService.SharedSubscription sharedSubscription1 = splitTopicAndGroup("group/topic/a");
         assertEquals("group", sharedSubscription1.getShareName());
         assertEquals("topic/a", sharedSubscription1.getTopicFilter());
 
-        final SharedSubscriptionServiceImpl.SharedSubscription sharedSubscription2 = splitTopicAndGroup("group/");
+        final SharedSubscriptionService.SharedSubscription sharedSubscription2 = splitTopicAndGroup("group/");
         assertEquals("group", sharedSubscription2.getShareName());
         assertEquals("", sharedSubscription2.getTopicFilter());
 
-        final SharedSubscriptionServiceImpl.SharedSubscription sharedSubscription3 = splitTopicAndGroup("group//a");
+        final SharedSubscriptionService.SharedSubscription sharedSubscription3 = splitTopicAndGroup("group//a");
         assertEquals("group", sharedSubscription3.getShareName());
         assertEquals("/a", sharedSubscription3.getTopicFilter());
     }

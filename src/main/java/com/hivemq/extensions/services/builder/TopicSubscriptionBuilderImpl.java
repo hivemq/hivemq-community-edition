@@ -33,7 +33,7 @@ import com.hivemq.util.Topics;
 
 import javax.inject.Inject;
 
-import static com.hivemq.persistence.clientsession.SharedSubscriptionServiceImpl.SharedSubscription;
+import static com.hivemq.persistence.clientsession.SharedSubscriptionService.SharedSubscription;
 
 /**
  * @author Florian Limpöck

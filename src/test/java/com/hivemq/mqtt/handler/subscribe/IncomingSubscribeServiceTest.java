@@ -40,7 +40,6 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -57,10 +56,7 @@ import java.util.HashSet;
 import java.util.Queue;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ALL")
