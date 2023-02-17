@@ -9,7 +9,7 @@
 image:https://maven-badges.herokuapp.com/maven-central/com.hivemq/hivemq-community-edition-embedded/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/com.hivemq/hivemq-community-edition-embedded"]
 image:https://jitpack.io/v/hivemq/hivemq-community-edition.svg["JitPack", link="https://jitpack.io/#hivemq/hivemq-community-edition"]
 image:https://javadoc.io/badge2/com.hivemq/hivemq-community-edition-embedded/javadoc.svg["javadoc", link=https://javadoc.io/doc/com.hivemq/hivemq-community-edition-embedded]
-image:https://img.shields.io/github/actions/workflow/status/hivemq/hivemq-community-edition/check.yml?branch=master[GitHub Workflow Status (with branch)]
+image:https://img.shields.io/github/actions/workflow/status/hivemq/hivemq-community-edition/check.yml?branch=master[GitHub Workflow Status (with branch), link=https://github.com/hivemq/hivemq-community-edition/actions/workflows/check.yml?query=branch%3Amaster]
 
 HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5.
 
