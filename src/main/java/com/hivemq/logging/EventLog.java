@@ -116,13 +116,13 @@ public class EventLog {
     /**
      * Log that a client has successfully connected to the broker.
      *
-     * @param channel of the client connection
+     * @param channel    of the client connection
+     * @param cleanStart if the connection was started clean
      */
-    public void clientConnected(@NotNull final Channel channel) {
+    public void clientConnected(final @NotNull Channel channel, final boolean cleanStart) {
         final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = clientConnection.getClientId();
         final String ip = clientConnection.getChannelIP().orElse(null);
-        final Boolean cleanStart = clientConnection.isCleanStart();
         final Long sessionExpiry = clientConnection.getClientSessionExpiryInterval();
 
         logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.",
