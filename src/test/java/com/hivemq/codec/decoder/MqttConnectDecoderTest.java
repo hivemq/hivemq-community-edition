@@ -28,6 +28,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.assertNotNull;
@@ -51,7 +52,7 @@ public class MqttConnectDecoderTest {
         mqttConnacker = mock(MqttConnacker.class);
         final HivemqId hiveMQId = new HivemqId();
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         decoder = new MqttConnectDecoder(mqttConnacker,
                 new TestConfigurationBootstrap().getFullConfigurationService(),

@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -36,10 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.REASON_STRING;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SERVER_REFERENCE;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SESSION_EXPIRY_INTERVAL;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 
 @LazySingleton
 public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
@@ -58,16 +55,17 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
     @Override
     public @Nullable DISCONNECT decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnectByInvalidFixedHeader(clientConnection, MessageType.DISCONNECT);
+            disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.DISCONNECT);
             return null;
         }
 
         //nothing more to read => normal disconnect
         if (!buf.isReadable()) {
-            return new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+            return new DISCONNECT(
+                    Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                     null,
                     Mqtt5UserProperties.NO_USER_PROPERTIES,
                     null,
@@ -76,20 +74,17 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
         final Mqtt5DisconnectReasonCode reasonCode = Mqtt5DisconnectReasonCode.fromCode(buf.readUnsignedByte());
         if (reasonCode == null) {
-            disconnectByInvalidReasonCode(clientConnection, MessageType.DISCONNECT);
+            disconnectByInvalidReasonCode(clientConnectionContext, MessageType.DISCONNECT);
             return null;
         }
 
         //nothing more to read => disconnect with reason code
         if (!buf.isReadable()) {
-            return new DISCONNECT(reasonCode,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES,
-                    null,
-                    SESSION_EXPIRY_NOT_SET);
+            return new DISCONNECT(
+                    reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES, null, SESSION_EXPIRY_NOT_SET);
         }
 
-        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnection, buf, MessageType.DISCONNECT);
+        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnectionContext, buf, MessageType.DISCONNECT);
         if (propertiesLength == DISCONNECTED) {
             return null;
         }
@@ -105,17 +100,14 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
             switch (propertyIdentifier) {
                 case SESSION_EXPIRY_INTERVAL:
-                    sessionExpiryInterval = decodeSessionExpiryInterval(clientConnection,
-                            buf,
-                            sessionExpiryInterval,
-                            SESSION_EXPIRY_NOT_SET,
-                            MessageType.DISCONNECT);
+                    sessionExpiryInterval =
+                            decodeSessionExpiryInterval(clientConnectionContext, buf, sessionExpiryInterval, SESSION_EXPIRY_NOT_SET, MessageType.DISCONNECT);
                     if (sessionExpiryInterval == DISCONNECTED) {
                         return null;
                     }
-                    final Long sessionExpiryIntervalFromChannel = clientConnection.getClientSessionExpiryInterval();
+                    final Long sessionExpiryIntervalFromChannel = clientConnectionContext.getClientSessionExpiryInterval();
                     if ((sessionExpiryInterval != 0) && (sessionExpiryIntervalFromChannel == 0)) {
-                        disconnector.disconnect(clientConnection.getChannel(),
+                        disconnector.disconnect(clientConnectionContext.getChannel(),
                                 "A client (IP: {}) sent a DISCONNECT with session expiry interval, but session expiry interval was set to zero at CONNECT. This is not allowed. Disconnecting client.",
                                 "DISCONNECT with session expiry interval, but session expiry interval was set to zero at CONNECT.",
                                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -125,9 +117,8 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
                     //it must not be greater than the configured maximum
                     if (sessionExpiryInterval > maxSessionExpiryInterval) {
                         if (log.isDebugEnabled()) {
-                            log.debug(
-                                    "A client (IP: {}) sent a DISCONNECT with a session expiry interval of ('{}'), which is larger than configured maximum of '{}'",
-                                    clientConnection.getChannelIP().orElse("UNKNOWN"),
+                            log.debug("A client (IP: {}) sent a DISCONNECT with a session expiry interval of ('{}'), which is larger than configured maximum of '{}'",
+                                    clientConnectionContext.getChannelIP().orElse("UNKNOWN"),
                                     sessionExpiryInterval,
                                     maxSessionExpiryInterval);
                         }
@@ -136,15 +127,14 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
                     break;
 
                 case SERVER_REFERENCE:
-                    serverReference =
-                            decodeServerReference(clientConnection, buf, serverReference, MessageType.DISCONNECT);
+                    serverReference = decodeServerReference(clientConnectionContext, buf, serverReference, MessageType.DISCONNECT);
                     if (serverReference == null) {
                         return null;
                     }
                     break;
 
                 case REASON_STRING:
-                    reasonString = decodeReasonString(clientConnection, buf, reasonString, MessageType.DISCONNECT);
+                    reasonString = decodeReasonString(clientConnectionContext, buf, reasonString, MessageType.DISCONNECT);
                     if (reasonString == null) {
                         return null;
                     }
@@ -152,20 +142,20 @@ public class Mqtt5DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
                 case USER_PROPERTY:
                     userPropertiesBuilder =
-                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.DISCONNECT);
+                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.DISCONNECT);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.DISCONNECT);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.DISCONNECT);
                     return null;
             }
         }
 
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if (invalidUserPropertiesLength(clientConnection, MessageType.DISCONNECT, userProperties)) {
+        if (invalidUserPropertiesLength(clientConnectionContext, MessageType.DISCONNECT, userProperties)) {
             return null;
         }
 

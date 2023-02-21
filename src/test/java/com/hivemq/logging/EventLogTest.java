@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
+import util.DummyClientConnection;
 import util.LogbackCapturingAppender;
 
 import java.net.InetSocketAddress;
@@ -72,7 +73,7 @@ public class EventLogTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setClientSessionExpiryInterval(sessionExpiry);
         clientConnection.setCleanStart(cleanStart);
         clientConnection.setClientId(clientId);

@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -52,34 +52,31 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
     @Override
     public @Nullable PUBCOMP decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnectByInvalidFixedHeader(clientConnection, MessageType.PUBCOMP);
+            disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBCOMP);
             return null;
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBCOMP);
+            disconnectByRemainingLengthToShort(clientConnectionContext, MessageType.PUBCOMP);
             return null;
         }
 
-        final int packetIdentifier = decodePacketIdentifier(clientConnection, buf, MessageType.PUBCOMP);
+        final int packetIdentifier = decodePacketIdentifier(clientConnectionContext, buf, MessageType.PUBCOMP);
         if (packetIdentifier == 0) {
             return null;
         }
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBCOMP(packetIdentifier,
-                    Mqtt5PUBCOMP.DEFAULT_REASON_CODE,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBCOMP(packetIdentifier, Mqtt5PUBCOMP.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubCompReasonCode reasonCode = Mqtt5PubCompReasonCode.fromCode(buf.readUnsignedByte());
         if (reasonCode == null) {
-            disconnectByInvalidReasonCode(clientConnection, MessageType.PUBCOMP);
+            disconnectByInvalidReasonCode(clientConnectionContext, MessageType.PUBCOMP);
             return null;
         }
 
@@ -87,7 +84,7 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
             return new PUBCOMP(packetIdentifier, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
-        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnection, buf, MessageType.PUBCOMP);
+        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnectionContext, buf, MessageType.PUBCOMP);
         if (propertiesLength == DISCONNECTED) {
             return null;
         }
@@ -100,28 +97,27 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
             switch (propertyIdentifier) {
                 case REASON_STRING:
-                    reasonString = decodeReasonString(clientConnection, buf, reasonString, MessageType.PUBCOMP);
+                    reasonString = decodeReasonString(clientConnectionContext, buf, reasonString, MessageType.PUBCOMP);
                     if (reasonString == null) {
                         return null;
                     }
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder =
-                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBCOMP);
+                    userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBCOMP);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.PUBCOMP);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.PUBCOMP);
                     return null;
             }
         }
 
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if (invalidUserPropertiesLength(clientConnection, MessageType.PUBCOMP, userProperties)) {
+        if (invalidUserPropertiesLength(clientConnectionContext, MessageType.PUBCOMP, userProperties)) {
             return null;
         }
 

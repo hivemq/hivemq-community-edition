@@ -58,7 +58,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.TestMessageUtil;
 
 import java.util.Collections;
@@ -99,17 +99,17 @@ public class PluginAuthenticatorServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final SecurityConfigurationServiceImpl securityConfig = new SecurityConfigurationServiceImpl();
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnection.setClientId("client");
         clientConnection.setClientReceiveMaximum(100);
 
-        channel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, Mockito.mock(MQTTMessageDecoder.class));
+        channel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, mock(MQTTMessageDecoder.class));
 
         when(channelHandlerContext.pipeline()).thenReturn(channel.pipeline());
         when(configurationService.securityConfiguration()).thenReturn(securityConfig);

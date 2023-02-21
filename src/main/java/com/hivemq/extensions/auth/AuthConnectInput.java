@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.auth;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthConnectInput;
@@ -44,9 +44,8 @@ public class AuthConnectInput extends ClientBasedInputImpl
     public AuthConnectInput(final @NotNull CONNECT connect, final @NotNull Channel channel) {
         super(connect.getClientIdentifier(), channel);
         this.connect = connect;
-        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .get()
-                .getConnectReceivedTimestamp(), System.currentTimeMillis());
+        this.connectTimestamp = Objects.requireNonNullElse(ClientConnectionContext.get(channel).getConnectReceivedTimestamp(),
+                System.currentTimeMillis());
     }
 
     @Override

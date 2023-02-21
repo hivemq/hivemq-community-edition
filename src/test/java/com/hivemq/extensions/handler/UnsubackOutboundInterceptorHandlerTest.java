@@ -52,6 +52,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
@@ -86,7 +87,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        final ClientConnection clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");

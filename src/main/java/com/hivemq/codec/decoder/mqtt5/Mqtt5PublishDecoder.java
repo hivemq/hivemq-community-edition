@@ -17,7 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttPublishDecoder;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
@@ -38,14 +38,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CONTENT_TYPE;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CORRELATION_DATA;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.MESSAGE_EXPIRY_INTERVAL;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.PAYLOAD_FORMAT_INDICATOR;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RESPONSE_TOPIC;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SUBSCRIPTION_IDENTIFIER;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.TOPIC_ALIAS;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 import static com.hivemq.mqtt.message.publish.PUBLISH.DEFAULT_NO_TOPIC_ALIAS;
 import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
 
@@ -73,24 +66,24 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
 
     @Override
     public @Nullable Mqtt5PUBLISH decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
-        final int qos = decodeQoS(clientConnection, header);
+        final int qos = decodeQoS(clientConnectionContext, header);
         if (qos == DISCONNECTED) {
             return null;
         }
 
-        final Boolean dup = decodeDup(clientConnection, header, qos);
+        final Boolean dup = decodeDup(clientConnectionContext, header, qos);
         if (dup == null) {
             return null;
         }
 
-        final Boolean retain = decodeRetain(clientConnection, header);
+        final Boolean retain = decodeRetain(clientConnectionContext, header);
         if (retain == null) {
             return null;
         }
 
-        String topicName = decodeUTF8Topic(clientConnection, buf, "topic", MessageType.PUBLISH);
+        String topicName = decodeUTF8Topic(clientConnectionContext, buf, "topic", MessageType.PUBLISH);
         if (topicName == null) {
             return null;
         }
@@ -98,7 +91,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         if (topicName.isEmpty()) {
             topicName = null;
         } else {
-            if (topicInvalid(clientConnection, topicName, MessageType.PUBLISH)) {
+            if (topicInvalid(clientConnectionContext, topicName, MessageType.PUBLISH)) {
                 return null;
             }
         }
@@ -106,10 +99,10 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         final int packetIdentifier;
         if (qos > 0) {
             if (buf.readableBytes() < 2) {
-                disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBLISH);
+                disconnectByRemainingLengthToShort(clientConnectionContext, MessageType.PUBLISH);
                 return null;
             }
-            packetIdentifier = decodePacketIdentifier(clientConnection, buf);
+            packetIdentifier = decodePacketIdentifier(clientConnectionContext, buf);
             if (packetIdentifier == 0) {
                 return null;
             }
@@ -117,13 +110,14 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
             packetIdentifier = 0;
         }
 
-        final Mqtt5Builder publishBuilder = readPublishPropertiesAndPayload(clientConnection, buf, topicName);
+        final Mqtt5Builder publishBuilder = readPublishPropertiesAndPayload(clientConnectionContext, buf, topicName);
 
         if (publishBuilder == null) {
             return null;
         }
 
-        return publishBuilder.withHivemqId(hiveMQId.get())
+        return publishBuilder
+                .withHivemqId(hiveMQId.get())
                 .withQoS(QoS.valueOf(qos))
                 .withOnwardQos(QoS.valueOf(qos))
                 .withRetain(retain)
@@ -133,13 +127,11 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
     }
 
     private Mqtt5Builder readPublishPropertiesAndPayload(
-            final @NotNull ClientConnection clientConnection,
-            final @NotNull ByteBuf buf,
-            final @Nullable String topicName) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final @Nullable String topicName) {
 
         final int propertiesLength = MqttVariableByteInteger.decode(buf);
 
-        if (propertiesLengthInvalid(clientConnection, buf, propertiesLength)) {
+        if (propertiesLengthInvalid(clientConnectionContext, buf, propertiesLength)) {
             return null;
         }
 
@@ -159,107 +151,94 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
 
             switch (propertyIdentifier) {
                 case MESSAGE_EXPIRY_INTERVAL:
-                    if (messageExpiryIntervalInvalid(clientConnection,
-                            buf,
-                            messageExpiryInterval,
-                            MessageType.PUBLISH)) {
+                    if (messageExpiryIntervalInvalid(clientConnectionContext, buf, messageExpiryInterval, MessageType.PUBLISH)) {
                         return null;
                     }
                     messageExpiryInterval = buf.readUnsignedInt();
                     break;
 
                 case PAYLOAD_FORMAT_INDICATOR:
-                    payloadFormatIndicator = readPayloadFormatIndicator(clientConnection,
-                            buf,
-                            payloadFormatIndicator,
-                            MessageType.PUBLISH);
+                    payloadFormatIndicator = readPayloadFormatIndicator(clientConnectionContext, buf, payloadFormatIndicator, MessageType.PUBLISH);
                     if (payloadFormatIndicator == null) {
                         return null;
                     }
                     break;
 
                 case CONTENT_TYPE:
-                    contentType = readContentType(clientConnection, buf, contentType, MessageType.PUBLISH);
+                    contentType = readContentType(clientConnectionContext, buf, contentType, MessageType.PUBLISH);
                     if (contentType == null) {
                         return null;
                     }
                     break;
 
                 case RESPONSE_TOPIC:
-                    responseTopic = readResponseTopic(clientConnection, buf, responseTopic, MessageType.PUBLISH);
+                    responseTopic = readResponseTopic(clientConnectionContext, buf, responseTopic, MessageType.PUBLISH);
                     if (responseTopic == null) {
                         return null;
                     }
                     break;
 
                 case CORRELATION_DATA:
-                    correlationData = readCorrelationData(clientConnection, buf, correlationData, MessageType.PUBLISH);
+                    correlationData = readCorrelationData(clientConnectionContext, buf, correlationData, MessageType.PUBLISH);
                     if (correlationData == null) {
                         return null;
                     }
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder =
-                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBLISH);
+                    userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBLISH);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 case TOPIC_ALIAS:
-                    if (topicAliasInvalid(clientConnection, buf, topicAlias)) {
+                    if (topicAliasInvalid(clientConnectionContext, buf, topicAlias)) {
                         return null;
                     }
                     topicAlias = buf.readUnsignedShort();
                     if (topicAlias == 0) {
-                        disconnector.disconnect(clientConnection.getChannel(),
+                        disconnector.disconnect(clientConnectionContext.getChannel(),
                                 "A client (IP: {}) sent a PUBLISH with topic alias = '0'. This is not allowed. Disconnecting client.",
-                                "Sent a PUBLISH with topic alias = '0'",
-                                Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                                "Sent a PUBLISH with topic alias = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                                 ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_ZERO);
                         return null;
                     }
                     break;
 
                 case SUBSCRIPTION_IDENTIFIER:
-                    disconnector.disconnect(clientConnection.getChannel(),
+                    disconnector.disconnect(clientConnectionContext.getChannel(),
                             "A client (IP: {}) sent a PUBLISH with subscription identifiers. This is not allowed. Disconnecting client.",
-                            "Sent PUBLISH with subscription identifiers",
-                            Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                            "Sent PUBLISH with subscription identifiers", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                             ReasonStrings.DISCONNECT_PROTOCOL_ERROR_PUBLISH_SUBSCRIPTION_IDENTIFIER);
                     return null;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.PUBLISH);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.PUBLISH);
                     return null;
             }
         }
 
         if (readPropertyLength != propertiesLength) {
-            disconnectByMalformedPropertyLength(clientConnection, MessageType.PUBLISH);
+            disconnectByMalformedPropertyLength(clientConnectionContext, MessageType.PUBLISH);
             return null;
         }
 
-        final Mqtt5Builder publishBuilder = readTopicFromAliasMapping(clientConnection, topicName, topicAlias);
+        final Mqtt5Builder publishBuilder = readTopicFromAliasMapping(clientConnectionContext, topicName, topicAlias);
         //return null if something failed. Client already disconnected.
         if (publishBuilder == null) {
             return null;
         }
 
 
-        final byte[] payload = decodePayload(clientConnection,
-                buf,
-                buf.readableBytes(),
-                payloadFormatIndicator,
-                validatePayloadFormat);
+        final byte[] payload = decodePayload(clientConnectionContext, buf, buf.readableBytes(), payloadFormatIndicator, validatePayloadFormat);
         //return null if something failed. Client already disconnected.
         if (payload == null) {
             return null;
         }
 
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if (invalidUserPropertiesLength(clientConnection, MessageType.PUBLISH, userProperties)) {
+        if (invalidUserPropertiesLength(clientConnectionContext, MessageType.PUBLISH, userProperties)) {
             return null;
         }
 
@@ -267,7 +246,8 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
             messageExpiryInterval = maxMessageExpiryInterval;
         }
 
-        return publishBuilder.withMessageExpiryInterval(messageExpiryInterval)
+        return publishBuilder
+                .withMessageExpiryInterval(messageExpiryInterval)
                 .withPayloadFormatIndicator(payloadFormatIndicator)
                 .withContentType(contentType)
                 .withResponseTopic(responseTopic)
@@ -277,27 +257,25 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
     }
 
     private @Nullable Mqtt5Builder readTopicFromAliasMapping(
-            final @NotNull ClientConnection clientConnection, @Nullable String topicName, final int topicAlias) {
+            final @NotNull ClientConnectionContext clientConnectionContext, @Nullable String topicName, final int topicAlias) {
 
         boolean isNewTopicAlias = false;
         if (topicAlias != DEFAULT_NO_TOPIC_ALIAS) {
 
-            final String[] topicAliasMapping = clientConnection.getTopicAliasMapping();
+            final String[] topicAliasMapping = clientConnectionContext.getTopicAliasMapping();
             if (topicAliasMapping == null || topicAlias > topicAliasMapping.length) {
-                disconnector.disconnect(clientConnection.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a PUBLISH with a too large topic alias. This is not allowed. Disconnecting client.",
-                        "Sent a PUBLISH with too large topic alias",
-                        Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                        "Sent a PUBLISH with too large topic alias", Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
                         ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_TOO_LARGE);
                 return null;
             }
             if (topicName == null) {
                 topicName = topicAliasMapping[topicAlias - 1];
                 if (topicName == null) {
-                    disconnector.disconnect(clientConnection.getChannel(),
+                    disconnector.disconnect(clientConnectionContext.getChannel(),
                             "A client (IP: {}) sent a PUBLISH with an unmapped topic alias. This is not allowed. Disconnecting client.",
-                            "Sent a PUBLISH with an unmapped topic alias",
-                            Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
+                            "Sent a PUBLISH with an unmapped topic alias", Mqtt5DisconnectReasonCode.TOPIC_ALIAS_INVALID,
                             ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_UNMAPPED);
                     return null;
                 }
@@ -310,7 +288,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
                 topicAliasLimiter.addUsage(topicName);
 
                 if (topicAliasLimiter.limitExceeded()) {
-                    disconnector.disconnect(clientConnection.getChannel(),
+                    disconnector.disconnect(clientConnectionContext.getChannel(),
                             "A client (IP: {}) sent a PUBLISH with a Topic Alias that exceeds the global memory hard limit. Disconnecting client.",
                             "Sent a PUBLISH with a Topic Alias that exceeds the global memory hard limit",
                             Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED,
@@ -321,10 +299,9 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
                 isNewTopicAlias = true;
             }
         } else if (topicName == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a PUBLISH with absent topic alias while topic name is zero length. This is not allowed. Disconnecting client.",
-                    "Sent a PUBLISH with absent topic alias while topic name is zero length",
-                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    "Sent a PUBLISH with absent topic alias while topic name is zero length", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_TOPIC_ALIAS_INVALID_ABSENT);
             return null;
         }
@@ -333,28 +310,28 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
     }
 
     private boolean topicAliasInvalid(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final int topicAlias) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final int topicAlias) {
 
         if (topicAlias != DEFAULT_NO_TOPIC_ALIAS) {
-            disconnectByMoreThanOnce(clientConnection, "topic alias", MessageType.PUBLISH);
+            disconnectByMoreThanOnce(clientConnectionContext, "topic alias", MessageType.PUBLISH);
             return true;
         }
         if (buf.readableBytes() < 2) {
-            disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBLISH);
+            disconnectByRemainingLengthToShort(clientConnectionContext, MessageType.PUBLISH);
             return true;
         }
         return false;
     }
 
     private boolean propertiesLengthInvalid(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final int propertyLength) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final int propertyLength) {
 
         if (propertyLength < 0) {
-            disconnectByMalformedPropertyLength(clientConnection, MessageType.PUBLISH);
+            disconnectByMalformedPropertyLength(clientConnectionContext, MessageType.PUBLISH);
             return true;
         }
         if (buf.readableBytes() < propertyLength) {
-            disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBLISH);
+            disconnectByRemainingLengthToShort(clientConnectionContext, MessageType.PUBLISH);
             return true;
         }
         return false;

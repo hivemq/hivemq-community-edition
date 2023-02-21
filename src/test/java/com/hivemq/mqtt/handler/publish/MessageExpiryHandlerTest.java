@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.LogbackCapturingAppender;
 import util.TestMessageUtil;
 
@@ -61,7 +62,7 @@ public class MessageExpiryHandlerTest {
         MockitoAnnotations.initMocks(this);
         final MessageExpiryHandler messageExpiryHandler = new MessageExpiryHandler();
         channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("ClientId");

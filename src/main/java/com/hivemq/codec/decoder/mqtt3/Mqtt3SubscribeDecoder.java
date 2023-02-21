@@ -17,7 +17,7 @@ package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -49,19 +49,19 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
     @Override
     public @Nullable SUBSCRIBE decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
-        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
+        if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             //Must match 0b0000_0010
             if ((header & 0b0000_1111) != 2) {
-                disconnectByInvalidFixedHeader(clientConnection, MessageType.SUBSCRIBE);
+                disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.SUBSCRIBE);
                 buf.clear();
                 return null;
             }
-        } else if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1) {
+        } else if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1) {
             //Must match 0b0000_0010 or 0b0000_0011
             if ((header & 0b0000_1111) > 3) {
-                disconnectByInvalidFixedHeader(clientConnection, MessageType.SUBSCRIBE);
+                disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.SUBSCRIBE);
                 buf.clear();
                 return null;
             }
@@ -71,13 +71,13 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (buf.readableBytes() >= 2) {
             messageId = buf.readUnsignedShort();
         } else {
-            disconnectByNoMessageId(clientConnection, MessageType.SUBSCRIBE);
+            disconnectByNoMessageId(clientConnectionContext, MessageType.SUBSCRIBE);
             buf.clear();
             return null;
         }
 
         if (messageId < 1) {
-            disconnectByNoMessageId(clientConnection, MessageType.SUBSCRIBE);
+            disconnectByNoMessageId(clientConnectionContext, MessageType.SUBSCRIBE);
             buf.clear();
             return null;
         }
@@ -85,7 +85,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         final ImmutableList.Builder<Topic> topics = new ImmutableList.Builder<>();
 
         if (!buf.isReadable()) {
-            disconnector.disconnect(clientConnection.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE which didn't contain any subscription. This is not allowed. Disconnecting client.",
                     "Sent SUBSCRIBE without any subscriptions",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -96,10 +96,9 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
-            if (isInvalidTopic(clientConnection, topic)) {
-                disconnector.disconnect(clientConnection.getChannel(),
-                        null,
-                        //already logged
+            if (isInvalidTopic(clientConnectionContext, topic)) {
+                disconnector.disconnect(clientConnectionContext.getChannel(),
+                        null, //already logged
                         "Sent SUBSCRIBE with an invalid topic filter",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                         ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
@@ -107,7 +106,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             }
 
             if (buf.readableBytes() == 0) {
-                disconnector.disconnect(clientConnection.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a SUBSCRIBE message without QoS. Disconnecting client.",
                         "Sent SUBSCRIBE without QoS",
                         Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -117,7 +116,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             }
             final int qos = buf.readByte();
             if (qos < 0 || qos > 2) {
-                disconnector.disconnect(clientConnection.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a SUBSCRIBE with an invalid qos '3'. This is not allowed. Disconnecting client.",
                         "Invalid SUBSCRIBE with invalid qos '3'",
                         Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,

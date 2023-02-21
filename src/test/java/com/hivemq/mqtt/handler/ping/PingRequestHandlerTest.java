@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +46,7 @@ public class PingRequestHandlerTest {
     public void test_pingreq() throws Exception {
 
         final EmbeddedChannel channel = new EmbeddedChannel(new PingRequestHandler());
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         channel.writeInbound(new PINGREQ());
 

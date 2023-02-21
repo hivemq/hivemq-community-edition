@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestChannelAttribute;
 
 import javax.net.ssl.SSLException;
@@ -60,7 +61,7 @@ public class SslExceptionHandlerTest {
         MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
 
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setClientId("client");
 
         when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(

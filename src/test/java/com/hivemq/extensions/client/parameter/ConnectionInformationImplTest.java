@@ -36,6 +36,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 
 import java.math.BigInteger;
 import java.security.Principal;
@@ -64,7 +65,7 @@ public class ConnectionInformationImplTest {
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 

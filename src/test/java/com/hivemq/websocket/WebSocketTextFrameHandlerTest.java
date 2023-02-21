@@ -15,12 +15,15 @@
  */
 package com.hivemq.websocket;
 
+import com.hivemq.bootstrap.UndefinedClientConnection;
+import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 public class WebSocketTextFrameHandlerTest {
 
@@ -30,11 +33,12 @@ public class WebSocketTextFrameHandlerTest {
     public void setUp() throws Exception {
         final WebSocketTextFrameHandler webSocketTextFrameHandler = new WebSocketTextFrameHandler();
         channel = new EmbeddedChannel(webSocketTextFrameHandler);
+        channel.attr(UndefinedClientConnection.CHANNEL_ATTRIBUTE_NAME)
+                .set(new UndefinedClientConnection(channel, mock(PublishFlushHandler.class)));
     }
 
     @Test
     public void test_disconnect_client() throws Exception {
-
         final TextWebSocketFrame frame = new TextWebSocketFrame();
         channel.writeInbound(frame);
         assertEquals(false, channel.isOpen());

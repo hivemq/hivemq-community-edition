@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.puback.PUBACK;
@@ -32,7 +32,9 @@ public class Mqtt3PubackEncoder implements MqttEncoder<PUBACK> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection, final @NotNull PUBACK msg, final @NotNull ByteBuf out) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull PUBACK msg,
+            final @NotNull ByteBuf out) {
 
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
@@ -46,7 +48,7 @@ public class Mqtt3PubackEncoder implements MqttEncoder<PUBACK> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PUBACK msg) {
+    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull PUBACK msg) {
         return ENCODED_PUBACK_SIZE;
     }
 }

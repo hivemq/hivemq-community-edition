@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 
 import java.util.Iterator;
@@ -80,7 +81,7 @@ public class LifecycleEventListenersImplTest {
 
             final Channel channelMock = mock(Channel.class);
             final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
-            final ClientConnection clientConnection = new ClientConnection(channelMock, publishFlushHandler);
+            final ClientConnection clientConnection = new DummyClientConnection(channelMock, publishFlushHandler);
             clientConnection.setClientId("client");
 
             when(channelMock.pipeline()).thenReturn(pipelineMock);

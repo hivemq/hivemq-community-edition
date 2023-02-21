@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestSingleWriterFactory;
 
 import java.util.concurrent.ExecutionException;
@@ -160,7 +161,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.close();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
 
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
@@ -178,7 +179,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_invalidate_caches_empty_subs() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
 
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
@@ -198,7 +199,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_invalidate_caches_success() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         when(connectionPersistence.get("client")).thenReturn(clientConnection);

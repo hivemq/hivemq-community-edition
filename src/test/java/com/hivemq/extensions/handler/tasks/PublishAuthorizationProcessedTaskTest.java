@@ -36,6 +36,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import util.DummyClientConnection;
 import util.DummyHandler;
 import util.TestMessageUtil;
 
@@ -62,7 +63,7 @@ public class PublishAuthorizationProcessedTaskTest {
         incomingPublishService = mock(IncomingPublishService.class);
 
         channel = new EmbeddedChannel(new DummyHandler());
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         final ChannelHandlerContext ctx = channel.pipeline().context(DummyHandler.class);
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic", QoS.AT_LEAST_ONCE);

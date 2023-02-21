@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
@@ -140,13 +141,13 @@ public class DisconnectInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final String clientId = clientConnection.getClientId();
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final String clientId = clientConnectionContext.getClientId();
         if (clientId == null) {
             return;
         }
 
-        final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
+        final ClientContextImpl clientContext = clientConnectionContext.getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(disconnect, promise);
             return;

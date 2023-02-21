@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
@@ -70,7 +71,7 @@ public class Mqtt31ConnectDecoderTest {
         MockitoAnnotations.initMocks(this);
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
 
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         clientConnection.setClientId("clientId");
         when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(

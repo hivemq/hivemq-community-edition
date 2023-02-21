@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
@@ -36,10 +36,7 @@ import io.netty.buffer.ByteBuf;
 import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_DATA;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_METHOD;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.REASON_STRING;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
 
 /**
  * Decoder for AUTH messages.
@@ -74,14 +71,14 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
 
     @Override
     public @Nullable AUTH decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
-        checkNotNull(clientConnection, "ClientConnection must not be null");
+        checkNotNull(clientConnectionContext, "ClientContext must not be null");
         checkNotNull(buf, "ByteBuf must not be null");
 
         // validate fixed header
         if (!validateHeader(header)) {
-            disconnectByInvalidFixedHeader(clientConnection, MessageType.AUTH);
+            disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.AUTH);
             return null;
         }
 
@@ -94,7 +91,7 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
         final Mqtt5AuthReasonCode code = Mqtt5AuthReasonCode.fromCode(buf.readUnsignedByte());
 
         if (code == null) {
-            disconnectByInvalidReasonCode(clientConnection, MessageType.AUTH);
+            disconnectByInvalidReasonCode(clientConnectionContext, MessageType.AUTH);
             return null;
         }
 
@@ -104,7 +101,7 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
             return AUTH.getSuccessAUTH();
         } else {
             // validate header remaining length
-            propertiesLength = decodePropertiesLengthNoPayload(clientConnection, buf, MessageType.AUTH);
+            propertiesLength = decodePropertiesLengthNoPayload(clientConnectionContext, buf, MessageType.AUTH);
             if (propertiesLength == DISCONNECTED) {
                 return null;
             }
@@ -122,45 +119,43 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
 
             switch (propertyIdentifier) {
                 case AUTHENTICATION_METHOD:
-                    authenticationMethod =
-                            decodeAuthenticationMethod(clientConnection, buf, authenticationMethod, MessageType.AUTH);
+                    authenticationMethod = decodeAuthenticationMethod(clientConnectionContext, buf, authenticationMethod, MessageType.AUTH);
                     if (authenticationMethod == null) {
                         return null;
                     }
                     break;
                 case AUTHENTICATION_DATA:
-                    authenticationData = readAuthenticationData(clientConnection, buf, authenticationData);
+                    authenticationData = readAuthenticationData(clientConnectionContext, buf, authenticationData);
                     if (authenticationData == null) {
                         return null;
                     }
                     break;
                 case REASON_STRING:
-                    reasonString = decodeReasonString(clientConnection, buf, reasonString, MessageType.AUTH);
+                    reasonString = decodeReasonString(clientConnectionContext, buf, reasonString, MessageType.AUTH);
                     if (reasonString == null) {
                         return null;
                     }
                     break;
                 case USER_PROPERTY:
-                    userPropertiesBuilder =
-                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.AUTH);
+                    userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.AUTH);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.AUTH);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.AUTH);
                     return null;
             }
         }
 
         if (authenticationMethod == null) {
-            disconnectByInvalidAuthMethod(clientConnection, MessageType.AUTH);
+            disconnectByInvalidAuthMethod(clientConnectionContext, MessageType.AUTH);
             return null;
         }
 
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
 
-        if (invalidUserPropertiesLength(clientConnection, MessageType.AUTH, userProperties)) {
+        if (invalidUserPropertiesLength(clientConnectionContext, MessageType.AUTH, userProperties)) {
             return null;
         }
 
@@ -170,23 +165,23 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
     /**
      * Read the authentication data.
      *
-     * @param clientConnection   the {@link ClientConnection} of the MQTT Client
-     * @param buf                the {@link ByteBuf} to decode
-     * @param authenticationData the {@link byte[]} authentication data
+     * @param clientConnectionContext the {@link ClientConnectionContext} of the MQTT Client
+     * @param buf                     the {@link ByteBuf} to decode
+     * @param authenticationData      the {@link byte[]} authentication data
      * @return decoded authentication data as byte array
      */
     private byte @Nullable [] readAuthenticationData(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             byte @Nullable [] authenticationData) {
 
         if (authenticationData != null) {
-            disconnectByMoreThanOnce(clientConnection, "auth data", MessageType.AUTH);
+            disconnectByMoreThanOnce(clientConnectionContext, "auth data", MessageType.AUTH);
             return null;
         }
         authenticationData = MqttBinaryData.decode(buf);
         if (authenticationData == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent an AUTH with a malformed authentication data. This is not allowed. Disconnecting client.",
                     "sent an AUTH with a malformed authentication data",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,

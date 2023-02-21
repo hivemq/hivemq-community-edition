@@ -31,6 +31,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.time.Duration;
 
@@ -57,7 +58,7 @@ public class PublishAuthorizerContextTest {
     public void before() {
         channel = new EmbeddedChannel();
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
+                .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
         when(ctx.channel()).thenReturn(channel);
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         resultFuture = SettableFuture.create();

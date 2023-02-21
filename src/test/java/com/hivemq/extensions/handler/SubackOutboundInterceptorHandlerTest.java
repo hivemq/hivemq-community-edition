@@ -51,6 +51,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
@@ -90,7 +91,7 @@ public class SubackOutboundInterceptorHandlerTest {
 
         channel = new EmbeddedChannel();
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
+                .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestResponseInformation(true);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -198,7 +199,7 @@ public class SubackOutboundInterceptorHandlerTest {
         assertTrue(isTriggered.get());
     }
 
-    @Test()
+    @Test
     public void test_set_too_many_reasonCodes() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());

@@ -25,6 +25,7 @@ import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 import util.encoder.TestMessageEncoder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -40,7 +41,7 @@ public class Mqtt3PublishEncoderTest {
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 

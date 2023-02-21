@@ -25,6 +25,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -47,12 +48,16 @@ public class MqttAuthSenderTest {
 
     @Test(expected = NullPointerException.class)
     public void test_send_auth_code_null() {
-        mqttAuthSender.sendAuth(new EmbeddedChannel(), null, null, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        mqttAuthSender.sendAuth(channel, null, null, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
     }
 
     @Test(expected = NullPointerException.class)
     public void test_send_auth_props_null() {
-        mqttAuthSender.sendAuth(new EmbeddedChannel(), null, Mqtt5AuthReasonCode.SUCCESS, null, "reason");
+        final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        mqttAuthSender.sendAuth(channel, null, Mqtt5AuthReasonCode.SUCCESS, null, "reason");
     }
 
     @Test(expected = NullPointerException.class)
@@ -67,6 +72,7 @@ public class MqttAuthSenderTest {
     @Test(expected = NullPointerException.class)
     public void test_send_auth_method_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().proposeClientState(ClientState.RE_AUTHENTICATING);
         mqttAuthSender.sendAuth(channel,
                 null,
@@ -78,7 +84,7 @@ public class MqttAuthSenderTest {
     @Test
     public void test_send_auth_success() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().proposeClientState(ClientState.RE_AUTHENTICATING);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthMethod("METHOD");
         final ChannelFuture future = mqttAuthSender.sendAuth(channel,

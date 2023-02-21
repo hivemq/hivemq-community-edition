@@ -25,6 +25,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestMqttDecoder;
 
 import static org.junit.Assert.assertFalse;
@@ -40,7 +41,7 @@ public class Mqtt3DisconnectDecoderTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
     }
 

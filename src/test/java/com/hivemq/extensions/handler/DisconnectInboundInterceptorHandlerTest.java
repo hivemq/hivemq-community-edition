@@ -48,6 +48,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
@@ -86,7 +87,7 @@ public class DisconnectInboundInterceptorHandlerTest {
 
         channel = new EmbeddedChannel();
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
+                .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestResponseInformation(true);

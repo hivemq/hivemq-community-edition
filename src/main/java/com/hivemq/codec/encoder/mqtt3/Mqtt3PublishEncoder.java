@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.publish.Mqtt3PUBLISH;
 import com.hivemq.util.Strings;
@@ -31,7 +31,7 @@ public class Mqtt3PublishEncoder extends AbstractVariableHeaderLengthEncoder<Mqt
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull Mqtt3PUBLISH msg,
             final @NotNull ByteBuf out) {
 

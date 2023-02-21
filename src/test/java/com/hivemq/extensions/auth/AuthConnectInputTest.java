@@ -22,6 +22,7 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -41,7 +42,7 @@ public class AuthConnectInputTest {
     public void setUp() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setConnectReceivedTimestamp(12345L);

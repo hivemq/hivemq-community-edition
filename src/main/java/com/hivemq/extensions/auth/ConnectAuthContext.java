@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.auth;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl;
 import com.hivemq.mqtt.handler.auth.MqttAuthSender;
@@ -62,16 +62,16 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     @Override
     void succeedAuthentication(final @NotNull ConnectAuthOutput output) {
         super.succeedAuthentication(output);
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        clientConnection.setAuthData(output.getAuthenticationData());
-        clientConnection.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties()
-                .asInternalList()));
-        connectHandler.connectSuccessfulAuthenticated(ctx, clientConnection, connect, output.getClientSettings());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        clientConnectionContext.setAuthData(output.getAuthenticationData());
+        clientConnectionContext.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()));
+        connectHandler.connectSuccessfulAuthenticated(ctx, clientConnectionContext, connect, output.getClientSettings());
     }
 
     @Override
     void failAuthentication(final @NotNull ConnectAuthOutput output) {
-        connacker.connackError(ctx.channel(),
+        connacker.connackError(
+                ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                 output.getReasonString(),
                 output.getReasonCode(),
@@ -83,10 +83,11 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     @Override
     void undecidedAuthentication(final @NotNull ConnectAuthOutput output) {
         if (initial) {
-            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-            connectHandler.connectSuccessfulUndecided(ctx, clientConnection, connect, output.getClientSettings());
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+            connectHandler.connectSuccessfulUndecided(ctx, clientConnectionContext, connect, output.getClientSettings());
         } else {
-            connacker.connackError(ctx.channel(),
+            connacker.connackError(
+                    ctx.channel(),
                     PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                     ReasonStrings.AUTH_FAILED_NO_AUTHENTICATOR,
                     Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
@@ -98,7 +99,8 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
 
     @Override
     void onTimeout() {
-        connacker.connackError(ctx.channel(),
+        connacker.connackError(
+                ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                 ReasonStrings.AUTH_FAILED_CLIENT_TIMEOUT,
                 Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
@@ -109,7 +111,8 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
 
     @Override
     void onSendException(final @NotNull Throwable cause) {
-        connacker.connackError(ctx.channel(),
+        connacker.connackError(
+                ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                 ReasonStrings.AUTH_FAILED_SEND_EXCEPTION,
                 Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,

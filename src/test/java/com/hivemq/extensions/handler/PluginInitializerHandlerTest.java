@@ -45,17 +45,14 @@ import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelPromise;
+import io.netty.channel.*;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
@@ -64,18 +61,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @since 4.0.0
@@ -109,7 +98,7 @@ public class PluginInitializerHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection = new DummyClientConnection(channel, publishFlushHandler);
         clientConnection.setConnectMessage(mock(CONNECT.class));
         clientConnection.setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
@@ -276,11 +265,13 @@ public class PluginInitializerHandlerTest {
         final IsolatedExtensionClassloader cl1 =
                 IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{
                         InitializersImplTest.TestClientInitializerOne.class,
-                        InitializersImplTest.TestClientInitializerTwo.class});
+                        InitializersImplTest.TestClientInitializerTwo.class
+                });
         final IsolatedExtensionClassloader cl2 =
                 IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{
                         InitializersImplTest.TestClientInitializerOne.class,
-                        InitializersImplTest.TestClientInitializerTwo.class});
+                        InitializersImplTest.TestClientInitializerTwo.class
+                });
 
         final TreeMap<String, ClientInitializer> clientInitializerTreeMap = new TreeMap<>();
         clientInitializerTreeMap.put("extension1",
