@@ -163,7 +163,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     public void authorizeWillPublish(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
 
-        final String clientId = ClientConnection.of(ctx.channel()).getClientId();
+        final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
         if (clientId == null || !ctx.channel().isActive()) {
             //no more processing needed, client is already disconnected
             return;
@@ -292,11 +292,11 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
     }
 
     private @NotNull ClientAuthorizers getClientAuthorizers(final @NotNull ChannelHandlerContext ctx) {
-        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
-        if (clientConnection.getExtensionClientAuthorizers() == null) {
-            clientConnection.setExtensionClientAuthorizers(new ClientAuthorizersImpl(extensionPriorityComparator));
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
+        if (clientConnectionContext.getExtensionClientAuthorizers() == null) {
+            clientConnectionContext.setExtensionClientAuthorizers(new ClientAuthorizersImpl(extensionPriorityComparator));
         }
-        return clientConnection.getExtensionClientAuthorizers();
+        return clientConnectionContext.getExtensionClientAuthorizers();
     }
 
     private void disconnectWithReasonCode(

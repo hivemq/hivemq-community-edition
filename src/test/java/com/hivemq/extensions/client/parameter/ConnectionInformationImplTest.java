@@ -17,8 +17,8 @@
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.Lists;
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.configuration.service.entity.*;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientTlsInformation;
@@ -33,7 +33,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import util.DummyClientConnection;
 
 import java.math.BigInteger;
 import java.security.Principal;
@@ -52,14 +51,16 @@ import static org.mockito.Mockito.when;
  */
 public class ConnectionInformationImplTest {
 
-    private @NotNull ClientConnection clientConnection;
     private @NotNull EmbeddedChannel channel;
+    private @NotNull ClientConnectionContext clientConnectionContext;
 
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
-        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
-        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        clientConnectionContext = new UndefinedClientConnection(channel,
+                mock(PublishFlushHandler.class),
+                mock(com.hivemq.configuration.service.entity.Listener.class));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnectionContext);
     }
 
     @Test(expected = NullPointerException.class)
@@ -70,47 +71,46 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_mqtt_v31() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
         assertEquals(MqttVersion.V_3_1, connectionInformation.getMqttVersion());
     }
 
     @Test
     public void test_mqtt_v311() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
         assertEquals(MqttVersion.V_3_1_1, connectionInformation.getMqttVersion());
     }
 
     @Test
     public void test_mqtt_v5() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
         assertEquals(MqttVersion.V_5, connectionInformation.getMqttVersion());
     }
 
     @Test(expected = NullPointerException.class)
     public void test_mqtt_version_not_set() {
-        new ConnectionInformationImpl(clientConnection);
+        new ConnectionInformationImpl(clientConnectionContext);
     }
 
     @Test
     public void test_minimum_information() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         assertEquals(MqttVersion.V_5, connectionInformation.getMqttVersion());
         assertNotNull(connectionInformation.getConnectionAttributeStore());
         assertEquals(Optional.empty(), connectionInformation.getInetAddress());
-        assertEquals(Optional.empty(), connectionInformation.getListener());
+        assertTrue(connectionInformation.getListener().isPresent());
         assertEquals(Optional.empty(), connectionInformation.getProxyInformation());
-        assertEquals(Optional.empty(), connectionInformation.getListener());
     }
 
     @Test
     public void test_inet_address() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         assertEquals(Optional.empty(), connectionInformation.getInetAddress());
@@ -118,10 +118,16 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_tcp_listener() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setConnectedListener(new TcpListener(1337, "127.0.0.1", "test"));
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final TcpListener tcpListener = new TcpListener(1337, "127.0.0.1", "test");
+
+        clientConnectionContext = new UndefinedClientConnection(channel,
+                mock(PublishFlushHandler.class),
+                tcpListener);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnectionContext);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<Listener> listener = connectionInformation.getListener();
@@ -136,14 +142,17 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_tls_tcp_listener() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setConnectedListener(new TlsTcpListener(
-                1337,
-                "127.0.0.1",
-                createDefaultTls().build(),
-                "test"));
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final TlsTcpListener tcpListener = new TlsTcpListener(1337, "127.0.0.1",
+                createDefaultTls().build(), "tls-test");
+
+        clientConnectionContext = new UndefinedClientConnection(channel,
+                mock(PublishFlushHandler.class),
+                tcpListener);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnectionContext);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<Listener> listener = connectionInformation.getListener();
@@ -158,12 +167,19 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_websocket_listener() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setConnectedListener(new WebsocketListener.Builder().port(1337)
-                .bindAddress("127.0.0.1")
-                .build());
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final WebsocketListener websocketListener = new WebsocketListener.Builder()
+                .port(1337)
+                .bindAddress("127.0.0.1")
+                .build();
+
+        clientConnectionContext = new UndefinedClientConnection(channel,
+                mock(PublishFlushHandler.class),
+                websocketListener);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnectionContext);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<Listener> listener = connectionInformation.getListener();
@@ -178,13 +194,20 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_tls_websocket_listener() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setConnectedListener(new TlsWebsocketListener.Builder().port(1337)
+
+        final TlsWebsocketListener websocketListener = new TlsWebsocketListener.Builder()
+                .port(1337)
                 .bindAddress("127.0.0.1")
                 .tls(createDefaultTls().build())
-                .build());
+                .build();
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        clientConnectionContext = new UndefinedClientConnection(channel,
+                mock(PublishFlushHandler.class),
+                websocketListener);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnectionContext);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<Listener> listener = connectionInformation.getListener();
@@ -199,13 +222,13 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_full_tls_information() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setAuthCipherSuite("cipher");
-        clientConnection.setAuthProtocol("1.3");
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnectionContext.setAuthCipherSuite("cipher");
+        clientConnectionContext.setAuthProtocol("1.3");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
-        clientConnection.setAuthCertificate(clientCertificate);
+        clientConnectionContext.setAuthCertificate(clientCertificate);
 
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
@@ -217,7 +240,7 @@ public class ConnectionInformationImplTest {
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<TlsInformation> tlsInformation = connectionInformation.getTlsInformation();
@@ -231,14 +254,14 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_full_client_tls_information() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setAuthCipherSuite("cipher");
-        clientConnection.setAuthSniHostname("sni-hostname");
-        clientConnection.setAuthProtocol("1.3");
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnectionContext.setAuthCipherSuite("cipher");
+        clientConnectionContext.setAuthSniHostname("sni-hostname");
+        clientConnectionContext.setAuthProtocol("1.3");
 
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
 
-        clientConnection.setAuthCertificate(clientCertificate);
+        clientConnectionContext.setAuthCertificate(clientCertificate);
 
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
@@ -250,7 +273,7 @@ public class ConnectionInformationImplTest {
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<ClientTlsInformation> tlsInformation = connectionInformation.getClientTlsInformation();
@@ -271,12 +294,12 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_cipher_protocol_only_client_tls_information() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
 
-        clientConnection.setAuthCipherSuite("random-ecdsa-cipher");
-        clientConnection.setAuthProtocol("1.3");
+        clientConnectionContext.setAuthCipherSuite("random-ecdsa-cipher");
+        clientConnectionContext.setAuthProtocol("1.3");
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<ClientTlsInformation> tlsInformation = connectionInformation.getClientTlsInformation();
@@ -293,12 +316,12 @@ public class ConnectionInformationImplTest {
 
     @Test
     public void test_cipher_protocol_only_tls_information() {
-        clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
 
-        clientConnection.setAuthCipherSuite("random-ecdsa-cipher");
-        clientConnection.setAuthProtocol("1.3");
+        clientConnectionContext.setAuthCipherSuite("random-ecdsa-cipher");
+        clientConnectionContext.setAuthProtocol("1.3");
 
-        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnection);
+        final ConnectionInformationImpl connectionInformation = new ConnectionInformationImpl(clientConnectionContext);
 
         // testing real values with integration test
         final Optional<TlsInformation> tlsInformation = connectionInformation.getTlsInformation();

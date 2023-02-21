@@ -111,21 +111,19 @@ public interface ClientConnectionContext {
 
     void setMaxPacketSizeSend(@NotNull Long maximumPacketSize);
 
-    @Nullable Listener getConnectedListener();
-
-    void setConnectedListener(@NotNull Listener listener);
+    @NotNull Listener getConnectedListener();
 
     @Nullable Integer getClientReceiveMaximum();
 
-    void setClientReceiveMaximum(@NotNull Integer clientReceiveMaximum);
-
     @Nullable Long getQueueSizeMaximum();
 
-    void setQueueSizeMaximum(@NotNull Long queueSizeMaximum);
+    void setClientReceiveMaximum(@NotNull Integer clientReceiveMaximum);
+
+    void setQueueSizeMaximum(@Nullable Long queueSizeMaximum);
 
     @Nullable ScheduledFuture<?> getAuthFuture();
 
-    void setAuthFuture(@NotNull ScheduledFuture<?> authFuture);
+    void setAuthFuture(@Nullable ScheduledFuture<?> authFuture);
 
     void setDisconnectFuture(@NotNull SettableFuture<Void> disconnectFuture);
 
@@ -135,9 +133,9 @@ public interface ClientConnectionContext {
 
     @Nullable Boolean getRequestProblemInformation();
 
-    void setRequestProblemInformation(Boolean problemInformationRequested);
+    void setRequestProblemInformation(boolean problemInformationRequested);
 
-    void setConnectMessage(@NotNull CONNECT msg);
+    void setConnectMessage(@Nullable CONNECT msg);
 
     @NotNull String @Nullable [] getTopicAliasMapping();
 
@@ -149,6 +147,8 @@ public interface ClientConnectionContext {
 
     @Nullable Mqtt5UserProperties getAuthUserProperties();
 
+    void setAuthUserProperties(@Nullable Mqtt5UserProperties mqtt5UserProperties);
+
     @Nullable ByteBuffer getAuthData();
 
     void setSendWill(boolean sendWill);
@@ -159,11 +159,9 @@ public interface ClientConnectionContext {
 
     @Nullable CONNECT getAuthConnect();
 
-    void setAuthConnect(@NotNull CONNECT connect);
+    void setAuthConnect(@Nullable CONNECT connect);
 
     void setAuthData(@Nullable ByteBuffer authenticationData);
-
-    void setAuthUserProperties(@NotNull Mqtt5UserProperties mqtt5UserProperties);
 
     @Nullable String getAuthCipherSuite();
 
