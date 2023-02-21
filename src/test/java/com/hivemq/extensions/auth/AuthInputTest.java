@@ -27,6 +27,7 @@ import com.hivemq.util.Bytes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -53,7 +54,7 @@ public class AuthInputTest {
     public void setUp() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 

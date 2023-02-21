@@ -24,6 +24,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -654,7 +655,7 @@ public class NonSslHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         disconnector = new MqttServerDisconnectorImpl(new EventLog());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
     }

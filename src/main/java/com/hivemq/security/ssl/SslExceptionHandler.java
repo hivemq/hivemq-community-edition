@@ -17,6 +17,7 @@ package com.hivemq.security.ssl;
 
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -74,13 +75,12 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
         ctx.fireExceptionCaught(cause);
     }
 
-
-    private void logSSLException(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
+    private static void logSSLException(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
         if (log.isDebugEnabled()) {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);
 
-            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+            final ClientConnectionContext clientConnection = ClientConnectionContext.get(ctx.channel());
             final String clientId = clientConnection.getClientId();
             if (clientId != null) {
                 log.debug("SSL message transmission for client {} failed: {}", clientId, rootCause.getMessage());
@@ -93,7 +93,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
         }
     }
 
-    private void logSSLHandshakeException(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
+    private static void logSSLHandshakeException(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
         if (log.isDebugEnabled()) {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);

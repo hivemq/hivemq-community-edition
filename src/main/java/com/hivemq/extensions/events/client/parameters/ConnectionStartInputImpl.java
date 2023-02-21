@@ -17,7 +17,7 @@ package com.hivemq.extensions.events.client.parameters;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
@@ -36,8 +36,7 @@ import java.util.Objects;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class ConnectionStartInputImpl
-        implements ConnectionStartInput, PluginTaskInput, Supplier<ConnectionStartInputImpl> {
+public class ConnectionStartInputImpl implements ConnectionStartInput, PluginTaskInput, Supplier<ConnectionStartInputImpl> {
 
     private final @NotNull CONNECT connect;
     private final @NotNull ClientInformation clientInformation;
@@ -50,11 +49,9 @@ public class ConnectionStartInputImpl
         Preconditions.checkNotNull(channel, "channel must never be null");
         this.connect = connect;
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation =
-                ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
-        this.connectTimestamp = Objects.requireNonNullElse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .get()
-                .getConnectReceivedTimestamp(), System.currentTimeMillis());
+        this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
+        this.connectTimestamp = Objects.requireNonNullElse(ClientConnectionContext.get(channel).getConnectReceivedTimestamp(),
+                System.currentTimeMillis());
     }
 
     @Override

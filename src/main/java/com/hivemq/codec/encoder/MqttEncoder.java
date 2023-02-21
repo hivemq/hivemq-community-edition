@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.encoder;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
@@ -32,19 +32,19 @@ public interface MqttEncoder<T extends Message> {
      * Encode a mqtt message into a {@link ByteBuf}. This method will be called for each written message that can be
      * handled by this encoder.
      *
-     * @param clientConnection the {@link ClientConnection} of the client
-     * @param msg              the message to encode
-     * @param out              the {@link ByteBuf} into which the encoded message will be written
+     * @param clientConnectionContext the {@link ClientConnectionContext} of the client
+     * @param msg                     the message to encode
+     * @param out                     the {@link ByteBuf} into which the encoded message will be written
      */
-    void encode(@NotNull ClientConnection clientConnection, @NotNull T msg, @NotNull ByteBuf out);
+    void encode(@NotNull ClientConnectionContext clientConnectionContext, @NotNull T msg, @NotNull ByteBuf out);
 
     /**
      * Calculate the buffer size for an mqtt message. This method will be called everytime
      * before {@link #encode} is called.
      *
-     * @param clientConnection the {@link ClientConnection} of the client
-     * @param msg              the message for which the buffer size should be calculated.
+     * @param clientConnectionContext the {@link ClientConnectionContext} of the client
+     * @param msg                     the message for which the buffer size should be calculated.
      * @return the required buffer size for the {@code msg}.
      */
-    int bufferSize(@NotNull ClientConnection clientConnection, @NotNull T msg);
+    int bufferSize(@NotNull ClientConnectionContext clientConnectionContext, @NotNull T msg);
 }

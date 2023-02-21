@@ -24,6 +24,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,7 +61,7 @@ public class NoTlsHandshakeIdleHandlerTest {
             }
         };
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(handler);
         channel.pipeline().addLast(eventAdapter);
     }

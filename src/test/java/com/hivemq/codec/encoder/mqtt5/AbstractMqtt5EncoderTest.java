@@ -25,6 +25,7 @@ import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
+import util.DummyClientConnection;
 import util.encoder.TestMessageEncoder;
 
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class AbstractMqtt5EncoderTest {
     protected void setUp() throws Exception {
         testMessageEncoder = new TestMessageEncoder();
         channel = new EmbeddedChannel(testMessageEncoder);
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);

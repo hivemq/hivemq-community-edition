@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -43,18 +43,18 @@ public class Mqtt3PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
     @Override
     public @Nullable PUBCOMP decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
-        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
+        if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                disconnectByInvalidFixedHeader(clientConnection, MessageType.PUBCOMP);
+                disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBCOMP);
                 buf.clear();
                 return null;
             }
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByNoMessageId(clientConnection, MessageType.PUBCOMP);
+            disconnectByNoMessageId(clientConnectionContext, MessageType.PUBCOMP);
             buf.clear();
             return null;
         }

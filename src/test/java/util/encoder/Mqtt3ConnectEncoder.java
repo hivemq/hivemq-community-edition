@@ -15,7 +15,7 @@
  */
 package util.encoder;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -43,7 +43,7 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection, final @NotNull CONNECT msg, final @NotNull ByteBuf out) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull CONNECT msg, final @NotNull ByteBuf out) {
 
         out.writeByte(CONNECT_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);

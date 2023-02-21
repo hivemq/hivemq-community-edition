@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttDecoder;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -52,34 +52,31 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
     @Override
     public @Nullable PUBREC decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
         if (!validateHeader(header)) {
-            disconnectByInvalidFixedHeader(clientConnection, MessageType.PUBREC);
+            disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBREC);
             return null;
         }
 
         if (buf.readableBytes() < 2) {
-            disconnectByRemainingLengthToShort(clientConnection, MessageType.PUBREC);
+            disconnectByRemainingLengthToShort(clientConnectionContext, MessageType.PUBREC);
             return null;
         }
 
-        final int packetIdentifier = decodePacketIdentifier(clientConnection, buf, MessageType.PUBREC);
+        final int packetIdentifier = decodePacketIdentifier(clientConnectionContext, buf, MessageType.PUBREC);
         if (packetIdentifier == 0) {
             return null;
         }
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBREC(packetIdentifier,
-                    Mqtt5PUBREC.DEFAULT_REASON_CODE,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBREC(packetIdentifier, Mqtt5PUBREC.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.fromCode(buf.readUnsignedByte());
         if (reasonCode == null) {
-            disconnectByInvalidReasonCode(clientConnection, MessageType.PUBREC);
+            disconnectByInvalidReasonCode(clientConnectionContext, MessageType.PUBREC);
             return null;
         }
 
@@ -87,7 +84,7 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
             return new PUBREC(packetIdentifier, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
-        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnection, buf, MessageType.PUBREC);
+        final int propertiesLength = decodePropertiesLengthNoPayload(clientConnectionContext, buf, MessageType.PUBREC);
         if (propertiesLength == DISCONNECTED) {
             return null;
         }
@@ -100,28 +97,27 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
             switch (propertyIdentifier) {
                 case REASON_STRING:
-                    reasonString = decodeReasonString(clientConnection, buf, reasonString, MessageType.PUBREC);
+                    reasonString = decodeReasonString(clientConnectionContext, buf, reasonString, MessageType.PUBREC);
                     if (reasonString == null) {
                         return null;
                     }
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder =
-                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBREC);
+                    userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBREC);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnection, propertyIdentifier, MessageType.PUBREC);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.PUBREC);
                     return null;
             }
         }
 
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
-        if (invalidUserPropertiesLength(clientConnection, MessageType.PUBREC, userProperties)) {
+        if (invalidUserPropertiesLength(clientConnectionContext, MessageType.PUBREC, userProperties)) {
             return null;
         }
 

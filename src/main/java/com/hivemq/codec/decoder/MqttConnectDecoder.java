@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
@@ -59,7 +59,9 @@ public class MqttConnectDecoder {
     }
 
     public @Nullable CONNECT decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte fixedHeader) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte fixedHeader) {
 
         /*
          * It is sufficient to look at the second byte of the variable header (Length LSB) This byte
@@ -75,7 +77,7 @@ public class MqttConnectDecoder {
         //The reader index is now at the beginning of the variable MQTT header field. We're only
         // interested in the Length LSB byte
         if (buf.readableBytes() < 2) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with a packet without protocol version.",
                     "Sent CONNECT without protocol version",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
@@ -84,14 +86,13 @@ public class MqttConnectDecoder {
         }
 
         final ByteBuf lengthLSBBuf = buf.slice(buf.readerIndex() + 1, 1);
-
         final int lengthLSB = lengthLSBBuf.readByte();
 
         final ProtocolVersion protocolVersion;
         switch (lengthLSB) {
             case 4:
                 if (buf.readableBytes() < 7) {
-                    connackInvalidProtocolVersion(clientConnection);
+                    connackInvalidProtocolVersion(clientConnectionContext);
                     return null;
                 }
                 final ByteBuf protocolVersionBuf = buf.slice(buf.readerIndex() + 6, 1);
@@ -101,7 +102,7 @@ public class MqttConnectDecoder {
                 } else if (versionByte == 4) {
                     protocolVersion = ProtocolVersion.MQTTv3_1_1;
                 } else {
-                    connackInvalidProtocolVersion(clientConnection);
+                    connackInvalidProtocolVersion(clientConnectionContext);
                     return null;
                 }
                 break;
@@ -109,24 +110,24 @@ public class MqttConnectDecoder {
                 protocolVersion = ProtocolVersion.MQTTv3_1;
                 break;
             default:
-                connackInvalidProtocolVersion(clientConnection);
+                connackInvalidProtocolVersion(clientConnectionContext);
                 return null;
         }
 
-        clientConnection.setProtocolVersion(protocolVersion);
-        clientConnection.setConnectReceivedTimestamp(System.currentTimeMillis());
+        clientConnectionContext.setProtocolVersion(protocolVersion);
+        clientConnectionContext.setConnectReceivedTimestamp(System.currentTimeMillis());
 
         if (protocolVersion == ProtocolVersion.MQTTv5) {
-            return mqtt5ConnectDecoder.decode(clientConnection, buf, fixedHeader);
+            return mqtt5ConnectDecoder.decode(clientConnectionContext, buf, fixedHeader);
         } else if (protocolVersion == ProtocolVersion.MQTTv3_1_1) {
-            return mqtt311ConnectDecoder.decode(clientConnection, buf, fixedHeader);
+            return mqtt311ConnectDecoder.decode(clientConnectionContext, buf, fixedHeader);
         } else {
-            return mqtt31ConnectDecoder.decode(clientConnection, buf, fixedHeader);
+            return mqtt31ConnectDecoder.decode(clientConnectionContext, buf, fixedHeader);
         }
     }
 
-    private void connackInvalidProtocolVersion(final @NotNull ClientConnection clientConnection) {
-        mqttConnacker.connackError(clientConnection.getChannel(),
+    private void connackInvalidProtocolVersion(final @NotNull ClientConnectionContext clientConnectionContext) {
+        mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (IP: {}) connected with an invalid protocol version.",
                 "Sent CONNECT with an invalid protocol version",
                 Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,

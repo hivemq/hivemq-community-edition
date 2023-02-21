@@ -23,6 +23,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 import util.TestMessageUtil;
 
 import static org.junit.Assert.assertNotNull;
@@ -38,7 +39,7 @@ public class PublishAuthorizerInputImplTest {
     @Before
     public void before() {
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }

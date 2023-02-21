@@ -51,6 +51,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import util.DummyClientConnection;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
@@ -100,7 +101,7 @@ public class PublishPollServiceImplTest {
 
         when(channel.pipeline()).thenReturn(pipeline);
 
-        clientConnection = spy(new ClientConnection(channel, publishFlushHandler));
+        clientConnection = spy(new DummyClientConnection(channel, publishFlushHandler));
         clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         when(clientConnection.getMessageIDPool()).thenReturn(messageIDPool);
 

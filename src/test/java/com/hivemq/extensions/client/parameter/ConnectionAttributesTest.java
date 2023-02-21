@@ -25,6 +25,7 @@ import io.netty.channel.Channel;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 import util.TestChannelAttribute;
 
 import java.nio.ByteBuffer;
@@ -33,11 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,9 +48,8 @@ public class ConnectionAttributesTest {
     public void setUp() {
         connectionAttributes = new ConnectionAttributes(1000);
         channel = mock(Channel.class);
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
-        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
-                clientConnection));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 
     @Test
@@ -67,7 +63,7 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getInstanceIfPresent_not_present() {
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
@@ -86,7 +82,7 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getInstance_not_present() {
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstance(channel);

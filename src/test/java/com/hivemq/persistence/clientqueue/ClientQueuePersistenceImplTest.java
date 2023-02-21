@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestSingleWriterFactory;
 
 import java.util.concurrent.ExecutionException;
@@ -145,7 +146,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
@@ -162,7 +163,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_channel_inactive() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
@@ -180,7 +181,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_not_sent() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
 
@@ -196,7 +197,7 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_sending() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(10));

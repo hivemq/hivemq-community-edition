@@ -24,6 +24,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestMqttDecoder;
 
 import static org.junit.Assert.assertFalse;
@@ -39,7 +40,7 @@ public class MQTTMessageDecoderTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         //setting version to fake "connected" state
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);

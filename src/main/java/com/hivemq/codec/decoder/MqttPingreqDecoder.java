@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -42,14 +42,14 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
 
     @Override
     public @Nullable PINGREQ decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
-        final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
+        final ProtocolVersion protocolVersion = clientConnectionContext.getProtocolVersion();
 
         //Pingreq of MQTTv5 is equal to MQTTv3_1_1
         if (protocolVersion == ProtocolVersion.MQTTv5 || protocolVersion == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                serverDisconnector.disconnect(clientConnection.getChannel(),
+                serverDisconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a PINGREQ with an invalid fixed header. Disconnecting client.",
                         "Sent a PINGREQ with invalid fixed header",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,

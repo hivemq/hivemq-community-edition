@@ -48,6 +48,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
@@ -88,7 +89,7 @@ public class ConnackOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, publishFlushHandler);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, publishFlushHandler);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 

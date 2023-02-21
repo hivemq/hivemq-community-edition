@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
@@ -55,7 +56,7 @@ public class SslParameterHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(new SslParameterHandler());
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }

@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import util.DummyClientConnection;
 import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
 
@@ -68,7 +69,7 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
     public void setUp() throws Exception {
         final Channel channel = mock(Channel.class);
         connacker = mock(MqttConnacker.class);
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         when(channel.attr(any(AttributeKey.class))).thenReturn(new TestChannelAttribute(clientConnection));
 
         decoder = new Mqtt311ConnectDecoder(connacker,

@@ -22,6 +22,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.local.LocalAddress;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class ClientConnectionTest {
         final ChannelPipeline pipeline = mock(ChannelPipeline.class);
         when(channel.pipeline()).thenReturn(pipeline);
         final PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
-        clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection = new DummyClientConnection(channel, publishFlushHandler);
     }
 
     @Test

@@ -44,10 +44,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import util.CollectUserEventsHandler;
-import util.IsolatedExtensionClassloaderUtil;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
+import util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -74,7 +71,7 @@ public class PublishOutboundInterceptorHandlerTest {
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
 

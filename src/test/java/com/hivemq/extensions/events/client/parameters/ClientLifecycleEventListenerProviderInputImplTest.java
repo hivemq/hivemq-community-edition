@@ -19,6 +19,7 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -36,7 +37,7 @@ public class ClientLifecycleEventListenerProviderInputImplTest {
     @Test
     public void test_construction_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ClientLifecycleEventListenerProviderInputImpl successfulInput =

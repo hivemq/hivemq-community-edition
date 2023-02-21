@@ -21,6 +21,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -39,7 +40,7 @@ public class SslSniHandlerTest {
 
         final SslSniHandler sslSniHandler = new SslSniHandler(sslHandler, sslContext);
         final Channel channel = new EmbeddedChannel(sslSniHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         sslSniHandler.replaceHandler(channel.pipeline().firstContext(), "abc.com", sslContext);
 

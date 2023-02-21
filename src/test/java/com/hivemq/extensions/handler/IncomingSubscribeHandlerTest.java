@@ -62,10 +62,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
-import util.DummyHandler;
-import util.IsolatedExtensionClassloaderUtil;
-import util.TestConfigurationBootstrap;
-import util.TestMessageUtil;
+import util.*;
 
 import java.nio.channels.ClosedChannelException;
 import java.time.Duration;
@@ -102,7 +99,7 @@ public class IncomingSubscribeHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection = new DummyClientConnection(channel, publishFlushHandler);
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 
@@ -185,7 +182,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -214,7 +211,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -243,7 +240,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -288,7 +285,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -332,7 +329,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -377,7 +374,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -421,7 +418,7 @@ public class IncomingSubscribeHandlerTest {
 
         clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, publishFlushHandler));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);

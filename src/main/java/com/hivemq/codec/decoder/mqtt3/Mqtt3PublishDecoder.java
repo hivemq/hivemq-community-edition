@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder.mqtt3;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttPublishDecoder;
 import com.hivemq.configuration.HivemqId;
@@ -51,24 +51,24 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
 
     @Override
     public @Nullable Mqtt3PUBLISH decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
 
-        final int qos = decodeQoS(clientConnection, header);
+        final int qos = decodeQoS(clientConnectionContext, header);
         if (qos == DISCONNECTED) {
             return null;
         }
 
-        final Boolean dup = decodeDup(clientConnection, header, qos);
+        final Boolean dup = decodeDup(clientConnectionContext, header, qos);
         if (dup == null) {
             return null;
         }
 
-        final Boolean retain = decodeRetain(clientConnection, header);
+        final Boolean retain = decodeRetain(clientConnectionContext, header);
         if (retain == null) {
             return null;
         }
 
-        final int utf8StringLength = decodeUTF8StringLength(clientConnection, buf, "topic", MessageType.PUBLISH);
+        final int utf8StringLength = decodeUTF8StringLength(clientConnectionContext, buf, "topic", MessageType.PUBLISH);
         if (utf8StringLength == DISCONNECTED) {
             return null;
         }
@@ -76,7 +76,7 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
         final String topicName;
 
         if (validateUTF8) {
-            topicName = decodeUTF8Topic(clientConnection, buf, utf8StringLength, "topic", MessageType.PUBLISH);
+            topicName = decodeUTF8Topic(clientConnectionContext, buf, utf8StringLength, "topic", MessageType.PUBLISH);
             if (topicName == null) {
                 return null;
             }
@@ -84,13 +84,13 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
             topicName = Strings.getPrefixedString(buf, utf8StringLength);
         }
 
-        if (topicInvalid(clientConnection, topicName, MessageType.PUBLISH)) {
+        if (topicInvalid(clientConnectionContext, topicName, MessageType.PUBLISH)) {
             return null;
         }
 
         final int packetIdentifier;
         if (qos > 0) {
-            packetIdentifier = decodePacketIdentifier(clientConnection, buf);
+            packetIdentifier = decodePacketIdentifier(clientConnectionContext, buf);
             if (packetIdentifier == 0) {
                 return null;
             }

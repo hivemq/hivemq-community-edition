@@ -44,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestMessageUtil;
 
 import static org.junit.Assert.assertEquals;
@@ -92,7 +93,7 @@ public class PublishFlowHandlerTest {
                 orderedTopicService,
                 incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
-        final ClientConnection clientConnection = spy(new ClientConnection(channel, null));
+        final ClientConnection clientConnection = spy(new DummyClientConnection(channel, null));
         when(clientConnection.getMessageIDPool()).thenReturn(pool);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(CLIENT_ID);

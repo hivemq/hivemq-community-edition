@@ -19,6 +19,7 @@ import com.hivemq.annotations.ExecuteInEventloop;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import io.netty.channel.Channel;
@@ -40,9 +41,13 @@ public interface MqttConnacker {
      *
      * @param ctx     the channel handler context of the connecting MQTT client.
      * @param connack the CONNACK message to send. Must be SUCCESS reason code.
+     * @param connect the CONNECT message sent by the MQTT client.
      * @return the connack sent future that completes when the CONNACK is sent
      */
-    @NotNull ChannelFuture connackSuccess(@NotNull ChannelHandlerContext ctx, @NotNull CONNACK connack);
+    @NotNull ChannelFuture connackSuccess(
+            @NotNull ChannelHandlerContext ctx,
+            @NotNull CONNACK connack,
+            @NotNull CONNECT connect);
 
     /**
      * Send a connack with optional reason code and reason string.

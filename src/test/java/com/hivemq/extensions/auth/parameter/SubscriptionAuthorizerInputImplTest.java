@@ -29,9 +29,9 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Christoph Schäbel
@@ -47,7 +47,7 @@ public class SubscriptionAuthorizerInputImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
@@ -66,8 +66,8 @@ public class SubscriptionAuthorizerInputImplTest {
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
-        assertEquals(true, input.getSubscription().getNoLocal());
-        assertEquals(true, input.getSubscription().getRetainAsPublished());
+        assertTrue(input.getSubscription().getNoLocal());
+        assertTrue(input.getSubscription().getRetainAsPublished());
         assertEquals(RetainHandling.SEND_IF_NEW_SUBSCRIPTION, input.getSubscription().getRetainHandling());
         assertEquals(Qos.EXACTLY_ONCE, input.getSubscription().getQos());
         assertEquals("topic", input.getSubscription().getTopicFilter());
@@ -84,12 +84,12 @@ public class SubscriptionAuthorizerInputImplTest {
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
-        assertEquals(false, input.getSubscription().getNoLocal());
-        assertEquals(false, input.getSubscription().getRetainAsPublished());
+        assertFalse(input.getSubscription().getNoLocal());
+        assertFalse(input.getSubscription().getRetainAsPublished());
         assertEquals(RetainHandling.SEND, input.getSubscription().getRetainHandling());
         assertEquals(Qos.EXACTLY_ONCE, input.getSubscription().getQos());
         assertEquals("topic", input.getSubscription().getTopicFilter());
-        assertEquals(false, input.getSubscriptionIdentifier().isPresent());
+        assertFalse(input.getSubscriptionIdentifier().isPresent());
         assertNotNull(input.getUserProperties());
     }
 

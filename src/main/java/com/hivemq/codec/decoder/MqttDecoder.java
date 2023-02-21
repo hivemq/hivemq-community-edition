@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.decoder;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.Message;
@@ -27,7 +27,7 @@ public abstract class MqttDecoder<T extends Message> {
 
     private static final Logger log = LoggerFactory.getLogger(MqttDecoder.class);
 
-    public abstract @Nullable T decode(@NotNull ClientConnection clientConnection, @NotNull ByteBuf buf, byte header);
+    public abstract @Nullable T decode(@NotNull ClientConnectionContext clientConnectionContext, @NotNull ByteBuf buf, byte header);
 
     /**
      * Checks if the last 4 bits are actually zeroed out
@@ -49,12 +49,12 @@ public abstract class MqttDecoder<T extends Message> {
      * @return {@code true} if the topic is valid.
      */
     protected static boolean isInvalidTopic(
-            final @NotNull ClientConnection clientConnection, final @Nullable String topic) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @Nullable String topic) {
 
         if (topic == null || topic.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.",
-                        clientConnection.getChannelIP().orElse("UNKNOWN"));
+                        clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
             }
             return true;
         }
@@ -63,7 +63,7 @@ public abstract class MqttDecoder<T extends Message> {
             if (log.isDebugEnabled()) {
                 log.debug("A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). " +
                                 "This is not allowed. Disconnecting client.",
-                        clientConnection.getChannelIP().orElse("UNKNOWN"));
+                        clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
             }
             return true;
         }

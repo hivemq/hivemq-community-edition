@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -232,7 +233,8 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
 
     public void authorizeSubscriptions(final @NotNull ChannelHandlerContext ctx, final @NotNull SUBSCRIBE msg) {
 
-        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final String clientId = clientConnectionContext.getClientId();
         if (clientId == null || !ctx.channel().isActive()) {
             //no more processing needed
             return;

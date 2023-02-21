@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.connack.Mqtt3CONNACK;
@@ -35,7 +35,7 @@ public class Mqtt3ConnackEncoder implements MqttEncoder<Mqtt3CONNACK> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull Mqtt3CONNACK msg,
             final @NotNull ByteBuf out) {
 
@@ -44,7 +44,7 @@ public class Mqtt3ConnackEncoder implements MqttEncoder<Mqtt3CONNACK> {
         out.writeByte(CONNACK_REMAINING_LENGTH);
 
         final Mqtt3ConnAckReturnCode returnCode = msg.getReturnCode();
-        switch (clientConnection.getProtocolVersion()) {
+        switch (clientConnectionContext.getProtocolVersion()) {
             case MQTTv3_1:
                 out.writeByte(CONNACK_FLAGS_EMPTY);
                 break;
@@ -60,7 +60,7 @@ public class Mqtt3ConnackEncoder implements MqttEncoder<Mqtt3CONNACK> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull Mqtt3CONNACK connack) {
+    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull Mqtt3CONNACK connack) {
         return ENCODED_CONNACK_SIZE;
     }
 }

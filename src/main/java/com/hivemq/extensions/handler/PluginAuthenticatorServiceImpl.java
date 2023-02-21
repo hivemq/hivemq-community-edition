@@ -18,7 +18,7 @@ package com.hivemq.extensions.handler;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -130,22 +130,22 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     @Override
     public void authenticateConnect(
             final @NotNull ChannelHandlerContext ctx,
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull CONNECT connect,
             final @NotNull ModifiableClientSettingsImpl clientSettings) {
 
         final String authMethod = connect.getAuthMethod();
         if (authMethod != null) {
-            clientConnection.setAuthMethod(authMethod);
+            clientConnectionContext.setAuthMethod(authMethod);
         }
 
         final ModifiableDefaultPermissions defaultPermissions = new ModifiableDefaultPermissionsImpl();
-        clientConnection.setAuthPermissions(defaultPermissions);
+        clientConnectionContext.setAuthPermissions(defaultPermissions);
 
         final Map<String, WrappedAuthenticatorProvider> authenticatorProviderMap =
                 authenticators.getAuthenticatorProviderMap();
         if (authenticatorProviderMap.isEmpty()) {
-            connectHandler.connectSuccessfulUndecided(ctx, clientConnection, connect, clientSettings);
+            connectHandler.connectSuccessfulUndecided(ctx, clientConnectionContext, connect, clientSettings);
             return;
         }
 
@@ -199,21 +199,21 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     @Override
     public void authenticateAuth(
             final @NotNull ChannelHandlerContext ctx,
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull AUTH auth) {
 
-        final boolean reAuth = clientConnection.getClientState() == ClientState.RE_AUTHENTICATING;
+        final boolean reAuth = clientConnectionContext.getClientState() == ClientState.RE_AUTHENTICATING;
 
         final String authMethod = auth.getAuthMethod();
-        if (!authMethod.equals(clientConnection.getAuthMethod())) {
+        if (!authMethod.equals(clientConnectionContext.getAuthMethod())) {
             badAuthMethodDisconnect(ctx, auth, reAuth);
             return;
         }
 
-        final ScheduledFuture<?> authFuture = clientConnection.getAuthFuture();
+        final ScheduledFuture<?> authFuture = clientConnectionContext.getAuthFuture();
         if (authFuture != null) {
             authFuture.cancel(true);
-            clientConnection.setAuthFuture(null);
+            clientConnectionContext.setAuthFuture(null);
         }
 
         int enhancedAuthenticatorCount = 0;
@@ -229,14 +229,14 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
             return;
         }
 
-        final String clientId = clientConnection.getClientId();
+        final String clientId = clientConnectionContext.getClientId();
 
         final AuthenticatorProviderInput authenticatorProviderInput =
                 new AuthenticatorProviderInputImpl(serverInformation, ctx.channel(), clientId);
 
         final AuthInput input = new AuthInput(clientId, ctx.channel(), auth, reAuth);
 
-        final ModifiableDefaultPermissions defaultPermissions = clientConnection.getAuthPermissions();
+        final ModifiableDefaultPermissions defaultPermissions = clientConnectionContext.getAuthPermissions();
         final ModifiableClientSettingsImpl clientSettings = getSettingsFromChannel(ctx.channel());
 
         final ClientAuthenticators clientAuthenticators = getClientAuthenticators(ctx);
@@ -259,7 +259,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                 }
             }
         } else {
-            final CONNECT connect = clientConnection.getAuthConnect();
+            final CONNECT connect = clientConnectionContext.getAuthConnect();
 
             final ConnectAuthOutput output =
                     new ConnectAuthOutput(asyncer, validateUTF8, defaultPermissions, clientSettings, timeout, true);
@@ -331,19 +331,19 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         }
     }
 
-    private @NotNull ModifiableClientSettingsImpl getSettingsFromChannel(final @NotNull Channel channel) {
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final Integer receiveMax = clientConnection.getClientReceiveMaximum();
+    private static @NotNull ModifiableClientSettingsImpl getSettingsFromChannel(final @NotNull Channel channel) {
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final Integer receiveMax = clientConnectionContext.getClientReceiveMaximum();
         Preconditions.checkNotNull(receiveMax, "Receive maximum must not be null here");
-        final Long queueSizeMaximum = clientConnection.getQueueSizeMaximum();
+        final Long queueSizeMaximum = clientConnectionContext.getQueueSizeMaximum();
         return new ModifiableClientSettingsImpl(receiveMax, queueSizeMaximum);
     }
 
     private @NotNull ClientAuthenticators getClientAuthenticators(final @NotNull ChannelHandlerContext ctx) {
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        if (clientConnection.getExtensionClientAuthenticators() == null) {
-            clientConnection.setExtensionClientAuthenticators(new ClientAuthenticatorsImpl(priorityComparator));
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        if (clientConnectionContext.getExtensionClientAuthenticators() == null) {
+            clientConnectionContext.setExtensionClientAuthenticators(new ClientAuthenticatorsImpl(priorityComparator));
         }
-        return clientConnection.getExtensionClientAuthenticators();
+        return clientConnectionContext.getExtensionClientAuthenticators();
     }
 }

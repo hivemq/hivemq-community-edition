@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.DummyHandler;
 
 import java.util.List;
@@ -62,7 +63,7 @@ public class UnsubscribeHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         channel = new EmbeddedChannel(unsubscribeHandler);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());

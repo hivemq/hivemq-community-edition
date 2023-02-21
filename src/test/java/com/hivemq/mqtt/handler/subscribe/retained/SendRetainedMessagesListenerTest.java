@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -163,7 +164,7 @@ public class SendRetainedMessagesListenerTest {
         ignoredTopics.add(anothertopic);
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
 
         when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test".getBytes(
@@ -196,7 +197,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
 
         listener.operationComplete(channel.newSucceededFuture());
@@ -280,7 +281,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
 
         listener.operationComplete(channel.newSucceededFuture());
@@ -313,7 +314,7 @@ public class SendRetainedMessagesListenerTest {
                         subResult(new Topic("topic2", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
 
         listener.operationComplete(channel.newSucceededFuture());
@@ -352,7 +353,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(new Topic("#", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         listener.operationComplete(channel.newSucceededFuture());
 
@@ -376,7 +377,7 @@ public class SendRetainedMessagesListenerTest {
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(new Topic("#", QoS.EXACTLY_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         listener.operationComplete(channel.newSucceededFuture());
         channel.runPendingTasks();
@@ -389,7 +390,7 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_exception_handling() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final SendRetainedMessageResultListener sendRetainedMessageResultListener =
                 createSendRetainedMessageSingleListener(channel);
@@ -414,7 +415,7 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_throwable_handling() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         createSendRetainedMessageSingleListener(channel).onFailure(new Throwable("test"));
 
         // tests if the test finish successfully. No need for assertion.
@@ -424,7 +425,7 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_error_handling() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         createSendRetainedMessageSingleListener(channel).onFailure(new Error());
     }
 
@@ -469,7 +470,7 @@ public class SendRetainedMessagesListenerTest {
                         subResult(new Topic("topic2", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
 
         listener.operationComplete(channel.newSucceededFuture());
