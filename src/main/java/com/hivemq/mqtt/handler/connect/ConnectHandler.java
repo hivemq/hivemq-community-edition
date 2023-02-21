@@ -49,6 +49,7 @@ import com.hivemq.mqtt.handler.publish.FlowControlHandler;
 import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.connack.CONNACKBuilder;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -611,7 +612,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             final @NotNull CONNECT msg,
             final boolean sessionPresent) {
 
-        final CONNACK.Mqtt5Builder builder = new CONNACK.Mqtt5Builder().withSessionPresent(sessionPresent)
+        final CONNACK.Mqtt5Builder builder =CONNACK.builder()
+                .withSessionPresent(sessionPresent)
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReceiveMaximum(configurationService.mqttConfiguration().serverReceiveMaximum())
                 .withSubscriptionIdentifierAvailable(configurationService.mqttConfiguration()
