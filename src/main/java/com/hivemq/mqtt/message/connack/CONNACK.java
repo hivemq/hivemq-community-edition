@@ -15,7 +15,6 @@
  */
 package com.hivemq.mqtt.message.connack;
 
-import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -23,16 +22,10 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extensions.packets.connack.ConnackPacketImpl;
 import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties.MqttMessageWithReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.Bytes;
-
-import java.nio.charset.StandardCharsets;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The MQTT CONNACK message
@@ -125,9 +118,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
 
         super(reasonCode, reasonString, userProperties);
 
-        checkPreconditions(sessionExpiryInterval, serverKeepAlive, assignedClientIdentifier,
-                authMethod, authData, receiveMaximum, topicAliasMaximum, maximumPacketSize, responseInformation, serverReference);
-
         this.sessionPresent = sessionPresent;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.serverKeepAlive = serverKeepAlive;
@@ -144,57 +134,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.isSharedSubscriptionAvailable = isSharedSubscriptionAvailable;
         this.responseInformation = responseInformation;
         this.serverReference = serverReference;
-    }
-
-    private void checkPreconditions(final long sessionExpiryInterval,
-                                    final int serverKeepAlive,
-                                    @Nullable final String assignedClientIdentifier,
-                                    @Nullable final String authMethod,
-                                    @Nullable final byte[] authData,
-                                    final int receiveMaximum,
-                                    final int topicAliasMaximum,
-                                    final int maximumPacketSize,
-                                    @Nullable final String responseInformation,
-                                    @Nullable final String serverReference) {
-
-        checkArgument(receiveMaximum != 0, "Receive maximum must never be zero");
-
-        if (assignedClientIdentifier != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(assignedClientIdentifier.getBytes(StandardCharsets.UTF_8).length),
-                    "A client Id must never exceed 65.535 bytes");
-        }
-        if (authMethod != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(authMethod.getBytes(StandardCharsets.UTF_8).length),
-                    "An auth method must never exceed 65.535 bytes");
-        }
-        if (authData != null) {
-            checkNotNull(authMethod, "Auth method must be set if auth data is set");
-            checkArgument(UnsignedDataTypes.isUnsignedShort(authData.length),
-                    "An auth data must never exceed 65.535 bytes");
-        }
-        if (responseInformation != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(responseInformation.getBytes(StandardCharsets.UTF_8).length),
-                    "A response information must never exceed 65.535 bytes");
-        }
-        if (serverReference != null) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(serverReference.getBytes(StandardCharsets.UTF_8).length),
-                    "A server reference must never exceed 65.535 bytes");
-        }
-        if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
-            checkArgument(UnsignedDataTypes.isUnsignedInt(sessionExpiryInterval),
-                    "A session expiry interval must never be larger than 4.294.967.296");
-        }
-
-        checkArgument(maximumPacketSize <= CONNECT.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
-                "A maximum packet size must never be larger than 268.435.460");
-
-        checkArgument(UnsignedDataTypes.isUnsignedShort(topicAliasMaximum),
-                "A topic alias maximum must never be larger than 65.535");
-
-        if (serverKeepAlive != KEEP_ALIVE_NOT_SET) {
-            checkArgument(UnsignedDataTypes.isUnsignedShort(serverKeepAlive),
-                    "A server keep alive must never be larger than 65.535");
-        }
     }
 
     @Override
