@@ -17,7 +17,6 @@
 package com.hivemq.mqtt.handler.connack;
 
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extensions.events.OnAuthFailedEvent;
@@ -35,7 +34,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import util.DummyClientConnection;
 import util.DummyHandler;
 import util.LogbackCapturingAppender;
 
@@ -585,7 +583,9 @@ public class MqttConnackerTest {
 
     @Test(expected = NullPointerException.class)
     public void test_connackSuccess_ctx_null() {
-        mqttConnacker.connackSuccess(null, new CONNACK(Mqtt5ConnAckReasonCode.SUCCESS, null), mock(CONNECT.class));
+        mqttConnacker.connackSuccess(null,
+                CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).build(),
+                mock(CONNECT.class));
     }
 
     @Test(expected = NullPointerException.class)
@@ -596,14 +596,14 @@ public class MqttConnackerTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_connackSuccess_connack_error_reason_code() {
         mqttConnacker.connackSuccess(clientConnection.getChannel().pipeline().firstContext(),
-                new CONNACK(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, null),
+                CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED).build(),
                 mock(CONNECT.class));
     }
 
     @Test
     public void test_connackSuccess() {
         mqttConnacker.connackSuccess(clientConnection.getChannel().pipeline().firstContext(),
-                new CONNACK(Mqtt5ConnAckReasonCode.SUCCESS, null),
+                CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).build(),
                 mock(CONNECT.class));
 
         final CONNACK connack = channel.readOutbound();

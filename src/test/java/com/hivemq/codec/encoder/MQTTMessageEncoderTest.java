@@ -30,6 +30,7 @@ import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
@@ -66,7 +67,7 @@ public class MQTTMessageEncoderTest {
     @Test
     public void test_connack_encoded() {
 
-        channel.writeOutbound(new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED));
+        channel.writeOutbound(CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).build());
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
     }
