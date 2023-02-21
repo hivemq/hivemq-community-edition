@@ -27,43 +27,5 @@ public class ConnackMessages {
 
     public static final CONNACK ACCEPTED_MSG_SESS_PRESENT = new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED, true);
 
-    public static final CONNACK REFUSED_UNACCEPTABLE_PROTOCOL_VERSION = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
-    public static final CONNACK REFUSED_IDENTIFIER_REJECTED = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED);
-    public static final CONNACK REFUSED_SERVER_UNAVAILABLE = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_SERVER_UNAVAILABLE);
-    public static final CONNACK REFUSED_BAD_USERNAME_OR_PASSWORD = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_BAD_USERNAME_OR_PASSWORD);
     public static final CONNACK REFUSED_NOT_AUTHORIZED = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED);
-
-    public static CONNACK getMessageForRefusedCode(final Mqtt3ConnAckReturnCode returnCode) {
-
-        final CONNACK connack;
-
-        switch (returnCode) {
-            case REFUSED_UNACCEPTABLE_PROTOCOL_VERSION:
-                connack = ConnackMessages.REFUSED_UNACCEPTABLE_PROTOCOL_VERSION;
-                break;
-
-            case REFUSED_IDENTIFIER_REJECTED:
-                connack = ConnackMessages.REFUSED_IDENTIFIER_REJECTED;
-                break;
-
-            case REFUSED_SERVER_UNAVAILABLE:
-                connack = ConnackMessages.REFUSED_SERVER_UNAVAILABLE;
-                break;
-
-            case REFUSED_BAD_USERNAME_OR_PASSWORD:
-                connack = ConnackMessages.REFUSED_BAD_USERNAME_OR_PASSWORD;
-                break;
-
-            case REFUSED_NOT_AUTHORIZED:
-                connack = ConnackMessages.REFUSED_NOT_AUTHORIZED;
-                break;
-
-            default:
-                throw new IllegalArgumentException("Unknown return code");
-
-        }
-
-        return connack;
-    }
-
 }
