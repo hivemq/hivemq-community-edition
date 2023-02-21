@@ -22,9 +22,11 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -41,9 +43,6 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_BARRIE
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-/**
- * @author Christoph Schäbel
- */
 public class MessageBarrierTest {
 
     private EmbeddedChannel channel;
@@ -116,7 +115,7 @@ public class MessageBarrierTest {
             }
         });
 
-        channel.writeOutbound(ConnackMessages.REFUSED_NOT_AUTHORIZED);
+        channel.writeOutbound(CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED).build());
 
         assertEquals(0, counter.get());
     }
@@ -144,7 +143,11 @@ public class MessageBarrierTest {
             }
         });
 
-        channel.writeOutbound(ConnackMessages.ACCEPTED_MSG_NO_SESS);
+        final CONNACK connack = CONNACK.builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
+                .withSessionPresent(false)
+                .build();
+        channel.writeOutbound(connack);
 
         assertEquals(2, counter.get());
         assertFalse(channel.pipeline().names().contains(MQTT_MESSAGE_BARRIER));

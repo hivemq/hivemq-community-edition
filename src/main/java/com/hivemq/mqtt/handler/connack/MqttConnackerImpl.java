@@ -152,7 +152,8 @@ public class MqttConnackerImpl implements MqttConnacker {
         clientConnection.proposeClientState(ClientState.CONNECT_FAILED);
 
         if (returnCode != null && withReasonCode) {
-            clientConnection.getChannel().writeAndFlush(new CONNACK(returnCode)).addListener(ChannelFutureListener.CLOSE);
+            final CONNACK connack = CONNACK.builder().withMqtt3ReturnCode(returnCode).build();
+            clientConnection.getChannel().writeAndFlush(connack).addListener(ChannelFutureListener.CLOSE);
         } else {
             //Do not send connack to not let the client know its an mqtt server
             clientConnection.getChannel().close();

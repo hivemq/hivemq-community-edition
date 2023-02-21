@@ -48,34 +48,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         return new CONNACKBuilder();
     }
 
-    public static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
-    public static final int KEEP_ALIVE_NOT_SET = -1;
-
-    private final boolean sessionPresent;
-
-    //Mqtt 5
-    private final long sessionExpiryInterval;
-    private final int serverKeepAlive;
-    private final @Nullable String assignedClientIdentifier;
-
-    //Auth
-    private final @Nullable String authMethod;
-    private final byte @Nullable [] authData;
-
-    //Restrictions from Server
-    private final int receiveMaximum;
-    private final int topicAliasMaximum;
-    private final int maximumPacketSize;
-    private final @Nullable QoS maximumQoS;
-    private final boolean isRetainAvailable;
-    private final boolean isWildcardSubscriptionAvailable;
-    private final boolean isSubscriptionIdentifierAvailable;
-    private final boolean isSharedSubscriptionAvailable;
-
-    private final @Nullable String responseInformation;
-    private final @Nullable String serverReference;
-
-
     public static @NotNull CONNACK from(final @NotNull ConnackPacketImpl packet) {
 
         final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
@@ -104,48 +76,52 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
                 .build();
     }
 
-    // MQTT 5 CONNACK for FAILED CONNECT
-    public CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode, @Nullable final String reasonString) {
-        super(reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES);
+    public static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
+    public static final int KEEP_ALIVE_NOT_SET = -1;
 
-        this.sessionPresent = false;
-        this.sessionExpiryInterval = SESSION_EXPIRY_NOT_SET;
-        this.serverKeepAlive = KEEP_ALIVE_NOT_SET;
-        this.assignedClientIdentifier = null;
-        this.authMethod = null;
-        this.authData = null;
-        this.receiveMaximum = DEFAULT_RECEIVE_MAXIMUM;
-        this.topicAliasMaximum = DEFAULT_TOPIC_ALIAS_MAXIMUM;
-        this.maximumPacketSize = DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-        this.maximumQoS = null;
-        this.isRetainAvailable = DEFAULT_RETAIN_AVAILABLE;
-        this.isWildcardSubscriptionAvailable = DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE;
-        this.isSubscriptionIdentifierAvailable = DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE;
-        this.isSharedSubscriptionAvailable = DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE;
-        this.responseInformation = null;
-        this.serverReference = null;
-    }
+    private final boolean sessionPresent;
 
-    // MQTT 5
-    CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode,
-            @Nullable final String reasonString,
-            @NotNull final Mqtt5UserProperties userProperties,
+    //Mqtt 5
+    private final long sessionExpiryInterval;
+    private final int serverKeepAlive;
+    private final @Nullable String assignedClientIdentifier;
+
+    //Auth
+    private final @Nullable String authMethod;
+    private final byte @Nullable [] authData;
+
+    //Restrictions from Server
+    private final int receiveMaximum;
+    private final int topicAliasMaximum;
+    private final int maximumPacketSize;
+    private final @Nullable QoS maximumQoS;
+    private final boolean isRetainAvailable;
+    private final boolean isWildcardSubscriptionAvailable;
+    private final boolean isSubscriptionIdentifierAvailable;
+    private final boolean isSharedSubscriptionAvailable;
+
+    private final @Nullable String responseInformation;
+    private final @Nullable String serverReference;
+
+    CONNACK(final @NotNull Mqtt5ConnAckReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
             final boolean sessionPresent,
             final long sessionExpiryInterval,
             final int serverKeepAlive,
-            @Nullable final String assignedClientIdentifier,
-            @Nullable final String authMethod,
-            @Nullable final byte[] authData,
+            final @Nullable String assignedClientIdentifier,
+            final @Nullable String authMethod,
+            final byte @Nullable [] authData,
             final int receiveMaximum,
             final int topicAliasMaximum,
             final int maximumPacketSize,
-            @Nullable final QoS maximumQoS,
+            final @Nullable QoS maximumQoS,
             final boolean isRetainAvailable,
             final boolean isWildcardSubscriptionAvailable,
             final boolean isSubscriptionIdentifierAvailable,
             final boolean isSharedSubscriptionAvailable,
-            @Nullable final String responseInformation,
-            @Nullable final String serverReference) {
+            final @Nullable String responseInformation,
+            final @Nullable String serverReference) {
 
         super(reasonCode, reasonString, userProperties);
 
@@ -168,41 +144,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.isSharedSubscriptionAvailable = isSharedSubscriptionAvailable;
         this.responseInformation = responseInformation;
         this.serverReference = serverReference;
-    }
-
-    //MQTT 3.1
-    public CONNACK(@NotNull final Mqtt3ConnAckReturnCode returnCode) {
-        this(returnCode, false);
-    }
-
-    //MQTT 3.1.1
-    public CONNACK(@NotNull final Mqtt3ConnAckReturnCode returnCode, final boolean sessionPresent) {
-
-        super(Mqtt5ConnAckReasonCode.fromReturnCode(returnCode), null, Mqtt5UserProperties.NO_USER_PROPERTIES);
-
-        if (returnCode != Mqtt3ConnAckReturnCode.ACCEPTED && sessionPresent) {
-            throw new IllegalArgumentException("The sessionPresent flag is only allowed for return code " + Mqtt3ConnAckReturnCode.ACCEPTED);
-        }
-
-        this.sessionPresent = sessionPresent;
-
-
-        //MQTT 5 only
-        this.sessionExpiryInterval = SESSION_EXPIRY_NOT_SET;
-        this.serverKeepAlive = KEEP_ALIVE_NOT_SET;
-        this.assignedClientIdentifier = null;
-        this.authMethod = null;
-        this.authData = null;
-        this.receiveMaximum = DEFAULT_RECEIVE_MAXIMUM;
-        this.topicAliasMaximum = DEFAULT_TOPIC_ALIAS_MAXIMUM;
-        this.maximumPacketSize = DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-        this.maximumQoS = null;
-        this.isRetainAvailable = DEFAULT_RETAIN_AVAILABLE;
-        this.isWildcardSubscriptionAvailable = DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE;
-        this.isSubscriptionIdentifierAvailable = DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE;
-        this.isSharedSubscriptionAvailable = DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE;
-        this.responseInformation = null;
-        this.serverReference = null;
     }
 
     private void checkPreconditions(final long sessionExpiryInterval,

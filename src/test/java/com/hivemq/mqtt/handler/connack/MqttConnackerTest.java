@@ -480,7 +480,7 @@ public class MqttConnackerTest {
 
     @Test(expected = NullPointerException.class)
     public void test_connackSuccess_ctx_null() {
-        mqttConnacker.connackSuccess(null, new CONNACK(Mqtt5ConnAckReasonCode.SUCCESS, null));
+        mqttConnacker.connackSuccess(null, CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).build());
     }
 
     @Test(expected = NullPointerException.class)
@@ -490,12 +490,12 @@ public class MqttConnackerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_connackSuccess_connack_error_reason_code() {
-        mqttConnacker.connackSuccess(clientConnection.getChannel().pipeline().firstContext(), new CONNACK(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, null));
+        mqttConnacker.connackSuccess(clientConnection.getChannel().pipeline().firstContext(), CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED).build());
     }
 
     @Test
     public void test_connackSuccess() {
-        mqttConnacker.connackSuccess(clientConnection.getChannel().pipeline().firstContext(), new CONNACK(Mqtt5ConnAckReasonCode.SUCCESS, null));
+        mqttConnacker.connackSuccess(clientConnection.getChannel().pipeline().firstContext(), CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).build());
 
         final CONNACK connack = channel.readOutbound();
         assertEquals(Mqtt5ConnAckReasonCode.SUCCESS, connack.getReasonCode());
