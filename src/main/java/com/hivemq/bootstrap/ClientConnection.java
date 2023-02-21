@@ -80,7 +80,6 @@ public class ClientConnection {
     private @Nullable SettableFuture<Void> disconnectFuture;
     private final @NotNull MessageIDPool messageIDPool;
 
-    private final Object connectionAttributesMutex = new Object();
     private @Nullable ConnectionAttributes connectionAttributes;
 
     private boolean sendWill = true;
@@ -364,19 +363,13 @@ public class ClientConnection {
         return connectionAttributes;
     }
 
-    public void setConnectionAttributes(final @Nullable ConnectionAttributes connectionAttributes) {
-        this.connectionAttributes = connectionAttributes;
-    }
-
-    public @NotNull ConnectionAttributes setConnectionAttributesIfAbsent(
+    public synchronized @NotNull ConnectionAttributes setConnectionAttributesIfAbsent(
             final @NotNull ConnectionAttributes connectionAttributes) {
 
-        synchronized (connectionAttributesMutex) {
-            if (this.connectionAttributes == null) {
-                this.connectionAttributes = connectionAttributes;
-            }
-            return this.connectionAttributes;
+        if (this.connectionAttributes == null) {
+            this.connectionAttributes = connectionAttributes;
         }
+        return this.connectionAttributes;
     }
 
     public boolean isSendWill() {
