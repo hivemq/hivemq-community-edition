@@ -304,7 +304,7 @@ public class TestMessageUtil {
     }
 
     public static CONNACK createFullMqtt5Connack() {
-        return new CONNACK.Mqtt5Builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
+        return CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString("success")
                 .withUserProperties(TEST_USER_PROPERTIES)
                 .withSessionPresent(true)

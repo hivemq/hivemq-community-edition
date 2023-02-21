@@ -146,7 +146,7 @@ public class PluginInitializerHandlerTest {
     @Test(timeout = 10000)
     public void test_write_connack_not_success() throws Exception {
         pluginInitializerHandler.write(channelHandlerContext,
-                new CONNACK.Mqtt5Builder().withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET).build(),
+                CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET).build(),
                 channelPromise);
 
         verify(initializers, never()).getClientInitializerMap();

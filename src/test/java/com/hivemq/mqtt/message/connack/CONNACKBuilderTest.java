@@ -27,10 +27,7 @@ import org.junit.rules.ExpectedException;
 
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Waldemar Ruck
@@ -40,8 +37,7 @@ public class CONNACKBuilderTest {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
-    private final CONNACK.Mqtt5Builder builder =
-            new CONNACK.Mqtt5Builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS);
+    private final CONNACKBuilder builder = CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS);
     private final String dataExceeded = new String(new char[65535 + 1]);
     private final int sizeExceeded = 65535 + 1;
 
@@ -99,7 +95,8 @@ public class CONNACKBuilderTest {
 
         final boolean wildcardSubscriptionAvailable = true;
 
-        final CONNACK connack = builder.withServerKeepAlive(serverKeepAlive)
+        final CONNACK connack = CONNACK.builder()
+                .withServerKeepAlive(serverKeepAlive)
                 .withTopicAliasMaximum(topicAliasMaximum)
                 .withMaximumPacketSize(maximumPacketSize)
                 .withSessionExpiryInterval(sessionExpiryInterval)
