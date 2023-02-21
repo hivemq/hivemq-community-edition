@@ -53,13 +53,13 @@ public class ClientConnection implements ClientConnectionContext {
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
     private final @NotNull MessageIDPool messageIDPool = new SequentialMessageIDPoolImpl();
+    private final @NotNull Listener connectedListener;
     private volatile @NotNull ClientState clientState;
 
     private @NotNull ProtocolVersion protocolVersion;
     private @NotNull String clientId;
     private boolean cleanStart;
     private @Nullable ModifiableDefaultPermissions authPermissions;
-    private @Nullable Listener connectedListener;
     private @Nullable CONNECT connectMessage;
     private @Nullable AtomicInteger inFlightMessageCount;
     private @Nullable Integer clientReceiveMaximum;
@@ -120,6 +120,7 @@ public class ClientConnection implements ClientConnectionContext {
         checkNotNull(context.clientId, "Client id must not be null.");
         checkNotNull(context.clientState, "Client state must not be null.");
         checkNotNull(context.protocolVersion, "Protocol version must not be null.");
+        checkNotNull(context.connectedListener, "Connected listener must not be null.");
 
         final ClientConnection clientConnection = new ClientConnection(
                 context.channel,
@@ -176,7 +177,7 @@ public class ClientConnection implements ClientConnectionContext {
             final @NotNull String clientId,
             final boolean cleanStart,
             final @Nullable ModifiableDefaultPermissions authPermissions,
-            final @Nullable Listener connectedListener,
+            final @NotNull Listener connectedListener,
             final @Nullable CONNECT connectMessage,
             final @Nullable Integer clientReceiveMaximum,
             final @Nullable Integer connectKeepAlive,
@@ -282,7 +283,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public @Nullable ProtocolVersion getProtocolVersion() {
+    public @NotNull ProtocolVersion getProtocolVersion() {
         return protocolVersion;
     }
 
@@ -322,12 +323,8 @@ public class ClientConnection implements ClientConnectionContext {
     /**
      * This key contains the actual listener a client connected to.
      */
-    public @Nullable Listener getConnectedListener() {
+    public @NotNull Listener getConnectedListener() {
         return connectedListener;
-    }
-
-    public void setConnectedListener(final @NotNull Listener connectedListener) {
-        this.connectedListener = connectedListener;
     }
 
     public @Nullable CONNECT getConnectMessage() {
@@ -335,7 +332,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setConnectMessage(final @NotNull CONNECT connectMessage) {
+    public void setConnectMessage(final @Nullable CONNECT connectMessage) {
         this.connectMessage = connectMessage;
     }
 
@@ -375,7 +372,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setQueueSizeMaximum(final @NotNull Long queueSizeMaximum) {
+    public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
     }
 
@@ -513,7 +510,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setRequestProblemInformation(final @NotNull Boolean requestProblemInformation) {
+    public void setRequestProblemInformation(final boolean requestProblemInformation) {
         this.requestProblemInformation = requestProblemInformation;
     }
 
@@ -647,7 +644,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setAuthConnect(final @NotNull CONNECT authConnect) {
+    public void setAuthConnect(final @Nullable CONNECT authConnect) {
         this.authConnect = authConnect;
     }
 
@@ -677,7 +674,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setAuthUserProperties(final @NotNull Mqtt5UserProperties authUserProperties) {
+    public void setAuthUserProperties(final @Nullable Mqtt5UserProperties authUserProperties) {
         this.authUserProperties = authUserProperties;
     }
 
@@ -687,7 +684,7 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setAuthFuture(final @NotNull ScheduledFuture<?> authFuture) {
+    public void setAuthFuture(final @Nullable ScheduledFuture<?> authFuture) {
         this.authFuture = authFuture;
     }
 

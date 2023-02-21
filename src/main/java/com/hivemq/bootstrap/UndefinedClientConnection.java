@@ -45,13 +45,13 @@ public class UndefinedClientConnection implements ClientConnectionContext {
 
     final @NotNull Channel channel;
     final @NotNull PublishFlushHandler publishFlushHandler;
-
+    final @NotNull Listener connectedListener;
     volatile @NotNull ClientState clientState = ClientState.CONNECTING;
+
     @Nullable ProtocolVersion protocolVersion;
     @Nullable String clientId;
     boolean cleanStart;
     @Nullable ModifiableDefaultPermissions authPermissions;
-    @Nullable Listener connectedListener;
     @Nullable CONNECT connectMessage;
     @Nullable Integer clientReceiveMaximum;
     @Nullable Integer connectKeepAlive;
@@ -93,9 +93,11 @@ public class UndefinedClientConnection implements ClientConnectionContext {
 
     public UndefinedClientConnection(
             final @NotNull Channel channel,
-            final @NotNull PublishFlushHandler publishFlushHandler) {
+            final @NotNull PublishFlushHandler publishFlushHandler,
+            final @NotNull Listener connectedListener) {
         this.channel = channel;
         this.publishFlushHandler = publishFlushHandler;
+        this.connectedListener = connectedListener;
     }
 
     @Override
@@ -156,17 +158,12 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public @Nullable Listener getConnectedListener() {
+    public @NotNull Listener getConnectedListener() {
         return connectedListener;
     }
 
     @Override
-    public void setConnectedListener(final @NotNull Listener connectedListener) {
-        this.connectedListener = connectedListener;
-    }
-
-    @Override
-    public void setConnectMessage(final @NotNull CONNECT connectMessage) {
+    public void setConnectMessage(final @Nullable CONNECT connectMessage) {
         this.connectMessage = connectMessage;
     }
 
@@ -195,7 +192,7 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setQueueSizeMaximum(final @NotNull Long queueSizeMaximum) {
+    public void setQueueSizeMaximum(final @Nullable Long queueSizeMaximum) {
         this.queueSizeMaximum = queueSizeMaximum;
     }
 
@@ -270,7 +267,7 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setRequestProblemInformation(final @NotNull Boolean requestProblemInformation) {
+    public void setRequestProblemInformation(final boolean requestProblemInformation) {
         this.requestProblemInformation = requestProblemInformation;
     }
 
@@ -387,7 +384,7 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setAuthConnect(final @NotNull CONNECT authConnect) {
+    public void setAuthConnect(final @Nullable CONNECT authConnect) {
         this.authConnect = authConnect;
     }
 
@@ -417,7 +414,7 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setAuthUserProperties(final @NotNull Mqtt5UserProperties authUserProperties) {
+    public void setAuthUserProperties(final @Nullable Mqtt5UserProperties authUserProperties) {
         this.authUserProperties = authUserProperties;
     }
 
@@ -427,7 +424,7 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setAuthFuture(final @NotNull ScheduledFuture<?> authFuture) {
+    public void setAuthFuture(final @Nullable ScheduledFuture<?> authFuture) {
         this.authFuture = authFuture;
     }
 

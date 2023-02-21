@@ -72,10 +72,9 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
         }
 
         final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
-        final UndefinedClientConnection clientContext = new UndefinedClientConnection(ch, publishFlushHandler);
+        final UndefinedClientConnection clientContext =
+                new UndefinedClientConnection(ch, publishFlushHandler, listener);
         ch.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientContext);
-
-        clientContext.setConnectedListener(listener);
 
         ch.pipeline().addLast(ALL_CHANNELS_GROUP_HANDLER, new ChannelGroupHandler(channelDependencies.getChannelGroup()));
         if (throttlingEnabled) {
