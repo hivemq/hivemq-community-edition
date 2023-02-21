@@ -61,7 +61,7 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
 
         if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL
                 || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
-            ClientConnectionContext.get(ctx.channel()).setIncomingPublishesSkipRest(true);
+            ClientConnectionContext.of(ctx.channel()).setIncomingPublishesSkipRest(true);
         }
 
 

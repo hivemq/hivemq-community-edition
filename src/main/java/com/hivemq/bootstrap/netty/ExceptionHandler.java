@@ -90,7 +90,7 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
             //do not log IllegalArgumentException as error
 
         } else {
-            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
 
             log.error("An unexpected error occurred for client with IP {}: {}",

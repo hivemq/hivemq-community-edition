@@ -45,7 +45,7 @@ public class ExtensionInformationUtil {
     private static final Logger log = LoggerFactory.getLogger(ExtensionInformationUtil.class);
 
     public static @NotNull ClientInformation getAndSetClientInformation(@NotNull final Channel channel, @NotNull final String clientId) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         if (clientConnectionContext.getExtensionClientInformation() == null) {
             clientConnectionContext.setExtensionClientInformation(new ClientInformationImpl(clientId));
         }
@@ -53,7 +53,7 @@ public class ExtensionInformationUtil {
     }
 
     public static @NotNull ConnectionInformation getAndSetConnectionInformation(@NotNull final Channel channel) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         if (clientConnectionContext.getExtensionConnectionInformation() == null) {
             clientConnectionContext.setExtensionConnectionInformation(new ConnectionInformationImpl(clientConnectionContext));
         }
@@ -63,7 +63,7 @@ public class ExtensionInformationUtil {
     public static @NotNull MqttVersion mqttVersionFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
-        final ProtocolVersion protocolVersion = ClientConnectionContext.get(channel).getProtocolVersion();
+        final ProtocolVersion protocolVersion = ClientConnectionContext.of(channel).getProtocolVersion();
         Preconditions.checkNotNull(protocolVersion, "protocol version must never be null");
 
         return mqttVersionFromProtocolVersion(protocolVersion);
@@ -84,7 +84,7 @@ public class ExtensionInformationUtil {
     public static @Nullable Listener getListenerFromChannel(final @NotNull Channel channel) {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
-        final com.hivemq.configuration.service.entity.Listener hiveMQListener = ClientConnectionContext.get(channel).getConnectedListener();
+        final com.hivemq.configuration.service.entity.Listener hiveMQListener = ClientConnectionContext.of(channel).getConnectedListener();
         if (hiveMQListener == null) {
             return null;
         }
@@ -110,7 +110,7 @@ public class ExtensionInformationUtil {
 
         Preconditions.checkNotNull(channel, "channel must never be null");
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         try {
             final String cipher = clientConnectionContext.getAuthCipherSuite();
             final String protocol = clientConnectionContext.getAuthProtocol();

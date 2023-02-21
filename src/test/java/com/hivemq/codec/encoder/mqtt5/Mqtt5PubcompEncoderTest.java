@@ -119,7 +119,7 @@ public class Mqtt5PubcompEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void encode_reason_string_request_problem_information_false() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
 
         // MQTT v5.0 Spec §3.4.2.2
         final byte[] expected = {
@@ -140,7 +140,7 @@ public class Mqtt5PubcompEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -163,7 +163,7 @@ public class Mqtt5PubcompEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_and_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header

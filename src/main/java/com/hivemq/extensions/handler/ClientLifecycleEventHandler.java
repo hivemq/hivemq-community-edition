@@ -155,7 +155,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     private void fireOnServerDisconnect(
             final @NotNull ChannelHandlerContext ctx, final @NotNull OnServerDisconnectEvent disconnectEvent) {
 
-        final String clientId = ClientConnectionContext.get(ctx.channel()).getClientId();
+        final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -194,7 +194,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     private void fireOnClientDisconnect(
             final @NotNull ChannelHandlerContext ctx, final @NotNull OnClientDisconnectEvent disconnectEvent) {
 
-        final String clientId = ClientConnectionContext.get(ctx.channel()).getClientId();
+        final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -235,7 +235,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     private void fireOnAuthFailed(
             final @NotNull ChannelHandlerContext ctx, final @NotNull OnAuthFailedEvent authFailedEvent) {
 
-        final String clientId = ClientConnectionContext.get(ctx.channel()).getClientId();
+        final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -273,7 +273,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     private void fireOnAuthSuccess(final @NotNull ChannelHandlerContext ctx) {
 
-        final String clientId = ClientConnectionContext.get(ctx.channel()).getClientId();
+        final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
         if (clientId == null) {
             //should never happen
             return;
@@ -337,7 +337,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
 
     @NotNull
     private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         if (clientConnectionContext.getExtensionClientEventListeners() == null) {
             clientConnectionContext.setExtensionClientEventListeners(new ClientEventListeners(hiveMQExtensions));
         }

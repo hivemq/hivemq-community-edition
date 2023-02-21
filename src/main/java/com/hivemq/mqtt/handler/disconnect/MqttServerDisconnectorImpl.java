@@ -71,7 +71,7 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         Preconditions.checkNotNull(channel, "Channel must never be null");
         ThreadPreConditions.inNettyChildEventloop();
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final ClientState oldClientState = clientConnectionContext.getClientState();
         clientConnectionContext.proposeClientState(ClientState.DISCONNECTING);
 

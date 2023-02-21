@@ -96,7 +96,7 @@ public class ConnackOutboundInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         if (clientId == null) {
             ctx.write(connack, promise);
@@ -198,7 +198,7 @@ public class ConnackOutboundInterceptorHandler {
         @Override
         public void run() {
             if (outputHolder.get().isPrevent()) {
-                final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+                final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
                 clientConnectionContext.proposeClientState(ClientState.DISCONNECTING);
 
                 eventLog.clientWasDisconnected(

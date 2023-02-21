@@ -52,7 +52,7 @@ public class MqttAuthSender {
             final @Nullable String reasonString) {
 
         final AUTH auth = new AUTH(
-                ClientConnectionContext.get(channel).getAuthMethod(),
+                ClientConnectionContext.of(channel).getAuthMethod(),
                 Bytes.fromReadOnlyBuffer(authData),
                 reasonCode,
                 userProperties,

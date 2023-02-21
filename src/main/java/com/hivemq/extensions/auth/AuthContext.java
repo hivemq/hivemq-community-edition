@@ -118,7 +118,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             });
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
-                final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+                final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
                 log.error("Execution of authentication was rejected for client with IP {}.",
                         clientConnectionContext.getChannelIP().orElse("UNKNOWN"), ex);
             }
@@ -137,7 +137,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             if (future.isSuccess()) {
                 final ScheduledFuture<?> timeoutFuture =
                         ctx.executor().schedule(this::onTimeout, output.getTimeout(), TimeUnit.SECONDS);
-                ClientConnectionContext.get(ctx.channel()).setAuthFuture(timeoutFuture);
+                ClientConnectionContext.of(ctx.channel()).setAuthFuture(timeoutFuture);
             } else if (future.channel().isActive()) {
                 onSendException(future.cause());
             }
@@ -145,7 +145,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     }
 
     void succeedAuthentication(final @NotNull T output) {
-        ClientConnectionContext.get(ctx.channel()).setAuthPermissions(output.getDefaultPermissions());
+        ClientConnectionContext.of(ctx.channel()).setAuthPermissions(output.getDefaultPermissions());
     }
 
     abstract void failAuthentication(@NotNull T output);

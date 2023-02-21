@@ -17,6 +17,7 @@ package com.hivemq.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -48,12 +49,12 @@ public class AbstractMqtt5EncoderTest {
         testMessageEncoder = new TestMessageEncoder();
         channel = new EmbeddedChannel(testMessageEncoder);
         clientConnection = new DummyClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("clientId");
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        ClientConnection.of(channel).setMaxPacketSizeSend((long) MAX_PACKET_SIZE);
+        ClientConnection.of(channel).setRequestProblemInformation(true);
+        ClientConnection.of(channel).setClientId("clientId");
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
 
     }
 

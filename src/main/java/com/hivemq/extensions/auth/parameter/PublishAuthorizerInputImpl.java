@@ -57,7 +57,7 @@ public class PublishAuthorizerInputImpl implements PublishAuthorizerInput, Plugi
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");
 
-        final Long timestamp = Objects.requireNonNullElse(ClientConnectionContext.get(channel).getConnectReceivedTimestamp(),
+        final Long timestamp = Objects.requireNonNullElse(ClientConnectionContext.of(channel).getConnectReceivedTimestamp(),
                 System.currentTimeMillis());
         this.publishPacket = new WillPublishPacketImpl(publish, timestamp);
         this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);

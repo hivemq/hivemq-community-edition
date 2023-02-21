@@ -36,7 +36,6 @@ import com.hivemq.mqtt.message.pool.MessageIDPool;
 import com.hivemq.mqtt.message.pool.SequentialMessageIDPoolImpl;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -50,9 +49,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ClientConnection implements ClientConnectionContext {
-
-    public static final AttributeKey<ClientConnection> CHANNEL_ATTRIBUTE_NAME =
-            AttributeKey.valueOf("Client.Connection");
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
@@ -106,6 +102,16 @@ public class ClientConnection implements ClientConnectionContext {
     private @Nullable ClientInformation extensionClientInformation;
     private @Nullable ConnectionInformation extensionConnectionInformation;
 
+    public static @NotNull ClientConnection of(final @NotNull Channel channel) {
+
+        final ClientConnectionContext clientConnectionContext =
+                channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).get();
+
+        checkArgument(clientConnectionContext instanceof ClientConnection);
+
+        return (ClientConnection) clientConnectionContext;
+    }
+
     public static @NotNull ClientConnection from(final @NotNull ClientConnectionContext clientConnectionContext) {
         checkArgument(clientConnectionContext instanceof UndefinedClientConnection);
 
@@ -115,7 +121,6 @@ public class ClientConnection implements ClientConnectionContext {
         checkNotNull(context.clientState, "Client state must not be null.");
         checkNotNull(context.protocolVersion, "Protocol version must not be null.");
 
-        context.getChannel().attr(UndefinedClientConnection.CHANNEL_ATTRIBUTE_NAME).set(null);
         final ClientConnection clientConnection = new ClientConnection(
                 context.channel,
                 context.publishFlushHandler,
@@ -159,7 +164,7 @@ public class ClientConnection implements ClientConnectionContext {
                 context.extensionClientInformation,
                 context.extensionConnectionInformation);
 
-        context.getChannel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        context.getChannel().attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         return clientConnection;
     }
 

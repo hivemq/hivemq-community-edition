@@ -78,7 +78,7 @@ public class IncomingPublishService {
             @NotNull final PUBLISH publish,
             @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
         final ProtocolVersion protocolVersion = clientConnection.getProtocolVersion();
 
         final int maxQos = mqttConfigurationService.maximumQos().getQosNumber();
@@ -146,7 +146,7 @@ public class IncomingPublishService {
             @NotNull final PUBLISH publish,
             @Nullable final PublishAuthorizerResult authorizerResult) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
 
         if (authorizerResult != null && authorizerResult.getAckReasonCode() != null) {
             //decision has been made in PublishAuthorizer
@@ -192,7 +192,7 @@ public class IncomingPublishService {
             @Nullable final AckReasonCode reasonCode,
             @Nullable final String reasonString) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
 
         clientConnection.setIncomingPublishesDefaultFailedSkipRest(true);
 
@@ -272,7 +272,7 @@ public class IncomingPublishService {
 
     private void publishMessage(final ChannelHandlerContext ctx, @NotNull final PUBLISH publish) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
         final String clientId = clientConnection.getClientId();
         final ListenableFuture<PublishReturnCode> publishFinishedFuture =
                 publishService.publish(publish, ctx.channel().eventLoop(), clientId);

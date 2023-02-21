@@ -109,7 +109,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         if (msg instanceof PUBACK) {
             final PUBACK puback = (PUBACK) msg;
-            final String client = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+            final String client = ClientConnection.of(ctx.channel()).getClientId();
             final int messageId = puback.getPacketIdentifier();
             persistence.addOrReplace(client, messageId, puback);
             promise.addListener(new PUBLISHFlowCompleteListener(messageId, client, qos1And2AlreadySentMap, persistence));
@@ -150,7 +150,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         orderedTopicService.handleInactive();
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         final Long sessionExpiryInterval = clientConnectionContext.getClientSessionExpiryInterval();
 
         //remove incoming message flow for not persisted client
@@ -167,7 +167,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBLISH publish) throws Exception {
 
-        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final String clientId = ClientConnection.of(ctx.channel()).getClientId();
 
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
             incomingPublishHandler.interceptOrDelegate(ctx, publish, clientId);
@@ -220,7 +220,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     private void handlePuback(final @NotNull ChannelHandlerContext ctx, final PUBACK msg) {
 
-        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final String clientId = ClientConnection.of(ctx.channel()).getClientId();
 
         log.trace("Client {}: Received PUBACK", clientId);
         final int messageId = msg.getPacketIdentifier();
@@ -234,7 +234,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     private void handlePubrec(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBREC msg) {
 
-        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final String clientId = ClientConnection.of(ctx.channel()).getClientId();
 
         log.trace("Client {}: Received pubrec", clientId);
 
@@ -254,7 +254,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     private void handlePubrel(final ChannelHandlerContext ctx, final PUBREL pubrel) {
 
-        final String client = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final String client = ClientConnection.of(ctx.channel()).getClientId();
 
         final int messageId = pubrel.getPacketIdentifier();
 
@@ -265,7 +265,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     private void handlePubcomp(final @NotNull ChannelHandlerContext ctx, @NotNull final PUBCOMP msg) {
 
-        final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final String clientId = ClientConnection.of(ctx.channel()).getClientId();
 
         log.trace("Client {}: Received PUBCOMP", clientId);
 
@@ -284,7 +284,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         //Such a message ID must never be zero, but better be safe than sorry
         if (messageId > 0) {
-            final MessageIDPool messageIDPool = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getMessageIDPool();
+            final MessageIDPool messageIDPool = ClientConnection.of(channel).getMessageIDPool();
             messageIDPool.returnId(messageId);
             if (log.isTraceEnabled()) {
                 log.trace("Returning Message ID {} for client {} because of a {} message was received", messageId, clientId, msg.getClass().getSimpleName());
