@@ -163,9 +163,8 @@ public class MqttConnackerImpl implements MqttConnacker {
         clientConnectionContext.proposeClientState(ClientState.CONNECT_FAILED);
 
         if (returnCode != null && withReasonCode) {
-            clientConnectionContext.getChannel()
-                    .writeAndFlush(new CONNACK(returnCode))
-                    .addListener(ChannelFutureListener.CLOSE);
+            final CONNACK connack = CONNACK.builder().withMqtt3ReturnCode(returnCode).build();
+            clientConnectionContext.getChannel().writeAndFlush(connack).addListener(ChannelFutureListener.CLOSE);
         } else {
             //Do not send connack to not let the client know its an mqtt server
             clientConnectionContext.getChannel().close();
@@ -193,7 +192,8 @@ public class MqttConnackerImpl implements MqttConnacker {
         clientConnectionContext.proposeClientState(ClientState.CONNECT_FAILED);
 
         if (reasonCode != null) {
-            final CONNACK.Mqtt5Builder connackBuilder = new CONNACK.Mqtt5Builder().withReasonCode(reasonCode)
+            final CONNACK.Mqtt5Builder connackBuilder = CONNACK.builder()
+                    .withReasonCode(reasonCode)
                     .withReasonString(reasonString)
                     .withUserProperties(userProperties);
 

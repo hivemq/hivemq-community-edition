@@ -50,6 +50,7 @@ import com.hivemq.mqtt.handler.publish.PublishFlowHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.CONNACKBuilder;
+import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
@@ -596,11 +597,11 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             connackSent = mqttConnacker.connackSuccess(ctx, connack, msg);
         } else {
             clientConnection.setClientSessionExpiryInterval(msg.getSessionExpiryInterval());
-            if (sessionPresent) {
-                connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_SESS_PRESENT, msg);
-            } else {
-                connackSent = mqttConnacker.connackSuccess(ctx, ConnackMessages.ACCEPTED_MSG_NO_SESS, msg);
-            }
+            final CONNACK connack = CONNACK.builder()
+                    .withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED)
+                    .withSessionPresent(sessionPresent)
+                    .build();
+            connackSent = mqttConnacker.connackSuccess(ctx, connack, msg);
         }
 
         //send out queued messages (from inflight and client-session queue) for client after connack is sent
@@ -612,7 +613,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             final @NotNull CONNECT msg,
             final boolean sessionPresent) {
 
-        final CONNACK.Mqtt5Builder builder =CONNACK.builder()
+        final CONNACK.Mqtt5Builder builder = CONNACK.builder()
                 .withSessionPresent(sessionPresent)
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReceiveMaximum(configurationService.mqttConfiguration().serverReceiveMaximum())
