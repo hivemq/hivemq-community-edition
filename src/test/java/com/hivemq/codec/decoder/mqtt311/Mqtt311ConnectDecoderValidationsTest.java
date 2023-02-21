@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt311;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -59,7 +60,8 @@ public class Mqtt311ConnectDecoderValidationsTest {
         MockitoAnnotations.initMocks(this);
 
         clientConnection = new DummyClientConnection(channel, null);
-        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(new DummyClientConnection(channel, null)));
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME))
+                .thenReturn(new TestChannelAttribute<>(new DummyClientConnection(channel, null)));
 
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
@@ -41,8 +42,8 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Before
     public void before() {
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     @Test
@@ -183,7 +184,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded1 = {
                 // fixed header
@@ -207,7 +208,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded2 = {
                 // fixed header
@@ -231,7 +232,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded3 = {
                 // fixed header
@@ -865,8 +866,8 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0x0B, 1,
 
         };
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(protocolVersion);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(protocolVersion);
 
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);

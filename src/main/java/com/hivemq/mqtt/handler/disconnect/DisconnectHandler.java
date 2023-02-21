@@ -76,7 +76,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     protected void channelRead0(
             final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT msg) throws Exception {
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
 
         clientConnectionContext.proposeClientState(ClientState.DISCONNECTING);
 
@@ -104,7 +104,7 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
     @Override
     public void channelInactive(final @NotNull ChannelHandlerContext ctx) throws Exception {
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
 
         // Any disconnect status other than unspecified is already handled.
         // We can be sure that we are logging the initial log and event when we can set this state.

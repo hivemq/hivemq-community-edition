@@ -73,7 +73,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
 
         final PublishFlushHandler publishFlushHandler = channelDependencies.createPublishFlushHandler();
         final UndefinedClientConnection clientContext = new UndefinedClientConnection(ch, publishFlushHandler);
-        ch.attr(UndefinedClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientContext);
+        ch.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientContext);
 
         clientContext.setConnectedListener(listener);
 
@@ -137,7 +137,7 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
     @Override
     public void exceptionCaught(final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) throws Exception {
         if (cause instanceof SslException) {
-            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
             log.error(
                     "{}. Disconnecting client {} ", cause.getMessage(),
                     clientConnectionContext.getChannelIP().orElse("UNKNOWN"));

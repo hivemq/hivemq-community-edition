@@ -73,7 +73,7 @@ public class SslClientCertificateHandler extends ChannelInboundHandlerAdapter {
             final SSLSession session = sslHandler.engine().getSession();
             final Certificate[] peerCertificates = session.getPeerCertificates();
             final SslClientCertificate sslClientCertificate = new SslClientCertificateImpl(peerCertificates);
-            ClientConnectionContext.get(channel).setAuthCertificate(sslClientCertificate);
+            ClientConnectionContext.of(channel).setAuthCertificate(sslClientCertificate);
 
         } catch (final SSLPeerUnverifiedException e) {
             handleSslPeerUnverifiedException(channel, e);

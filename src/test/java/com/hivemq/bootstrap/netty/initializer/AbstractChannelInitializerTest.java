@@ -15,8 +15,7 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
-import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.bootstrap.UndefinedClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -90,7 +89,7 @@ public class AbstractChannelInitializerTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
-        when(socketChannel.attr(UndefinedClientConnection.CHANNEL_ATTRIBUTE_NAME))
+        when(socketChannel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME))
                 .thenReturn(new TestChannelAttribute<>(null));
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.isActive()).thenReturn(true);
@@ -253,7 +252,7 @@ public class AbstractChannelInitializerTest {
 
         @Override
         protected void initChannel(@NotNull final Channel ch) throws Exception {
-            ch.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(ch, null));
+            ch.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(ch, null));
             addSpecialHandlers(ch);
         }
 

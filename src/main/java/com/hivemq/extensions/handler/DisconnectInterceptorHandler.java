@@ -84,7 +84,7 @@ public class DisconnectInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx, final @NotNull DISCONNECT disconnect) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -141,7 +141,7 @@ public class DisconnectInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         if (clientId == null) {
             return;

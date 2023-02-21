@@ -93,7 +93,9 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise)
             throws Exception {
 
         if (msg instanceof CONNACK) {
@@ -118,7 +120,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @NotNull ChannelPromise promise) {
 
         final Map<String, ClientInitializer> pluginInitializerMap = initializers.getClientInitializerMap();
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
 
         //No initializer set through any extension
         if (pluginInitializerMap.isEmpty() && msg != null) {
@@ -138,7 +140,8 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         final String clientId = clientConnection.getClientId();
 
         if (clientContext == null) {
-            final ModifiableDefaultPermissions defaultPermissions = clientConnection.getAuthPermissions();
+            final ModifiableDefaultPermissions defaultPermissions =
+                    clientConnection.getAuthPermissions();
             assert defaultPermissions != null;
             clientContext = new ClientContextImpl(hiveMQExtensions, defaultPermissions);
         }
@@ -148,26 +151,27 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         }
 
         final SettableFuture<Void> initializeFuture = SettableFuture.create();
-        final MultiInitializerTaskContext taskContext = new MultiInitializerTaskContext(clientId,
-                ctx,
-                initializeFuture,
-                clientContext,
-                pluginInitializerMap.size());
+        final MultiInitializerTaskContext taskContext =
+                new MultiInitializerTaskContext(clientId, ctx, initializeFuture, clientContext,
+                        pluginInitializerMap.size());
 
         for (final Map.Entry<String, ClientInitializer> initializerEntry : pluginInitializerMap.entrySet()) {
 
             final ClientInitializer initializer = initializerEntry.getValue();
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(initializer.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(initializer.getClass().getClassLoader());
             if (extension == null || extension.getExtensionClassloader() == null) {
                 taskContext.finishInitializer();
                 continue;
             }
 
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(taskContext,
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(
+                    taskContext,
                     () -> initializerInput,
-                    () -> new ClientContextPluginImpl(extension.getExtensionClassloader(), clientContext),
-                    new InitializeTask(initializer, initializerEntry.getKey()));
+                    () -> new ClientContextPluginImpl(
+                            extension.getExtensionClassloader(),
+                            clientContext),
+                    new InitializeTask(initializer, initializerEntry.getKey())
+            );
 
         }
 
@@ -193,7 +197,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             final @Nullable CONNACK msg,
             final @NotNull ChannelPromise promise) {
 
-        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
 
         final CONNECT connect = clientConnection.getConnectMessage();
         if (connect == null || connect.getWillPublish() == null) {
@@ -229,29 +233,17 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
                 promise.setFailure(new ClosedChannelException());
                 //will publish is not authorized, disconnect client
-                mqttConnacker.connackError(ctx.channel(),
-                        "A client (IP: {}) sent a CONNECT message with an not authorized Will Publish to topic '" +
-                                willPublish.getTopic() +
-                                "' with QoS '" +
-                                willPublish.getQos().getQosNumber() +
-                                "' and retain '" +
-                                willPublish.isRetain() +
-                                "'.",
+                mqttConnacker.connackError(
+                        ctx.channel(),
+                        "A client (IP: {}) sent a CONNECT message with an not authorized Will Publish to topic '"
+                                + willPublish.getTopic() + "' with QoS '" + willPublish.getQos().getQosNumber()
+                                + "' and retain '" + willPublish.isRetain() + "'.",
                         "sent a CONNECT message with an not authorized Will Publish to topic '" +
-                                willPublish.getTopic() +
-                                "' with QoS '" +
-                                willPublish.getQos().getQosNumber() +
-                                "' and retain '" +
-                                willPublish.isRetain() +
-                                "'",
+                                willPublish.getTopic() + "' with QoS '" + willPublish.getQos().getQosNumber()
+                                + "' and retain '" + willPublish.isRetain() + "'",
                         Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
-                        "Will Publish is not authorized to topic '" +
-                                willPublish.getTopic() +
-                                "' with QoS '" +
-                                willPublish.getQos() +
-                                "' and retain '" +
-                                willPublish.isRetain() +
-                                "'",
+                        "Will Publish is not authorized to topic '" + willPublish.getTopic() + "' with QoS '"
+                                + willPublish.getQos() + "' and retain '" + willPublish.isRetain() + "'",
                         Mqtt5UserProperties.NO_USER_PROPERTIES,
                         true);
             }
@@ -297,8 +289,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         public void finishInitializer() {
             try {
                 if (counter.incrementAndGet() == initializerSize) {
-                    final ClientConnection clientConnection =
-                            channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+                    final ClientConnection clientConnection = ClientConnection.of(channelHandlerContext.channel());
                     //update the clients context when all initializers are initialized.
                     clientConnection.setExtensionClientContext(clientContext);
                     clientConnection.setAuthPermissions(clientContext.getDefaultPermissions());

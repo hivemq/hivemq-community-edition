@@ -50,7 +50,7 @@ public class SslSniHandler extends SniHandler {
     protected void replaceHandler(final @NotNull ChannelHandlerContext ctx, final @Nullable String hostname, final @NotNull SslContext sslContext) throws Exception {
 
         if (hostname != null) {
-            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
             clientConnectionContext.setAuthSniHostname(hostname);
             if (log.isTraceEnabled()) {
                 log.trace("Client with IP '{}' sent SNI hostname '{}'", clientConnectionContext.getChannelIP().orElse("UNKNOWN"), hostname);

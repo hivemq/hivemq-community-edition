@@ -101,7 +101,7 @@ public class EventLog {
      * @param cleanStart if the connection was started clean
      */
     public void clientConnected(final @NotNull Channel channel, final boolean cleanStart) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         final Long sessionExpiry = clientConnectionContext.getClientSessionExpiryInterval();
@@ -155,7 +155,7 @@ public class EventLog {
      * @param reason  why the connection was closed
      */
     public void clientWasDisconnected(@NotNull final Channel channel, @NotNull final String reason) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         if (log.isTraceEnabled()) {
@@ -171,7 +171,7 @@ public class EventLog {
      * @param reasonCode of the AUTH packet.
      */
     public void clientAuthentication(@NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         if (received) {

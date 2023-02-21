@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -90,11 +91,11 @@ public class SubackOutboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestResponseInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setClientId("client");
+        ClientConnection.of(channel).setRequestResponseInformation(true);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
 
         final FullConfigurationService configurationService =
@@ -133,8 +134,8 @@ public class SubackOutboundInterceptorHandlerTest {
                         SimpleSubackTestInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -158,8 +159,8 @@ public class SubackOutboundInterceptorHandlerTest {
                         TestModifySubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -184,8 +185,8 @@ public class SubackOutboundInterceptorHandlerTest {
                         TestExceptionSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
@@ -208,8 +209,8 @@ public class SubackOutboundInterceptorHandlerTest {
                         TestIndexOutOfBoundsSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 

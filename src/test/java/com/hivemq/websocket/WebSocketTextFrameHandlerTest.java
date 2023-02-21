@@ -15,6 +15,7 @@
  */
 package com.hivemq.websocket;
 
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -33,7 +34,7 @@ public class WebSocketTextFrameHandlerTest {
     public void setUp() throws Exception {
         final WebSocketTextFrameHandler webSocketTextFrameHandler = new WebSocketTextFrameHandler();
         channel = new EmbeddedChannel(webSocketTextFrameHandler);
-        channel.attr(UndefinedClientConnection.CHANNEL_ATTRIBUTE_NAME)
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new UndefinedClientConnection(channel, mock(PublishFlushHandler.class)));
     }
 

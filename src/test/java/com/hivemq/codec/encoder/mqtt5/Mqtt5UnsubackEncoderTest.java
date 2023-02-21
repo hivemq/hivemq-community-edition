@@ -75,7 +75,7 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_and_user_properties_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
         final byte[] expected = {
                 // fixed header
                 //   type, flags
@@ -129,7 +129,7 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -274,7 +274,7 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_propertyLengthExceeded_omitReasonString() {
 
         final int maxPacketSize = 130;
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) maxPacketSize);
+        ClientConnection.of(channel).setMaxPacketSizeSend((long) maxPacketSize);
 
         final int maxUserPropertiesCount = maxPacketSize / userPropertyBytes;
         final Mqtt5UserProperties maxUserProperties = getUserProperties(maxUserPropertiesCount);
@@ -312,7 +312,7 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_propertyLengthExceeded_omitUserProperties() {
 
         final int maxPacketSize = 130;
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) maxPacketSize);
+        ClientConnection.of(channel).setMaxPacketSizeSend((long) maxPacketSize);
 
         final int maxUserPropertiesCount = maxPacketSize / userPropertyBytes;
         final Mqtt5UserProperties maxUserProperties = getUserProperties(maxUserPropertiesCount + 1);

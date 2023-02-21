@@ -53,7 +53,7 @@ public class ConnectionAttributes {
     static ConnectionAttributes getInstanceIfPresent(@NotNull final Channel channel) {
         Preconditions.checkNotNull(channel, "Channel for connection attributes must not be null.");
 
-        return ClientConnectionContext.get(channel).getConnectionAttributes();
+        return ClientConnectionContext.of(channel).getConnectionAttributes();
     }
 
     /**
@@ -74,7 +74,7 @@ public class ConnectionAttributes {
 
         final int maxValueSizeBytes = InternalConfigurations.CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE_BYTES;
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         return clientConnectionContext.setConnectionAttributesIfAbsent(new ConnectionAttributes(maxValueSizeBytes));
     }
 

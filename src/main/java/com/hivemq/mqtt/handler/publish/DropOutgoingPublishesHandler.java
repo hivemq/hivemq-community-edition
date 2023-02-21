@@ -72,7 +72,7 @@ public class DropOutgoingPublishesHandler {
                         future.set(PublishStatus.CHANNEL_NOT_WRITABLE);
                     }
                     //Drop message
-                    final String clientId = ClientConnectionContext.get(ctx.channel()).getClientId();
+                    final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
                     log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable", clientId, publish.getTopic());
                     messageDroppedService.notWritable(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
                     promise.setSuccess();

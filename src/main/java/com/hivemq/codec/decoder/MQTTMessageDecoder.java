@@ -92,7 +92,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return;
         }
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
 
         if (remainingLength == MALFORMED_REMAINING_LENGTH) {
             mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),

@@ -46,7 +46,7 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
     @Override
     protected void encode(
             final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final @NotNull ByteBuf out) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         globalMQTTMessageCounter.countOutbound(msg);
         encoderFactory.encode(clientConnectionContext, msg, out);
         globalMQTTMessageCounter.countOutboundTraffic(out.readableBytes());
@@ -58,7 +58,7 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
             final @NotNull Message msg,
             final boolean preferDirect) {
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         return encoderFactory.allocateBuffer(clientConnectionContext, msg, preferDirect);
     }
 }

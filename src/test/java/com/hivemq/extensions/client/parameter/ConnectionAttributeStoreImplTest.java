@@ -18,6 +18,7 @@ package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ConnectionAttributeStore;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
@@ -63,8 +64,8 @@ public class ConnectionAttributeStoreImplTest {
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
 
         //noinspection unchecked
-        final Attribute<ClientConnection> clientConnectionAttribute = mock(Attribute.class);
-        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(clientConnectionAttribute);
+        final Attribute<ClientConnectionContext> clientConnectionAttribute = mock(Attribute.class);
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(clientConnectionAttribute);
         when(clientConnectionAttribute.get()).thenReturn(clientConnection);
     }
 

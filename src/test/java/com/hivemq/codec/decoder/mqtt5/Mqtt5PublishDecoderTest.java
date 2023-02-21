@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
@@ -173,7 +174,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setTopicAliasMapping(new String[3]);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded = {
                 // fixed header
@@ -201,7 +202,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         clientConnection = new DummyClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setTopicAliasMapping(new String[3]);
         clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
@@ -371,7 +372,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded = {
                 // fixed header
@@ -433,7 +434,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded = {
                 // fixed header
@@ -598,7 +599,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfigurationService));
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded = {
                 // fixed header
@@ -1042,7 +1043,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         encoded[20] = 'b';
         publish = decode(encoded);
@@ -1054,7 +1055,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         encoded[20] = 'c';
         publish = decode(encoded);
@@ -1127,7 +1128,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES.set(1024 * 1024 * 200);
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnection.proposeClientState(ClientState.AUTHENTICATED);
         clientConnection.setTopicAliasMapping(new String[3]);
@@ -1276,7 +1277,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         encoded[10] = 'b';
         decode = decode(encoded);
@@ -1288,7 +1289,7 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         encoded[10] = 'c';
         decode = decode(encoded);

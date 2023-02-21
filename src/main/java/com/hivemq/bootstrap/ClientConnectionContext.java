@@ -33,6 +33,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.util.AttributeKey;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -59,12 +60,10 @@ import java.util.concurrent.ScheduledFuture;
  */
 public interface ClientConnectionContext {
 
-    static @NotNull ClientConnectionContext get(final @NotNull Channel channel) {
-        ClientConnectionContext context = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        if (context != null) {
-            return context;
-        }
-        context = channel.attr(UndefinedClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+    AttributeKey<ClientConnectionContext> CHANNEL_ATTRIBUTE_NAME = AttributeKey.valueOf("ClientConnectionContext");
+
+    static @NotNull ClientConnectionContext of(final @NotNull Channel channel) {
+        ClientConnectionContext context = channel.attr(CHANNEL_ATTRIBUTE_NAME).get();
         if (context != null) {
             return context;
         }

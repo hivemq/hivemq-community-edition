@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -53,7 +54,7 @@ public class MqttConnectDecoderTest {
         final HivemqId hiveMQId = new HivemqId();
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         decoder = new MqttConnectDecoder(mqttConnacker,
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 hiveMQId,
@@ -92,7 +93,7 @@ public class MqttConnectDecoderTest {
         }
 
         assertSame(ProtocolVersion.MQTTv5, clientConnection.getProtocolVersion());
-        assertNotNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectReceivedTimestamp());
+        assertNotNull(ClientConnection.of(channel).getConnectReceivedTimestamp());
     }
 
     @Test
@@ -100,7 +101,7 @@ public class MqttConnectDecoderTest {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 4});
         decoder.decode(clientConnection, buf, fixedHeader);
         assertSame(ProtocolVersion.MQTTv3_1_1, clientConnection.getProtocolVersion());
-        assertNotNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectReceivedTimestamp());
+        assertNotNull(ClientConnection.of(channel).getConnectReceivedTimestamp());
     }
 
     @Test
@@ -108,7 +109,7 @@ public class MqttConnectDecoderTest {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 6, 'M', 'Q', 'T', 'T', 3, 1});
         decoder.decode(clientConnection, buf, fixedHeader);
         assertSame(ProtocolVersion.MQTTv3_1, clientConnection.getProtocolVersion());
-        assertNotNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectReceivedTimestamp());
+        assertNotNull(ClientConnection.of(channel).getConnectReceivedTimestamp());
     }
 
     @Test

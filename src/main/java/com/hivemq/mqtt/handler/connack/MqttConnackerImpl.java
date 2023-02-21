@@ -109,7 +109,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         Preconditions.checkArgument(reasonCode != Mqtt5ConnAckReasonCode.SUCCESS, "Success is no error");
         ThreadPreConditions.inNettyChildEventloop();
 
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
 
         final ClientState oldClientState = clientConnectionContext.getClientState();
         clientConnectionContext.proposeClientState(ClientState.DISCONNECTING);
@@ -137,7 +137,7 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
-            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             log.debug(logMessage, clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
         }
 

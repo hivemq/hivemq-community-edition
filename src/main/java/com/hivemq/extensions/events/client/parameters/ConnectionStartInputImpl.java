@@ -50,7 +50,7 @@ public class ConnectionStartInputImpl implements ConnectionStartInput, PluginTas
         this.connect = connect;
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
         this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
-        this.connectTimestamp = Objects.requireNonNullElse(ClientConnectionContext.get(channel).getConnectReceivedTimestamp(),
+        this.connectTimestamp = Objects.requireNonNullElse(ClientConnectionContext.of(channel).getConnectReceivedTimestamp(),
                 System.currentTimeMillis());
     }
 

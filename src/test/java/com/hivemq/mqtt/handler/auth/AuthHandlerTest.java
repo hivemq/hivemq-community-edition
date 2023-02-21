@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.auth;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
@@ -66,7 +67,7 @@ public class AuthHandlerTest {
 
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         authHandler = new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
 
         channel.pipeline().addLast(authHandler);

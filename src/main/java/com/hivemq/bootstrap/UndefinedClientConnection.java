@@ -33,7 +33,6 @@ import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -43,9 +42,6 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 
 public class UndefinedClientConnection implements ClientConnectionContext {
-
-    public static final AttributeKey<UndefinedClientConnection> CHANNEL_ATTRIBUTE_NAME =
-            AttributeKey.valueOf("Client.Connection.Builder");
 
     final @NotNull Channel channel;
     final @NotNull PublishFlushHandler publishFlushHandler;

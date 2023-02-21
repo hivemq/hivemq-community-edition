@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -58,7 +59,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(100L);
+        ClientConnection.of(channel).setClientSessionExpiryInterval(100L);
     }
 
     @Test
@@ -158,8 +159,8 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         channel = new EmbeddedChannel(new TestMessageEncoder(messageDroppedService, securityConfigurationService));
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(disconnect);
         final ByteBuf buf = channel.readOutbound();
@@ -344,7 +345,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_session_expiry_zero_overwrite() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(0L);
+        ClientConnection.of(channel).setClientSessionExpiryInterval(0L);
 
         final byte[] encoded = {
 
@@ -379,10 +380,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setMaxSessionExpiryInterval(80);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         //from connect
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(50L);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        ClientConnection.of(channel).setClientSessionExpiryInterval(50L);
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final byte[] encoded = {
 

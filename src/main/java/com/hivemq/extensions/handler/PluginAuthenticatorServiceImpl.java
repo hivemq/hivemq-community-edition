@@ -332,7 +332,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private static @NotNull ModifiableClientSettingsImpl getSettingsFromChannel(final @NotNull Channel channel) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final Integer receiveMax = clientConnectionContext.getClientReceiveMaximum();
         Preconditions.checkNotNull(receiveMax, "Receive maximum must not be null here");
         final Long queueSizeMaximum = clientConnectionContext.getQueueSizeMaximum();
@@ -340,7 +340,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
     }
 
     private @NotNull ClientAuthenticators getClientAuthenticators(final @NotNull ChannelHandlerContext ctx) {
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         if (clientConnectionContext.getExtensionClientAuthenticators() == null) {
             clientConnectionContext.setExtensionClientAuthenticators(new ClientAuthenticatorsImpl(priorityComparator));
         }

@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -74,7 +75,7 @@ public class FlowControlHandlerTest {
     public void test_disconnect_after_receiving_to_many_qos_1_publishes() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
                 .withQoS(QoS.AT_LEAST_ONCE)
@@ -83,7 +84,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 11; i++) {
             channel.writeInbound(builder.build());
@@ -99,7 +100,7 @@ public class FlowControlHandlerTest {
     public void test_sending_publish_after_disconnect() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
@@ -109,7 +110,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 12; i++) {
             channel.writeInbound(builder.build());
@@ -121,7 +122,7 @@ public class FlowControlHandlerTest {
     public void test_no_disconnect_after_receiving_to_9_publishes_than_sending_9_pubacks() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
@@ -131,7 +132,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -155,7 +156,7 @@ public class FlowControlHandlerTest {
     public void test_quota_not_exceeding_max_value() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
@@ -165,7 +166,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -186,7 +187,7 @@ public class FlowControlHandlerTest {
     public void test_no_disconnect_after_receiving_to_10_publishes_than_sending_10_pubcomps() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
@@ -196,7 +197,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -220,7 +221,7 @@ public class FlowControlHandlerTest {
     public void test_no_disconnect_after_receiving_to_10_publishes_than_sending_10_pubrecs_with_failure_code() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
@@ -230,7 +231,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -257,7 +258,7 @@ public class FlowControlHandlerTest {
     public void test_disconnect_after_receiving_to_10_publishes_than_sending_10_pubrecs_with_success_pub() {
 
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
         builder.withTopic("topic")
@@ -267,7 +268,7 @@ public class FlowControlHandlerTest {
                 .withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
+        ClientConnection.of(channel).setClientReceiveMaximum(10);
 
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());

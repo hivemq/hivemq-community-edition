@@ -99,7 +99,7 @@ public class ConnectInboundInterceptorHandler {
 
     public void handleInboundConnect(final @NotNull ChannelHandlerContext ctx, final @NotNull CONNECT connect) {
         final Channel channel = ctx.channel();
-        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(channel);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         if (clientId == null) {
             return;
@@ -213,7 +213,7 @@ public class ConnectInboundInterceptorHandler {
                         reasonString);
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
-                final ClientConnectionContext clientConnectionContext = ClientConnectionContext.get(ctx.channel());
+                final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
                 clientConnectionContext.setClientId(connect.getClientIdentifier());
                 clientConnectionContext.setExtensionClientInformation(new ClientInformationImpl(connect.getClientIdentifier()));
                 clientConnectionContext.setCleanStart(connect.isCleanStart());
