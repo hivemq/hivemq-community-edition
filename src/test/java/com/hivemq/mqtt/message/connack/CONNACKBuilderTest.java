@@ -37,7 +37,7 @@ public class CONNACKBuilderTest {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
-    private final CONNACK.Mqtt5Builder builder = new CONNACK.Mqtt5Builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS);
+    private final CONNACKBuilder builder = CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS);
     private final String dataExceeded = new String(new char[65535 + 1]);
     private final int sizeExceeded = 65535 + 1;
 
@@ -95,7 +95,7 @@ public class CONNACKBuilderTest {
 
         final boolean wildcardSubscriptionAvailable = true;
 
-        final CONNACK connack = builder
+        final CONNACK connack = CONNACK.builder()
                 .withServerKeepAlive(serverKeepAlive)
                 .withTopicAliasMaximum(topicAliasMaximum)
                 .withMaximumPacketSize(maximumPacketSize)

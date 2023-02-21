@@ -44,6 +44,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> implements Mqtt3CONNACK, Mqtt5CONNACK {
 
+    public static @NotNull CONNACKBuilder builder() {
+        return new CONNACKBuilder();
+    }
+
     public static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
     public static final int KEEP_ALIVE_NOT_SET = -1;
 
@@ -56,7 +60,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
 
     //Auth
     private final @Nullable String authMethod;
-    private final @Nullable byte[] authData;
+    private final byte @Nullable [] authData;
 
     //Restrictions from Server
     private final int receiveMaximum;
@@ -70,6 +74,35 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
 
     private final @Nullable String responseInformation;
     private final @Nullable String serverReference;
+
+
+    public static @NotNull CONNACK from(final @NotNull ConnackPacketImpl packet) {
+
+        final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
+        final QoS qoS = (extensionMaxQos != null) ? QoS.valueOf(extensionMaxQos.getQosNumber()) : null;
+
+        return new CONNACKBuilder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
+                .withSessionPresent(packet.getSessionPresent())
+                .withSessionExpiryInterval(packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET))
+                .withServerKeepAlive(packet.getServerKeepAlive().orElse(KEEP_ALIVE_NOT_SET))
+                .withAssignedClientIdentifier(packet.getAssignedClientIdentifier().orElse(null))
+                .withAuthMethod(packet.getAuthenticationMethod().orElse(null))
+                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(packet.getAuthenticationData()))
+                .withReceiveMaximum(packet.getReceiveMaximum())
+                .withMaximumPacketSize(packet.getMaximumPacketSize())
+                .withTopicAliasMaximum(packet.getTopicAliasMaximum())
+                .withMaximumQoS(qoS)
+                .withRetainAvailable(packet.getRetainAvailable())
+                .withWildcardSubscriptionAvailable(packet.getWildCardSubscriptionAvailable())
+                .withSharedSubscriptionAvailable(packet.getSharedSubscriptionsAvailable())
+                .withSubscriptionIdentifierAvailable(packet.getSubscriptionIdentifiersAvailable())
+                .withResponseInformation(packet.getResponseInformation().orElse(null))
+                .withServerReference(packet.getServerReference().orElse(null))
+                .withReasonString(packet.getReasonString().orElse(null))
+                .withUserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()))
+                .build();
+    }
 
     // MQTT 5 CONNACK for FAILED CONNECT
     public CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode, @Nullable final String reasonString) {
@@ -94,25 +127,25 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
     }
 
     // MQTT 5
-    private CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode,
-                    @Nullable final String reasonString,
-                    @NotNull final Mqtt5UserProperties userProperties,
-                    final boolean sessionPresent,
-                    final long sessionExpiryInterval,
-                    final int serverKeepAlive,
-                    @Nullable final String assignedClientIdentifier,
-                    @Nullable final String authMethod,
-                    @Nullable final byte[] authData,
-                    final int receiveMaximum,
-                    final int topicAliasMaximum,
-                    final int maximumPacketSize,
-                    @Nullable final QoS maximumQoS,
-                    final boolean isRetainAvailable,
-                    final boolean isWildcardSubscriptionAvailable,
-                    final boolean isSubscriptionIdentifierAvailable,
-                    final boolean isSharedSubscriptionAvailable,
-                    @Nullable final String responseInformation,
-                    @Nullable final String serverReference) {
+    CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode,
+            @Nullable final String reasonString,
+            @NotNull final Mqtt5UserProperties userProperties,
+            final boolean sessionPresent,
+            final long sessionExpiryInterval,
+            final int serverKeepAlive,
+            @Nullable final String assignedClientIdentifier,
+            @Nullable final String authMethod,
+            @Nullable final byte[] authData,
+            final int receiveMaximum,
+            final int topicAliasMaximum,
+            final int maximumPacketSize,
+            @Nullable final QoS maximumQoS,
+            final boolean isRetainAvailable,
+            final boolean isWildcardSubscriptionAvailable,
+            final boolean isSubscriptionIdentifierAvailable,
+            final boolean isSharedSubscriptionAvailable,
+            @Nullable final String responseInformation,
+            @Nullable final String serverReference) {
 
         super(reasonCode, reasonString, userProperties);
 
@@ -135,34 +168,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.isSharedSubscriptionAvailable = isSharedSubscriptionAvailable;
         this.responseInformation = responseInformation;
         this.serverReference = serverReference;
-    }
-
-    public static @NotNull CONNACK from(final @NotNull ConnackPacketImpl packet) {
-
-        final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
-        final QoS qoS = (extensionMaxQos != null) ? QoS.valueOf(extensionMaxQos.getQosNumber()) : null;
-
-        return new CONNACK.Mqtt5Builder()
-                .withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
-                .withSessionPresent(packet.getSessionPresent())
-                .withSessionExpiryInterval(packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET))
-                .withServerKeepAlive(packet.getServerKeepAlive().orElse(KEEP_ALIVE_NOT_SET))
-                .withAssignedClientIdentifier(packet.getAssignedClientIdentifier().orElse(null))
-                .withAuthMethod(packet.getAuthenticationMethod().orElse(null))
-                .withAuthData(Bytes.getBytesFromReadOnlyBuffer(packet.getAuthenticationData()))
-                .withReceiveMaximum(packet.getReceiveMaximum())
-                .withMaximumPacketSize(packet.getMaximumPacketSize())
-                .withTopicAliasMaximum(packet.getTopicAliasMaximum())
-                .withMaximumQoS(qoS)
-                .withRetainAvailable(packet.getRetainAvailable())
-                .withWildcardSubscriptionAvailable(packet.getWildCardSubscriptionAvailable())
-                .withSharedSubscriptionAvailable(packet.getSharedSubscriptionsAvailable())
-                .withSubscriptionIdentifierAvailable(packet.getSubscriptionIdentifiersAvailable())
-                .withResponseInformation(packet.getResponseInformation().orElse(null))
-                .withServerReference(packet.getServerReference().orElse(null))
-                .withReasonString(packet.getReasonString().orElse(null))
-                .withUserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()))
-                .build();
     }
 
     //MQTT 3.1
@@ -251,154 +256,6 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         }
     }
 
-    public static class Mqtt5Builder {
-
-        private Mqtt5ConnAckReasonCode reasonCode;
-        private String reasonString;
-        private Mqtt5UserProperties userProperties = Mqtt5UserProperties.NO_USER_PROPERTIES;
-
-        private boolean sessionPresent;
-
-        //Mqtt 5
-        private long sessionExpiryInterval = SESSION_EXPIRY_NOT_SET;
-        private int serverKeepAlive = KEEP_ALIVE_NOT_SET;
-        private String assignedClientIdentifier;
-
-        //Auth
-        private String authMethod;
-        private byte[] authData;
-
-        //Restrictions from Server
-        private int receiveMaximum = DEFAULT_RECEIVE_MAXIMUM;
-        private int topicAliasMaximum = DEFAULT_TOPIC_ALIAS_MAXIMUM;
-        private int maximumPacketSize = DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-        private QoS maximumQoS;
-        private boolean isRetainAvailable = DEFAULT_RETAIN_AVAILABLE;
-        private boolean isWildcardSubscriptionAvailable = DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE;
-        private boolean isSubscriptionIdentifierAvailable = DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE;
-        private boolean isSharedSubscriptionAvailable = DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE;
-
-        private String responseInformation;
-        private String serverReference;
-
-        public CONNACK build() {
-            return new CONNACK(reasonCode,
-                    reasonString,
-                    userProperties,
-                    sessionPresent,
-                    sessionExpiryInterval,
-                    serverKeepAlive,
-                    assignedClientIdentifier,
-                    authMethod,
-                    authData,
-                    receiveMaximum,
-                    topicAliasMaximum,
-                    maximumPacketSize,
-                    maximumQoS,
-                    isRetainAvailable,
-                    isWildcardSubscriptionAvailable,
-                    isSubscriptionIdentifierAvailable,
-                    isSharedSubscriptionAvailable,
-                    responseInformation,
-                    serverReference);
-        }
-
-        public Mqtt5Builder withReasonCode(final Mqtt5ConnAckReasonCode reasonCode) {
-            this.reasonCode = reasonCode;
-            return this;
-        }
-
-        public Mqtt5Builder withReasonString(final String reasonString) {
-            this.reasonString = reasonString;
-            return this;
-        }
-
-        public Mqtt5Builder withUserProperties(final Mqtt5UserProperties userProperties) {
-            this.userProperties = userProperties;
-            return this;
-        }
-
-        public Mqtt5Builder withSessionPresent(final boolean sessionPresent) {
-            this.sessionPresent = sessionPresent;
-            return this;
-        }
-
-        public Mqtt5Builder withSessionExpiryInterval(final long sessionExpiryInterval) {
-            this.sessionExpiryInterval = sessionExpiryInterval;
-            return this;
-        }
-
-        public Mqtt5Builder withServerKeepAlive(final int serverKeepAlive) {
-            this.serverKeepAlive = serverKeepAlive;
-            return this;
-        }
-
-        public Mqtt5Builder withAssignedClientIdentifier(final String assignedClientIdentifier) {
-            this.assignedClientIdentifier = assignedClientIdentifier;
-            return this;
-        }
-
-        public Mqtt5Builder withAuthMethod(final String authMethod) {
-            this.authMethod = authMethod;
-            return this;
-        }
-
-        public Mqtt5Builder withAuthData(final byte[] authData) {
-            this.authData = authData;
-            return this;
-        }
-
-        public Mqtt5Builder withReceiveMaximum(final int receiveMaximum) {
-            this.receiveMaximum = receiveMaximum;
-            return this;
-        }
-
-        public Mqtt5Builder withTopicAliasMaximum(final int topicAliasMaximum) {
-            this.topicAliasMaximum = topicAliasMaximum;
-            return this;
-        }
-
-        public Mqtt5Builder withMaximumPacketSize(final int maximumPacketSize) {
-            this.maximumPacketSize = maximumPacketSize;
-            return this;
-        }
-
-        public Mqtt5Builder withMaximumQoS(final QoS maximumQoS) {
-            this.maximumQoS = maximumQoS;
-            return this;
-        }
-
-        public Mqtt5Builder withRetainAvailable(final boolean retainAvailable) {
-            isRetainAvailable = retainAvailable;
-            return this;
-        }
-
-        public Mqtt5Builder withWildcardSubscriptionAvailable(final boolean wildcardSubscriptionAvailable) {
-            isWildcardSubscriptionAvailable = wildcardSubscriptionAvailable;
-            return this;
-        }
-
-        public Mqtt5Builder withSubscriptionIdentifierAvailable(final boolean subscriptionIdentifierAvailable) {
-            isSubscriptionIdentifierAvailable = subscriptionIdentifierAvailable;
-            return this;
-        }
-
-        public Mqtt5Builder withSharedSubscriptionAvailable(final boolean sharedSubscriptionAvailable) {
-            isSharedSubscriptionAvailable = sharedSubscriptionAvailable;
-            return this;
-        }
-
-        public Mqtt5Builder withResponseInformation(final String responseInformation) {
-            this.responseInformation = responseInformation;
-            return this;
-        }
-
-        public Mqtt5Builder withServerReference(final String serverReference) {
-            this.serverReference = serverReference;
-            return this;
-        }
-    }
-
     @Override
     public int getReceiveMaximum() {
         return receiveMaximum;
@@ -414,8 +271,8 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         return maximumPacketSize;
     }
 
-    @NotNull
-    public Mqtt3ConnAckReturnCode getReturnCode() {
+    @Override
+    public @NotNull Mqtt3ConnAckReturnCode getReturnCode() {
         return Mqtt3ConnAckReturnCode.fromReasonCode(getReasonCode());
     }
 
@@ -439,6 +296,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         return isSharedSubscriptionAvailable;
     }
 
+    @Override
     public boolean isSessionPresent() {
         return sessionPresent;
     }
@@ -453,46 +311,38 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         return serverKeepAlive;
     }
 
-    @Nullable
     @Override
-    public QoS getMaximumQoS() {
+    public @Nullable QoS getMaximumQoS() {
         return maximumQoS;
     }
 
-    @Nullable
     @Override
-    public String getAssignedClientIdentifier() {
+    public @Nullable String getAssignedClientIdentifier() {
         return assignedClientIdentifier;
     }
 
-    @Nullable
     @Override
-    public String getAuthMethod() {
+    public @Nullable String getAuthMethod() {
         return authMethod;
     }
 
-    @Nullable
     @Override
-    public byte[] getAuthData() {
+    public byte @Nullable [] getAuthData() {
         return authData;
     }
 
-    @Nullable
     @Override
-    public String getResponseInformation() {
+    public @Nullable String getResponseInformation() {
         return responseInformation;
     }
 
-    @NotNull
     @Override
-    public MessageType getType() {
+    public @NotNull MessageType getType() {
         return MessageType.CONNACK;
     }
 
-    @Nullable
     @Override
-    public String getServerReference() {
+    public @Nullable String getServerReference() {
         return serverReference;
     }
-
 }

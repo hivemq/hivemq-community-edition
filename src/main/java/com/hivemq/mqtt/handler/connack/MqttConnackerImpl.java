@@ -27,6 +27,7 @@ import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.connack.CONNACKBuilder;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -179,7 +180,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         clientConnection.proposeClientState(ClientState.CONNECT_FAILED);
 
         if (reasonCode != null) {
-            final CONNACK.Mqtt5Builder connackBuilder = new CONNACK.Mqtt5Builder()
+            final CONNACKBuilder connackBuilder = CONNACK.builder()
                     .withReasonCode(reasonCode)
                     .withReasonString(reasonString)
                     .withUserProperties(userProperties);

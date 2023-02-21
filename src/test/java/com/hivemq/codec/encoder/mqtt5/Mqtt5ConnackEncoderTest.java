@@ -106,7 +106,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 new MqttUserProperty("test", "value2"),
                 new MqttUserProperty("test2", "value"));
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString("success")
                 .withUserProperties(userProperties)
@@ -149,7 +149,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -194,7 +194,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString("reason")
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -241,7 +241,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString("reason")
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -296,7 +296,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 new MqttUserProperty("test", "value2"),
                 new MqttUserProperty("test2", "value"));
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(userProperties)
@@ -349,7 +349,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 new MqttUserProperty("test", "value2"),
                 new MqttUserProperty("test2", "value"));
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(userProperties)
@@ -392,7 +392,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -437,7 +437,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x11, 0, 0, 0, 100
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -482,7 +482,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x21, 0, 100
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -527,7 +527,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x24, 1
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -570,7 +570,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -615,7 +615,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x25, 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -660,7 +660,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x28, 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -705,7 +705,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x2A, 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -750,7 +750,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x29, 0
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -795,7 +795,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x27, 0, 0, 0, 100
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -840,7 +840,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x12, 0, 4, 't', 'e', 's', 't'
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -885,7 +885,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x22, 0, 5,
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -930,7 +930,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x13, 0, 120,
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -975,7 +975,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x1A, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e',
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -1020,7 +1020,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x1C, 0, 6, 's', 'e', 'r', 'v', 'e', 'r',
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -1066,7 +1066,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         };
 
-        final CONNACK connack = new CONNACK.Mqtt5Builder()
+        final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReasonString(null)
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -1112,7 +1112,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
             };
 
             expected[3] = (byte) reasonCode.getCode();
-            final CONNACK connack = new CONNACK.Mqtt5Builder()
+            final CONNACK connack = CONNACK.builder()
                     .withReasonCode(reasonCode)
                     .withReasonString(null)
                     .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
@@ -1170,7 +1170,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
         maxUserProperties.encode(expected);
 
         final CONNACK connack =
-                new CONNACK.Mqtt5Builder()
+                CONNACK.builder()
                         .withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET)
                         .withReasonString(reasonString)
                         .withUserProperties(maxUserProperties)
@@ -1219,7 +1219,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
         final Mqtt5UserProperties userProperties = getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1);
 
         final CONNACK connack =
-                new CONNACK.Mqtt5Builder()
+                CONNACK.builder()
                         .withReasonCode(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR)
                         .withReasonString(null)
                         .withUserProperties(userProperties)
