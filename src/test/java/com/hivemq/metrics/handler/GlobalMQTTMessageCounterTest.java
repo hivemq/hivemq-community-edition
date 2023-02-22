@@ -232,7 +232,7 @@ public class GlobalMQTTMessageCounterTest {
 
     @Test
     public void test_count_outgoing_connacks() throws Exception {
-        globalMQTTMessageCounter.countOutbound(new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED));
+        globalMQTTMessageCounter.countOutbound(CONNACK.builder().withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED).build());
 
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
 

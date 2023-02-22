@@ -96,6 +96,7 @@ public class CONNACKBuilderTest {
         final boolean wildcardSubscriptionAvailable = true;
 
         final CONNACK connack = CONNACK.builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withServerKeepAlive(serverKeepAlive)
                 .withTopicAliasMaximum(topicAliasMaximum)
                 .withMaximumPacketSize(maximumPacketSize)
