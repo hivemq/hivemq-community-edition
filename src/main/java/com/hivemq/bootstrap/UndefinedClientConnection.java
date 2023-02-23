@@ -177,10 +177,6 @@ public class UndefinedClientConnection implements ClientConnectionContext {
         this.clientReceiveMaximum = clientReceiveMaximum;
     }
 
-    public @Nullable Integer getConnectKeepAlive() {
-        return connectKeepAlive;
-    }
-
     @Override
     public void setConnectKeepAlive(final @NotNull Integer connectKeepAlive) {
         this.connectKeepAlive = connectKeepAlive;
@@ -360,17 +356,9 @@ public class UndefinedClientConnection implements ClientConnectionContext {
         this.authProtocol = authProtocol;
     }
 
-    public @Nullable String getAuthUsername() {
-        return authUsername;
-    }
-
     @Override
     public void setAuthUsername(final @NotNull String authUsername) {
         this.authUsername = authUsername;
-    }
-
-    public byte @Nullable [] getAuthPassword() {
-        return authPassword;
     }
 
     @Override
