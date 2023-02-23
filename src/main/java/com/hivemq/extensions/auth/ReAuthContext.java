@@ -16,6 +16,7 @@
 package com.hivemq.extensions.auth;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.events.OnAuthSuccessEvent;
@@ -59,6 +60,8 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
     void succeedAuthentication(final @NotNull ReAuthOutput output) {
         super.succeedAuthentication(output);
         final Channel channel = ctx.channel();
+        final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+
         applyClientSettings(output.getClientSettings(), channel);
 
         final ChannelFuture authFuture = authSender.sendAuth(
@@ -75,6 +78,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 onSendException(future.cause());
             }
         });
+        clientConnection.proposeClientState(ClientState.AUTHENTICATED);
     }
 
     @Override
