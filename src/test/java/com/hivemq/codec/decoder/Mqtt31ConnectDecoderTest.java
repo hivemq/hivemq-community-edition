@@ -38,9 +38,16 @@ import util.TestConfigurationBootstrap;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class Mqtt31ConnectDecoderTest {
 
@@ -66,7 +73,8 @@ public class Mqtt31ConnectDecoderTest {
         clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
         clientConnection.setClientId("clientId");
-        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
+                clientConnection));
 
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

@@ -74,8 +74,7 @@ public class AbstractConfigurationTest {
 
         when(envVarUtil.replaceEnvironmentVariablePlaceholders(anyString())).thenCallRealMethod();
         final ConfigurationFile configurationFile = new ConfigurationFile(xmlFile);
-        reader = new ConfigFileReader(
-                configurationFile,
+        reader = new ConfigFileReader(configurationFile,
                 new RestrictionConfigurator(restrictionsConfigurationService),
                 new SecurityConfigurator(securityConfigurationService),
                 envVarUtil,

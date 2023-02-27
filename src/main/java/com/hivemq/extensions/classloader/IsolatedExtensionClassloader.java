@@ -48,17 +48,13 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
     @VisibleForTesting
     private static final ImmutableSet<String> restrictedPackages = new ImmutableSet.Builder<String>().add(
             // JDK
-            "java.",
-            "javax.annotation",
-            "jdk.",
+            "java.", "javax.annotation", "jdk.",
 
             // HiveMQ
             "com.hivemq.extension.sdk.api",
 
             // HiveMQ dependencies
-            "org.slf4j",
-            "com.codahale.metrics"
-    ).build();
+            "org.slf4j", "com.codahale.metrics").build();
 
     private static final ImmutableSet<Class<?>> classesWithStaticContext =
             new ImmutableSet.Builder<Class<?>>().add(Services.class, Builders.class).build();
@@ -81,8 +77,8 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
 
     public void loadClassesWithStaticContext() {
         for (final Class<?> staticClass : classesWithStaticContext) {
-            try (final InputStream resourceAsStream = staticClass.getResourceAsStream(
-                    staticClass.getSimpleName() + ".class")) {
+            try (final InputStream resourceAsStream = staticClass.getResourceAsStream(staticClass.getSimpleName() +
+                    ".class")) {
                 if (resourceAsStream != null) {
                     final byte[] bytes = resourceAsStream.readAllBytes();
                     defineClass(staticClass.getCanonicalName(), bytes, 0, bytes.length);

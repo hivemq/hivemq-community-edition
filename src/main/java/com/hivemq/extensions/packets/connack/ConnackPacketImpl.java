@@ -24,12 +24,12 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.connack.CONNACK;
 
-import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
-
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
+import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 
 /**
  * @author Florian Limpöck
@@ -105,8 +105,7 @@ public class ConnackPacketImpl implements ConnackPacket {
     }
 
     public ConnackPacketImpl(final @NotNull CONNACK connack) {
-        this(
-                connack.getReasonCode().toConnackReasonCode(),
+        this(connack.getReasonCode().toConnackReasonCode(),
                 connack.isSessionPresent(),
                 connack.getSessionExpiryInterval(),
                 connack.getServerKeepAlive(),
@@ -260,9 +259,24 @@ public class ConnackPacketImpl implements ConnackPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(reasonCode, sessionPresent, sessionExpiryInterval, serverKeepAlive, assignedClientId,
-                authenticationMethod, authenticationData, receiveMaximum, maximumPacketSize, topicAliasMaximum,
-                maximumQos, retainAvailable, wildCardSubscriptionAvailable, sharedSubscriptionsAvailable,
-                subscriptionIdentifiersAvailable, responseInformation, serverReference, reasonString, userProperties);
+        return Objects.hash(reasonCode,
+                sessionPresent,
+                sessionExpiryInterval,
+                serverKeepAlive,
+                assignedClientId,
+                authenticationMethod,
+                authenticationData,
+                receiveMaximum,
+                maximumPacketSize,
+                topicAliasMaximum,
+                maximumQos,
+                retainAvailable,
+                wildCardSubscriptionAvailable,
+                sharedSubscriptionsAvailable,
+                subscriptionIdentifiersAvailable,
+                responseInformation,
+                serverReference,
+                reasonString,
+                userProperties);
     }
 }

@@ -23,8 +23,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "clientAuthenticationMode")
 public enum ClientAuthenticationModeEntity {
 
-    @XmlEnumValue("OPTIONAL")
-    OPTIONAL,
+    @XmlEnumValue("OPTIONAL") OPTIONAL,
     REQUIRED,
     NONE
 

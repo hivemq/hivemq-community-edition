@@ -38,12 +38,23 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.*;
-import static org.junit.Assert.*;
+import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.DEFAULT_NO_LOCAL;
+import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.DEFAULT_RETAIN_AS_PUBLISHED;
+import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.DEFAULT_RETAIN_HANDLING;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +80,8 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         MockitoAnnotations.initMocks(this);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
-        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(temporaryFolder.newFolder());
+        when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
+                temporaryFolder.newFolder());
         metricRegistry = new MetricRegistry();
 
         persistence = new ClientSessionSubscriptionMemoryLocalPersistence(metricRegistry);
@@ -78,7 +90,12 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_add_get_subscriptions() {
 
-        persistence.addSubscriptions("clientid", ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE), new Topic("topic2", QoS.AT_MOST_ONCE), new Topic("topic3", QoS.AT_MOST_ONCE)), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscriptions("clientid",
+                ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE),
+                        new Topic("topic2", QoS.AT_MOST_ONCE),
+                        new Topic("topic3", QoS.AT_MOST_ONCE)),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         final ImmutableSet<Topic> subscriptions = persistence.getSubscriptions("clientid");
 
@@ -104,8 +121,16 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_add_remove_subscriptions_none_remaining() {
 
-        persistence.addSubscriptions("clientid", ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE), new Topic("topic2", QoS.AT_MOST_ONCE), new Topic("topic3", QoS.AT_MOST_ONCE)), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.removeSubscriptions("clientid", ImmutableSet.of("topic1", "topic2", "topic3"), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscriptions("clientid",
+                ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE),
+                        new Topic("topic2", QoS.AT_MOST_ONCE),
+                        new Topic("topic3", QoS.AT_MOST_ONCE)),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.removeSubscriptions("clientid",
+                ImmutableSet.of("topic1", "topic2", "topic3"),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         final ImmutableSet<Topic> subscriptions = persistence.getSubscriptions("clientid");
 
@@ -120,8 +145,16 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_add_remove_subscriptions_with_remaining() {
 
-        persistence.addSubscriptions("clientid", ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE), new Topic("topic2", QoS.AT_MOST_ONCE), new Topic("topic3", QoS.AT_MOST_ONCE)), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.removeSubscriptions("clientid", ImmutableSet.of("topic1", "topic2"), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscriptions("clientid",
+                ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE),
+                        new Topic("topic2", QoS.AT_MOST_ONCE),
+                        new Topic("topic3", QoS.AT_MOST_ONCE)),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.removeSubscriptions("clientid",
+                ImmutableSet.of("topic1", "topic2"),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         final ImmutableSet<Topic> subscriptions = persistence.getSubscriptions("clientid");
 
@@ -146,7 +179,12 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test(expected = NullPointerException.class)
     public void test_add_get_subscriptions_client_id_null_check() {
 
-        persistence.addSubscriptions(null, ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE), new Topic("topic2", QoS.AT_MOST_ONCE), new Topic("topic3", QoS.AT_MOST_ONCE)), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscriptions(null,
+                ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE),
+                        new Topic("topic2", QoS.AT_MOST_ONCE),
+                        new Topic("topic3", QoS.AT_MOST_ONCE)),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
         final Long value = (Long) metricRegistry.getGauges()
                 .get(HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name())
                 .getValue();
@@ -166,7 +204,12 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test(expected = IllegalStateException.class)
     public void test_add_get_subscriptions_client_timestamp_state_check() {
 
-        persistence.addSubscriptions("clientid", ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE), new Topic("topic2", QoS.AT_MOST_ONCE), new Topic("topic3", QoS.AT_MOST_ONCE)), -123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscriptions("clientid",
+                ImmutableSet.of(new Topic("topic1", QoS.AT_MOST_ONCE),
+                        new Topic("topic2", QoS.AT_MOST_ONCE),
+                        new Topic("topic3", QoS.AT_MOST_ONCE)),
+                -123L,
+                BucketUtils.getBucket("clientid", bucketCount));
         final Long value = (Long) metricRegistry.getGauges()
                 .get(HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name())
                 .getValue();
@@ -176,7 +219,10 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_add_get_subscription() {
 
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         final ImmutableSet<Topic> subscriptions = persistence.getSubscriptions("clientid");
 
@@ -185,7 +231,10 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         assertEquals("topic", next.getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, next.getQoS());
 
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         final ImmutableSet<Topic> subscriptions2 = persistence.getSubscriptions("clientid");
 
@@ -207,8 +256,14 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_add_get_subscription_with_same_topic() {
 
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic", QoS.EXACTLY_ONCE), 124L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.EXACTLY_ONCE),
+                124L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         final ImmutableSet<Topic> subscriptions = persistence.getSubscriptions("clientid");
 
@@ -253,10 +308,16 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     public void test_remove() {
         final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE);
         persistence.addSubscription("clientid", topic, 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
         final Topic topic4 = new Topic("topic4", QoS.EXACTLY_ONCE);
         persistence.addSubscription("clientid", topic4, 5431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic3", QoS.AT_MOST_ONCE), 1234567890L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic3", QoS.AT_MOST_ONCE),
+                1234567890L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
         assertEquals(3, persistence.getSubscriptions("clientid").size());
         assertEquals(1, persistence.getSubscriptions("clientid2").size());
@@ -295,9 +356,18 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Test
     public void test_removeAll() {
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic3", QoS.AT_MOST_ONCE), 1234567890L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic3", QoS.AT_MOST_ONCE),
+                1234567890L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
         assertEquals(2, persistence.getSubscriptions("clientid").size());
         assertEquals(1, persistence.getSubscriptions("clientid2").size());
@@ -335,14 +405,29 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Test
     public void test_remove_subscriptions() {
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic3", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
         assertEquals(3, persistence.getSubscriptions("clientid").size());
 
-        persistence.removeSubscriptions("clientid", ImmutableSet.of("topic", "topic2"), 12345678901L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.removeSubscriptions("clientid",
+                ImmutableSet.of("topic", "topic2"),
+                12345678901L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         assertEquals(1, persistence.getSubscriptions("clientid").size());
         assertEquals(1, persistence.getSubscriptions("clientid2").size());
@@ -356,10 +441,22 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Test
     public void test_add_after_closeDB() {
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic3", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
         for (int i = 0; i < bucketCount; i++) {
             persistence.closeDB(i);
@@ -370,10 +467,22 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
                 .getValue();
         assertEquals(0, value.intValue());
 
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic3", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
         assertEquals(3, persistence.getSubscriptions("clientid").size());
 
@@ -388,10 +497,22 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Test
     public void test_closeDB() {
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic3", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic", QoS.EXACTLY_ONCE), 567L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic3", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic", QoS.EXACTLY_ONCE),
+                567L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
         for (int i = 0; i < bucketCount; i++) {
             persistence.closeDB(i);
@@ -408,7 +529,10 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     public void test_remove_subscriptions_non_existent() {
         assertEquals(0, persistence.getSubscriptions("clientid").size());
 
-        persistence.removeSubscriptions("clientid", ImmutableSet.of("topic"), 12345678901L, BucketUtils.getBucket("clientid", bucketCount));
+        persistence.removeSubscriptions("clientid",
+                ImmutableSet.of("topic"),
+                12345678901L,
+                BucketUtils.getBucket("clientid", bucketCount));
 
         assertEquals(0, persistence.getSubscriptions("clientid").size());
 
@@ -425,7 +549,10 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         final Thread thread1 = new Thread(() -> {
             try {
                 for (int i = 0; i < 10000; i++) {
-                    persistence.addSubscription("client", new Topic("topic" + i, QoS.AT_LEAST_ONCE), System.currentTimeMillis(), BucketUtils.getBucket("client", bucketCount));
+                    persistence.addSubscription("client",
+                            new Topic("topic" + i, QoS.AT_LEAST_ONCE),
+                            System.currentTimeMillis(),
+                            BucketUtils.getBucket("client", bucketCount));
                     waiter.resume();
                 }
                 adding.set(false);
@@ -475,12 +602,24 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Test
     public void test_get_with_subscription_identifier() {
-        final Topic topic1 = new Topic("topic/a", QoS.AT_LEAST_ONCE, DEFAULT_NO_LOCAL, DEFAULT_RETAIN_AS_PUBLISHED,
-                DEFAULT_RETAIN_HANDLING, 1);
-        final Topic topic2 = new Topic("topic/#", QoS.AT_LEAST_ONCE, DEFAULT_NO_LOCAL, DEFAULT_RETAIN_AS_PUBLISHED,
-                DEFAULT_RETAIN_HANDLING, 2);
-        final Topic topic3 = new Topic("topic/+", QoS.AT_LEAST_ONCE, DEFAULT_NO_LOCAL, DEFAULT_RETAIN_AS_PUBLISHED,
-                DEFAULT_RETAIN_HANDLING, 3);
+        final Topic topic1 = new Topic("topic/a",
+                QoS.AT_LEAST_ONCE,
+                DEFAULT_NO_LOCAL,
+                DEFAULT_RETAIN_AS_PUBLISHED,
+                DEFAULT_RETAIN_HANDLING,
+                1);
+        final Topic topic2 = new Topic("topic/#",
+                QoS.AT_LEAST_ONCE,
+                DEFAULT_NO_LOCAL,
+                DEFAULT_RETAIN_AS_PUBLISHED,
+                DEFAULT_RETAIN_HANDLING,
+                2);
+        final Topic topic3 = new Topic("topic/+",
+                QoS.AT_LEAST_ONCE,
+                DEFAULT_NO_LOCAL,
+                DEFAULT_RETAIN_AS_PUBLISHED,
+                DEFAULT_RETAIN_HANDLING,
+                3);
 
         persistence.addSubscription("clientid", topic1, 123L, BucketUtils.getBucket("clientid", bucketCount));
         persistence.addSubscription("clientid", topic2, 124L, BucketUtils.getBucket("clientid", bucketCount));
@@ -511,13 +650,25 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Test
     public void test_get_chunk_match_all() {
-        persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid", new Topic("topic2", QoS.EXACTLY_ONCE), 431L, BucketUtils.getBucket("clientid", bucketCount));
-        persistence.addSubscription("clientid2", new Topic("topic3", QoS.AT_MOST_ONCE), 1234567890L, BucketUtils.getBucket("clientid2", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic", QoS.AT_LEAST_ONCE),
+                123L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid",
+                new Topic("topic2", QoS.EXACTLY_ONCE),
+                431L,
+                BucketUtils.getBucket("clientid", bucketCount));
+        persistence.addSubscription("clientid2",
+                new Topic("topic3", QoS.AT_MOST_ONCE),
+                1234567890L,
+                BucketUtils.getBucket("clientid2", bucketCount));
 
 
-        final Map<String, ImmutableSet<Topic>> client1Entries = persistence.getAllSubscribersChunk(BucketUtils.getBucket("clientid", bucketCount), null, 10).getValue();
-        final Map<String, ImmutableSet<Topic>> client2Entries = persistence.getAllSubscribersChunk(BucketUtils.getBucket("clientid2", bucketCount), null, 10).getValue();
+        final Map<String, ImmutableSet<Topic>> client1Entries =
+                persistence.getAllSubscribersChunk(BucketUtils.getBucket("clientid", bucketCount), null, 10).getValue();
+        final Map<String, ImmutableSet<Topic>> client2Entries =
+                persistence.getAllSubscribersChunk(BucketUtils.getBucket("clientid2", bucketCount), null, 10)
+                        .getValue();
 
         assertEquals(2, client1Entries.get("clientid").size());
         assertEquals(1, client2Entries.get("clientid2").size());
@@ -531,8 +682,14 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_get_chunk_multiple_subscriptions() {
         for (int i = 0; i < 60; i++) {
-            persistence.addSubscription("client" + i, new Topic("A" + i, QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("client" + i, bucketCount));
-            persistence.addSubscription("client" + i, new Topic("B" + i, QoS.AT_LEAST_ONCE), 123L, BucketUtils.getBucket("client" + i, bucketCount));
+            persistence.addSubscription("client" + i,
+                    new Topic("A" + i, QoS.AT_LEAST_ONCE),
+                    123L,
+                    BucketUtils.getBucket("client" + i, bucketCount));
+            persistence.addSubscription("client" + i,
+                    new Topic("B" + i, QoS.AT_LEAST_ONCE),
+                    123L,
+                    BucketUtils.getBucket("client" + i, bucketCount));
         }
 
         final Map<String, Set<Topic>> all = new HashMap<>();
@@ -602,7 +759,8 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         persistence.addSubscription("clientid", new Topic("topic", QoS.AT_LEAST_ONCE), 123L, 1);
         persistence.addSubscription("clientid", new Topic("topic", QoS.EXACTLY_ONCE), 431L, 1);
 
-        final Map<String, ImmutableSet<Topic>> client1Entries = persistence.getAllSubscribersChunk(1, null, 100).getValue();
+        final Map<String, ImmutableSet<Topic>> client1Entries =
+                persistence.getAllSubscribersChunk(1, null, 100).getValue();
 
         final Set<Topic> topics = client1Entries.get("clientid");
         assertEquals(1, topics.size());
@@ -614,8 +772,14 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Test
     public void test_add_subscriptions_duplicate_topics() {
         final int bucket = BucketUtils.getBucket("clientid", bucketCount);
-        persistence.addSubscriptions("clientid", ImmutableSet.of(new Topic("topic", QoS.AT_LEAST_ONCE), new Topic("topic1", QoS.AT_LEAST_ONCE)), 123L, bucket);
-        persistence.addSubscriptions("clientid", ImmutableSet.of(new Topic("topic", QoS.EXACTLY_ONCE), new Topic("topic1", QoS.EXACTLY_ONCE)), 123L, bucket);
+        persistence.addSubscriptions("clientid",
+                ImmutableSet.of(new Topic("topic", QoS.AT_LEAST_ONCE), new Topic("topic1", QoS.AT_LEAST_ONCE)),
+                123L,
+                bucket);
+        persistence.addSubscriptions("clientid",
+                ImmutableSet.of(new Topic("topic", QoS.EXACTLY_ONCE), new Topic("topic1", QoS.EXACTLY_ONCE)),
+                123L,
+                bucket);
 
         final ImmutableSet<Topic> topics = persistence.getSubscriptions("clientid");
         assertEquals(2, topics.size());

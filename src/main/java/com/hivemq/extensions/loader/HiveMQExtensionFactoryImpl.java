@@ -29,10 +29,11 @@ import java.nio.file.Path;
 public class HiveMQExtensionFactoryImpl implements HiveMQExtensionFactory {
 
     @Override
-    public @NotNull HiveMQExtension createHiveMQExtension(final @NotNull ExtensionMain extensionMainInstance,
-                                                          final @NotNull Path extensionFolder,
-                                                          final @NotNull HiveMQExtensionEntity extensionConfig,
-                                                          final boolean enabled) {
+    public @NotNull HiveMQExtension createHiveMQExtension(
+            final @NotNull ExtensionMain extensionMainInstance,
+            final @NotNull Path extensionFolder,
+            final @NotNull HiveMQExtensionEntity extensionConfig,
+            final boolean enabled) {
         return new HiveMQExtensionImpl(extensionConfig, extensionFolder, extensionMainInstance, enabled);
     }
 }

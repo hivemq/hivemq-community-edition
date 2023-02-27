@@ -15,9 +15,9 @@
  */
 package com.hivemq.bootstrap;
 
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.configuration.service.entity.Listener;
 import io.netty.channel.ChannelFuture;
 
 import static com.google.common.base.Preconditions.checkNotNull;

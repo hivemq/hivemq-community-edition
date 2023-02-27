@@ -193,8 +193,7 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
     }
 
     public PUBLISH(
-            final @NotNull PUBLISH publish,
-            final @Nullable PublishPayloadPersistence persistence) {
+            final @NotNull PUBLISH publish, final @Nullable PublishPayloadPersistence persistence) {
 
         this(publish.getHivemqId(),
                 publish.getTopic(),
@@ -353,11 +352,17 @@ public class PUBLISH extends MqttMessageWithUserProperties implements Mqtt3PUBLI
             return false;
         }
         final PUBLISH publish = (PUBLISH) o;
-        return timestamp == publish.timestamp && duplicateDelivery == publish.duplicateDelivery &&
-                retain == publish.retain && messageExpiryInterval == publish.messageExpiryInterval &&
-                publishId == publish.publishId && isNewTopicAlias == publish.isNewTopicAlias &&
-                Arrays.equals(payload, publish.payload) && Objects.equals(topic, publish.topic) && qoS == publish.qoS &&
-                Objects.equals(hivemqId, publish.hivemqId) && Objects.equals(uniqueId, publish.uniqueId) &&
+        return timestamp == publish.timestamp &&
+                duplicateDelivery == publish.duplicateDelivery &&
+                retain == publish.retain &&
+                messageExpiryInterval == publish.messageExpiryInterval &&
+                publishId == publish.publishId &&
+                isNewTopicAlias == publish.isNewTopicAlias &&
+                Arrays.equals(payload, publish.payload) &&
+                Objects.equals(topic, publish.topic) &&
+                qoS == publish.qoS &&
+                Objects.equals(hivemqId, publish.hivemqId) &&
+                Objects.equals(uniqueId, publish.uniqueId) &&
                 payloadFormatIndicator == publish.payloadFormatIndicator &&
                 Objects.equals(contentType, publish.contentType) &&
                 Objects.equals(responseTopic, publish.responseTopic) &&

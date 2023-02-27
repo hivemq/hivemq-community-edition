@@ -45,7 +45,8 @@ public class MQTTHandlerModuleTest {
             @Override
             protected void configure() {
                 final Injector persistenceInjector = mock(Injector.class);
-                when(persistenceInjector.getInstance(MessageDroppedService.class)).thenReturn(mock(MessageDroppedServiceImpl.class));
+                when(persistenceInjector.getInstance(MessageDroppedService.class)).thenReturn(mock(
+                        MessageDroppedServiceImpl.class));
                 install(new MQTTHandlerModule(persistenceInjector));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
             }

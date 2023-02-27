@@ -15,7 +15,11 @@
  */
 package com.hivemq.diagnostic;
 
-import com.google.inject.*;
+import com.google.inject.Binding;
+import com.google.inject.CreationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.hivemq.configuration.SystemProperties;
 import org.junit.Rule;
 import org.junit.Test;

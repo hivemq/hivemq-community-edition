@@ -41,7 +41,8 @@ public class ConnectionStartInputImplTest {
         ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ConnectionStartInputImpl input = new ConnectionStartInputImpl(TestMessageUtil.createFullMqtt5Connect(), channel);
+        final ConnectionStartInputImpl input =
+                new ConnectionStartInputImpl(TestMessageUtil.createFullMqtt5Connect(), channel);
         assertEquals(input, input.get());
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());

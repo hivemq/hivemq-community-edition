@@ -119,8 +119,7 @@ public class ConnectInboundInterceptorHandler {
                 new ConnectInboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
 
         final long timestamp =
-                Objects.requireNonNullElse(clientConnection.getConnectReceivedTimestamp(),
-                        System.currentTimeMillis());
+                Objects.requireNonNullElse(clientConnection.getConnectReceivedTimestamp(), System.currentTimeMillis());
         final ConnectPacketImpl packet = new ConnectPacketImpl(connect, timestamp);
         final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<ConnectInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
@@ -177,9 +176,9 @@ public class ConnectInboundInterceptorHandler {
             if (output.isPrevent()) {
                 finishInterceptor();
             } else if (output.isTimedOut() && (output.getTimeoutFallback() == TimeoutFallback.FAILURE)) {
-                output.prevent(
-                        "Connect with client ID " + getIdentifier() + " failed because of an interceptor timeout",
-                        "Extension interceptor timeout");
+                output.prevent("Connect with client ID " +
+                        getIdentifier() +
+                        " failed because of an interceptor timeout", "Extension interceptor timeout");
                 finishInterceptor();
             } else {
                 if (output.getConnectPacket().isModified()) {
@@ -205,15 +204,15 @@ public class ConnectInboundInterceptorHandler {
             if (output.isPrevent()) {
                 final String logMessage = output.getLogMessage();
                 final String reasonString = output.getReasonString();
-                connacker.connackError(
-                        ctx.channel(),
+                connacker.connackError(ctx.channel(),
                         logMessage,
                         logMessage,
                         Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
                         reasonString);
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
-                final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+                final ClientConnection clientConnection =
+                        ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
                 clientConnection.setClientId(connect.getClientIdentifier());
                 clientConnection.setExtensionClientInformation(new ClientInformationImpl(connect.getClientIdentifier()));
                 clientConnection.setCleanStart(connect.isCleanStart());
@@ -260,11 +259,8 @@ public class ConnectInboundInterceptorHandler {
                     interceptor.onConnect(input, output);
                 }
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound CONNECT interception. " +
-                                "Extensions are responsible for their own exception handling.",
-                        extensionId,
-                        e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound CONNECT interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.prevent(String.format(ReasonStrings.CONNACK_UNSPECIFIED_ERROR_EXTENSION_EXCEPTION, clientId),
                         "Exception in CONNECT inbound interceptor");
                 Exceptions.rethrowError(e);

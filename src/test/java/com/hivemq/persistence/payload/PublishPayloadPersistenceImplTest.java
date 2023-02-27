@@ -27,9 +27,15 @@ import util.LogbackCapturingAppender;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Lukas Brandl
@@ -39,7 +45,7 @@ public class PublishPayloadPersistenceImplTest {
 
     @Mock
     private @NotNull PublishPayloadLocalPersistence localPersistence;
-    
+
     @Mock
     private @NotNull ListeningScheduledExecutorService scheduledExecutorService;
 
@@ -152,9 +158,21 @@ public class PublishPayloadPersistenceImplTest {
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
         persistence.init();
 
-        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(0L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
-        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(250L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
-        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(500L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
-        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class), eq(750L), eq(250L * 4L), eq(TimeUnit.MILLISECONDS));
+        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class),
+                eq(0L),
+                eq(250L * 4L),
+                eq(TimeUnit.MILLISECONDS));
+        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class),
+                eq(250L),
+                eq(250L * 4L),
+                eq(TimeUnit.MILLISECONDS));
+        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class),
+                eq(500L),
+                eq(250L * 4L),
+                eq(TimeUnit.MILLISECONDS));
+        verify(scheduledExecutorService).scheduleAtFixedRate(any(RemoveEntryTask.class),
+                eq(750L),
+                eq(250L * 4L),
+                eq(TimeUnit.MILLISECONDS));
     }
 }

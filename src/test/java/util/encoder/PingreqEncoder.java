@@ -32,9 +32,7 @@ public class PingreqEncoder implements MqttEncoder<PINGREQ> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
-            final @NotNull PINGREQ msg,
-            final @NotNull ByteBuf out) {
+            final @NotNull ClientConnection clientConnection, final @NotNull PINGREQ msg, final @NotNull ByteBuf out) {
 
         out.writeByte(PINGREQ_FIXED_HEADER);
         out.writeByte(PINGREQ_REMAINING_LENGTH);

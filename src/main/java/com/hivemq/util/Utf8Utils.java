@@ -106,12 +106,16 @@ public class Utf8Utils {
                 }
 
 //              '\uFDD0' - '\uFDEF'
-                if (byte1 == (byte) 0xEF && bytes[i + 1] == (byte) 0xB7 && (bytes[i + 2] >= (byte) 0x90 || bytes[i + 2] <= (byte) 0xAF)) {
+                if (byte1 == (byte) 0xEF &&
+                        bytes[i + 1] == (byte) 0xB7 &&
+                        (bytes[i + 2] >= (byte) 0x90 || bytes[i + 2] <= (byte) 0xAF)) {
                     return true;
                 }
 
 //              '\uFFFE' | '\uFFFF'
-                if (byte1 == (byte) 0xEF && bytes[i + 1] == (byte) 0xBF && (bytes[i + 2] == (byte) 0xBE || bytes[i + 2] == (byte) 0xBF)) {
+                if (byte1 == (byte) 0xEF &&
+                        bytes[i + 1] == (byte) 0xBF &&
+                        (bytes[i + 2] == (byte) 0xBE || bytes[i + 2] == (byte) 0xBF)) {
                     return true;
                 }
             } else {
@@ -242,7 +246,8 @@ public class Utf8Utils {
 
         byteBuf.markReaderIndex();
 
-        final boolean wellFormed = isSliceWellFormed(byteBuf.slice(byteBuf.readerIndex(), utf8StringLength), utf8StringLength);
+        final boolean wellFormed =
+                isSliceWellFormed(byteBuf.slice(byteBuf.readerIndex(), utf8StringLength), utf8StringLength);
 
         byteBuf.resetReaderIndex();
 
@@ -291,7 +296,10 @@ public class Utf8Utils {
                     }
 
                     byte2 = byteBuf.readByte();
-                    if (byte2 > -65 || byte1 == -32 && byte2 < -96 || byte1 == -19 && -96 <= byte2 || byteBuf.readByte() > -65) {
+                    if (byte2 > -65 ||
+                            byte1 == -32 && byte2 < -96 ||
+                            byte1 == -19 && -96 <= byte2 ||
+                            byteBuf.readByte() > -65) {
                         return false;
                     }
                 } else {
@@ -300,7 +308,10 @@ public class Utf8Utils {
                     }
 
                     byte2 = byteBuf.readByte();
-                    if (byte2 > -65 || (byte1 << 28) + (byte2 - -112) >> 30 != 0 || byteBuf.readByte() > -65 || byteBuf.readByte() > -65) {
+                    if (byte2 > -65 ||
+                            (byte1 << 28) + (byte2 - -112) >> 30 != 0 ||
+                            byteBuf.readByte() > -65 ||
+                            byteBuf.readByte() > -65) {
                         return false;
                     }
                 }

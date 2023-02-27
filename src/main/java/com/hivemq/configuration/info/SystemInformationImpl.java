@@ -100,39 +100,24 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = Objects.requireNonNullElseGet(
-                configFolder,
-                () -> setUpHiveMQFolder(
-                        SystemProperties.CONFIG_FOLDER,
+        configFolder = Objects.requireNonNullElseGet(configFolder,
+                () -> setUpHiveMQFolder(SystemProperties.CONFIG_FOLDER,
                         EnvironmentVariables.CONFIG_FOLDER,
                         "conf",
-                        false
-                )
-        );
+                        false));
 
         logFolder = setUpHiveMQFolder(SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", !embedded);
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
 
-        dataFolder = Objects.requireNonNullElseGet(
-                dataFolder,
-                () -> setUpHiveMQFolder(
-                        SystemProperties.DATA_FOLDER,
-                        EnvironmentVariables.DATA_FOLDER,
-                        "data",
-                        true
-                )
-        );
+        dataFolder = Objects.requireNonNullElseGet(dataFolder,
+                () -> setUpHiveMQFolder(SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true));
 
-        pluginFolder = Objects.requireNonNullElseGet(
-                pluginFolder,
-                () -> setUpHiveMQFolder(
-                        SystemProperties.EXTENSIONS_FOLDER,
+        pluginFolder = Objects.requireNonNullElseGet(pluginFolder,
+                () -> setUpHiveMQFolder(SystemProperties.EXTENSIONS_FOLDER,
                         EnvironmentVariables.EXTENSION_FOLDER,
                         "extensions",
-                        !embedded
-                )
-        );
+                        !embedded));
     }
 
     private void setHivemqVersion() {

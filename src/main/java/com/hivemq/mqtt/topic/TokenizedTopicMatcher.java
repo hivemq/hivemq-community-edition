@@ -25,7 +25,8 @@ import static java.lang.Math.min;
  */
 public class TokenizedTopicMatcher implements TopicMatcher {
 
-    public boolean matches(@NotNull final String topicSubscription, @NotNull final String actualTopic) throws InvalidTopicException {
+    public boolean matches(@NotNull final String topicSubscription, @NotNull final String actualTopic)
+            throws InvalidTopicException {
 
         if (StringUtils.containsAny(actualTopic, "#+")) {
             throw new InvalidTopicException("The actual topic must not contain a wildcard character (# or +)");

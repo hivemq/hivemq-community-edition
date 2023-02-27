@@ -29,7 +29,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.SplittableRandom;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -63,10 +67,10 @@ public class SingleWriterServiceImpl implements SingleWriterService {
 
     @VisibleForTesting
     @NotNull ExecutorService singleWriterExecutor;
-    
+
     @VisibleForTesting
     public final @NotNull ExecutorService @NotNull [] callbackExecutors;
-    
+
     @VisibleForTesting
     final @NotNull ScheduledExecutorService checkScheduler;
 
@@ -106,19 +110,23 @@ public class SingleWriterServiceImpl implements SingleWriterService {
     public void postConstruct() {
         // Periodically check if there are pending tasks in the queues
         checkScheduler.scheduleAtFixedRate(() -> {
-            try {
+                    try {
 
-                if (runningThreadsCount.getAndIncrement() == 0 && !singleWriterExecutor.isShutdown()) {
-                    singleWriterExecutor.submit(
-                            new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount,
+                        if (runningThreadsCount.getAndIncrement() == 0 && !singleWriterExecutor.isShutdown()) {
+                            singleWriterExecutor.submit(new SingleWriterTask(nonemptyQueueCounter,
+                                    globalTaskCount,
+                                    runningThreadsCount,
                                     producers));
-                } else {
-                    runningThreadsCount.decrementAndGet();
-                }
-            } catch (final Exception e) {
-                log.error("Exception in single writer check task ", e);
-            }
-        }, SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(), SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(), TimeUnit.MILLISECONDS);
+                        } else {
+                            runningThreadsCount.decrementAndGet();
+                        }
+                    } catch (final Exception e) {
+                        log.error("Exception in single writer check task ", e);
+                    }
+                },
+                SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(),
+                SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(),
+                TimeUnit.MILLISECONDS);
     }
 
     @VisibleForTesting
@@ -135,8 +143,10 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         nonemptyQueueCounter.incrementAndGet();
 
         if (runningThreadsCount.getAndIncrement() < threadPoolSize) {
-            singleWriterExecutor.submit(
-                    new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount, producers));
+            singleWriterExecutor.submit(new SingleWriterTask(nonemptyQueueCounter,
+                    globalTaskCount,
+                    runningThreadsCount,
+                    producers));
         } else {
             runningThreadsCount.decrementAndGet();
         }
@@ -243,7 +253,8 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         private static final @NotNull SplittableRandom RANDOM = new SplittableRandom();
 
         public SingleWriterTask(
-                final @NotNull AtomicLong nonemptyQueueCounter, final @NotNull AtomicLong globalTaskCount,
+                final @NotNull AtomicLong nonemptyQueueCounter,
+                final @NotNull AtomicLong globalTaskCount,
                 final @NotNull AtomicInteger runningThreadsCount,
                 final ProducerQueuesImpl @NotNull [] producers) {
 

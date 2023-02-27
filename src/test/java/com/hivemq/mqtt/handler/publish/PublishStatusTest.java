@@ -22,9 +22,6 @@ public class PublishStatusTest {
 
     @Test
     public void test_all_value_of() {
-        EnumTestUtil.assertAllValueOf(
-                PublishStatus.class,
-                PublishStatus::getId,
-                PublishStatus::valueOf);
+        EnumTestUtil.assertAllValueOf(PublishStatus.class, PublishStatus::getId, PublishStatus::valueOf);
     }
 }

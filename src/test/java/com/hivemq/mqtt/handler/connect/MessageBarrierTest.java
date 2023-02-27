@@ -68,7 +68,9 @@ public class MessageBarrierTest {
     @Test
     public void test_connect_sent() {
 
-        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
         assertEquals(true, messageBarrier.getConnectReceived());
     }
 
@@ -83,7 +85,9 @@ public class MessageBarrierTest {
     @Test
     public void test_queue_messages_after_connect() {
 
-        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
 
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
@@ -99,7 +103,9 @@ public class MessageBarrierTest {
     @Test
     public void test_messages_not_sent_on_connack_fail() {
 
-        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
 
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
@@ -124,7 +130,9 @@ public class MessageBarrierTest {
     @Test
     public void test_messages_sent_on_connack_success() {
 
-        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1).withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
 
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));

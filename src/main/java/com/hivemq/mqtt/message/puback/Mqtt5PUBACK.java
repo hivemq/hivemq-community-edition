@@ -32,20 +32,17 @@ public interface Mqtt5PUBACK {
     /**
      * @return the reason code of this PUBACK packet.
      */
-    @NotNull
-    Mqtt5PubAckReasonCode getReasonCode();
+    @NotNull Mqtt5PubAckReasonCode getReasonCode();
 
     /**
      * @return the optional reason string of this PUBACK packet.
      */
-    @NotNull
-    String getReasonString();
+    @NotNull String getReasonString();
 
     /**
      * @return the optional user properties of this PUBACK packet.
      */
-    @NotNull
-    Mqtt5UserProperties getUserProperties();
+    @NotNull Mqtt5UserProperties getUserProperties();
 
     MessageType getType();
 }

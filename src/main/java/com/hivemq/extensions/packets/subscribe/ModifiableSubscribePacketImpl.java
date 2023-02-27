@@ -43,15 +43,14 @@ public class ModifiableSubscribePacketImpl implements ModifiableSubscribePacket 
     private final @NotNull FullConfigurationService configurationService;
 
     public ModifiableSubscribePacketImpl(
-            final @NotNull SubscribePacketImpl packet,
-            final @NotNull FullConfigurationService configurationService) {
+            final @NotNull SubscribePacketImpl packet, final @NotNull FullConfigurationService configurationService) {
 
         final ImmutableList.Builder<ModifiableSubscriptionImpl> builder = ImmutableList.builder();
-        packet.subscriptions.forEach(
-                subscription -> builder.add(new ModifiableSubscriptionImpl(subscription, configurationService)));
+        packet.subscriptions.forEach(subscription -> builder.add(new ModifiableSubscriptionImpl(subscription,
+                configurationService)));
         subscriptions = builder.build();
-        userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
         subscriptionIdentifier = packet.subscriptionIdentifier;
         packetIdentifier = packet.packetIdentifier;
 
@@ -94,8 +93,10 @@ public class ModifiableSubscribePacketImpl implements ModifiableSubscribePacket 
     public @NotNull SubscribePacketImpl copy() {
         final ImmutableList.Builder<SubscriptionImpl> builder = ImmutableList.builder();
         subscriptions.forEach(subscription -> builder.add(subscription.copy()));
-        return new SubscribePacketImpl(
-                builder.build(), userProperties.copy(), subscriptionIdentifier, packetIdentifier);
+        return new SubscribePacketImpl(builder.build(),
+                userProperties.copy(),
+                subscriptionIdentifier,
+                packetIdentifier);
     }
 
     public @NotNull ModifiableSubscribePacketImpl update(final @NotNull SubscribePacketImpl packet) {

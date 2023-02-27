@@ -28,7 +28,9 @@ import util.TestConfigurationBootstrap;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Robin Atherton
@@ -45,8 +47,8 @@ public class ModifiableSubackPacketImplTest {
 
     @Test
     public void setReasonCodes() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
@@ -55,19 +57,18 @@ public class ModifiableSubackPacketImplTest {
 
         assertFalse(modifiablePacket.isModified());
 
-        modifiablePacket.setReasonCodes(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED));
+        modifiablePacket.setReasonCodes(ImmutableList.of(SubackReasonCode.GRANTED_QOS_1,
+                SubackReasonCode.NOT_AUTHORIZED));
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED),
+        assertEquals(ImmutableList.of(SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED),
                 modifiablePacket.getReasonCodes());
     }
 
     @Test
     public void setReasonCodes_same() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
@@ -76,33 +77,33 @@ public class ModifiableSubackPacketImplTest {
 
         assertFalse(modifiablePacket.isModified());
 
-        modifiablePacket.setReasonCodes(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR));
+        modifiablePacket.setReasonCodes(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR));
 
         assertFalse(modifiablePacket.isModified());
-        assertEquals(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        assertEquals(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 modifiablePacket.getReasonCodes());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonCodes_tooMany() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
 
-        modifiablePacket.setReasonCodes(ImmutableList.of(
-                SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED, SubackReasonCode.QUOTA_EXCEEDED));
+        modifiablePacket.setReasonCodes(ImmutableList.of(SubackReasonCode.GRANTED_QOS_1,
+                SubackReasonCode.NOT_AUTHORIZED,
+                SubackReasonCode.QUOTA_EXCEEDED));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonCodes_tooFew() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
@@ -114,8 +115,8 @@ public class ModifiableSubackPacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setReasonCodes_null() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
@@ -127,8 +128,8 @@ public class ModifiableSubackPacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setReasonCodes_nullElement() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
@@ -140,8 +141,10 @@ public class ModifiableSubackPacketImplTest {
 
     @Test
     public void setReasonString() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2), null, 1, UserPropertiesImpl.of(ImmutableList.of()));
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2),
+                null,
+                1,
+                UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
 
@@ -155,8 +158,9 @@ public class ModifiableSubackPacketImplTest {
 
     @Test
     public void setReasonString_null() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2), "reason", 1,
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2),
+                "reason",
+                1,
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
@@ -171,8 +175,10 @@ public class ModifiableSubackPacketImplTest {
 
     @Test
     public void setReasonString_same() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2), "same", 1, UserPropertiesImpl.of(ImmutableList.of()));
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2),
+                "same",
+                1,
+                UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
 
@@ -186,8 +192,10 @@ public class ModifiableSubackPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonString_invalid() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2), "same", 1, UserPropertiesImpl.of(ImmutableList.of()));
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2),
+                "same",
+                1,
+                UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
 
@@ -196,8 +204,10 @@ public class ModifiableSubackPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonString_exceedsMaxLength() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2), "same", 1, UserPropertiesImpl.of(ImmutableList.of()));
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2),
+                "same",
+                1,
+                UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
 
@@ -210,8 +220,8 @@ public class ModifiableSubackPacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
@@ -225,25 +235,25 @@ public class ModifiableSubackPacketImplTest {
 
     @Test
     public void copy_changes() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reason",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiableSubackPacketImpl modifiablePacket =
                 new ModifiableSubackPacketImpl(packet, configurationService);
 
-        modifiablePacket.setReasonCodes(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED));
+        modifiablePacket.setReasonCodes(ImmutableList.of(SubackReasonCode.GRANTED_QOS_1,
+                SubackReasonCode.NOT_AUTHORIZED));
         modifiablePacket.setReasonString("testReason");
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final SubackPacketImpl copy = modifiablePacket.copy();
 
-        final SubackPacketImpl expectedPacket = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED),
-                "testReason",
-                1,
-                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
+        final SubackPacketImpl expectedPacket =
+                new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_1, SubackReasonCode.NOT_AUTHORIZED),
+                        "testReason",
+                        1,
+                        UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }
 }

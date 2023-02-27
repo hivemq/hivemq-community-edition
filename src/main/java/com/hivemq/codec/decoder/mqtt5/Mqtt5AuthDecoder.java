@@ -36,7 +36,10 @@ import io.netty.buffer.ByteBuf;
 import javax.inject.Inject;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_DATA;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_METHOD;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.REASON_STRING;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 
 /**
  * Decoder for AUTH messages.
@@ -119,7 +122,8 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
 
             switch (propertyIdentifier) {
                 case AUTHENTICATION_METHOD:
-                    authenticationMethod = decodeAuthenticationMethod(clientConnection, buf, authenticationMethod, MessageType.AUTH);
+                    authenticationMethod =
+                            decodeAuthenticationMethod(clientConnection, buf, authenticationMethod, MessageType.AUTH);
                     if (authenticationMethod == null) {
                         return null;
                     }
@@ -137,7 +141,8 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
                     }
                     break;
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.AUTH);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.AUTH);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }

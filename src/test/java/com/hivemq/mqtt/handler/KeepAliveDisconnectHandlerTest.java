@@ -28,8 +28,19 @@ import org.mockito.ArgumentCaptor;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class KeepAliveDisconnectHandlerTest {
 
@@ -37,7 +48,8 @@ public class KeepAliveDisconnectHandlerTest {
     private final @NotNull ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
     private final @NotNull Channel channel = mock(Channel.class);
     private final @NotNull EventLoop executor = mock(EventLoop.class);
-    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService = mock(KeepAliveDisconnectService.class);
+    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService =
+            mock(KeepAliveDisconnectService.class);
 
     @Before
     public void setUp() {
@@ -47,44 +59,55 @@ public class KeepAliveDisconnectHandlerTest {
 
     @Test
     public void test_handlerAdded_whenNotInitialized_thenInitialize() {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.handlerAdded(ctx);
-        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_handlerRemoved_stateIsDestroyed() {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         keepAliveDisconnectHandler.handlerRemoved(ctx);
         assertEquals(2, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_channelRegistered_whenNotInitialized_thenInitialize() throws Exception {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.channelRegistered(ctx);
-        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_channelActive_whenNotInitialized_thenInitialize() throws Exception {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.channelActive(ctx);
-        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_channelInactive_stateIsDestroyed() throws Exception {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         keepAliveDisconnectHandler.channelInactive(ctx);
         assertEquals(2, keepAliveDisconnectHandler.getState());
     }
@@ -92,7 +115,8 @@ public class KeepAliveDisconnectHandlerTest {
 
     @Test
     public void test_channelRead_whileReading_thenReadingIsSetToTrue() throws Exception {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.channelRead(ctx, new byte[12]);
@@ -102,7 +126,8 @@ public class KeepAliveDisconnectHandlerTest {
 
     @Test
     public void test_channelReadComplete() throws Exception {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.channelRead(ctx, new byte[12]);
@@ -113,49 +138,62 @@ public class KeepAliveDisconnectHandlerTest {
 
     @Test
     public void test_initialize_whenNotInitialize_thenInitialize() {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.initialize(channel);
-        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_initialize_whenAlreadyInitialized_thenDontInitialize() {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
 
         keepAliveDisconnectHandler.initialize(channel);
-        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
         keepAliveDisconnectHandler.initialize(channel);
-        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, times(1)).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_initialize_whenDestroyed_thenDontInitialize() {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.handlerRemoved(ctx);
         keepAliveDisconnectHandler.initialize(channel);
-        verify(executor, never()).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, never()).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(2, keepAliveDisconnectHandler.getState());
     }
 
     @Test
     public void test_initialize_whenKeepAliveIs0_thenDontScheduleTask() {
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = new KeepAliveDisconnectHandler(0, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                new KeepAliveDisconnectHandler(0, TimeUnit.NANOSECONDS, keepAliveDisconnectService);
         when(channel.isActive()).thenReturn(true);
         when(channel.isRegistered()).thenReturn(true);
         keepAliveDisconnectHandler.initialize(channel);
-        verify(executor, never()).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class), eq(READER_IDLE_TIME), eq(TimeUnit.NANOSECONDS));
+        verify(executor, never()).schedule(any(KeepAliveDisconnectHandler.ReaderIdleTimeoutTask.class),
+                eq(READER_IDLE_TIME),
+                eq(TimeUnit.NANOSECONDS));
         assertEquals(1, keepAliveDisconnectHandler.getState());
     }
-
 
 
     @Test
@@ -164,7 +202,8 @@ public class KeepAliveDisconnectHandlerTest {
         final EmbeddedChannel embeddedChannel = new EmbeddedChannel();
         final ArgumentCaptor<Channel> argumentCaptor = ArgumentCaptor.forClass(Channel.class);
         doNothing().when(keepAliveDisconnectService).submitKeepAliveDisconnect(argumentCaptor.capture());
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = spy(new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService));
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                spy(new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService));
         when(keepAliveDisconnectHandler.ticksInNanos()).thenReturn(0L);
         keepAliveDisconnectHandler.initialize(embeddedChannel);
         when(keepAliveDisconnectHandler.ticksInNanos()).thenReturn(READER_IDLE_TIME * 2);
@@ -181,7 +220,8 @@ public class KeepAliveDisconnectHandlerTest {
         when(ctx.channel()).thenReturn(embeddedChannel);
         final ArgumentCaptor<Channel> argumentCaptor = ArgumentCaptor.forClass(Channel.class);
         doNothing().when(keepAliveDisconnectService).submitKeepAliveDisconnect(argumentCaptor.capture());
-        final KeepAliveDisconnectHandler keepAliveDisconnectHandler = spy(new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService));
+        final KeepAliveDisconnectHandler keepAliveDisconnectHandler =
+                spy(new KeepAliveDisconnectHandler(READER_IDLE_TIME, TimeUnit.NANOSECONDS, keepAliveDisconnectService));
         when(keepAliveDisconnectHandler.ticksInNanos()).thenReturn(0L);
         keepAliveDisconnectHandler.initialize(embeddedChannel);
         keepAliveDisconnectHandler.channelRead(ctx, new byte[12]);

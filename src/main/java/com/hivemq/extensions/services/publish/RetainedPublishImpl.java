@@ -39,29 +39,44 @@ import static com.hivemq.util.Bytes.getBytesFromReadOnlyBuffer;
  */
 public class RetainedPublishImpl extends PublishImpl implements RetainedPublish {
 
-    public RetainedPublishImpl(@NotNull final Qos qos,
-                               @NotNull final String topic,
-                               @Nullable final PayloadFormatIndicator payloadFormatIndicator,
-                               @Nullable final Long messageExpiryInterval,
-                               @Nullable final String responseTopic,
-                               @Nullable final ByteBuffer correlationData,
-                               @Nullable final String contentType,
-                               @Nullable final ByteBuffer payload,
-                               @NotNull final UserPropertiesImpl userProperties) {
-        super(qos, true, topic, payloadFormatIndicator, messageExpiryInterval,
-                responseTopic, correlationData, contentType, payload, userProperties);
+    public RetainedPublishImpl(
+            @NotNull final Qos qos,
+            @NotNull final String topic,
+            @Nullable final PayloadFormatIndicator payloadFormatIndicator,
+            @Nullable final Long messageExpiryInterval,
+            @Nullable final String responseTopic,
+            @Nullable final ByteBuffer correlationData,
+            @Nullable final String contentType,
+            @Nullable final ByteBuffer payload,
+            @NotNull final UserPropertiesImpl userProperties) {
+        super(qos,
+                true,
+                topic,
+                payloadFormatIndicator,
+                messageExpiryInterval,
+                responseTopic,
+                correlationData,
+                contentType,
+                payload,
+                userProperties);
     }
 
     public RetainedPublishImpl(@NotNull final String topic, @NotNull final RetainedMessage retainedMessage) {
 
         this(retainedMessage.getQos().toQos(),
                 topic,
-                retainedMessage.getPayloadFormatIndicator() == null ? null : PayloadFormatIndicator.valueOf(retainedMessage.getPayloadFormatIndicator().name()),
+                retainedMessage.getPayloadFormatIndicator() == null ?
+                        null :
+                        PayloadFormatIndicator.valueOf(retainedMessage.getPayloadFormatIndicator().name()),
                 retainedMessage.getMessageExpiryInterval(),
                 retainedMessage.getResponseTopic(),
-                retainedMessage.getCorrelationData() == null ? null : ByteBuffer.wrap(retainedMessage.getCorrelationData()).asReadOnlyBuffer(),
+                retainedMessage.getCorrelationData() == null ?
+                        null :
+                        ByteBuffer.wrap(retainedMessage.getCorrelationData()).asReadOnlyBuffer(),
                 retainedMessage.getContentType(),
-                retainedMessage.getMessage() == null ? null : ByteBuffer.wrap(retainedMessage.getMessage()).asReadOnlyBuffer(),
+                retainedMessage.getMessage() == null ?
+                        null :
+                        ByteBuffer.wrap(retainedMessage.getMessage()).asReadOnlyBuffer(),
                 UserPropertiesImpl.of(retainedMessage.getUserProperties().asList()));
     }
 
@@ -74,10 +89,10 @@ public class RetainedPublishImpl extends PublishImpl implements RetainedPublish 
 
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator =
                 retainedPublish.getPayloadFormatIndicator().isPresent() ?
-                        Mqtt5PayloadFormatIndicator.from(retainedPublish.getPayloadFormatIndicator().get()) : null;
+                        Mqtt5PayloadFormatIndicator.from(retainedPublish.getPayloadFormatIndicator().get()) :
+                        null;
 
-        return new RetainedMessage(
-                payloadAsArray,
+        return new RetainedMessage(payloadAsArray,
                 Objects.requireNonNull(QoS.valueOf(retainedPublish.getQos().getQosNumber())),
                 PublishPayloadPersistenceImpl.createId(),
                 retainedPublish.getMessageExpiryInterval().orElse(PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET),

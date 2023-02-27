@@ -94,8 +94,7 @@ public class InitializersImplTest {
     @Test
     public void test_add_two_different_priorities() throws Exception {
         final Class<?>[] classes = {
-                TestClientInitializerOne.class, TestClientInitializerTwo.class
-        };
+                TestClientInitializerOne.class, TestClientInitializerTwo.class};
 
         try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
                 .toPath(), classes);
@@ -135,8 +134,7 @@ public class InitializersImplTest {
     @Test
     public void test_add_two_equal_priorities() throws Exception {
         final Class<?>[] classes = {
-                TestClientInitializerOne.class, TestClientInitializerTwo.class
-        };
+                TestClientInitializerOne.class, TestClientInitializerTwo.class};
 
         try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
                 .toPath(), classes);

@@ -65,8 +65,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     boolean modified = false;
 
     public ModifiablePublishPacketImpl(
-            final @NotNull PublishPacketImpl packet,
-            final @NotNull FullConfigurationService configurationService) {
+            final @NotNull PublishPacketImpl packet, final @NotNull FullConfigurationService configurationService) {
 
         this.topic = packet.topic;
         this.qos = packet.qos;
@@ -81,8 +80,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
         this.responseTopic = packet.responseTopic;
         this.correlationData = packet.correlationData;
         this.subscriptionIdentifiers = packet.subscriptionIdentifiers;
-        this.userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        this.userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
         this.timestamp = packet.timestamp;
 
         this.configurationService = configurationService;
@@ -96,11 +95,12 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     @Override
     public void setTopic(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
-        checkArgument(
-                topic.length() <= configurationService.restrictionsConfiguration().maxTopicLength(),
+        checkArgument(topic.length() <= configurationService.restrictionsConfiguration().maxTopicLength(),
                 "Topic filter length must not exceed '" +
-                        configurationService.restrictionsConfiguration().maxTopicLength() + "' characters, but has '" +
-                        topic.length() + "' characters");
+                        configurationService.restrictionsConfiguration().maxTopicLength() +
+                        "' characters, but has '" +
+                        topic.length() +
+                        "' characters");
 
         if (!Topics.isValidTopicToPublish(topic)) {
             throw new IllegalArgumentException("The topic (" + topic + ") is invalid for PUBLISH messages");
@@ -189,8 +189,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public void setMessageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil.checkMessageExpiryInterval(
-                messageExpiryInterval, configurationService.mqttConfiguration().maxMessageExpiryInterval());
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
+                configurationService.mqttConfiguration().maxMessageExpiryInterval());
         if (this.messageExpiryInterval == messageExpiryInterval) {
             return;
         }
@@ -234,8 +234,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public void setResponseTopic(final @Nullable String responseTopic) {
-        PluginBuilderUtil.checkResponseTopic(
-                responseTopic, configurationService.securityConfiguration().validateUTF8());
+        PluginBuilderUtil.checkResponseTopic(responseTopic,
+                configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.responseTopic, responseTopic)) {
             return;
         }
@@ -277,9 +277,21 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     public @NotNull PublishPacketImpl copy() {
-        return new PublishPacketImpl(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
-                payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties.copy(), timestamp);
+        return new PublishPacketImpl(topic,
+                qos,
+                onwardQos,
+                packetId,
+                dupFlag,
+                payload,
+                retain,
+                messageExpiryInterval,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                correlationData,
+                subscriptionIdentifiers,
+                userProperties.copy(),
+                timestamp);
     }
 
     public @NotNull ModifiablePublishPacketImpl update(final @NotNull PublishPacketImpl packet) {
@@ -319,8 +331,20 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
-                payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties, timestamp);
+        return Objects.hash(topic,
+                qos,
+                onwardQos,
+                packetId,
+                dupFlag,
+                payload,
+                retain,
+                messageExpiryInterval,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                correlationData,
+                subscriptionIdentifiers,
+                userProperties,
+                timestamp);
     }
 }

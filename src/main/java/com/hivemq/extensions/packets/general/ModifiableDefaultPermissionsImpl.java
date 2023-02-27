@@ -36,8 +36,8 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
 
     private @NotNull ImmutableList<TopicPermission> topicPermissions = ImmutableList.of();
 
-    private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour
-            = new AtomicReference<>(DefaultAuthorizationBehaviour.ALLOW);
+    private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour =
+            new AtomicReference<>(DefaultAuthorizationBehaviour.ALLOW);
 
     private final AtomicBoolean defaultAuthorizationBehaviourOverridden = new AtomicBoolean(false);
 
@@ -74,7 +74,8 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
             defaultAuthorizationBehaviour.set(DefaultAuthorizationBehaviour.DENY);
         }
 
-        topicPermissions = ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions).build();
+        topicPermissions =
+                ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions).build();
     }
 
     @Override

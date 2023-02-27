@@ -55,8 +55,12 @@ public class SubscriptionAuthorizerInputImplTest {
     @Test
     public void test_full_subscription() {
         final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
-        final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE, true, true,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 3);
+        final Topic topic = new Topic("topic",
+                QoS.EXACTLY_ONCE,
+                true,
+                true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                3);
         final SubscriptionAuthorizerInputImpl input =
                 new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
 
@@ -75,7 +79,8 @@ public class SubscriptionAuthorizerInputImplTest {
     public void test_subscription_minimal() {
         final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
         final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE);
-        final SubscriptionAuthorizerInputImpl input = new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
+        final SubscriptionAuthorizerInputImpl input =
+                new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());

@@ -51,8 +51,7 @@ public class PubrecPacketImpl implements PubrecPacket {
     }
 
     public PubrecPacketImpl(final @NotNull PUBREC pubrec) {
-        this(
-                pubrec.getPacketIdentifier(),
+        this(pubrec.getPacketIdentifier(),
                 pubrec.getReasonCode().toAckReasonCode(),
                 pubrec.getReasonString(),
                 UserPropertiesImpl.of(pubrec.getUserProperties().asList()));

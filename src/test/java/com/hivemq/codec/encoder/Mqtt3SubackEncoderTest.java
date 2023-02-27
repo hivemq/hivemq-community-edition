@@ -33,8 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.*;
-import static org.junit.Assert.*;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_0;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_1;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_2;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class Mqtt3SubackEncoderTest {
 
@@ -102,7 +107,8 @@ public class Mqtt3SubackEncoderTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR));
+        final SUBACK suback =
+                new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR));
         channel.writeOutbound(suback);
 
         final ByteBuf buf = channel.readOutbound();
@@ -126,7 +132,10 @@ public class Mqtt3SubackEncoderTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        final SUBACK suback = new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR), "reason-string", Mqtt5UserProperties.of(MqttUserProperty.of("user", "prop")));
+        final SUBACK suback = new SUBACK(10,
+                newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR),
+                "reason-string",
+                Mqtt5UserProperties.of(MqttUserProperty.of("user", "prop")));
         channel.writeOutbound(suback);
 
         final ByteBuf buf = channel.readOutbound();

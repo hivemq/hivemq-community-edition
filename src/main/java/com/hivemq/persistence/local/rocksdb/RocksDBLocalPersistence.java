@@ -23,7 +23,12 @@ import com.hivemq.persistence.LocalPersistence;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import org.rocksdb.*;
+import org.rocksdb.BlockBasedTableConfig;
+import org.rocksdb.LRUCache;
+import org.rocksdb.Options;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
+import org.rocksdb.Statistics;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -121,8 +126,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             }
 
         } catch (final RocksDBException e) {
-            logger.error(
-                    "An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
+            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+                    name);
             logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
@@ -179,8 +184,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             counter.await();
 
         } catch (final Exception e) {
-            logger.error(
-                    "An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
+            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+                    name);
             logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
@@ -196,7 +201,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             if (!(operatingSystemMXBean instanceof com.sun.management.OperatingSystemMXBean)) {
                 return (long) (heap * 1.5);
             }
-            final long physicalMemory = ((com.sun.management.OperatingSystemMXBean) operatingSystemMXBean).getTotalPhysicalMemorySize();
+            final long physicalMemory =
+                    ((com.sun.management.OperatingSystemMXBean) operatingSystemMXBean).getTotalPhysicalMemorySize();
             if (physicalMemory > 0) {
                 return physicalMemory;
             }

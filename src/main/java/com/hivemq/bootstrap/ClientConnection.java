@@ -51,7 +51,8 @@ public class ClientConnection {
     /**
      * The name of the {@link Channel} attribute which the client connection information is stored in.
      */
-    public static final AttributeKey<ClientConnection> CHANNEL_ATTRIBUTE_NAME = AttributeKey.valueOf("Client.Connection");
+    public static final AttributeKey<ClientConnection> CHANNEL_ATTRIBUTE_NAME =
+            AttributeKey.valueOf("Client.Connection");
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;

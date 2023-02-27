@@ -83,17 +83,27 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
             if (msg instanceof PUBLISH) {
                 // The maximal packet size exceeds the clients accepted packet size
                 clientConnection.getChannel().pipeline().fireUserEventTriggered(new PublishDroppedEvent((PUBLISH) msg));
-                messageDroppedService.publishMaxPacketSizeExceeded(clientId, ((PUBLISH) msg).getTopic(), ((PUBLISH) msg).getQoS().getQosNumber(), maximumPacketSize, msg.getEncodedLength());
+                messageDroppedService.publishMaxPacketSizeExceeded(clientId,
+                        ((PUBLISH) msg).getTopic(),
+                        ((PUBLISH) msg).getQoS().getQosNumber(),
+                        maximumPacketSize,
+                        msg.getEncodedLength());
                 if (log.isTraceEnabled()) {
-                    log.trace("Could not encode publish message for client ({}): Maximum packet size limit exceeded", clientId);
+                    log.trace("Could not encode publish message for client ({}): Maximum packet size limit exceeded",
+                            clientId);
                 }
                 return;
             }
 
             if (msg.getPropertyLength() < 0 && msg.getEncodedLength() > maximumPacketSize) {
-                messageDroppedService.messageMaxPacketSizeExceeded(clientId, msg.getType().name(), maximumPacketSize, msg.getEncodedLength());
+                messageDroppedService.messageMaxPacketSizeExceeded(clientId,
+                        msg.getType().name(),
+                        maximumPacketSize,
+                        msg.getEncodedLength());
                 if (log.isTraceEnabled()) {
-                    log.trace("Could not encode message of type {} for client {}: Packet too large", msg.getType(), clientId);
+                    log.trace("Could not encode message of type {} for client {}: Packet too large",
+                            msg.getType(),
+                            clientId);
                 }
                 throw new EncoderException("Maximum packet size exceeded");
             }
@@ -108,8 +118,9 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
         int omittedProperties = 0;
         int propertyLength = calculatePropertyLength(msg);
 
-        if (!securityConfigurationService.allowRequestProblemInformation()
-                || !Objects.requireNonNullElse(clientConnection.getRequestProblemInformation(), Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED)) {
+        if (!securityConfigurationService.allowRequestProblemInformation() ||
+                !Objects.requireNonNullElse(clientConnection.getRequestProblemInformation(),
+                        Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED)) {
 
             //Must omit user properties and reason string for any other packet than PUBLISH, CONNACK, DISCONNECT
             //if no problem information requested.
@@ -156,7 +167,8 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
 
     abstract void encode(@NotNull T message, @NotNull ByteBuf out);
 
-    public int remainingLength(final @NotNull T message, final int remainingLengthWithoutProperties, final int propertyLength) {
+    public int remainingLength(
+            final @NotNull T message, final int remainingLengthWithoutProperties, final int propertyLength) {
         return remainingLengthWithoutProperties + encodedPropertyLengthWithHeader(message, propertyLength);
     }
 

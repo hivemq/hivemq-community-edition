@@ -30,7 +30,8 @@ import java.util.function.Supplier;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-public class AuthenticationSuccessfulInputImpl implements AuthenticationSuccessfulInput, PluginTaskInput, Supplier<AuthenticationSuccessfulInputImpl> {
+public class AuthenticationSuccessfulInputImpl
+        implements AuthenticationSuccessfulInput, PluginTaskInput, Supplier<AuthenticationSuccessfulInputImpl> {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;

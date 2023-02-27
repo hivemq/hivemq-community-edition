@@ -54,8 +54,7 @@ public class SubscriptionImpl implements Subscription {
     }
 
     public SubscriptionImpl(final @NotNull Topic topic) {
-        this(
-                topic.getTopic(),
+        this(topic.getTopic(),
                 topic.getQoS().toQos(),
                 Objects.requireNonNull(RetainHandling.fromCode(topic.getRetainHandling().getCode())),
                 topic.isRetainAsPublished(),

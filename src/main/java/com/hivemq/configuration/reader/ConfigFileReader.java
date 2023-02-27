@@ -16,13 +16,13 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.HiveMQConfigEntity;
 import com.hivemq.configuration.entity.listener.TCPListenerEntity;
 import com.hivemq.configuration.entity.listener.TlsTCPListenerEntity;
 import com.hivemq.configuration.entity.listener.TlsWebsocketListenerEntity;
 import com.hivemq.configuration.entity.listener.WebsocketListenerEntity;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.EnvVarUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +88,9 @@ public class ConfigFileReader {
     @NotNull List<Class<?>> getInheritedEntityClasses() {
         return ImmutableList.of(
                 /* ListenerEntity */
-                TCPListenerEntity.class, WebsocketListenerEntity.class, TlsTCPListenerEntity.class,
+                TCPListenerEntity.class,
+                WebsocketListenerEntity.class,
+                TlsTCPListenerEntity.class,
                 TlsWebsocketListenerEntity.class);
     }
 
@@ -98,7 +100,8 @@ public class ConfigFileReader {
             log.debug("Reading configuration file {}", configFile);
 
             try {
-                final Class<?>[] classes = ImmutableList.<Class<?>>builder().add(getConfigEntityClass())
+                final Class<?>[] classes = ImmutableList.<Class<?>>builder()
+                        .add(getConfigEntityClass())
                         .addAll(getInheritedEntityClasses())
                         .build()
                         .toArray(new Class<?>[0]);
@@ -123,7 +126,8 @@ public class ConfigFileReader {
                     }
                     System.exit(1);
                 }
-                log.error("Could not read the configuration file {}. Using default config", configFile.getAbsolutePath());
+                log.error("Could not read the configuration file {}. Using default config",
+                        configFile.getAbsolutePath());
                 log.debug("Original error message:", e);
                 setConfiguration(getDefaultConfig());
             }

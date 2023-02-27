@@ -50,18 +50,14 @@ public class PublishTopicTree {
 
     private static class Node {
         // child and childSubTopic are only used if there is no more than one child node.
-        @Nullable
-        Node child = null;
-        @Nullable
-        String childSubTopic = null;
+        @Nullable Node child = null;
+        @Nullable String childSubTopic = null;
 
-        @Nullable
-        Map<String, Node> childNodes = null;
+        @Nullable Map<String, Node> childNodes = null;
         /*
         The boolean "directMatch" is true if a topic that ends at this node is stored in the tree.
         This is important if for example the topics "a/b/c" and "a/b" are both stored in the tree.
-        */
-        boolean directMatch = false;
+        */ boolean directMatch = false;
 
         public void add(@NotNull final ArrayList<String> subTopics) {
             final String currentSubTopic = subTopics.get(0);
@@ -189,12 +185,12 @@ public class PublishTopicTree {
                 if (childNodes != null) {
                     for (final Map.Entry<String, Node> entry : childNodes.entrySet()) {
                         if (currentTopic == null) {
-                            result.addAll(
-                                    entry.getValue().get(nextSubTopics, entry.getKey(), currentSubTopic.equals("#")));
+                            result.addAll(entry.getValue()
+                                    .get(nextSubTopics, entry.getKey(), currentSubTopic.equals("#")));
                         } else {
                             result.addAll(entry.getValue()
-                                    .get(
-                                            nextSubTopics, currentTopic + "/" + entry.getKey(),
+                                    .get(nextSubTopics,
+                                            currentTopic + "/" + entry.getKey(),
                                             currentSubTopic.equals("#")));
                         }
                     }
@@ -202,7 +198,8 @@ public class PublishTopicTree {
                     if (currentTopic == null) {
                         result.addAll(child.get(nextSubTopics, childSubTopic, currentSubTopic.equals("#")));
                     } else {
-                        result.addAll(child.get(nextSubTopics, currentTopic + "/" + childSubTopic,
+                        result.addAll(child.get(nextSubTopics,
+                                currentTopic + "/" + childSubTopic,
                                 currentSubTopic.equals("#")));
                     }
                 }

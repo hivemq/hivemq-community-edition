@@ -52,7 +52,8 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param bucketIndex The index of the bucket in which the subscriptions are stored.
      */
     @ExecuteInSingleWriter
-    void addSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<Topic> topics, long timestamp, int bucketIndex);
+    void addSubscriptions(
+            @NotNull String clientId, @NotNull ImmutableSet<Topic> topics, long timestamp, int bucketIndex);
 
     /**
      * Remove a subscription of specific topic for a specific client from a persistence bucket.
@@ -74,7 +75,8 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @param bucketIndex The index of the bucket in which the subscriptions are stored.
      */
     @ExecuteInSingleWriter
-    void removeSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<String> topics, long timestamp, int bucketIndex);
+    void removeSubscriptions(
+            @NotNull String clientId, @NotNull ImmutableSet<String> topics, long timestamp, int bucketIndex);
 
     /**
      * Remove all subscriptions for a specific client from a persistence bucket.
@@ -101,8 +103,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @return A read only set of {@link Topic}s.
      */
     @ReadOnly
-    @NotNull
-    ImmutableSet<Topic> getSubscriptions(@NotNull final String client);
+    @NotNull ImmutableSet<Topic> getSubscriptions(@NotNull final String client);
 
     /**
      * Get a chunk of subscriptions.
@@ -114,6 +115,6 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      *                     exceeds the limit, it will contain all subscriptions for this client anyway.
      * @return a {@link BucketChunkResult} with the entries and the information if more chunks are available
      */
-    @NotNull
-    BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(int bucketIndex, @Nullable String lastClientId, int maxResults);
+    @NotNull BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
+            int bucketIndex, @Nullable String lastClientId, int maxResults);
 }

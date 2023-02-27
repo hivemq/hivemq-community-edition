@@ -95,7 +95,13 @@ public class ConnectionAttributes {
         Preconditions.checkNotNull(value, "Value of connection attribute must not be null.");
 
         if (value.remaining() > maxValueSizeBytes) {
-            throw new LimitExceededException("value with a size of " + value.remaining() + " bytes for key '" + key + "' in connection attribute store is larger than the allowed limit of " + maxValueSizeBytes + " bytes");
+            throw new LimitExceededException("value with a size of " +
+                    value.remaining() +
+                    " bytes for key '" +
+                    key +
+                    "' in connection attribute store is larger than the allowed limit of " +
+                    maxValueSizeBytes +
+                    " bytes");
         }
 
         if (data == null) {

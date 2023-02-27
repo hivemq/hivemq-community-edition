@@ -42,13 +42,15 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
     private final ExtensionBuilderDependencies builderDependencies;
 
     @Inject
-    public ExtensionStaticInitializerImpl(final @NotNull ExtensionServicesDependencies servicesDependencies,
-                                          final @NotNull ExtensionBuilderDependencies builderDependencies) {
+    public ExtensionStaticInitializerImpl(
+            final @NotNull ExtensionServicesDependencies servicesDependencies,
+            final @NotNull ExtensionBuilderDependencies builderDependencies) {
         this.servicesDependencies = servicesDependencies;
         this.builderDependencies = builderDependencies;
     }
 
-    public void initialize(final @NotNull String pluginId, final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
+    public void initialize(final @NotNull String pluginId, final @NotNull ClassLoader classLoader)
+            throws ExtensionLoadingException {
         checkNotNull(pluginId, "extension id must not be null");
         checkNotNull(classLoader, "classLoader must not be null");
 
@@ -56,8 +58,8 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
         initializeBuilders(pluginId, classLoader);
     }
 
-    private void initializeServices(final @NotNull String pluginId,
-                                    final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
+    private void initializeServices(
+            final @NotNull String pluginId, final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
         try {
             final Class<?> servicesClass = classLoader.loadClass(SERVICES_CLASS);
             final Field servicesField = servicesClass.getDeclaredField("services");
@@ -70,8 +72,8 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
         }
     }
 
-    private void initializeBuilders(final @NotNull String pluginId,
-                                    final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
+    private void initializeBuilders(
+            final @NotNull String pluginId, final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
         try {
             final Class<?> buildersClass = classLoader.loadClass(BUILDERS_CLASS);
             final Field buildersField = buildersClass.getDeclaredField("builders");

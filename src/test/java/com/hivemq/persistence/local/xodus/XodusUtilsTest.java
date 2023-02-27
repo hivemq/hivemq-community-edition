@@ -25,7 +25,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
-import static com.hivemq.persistence.local.xodus.XodusUtils.*;
+import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
+import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToString;
+import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
+import static com.hivemq.persistence.local.xodus.XodusUtils.stringToByteIterable;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -41,15 +44,35 @@ public class XodusUtilsTest {
 
     @Test
     public void test_byteiterable_to_string_conversion() throws Exception {
-        final String[] input = new String[]{"string", RandomStringUtils.randomAlphabetic(65535),
-                "Я Б Г Д Ж Й", "Ł Ą Ż Ę Ć Ń Ś Ź", "てすと", "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ ",
-                "０１２３４５６７８９", "ａｂｃｄｅｆｇｈｉ", "ＡＢＣＤＥＦＧＨＩ", "Iñtërnâtiônàlizætiøn",
-                "⡍⠜⠇⠑⠹ ⠺⠁⠎ ⠙⠑⠁⠙⠒ ⠞⠕ ⠃⠑⠛⠔ ⠺⠊⠹⠲ ⡹⠻⠑ ⠊⠎ ⠝⠕ ⠙⠳⠃⠞", "i ♥ u",
+        final String[] input = new String[]{
+                "string",
+                RandomStringUtils.randomAlphabetic(65535),
+                "Я Б Г Д Ж Й",
+                "Ł Ą Ż Ę Ć Ń Ś Ź",
+                "てすと",
+                "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃ ",
+                "０１２３４５６７８９",
+                "ａｂｃｄｅｆｇｈｉ",
+                "ＡＢＣＤＥＦＧＨＩ",
+                "Iñtërnâtiônàlizætiøn",
+                "⡍⠜⠇⠑⠹ ⠺⠁⠎ ⠙⠑⠁⠙⠒ ⠞⠕ ⠃⠑⠛⠔ ⠺⠊⠹⠲ ⡹⠻⠑ ⠊⠎ ⠝⠕ ⠙⠳⠃⠞",
+                "i ♥ u",
                 "\uD843\uDED7 \uD843\uDEF9 \uD843\uDEFA \uD843\uDF2D",
                 "\uD843\uDF2E \uD843\uDF4C \uD843\uDFB4 \uD843\uDFBC \uD843\uDFEA \uD844\uDC5C",
-                "ვეპხის ტყაოსანი", "ฉันกินกระจกไ", "Կրնամ", "सकता", "\uD834\uDE00\uD834\uDE10",
-                "\uD83D\uDE1A", "\uD83D\uDEAA", "\uD83C\uDD84", "\uD80C\uDCE6", "\uD804\uDD3D",
-                "\uDB40\uDC50", "\uDB40\uDFFC", "\uD83E\uDE13", "\uD800\uDF17"};
+                "ვეპხის ტყაოსანი",
+                "ฉันกินกระจกไ",
+                "Կրնամ",
+                "सकता",
+                "\uD834\uDE00\uD834\uDE10",
+                "\uD83D\uDE1A",
+                "\uD83D\uDEAA",
+                "\uD83C\uDD84",
+                "\uD80C\uDCE6",
+                "\uD804\uDD3D",
+                "\uDB40\uDC50",
+                "\uDB40\uDFFC",
+                "\uD83E\uDE13",
+                "\uD800\uDF17"};
 
         for (final String string : input) {
 
@@ -62,7 +85,10 @@ public class XodusUtilsTest {
 
     @Test
     public void test_byteiterable_to_bytes_conversion() throws Exception {
-        final List<byte[]> bytes = Lists.newArrayList(RandomUtils.nextBytes(1), RandomUtils.nextBytes(1024), RandomUtils.nextBytes(65535), RandomUtils.nextBytes(1024 * 1024 * 10));
+        final List<byte[]> bytes = Lists.newArrayList(RandomUtils.nextBytes(1),
+                RandomUtils.nextBytes(1024),
+                RandomUtils.nextBytes(65535),
+                RandomUtils.nextBytes(1024 * 1024 * 10));
 
         for (final byte[] input : bytes) {
             final ByteIterable byteIterable = bytesToByteIterable(input);

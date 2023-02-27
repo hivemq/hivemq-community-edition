@@ -36,7 +36,9 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
 public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
@@ -47,10 +49,15 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
 
     @Parameterized.Parameters
     public static Collection<Byte> parameters() {
-        return Arrays.asList(
-                (byte) 0b0001_0001, (byte) 0b0001_0011, (byte) 0b0001_0111, (byte) 0b0001_1111,
-                (byte) 0b0001_0010, (byte) 0b0001_0110, (byte) 0b0001_1110,
-                (byte) 0b0001_0100, (byte) 0b0001_1100,
+        return Arrays.asList((byte) 0b0001_0001,
+                (byte) 0b0001_0011,
+                (byte) 0b0001_0111,
+                (byte) 0b0001_1111,
+                (byte) 0b0001_0010,
+                (byte) 0b0001_0110,
+                (byte) 0b0001_1110,
+                (byte) 0b0001_0100,
+                (byte) 0b0001_1100,
                 (byte) 0b0001_1000);
     }
 

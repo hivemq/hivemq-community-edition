@@ -28,7 +28,9 @@ import util.TestConfigurationBootstrap;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -42,22 +44,22 @@ public class ModifiableSubscribePacketImplTest {
     public void setUp() throws Exception {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
 
-        final SubscribePacketImpl packet = new SubscribePacketImpl(
-                ImmutableList.of(new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false)),
-                UserPropertiesImpl.of(ImmutableList.of()),
-                1,
-                1);
+        final SubscribePacketImpl packet = new SubscribePacketImpl(ImmutableList.of(new SubscriptionImpl("topic",
+                Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND,
+                false,
+                false)), UserPropertiesImpl.of(ImmutableList.of()), 1, 1);
         final ModifiableSubscribePacketImpl modifiablePacket =
                 new ModifiableSubscribePacketImpl(packet, configurationService);
     }
 
     @Test
     public void modifySubscription() {
-        final SubscribePacketImpl packet = new SubscribePacketImpl(
-                ImmutableList.of(new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false)),
-                UserPropertiesImpl.of(ImmutableList.of()),
-                1,
-                1);
+        final SubscribePacketImpl packet = new SubscribePacketImpl(ImmutableList.of(new SubscriptionImpl("topic",
+                Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND,
+                false,
+                false)), UserPropertiesImpl.of(ImmutableList.of()), 1, 1);
         final ModifiableSubscribePacketImpl modifiablePacket =
                 new ModifiableSubscribePacketImpl(packet, configurationService);
 
@@ -71,11 +73,11 @@ public class ModifiableSubscribePacketImplTest {
 
     @Test
     public void modifyUserProperties() {
-        final SubscribePacketImpl packet = new SubscribePacketImpl(
-                ImmutableList.of(new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false)),
-                UserPropertiesImpl.of(ImmutableList.of()),
-                1,
-                1);
+        final SubscribePacketImpl packet = new SubscribePacketImpl(ImmutableList.of(new SubscriptionImpl("topic",
+                Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND,
+                false,
+                false)), UserPropertiesImpl.of(ImmutableList.of()), 1, 1);
         final ModifiableSubscribePacketImpl modifiablePacket =
                 new ModifiableSubscribePacketImpl(packet, configurationService);
 
@@ -89,11 +91,11 @@ public class ModifiableSubscribePacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final SubscribePacketImpl packet = new SubscribePacketImpl(
-                ImmutableList.of(new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false)),
-                UserPropertiesImpl.of(ImmutableList.of()),
-                1,
-                1);
+        final SubscribePacketImpl packet = new SubscribePacketImpl(ImmutableList.of(new SubscriptionImpl("topic",
+                Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND,
+                false,
+                false)), UserPropertiesImpl.of(ImmutableList.of()), 1, 1);
         final ModifiableSubscribePacketImpl modifiablePacket =
                 new ModifiableSubscribePacketImpl(packet, configurationService);
 
@@ -104,11 +106,11 @@ public class ModifiableSubscribePacketImplTest {
 
     @Test
     public void copy_changes() {
-        final SubscribePacketImpl packet = new SubscribePacketImpl(
-                ImmutableList.of(new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false)),
-                UserPropertiesImpl.of(ImmutableList.of()),
-                1,
-                1);
+        final SubscribePacketImpl packet = new SubscribePacketImpl(ImmutableList.of(new SubscriptionImpl("topic",
+                Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND,
+                false,
+                false)), UserPropertiesImpl.of(ImmutableList.of()), 1, 1);
         final ModifiableSubscribePacketImpl modifiablePacket =
                 new ModifiableSubscribePacketImpl(packet, configurationService);
 
@@ -116,11 +118,11 @@ public class ModifiableSubscribePacketImplTest {
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final SubscribePacketImpl copy = modifiablePacket.copy();
 
-        final SubscribePacketImpl expectedPacket = new SubscribePacketImpl(
-                ImmutableList.of(new SubscriptionImpl("test", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false)),
-                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))),
-                1,
-                1);
+        final SubscribePacketImpl expectedPacket = new SubscribePacketImpl(ImmutableList.of(new SubscriptionImpl("test",
+                Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND,
+                false,
+                false)), UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))), 1, 1);
         assertEquals(expectedPacket, copy);
     }
 }

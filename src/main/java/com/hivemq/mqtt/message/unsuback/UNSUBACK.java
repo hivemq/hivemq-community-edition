@@ -86,8 +86,7 @@ public class UNSUBACK extends MqttMessageWithUserProperties.MqttMessageWithIdAnd
         final ImmutableList.Builder<Mqtt5UnsubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
         packet.getReasonCodes().forEach(reasonCode -> reasonCodesBuilder.add(Mqtt5UnsubAckReasonCode.from(reasonCode)));
 
-        return new UNSUBACK(
-                packet.getPacketIdentifier(),
+        return new UNSUBACK(packet.getPacketIdentifier(),
                 reasonCodesBuilder.build(),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));

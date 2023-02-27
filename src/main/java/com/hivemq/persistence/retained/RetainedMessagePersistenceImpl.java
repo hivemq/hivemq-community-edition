@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence.retained;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -151,10 +149,8 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
                     singleWriter.submitToAllBucketsParallel((bucketIndex) -> new HashSet<>(localPersistence.getAllTopics(
                             subscription,
                             bucketIndex)));
-            return Futures.transform(Futures.allAsList(futures), listOfSets -> listOfSets
-                            .stream()
-                            .flatMap(Set::stream)
-                            .collect(Collectors.toSet()),
+            return Futures.transform(Futures.allAsList(futures),
+                    listOfSets -> listOfSets.stream().flatMap(Set::stream).collect(Collectors.toSet()),
                     MoreExecutors.directExecutor());
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
@@ -179,24 +175,23 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @NotNull
     @Override
     public ListenableFuture<Void> clear() {
-        final List<ListenableFuture<Void>> futureList =
-                singleWriter.submitToAllBucketsParallel((bucketIndex) -> {
-                    localPersistence.clear(bucketIndex);
-                    return null;
-                });
+        final List<ListenableFuture<Void>> futureList = singleWriter.submitToAllBucketsParallel((bucketIndex) -> {
+            localPersistence.clear(bucketIndex);
+            return null;
+        });
         return FutureUtils.voidFutureFromList(ImmutableList.copyOf(futureList));
     }
 
     @Override
     public @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
             @NotNull ChunkCursor cursor) {
-        return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY_BYTES,
+        return chunker.getAllLocalChunk(cursor,
+                InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY_BYTES,
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) ->
                         // actual single writer call
                         singleWriter.submit(bucket,
-                                (bucketIndex) -> localPersistence.getAllRetainedMessagesChunk(
-                                        bucketIndex,
+                                (bucketIndex) -> localPersistence.getAllRetainedMessagesChunk(bucketIndex,
                                         lastKey,
                                         maxResults)));
     }

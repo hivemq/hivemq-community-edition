@@ -125,9 +125,9 @@ public class SubackOutboundInterceptorHandlerTest {
     public void test_intercept_simple_subAck() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                SimpleSubackTestInterceptor.class);
+        final SubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        SimpleSubackTestInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -150,9 +150,9 @@ public class SubackOutboundInterceptorHandlerTest {
     public void test_modify_subAck() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifySubackInterceptor.class);
+        final SubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifySubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -176,9 +176,9 @@ public class SubackOutboundInterceptorHandlerTest {
     public void test_outbound_exception() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestExceptionSubackInterceptor.class);
+        final SubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestExceptionSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);

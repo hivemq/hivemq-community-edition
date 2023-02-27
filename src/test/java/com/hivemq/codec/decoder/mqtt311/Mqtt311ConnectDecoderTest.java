@@ -72,7 +72,8 @@ public class Mqtt311ConnectDecoderTest {
         MockitoAnnotations.initMocks(this);
 
         clientConnection = new ClientConnection(channel, null);
-        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
+                clientConnection));
 
         when(fullConfiguration.securityConfiguration()).thenReturn(securityConfigurationService);
         when(securityConfigurationService.validateUTF8()).thenReturn(true);
@@ -290,7 +291,11 @@ public class Mqtt311ConnectDecoderTest {
         final CONNECT connectPacket = decoder.decode(clientConnection, buf, fixedHeader);
 
         assertNull(connectPacket);
-        verify(connacker).connackError(any(Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
+        verify(connacker).connackError(any(Channel.class),
+                isNull(),
+                anyString(),
+                eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET),
+                anyString());
     }
 
     @Test

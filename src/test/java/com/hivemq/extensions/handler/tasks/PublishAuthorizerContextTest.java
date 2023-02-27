@@ -34,8 +34,13 @@ import org.junit.Test;
 
 import java.time.Duration;
 
-import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.*;
-import static org.junit.Assert.*;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.FAIL;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.SUCCESS;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.UNDECIDED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

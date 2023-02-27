@@ -36,11 +36,12 @@ public class ClientTlsInformationImpl implements ClientTlsInformation, TlsInform
     private final @NotNull String protocol;
     private final @Nullable String hostname;
 
-    public ClientTlsInformationImpl(final @Nullable X509Certificate certificate,
-                                    final X509Certificate @Nullable [] certificateChain,
-                                    final @NotNull String cipherSuite,
-                                    final @NotNull String protocol,
-                                    final @Nullable String hostname) {
+    public ClientTlsInformationImpl(
+            final @Nullable X509Certificate certificate,
+            final X509Certificate @Nullable [] certificateChain,
+            final @NotNull String cipherSuite,
+            final @NotNull String protocol,
+            final @Nullable String hostname) {
         Preconditions.checkNotNull(cipherSuite, "cipher suite must never be null");
         Preconditions.checkNotNull(protocol, "protocol must never be null");
         this.certificate = certificate;

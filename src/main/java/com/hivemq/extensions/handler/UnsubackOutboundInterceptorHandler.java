@@ -109,12 +109,17 @@ public class UnsubackOutboundInterceptorHandler {
         final ExtensionParameterHolder<UnsubackOutboundOutputImpl> outputHolder =
                 new ExtensionParameterHolder<>(output);
 
-        final UnsubackOutboundInterceptorContext context = new UnsubackOutboundInterceptorContext(
-                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+        final UnsubackOutboundInterceptorContext context = new UnsubackOutboundInterceptorContext(clientId,
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
 
         for (final UnsubackOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
@@ -156,8 +161,7 @@ public class UnsubackOutboundInterceptorHandler {
         @Override
         public void pluginPost(final @NotNull UnsubackOutboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug(
-                        "Async timeout on outbound UNSUBACK interception. Discarding changes made by the interceptor.");
+                log.debug("Async timeout on outbound UNSUBACK interception. Discarding changes made by the interceptor.");
             } else if (output.isFailed()) {
                 log.debug("Exception on outbound UNSUBACK interception. Discarding changes made by the interceptor.");
             } else if (output.getUnsubackPacket().isModified()) {
@@ -204,7 +208,9 @@ public class UnsubackOutboundInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound UNSUBACK interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

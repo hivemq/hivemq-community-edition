@@ -68,13 +68,11 @@ public class MqttUserProperty implements UserProperty {
 
     public MqttUserProperty(final @NotNull String name, final @NotNull String value) {
 
-        Preconditions.checkArgument(
-                name.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
-                "A user property name must never exceed 65535 bytes");
+        Preconditions.checkArgument(name.getBytes(StandardCharsets.UTF_8).length <=
+                UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "A user property name must never exceed 65535 bytes");
 
-        Preconditions.checkArgument(
-                value.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
-                "A user property value must never exceed 65535 bytes");
+        Preconditions.checkArgument(value.getBytes(StandardCharsets.UTF_8).length <=
+                UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "A user property value must never exceed 65535 bytes");
 
         this.name = name;
         this.value = value;

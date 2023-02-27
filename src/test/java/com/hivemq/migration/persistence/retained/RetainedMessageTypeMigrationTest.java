@@ -56,7 +56,12 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpoeck
@@ -119,16 +124,17 @@ public class RetainedMessageTypeMigrationTest {
     @Test(timeout = 5000)
     public void test_missing_payload_gets_logged() throws Exception {
 
-        callback.onItem("topic", new RetainedMessage("message".getBytes(),
-                QoS.AT_LEAST_ONCE,
-                1L,
-                System.currentTimeMillis(),
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                null,
-                null,
-                null,
-                null,
-                1234L));
+        callback.onItem("topic",
+                new RetainedMessage("message".getBytes(),
+                        QoS.AT_LEAST_ONCE,
+                        1L,
+                        System.currentTimeMillis(),
+                        Mqtt5UserProperties.NO_USER_PROPERTIES,
+                        null,
+                        null,
+                        null,
+                        null,
+                        1234L));
         verify(payloadExceptionLogging, times(1)).addLogging(1L, true, "topic");
 
     }
@@ -136,16 +142,17 @@ public class RetainedMessageTypeMigrationTest {
     @Test(timeout = 5000)
     public void test_nothing_gets_logged_if_payload_exists() throws Exception {
         when(payloadLocalPersistence.get(1L)).thenReturn(new byte[0]);
-        callback.onItem("topic", new RetainedMessage("message".getBytes(),
-                QoS.AT_LEAST_ONCE,
-                1L,
-                System.currentTimeMillis(),
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                null,
-                null,
-                null,
-                null,
-                1234L));
+        callback.onItem("topic",
+                new RetainedMessage("message".getBytes(),
+                        QoS.AT_LEAST_ONCE,
+                        1L,
+                        System.currentTimeMillis(),
+                        Mqtt5UserProperties.NO_USER_PROPERTIES,
+                        null,
+                        null,
+                        null,
+                        null,
+                        1234L));
         verify(payloadExceptionLogging, never()).addLogging(anyLong(), any(), any());
     }
 
@@ -183,9 +190,10 @@ public class RetainedMessageTypeMigrationTest {
                 persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class);
         assertEquals(1000, persistence.size());
         for (int i = 0; i < 1000; i++) {
-            assertEquals("message" + i, new String(persistence.get("topic" + i,
-                    BucketUtils.getBucket("topic" + i, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get()))
-                    .getMessage()));
+            assertEquals("message" + i,
+                    new String(persistence.get("topic" + i,
+                                    BucketUtils.getBucket("topic" + i, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get()))
+                            .getMessage()));
         }
 
         Migrations.afterMigration(systemInformation);
@@ -235,11 +243,9 @@ public class RetainedMessageTypeMigrationTest {
                 persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class);
         assertEquals(1000, xodus.size());
         for (int i = 0; i < 1000; i++) {
-            assertEquals(
-                    "message" + i,
-                    new String(xodus.get(
-                            "topic" + i,
-                            BucketUtils.getBucket("topic" + i, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get()))
+            assertEquals("message" + i,
+                    new String(xodus.get("topic" + i,
+                                    BucketUtils.getBucket("topic" + i, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get()))
                             .getMessage()));
         }
 

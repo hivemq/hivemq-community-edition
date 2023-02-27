@@ -22,7 +22,6 @@ import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- *
  * @since 4.0
  */
 public interface RestrictionsConfigurationService {

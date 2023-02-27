@@ -142,7 +142,8 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         if (authMethod != null) {
             ctx.pipeline()
-                    .addAfter(MQTT_MESSAGE_DECODER, AUTH_IN_PROGRESS_MESSAGE_HANDLER,
+                    .addAfter(MQTT_MESSAGE_DECODER,
+                            AUTH_IN_PROGRESS_MESSAGE_HANDLER,
                             channelDependencies.getAuthInProgressMessageHandler());
         }
 
@@ -153,10 +154,20 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
         final ClientAuthenticators clientAuthenticators = getClientAuthenticators(ctx);
 
-        final ConnectAuthOutput output = new ConnectAuthOutput(
-                asyncer, validateUTF8, defaultPermissions, clientSettings, timeout, authMethod != null);
-        final ConnectAuthContext context = new ConnectAuthContext(
-                ctx, authSender, authenticatorProviderMap.size(), output, connectHandler, connacker, connect, true);
+        final ConnectAuthOutput output = new ConnectAuthOutput(asyncer,
+                validateUTF8,
+                defaultPermissions,
+                clientSettings,
+                timeout,
+                authMethod != null);
+        final ConnectAuthContext context = new ConnectAuthContext(ctx,
+                authSender,
+                authenticatorProviderMap.size(),
+                output,
+                connectHandler,
+                connacker,
+                connect,
+                true);
 
         // calls the authenticators in the order of the priority of their plugins
         for (final Map.Entry<String, WrappedAuthenticatorProvider> entry : authenticatorProviderMap.entrySet()) {
@@ -167,8 +178,10 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                         new ConnectSimpleAuthTask(authenticatorProvider, authenticatorProviderInput, extensionId);
                 pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, task);
             } else {
-                final ConnectAuthConnectTask task = new ConnectAuthConnectTask(
-                        authenticatorProvider, authenticatorProviderInput, extensionId, clientAuthenticators);
+                final ConnectAuthConnectTask task = new ConnectAuthConnectTask(authenticatorProvider,
+                        authenticatorProviderInput,
+                        extensionId,
+                        clientAuthenticators);
                 pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, task);
             }
         }
@@ -222,43 +235,54 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
         if (reAuth) {
             final ReAuthOutput output =
                     new ReAuthOutput(asyncer, validateUTF8, defaultPermissions, clientSettings, timeout);
-            final ReAuthContext context = new ReAuthContext(
-                    clientId, ctx, authSender, enhancedAuthenticatorCount, output, disconnector);
+            final ReAuthContext context =
+                    new ReAuthContext(clientId, ctx, authSender, enhancedAuthenticatorCount, output, disconnector);
 
             for (final Map.Entry<String, WrappedAuthenticatorProvider> entry : authenticatorProviderMap.entrySet()) {
                 final String extensionId = entry.getKey();
                 final WrappedAuthenticatorProvider authenticatorProvider = entry.getValue();
                 if (authenticatorProvider.isEnhanced()) {
-                    final ReAuthTask task = new ReAuthTask(
-                            authenticatorProvider, authenticatorProviderInput, extensionId, clientAuthenticators);
+                    final ReAuthTask task = new ReAuthTask(authenticatorProvider,
+                            authenticatorProviderInput,
+                            extensionId,
+                            clientAuthenticators);
                     pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, task);
                 }
             }
         } else {
             final CONNECT connect = clientConnection.getAuthConnect();
 
-            final ConnectAuthOutput output = new ConnectAuthOutput(
-                    asyncer, validateUTF8, defaultPermissions, clientSettings, timeout, true);
-            final ConnectAuthContext context = new ConnectAuthContext(
-                    ctx, authSender, enhancedAuthenticatorCount, output, connectHandler, connacker, connect, false);
+            final ConnectAuthOutput output =
+                    new ConnectAuthOutput(asyncer, validateUTF8, defaultPermissions, clientSettings, timeout, true);
+            final ConnectAuthContext context = new ConnectAuthContext(ctx,
+                    authSender,
+                    enhancedAuthenticatorCount,
+                    output,
+                    connectHandler,
+                    connacker,
+                    connect,
+                    false);
 
             for (final Map.Entry<String, WrappedAuthenticatorProvider> entry : authenticatorProviderMap.entrySet()) {
                 final String extensionId = entry.getKey();
                 final WrappedAuthenticatorProvider authenticatorProvider = entry.getValue();
                 if (authenticatorProvider.isEnhanced()) {
-                    final ConnectAuthTask task = new ConnectAuthTask(
-                            authenticatorProvider, authenticatorProviderInput, extensionId, clientAuthenticators);
+                    final ConnectAuthTask task = new ConnectAuthTask(authenticatorProvider,
+                            authenticatorProviderInput,
+                            extensionId,
+                            clientAuthenticators);
                     pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, context, task);
                 }
             }
         }
     }
 
-    private void badAuthMethodDisconnect(final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth, final boolean reAuth) {
-        final String reasonString = String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name());
+    private void badAuthMethodDisconnect(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull AUTH auth, final boolean reAuth) {
+        final String reasonString =
+                String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, auth.getType().name());
         if (reAuth) {
-            disconnector.disconnect(
-                    ctx.channel(),
+            disconnector.disconnect(ctx.channel(),
                     DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT,
                     "Different auth method",
                     Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
@@ -267,8 +291,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     true,
                     false);
         } else {
-            connacker.connackError(
-                    ctx.channel(),
+            connacker.connackError(ctx.channel(),
                     CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT,
                     "Different auth method",
                     Mqtt5ConnAckReasonCode.BAD_AUTHENTICATION_METHOD,
@@ -280,8 +303,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
 
     private void noAuthAvailableDisconnect(final @NotNull ChannelHandlerContext ctx, final boolean reAuth) {
         if (reAuth) {
-            disconnector.disconnect(
-                    ctx.channel(),
+            disconnector.disconnect(ctx.channel(),
                     RE_AUTH_FAILED_LOG,
                     ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                     Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
@@ -290,8 +312,7 @@ public class PluginAuthenticatorServiceImpl implements PluginAuthenticatorServic
                     true,
                     false);
         } else {
-            connacker.connackError(
-                    ctx.channel(),
+            connacker.connackError(ctx.channel(),
                     PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                     ReasonStrings.AUTH_FAILED_NO_AUTHENTICATOR,
                     Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,

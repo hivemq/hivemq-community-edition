@@ -113,7 +113,8 @@ public class PubcompInterceptorHandler {
 
         for (final PubcompInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -160,12 +161,17 @@ public class PubcompInterceptorHandler {
         final PubcompOutboundOutputImpl output = new PubcompOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubcompOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
 
-        final PubcompOutboundInterceptorContext context = new PubcompOutboundInterceptorContext(
-                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+        final PubcompOutboundInterceptorContext context = new PubcompOutboundInterceptorContext(clientId,
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
 
         for (final PubcompOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -249,9 +255,8 @@ public class PubcompInterceptorHandler {
             try {
                 interceptor.onInboundPubcomp(input, output);
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBCOMP interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound PUBCOMP interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -342,7 +347,9 @@ public class PubcompInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBCOMP interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

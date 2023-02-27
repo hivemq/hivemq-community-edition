@@ -43,8 +43,14 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
             final int startPriority,
             final @NotNull ExtensionMain extensionMain,
             final boolean enabled) {
-        super(id, version, name, author, priority,
-                startPriority, extensionMain, enabled,
+        super(id,
+                version,
+                name,
+                author,
+                priority,
+                startPriority,
+                extensionMain,
+                enabled,
                 new File(System.getProperty("java.io.tmpdir")).toPath());
 
         classLoader = extensionMain.getClass().getClassLoader();

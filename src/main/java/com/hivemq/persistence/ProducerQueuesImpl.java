@@ -17,7 +17,12 @@ package com.hivemq.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -37,9 +42,9 @@ import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
 
 /**
  * @author Lukas Brandl
- * <p>
- * The ProducerQueuesImpl class is a part of the single writer concept. There is one Instance of this class for
- * each persistence that utilizes the single writer service.
+ *         <p>
+ *         The ProducerQueuesImpl class is a part of the single writer concept. There is one Instance of this class for
+ *         each persistence that utilizes the single writer service.
  */
 @SuppressWarnings("unchecked")
 public class ProducerQueuesImpl implements ProducerQueues {
@@ -61,7 +66,8 @@ public class ProducerQueuesImpl implements ProducerQueues {
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
 
     private @Nullable ListenableFuture<Void> closeFuture;
-    private long shutdownStartTime = Long.MAX_VALUE; // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
+    private long shutdownStartTime = Long.MAX_VALUE;
+    // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
 
 
     public ProducerQueuesImpl(final SingleWriterServiceImpl singleWriterServiceImpl, final int amountOfQueues) {
@@ -115,7 +121,8 @@ public class ProducerQueuesImpl implements ProducerQueues {
             @Nullable final SingleWriterServiceImpl.SuccessCallback<R> successCallback,
             @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback,
             final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get() &&
+        if (!ignoreShutdown &&
+                shutdown.get() &&
                 System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
@@ -146,8 +153,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
      * @return a list of listenableFutures of type R
      */
     public @NotNull <R> List<ListenableFuture<R>> submitToAllBuckets(
-            final @NotNull Task<R> task,
-            final boolean parallel) {
+            final @NotNull Task<R> task, final boolean parallel) {
         if (parallel) {
             return submitToAllBucketsParallel(task, false);
         } else {
@@ -167,8 +173,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
     }
 
     private @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(
-            final @NotNull Task<R> task,
-            final boolean ignoreShutdown) {
+            final @NotNull Task<R> task, final boolean ignoreShutdown) {
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
         final int bucketCount = singleWriterServiceImpl.getPersistenceBucketCount();
         for (int bucket = 0; bucket < bucketCount; bucket++) {
@@ -265,8 +270,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
         final ListeningScheduledExecutorService executorService =
                 MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(threadFactory));
 
-        closeFuture = executorService.schedule(
-                () -> {
+        closeFuture = executorService.schedule(() -> {
                     // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by the shutdown grace period.
                     if (finalTask != null) {
                         Futures.allAsList(submitToAllBucketsParallel(finalTask, true)).get();

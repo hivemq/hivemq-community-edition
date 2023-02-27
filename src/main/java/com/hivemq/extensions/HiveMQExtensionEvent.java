@@ -66,24 +66,39 @@ public class HiveMQExtensionEvent {
         return embedded;
     }
 
-    public enum Change {ENABLE, DISABLE}
+    public enum Change {
+        ENABLE,
+        DISABLE
+    }
 
     @Override
     public String toString() {
         return "HiveMQExtensionEvent{" +
-                "change=" + change +
-                ", extensionId='" + extensionId + '\'' +
-                ", priority=" + priority +
-                ", extensionFolder=" + extensionFolder +
+                "change=" +
+                change +
+                ", extensionId='" +
+                extensionId +
+                '\'' +
+                ", priority=" +
+                priority +
+                ", extensionFolder=" +
+                extensionFolder +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HiveMQExtensionEvent that = (HiveMQExtensionEvent) o;
-        return priority == that.priority && change == that.change && Objects.equals(extensionId, that.extensionId) && Objects.equals(extensionFolder, that.extensionFolder);
+        return priority == that.priority &&
+                change == that.change &&
+                Objects.equals(extensionId, that.extensionId) &&
+                Objects.equals(extensionFolder, that.extensionFolder);
     }
 
     @Override

@@ -55,9 +55,16 @@ import util.TestConfigurationBootstrap;
 import java.util.HashSet;
 import java.util.Queue;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("ALL")
 public class IncomingSubscribeServiceTest {
@@ -98,15 +105,23 @@ public class IncomingSubscribeServiceTest {
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
-        incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence, retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService, restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog));
+        incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence,
+                retainedMessagePersistence,
+                sharedSubscriptionService,
+                retainedMessagesSender,
+                mqttConfigurationService,
+                restrictionsConfigurationService,
+                new MqttServerDisconnectorImpl(eventLog));
 
         channel = new EmbeddedChannel();
         clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
 
-        when(clientSessionSubscriptionPersistence.addSubscription(anyString(), any(Topic.class))).thenReturn(Futures.immediateFuture(null));
-        when(clientSessionSubscriptionPersistence.addSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(Futures.<Void>immediateFuture(null));
+        when(clientSessionSubscriptionPersistence.addSubscription(anyString(),
+                any(Topic.class))).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionSubscriptionPersistence.addSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(
+                Futures.<Void>immediateFuture(null));
         when(ctx.channel()).thenReturn(channel);
         when(ctx.writeAndFlush(any())).thenReturn(channelFuture);
         when(ctx.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
@@ -238,7 +253,9 @@ public class IncomingSubscribeServiceTest {
     @Test
     public void test_subscription_metric() throws Exception {
 
-        final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("t1", QoS.AT_LEAST_ONCE), new Topic("t2", QoS.AT_LEAST_ONCE))), 1);
+        final SUBSCRIBE subscribe =
+                new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("t1", QoS.AT_LEAST_ONCE),
+                        new Topic("t2", QoS.AT_LEAST_ONCE))), 1);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
     }
@@ -246,7 +263,9 @@ public class IncomingSubscribeServiceTest {
     @Test
     public void test_send_invalid_subscribe_message() throws Exception {
 
-        final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("not/#/allowed", QoS.AT_LEAST_ONCE))), 1);
+        final SUBSCRIBE subscribe =
+                new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("not/#/allowed", QoS.AT_LEAST_ONCE))),
+                        1);
 
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
 
@@ -369,7 +388,8 @@ public class IncomingSubscribeServiceTest {
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").type(TopicPermission.PermissionType.ALLOW).build());
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
@@ -391,7 +411,8 @@ public class IncomingSubscribeServiceTest {
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.DENY).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").type(TopicPermission.PermissionType.DENY).build());
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
@@ -415,7 +436,8 @@ public class IncomingSubscribeServiceTest {
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").type(TopicPermission.PermissionType.ALLOW).build());
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
@@ -441,7 +463,8 @@ public class IncomingSubscribeServiceTest {
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").type(TopicPermission.PermissionType.DENY).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").type(TopicPermission.PermissionType.DENY).build());
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
 
@@ -469,11 +492,14 @@ public class IncomingSubscribeServiceTest {
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final Topic topic4 = new Topic("test4", QoS.EXACTLY_ONCE);
 
-        final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3, topic4)), 10);
+        final SUBSCRIBE subscribe =
+                new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3, topic4)), 10);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test1").type(TopicPermission.PermissionType.ALLOW).build());
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test4").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test1").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test4").type(TopicPermission.PermissionType.ALLOW).build());
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(permissions);
@@ -523,9 +549,11 @@ public class IncomingSubscribeServiceTest {
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(null);
 
-        incomingSubscribeService.processSubscribe(ctx, subscribe,
+        incomingSubscribeService.processSubscribe(ctx,
+                subscribe,
                 new Mqtt5SubAckReasonCode[]{Mqtt5SubAckReasonCode.GRANTED_QOS_1, null, null},
-                new String[3], true);
+                new String[3],
+                true);
 
         final SUBACK response = channel.readOutbound();
 

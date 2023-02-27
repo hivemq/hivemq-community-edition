@@ -32,7 +32,12 @@ import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class Mqtt3PublishDecoderTest {

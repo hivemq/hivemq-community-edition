@@ -24,7 +24,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dominik Obermaier
@@ -59,10 +61,12 @@ public class NettyConfigurationProviderTest {
     @Test
     public void test_thread_names_for_nio_are_set() throws Exception {
 
-        final String childThreadName = nettyConfiguration.getChildEventLoopGroup().submit(() -> Thread.currentThread().getName()).get();
+        final String childThreadName =
+                nettyConfiguration.getChildEventLoopGroup().submit(() -> Thread.currentThread().getName()).get();
         assertTrue(childThreadName.startsWith("hivemq-eventloop-child-"));
 
-        final String parentThreadName = nettyConfiguration.getParentEventLoopGroup().submit(() -> Thread.currentThread().getName()).get();
+        final String parentThreadName =
+                nettyConfiguration.getParentEventLoopGroup().submit(() -> Thread.currentThread().getName()).get();
         assertTrue(parentThreadName.startsWith("hivemq-eventloop-parent-"));
     }
 }

@@ -64,15 +64,21 @@ public final class SslUtil {
         } catch (final FileNotFoundException e) {
             throw new SslException("Cannot find KeyStore at path '" + keyStorePath + "'");
         } catch (final KeyStoreException | IOException e) {
-            throw new SslException(String.format("Not able to open or read KeyStore '%s' with type '%s'", keyStorePath, keyStoreType), e);
+            throw new SslException(String.format("Not able to open or read KeyStore '%s' with type '%s'",
+                    keyStorePath,
+                    keyStoreType), e);
         } catch (final NoSuchAlgorithmException | CertificateException e) {
             throw new SslException("Not able to read the certificate from KeyStore '" + keyStorePath + "'", e);
         }
     }
 
     public static @Nullable TrustManagerFactory getTrustManagerFactory(final @NotNull Tls tls) throws SslException {
-        return isNotBlank(tls.getTruststorePath()) && tls.getTruststoreType() != null && tls.getTruststorePassword() != null ?
-                createTrustManagerFactory(tls.getTruststoreType(), tls.getTruststorePath(), tls.getTruststorePassword()) :
+        return isNotBlank(tls.getTruststorePath()) &&
+                tls.getTruststoreType() != null &&
+                tls.getTruststorePassword() != null ?
+                createTrustManagerFactory(tls.getTruststoreType(),
+                        tls.getTruststorePath(),
+                        tls.getTruststorePassword()) :
                 null;
     }
 
@@ -93,7 +99,9 @@ public final class SslUtil {
         } catch (final FileNotFoundException e) {
             throw new SslException("Cannot find TrustStore at path '" + trustStorePath + "'");
         } catch (final KeyStoreException | IOException e) {
-            throw new SslException(String.format("Not able to open or read TrustStore '%s' with type '%s'", trustStorePath, trustStoreType), e);
+            throw new SslException(String.format("Not able to open or read TrustStore '%s' with type '%s'",
+                    trustStorePath,
+                    trustStoreType), e);
         } catch (final NoSuchAlgorithmException | CertificateException e) {
             throw new SslException("Not able to read the certificate from TrustStore '" + trustStorePath + "'", e);
         }

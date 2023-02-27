@@ -27,10 +27,14 @@ public class ConnackMessages {
 
     public static final CONNACK ACCEPTED_MSG_SESS_PRESENT = new CONNACK(Mqtt3ConnAckReturnCode.ACCEPTED, true);
 
-    public static final CONNACK REFUSED_UNACCEPTABLE_PROTOCOL_VERSION = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
-    public static final CONNACK REFUSED_IDENTIFIER_REJECTED = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED);
-    public static final CONNACK REFUSED_SERVER_UNAVAILABLE = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_SERVER_UNAVAILABLE);
-    public static final CONNACK REFUSED_BAD_USERNAME_OR_PASSWORD = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_BAD_USERNAME_OR_PASSWORD);
+    public static final CONNACK REFUSED_UNACCEPTABLE_PROTOCOL_VERSION =
+            new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_UNACCEPTABLE_PROTOCOL_VERSION);
+    public static final CONNACK REFUSED_IDENTIFIER_REJECTED =
+            new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_IDENTIFIER_REJECTED);
+    public static final CONNACK REFUSED_SERVER_UNAVAILABLE =
+            new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_SERVER_UNAVAILABLE);
+    public static final CONNACK REFUSED_BAD_USERNAME_OR_PASSWORD =
+            new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_BAD_USERNAME_OR_PASSWORD);
     public static final CONNACK REFUSED_NOT_AUTHORIZED = new CONNACK(Mqtt3ConnAckReturnCode.REFUSED_NOT_AUTHORIZED);
 
     public static CONNACK getMessageForRefusedCode(final Mqtt3ConnAckReturnCode returnCode) {

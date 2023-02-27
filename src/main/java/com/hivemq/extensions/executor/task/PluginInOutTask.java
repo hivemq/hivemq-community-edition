@@ -25,5 +25,6 @@ import java.util.function.BiFunction;
  *
  * @author Georg Held
  */
-public interface PluginInOutTask<I extends PluginTaskInput, O extends PluginTaskOutput> extends BiFunction<I, O, O>, PluginTask {
+public interface PluginInOutTask<I extends PluginTaskInput, O extends PluginTaskOutput>
+        extends BiFunction<I, O, O>, PluginTask {
 }

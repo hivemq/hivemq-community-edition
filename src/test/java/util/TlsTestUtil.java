@@ -27,8 +27,7 @@ public final class TlsTestUtil {
     }
 
     public static @NotNull Tls.Builder createDefaultTLSBuilder() {
-        return new Tls.Builder()
-                .withKeystorePath("")
+        return new Tls.Builder().withKeystorePath("")
                 .withKeystorePassword("")
                 .withKeystoreType("JKS")
                 .withPrivateKeyPassword("")

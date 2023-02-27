@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
  * Interface for Mqtt 3 UNSUBSCRIBE message
  *
  * @author Florian Limpöck
- *
  * @since 4.0.0
  */
 public interface Mqtt3UNSUBSCRIBE {

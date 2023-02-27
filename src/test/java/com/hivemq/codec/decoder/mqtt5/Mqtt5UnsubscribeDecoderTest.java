@@ -54,10 +54,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0x26, 0, 4, 'u', 's', 'e', 'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', //
                 0x26, 0, 4, 'u', 's', 'e', 'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y',
                 // payload topic filter
-                0, 5, 't', 'o', 'p', 'i', 'c',
-                0, 5, 't', 'o', 'p', 'i', 'd',
-                0, 5, 't', 'o', 'p', 'i', 'e'
-        };
+                0, 5, 't', 'o', 'p', 'i', 'c', 0, 5, 't', 'o', 'p', 'i', 'd', 0, 5, 't', 'o', 'p', 'i', 'e'};
 
         final UNSUBSCRIBE unsubscribe = decode(encoded);
 
@@ -85,8 +82,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 1,
                 // packet identifier
-                0
-        };
+                0};
 
         decodeNullExpected(encoded);
 
@@ -104,8 +100,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // packet identifier
                 0, 0,
                 //property length
-                0
-        };
+                0};
 
         decodeNullExpected(encoded);
 
@@ -121,8 +116,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 2,
                 // packet identifier
-                0, 1,
-        };
+                0, 1,};
 
         decodeNullExpected(encoded);
 
@@ -183,8 +177,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // payload topic filter
-                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
-        };
+                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',};
 
         decodeNullExpected(encoded);
 
@@ -205,8 +198,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // payload topic filter
-                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
-        };
+                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',};
 
         decodeNullExpected(encoded1);
 
@@ -227,8 +219,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // payload topic filter
-                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
-        };
+                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',};
 
         decodeNullExpected(encoded2);
 
@@ -249,8 +240,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // payload topic filter
-                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
-        };
+                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',};
 
         decodeNullExpected(encoded3);
 
@@ -273,7 +263,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // invalid identifier
                 (byte) 0xBB, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -315,7 +305,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -359,7 +349,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 2, 't',
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -403,7 +393,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -447,7 +437,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }

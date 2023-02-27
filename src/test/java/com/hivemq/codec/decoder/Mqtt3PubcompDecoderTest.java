@@ -27,7 +27,9 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class Mqtt3PubcompDecoderTest {
 

@@ -16,7 +16,16 @@
 package com.hivemq.extensions.executor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.executor.task.*;
+import com.hivemq.extensions.executor.task.PluginInOutTask;
+import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
+import com.hivemq.extensions.executor.task.PluginInTask;
+import com.hivemq.extensions.executor.task.PluginInTaskContext;
+import com.hivemq.extensions.executor.task.PluginOutTask;
+import com.hivemq.extensions.executor.task.PluginOutTaskContext;
+import com.hivemq.extensions.executor.task.PluginTask;
+import com.hivemq.extensions.executor.task.PluginTaskContext;
+import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.extensions.executor.task.PluginTaskOutput;
 
 import java.util.function.Supplier;
 
@@ -54,9 +63,10 @@ public interface PluginTaskExecutorService {
      * @param <I>                 a type extending the {@link PluginTaskInput} marker interface.
      * @throws java.util.concurrent.RejectedExecutionException when task executor is shut down.
      */
-    <I extends PluginTaskInput> void handlePluginInTaskExecution(@NotNull final PluginInTaskContext pluginInTaskContext,
-                                                                    @NotNull final Supplier<I> pluginInputSupplier,
-                                                                    @NotNull final PluginInTask<I> pluginTask);
+    <I extends PluginTaskInput> void handlePluginInTaskExecution(
+            @NotNull final PluginInTaskContext pluginInTaskContext,
+            @NotNull final Supplier<I> pluginInputSupplier,
+            @NotNull final PluginInTask<I> pluginTask);
 
     /**
      * Handle a {@link PluginTask}, that can affect the execution of HiveMQ, but provides no additional information to
@@ -69,9 +79,10 @@ public interface PluginTaskExecutorService {
      * @param <O>                  a type extending the {@link PluginTaskOutput} marker interface.
      * @throws java.util.concurrent.RejectedExecutionException when task executor is shut down.
      */
-    <O extends PluginTaskOutput> void handlePluginOutTaskExecution(@NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
-                                                                      @NotNull final Supplier<O> pluginOutputSupplier,
-                                                                      @NotNull final PluginOutTask<O> pluginTask);
+    <O extends PluginTaskOutput> void handlePluginOutTaskExecution(
+            @NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
+            @NotNull final Supplier<O> pluginOutputSupplier,
+            @NotNull final PluginOutTask<O> pluginTask);
 
     /**
      * Handle a {@link PluginTask}, that can affect the execution of HiveMQ and provides additional information to
@@ -86,10 +97,11 @@ public interface PluginTaskExecutorService {
      * @param <O>                  a type extending the {@link PluginTaskOutput} marker interface.
      * @throws java.util.concurrent.RejectedExecutionException when task executor is shut down.
      */
-    <I extends PluginTaskInput, O extends PluginTaskOutput> void handlePluginInOutTaskExecution(@NotNull final PluginInOutTaskContext<O> pluginInOutContext,
-                                                                                                   @NotNull final Supplier<I> pluginInputSupplier,
-                                                                                                   @NotNull final Supplier<O> pluginOutputSupplier,
-                                                                                                   @NotNull final PluginInOutTask<I, O> pluginTask);
+    <I extends PluginTaskInput, O extends PluginTaskOutput> void handlePluginInOutTaskExecution(
+            @NotNull final PluginInOutTaskContext<O> pluginInOutContext,
+            @NotNull final Supplier<I> pluginInputSupplier,
+            @NotNull final Supplier<O> pluginOutputSupplier,
+            @NotNull final PluginInOutTask<I, O> pluginTask);
 
 
 

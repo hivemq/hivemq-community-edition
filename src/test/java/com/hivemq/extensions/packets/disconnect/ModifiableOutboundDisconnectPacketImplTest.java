@@ -27,7 +27,9 @@ import util.TestConfigurationBootstrap;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Robin Atherton
@@ -44,8 +46,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setReasonCode() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -63,8 +64,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setReasonCode_same() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -82,8 +82,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setReasonCode_null() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -96,8 +95,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setReasonString() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 null,
                 5,
                 "serverReference",
@@ -115,8 +113,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setReasonString_null() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -134,8 +131,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setReasonString_same() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "same",
                 5,
                 "serverReference",
@@ -153,8 +149,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonString_invalid() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -167,8 +162,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonString_exceedsMaxLength() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -185,8 +179,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setServerReference() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 null,
@@ -204,8 +197,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setServerReference_null() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "reason",
                 5,
                 "serverReference",
@@ -223,8 +215,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void setServerReference_same() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "same",
                 5,
                 "serverReference",
@@ -242,8 +233,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setServerReference_invalid() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "same",
                 5,
                 "serverReference",
@@ -256,8 +246,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setServerReference_exceedsMaxLength() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "same",
                 5,
                 "serverReference",
@@ -274,8 +263,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "same",
                 5,
                 "serverReference",
@@ -290,8 +278,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
 
     @Test
     public void copy_changes() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(
-                DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                 "same",
                 5,
                 "serverReference",
@@ -305,8 +292,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final DisconnectPacketImpl copy = modifiablePacket.copy();
 
-        final DisconnectPacketImpl expectedPacket = new DisconnectPacketImpl(
-                DisconnectReasonCode.UNSPECIFIED_ERROR,
+        final DisconnectPacketImpl expectedPacket = new DisconnectPacketImpl(DisconnectReasonCode.UNSPECIFIED_ERROR,
                 "modifiedReasonString",
                 5,
                 "modifiedServerReference",

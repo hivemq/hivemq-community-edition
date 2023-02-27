@@ -237,9 +237,11 @@ public class PublishOutboundInterceptorHandler {
             try {
                 interceptor.onOutboundPublish(input, output);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. " +
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. " +
                                 "Extensions are responsible for their own exception handling.",
-                        extensionId, e);
+                        extensionId,
+                        e);
                 output.forciblyPreventPublishDelivery();
                 Exceptions.rethrowError(e);
             }

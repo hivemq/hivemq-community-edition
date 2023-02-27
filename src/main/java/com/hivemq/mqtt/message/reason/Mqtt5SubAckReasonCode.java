@@ -76,7 +76,7 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the SUBACK Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
-     * valid SUBACK Reason Code.
+     *         valid SUBACK Reason Code.
      */
     public static @Nullable Mqtt5SubAckReasonCode fromCode(final int code) {
         for (final Mqtt5SubAckReasonCode reasonCode : VALUES) {

@@ -35,7 +35,11 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author Georg Held
@@ -127,8 +131,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 failFutureLists(failedException, localStartFutures, localStopFutures);
             } else {
                 log.error("Encountered a FAILED EmbeddedHiveMQ state without a reason present.");
-                failFutureLists(
-                        new IllegalStateException("FAILED EmbeddedHiveMQ state without a reason present"),
+                failFutureLists(new IllegalStateException("FAILED EmbeddedHiveMQ state without a reason present"),
                         localStartFutures,
                         localStopFutures);
             }

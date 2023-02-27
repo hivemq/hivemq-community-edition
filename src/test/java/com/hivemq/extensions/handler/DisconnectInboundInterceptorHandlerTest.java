@@ -154,9 +154,9 @@ public class DisconnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_plugin_null() throws Exception {
-        final DisconnectInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifyInboundInterceptor.class);
+        final DisconnectInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifyInboundInterceptor.class);
         final List<DisconnectInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectInboundInterceptors()).thenReturn(list);
@@ -178,9 +178,9 @@ public class DisconnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_modified() throws Exception {
-        final DisconnectInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifyInboundInterceptor.class);
+        final DisconnectInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifyInboundInterceptor.class);
         final List<DisconnectInboundInterceptor> interceptors = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectInboundInterceptors()).thenReturn(interceptors);
@@ -226,9 +226,9 @@ public class DisconnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_exception() throws Exception {
-        final DisconnectInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestExceptionInboundInterceptor.class);
+        final DisconnectInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestExceptionInboundInterceptor.class);
         final List<DisconnectInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getDisconnectInboundInterceptors()).thenReturn(list);

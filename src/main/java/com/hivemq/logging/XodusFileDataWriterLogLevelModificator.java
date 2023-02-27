@@ -39,7 +39,13 @@ public class XodusFileDataWriterLogLevelModificator extends TurboFilter {
     private final AtomicBoolean first = new AtomicBoolean(true);
 
     @Override
-    public FilterReply decide(final Marker marker, final ch.qos.logback.classic.Logger logger, final Level level, final String format, final Object[] params, final Throwable t) {
+    public FilterReply decide(
+            final Marker marker,
+            final ch.qos.logback.classic.Logger logger,
+            final Level level,
+            final String format,
+            final Object[] params,
+            final Throwable t) {
 
         if (level.isGreaterOrEqual(Level.WARN)) {
             if (logger.getName().equals(fileDataWriterLogger.getName())) {

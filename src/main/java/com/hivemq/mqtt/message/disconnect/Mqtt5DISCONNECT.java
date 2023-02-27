@@ -29,8 +29,7 @@ public interface Mqtt5DISCONNECT {
     /**
      * @return the reason code of this DISCONNECT packet.
      */
-    @NotNull
-    Mqtt5DisconnectReasonCode getReasonCode();
+    @NotNull Mqtt5DisconnectReasonCode getReasonCode();
 
     /**
      * @return the optional expiry interval for the session, the client disconnects from with this DISCONNECT packet.
@@ -40,20 +39,17 @@ public interface Mqtt5DISCONNECT {
     /**
      * @return the optional server reference, which can be used if the server sent this DISCONNECT packet.
      */
-    @Nullable
-    String getServerReference();
+    @Nullable String getServerReference();
 
     /**
      * @return the optional reason string of this DISCONNECT packet.
      */
-    @Nullable
-    String getReasonString();
+    @Nullable String getReasonString();
 
     /**
      * @return the optional user properties of this DISCONNECT packet.
      */
-    @NotNull
-    Mqtt5UserProperties getUserProperties();
+    @NotNull Mqtt5UserProperties getUserProperties();
 
     MessageType getType();
 

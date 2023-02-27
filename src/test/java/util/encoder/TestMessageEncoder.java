@@ -46,10 +46,13 @@ public class TestMessageEncoder extends MQTTMessageEncoder {
             final MessageDroppedService messageDroppedService,
             final SecurityConfigurationService securityConfigurationService) {
 
-        super(new TestEncoderFactory(messageDroppedService, securityConfigurationService,
-                        new MqttServerDisconnectorImpl(new EventLog()), new Mqtt3ConnectEncoder(), new Mqtt3SubscribeEncoder(),
-                        new Mqtt3UnsubscribeEncoder(), new PingreqEncoder()),
-                new GlobalMQTTMessageCounter(new MetricsHolder(new MetricRegistry())));
+        super(new TestEncoderFactory(messageDroppedService,
+                securityConfigurationService,
+                new MqttServerDisconnectorImpl(new EventLog()),
+                new Mqtt3ConnectEncoder(),
+                new Mqtt3SubscribeEncoder(),
+                new Mqtt3UnsubscribeEncoder(),
+                new PingreqEncoder()), new GlobalMQTTMessageCounter(new MetricsHolder(new MetricRegistry())));
 
         this.securityConfigurationService = securityConfigurationService;
     }

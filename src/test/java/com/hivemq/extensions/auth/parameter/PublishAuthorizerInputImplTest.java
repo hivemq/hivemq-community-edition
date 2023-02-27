@@ -75,7 +75,8 @@ public class PublishAuthorizerInputImplTest {
     @Test
     public void test_will_publish() {
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
-        final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(connect.getWillPublish(), channel, "client");
+        final PublishAuthorizerInputImpl input =
+                new PublishAuthorizerInputImpl(connect.getWillPublish(), channel, "client");
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());

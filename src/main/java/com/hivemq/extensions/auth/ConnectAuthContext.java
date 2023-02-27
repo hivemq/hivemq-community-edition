@@ -64,14 +64,14 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
         super.succeedAuthentication(output);
         final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         clientConnection.setAuthData(output.getAuthenticationData());
-        clientConnection.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()));
+        clientConnection.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties()
+                .asInternalList()));
         connectHandler.connectSuccessfulAuthenticated(ctx, clientConnection, connect, output.getClientSettings());
     }
 
     @Override
     void failAuthentication(final @NotNull ConnectAuthOutput output) {
-        connacker.connackError(
-                ctx.channel(),
+        connacker.connackError(ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                 output.getReasonString(),
                 output.getReasonCode(),
@@ -86,8 +86,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
             final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
             connectHandler.connectSuccessfulUndecided(ctx, clientConnection, connect, output.getClientSettings());
         } else {
-            connacker.connackError(
-                    ctx.channel(),
+            connacker.connackError(ctx.channel(),
                     PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                     ReasonStrings.AUTH_FAILED_NO_AUTHENTICATOR,
                     Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
@@ -99,8 +98,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
 
     @Override
     void onTimeout() {
-        connacker.connackError(
-                ctx.channel(),
+        connacker.connackError(ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                 ReasonStrings.AUTH_FAILED_CLIENT_TIMEOUT,
                 Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
@@ -111,8 +109,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
 
     @Override
     void onSendException(final @NotNull Throwable cause) {
-        connacker.connackError(
-                ctx.channel(),
+        connacker.connackError(ctx.channel(),
                 PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG,
                 ReasonStrings.AUTH_FAILED_SEND_EXCEPTION,
                 Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,

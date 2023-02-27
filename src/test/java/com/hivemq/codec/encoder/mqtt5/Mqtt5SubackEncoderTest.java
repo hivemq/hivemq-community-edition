@@ -59,8 +59,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //     user properties
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -91,8 +90,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   properties
                 0,
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -121,8 +119,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   properties
                 0,
                 // payload
-                0x00
-        };
+                0x00};
 
         final SUBACK subAck = new SUBACK(3,
                 ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
@@ -150,8 +147,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   properties
                 0,
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -183,8 +179,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 

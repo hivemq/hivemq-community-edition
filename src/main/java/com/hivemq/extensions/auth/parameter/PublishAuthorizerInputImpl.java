@@ -36,13 +36,15 @@ import java.util.function.Supplier;
 /**
  * @author Christoph Schäbel
  */
-public class PublishAuthorizerInputImpl implements PublishAuthorizerInput, PluginTaskInput, Supplier<PublishAuthorizerInputImpl> {
+public class PublishAuthorizerInputImpl
+        implements PublishAuthorizerInput, PluginTaskInput, Supplier<PublishAuthorizerInputImpl> {
 
     private final @NotNull PublishPacket publishPacket;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ClientInformation clientInformation;
 
-    public PublishAuthorizerInputImpl(final @NotNull PUBLISH publish, final @NotNull Channel channel, final @NotNull String clientId) {
+    public PublishAuthorizerInputImpl(
+            final @NotNull PUBLISH publish, final @NotNull Channel channel, final @NotNull String clientId) {
         Preconditions.checkNotNull(publish, "publish must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");
@@ -52,13 +54,15 @@ public class PublishAuthorizerInputImpl implements PublishAuthorizerInput, Plugi
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
     }
 
-    public PublishAuthorizerInputImpl(final @NotNull MqttWillPublish publish, final @NotNull Channel channel, final @NotNull String clientId) {
+    public PublishAuthorizerInputImpl(
+            final @NotNull MqttWillPublish publish, final @NotNull Channel channel, final @NotNull String clientId) {
         Preconditions.checkNotNull(publish, "publish must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");
 
-        final Long timestamp = Objects.requireNonNullElse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectReceivedTimestamp(),
-                System.currentTimeMillis());
+        final Long timestamp = Objects.requireNonNullElse(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
+                .get()
+                .getConnectReceivedTimestamp(), System.currentTimeMillis());
         this.publishPacket = new WillPublishPacketImpl(publish, timestamp);
         this.clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);

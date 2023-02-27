@@ -51,8 +51,7 @@ public class PubrelPacketImpl implements PubrelPacket {
     }
 
     public PubrelPacketImpl(final @NotNull PUBREL pubrel) {
-        this(
-                pubrel.getPacketIdentifier(),
+        this(pubrel.getPacketIdentifier(),
                 pubrel.getReasonCode().toPubrelReasonCode(),
                 pubrel.getReasonString(),
                 UserPropertiesImpl.of(pubrel.getUserProperties().asList()));

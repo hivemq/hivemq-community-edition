@@ -71,7 +71,10 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBREC(packetIdentifier, Mqtt5PUBREC.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBREC(packetIdentifier,
+                    Mqtt5PUBREC.DEFAULT_REASON_CODE,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.fromCode(buf.readUnsignedByte());
@@ -104,7 +107,8 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBREC);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBREC);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }

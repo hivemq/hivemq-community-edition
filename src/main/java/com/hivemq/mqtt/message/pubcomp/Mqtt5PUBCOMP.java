@@ -32,20 +32,17 @@ public interface Mqtt5PUBCOMP {
     /**
      * @return the reason code of this PUBCOMP packet.
      */
-    @NotNull
-    Mqtt5PubCompReasonCode getReasonCode();
+    @NotNull Mqtt5PubCompReasonCode getReasonCode();
 
     /**
      * @return the optional reason string of this PUBACK packet.
      */
-    @NotNull
-    String getReasonString();
+    @NotNull String getReasonString();
 
     /**
      * @return the optional user properties of this PUBACK packet.
      */
-    @NotNull
-    Mqtt5UserProperties getUserProperties();
+    @NotNull Mqtt5UserProperties getUserProperties();
 
     MessageType getType();
 }

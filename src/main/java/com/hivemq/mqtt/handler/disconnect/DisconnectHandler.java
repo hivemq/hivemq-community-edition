@@ -93,8 +93,11 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         clientConnection.setSendWill(msg.getReasonCode() != NORMAL_DISCONNECTION);
 
-        ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
-                msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
+        ctx.pipeline()
+                .fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
+                        msg.getReasonString(),
+                        UserPropertiesImpl.of(msg.getUserProperties().asList()),
+                        true));
 
         clientConnection.proposeClientState(ClientState.DISCONNECTED_BY_CLIENT);
         ctx.channel().close();
@@ -135,8 +138,8 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
 
         final SettableFuture<Void> disconnectFuture = clientConnection.getDisconnectFuture();
 
-        if (clientConnection.getClientId() == null
-                || clientConnection != connectionPersistence.get(clientConnection.getClientId())) {
+        if (clientConnection.getClientId() == null ||
+                clientConnection != connectionPersistence.get(clientConnection.getClientId())) {
             if (disconnectFuture != null) {
                 disconnectFuture.set(null);
             }
@@ -148,15 +151,15 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             clientConnection.setSendWill(false);
 
             // ungraceful disconnect
-        } else if ((clientConnection.getClientState() == ClientState.DISCONNECTED_BY_SERVER)
-                || (clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED)) {
+        } else if ((clientConnection.getClientState() == ClientState.DISCONNECTED_BY_SERVER) ||
+                (clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED)) {
             clientConnection.setSendWill(true);
         }
 
-        final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(
-                clientConnection.getClientId(),
-                clientConnection.isSendWill(),
-                clientConnection.getClientSessionExpiryInterval());
+        final ListenableFuture<Void> persistenceFuture =
+                clientSessionPersistence.clientDisconnected(clientConnection.getClientId(),
+                        clientConnection.isSendWill(),
+                        clientConnection.getClientSessionExpiryInterval());
         Futures.addCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
@@ -172,7 +175,10 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             public void onFailure(final @NotNull Throwable throwable) {
                 final boolean persistent = clientConnection.getClientSessionExpiryInterval() > 0;
                 Exceptions.rethrowError("Unable to update client session data for disconnecting client " +
-                        clientConnection.getClientId() + " with clean session set to " + !persistent + ".", throwable);
+                        clientConnection.getClientId() +
+                        " with clean session set to " +
+                        !persistent +
+                        ".", throwable);
             }
         }, MoreExecutors.directExecutor());
     }

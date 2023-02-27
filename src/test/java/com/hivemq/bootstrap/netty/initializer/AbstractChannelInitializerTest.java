@@ -27,7 +27,10 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.security.exception.SslException;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -45,10 +48,21 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
-import static org.junit.Assert.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.GLOBAL_THROTTLING_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_BARRIER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_DECODER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NO_CONNECT_IDLE_EVENT_HANDLER;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class AbstractChannelInitializerTest {
 
@@ -85,12 +99,14 @@ public class AbstractChannelInitializerTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
-        when(socketChannel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(new ClientConnection(socketChannel, null)));
+        when(socketChannel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(new ClientConnection(
+                socketChannel,
+                null)));
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.isActive()).thenReturn(true);
 
-        when(channelDependencies.getGlobalTrafficShapingHandler())
-                .thenReturn(new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(), 1000L));
+        when(channelDependencies.getGlobalTrafficShapingHandler()).thenReturn(new GlobalTrafficShapingHandler(Executors.newSingleThreadScheduledExecutor(),
+                1000L));
 
         when(channelDependencies.getConfigurationService()).thenReturn(configurationService);
         when(channelDependencies.getShutdownHooks()).thenReturn(shutdownHooks);
@@ -152,7 +168,9 @@ public class AbstractChannelInitializerTest {
 
         final IdleStateHandler[] idleStateHandler = new IdleStateHandler[1];
 
-        when(pipeline.addAfter(anyString(), anyString(), any(ChannelHandler.class))).thenAnswer((Answer<ChannelPipeline>) invocation -> {
+        when(pipeline.addAfter(anyString(),
+                anyString(),
+                any(ChannelHandler.class))).thenAnswer((Answer<ChannelPipeline>) invocation -> {
 
             if (invocation.getArguments()[1].equals(NEW_CONNECTION_IDLE_HANDLER)) {
                 idleStateHandler[0] = (IdleStateHandler) (invocation.getArguments()[2]);

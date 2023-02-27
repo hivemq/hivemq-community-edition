@@ -28,7 +28,11 @@ import com.hivemq.migration.logging.PayloadExceptionLogging;
 import com.hivemq.migration.meta.MetaFileService;
 import com.hivemq.migration.meta.MetaInformation;
 import com.hivemq.migration.meta.PersistenceType;
-import com.hivemq.migration.persistence.legacy.*;
+import com.hivemq.migration.persistence.legacy.ClientQueueXodusLocalPersistence_4_4;
+import com.hivemq.migration.persistence.legacy.PUBLISH_4_4;
+import com.hivemq.migration.persistence.legacy.PublishPayloadLocalPersistence_4_4;
+import com.hivemq.migration.persistence.legacy.PublishPayloadRocksDBLocalPersistence_4_4;
+import com.hivemq.migration.persistence.legacy.PublishPayloadXodusLocalPersistence_4_4;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.clientqueue.ClientQueueEntry;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl;
@@ -65,10 +69,13 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
     private final @NotNull Provider<ClientSessionLocalPersistence> sessionLocalPersistenceProvider;
     private final @NotNull Provider<ClientQueueXodusLocalPersistence> localXodusPersistenceProvider;
     private final @NotNull Provider<ClientQueueXodusLocalPersistence_4_4> clientQueueXodusLocalPersistence_4_4Provider;
-    private final @NotNull Provider<PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider;
-    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider;
+    private final @NotNull Provider<PublishPayloadXodusLocalPersistence_4_4>
+            publishPayloadXodusLocalPersistence_4_4Provider;
+    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4>
+            publishPayloadRocksDBLocalPersistence_4_4Provider;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
-    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> publishPayloadRocksDBLocalPersistenceProvider;
+    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence>
+            publishPayloadRocksDBLocalPersistenceProvider;
     private final @NotNull Provider<PublishPayloadXodusLocalPersistence> publishPayloadXodusLocalPersistenceProvider;
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
@@ -79,17 +86,18 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
     private final @NotNull AtomicReference<PersistenceType> previousPayloadType = new AtomicReference<>();
 
     @Inject
-    public ClientQueuePayloadIDMigration(final @NotNull Provider<ClientSessionLocalPersistence> sessionLocalPersistenceProvider,
-                                         final @NotNull Provider<ClientQueueXodusLocalPersistence> localXodusPersistenceProvider,
-                                         final @NotNull Provider<ClientQueueXodusLocalPersistence_4_4> clientQueueXodusLocalPersistence_4_4Provider,
-                                         final @NotNull Provider<PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider,
-                                         final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider,
-                                         final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-                                         final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> publishPayloadRocksDBLocalPersistenceProvider,
-                                         final @NotNull Provider<PublishPayloadXodusLocalPersistence> publishPayloadXodusLocalPersistenceProvider,
-                                         final @NotNull SystemInformation systemInformation,
-                                         final @NotNull PayloadExceptionLogging payloadExceptionLogging,
-                                         final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
+    public ClientQueuePayloadIDMigration(
+            final @NotNull Provider<ClientSessionLocalPersistence> sessionLocalPersistenceProvider,
+            final @NotNull Provider<ClientQueueXodusLocalPersistence> localXodusPersistenceProvider,
+            final @NotNull Provider<ClientQueueXodusLocalPersistence_4_4> clientQueueXodusLocalPersistence_4_4Provider,
+            final @NotNull Provider<PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider,
+            final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider,
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> publishPayloadRocksDBLocalPersistenceProvider,
+            final @NotNull Provider<PublishPayloadXodusLocalPersistence> publishPayloadXodusLocalPersistenceProvider,
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull PayloadExceptionLogging payloadExceptionLogging,
+            final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
         this.sessionLocalPersistenceProvider = sessionLocalPersistenceProvider;
         this.localXodusPersistenceProvider = localXodusPersistenceProvider;
         this.clientQueueXodusLocalPersistence_4_4Provider = clientQueueXodusLocalPersistence_4_4Provider;
@@ -119,7 +127,9 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
 
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
 
-        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(ClientQueueXodusLocalPersistence.PERSISTENCE_NAME, ClientQueueXodusLocalPersistence_4_4.PERSISTENCE_VERSION);
+        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(
+                ClientQueueXodusLocalPersistence.PERSISTENCE_NAME,
+                ClientQueueXodusLocalPersistence_4_4.PERSISTENCE_VERSION);
         if (oldFolderMissing(persistenceFolder)) {
             return;
         }
@@ -137,8 +147,12 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
         }
 
         final var iterationCallback = new QueuedMessagePersistenceValueSwitchCallback(bucketCount,
-                publishPayloadLocalPersistence, localXodusPersistenceProvider.get(), payloadExceptionLogging,
-                legacyPayloadPersistence, sessionLocalPersistenceProvider.get(), publishPayloadPersistence);
+                publishPayloadLocalPersistence,
+                localXodusPersistenceProvider.get(),
+                payloadExceptionLogging,
+                legacyPayloadPersistence,
+                sessionLocalPersistenceProvider.get(),
+                publishPayloadPersistence);
 
         clientQueueXodusLocalPersistence_4_4Provider.get().iterate(iterationCallback);
     }
@@ -153,7 +167,8 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
     }
 
     @VisibleForTesting
-    static class QueuedMessagePersistenceValueSwitchCallback implements ClientQueueXodusLocalPersistence_4_4.QueueCallback_4_4 {
+    static class QueuedMessagePersistenceValueSwitchCallback
+            implements ClientQueueXodusLocalPersistence_4_4.QueueCallback_4_4 {
 
         private final int bucketCount;
         private final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence;
@@ -163,13 +178,14 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
         private final @NotNull ClientSessionLocalPersistence sessionLocalPersistence;
         private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
 
-        QueuedMessagePersistenceValueSwitchCallback(final int bucketCount,
-                                                    final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence,
-                                                    final @NotNull ClientQueueXodusLocalPersistence clientQueueXodusLocalPersistence,
-                                                    final @NotNull PayloadExceptionLogging payloadExceptionLogging,
-                                                    final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence,
-                                                    final @NotNull ClientSessionLocalPersistence sessionLocalPersistence,
-                                                    final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
+        QueuedMessagePersistenceValueSwitchCallback(
+                final int bucketCount,
+                final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence,
+                final @NotNull ClientQueueXodusLocalPersistence clientQueueXodusLocalPersistence,
+                final @NotNull PayloadExceptionLogging payloadExceptionLogging,
+                final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence,
+                final @NotNull ClientSessionLocalPersistence sessionLocalPersistence,
+                final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
             this.bucketCount = bucketCount;
             this.payloadLocalPersistence = payloadLocalPersistence;
             this.clientQueueXodusLocalPersistence = clientQueueXodusLocalPersistence;
@@ -180,7 +196,9 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
         }
 
         @Override
-        public void onItem(final ClientQueuePersistenceImpl.@NotNull Key key, final @NotNull ImmutableList<ClientQueueEntry> messages) {
+        public void onItem(
+                final ClientQueuePersistenceImpl.@NotNull Key key,
+                final @NotNull ImmutableList<ClientQueueEntry> messages) {
             try {
                 if (messages.isEmpty()) {
                     //no need to migrate no messages
@@ -203,16 +221,26 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
                             continue;
                         }
                         payloadLocalPersistence.put(legacyPublish.getPublish().getPublishId(), bytes);
-                        publishPayloadPersistence.incrementReferenceCounterOnBootstrap(legacyPublish.getPublish().getPublishId());
-                        clientQueueXodusLocalPersistence.add(key.getQueueId(), key.isShared(), legacyPublish.getPublish(),
-                                Long.MAX_VALUE, MqttConfigurationService.QueuedMessagesStrategy.DISCARD, queueEntry.isRetained(), bucketIndex);
+                        publishPayloadPersistence.incrementReferenceCounterOnBootstrap(legacyPublish.getPublish()
+                                .getPublishId());
+                        clientQueueXodusLocalPersistence.add(key.getQueueId(),
+                                key.isShared(),
+                                legacyPublish.getPublish(),
+                                Long.MAX_VALUE,
+                                MqttConfigurationService.QueuedMessagesStrategy.DISCARD,
+                                queueEntry.isRetained(),
+                                bucketIndex);
                     }
                     if (queueEntry.getMessageWithID() instanceof PUBREL) {
-                        clientQueueXodusLocalPersistence.replace(key.getQueueId(), (PUBREL) queueEntry.getMessageWithID(), bucketIndex);
+                        clientQueueXodusLocalPersistence.replace(key.getQueueId(),
+                                (PUBREL) queueEntry.getMessageWithID(),
+                                bucketIndex);
                     }
                 }
             } catch (final Throwable throwable) {
-                log.warn("Could not migrate queued messages for queue id " + key.getQueueId() + ". Original exception: ", throwable);
+                log.warn("Could not migrate queued messages for queue id " +
+                        key.getQueueId() +
+                        ". Original exception: ", throwable);
                 Exceptions.rethrowError(throwable);
             }
         }

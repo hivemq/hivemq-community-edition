@@ -17,8 +17,8 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import javax.inject.Singleton;
 import java.io.BufferedReader;
@@ -52,14 +52,16 @@ public class ClassServiceLoader {
      * @param classLoader the classloader to load the classes from
      * @param <S>         The type of the class to load
      * @return an immutable Iterable which contains all classes found via the service loader mechanism. All classes get
-     * initialized.
+     *         initialized.
      * @throws IOException                    If an IO error happens
      * @throws ClassNotFoundException         If the found class can not be found and thus can't be initialized and
      *                                        loaded
      * @throws java.lang.NullPointerException If <code>null</code> is passed to any parameter
      */
     @ReadOnly
-    public <S> @NotNull Iterable<Class<? extends S>> load(final @NotNull Class<S> classToLoad, final @NotNull ClassLoader classLoader) throws IOException, ClassNotFoundException {
+    public <S> @NotNull Iterable<Class<? extends S>> load(
+            final @NotNull Class<S> classToLoad, final @NotNull ClassLoader classLoader)
+            throws IOException, ClassNotFoundException {
         checkNotNull(classToLoad, "Class to load mus not be null");
         checkNotNull(classLoader, "Classloader must not be null");
 

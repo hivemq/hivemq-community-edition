@@ -81,7 +81,12 @@ public class NettyLogLevelModifierTest {
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.util.internal.PlatformDependent0");
 
-        final FilterReply decide = nettyLogLevelModifier.decide(null, rootLogger, Level.DEBUG, format, null, new UnsupportedOperationException());
+        final FilterReply decide = nettyLogLevelModifier.decide(null,
+                rootLogger,
+                Level.DEBUG,
+                format,
+                null,
+                new UnsupportedOperationException());
 
         assertEquals(FilterReply.DENY, decide);
     }
@@ -92,7 +97,8 @@ public class NettyLogLevelModifierTest {
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.channel.nio.NioEventLoop");
 
-        final FilterReply decide = nettyLogLevelModifier.decide(null, rootLogger, Level.TRACE, format, null, new RuntimeException());
+        final FilterReply decide =
+                nettyLogLevelModifier.decide(null, rootLogger, Level.TRACE, format, null, new RuntimeException());
 
         assertEquals(FilterReply.NEUTRAL, decide);
     }
@@ -103,7 +109,12 @@ public class NettyLogLevelModifierTest {
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.channel.nio.NioEventLoop");
 
-        final FilterReply decide = nettyLogLevelModifier.decide(null, rootLogger, Level.TRACE, format, null, new UnsupportedOperationException());
+        final FilterReply decide = nettyLogLevelModifier.decide(null,
+                rootLogger,
+                Level.TRACE,
+                format,
+                null,
+                new UnsupportedOperationException());
 
         assertEquals(FilterReply.DENY, decide);
     }
@@ -114,7 +125,12 @@ public class NettyLogLevelModifierTest {
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.util.internal.PlatformDependent0");
 
-        final FilterReply decide = nettyLogLevelModifier.decide(null, rootLogger, Level.DEBUG, format, new Object[]{new UnsupportedOperationException()}, null);
+        final FilterReply decide = nettyLogLevelModifier.decide(null,
+                rootLogger,
+                Level.DEBUG,
+                format,
+                new Object[]{new UnsupportedOperationException()},
+                null);
 
         assertEquals(FilterReply.DENY, decide);
     }
@@ -125,7 +141,12 @@ public class NettyLogLevelModifierTest {
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.util.internal.NativeLibraryLoader");
 
-        final FilterReply decide = nettyLogLevelModifier.decide(null, rootLogger, Level.DEBUG, format, new Object[]{new UnsupportedOperationException()}, null);
+        final FilterReply decide = nettyLogLevelModifier.decide(null,
+                rootLogger,
+                Level.DEBUG,
+                format,
+                new Object[]{new UnsupportedOperationException()},
+                null);
 
         assertEquals(FilterReply.DENY, decide);
     }

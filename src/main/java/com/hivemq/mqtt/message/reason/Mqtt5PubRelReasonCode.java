@@ -64,7 +64,7 @@ public enum Mqtt5PubRelReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the PUBREL Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
-     * valid PUBREL Reason Code.
+     *         valid PUBREL Reason Code.
      */
     public static @Nullable Mqtt5PubRelReasonCode fromCode(final int code) {
         if (code == SUCCESS.code) {

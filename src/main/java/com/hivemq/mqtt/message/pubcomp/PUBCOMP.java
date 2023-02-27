@@ -54,8 +54,7 @@ public class PUBCOMP extends MqttMessageWithUserProperties.MqttMessageWithIdAndR
     }
 
     public static @NotNull PUBCOMP from(final @NotNull PubcompPacketImpl packet) {
-        return new PUBCOMP(
-                packet.getPacketIdentifier(),
+        return new PUBCOMP(packet.getPacketIdentifier(),
                 Mqtt5PubCompReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));

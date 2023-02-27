@@ -62,7 +62,8 @@ public class XodusEnvironmentImplLogLevelModificatorTest {
 
     @Test
     public void test_xodus_error_message_transactions_not_finished() throws Exception {
-        final String msg = "Environment[/var/folders/fp/dfyv187j4h5g6cn6xs49qpqw0000gn/T/junit5059509984233082259/junit231924022829037059] is active: 1 transaction(s) not finished";
+        final String msg =
+                "Environment[/var/folders/fp/dfyv187j4h5g6cn6xs49qpqw0000gn/T/junit5059509984233082259/junit231924022829037059] is active: 1 transaction(s) not finished";
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();

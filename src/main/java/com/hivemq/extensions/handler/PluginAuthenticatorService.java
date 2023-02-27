@@ -53,7 +53,5 @@ public interface PluginAuthenticatorService {
      * @param auth             the original AUTH message.
      */
     void authenticateAuth(
-            @NotNull ChannelHandlerContext ctx,
-            @NotNull ClientConnection clientConnection,
-            @NotNull AUTH auth);
+            @NotNull ChannelHandlerContext ctx, @NotNull ClientConnection clientConnection, @NotNull AUTH auth);
 }

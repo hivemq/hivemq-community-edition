@@ -18,7 +18,11 @@ package com.hivemq.configuration.entity;
 import com.hivemq.configuration.entity.listener.ListenerEntity;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -50,8 +50,8 @@ public class TestInterceptorUtil {
     public static <T extends Interceptor> @NotNull List<T> getIsolatedInterceptors(
             final @NotNull List<Class<? extends T>> types, final @NotNull TemporaryFolder temporaryFolder)
             throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
-                types.toArray(new Class[0]))) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
+                .toPath(), types.toArray(new Class[0]))) {
             final LinkedList<T> list = new LinkedList<>();
             for (final Class<? extends T> type : types) {
                 final Class<?> clazz = cl.loadClass(type.getName());

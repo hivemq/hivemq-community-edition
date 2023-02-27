@@ -63,10 +63,16 @@ public class PersistenceShutdownHookTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        persistenceShutdownHook = new PersistenceShutdownHook(clientSessionPersistence, clientSessionSubscriptionPersistence,
-                incomingMessageFlowPersistence, retainedMessagePersistence, payloadPersistence,
-                clientQueuePersistence, persistenceExecutorService, persistenceScheduledExecutorService,
-                payloadPersistenceExecutor, singleWriterService);
+        persistenceShutdownHook = new PersistenceShutdownHook(clientSessionPersistence,
+                clientSessionSubscriptionPersistence,
+                incomingMessageFlowPersistence,
+                retainedMessagePersistence,
+                payloadPersistence,
+                clientQueuePersistence,
+                persistenceExecutorService,
+                persistenceScheduledExecutorService,
+                payloadPersistenceExecutor,
+                singleWriterService);
 
         when(clientSessionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));

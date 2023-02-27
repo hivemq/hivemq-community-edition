@@ -16,12 +16,12 @@
 package com.hivemq.extensions.services.builder;
 
 import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.Subscription;
 import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
@@ -79,15 +79,22 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
     @Override
     public @NotNull TopicSubscriptionBuilder topicFilter(@NotNull final String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter must never be null");
-        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(), "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength() + "' characters, but has '" + topicFilter.length() + "' characters");
-        Preconditions.checkArgument(!(!mqttConfig.wildcardSubscriptionsEnabled() && Topics.containsWildcard(topicFilter)), "Wildcard characters '+' or '#' are not allowed");
+        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(),
+                "Topic filter length must not exceed '" +
+                        restrictionsConfig.maxTopicLength() +
+                        "' characters, but has '" +
+                        topicFilter.length() +
+                        "' characters");
+        Preconditions.checkArgument(!(!mqttConfig.wildcardSubscriptionsEnabled() &&
+                Topics.containsWildcard(topicFilter)), "Wildcard characters '+' or '#' are not allowed");
 
         shared = Topics.isSharedSubscriptionTopic(topicFilter);
         if (shared) {
             Preconditions.checkArgument(mqttConfig.sharedSubscriptionsEnabled(), "Shared subscriptions not allowed");
             final SharedSubscription sharedSubscription = Topics.checkForSharedSubscription(topicFilter);
             if (sharedSubscription != null) {
-                Preconditions.checkArgument(!sharedSubscription.getTopicFilter().isEmpty(), "Shared subscription topic must not be empty");
+                Preconditions.checkArgument(!sharedSubscription.getTopicFilter().isEmpty(),
+                        "Shared subscription topic must not be empty");
             }
         }
 
@@ -124,8 +131,10 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
 
     @Override
     public @NotNull TopicSubscriptionBuilder subscriptionIdentifier(final int subscriptionIdentifier) {
-        Preconditions.checkArgument(mqttConfig.subscriptionIdentifierEnabled(), "Subscription identifier are not allowed");
-        Preconditions.checkArgument(subscriptionIdentifier >= 1 && subscriptionIdentifier <= MAX_SUBSCRIPTION_IDENTIFIER,
+        Preconditions.checkArgument(mqttConfig.subscriptionIdentifierEnabled(),
+                "Subscription identifier are not allowed");
+        Preconditions.checkArgument(subscriptionIdentifier >= 1 &&
+                        subscriptionIdentifier <= MAX_SUBSCRIPTION_IDENTIFIER,
                 "Subscription identifier must be between 1 and 268,435,455");
         this.subscriptionIdentifier = subscriptionIdentifier;
         return this;

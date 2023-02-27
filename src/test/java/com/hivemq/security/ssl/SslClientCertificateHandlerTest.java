@@ -163,7 +163,8 @@ public class SslClientCertificateHandlerTest {
     private class WrongHandler extends SimpleChannelInboundHandler<Object> {
 
         @Override
-        protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final Object o) throws Exception {
+        protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final Object o)
+                throws Exception {
             super.channelRead(channelHandlerContext, o);
         }
     }

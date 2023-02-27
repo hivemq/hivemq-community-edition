@@ -62,7 +62,8 @@ public class InMemoryProducerQueuesTest {
     }
 
     @Test
-    public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws InterruptedException {
+    public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently()
+            throws InterruptedException {
 
         final LinkedList<Integer> list = new LinkedList<>();
         list.add(0);

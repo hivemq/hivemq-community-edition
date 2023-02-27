@@ -43,10 +43,29 @@ import com.hivemq.util.Topics;
 import io.netty.buffer.ByteBuf;
 
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-import static com.hivemq.mqtt.message.connect.CONNECT.*;
+import static com.hivemq.mqtt.message.connect.CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED;
+import static com.hivemq.mqtt.message.connect.CONNECT.DEFAULT_RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.connect.CONNECT.DEFAULT_RESPONSE_INFORMATION_REQUESTED;
+import static com.hivemq.mqtt.message.connect.CONNECT.DEFAULT_TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.connect.CONNECT.Mqtt5Builder;
+import static com.hivemq.mqtt.message.connect.CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT;
 import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_DATA;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_METHOD;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CONTENT_TYPE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CORRELATION_DATA;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.MAXIMUM_PACKET_SIZE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.MESSAGE_EXPIRY_INTERVAL;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.PAYLOAD_FORMAT_INDICATOR;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.REQUEST_PROBLEM_INFORMATION;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.REQUEST_RESPONSE_INFORMATION;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RESPONSE_TOPIC;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SESSION_EXPIRY_INTERVAL;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.WILL_DELAY_INTERVAL;
 import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
 import static com.hivemq.util.Bytes.isBitSet;
 
@@ -183,8 +202,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
         clientConnection.setCleanStart(cleanStart);
 
-        return connectBuilder
-                .withClientIdentifier(clientId)
+        return connectBuilder.withClientIdentifier(clientId)
                 .withCleanStart(cleanStart)
                 .withKeepAlive(keepAlive)
                 .withWillPublish(mqttWillPublish)
@@ -315,14 +333,20 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                     break;
 
                 case REQUEST_RESPONSE_INFORMATION:
-                    requestResponseInformation = readBoolean(clientConnection, buf, requestResponseInformation, "request response information");
+                    requestResponseInformation = readBoolean(clientConnection,
+                            buf,
+                            requestResponseInformation,
+                            "request response information");
                     if (requestResponseInformation == null) {
                         return false;
                     }
                     break;
 
                 case REQUEST_PROBLEM_INFORMATION:
-                    requestProblemInformation = readBoolean(clientConnection, buf, requestProblemInformation, "request problem information");
+                    requestProblemInformation = readBoolean(clientConnection,
+                            buf,
+                            requestProblemInformation,
+                            "request problem information");
                     if (requestProblemInformation == null) {
                         return false;
                     }
@@ -394,12 +418,12 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withReceiveMaximum(receiveMaximum)
                 .withMaximumPacketSize(maximumPacketSize)
                 .withTopicAliasMaximum(topicAliasMaximum)
-                .withResponseInformationRequested(
-                        requestResponseInformation == null ? DEFAULT_RESPONSE_INFORMATION_REQUESTED :
-                                requestResponseInformation)
-                .withProblemInformationRequested(
-                        requestProblemInformation == null ? DEFAULT_PROBLEM_INFORMATION_REQUESTED :
-                                requestProblemInformation)
+                .withResponseInformationRequested(requestResponseInformation == null ?
+                        DEFAULT_RESPONSE_INFORMATION_REQUESTED :
+                        requestResponseInformation)
+                .withProblemInformationRequested(requestProblemInformation == null ?
+                        DEFAULT_PROBLEM_INFORMATION_REQUESTED :
+                        requestProblemInformation)
                 .withUserProperties(userProperties);
 
         return true;
@@ -651,7 +675,9 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     }
 
     private boolean willDelayIntervalInvalid(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final long willDelayInterval) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ByteBuf buf,
+            final long willDelayInterval) {
 
         if (willDelayInterval != WILL_DELAY_INTERVAL_NOT_SET) {
             connackByMoreThanOnce(clientConnection, "will delay interval");
@@ -844,10 +870,12 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @param buf              the encoded ByteBuf of the message
      * @param responseTopic    the initial response topic (must be null)
      * @return a response topic,
-     * or {@code null} when failed.
+     *         or {@code null} when failed.
      */
     private @Nullable String readResponseTopic(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, @Nullable String responseTopic) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ByteBuf buf,
+            @Nullable String responseTopic) {
 
         if (responseTopic != null) {
             connackByMoreThanOnce(clientConnection, "response topic");
@@ -886,10 +914,12 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @param buf              the encoded ByteBuf of the message
      * @param correlationData  the initial correlation data (must be null)
      * @return a byte[] containing decoded correlation data,
-     * or {@code null} when failed.
+     *         or {@code null} when failed.
      */
     private byte @Nullable [] readCorrelationData(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, byte @Nullable [] correlationData) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ByteBuf buf,
+            byte @Nullable [] correlationData) {
 
         if (correlationData != null) {
             connackByMoreThanOnce(clientConnection, "correlation data");
@@ -925,10 +955,12 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @param buf              the encoded ByteBuf of the message
      * @param contentType      the initial content type (must be null)
      * @return a content type,
-     * or {@code null} when failed.
+     *         or {@code null} when failed.
      */
     private @Nullable String readContentType(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, @Nullable String contentType) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ByteBuf buf,
+            @Nullable String contentType) {
 
         if (contentType != null) {
             connackByMoreThanOnce(clientConnection, "content type");
@@ -964,7 +996,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @param buf                    the encoded ByteBuf of the message
      * @param payloadFormatIndicator the initial payload format indicator (must be null)
      * @return a {@link Mqtt5PayloadFormatIndicator},
-     * or {@code null} when failed.
+     *         or {@code null} when failed.
      */
     private @Nullable Mqtt5PayloadFormatIndicator readPayloadFormatIndicator(
             final @NotNull ClientConnection clientConnection,
@@ -1011,7 +1043,9 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @return the session expiry interval, or -1 when decoding failed.
      */
     private long decodeSessionExpiryInterval(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final long sessionExpiryInterval) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ByteBuf buf,
+            final long sessionExpiryInterval) {
 
         if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
             connackByMoreThanOnce(clientConnection, "session expiry interval");
@@ -1042,7 +1076,9 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @return true if invalid, false if valid
      */
     private boolean messageExpiryIntervalInvalid(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final long messageExpiryInterval) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull ByteBuf buf,
+            final long messageExpiryInterval) {
 
         if (messageExpiryInterval != MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             connackByMoreThanOnce(clientConnection, "message expiry interval");
@@ -1073,7 +1109,9 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
         if (Topics.containsWildcard(topicName)) {
             mqttConnacker.connackError(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a CONNECT with a wildcard character (# or +) in the " + location + ". This is not allowed.",
+                    "A client (IP: {}) sent a CONNECT with a wildcard character (# or +) in the " +
+                            location +
+                            ". This is not allowed.",
                     "Sent CONNECT with wildcard character (#/+) in the " + location,
                     Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
                     String.format(ReasonStrings.CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD, location));
@@ -1111,7 +1149,8 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             final @NotNull ClientConnection clientConnection, final int propertyIdentifier) {
         mqttConnacker.connackError(clientConnection.getChannel(),
                 "A client (IP: {}) sent a CONNECT with a invalid property identifier '" +
-                        propertyIdentifier + "'. This is not allowed. Disconnecting client.",
+                        propertyIdentifier +
+                        "'. This is not allowed. Disconnecting client.",
                 "Sent CONNECT with invalid property identifier",
                 Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                 ReasonStrings.CONNACK_MALFORMED_PROPERTIES_INVALID);

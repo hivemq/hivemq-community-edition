@@ -37,9 +37,17 @@ import util.TestMqttDecoder;
 import java.nio.charset.StandardCharsets;
 
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.*;
-import static com.hivemq.mqtt.message.connect.MqttWillPublish.WILL_DELAY_INTERVAL_NOT_SET;
-import static org.junit.Assert.*;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.DEFAULT_RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.DEFAULT_RESPONSE_INFORMATION_REQUESTED;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.DEFAULT_TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -122,8 +130,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   username
                 0, 8, 'u', 's', 'e', 'r', 'n', 'a', 'm', 'e',
                 //   password
-                0, 4, 'p', 'a', 's', 's'
-        };
+                0, 4, 'p', 'a', 's', 's'};
 
         final CONNECT connect = decodeInternal(encoded);
 
@@ -173,7 +180,9 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         assertNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getConnectKeepAlive());
         assertEquals("username", channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthUsername());
-        assertEquals("pass", new String(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthPassword(), StandardCharsets.UTF_8));
+        assertEquals("pass",
+                new String(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthPassword(),
+                        StandardCharsets.UTF_8));
     }
 
     @Test
@@ -197,8 +206,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
 
         final CONNECT connect = decodeInternal(encoded);
         assertEquals(ProtocolVersion.MQTTv5, connect.getProtocolVersion());
@@ -221,9 +229,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
-                0b0001_0001,
-                0
-        };
+                0b0001_0001, 0};
         decodeNullExpected(encoded);
     }
 
@@ -232,12 +238,9 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
-                0b0001_0001,
-                7,
-                0, 4, 'M', 'Q', 'T', 'T',
+                0b0001_0001, 7, 0, 4, 'M', 'Q', 'T', 'T',
                 //   protocol version
-                6,
-        };
+                6,};
         decodeNullExpected(encoded);
     }
 
@@ -246,12 +249,9 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
-                0b0001_0000,
-                7,
-                0, 4, 'M', 'Q', 'T', 'T',
+                0b0001_0000, 7, 0, 4, 'M', 'Q', 'T', 'T',
                 //   protocol version
-                5,
-        };
+                5,};
         decodeNullExpected(encoded);
     }
 
@@ -260,12 +260,9 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         final byte[] encoded = {
                 // fixed header
                 //   type, reserved
-                0b0001_0001,
-                7,
-                0, 4, 'M', 'Q', 'T', 'T',
+                0b0001_0001, 7, 0, 4, 'M', 'Q', 'T', 'T',
                 //   protocol version
-                5,
-        };
+                5,};
         decodeNullExpected(encoded);
     }
 
@@ -284,8 +281,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   connect flags
                 (byte) 0b0000_0000,
                 //   keep alive
-                0, 0,
-        };
+                0, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -304,8 +300,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   connect flags
                 (byte) 0b0000_0001,
                 //   keep alive
-                0, 0,
-        };
+                0, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -324,8 +319,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   connect flags
                 (byte) 0b0001_1000,
                 //   keep alive
-                0, 0,
-        };
+                0, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -344,8 +338,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   connect flags
                 (byte) 0b0000_1000,
                 //   keep alive
-                0, 0,
-        };
+                0, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -364,8 +357,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   connect flags
                 (byte) 0b0010_0000,
                 //   keep alive
-                0, 0,
-        };
+                0, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -389,8 +381,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 27,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -414,8 +405,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 -1,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -441,8 +431,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x11, 0, 0, 0, 10,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -465,12 +454,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 10,
                 //     session expiry interval
-                0x11, 0, 0, 0, 10,
-                0x11, 0, 0, 0, 10,
+                0x11, 0, 0, 0, 10, 0x11, 0, 0, 0, 10,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -493,8 +480,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     session expiry interval
-                0x11, 0, 0, 10,
-        };
+                0x11, 0, 0, 10,};
         decodeNullExpected(encoded);
     }
 
@@ -517,12 +503,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 6,
                 //   receive maximum
-                0x21, 0, 3,
-                0x21, 0, 3,
+                0x21, 0, 3, 0x21, 0, 3,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -548,8 +532,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x21, 0, 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -572,8 +555,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 2,
                 //   receive maximum
-                0x21, 0,
-        };
+                0x21, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -596,8 +578,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 2,
                 //   maximum packet size
-                0x27, 0,
-        };
+                0x27, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -620,12 +601,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 10,
                 //   maximum packet size
-                0x27, 0, 0, 0, 100,
-                0x27, 0, 0, 0, 100,
+                0x27, 0, 0, 0, 100, 0x27, 0, 0, 0, 100,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -651,8 +630,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x27, 0, 0, 0, 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -675,12 +653,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 6,
                 //     topic alias maximum
-                0x22, 0, 10,
-                0x22, 0, 10,
+                0x22, 0, 10, 0x22, 0, 10,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -703,8 +679,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 2,
                 //     topic alias maximum
-                0x22, 10,
-        };
+                0x22, 10,};
         decodeNullExpected(encoded);
     }
 
@@ -727,12 +702,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     request response information
-                0x19, 1,
-                0x19, 1,
+                0x19, 1, 0x19, 1,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -780,12 +753,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     request response information
-                0x19, 3,
-                0x19, 1,
+                0x19, 3, 0x19, 1,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -811,8 +782,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x19, 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         final CONNECT connect = decodeInternal(encoded);
         assertFalse(connect.isResponseInformationRequested());
     }
@@ -836,12 +806,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     request problem information
-                0x17, 0,
-                0x17, 0,
+                0x17, 0, 0x17, 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -864,12 +832,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     request problem information
-                0x17, 3,
-                0x17, 0,
+                0x17, 3, 0x17, 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -920,8 +886,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x17, 1,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         final CONNECT connect = decodeInternal(encoded);
         assertTrue(connect.isProblemInformationRequested());
     }
@@ -945,12 +910,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 26,
                 //     auth data
-                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -976,8 +939,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -1000,8 +962,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 12,
                 //     auth data
-                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        };
+                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,};
         decodeNullExpected(encoded);
     }
 
@@ -1024,8 +985,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 2,
                 //     auth data
-                0x16, 0,
-        };
+                0x16, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -1048,12 +1008,10 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 22,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5', 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
         decodeNullExpected(encoded);
     }
 
@@ -1076,8 +1034,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 10,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B',
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B',};
         decodeNullExpected(encoded);
     }
 
@@ -1100,8 +1057,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 2,
                 //     auth method
-                0x15, 0,
-        };
+                0x15, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -1124,8 +1080,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 6,
                 //     auth method
-                0x15, 0, 3, (byte) 0x7F, 'a', 'b'
-        };
+                0x15, 0, 3, (byte) 0x7F, 'a', 'b'};
         decodeNullExpected(encoded);
     }
 
@@ -1148,8 +1103,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 6,
                 //     auth method
-                0x15, 0, 3, -19, -96, 'b'
-        };
+                0x15, 0, 3, -19, -96, 'b'};
         decodeNullExpected(encoded);
     }
 
@@ -1172,8 +1126,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 13,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',};
         decodeNullExpected(encoded);
     }
 
@@ -1196,8 +1149,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 13,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -1220,8 +1172,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 2,
                 //   user property
-                0x26, 0,
-        };
+                0x26, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -1244,8 +1195,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', (byte) 0xFF, 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', (byte) 0xFF, 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -1268,8 +1218,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 0x7F, 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 0x7F, 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -1292,8 +1241,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', (byte) 0xFF
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', (byte) 0xFF};
         decodeNullExpected(encoded);
     }
 
@@ -1316,8 +1264,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 0x7F
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 0x7F};
         decodeNullExpected(encoded);
     }
 
@@ -1343,8 +1290,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 0,
-        };
+                0, 0,};
 
         final CONNECT connect = decodeInternal(encoded);
 
@@ -1380,8 +1326,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 0,
-        };
+                0, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -1407,8 +1352,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', 'u'
-        };
+                0, 4, 'h', 'u', 'h', 'u'};
 
         final CONNECT connect = decodeInternal(encoded);
 
@@ -1438,8 +1382,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x18, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', 'u'
-        };
+                0, 4, 'h', 'u', 'h', 'u'};
         decodeNullExpected(encoded);
     }
 
@@ -1465,8 +1408,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h'
-        };
+                0, 4, 'h', 'u', 'h'};
         decodeNullExpected(encoded);
     }
 
@@ -1492,8 +1434,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', (byte) 0xFF
-        };
+                0, 4, 'h', 'u', 'h', (byte) 0xFF};
         decodeNullExpected(encoded);
     }
 
@@ -1519,8 +1460,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', -19, -96, 'u'
-        };
+                0, 4, 'h', -19, -96, 'u'};
         decodeNullExpected(encoded);
     }
 
@@ -1546,8 +1486,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', 'u'
-        };
+                0, 4, 'h', 'u', 'h', 'u'};
         decodeNullExpected(encoded);
     }
 
@@ -1573,8 +1512,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', 'u'
-        };
+                0, 4, 'h', 'u', 'h', 'u'};
         decodeNullExpected(encoded);
     }
 
@@ -1602,8 +1540,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 // password
-                0,
-        };
+                0,};
         decodeNullExpected(encoded);
     }
 
@@ -1631,8 +1568,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 // password
-                0, 5, 1, 2, 3, 4
-        };
+                0, 5, 1, 2, 3, 4};
         decodeNullExpected(encoded);
     }
 
@@ -1660,8 +1596,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 // password
-                0, 0
-        };
+                0, 0};
         final CONNECT connect = decodeInternal(encoded);
         assertEquals(0, connect.getPassword().length);
     }
@@ -1690,8 +1625,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 //   username
-                0,
-        };
+                0,};
         decodeNullExpected(encoded);
     }
 
@@ -1719,8 +1653,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 //   username
-                0, 0
-        };
+                0, 0};
         final CONNECT connect = decodeInternal(encoded);
         assertEquals("", connect.getUsername());
     }
@@ -1749,8 +1682,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 //   username
-                0, 5, 'h', 'u', 'h', 'u',
-        };
+                0, 5, 'h', 'u', 'h', 'u',};
         decodeNullExpected(encoded);
     }
 
@@ -1780,8 +1712,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 // will properties
                 4,
                 //     message expiry interval
-                0x02, 0, 0, 0, 10,
-        };
+                0x02, 0, 0, 0, 10,};
         decodeNullExpected(encoded);
     }
 
@@ -1811,8 +1742,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 // will properties
                 6,
                 //     message expiry interval
-                0x02, 0, 0, 0, 10,
-        };
+                0x02, 0, 0, 0, 10,};
         decodeNullExpected(encoded);
     }
 
@@ -1840,8 +1770,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   client identifier
                 0, 4, 'h', 'u', 'h', 'u',
                 // will properties
-                -1,
-        };
+                -1,};
         decodeNullExpected(encoded);
     }
 
@@ -1867,8 +1796,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', 'u',
-        };
+                0, 4, 'h', 'u', 'h', 'u',};
         decodeNullExpected(encoded);
     }
 
@@ -1898,9 +1826,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 10,
                 //     will delay interval
-                0x18, 0, 0, 0, 5,
-                0x18, 0, 0, 0, 5,
-        };
+                0x18, 0, 0, 0, 5, 0x18, 0, 0, 0, 5,};
         decodeNullExpected(encoded);
     }
 
@@ -1930,8 +1856,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 4,
                 //     will delay interval
-                0x18, 0, 0, 5,
-        };
+                0x18, 0, 0, 5,};
         decodeNullExpected(encoded);
     }
 
@@ -1961,8 +1886,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 2,
                 //   payload format indicator
-                0x01, 2
-        };
+                0x01, 2};
         decodeNullExpected(encoded);
     }
 
@@ -1992,8 +1916,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 1,
                 //   payload format indicator
-                0x01,
-        };
+                0x01,};
         decodeNullExpected(encoded);
     }
 
@@ -2023,9 +1946,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 4,
                 //   payload format indicator
-                0x01, 1,
-                0x01, 1
-        };
+                0x01, 1, 0x01, 1};
         decodeNullExpected(encoded);
     }
 
@@ -2055,9 +1976,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 10,
                 //   message expiry interval
-                0x02, 0, 0, 0, 5,
-                0x02, 0, 0, 0, 5,
-        };
+                0x02, 0, 0, 0, 5, 0x02, 0, 0, 0, 5,};
         decodeNullExpected(encoded);
     }
 
@@ -2087,8 +2006,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 3,
                 //   message expiry interval
-                0x02, 0, 5,
-        };
+                0x02, 0, 5,};
         decodeNullExpected(encoded);
     }
 
@@ -2130,8 +2048,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will topic
                 0, 1, 't',
                 //   will payload
-                0, 0,
-        };
+                0, 0,};
         final CONNECT connect = decodeInternal(encoded);
         assertEquals(110, connect.getWillPublish().getMessageExpiryInterval());
     }
@@ -2162,8 +2079,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 2,
                 //   content type
-                0x03, 5,
-        };
+                0x03, 5,};
         decodeNullExpected(encoded);
     }
 
@@ -2193,9 +2109,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   content type
-                0x03, 0, 4, 't', 'e', 'x', 't',
-                0x03, 0, 4, 't', 'e', 'x', 't',
-        };
+                0x03, 0, 4, 't', 'e', 'x', 't', 0x03, 0, 4, 't', 'e', 'x', 't',};
         decodeNullExpected(encoded);
     }
 
@@ -2208,26 +2122,66 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 51,
                 // protocol name
-                0, 4, 'M', 'Q', 'T', 'T',
+                0,
+                4,
+                'M',
+                'Q',
+                'T',
+                'T',
                 //   protocol version
                 5,
                 //   connect flags
                 (byte) 0b0010_1100,
                 //   keep alive
-                0, 0,
+                0,
+                0,
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
+                0x15,
+                0,
+                8,
+                'G',
+                'S',
+                '2',
+                '-',
+                'K',
+                'R',
+                'B',
+                '5',
                 // payload
                 //   client identifier
-                0, 4, 'h', 'u', 'h', 'u',
+                0,
+                4,
+                'h',
+                'u',
+                'h',
+                'u',
                 //   will properties
                 22,
                 //   response topic
-                0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e',
-                0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e',
-        };
+                0x08,
+                0,
+                8,
+                'r',
+                'e',
+                's',
+                'p',
+                'o',
+                'n',
+                's',
+                'e',
+                0x08,
+                0,
+                8,
+                'r',
+                'e',
+                's',
+                'p',
+                'o',
+                'n',
+                's',
+                'e',};
         decodeNullExpected(encoded);
     }
 
@@ -2257,8 +2211,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 2,
                 //   response topic
-                0x08, 8,
-        };
+                0x08, 8,};
         decodeNullExpected(encoded);
     }
 
@@ -2288,8 +2241,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 11,
                 //   response topic
-                0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', '/', '#',
-        };
+                0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', '/', '#',};
         decodeNullExpected(encoded);
     }
 
@@ -2319,8 +2271,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 11,
                 //   response topic
-                0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', '/', '+',
-        };
+                0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', '/', '+',};
         decodeNullExpected(encoded);
     }
 
@@ -2350,8 +2301,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 2,
                 //   correlation data
-                0x09, 0,
-        };
+                0x09, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -2381,8 +2331,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 4,
                 //   correlation data
-                0x09, 0, 5, 1
-        };
+                0x09, 0, 5, 1};
         decodeNullExpected(encoded);
     }
 
@@ -2412,9 +2361,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 8,
                 //   correlation data
-                0x09, 0, 1, 1,
-                0x09, 0, 1, 1,
-        };
+                0x09, 0, 1, 1, 0x09, 0, 1, 1,};
         decodeNullExpected(encoded);
     }
 
@@ -2444,8 +2391,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 13,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',};
         decodeNullExpected(encoded);
     }
 
@@ -2475,8 +2421,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 13,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -2506,8 +2451,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 2,
                 //   user property
-                0x26, 0,
-        };
+                0x26, 0,};
         decodeNullExpected(encoded);
     }
 
@@ -2537,8 +2481,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', (byte) 0xFF, 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', (byte) 0xFF, 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -2568,8 +2511,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 0x7F, 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 0x7F, 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -2599,8 +2541,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', (byte) 0xFF
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', (byte) 0xFF};
         decodeNullExpected(encoded);
     }
 
@@ -2630,8 +2571,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 0x7F
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 0x7F};
         decodeNullExpected(encoded);
     }
 
@@ -2661,8 +2601,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   unknown property
-                0x25, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x25, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -2692,8 +2631,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will properties
                 14,
                 //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
@@ -2725,8 +2663,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 6, 't', 'o', 'p', 'i', 'c',
-        };
+                0, 6, 't', 'o', 'p', 'i', 'c',};
         decodeNullExpected(encoded);
     }
 
@@ -2758,8 +2695,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0,
-        };
+                0,};
         decodeNullExpected(encoded);
     }
 
@@ -2791,8 +2727,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 0
-        };
+                0, 0};
         decodeNullExpected(encoded);
     }
 
@@ -2824,8 +2759,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 1, '+'
-        };
+                0, 1, '+'};
         decodeNullExpected(encoded);
     }
 
@@ -2857,8 +2791,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 1, '#'
-        };
+                0, 1, '#'};
         decodeNullExpected(encoded);
     }
 
@@ -2890,8 +2823,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 1, 0
-        };
+                0, 1, 0};
         decodeNullExpected(encoded);
     }
 
@@ -2923,8 +2855,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 1, 0x7F
-        };
+                0, 1, 0x7F};
         decodeNullExpected(encoded);
     }
 
@@ -2956,8 +2887,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //   will topic
-                0, 1, 't'
-        };
+                0, 1, 't'};
         decodeNullExpected(encoded);
     }
 
@@ -2991,8 +2921,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will topic
                 0, 1, 't',
                 //   will payload
-                0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-        };
+                0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,};
         decodeNullExpected(encoded);
     }
 
@@ -3026,8 +2955,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will topic
                 0, 1, 't',
                 //   will payload
-                0, 0,
-        };
+                0, 0,};
         final CONNECT connect = decodeInternal(encoded);
         assertEquals(0, connect.getWillPublish().getPayload().length);
     }
@@ -3063,8 +2991,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will topic
                 0, 1, 't',
                 //   will payload
-                (byte) 0xFF, (byte) 0xFF
-        };
+                (byte) 0xFF, (byte) 0xFF};
 
         final byte[] bytes = Bytes.concat(encoded, new byte[0xFFFF]);
         final CONNECT connect = decodeInternal(bytes);
@@ -3101,8 +3028,7 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   will topic
                 0, 1, 't',
                 //   will payload
-                0, 0,
-        };
+                0, 0,};
         final CONNECT connect = decodeInternal(encoded);
         assertEquals(MqttWillPublish.WILL_DELAY_INTERVAL_DEFAULT, connect.getWillPublish().getDelayInterval());
     }

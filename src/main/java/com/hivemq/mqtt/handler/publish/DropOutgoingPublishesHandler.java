@@ -48,14 +48,17 @@ public class DropOutgoingPublishesHandler {
     private final int notWritableQueueSize;
 
     @Inject
-    public DropOutgoingPublishesHandler(final @NotNull PublishPayloadPersistence publishPayloadPersistence,
-                                        final @NotNull MessageDroppedService messageDroppedService) {
+    public DropOutgoingPublishesHandler(
+            final @NotNull PublishPayloadPersistence publishPayloadPersistence,
+            final @NotNull MessageDroppedService messageDroppedService) {
         this.publishPayloadPersistence = publishPayloadPersistence;
         this.messageDroppedService = messageDroppedService;
         this.notWritableQueueSize = NOT_WRITABLE_QUEUE_SIZE.get();
     }
 
-    public boolean checkChannelNotWritable(final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+    public boolean checkChannelNotWritable(
+            final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
+            throws Exception {
         if (!ctx.channel().isWritable()) {
 
             if (msg instanceof PUBLISH) {
@@ -72,8 +75,11 @@ public class DropOutgoingPublishesHandler {
                         future.set(PublishStatus.CHANNEL_NOT_WRITABLE);
                     }
                     //Drop message
-                    final String clientId = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
-                    log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable", clientId, publish.getTopic());
+                    final String clientId =
+                            ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+                    log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable",
+                            clientId,
+                            publish.getTopic());
                     messageDroppedService.notWritable(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
                     promise.setSuccess();
                     return true;

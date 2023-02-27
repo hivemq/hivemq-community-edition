@@ -30,7 +30,9 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dominik Obermaier
@@ -50,7 +52,8 @@ public class LocalPersistenceFileUtilTest {
 
     @Test
     public void test_is_singleton() {
-        final Injector injector = Guice.createInjector(new LazySingletonModule(), new SystemInformationModule(new SystemInformationImpl(false)));
+        final Injector injector = Guice.createInjector(new LazySingletonModule(),
+                new SystemInformationModule(new SystemInformationImpl(false)));
         final LocalPersistenceFileUtil instance = injector.getInstance(LocalPersistenceFileUtil.class);
         final LocalPersistenceFileUtil instance2 = injector.getInstance(LocalPersistenceFileUtil.class);
 

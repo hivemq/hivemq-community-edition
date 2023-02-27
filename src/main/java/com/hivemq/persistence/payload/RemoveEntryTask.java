@@ -56,8 +56,8 @@ class RemoveEntryTask implements Runnable {
             RemovablePayload removablePayload = removablePayloads.poll();
             final long startTime = System.currentTimeMillis();
             while (removablePayload != null) {
-                if (System.currentTimeMillis() - removablePayload.getTimestamp() > removeDelay
-                && removablePayload.inProgress.compareAndSet(false, true)) {
+                if (System.currentTimeMillis() - removablePayload.getTimestamp() > removeDelay &&
+                        removablePayload.inProgress.compareAndSet(false, true)) {
                     final long payloadId = removablePayload.getId();
                     bucketLock.accessBucketByPaloadId(removablePayload.getId(), () -> {
                         final int referenceCount = payloadReferenceCounterRegistry.get(payloadId);

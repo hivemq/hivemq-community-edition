@@ -134,8 +134,7 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                     while (cursor.getNext()) {
-                        final RetainedMessage message =
-                                deserializeValue(byteIterableToBytes(cursor.getValue()));
+                        final RetainedMessage message = deserializeValue(byteIterableToBytes(cursor.getValue()));
                         final String topic = deserializeKey(byteIterableToBytes(cursor.getKey()));
                         callback.onItem(topic, message);
                     }
@@ -145,9 +144,7 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
     }
 
     public void put(
-            @NotNull final RetainedMessage retainedMessage,
-            @NotNull final String topic,
-            final int bucketIndex) {
+            @NotNull final RetainedMessage retainedMessage, @NotNull final String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
@@ -158,13 +155,20 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 final ByteIterable byteIterable = cursor.getSearchKey(bytesToByteIterable(serializeKey(topic)));
                 if (byteIterable != null) {
-                    final RetainedMessage retainedMessageFromStore = deserializeValue(byteIterableToBytes(cursor.getValue()));
+                    final RetainedMessage retainedMessageFromStore =
+                            deserializeValue(byteIterableToBytes(cursor.getValue()));
                     log.trace("Replacing retained message for topic {}", topic);
-                    bucket.getStore().put(txn, bytesToByteIterable(serializeKey(topic)), bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore()
+                            .put(txn,
+                                    bytesToByteIterable(serializeKey(topic)),
+                                    bytesToByteIterable(serializeValue(retainedMessage)));
                     // The previous retained message is replaced, so we have to decrement the reference count.
                     payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPublishId());
                 } else {
-                    bucket.getStore().put(txn, bytesToByteIterable(serializeKey(topic)), bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore()
+                            .put(txn,
+                                    bytesToByteIterable(serializeKey(topic)),
+                                    bytesToByteIterable(serializeValue(retainedMessage)));
                     log.trace("Creating new retained message for topic {}", topic);
                     //persist needs increment.
                     retainMessageCounter.incrementAndGet();

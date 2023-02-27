@@ -75,12 +75,10 @@ public class WebsocketChannelInitializerTest {
     @Test
     public void test_add_special_handlers() throws Exception {
 
-        final WebsocketListener websocketListener = new WebsocketListener.Builder()
-                .bindAddress("")
-                .port(0)
-                .build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress("").port(0).build();
 
-        final WebsocketChannelInitializer websocketChannelInitializer = new WebsocketChannelInitializer(channelDependencies, websocketListener, nonSslHandlerProvider);
+        final WebsocketChannelInitializer websocketChannelInitializer =
+                new WebsocketChannelInitializer(channelDependencies, websocketListener, nonSslHandlerProvider);
 
         websocketChannelInitializer.addSpecialHandlers(socketChannel);
 

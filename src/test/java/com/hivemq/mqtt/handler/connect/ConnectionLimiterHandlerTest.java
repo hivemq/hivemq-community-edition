@@ -30,7 +30,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Yannick Weber
@@ -77,7 +84,11 @@ public class ConnectionLimiterHandlerTest {
         limiter.channelRead(ctx, connect);
         assertEquals(10L, limiter.getMaxConnections());
         assertEquals(9L, limiter.getWarnThreshold());
-        verify(mqttConnacker).connackError(any(Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.QUOTA_EXCEEDED), isNull());
+        verify(mqttConnacker).connackError(any(Channel.class),
+                isNull(),
+                anyString(),
+                eq(Mqtt5ConnAckReasonCode.QUOTA_EXCEEDED),
+                isNull());
         verify(ctx, never()).close();
     }
 

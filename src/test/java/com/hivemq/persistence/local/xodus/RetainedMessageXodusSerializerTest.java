@@ -64,9 +64,19 @@ public class RetainedMessageXodusSerializerTest {
     public void test_serializeValue_qos0() throws Exception {
 
 
-        final byte[] value = serializer.serializeValue(new RetainedMessage(new byte[]{5, 5, 5}, QoS.AT_MOST_ONCE, 10L, 10, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null, null, 1231321231320L));
+        final byte[] value = serializer.serializeValue(new RetainedMessage(new byte[]{5, 5, 5},
+                QoS.AT_MOST_ONCE,
+                10L,
+                10,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                null,
+                null,
+                null,
+                1231321231320L));
 
-        final byte[] expected = new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
+        final byte[] expected =
+                new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
         expected[0] = 0b0000_0000;
         Bytes.copyLongToByteArray(1231321231320L, expected, 1);
         Bytes.copyLongToByteArray(10L, expected, 9);
@@ -82,7 +92,8 @@ public class RetainedMessageXodusSerializerTest {
     @Test
     public void test_deserializeValue_qos0() throws Exception {
 
-        final byte[] serialized = new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
+        final byte[] serialized =
+                new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
         serialized[0] = 0b0000_0000;
         Bytes.copyLongToByteArray(1231321231320L, serialized, 1);
         Bytes.copyLongToByteArray(10L, serialized, 9);
@@ -103,9 +114,19 @@ public class RetainedMessageXodusSerializerTest {
     @Test
     public void test_serializeValue_qos1() throws Exception {
 
-        final byte[] value = serializer.serializeValue(new RetainedMessage(new byte[]{5, 5, 5}, QoS.AT_LEAST_ONCE, 10L, 10, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null, null, 1231321231321L));
+        final byte[] value = serializer.serializeValue(new RetainedMessage(new byte[]{5, 5, 5},
+                QoS.AT_LEAST_ONCE,
+                10L,
+                10,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                null,
+                null,
+                null,
+                1231321231321L));
 
-        final byte[] expected = new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
+        final byte[] expected =
+                new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
         expected[0] = 0b0000_0001;
         Bytes.copyLongToByteArray(1231321231321L, expected, 1);
         Bytes.copyLongToByteArray(10L, expected, 9);
@@ -121,7 +142,8 @@ public class RetainedMessageXodusSerializerTest {
     @Test
     public void test_deserializeValue_qos1() throws Exception {
 
-        final byte[] serialized = new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
+        final byte[] serialized =
+                new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
         serialized[0] = 0b0000_0001;
 
         Bytes.copyLongToByteArray(1231321231321L, serialized, 1);
@@ -144,9 +166,19 @@ public class RetainedMessageXodusSerializerTest {
     public void test_serializeValue_qos2() throws Exception {
 
 
-        final byte[] value = serializer.serializeValue(new RetainedMessage(new byte[]{5, 5, 5}, QoS.EXACTLY_ONCE, 10L, 10, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null, null, 1231321231302L));
+        final byte[] value = serializer.serializeValue(new RetainedMessage(new byte[]{5, 5, 5},
+                QoS.EXACTLY_ONCE,
+                10L,
+                10,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                null,
+                null,
+                null,
+                1231321231302L));
 
-        final byte[] expected = new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
+        final byte[] expected =
+                new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
         expected[0] = 0b0000_0010;
         Bytes.copyLongToByteArray(1231321231302L, expected, 1);
         Bytes.copyLongToByteArray(10L, expected, 9);
@@ -162,7 +194,8 @@ public class RetainedMessageXodusSerializerTest {
     @Test
     public void test_deserializeValue_qos2() throws Exception {
 
-        final byte[] serialized = new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
+        final byte[] serialized =
+                new byte[38 + PropertiesSerializationUtil.encodedSize(Mqtt5UserProperties.NO_USER_PROPERTIES)];
         serialized[0] = 0b0000_0010;
         Bytes.copyLongToByteArray(1231321231302L, serialized, 1);
         Bytes.copyLongToByteArray(10L, serialized, 9);
@@ -186,8 +219,16 @@ public class RetainedMessageXodusSerializerTest {
 
         final long now = System.currentTimeMillis();
 
-        final RetainedMessage retainedMessage = new RetainedMessage(new byte[]{5, 5, 5}, QoS.AT_MOST_ONCE, 1L, 10, Mqtt5UserProperties.of(MqttUserProperty.of("name", "value")),
-                "responseTopic", "contentType", new byte[]{1, 2, 3}, Mqtt5PayloadFormatIndicator.UTF_8, now);
+        final RetainedMessage retainedMessage = new RetainedMessage(new byte[]{5, 5, 5},
+                QoS.AT_MOST_ONCE,
+                1L,
+                10,
+                Mqtt5UserProperties.of(MqttUserProperty.of("name", "value")),
+                "responseTopic",
+                "contentType",
+                new byte[]{1, 2, 3},
+                Mqtt5PayloadFormatIndicator.UTF_8,
+                now);
         final byte[] bytes = serializer.serializeValue(retainedMessage);
         final RetainedMessage messageFromStore = serializer.deserializeValue(bytes);
         final Mqtt5UserProperties userProperties = messageFromStore.getUserProperties();

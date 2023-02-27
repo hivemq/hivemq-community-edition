@@ -54,8 +54,11 @@ public class EnvironmentCloser {
      * @throws NullPointerException     if the name or the environment is <code>null</code>
      * @throws IllegalArgumentException if the maxTries or retryinterval is smaller than 1
      */
-    public EnvironmentCloser(@NotNull final String name, @NotNull final Environment environment,
-                             final int maxTries, final int retryInterval) {
+    public EnvironmentCloser(
+            @NotNull final String name,
+            @NotNull final Environment environment,
+            final int maxTries,
+            final int retryInterval) {
 
         checkNotNull(name, "Name must not be null");
         checkNotNull(environment, "Environment must not be null");
@@ -102,7 +105,12 @@ public class EnvironmentCloser {
         if ("Finish all transactions before closing database environment".equals(e.getMessage())) {
             //This exception means we still have pending transactions
             tryNo += 1;
-            log.debug("Could not close {}, transactions still aren't finished yet. Retrying again in {}ms (Retry {} of {})", name, retryInterval, tryNo, maxTries);
+            log.debug(
+                    "Could not close {}, transactions still aren't finished yet. Retrying again in {}ms (Retry {} of {})",
+                    name,
+                    retryInterval,
+                    tryNo,
+                    maxTries);
             try {
                 Thread.sleep(retryInterval);
                 //Let's call ourselves recursively!

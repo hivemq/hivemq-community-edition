@@ -22,7 +22,12 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,10 +64,12 @@ class MatchingNodeSubscriptions {
      * Attempts to add the subscription information and updates the counters based on how the addition went and
      * what subscription information was stored previously.
      *
-     * @param subscriberToAdd                subscription information that is considered for addition to the node of the topic tree.
+     * @param subscriberToAdd                subscription information that is considered for addition to the node of the
+     *                                       topic tree.
      * @param topicFilter                    topic filter for the to-be-added subscription represented as a string;
      *                                       is not stored with subscription for memory saving reasons.
-     * @param counters                       container with subscription counters that are updated upon subscription addition.
+     * @param counters                       container with subscription counters that are updated upon subscription
+     *                                       addition.
      * @param subscriberMapCreationThreshold a threshold to decide if the nonSharedSubscribersMap should be initialized
      *                                       instead of nonSharedSubscribersArray.
      * @return whether the subscription information was replaced with {@param subscriberToAdd}.
@@ -84,7 +91,8 @@ class MatchingNodeSubscriptions {
     }
 
     /**
-     * Attempts to remove the subscription information from the topic tree for the provided subscriber that is part of the
+     * Attempts to remove the subscription information from the topic tree for the provided subscriber that is part of
+     * the
      * shared subscribers group with the sharedName (if set) and subscribed to the topicFilter.
      *
      * @param subscriber  the client identifier of the subscriber whose subscription is to be removed.
@@ -127,20 +135,20 @@ class MatchingNodeSubscriptions {
 
         assert subscribersBuilder != null || subscriberNamesBuilder != null;
 
-        getAllSubscriptionsStream().filter(itemFilter)
-                .forEach(subscriber -> {
-                    if (subscribersBuilder != null) {
-                        subscribersBuilder.add(subscriber);
-                    } else {
-                        subscriberNamesBuilder.add(subscriber.getSubscriber());
-                    }
-                });
+        getAllSubscriptionsStream().filter(itemFilter).forEach(subscriber -> {
+            if (subscribersBuilder != null) {
+                subscribersBuilder.add(subscriber);
+            } else {
+                subscriberNamesBuilder.add(subscriber.getSubscriber());
+            }
+        });
     }
 
     @ReadOnly
     public int getSubscriberCount() {
         final int nonSharedSubscribersCount = nonSharedSubscribersMap != null ?
-                nonSharedSubscribersMap.size() : countArraySize(nonSharedSubscribersArray);
+                nonSharedSubscribersMap.size() :
+                countArraySize(nonSharedSubscribersArray);
 
         return nonSharedSubscribersCount + sharedSubscribersMap.size();
     }
@@ -194,8 +202,7 @@ class MatchingNodeSubscriptions {
     ///////////////////////////////////////////////////////////////////////
 
     private static @NotNull String sharedSubscriptionKey(
-            final @NotNull String sharedName,
-            final @NotNull String topicFilter) {
+            final @NotNull String sharedName, final @NotNull String topicFilter) {
 
         return sharedName + "/" + topicFilter;
     }
@@ -203,7 +210,8 @@ class MatchingNodeSubscriptions {
     /**
      * Holds information about the subscriptions in a group identified by the shared name and the topic filter.
      * Used as a means of optimizing storage and retrieval of shared name/topic filter combinations that
-     * have high chance of duplication if there are many shared subscribers in the same group and for the same topic filter.
+     * have high chance of duplication if there are many shared subscribers in the same group and for the same topic
+     * filter.
      */
     private static class SubscriptionGroup {
 
@@ -244,18 +252,17 @@ class MatchingNodeSubscriptions {
             if (sharedSubscribersMap.isEmpty()) {
                 sharedSubscribersMap = new HashMap<>(subscriberMapCreationThreshold);
             }
-            final SubscriberWithQoS prev = sharedSubscribersMap
-                    .computeIfAbsent(
-                            sharedSubscriptionKey(subscriberToAdd.getSharedName(), topicFilter),
-                            key -> new SubscriptionGroup())
-                    .put(subscriberToAdd);
+            final SubscriberWithQoS prev =
+                    sharedSubscribersMap.computeIfAbsent(sharedSubscriptionKey(subscriberToAdd.getSharedName(),
+                            topicFilter), key -> new SubscriptionGroup()).put(subscriberToAdd);
 
             return prev == null ? null : new SubscriptionInfoPresenceStatus(prev.equals(subscriberToAdd));
         }
 
         // Possible initialization of map and moving the data
         final int exactSubscribersCount = nonSharedSubscribersMap != null ?
-                nonSharedSubscribersMap.values().size() : countArraySize(nonSharedSubscribersArray);
+                nonSharedSubscribersMap.values().size() :
+                countArraySize(nonSharedSubscribersArray);
 
         if (nonSharedSubscribersMap == null && exactSubscribersCount > subscriberMapCreationThreshold) {
             nonSharedSubscribersMap = new HashMap<>(subscriberMapCreationThreshold + 1);
@@ -271,7 +278,8 @@ class MatchingNodeSubscriptions {
         }
 
         if (nonSharedSubscribersMap != null) {
-            final SubscriberWithQoS prev = nonSharedSubscribersMap.put(subscriberToAdd.getSubscriber(), subscriberToAdd);
+            final SubscriberWithQoS prev =
+                    nonSharedSubscribersMap.put(subscriberToAdd.getSubscriber(), subscriberToAdd);
             return prev == null ? null : new SubscriptionInfoPresenceStatus(prev.equals(subscriberToAdd));
         }
 
@@ -317,9 +325,7 @@ class MatchingNodeSubscriptions {
     }
 
     private @Nullable SubscriptionInfoRemovalStatus removeSubscriberFromStructures(
-            final @NotNull String subscriber,
-            final @Nullable String sharedName,
-            final @Nullable String topicFilter) {
+            final @NotNull String subscriber, final @Nullable String sharedName, final @Nullable String topicFilter) {
 
         SubscriberWithQoS remove = null;
         if (sharedName != null && topicFilter != null) { // shared subscription removal

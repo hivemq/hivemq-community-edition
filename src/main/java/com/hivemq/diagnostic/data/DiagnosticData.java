@@ -27,11 +27,12 @@ import java.time.LocalDateTime;
 public class DiagnosticData {
 
 
-    private static final String BANNER = "   __ ___          __  _______     ___  _                         __  _       \n" +
-            "  / // (_)  _____ /  |/  / __ \\   / _ \\(_)__ ____ ____  ___  ___ / /_(_)______\n" +
-            " / _  / / |/ / -_) /|_/ / /_/ /  / // / / _ `/ _ `/ _ \\/ _ \\(_-</ __/ / __(_-<\n" +
-            "/_//_/_/|___/\\__/_/  /_/\\___\\_\\ /____/_/\\_,_/\\_, /_//_/\\___/___/\\__/_/\\__/___/\n" +
-            "                                            /___/                             \n";
+    private static final String BANNER =
+            "   __ ___          __  _______     ___  _                         __  _       \n" +
+                    "  / // (_)  _____ /  |/  / __ \\   / _ \\(_)__ ____ ____  ___  ___ / /_(_)______\n" +
+                    " / _  / / |/ / -_) /|_/ / /_/ /  / // / / _ `/ _ `/ _ \\/ _ \\(_-</ __/ / __(_-<\n" +
+                    "/_//_/_/|___/\\__/_/  /_/\\___\\_\\ /____/_/\\_,_/\\_, /_//_/\\___/___/\\__/_/\\__/___/\n" +
+                    "                                            /___/                             \n";
 
     private static final String SECTION_HEADLINE = "##############################\n";
     private final SystemPropertyInformation systemPropertyInformation;
@@ -41,10 +42,11 @@ public class DiagnosticData {
 
 
     @Inject
-    DiagnosticData(final SystemPropertyInformation systemPropertyInformation,
-                   final HiveMQInformation hiveMQInformation,
-                   final HiveMQSystemInformation systemInformation,
-                   final NetworkInterfaceInformation networkInterfaceInformation) {
+    DiagnosticData(
+            final SystemPropertyInformation systemPropertyInformation,
+            final HiveMQInformation hiveMQInformation,
+            final HiveMQSystemInformation systemInformation,
+            final NetworkInterfaceInformation networkInterfaceInformation) {
         this.systemPropertyInformation = systemPropertyInformation;
         this.hiveMQInformation = hiveMQInformation;
         this.systemInformation = systemInformation;
@@ -58,7 +60,8 @@ public class DiagnosticData {
         diagnosticWriter.append("\n");
 
         diagnosticWriter.append(String.format("Generated at %s \n", LocalDateTime.now().toString()));
-        diagnosticWriter.append("Please send this file along with any other files in the 'diagnostic' folder to support@hivemq.com.\n\n");
+        diagnosticWriter.append(
+                "Please send this file along with any other files in the 'diagnostic' folder to support@hivemq.com.\n\n");
 
         diagnosticWriter.append(createHeadline("HiveMQ Information"));
 

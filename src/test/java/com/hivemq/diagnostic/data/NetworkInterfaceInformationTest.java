@@ -20,7 +20,9 @@ import org.junit.Test;
 
 import java.net.NetworkInterface;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class NetworkInterfaceInformationTest {

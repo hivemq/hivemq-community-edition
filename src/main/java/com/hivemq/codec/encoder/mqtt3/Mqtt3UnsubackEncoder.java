@@ -32,9 +32,7 @@ public class Mqtt3UnsubackEncoder implements MqttEncoder<UNSUBACK> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
-            final @NotNull UNSUBACK msg,
-            final @NotNull ByteBuf out) {
+            final @NotNull ClientConnection clientConnection, final @NotNull UNSUBACK msg, final @NotNull ByteBuf out) {
 
         out.writeByte(UNSUBACK_FIXED_HEADER);
         //The remaining length is always static for UNSUBACKs

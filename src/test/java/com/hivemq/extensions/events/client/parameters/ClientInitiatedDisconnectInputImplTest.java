@@ -26,7 +26,9 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -45,7 +47,8 @@ public class ClientInitiatedDisconnectInputImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client", channel, null, null, null, false);
+        final ClientInitiatedDisconnectInputImpl disconnectInput =
+                new ClientInitiatedDisconnectInputImpl("client", channel, null, null, null, false);
         assertEquals(Optional.empty(), disconnectInput.getReasonCode());
         assertEquals(Optional.empty(), disconnectInput.getReasonString());
         assertEquals(Optional.empty(), disconnectInput.getUserProperties());
@@ -61,9 +64,12 @@ public class ClientInitiatedDisconnectInputImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ClientInitiatedDisconnectInputImpl disconnectInput =
-                new ClientInitiatedDisconnectInputImpl("client", channel, DisconnectedReasonCode.NORMAL_DISCONNECTION,
-                        "reason", UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))), true);
+        final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client",
+                channel,
+                DisconnectedReasonCode.NORMAL_DISCONNECTION,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))),
+                true);
         assertEquals(Optional.of(DisconnectedReasonCode.NORMAL_DISCONNECTION), disconnectInput.getReasonCode());
         assertEquals(Optional.of("reason"), disconnectInput.getReasonString());
         assertTrue(disconnectInput.getUserProperties().isPresent());

@@ -118,16 +118,17 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             });
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
-                final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+                final ClientConnection clientConnection =
+                        ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
                 log.error("Execution of authentication was rejected for client with IP {}.",
-                        clientConnection.getChannelIP().orElse("UNKNOWN"), ex);
+                        clientConnection.getChannelIP().orElse("UNKNOWN"),
+                        ex);
             }
         }
     }
 
     private void continueAuthentication(final @NotNull T output) {
-        final ChannelFuture authFuture = authSender.sendAuth(
-                ctx.channel(),
+        final ChannelFuture authFuture = authSender.sendAuth(ctx.channel(),
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
@@ -145,7 +146,10 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     }
 
     void succeedAuthentication(final @NotNull T output) {
-        ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setAuthPermissions(output.getDefaultPermissions());
+        ctx.channel()
+                .attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
+                .get()
+                .setAuthPermissions(output.getDefaultPermissions());
     }
 
     abstract void failAuthentication(@NotNull T output);

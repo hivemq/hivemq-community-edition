@@ -35,9 +35,10 @@ public class TlsWebsocketChannelInitializer extends AbstractTlsChannelInitialize
     @NotNull
     private final TlsWebsocketListener tlsWebsocketListener;
 
-    public TlsWebsocketChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
-                                          @NotNull final TlsWebsocketListener tlsWebsocketListener,
-                                          @NotNull final SslFactory sslFactory) {
+    public TlsWebsocketChannelInitializer(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final TlsWebsocketListener tlsWebsocketListener,
+            @NotNull final SslFactory sslFactory) {
 
         super(channelDependencies, tlsWebsocketListener, sslFactory);
         this.tlsWebsocketListener = tlsWebsocketListener;
@@ -48,7 +49,8 @@ public class TlsWebsocketChannelInitializer extends AbstractTlsChannelInitialize
         super.addSpecialHandlers(ch);
 
         final Tls.ClientAuthMode authMode = tlsWebsocketListener.getTls().getClientAuthMode();
-        final String handlerName = !Tls.ClientAuthMode.NONE.equals(authMode) ? SSL_CLIENT_CERTIFICATE_HANDLER : SSL_PARAMETER_HANDLER;
+        final String handlerName =
+                !Tls.ClientAuthMode.NONE.equals(authMode) ? SSL_CLIENT_CERTIFICATE_HANDLER : SSL_PARAMETER_HANDLER;
         new WebSocketInitializer(tlsWebsocketListener).addHandlers(ch, handlerName);
     }
 }

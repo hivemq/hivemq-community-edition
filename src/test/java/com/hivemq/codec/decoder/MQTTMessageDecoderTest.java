@@ -26,7 +26,9 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class MQTTMessageDecoderTest {
 
@@ -154,8 +156,7 @@ public class MQTTMessageDecoderTest {
                 0,
                 // payload
                 //   client identifier
-                0, 4, 't', 'e', 's', 't'
-        };
+                0, 4, 't', 'e', 's', 't'};
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeBytes(connect);

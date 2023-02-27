@@ -63,7 +63,9 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
             final PUBREL pubrel = (PUBREL) msg;
             checkAndSetPubrelExpiry(pubrel);
             final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED;
-            final boolean drop = (pubrel.getMessageExpiryInterval() != null) && (pubrel.getMessageExpiryInterval() == 0) && expireInflight;
+            final boolean drop = (pubrel.getMessageExpiryInterval() != null) &&
+                    (pubrel.getMessageExpiryInterval() == 0) &&
+                    expireInflight;
             if (drop) {
                 ctx.fireUserEventTriggered(new PubrelDroppedEvent(pubrel));
                 return;

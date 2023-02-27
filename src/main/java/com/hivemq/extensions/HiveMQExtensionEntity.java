@@ -59,8 +59,13 @@ public class HiveMQExtensionEntity {
     public HiveMQExtensionEntity() {
     }
 
-    public HiveMQExtensionEntity(@NotNull final String id, @NotNull final String name, @NotNull final String version,
-                                 final int priority, final int startPriority, @Nullable final String author) {
+    public HiveMQExtensionEntity(
+            @NotNull final String id,
+            @NotNull final String name,
+            @NotNull final String version,
+            final int priority,
+            final int startPriority,
+            @Nullable final String author) {
         this.id = id;
         this.name = name;
         this.version = version;

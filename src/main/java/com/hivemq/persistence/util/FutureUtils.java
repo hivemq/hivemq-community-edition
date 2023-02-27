@@ -17,17 +17,17 @@
 package com.hivemq.persistence.util;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.*;
-import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**

@@ -32,7 +32,10 @@ import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ExtensionLifecycleHandlerImplTest {
 
@@ -65,23 +68,26 @@ public class ExtensionLifecycleHandlerImplTest {
     @Test(timeout = 5000)
     public void handleExtensionEvents_inStartPriority() throws Exception {
         final ImmutableList<HiveMQExtensionEvent> events = ImmutableList.of(new HiveMQExtensionEvent(
-                HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-100",
-                100,
-                temporaryFolder.getRoot().toPath(),
-                false), new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-1",
-                1,
-                temporaryFolder.getRoot().toPath(),
-                false), new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-10",
-                10,
-                temporaryFolder.getRoot().toPath(),
-                false), new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-1000",
-                1000,
-                temporaryFolder.getRoot().toPath(),
-                false));
+                        HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-100",
+                        100,
+                        temporaryFolder.getRoot().toPath(),
+                        false),
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-1",
+                        1,
+                        temporaryFolder.getRoot().toPath(),
+                        false),
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-10",
+                        10,
+                        temporaryFolder.getRoot().toPath(),
+                        false),
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-1000",
+                        1000,
+                        temporaryFolder.getRoot().toPath(),
+                        false));
 
         extensionLifecycleHandler.handleExtensionEvents(events).get();
 
@@ -100,23 +106,26 @@ public class ExtensionLifecycleHandlerImplTest {
         when(hiveMQExtensions.extensionStart(eq("test-extension-100"))).thenThrow(new RuntimeException());
 
         final ImmutableList<HiveMQExtensionEvent> events = ImmutableList.of(new HiveMQExtensionEvent(
-                HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-100",
-                100,
-                temporaryFolder.getRoot().toPath(),
-                false), new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-1",
-                1,
-                temporaryFolder.getRoot().toPath(),
-                false), new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-10",
-                10,
-                temporaryFolder.getRoot().toPath(),
-                false), new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
-                "test-extension-1000",
-                1000,
-                temporaryFolder.getRoot().toPath(),
-                false));
+                        HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-100",
+                        100,
+                        temporaryFolder.getRoot().toPath(),
+                        false),
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-1",
+                        1,
+                        temporaryFolder.getRoot().toPath(),
+                        false),
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-10",
+                        10,
+                        temporaryFolder.getRoot().toPath(),
+                        false),
+                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "test-extension-1000",
+                        1000,
+                        temporaryFolder.getRoot().toPath(),
+                        false));
 
         extensionLifecycleHandler.handleExtensionEvents(events).get();
 

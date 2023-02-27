@@ -58,16 +58,17 @@ public class PersistenceShutdownHook implements HiveMQShutdownHook {
     private final @NotNull PublishPayloadPersistence payloadPersistence;
 
     @Inject
-    PersistenceShutdownHook(final @NotNull ClientSessionPersistence clientSessionPersistence,
-                            final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
-                            final @NotNull IncomingMessageFlowPersistence incomingMessageFlowPersistence,
-                            final @NotNull RetainedMessagePersistence retainedMessagePersistence,
-                            final @NotNull PublishPayloadPersistence payloadPersistence,
-                            final @NotNull ClientQueuePersistence clientQueuePersistence,
-                            final @NotNull @Persistence ListeningExecutorService persistenceExecutorService,
-                            final @NotNull @Persistence ListeningScheduledExecutorService persistenceScheduledExecutorService,
-                            final @NotNull @PayloadPersistence ListeningScheduledExecutorService payloadPersistenceExecutor,
-                            final @NotNull SingleWriterService singleWriterService) {
+    PersistenceShutdownHook(
+            final @NotNull ClientSessionPersistence clientSessionPersistence,
+            final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
+            final @NotNull IncomingMessageFlowPersistence incomingMessageFlowPersistence,
+            final @NotNull RetainedMessagePersistence retainedMessagePersistence,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull ClientQueuePersistence clientQueuePersistence,
+            final @NotNull @Persistence ListeningExecutorService persistenceExecutorService,
+            final @NotNull @Persistence ListeningScheduledExecutorService persistenceScheduledExecutorService,
+            final @NotNull @PayloadPersistence ListeningScheduledExecutorService payloadPersistenceExecutor,
+            final @NotNull SingleWriterService singleWriterService) {
 
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;

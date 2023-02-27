@@ -94,30 +94,39 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
     }
 
     // MQTT 5
-    private CONNACK(@NotNull final Mqtt5ConnAckReasonCode reasonCode,
-                    @Nullable final String reasonString,
-                    @NotNull final Mqtt5UserProperties userProperties,
-                    final boolean sessionPresent,
-                    final long sessionExpiryInterval,
-                    final int serverKeepAlive,
-                    @Nullable final String assignedClientIdentifier,
-                    @Nullable final String authMethod,
-                    @Nullable final byte[] authData,
-                    final int receiveMaximum,
-                    final int topicAliasMaximum,
-                    final int maximumPacketSize,
-                    @Nullable final QoS maximumQoS,
-                    final boolean isRetainAvailable,
-                    final boolean isWildcardSubscriptionAvailable,
-                    final boolean isSubscriptionIdentifierAvailable,
-                    final boolean isSharedSubscriptionAvailable,
-                    @Nullable final String responseInformation,
-                    @Nullable final String serverReference) {
+    private CONNACK(
+            @NotNull final Mqtt5ConnAckReasonCode reasonCode,
+            @Nullable final String reasonString,
+            @NotNull final Mqtt5UserProperties userProperties,
+            final boolean sessionPresent,
+            final long sessionExpiryInterval,
+            final int serverKeepAlive,
+            @Nullable final String assignedClientIdentifier,
+            @Nullable final String authMethod,
+            @Nullable final byte[] authData,
+            final int receiveMaximum,
+            final int topicAliasMaximum,
+            final int maximumPacketSize,
+            @Nullable final QoS maximumQoS,
+            final boolean isRetainAvailable,
+            final boolean isWildcardSubscriptionAvailable,
+            final boolean isSubscriptionIdentifierAvailable,
+            final boolean isSharedSubscriptionAvailable,
+            @Nullable final String responseInformation,
+            @Nullable final String serverReference) {
 
         super(reasonCode, reasonString, userProperties);
 
-        checkPreconditions(sessionExpiryInterval, serverKeepAlive, assignedClientIdentifier,
-                authMethod, authData, receiveMaximum, topicAliasMaximum, maximumPacketSize, responseInformation, serverReference);
+        checkPreconditions(sessionExpiryInterval,
+                serverKeepAlive,
+                assignedClientIdentifier,
+                authMethod,
+                authData,
+                receiveMaximum,
+                topicAliasMaximum,
+                maximumPacketSize,
+                responseInformation,
+                serverReference);
 
         this.sessionPresent = sessionPresent;
         this.sessionExpiryInterval = sessionExpiryInterval;
@@ -142,8 +151,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
         final QoS qoS = (extensionMaxQos != null) ? QoS.valueOf(extensionMaxQos.getQosNumber()) : null;
 
-        return new CONNACK.Mqtt5Builder()
-                .withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
+        return new CONNACK.Mqtt5Builder().withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
                 .withSessionPresent(packet.getSessionPresent())
                 .withSessionExpiryInterval(packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET))
                 .withServerKeepAlive(packet.getServerKeepAlive().orElse(KEEP_ALIVE_NOT_SET))
@@ -176,7 +184,8 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         super(Mqtt5ConnAckReasonCode.fromReturnCode(returnCode), null, Mqtt5UserProperties.NO_USER_PROPERTIES);
 
         if (returnCode != Mqtt3ConnAckReturnCode.ACCEPTED && sessionPresent) {
-            throw new IllegalArgumentException("The sessionPresent flag is only allowed for return code " + Mqtt3ConnAckReturnCode.ACCEPTED);
+            throw new IllegalArgumentException("The sessionPresent flag is only allowed for return code " +
+                    Mqtt3ConnAckReturnCode.ACCEPTED);
         }
 
         this.sessionPresent = sessionPresent;
@@ -200,16 +209,17 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         this.serverReference = null;
     }
 
-    private void checkPreconditions(final long sessionExpiryInterval,
-                                    final int serverKeepAlive,
-                                    @Nullable final String assignedClientIdentifier,
-                                    @Nullable final String authMethod,
-                                    @Nullable final byte[] authData,
-                                    final int receiveMaximum,
-                                    final int topicAliasMaximum,
-                                    final int maximumPacketSize,
-                                    @Nullable final String responseInformation,
-                                    @Nullable final String serverReference) {
+    private void checkPreconditions(
+            final long sessionExpiryInterval,
+            final int serverKeepAlive,
+            @Nullable final String assignedClientIdentifier,
+            @Nullable final String authMethod,
+            @Nullable final byte[] authData,
+            final int receiveMaximum,
+            final int topicAliasMaximum,
+            final int maximumPacketSize,
+            @Nullable final String responseInformation,
+            @Nullable final String serverReference) {
 
         checkArgument(receiveMaximum != 0, "Receive maximum must never be zero");
 

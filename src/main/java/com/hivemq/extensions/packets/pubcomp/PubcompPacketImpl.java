@@ -51,8 +51,7 @@ public class PubcompPacketImpl implements PubcompPacket {
     }
 
     public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
-        this(
-                pubcomp.getPacketIdentifier(),
+        this(pubcomp.getPacketIdentifier(),
                 pubcomp.getReasonCode().toPubcompReasonCode(),
                 pubcomp.getReasonString(),
                 UserPropertiesImpl.of(pubcomp.getUserProperties().asList()));

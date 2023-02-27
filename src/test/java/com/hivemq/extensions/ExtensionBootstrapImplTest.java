@@ -88,7 +88,8 @@ public class ExtensionBootstrapImplTest {
     @Test
     public void test_startPluginSystem_with_embeddedExtensions() {
         when(extensionLoader.loadExtensions(any(Path.class), anyBoolean())).thenReturn(ImmutableList.of());
-        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(
+                HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension",
                 0,
                 new File("/tmp").toPath(),
@@ -101,14 +102,14 @@ public class ExtensionBootstrapImplTest {
 
     @Test
     public void test_startPluginSystem_mixed() {
-        when(extensionLoader.loadExtensions(
-                any(Path.class),
+        when(extensionLoader.loadExtensions(any(Path.class),
                 anyBoolean())).thenReturn(ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension-1",
                 0,
                 new File("/folder").toPath(),
                 false)));
-        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(
+                HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension-2",
                 0,
                 new File("/tmp").toPath(),

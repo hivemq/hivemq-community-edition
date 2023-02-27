@@ -15,10 +15,9 @@
  */
 package com.hivemq.persistence.retained;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.annotations.ReadOnly;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.persistence.RetainedMessage;
@@ -40,17 +39,15 @@ public interface RetainedMessagePersistence {
     /**
      * Remove the retained message for a given topic
      *
-     * @param topic     for which the retained message should be removed
+     * @param topic for which the retained message should be removed
      */
-    @NotNull
-    ListenableFuture<Void> remove(@NotNull String topic);
+    @NotNull ListenableFuture<Void> remove(@NotNull String topic);
 
     /**
      * @param topic of the retained message
      * @return the retained message for the topic
      */
-    @NotNull
-    ListenableFuture<RetainedMessage> get(@NotNull String topic);
+    @NotNull ListenableFuture<RetainedMessage> get(@NotNull String topic);
 
     /**
      * Add a new rained message to a given topic
@@ -58,8 +55,7 @@ public interface RetainedMessagePersistence {
      * @param topic           of the retained message
      * @param retainedMessage to be added
      */
-    @NotNull
-    ListenableFuture<Void> persist(@NotNull String topic, @NotNull RetainedMessage retainedMessage);
+    @NotNull ListenableFuture<Void> persist(@NotNull String topic, @NotNull RetainedMessage retainedMessage);
 
     /**
      * @param topicWithWildcards for the retained messages
@@ -74,8 +70,7 @@ public interface RetainedMessagePersistence {
      *
      * @return a future which completes, when closing is done.
      */
-    @NotNull
-    ListenableFuture<Void> closeDB();
+    @NotNull ListenableFuture<Void> closeDB();
 
     /**
      * Trigger a clean up a in a given persistence bucket.
@@ -83,16 +78,14 @@ public interface RetainedMessagePersistence {
      * @param bucketIndex the persistence bucket index.
      * @return a future which completes, when clean up is done.
      */
-    @NotNull
-    ListenableFuture<Void> cleanUp(int bucketIndex);
+    @NotNull ListenableFuture<Void> cleanUp(int bucketIndex);
 
     /**
      * Remove all retained messages in the persistence.
      *
      * @return a future which completes, when all messages are removed.
      */
-    @NotNull
-    ListenableFuture<Void> clear();
+    @NotNull ListenableFuture<Void> clear();
 
     /**
      * Process a request for a chunk of all the client sessions from this node
@@ -100,5 +93,6 @@ public interface RetainedMessagePersistence {
      * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
      * @return a result containing the new cursor and a map of clientIds to their session
      */
-    @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(@NotNull ChunkCursor cursor);
+    @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
+            @NotNull ChunkCursor cursor);
 }

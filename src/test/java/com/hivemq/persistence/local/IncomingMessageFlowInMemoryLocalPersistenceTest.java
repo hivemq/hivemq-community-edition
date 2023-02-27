@@ -20,7 +20,9 @@ import com.hivemq.mqtt.message.puback.PUBACK;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Lukas Brandl

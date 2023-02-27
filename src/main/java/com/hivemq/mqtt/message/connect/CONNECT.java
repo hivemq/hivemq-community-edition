@@ -209,8 +209,7 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
 
         public @NotNull CONNECT build() {
             Preconditions.checkNotNull(clientIdentifier, "client identifier must never be null");
-            return new CONNECT(
-                    protocolVersion,
+            return new CONNECT(protocolVersion,
                     clientIdentifier,
                     keepAlive,
                     cleanStart,
@@ -297,8 +296,7 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
 
         public @NotNull CONNECT build() {
             Preconditions.checkNotNull(clientIdentifier, "client identifier must never be null");
-            return new CONNECT(
-                    ProtocolVersion.MQTTv5,
+            return new CONNECT(ProtocolVersion.MQTTv5,
                     clientIdentifier,
                     keepAlive,
                     cleanStart,
@@ -393,8 +391,7 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     }
 
     public static @NotNull CONNECT from(final @NotNull ConnectPacketImpl packet, final @NotNull String clusterId) {
-        return new CONNECT(
-                MqttVersionUtil.toProtocolVersion(packet.getMqttVersion()),
+        return new CONNECT(MqttVersionUtil.toProtocolVersion(packet.getMqttVersion()),
                 packet.getClientId(),
                 packet.getKeepAlive(),
                 packet.getCleanStart(),

@@ -32,9 +32,7 @@ public class Mqtt3PubrecEncoder implements MqttEncoder<PUBREC> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
-            final @NotNull PUBREC msg,
-            final @NotNull ByteBuf out) {
+            final @NotNull ClientConnection clientConnection, final @NotNull PUBREC msg, final @NotNull ByteBuf out) {
 
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");

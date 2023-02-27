@@ -19,7 +19,12 @@ import com.google.common.base.Preconditions;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extension.sdk.api.client.parameter.*;
+import com.hivemq.extension.sdk.api.client.parameter.ClientTlsInformation;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionAttributeStore;
+import com.hivemq.extension.sdk.api.client.parameter.ConnectionInformation;
+import com.hivemq.extension.sdk.api.client.parameter.Listener;
+import com.hivemq.extension.sdk.api.client.parameter.ProxyInformation;
+import com.hivemq.extension.sdk.api.client.parameter.TlsInformation;
 import com.hivemq.extension.sdk.api.packets.general.MqttVersion;
 import com.hivemq.extensions.ExtensionInformationUtil;
 import io.netty.channel.Channel;
@@ -80,7 +85,9 @@ public class ConnectionInformationImpl implements ConnectionInformation {
 
     @Override
     public @NotNull Optional<TlsInformation> getTlsInformation() {
-        if (tlsInformation != null && tlsInformation.getClientCertificate().isPresent() && tlsInformation.getClientCertificateChain().isPresent()) {
+        if (tlsInformation != null &&
+                tlsInformation.getClientCertificate().isPresent() &&
+                tlsInformation.getClientCertificateChain().isPresent()) {
             return Optional.of((TlsInformation) tlsInformation);
         }
         return Optional.empty();

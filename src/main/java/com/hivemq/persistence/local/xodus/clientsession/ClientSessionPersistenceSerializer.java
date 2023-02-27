@@ -76,7 +76,16 @@ public class ClientSessionPersistenceSerializer {
             hivemqIdLength = hivemqId.length;
 
             // payload ID, delay, ttl, payload format, retained, topic length, topic, hivemq id length, hivemq id , user properties
-            willLength += 8 + 8 + 8 + 1 + 1 + 4 + topicLength + 4 + hivemqIdLength + PropertiesSerializationUtil.encodedSize(willPublish.getUserProperties());
+            willLength += 8 +
+                    8 +
+                    8 +
+                    1 +
+                    1 +
+                    4 +
+                    topicLength +
+                    4 +
+                    hivemqIdLength +
+                    PropertiesSerializationUtil.encodedSize(willPublish.getUserProperties());
 
             responseTopic = willPublish.getResponseTopic() != null ? willPublish.getResponseTopic().getBytes() : null;
             responseTopicLength = responseTopic != null ? responseTopic.length : 0;
@@ -90,18 +99,18 @@ public class ClientSessionPersistenceSerializer {
             contentTypeLength = contentType != null ? contentType.length : 0;
             willLength += contentTypeLength + 4;
 
-            payloadFormatIndicator = (byte) (willPublish.getPayloadFormatIndicator() != null ? willPublish.getPayloadFormatIndicator().getCode() : -1);
+            payloadFormatIndicator = (byte) (willPublish.getPayloadFormatIndicator() != null ?
+                    willPublish.getPayloadFormatIndicator().getCode() :
+                    -1);
         }
 
         int queueLimitLength = clientSession.getQueueLimit() != null ? Long.BYTES : 0;
 
 
-        final byte[] bytes = new byte[
-                Long.BYTES +        // timestamp
-                        Long.BYTES +        // expiry interval
-                        1 +                 // flags
-                        willLength +
-                        queueLimitLength];
+        final byte[] bytes = new byte[Long.BYTES +        // timestamp
+                Long.BYTES +        // expiry interval
+                1 +                 // flags
+                willLength + queueLimitLength];
         int cursor = 0;
 
         Bytes.copyLongToByteArray(timestamp, bytes, 0);
@@ -208,7 +217,9 @@ public class ClientSessionPersistenceSerializer {
 
             final byte payloadFormatCode = bytes[cursor];
             cursor += 1;
-            willBuilder.withPayloadFormatIndicator(payloadFormatCode != -1 ? Mqtt5PayloadFormatIndicator.fromCode(payloadFormatCode) : null);
+            willBuilder.withPayloadFormatIndicator(payloadFormatCode != -1 ?
+                    Mqtt5PayloadFormatIndicator.fromCode(payloadFormatCode) :
+                    null);
 
             willBuilder.withRetain(bytes[cursor] == 1);
             cursor += 1;

@@ -56,7 +56,10 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -127,9 +130,9 @@ public class UnsubscribeInboundInterceptorHandlerTest {
     public void test_simple_intercept() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubscribeInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                SimpleUnsubscribeTestInterceptor.class);
+        final UnsubscribeInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        SimpleUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -153,9 +156,9 @@ public class UnsubscribeInboundInterceptorHandlerTest {
     public void test_modifying_topics() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubscribeInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                ModifyUnsubscribeTestInterceptor.class);
+        final UnsubscribeInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        ModifyUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);

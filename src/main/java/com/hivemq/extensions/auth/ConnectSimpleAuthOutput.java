@@ -90,8 +90,7 @@ class ConnectSimpleAuthOutput implements SimpleAuthOutput {
 
     @Override
     public @NotNull Async<SimpleAuthOutput> async(
-            final @NotNull Duration timeout,
-            final @NotNull TimeoutFallback fallback) {
+            final @NotNull Duration timeout, final @NotNull TimeoutFallback fallback) {
 
         return new AsyncWrapper<>(delegate.async(timeout, fallback), this);
     }

@@ -23,7 +23,11 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.*;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.CONTINUE;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.FAIL;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.SUCCESS;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.UNDECIDED;
 import static org.junit.Assert.assertEquals;
 
 /**

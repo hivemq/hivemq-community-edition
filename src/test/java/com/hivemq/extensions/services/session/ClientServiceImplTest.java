@@ -25,7 +25,13 @@ import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.services.exception.RateLimitExceededException;
 import com.hivemq.extension.sdk.api.services.session.ClientService;
 import com.hivemq.extension.sdk.api.services.session.SessionInformation;
-import com.hivemq.extensions.iteration.*;
+import com.hivemq.extensions.iteration.AllItemsItemCallback;
+import com.hivemq.extensions.iteration.AsyncIterator;
+import com.hivemq.extensions.iteration.AsyncIteratorFactory;
+import com.hivemq.extensions.iteration.BucketChunkResult;
+import com.hivemq.extensions.iteration.ChunkResult;
+import com.hivemq.extensions.iteration.FetchCallback;
+import com.hivemq.extensions.iteration.MultipleChunkResult;
 import com.hivemq.extensions.services.PluginServiceRateLimitService;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -34,7 +40,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
-
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,11 +51,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.DisconnectSource.EXTENSION;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -78,8 +91,10 @@ public class ClientServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        clientService = new ClientServiceImpl(pluginServiceRateLimitService, clientSessionPersistence,
-                getManagedExtensionExecutorService(), asyncIteratorFactory);
+        clientService = new ClientServiceImpl(pluginServiceRateLimitService,
+                clientSessionPersistence,
+                getManagedExtensionExecutorService(),
+                asyncIteratorFactory);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
     }
 
@@ -136,8 +151,11 @@ public class ClientServiceImplTest {
     @Test(expected = ExecutionException.class)
     public void test_disconnect_prevent_lwt_failed() throws Throwable {
 
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFailedFuture(TestException.INSTANCE));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                true,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
         clientService.disconnectClient(clientId, true).get();
 
     }
@@ -145,8 +163,11 @@ public class ClientServiceImplTest {
     @Test(expected = ExecutionException.class)
     public void test_disconnect_do_not_prevent_lwt_failed() throws Throwable {
 
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFailedFuture(TestException.INSTANCE));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                false,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
         clientService.disconnectClient(clientId).get();
 
     }
@@ -154,8 +175,8 @@ public class ClientServiceImplTest {
     @Test(expected = ExecutionException.class)
     public void test_invalidate_session_request_failed() throws Throwable {
 
-        when(clientSessionPersistence.invalidateSession(clientId, EXTENSION)).thenReturn(
-                Futures.immediateFailedFuture(TestException.INSTANCE));
+        when(clientSessionPersistence.invalidateSession(clientId, EXTENSION)).thenReturn(Futures.immediateFailedFuture(
+                TestException.INSTANCE));
         clientService.invalidateSession(clientId).get();
 
     }
@@ -215,46 +236,65 @@ public class ClientServiceImplTest {
 
     @Test(timeout = 20000)
     public void test_disconnect_client_do_not_prevent_lwt_null_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFuture(null));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                false,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFuture(null));
         assertEquals(null, clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_do_not_prevent_lwt_true_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFuture(true));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                false,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFuture(true));
         assertEquals(true, clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_do_not_prevent_lwt_false_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, false, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFuture(false));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                false,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFuture(false));
         assertEquals(false, clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_prevent_lwt_null_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFuture(null));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                true,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFuture(null));
         assertEquals(null, clientService.disconnectClient(clientId, true).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_prevent_lwt_true_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFuture(true));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                true,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFuture(true));
         assertEquals(true, clientService.disconnectClient(clientId, true).get());
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_with_reason_Code() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(
-                clientId, true, EXTENSION, Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                true,
+                EXTENSION,
+                Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                 "Disconnecting Normally")).thenReturn(Futures.immediateFuture(true));
-        assertEquals(
-                true, clientService.disconnectClient(clientId, true, DisconnectReasonCode.NORMAL_DISCONNECTION,
+        assertEquals(true,
+                clientService.disconnectClient(clientId,
+                        true,
+                        DisconnectReasonCode.NORMAL_DISCONNECTION,
                         "Disconnecting Normally").get());
     }
 
@@ -265,7 +305,9 @@ public class ClientServiceImplTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientSessionPersistence.getSession(eq("client"), anyBoolean())).thenReturn(new ClientSession(true, 0));
-        clientService.disconnectClient("client", true, DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+        clientService.disconnectClient("client",
+                true,
+                DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                 "reason-string");
     }
 
@@ -276,14 +318,19 @@ public class ClientServiceImplTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientSessionPersistence.getSession(eq("client"), anyBoolean())).thenReturn(new ClientSession(true, 0));
-        clientService.disconnectClient("client", true, DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE,
+        clientService.disconnectClient("client",
+                true,
+                DisconnectReasonCode.DISCONNECT_WITH_WILL_MESSAGE,
                 "reason-string");
     }
 
     @Test(timeout = 20000)
     public void test_disconnect_client_prevent_lwt_false_success() throws Throwable {
-        when(clientSessionPersistence.forceDisconnectClient(clientId, true, EXTENSION, null, null)).thenReturn(
-                Futures.immediateFuture(false));
+        when(clientSessionPersistence.forceDisconnectClient(clientId,
+                true,
+                EXTENSION,
+                null,
+                null)).thenReturn(Futures.immediateFuture(false));
         assertEquals(false, clientService.disconnectClient(clientId, true).get());
     }
 
@@ -301,8 +348,8 @@ public class ClientServiceImplTest {
 
     @Test(timeout = 20000)
     public void test_invalidate_session_false_success() throws Throwable {
-        when(clientSessionPersistence.invalidateSession(clientId, EXTENSION)).thenReturn(
-                Futures.immediateFuture(false));
+        when(clientSessionPersistence.invalidateSession(clientId,
+                EXTENSION)).thenReturn(Futures.immediateFuture(false));
         assertEquals(false, clientService.invalidateSession(clientId).get());
     }
 
@@ -324,7 +371,10 @@ public class ClientServiceImplTest {
 
     @NotNull
     private ClientSession getSession(final boolean connected) {
-        return new ClientSession(connected, sessionExpiry, new ClientSessionWill(mock(MqttWillPublish.class), 12345L), 23456L);
+        return new ClientSession(connected,
+                sessionExpiry,
+                new ClientSessionWill(mock(MqttWillPublish.class), 12345L),
+                23456L);
     }
 
     @Test(timeout = 10000, expected = RateLimitExceededException.class)
@@ -362,11 +412,10 @@ public class ClientServiceImplTest {
                     latch.countDown();
                 });
 
-        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
-                new SessionInformationImpl("client", 1, true),
-                new SessionInformationImpl("client2", 2, true),
-                new SessionInformationImpl("client3", 3, false)
-        ));
+        final ListenableFuture<Boolean> onItems =
+                itemCallback.onItems(List.of(new SessionInformationImpl("client", 1, true),
+                        new SessionInformationImpl("client2", 2, true),
+                        new SessionInformationImpl("client3", 3, false)));
 
         assertEquals(true, onItems.get());
 
@@ -384,11 +433,10 @@ public class ClientServiceImplTest {
                     context.abortIteration();
                 });
 
-        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
-                new SessionInformationImpl("client", 1, true),
-                new SessionInformationImpl("client2", 2, true),
-                new SessionInformationImpl("client3", 3, false)
-        ));
+        final ListenableFuture<Boolean> onItems =
+                itemCallback.onItems(List.of(new SessionInformationImpl("client", 1, true),
+                        new SessionInformationImpl("client2", 2, true),
+                        new SessionInformationImpl("client3", 3, false)));
 
         assertEquals(false, onItems.get());
 
@@ -404,11 +452,10 @@ public class ClientServiceImplTest {
                     throw new RuntimeException("test-exception");
                 });
 
-        final ListenableFuture<Boolean> onItems = itemCallback.onItems(List.of(
-                new SessionInformationImpl("client", 1, true),
-                new SessionInformationImpl("client2", 2, true),
-                new SessionInformationImpl("client3", 3, false)
-        ));
+        final ListenableFuture<Boolean> onItems =
+                itemCallback.onItems(List.of(new SessionInformationImpl("client", 1, true),
+                        new SessionInformationImpl("client2", 2, true),
+                        new SessionInformationImpl("client3", 3, false)));
 
         try {
             onItems.get();
@@ -427,19 +474,19 @@ public class ClientServiceImplTest {
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
 
         //noinspection unchecked
-        when(asyncIteratorFactory.createIterator(any(FetchCallback.class), any(AsyncIterator.ItemCallback.class)))
-                .thenReturn(new AsyncIterator() {
-                    @Override
-                    public void fetchAndIterate() {
-                        latch.countDown();
-                    }
+        when(asyncIteratorFactory.createIterator(any(FetchCallback.class),
+                any(AsyncIterator.ItemCallback.class))).thenReturn(new AsyncIterator() {
+            @Override
+            public void fetchAndIterate() {
+                latch.countDown();
+            }
 
-                    @Override
-                    public @NotNull CompletableFuture<Void> getFinishedFuture() {
-                        return resultFuture;
-                    }
+            @Override
+            public @NotNull CompletableFuture<Void> getFinishedFuture() {
+                return resultFuture;
+            }
 
-                });
+        });
 
         clientService.iterateAllClients((context, value) -> {
         });
@@ -456,15 +503,13 @@ public class ClientServiceImplTest {
                 new ClientServiceImpl.AllClientsFetchCallback(null);
 
         final ChunkResult<SessionInformation> chunkResult =
-                fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ClientSession>>(
-                        Map.of(
-                                1, new BucketChunkResult<>(Map.of(
-                                        "client1", new ClientSession(true, 10)), true, "client1", 1),
-                                2, new BucketChunkResult<>(Map.of(
-                                        "client2", new ClientSession(true, 10),
-                                        "client3", new ClientSession(true, 10))
-                                        , false, "client3", 2)
-                        )));
+                fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ClientSession>>(Map.of(1,
+                        new BucketChunkResult<>(Map.of("client1", new ClientSession(true, 10)), true, "client1", 1),
+                        2,
+                        new BucketChunkResult<>(Map.of("client2",
+                                new ClientSession(true, 10),
+                                "client3",
+                                new ClientSession(true, 10)), false, "client3", 2))));
 
         assertTrue(chunkResult.getCursor().getFinishedBuckets().contains(1));
         assertFalse(chunkResult.getCursor().getFinishedBuckets().contains(2));

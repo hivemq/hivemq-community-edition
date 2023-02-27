@@ -75,7 +75,8 @@ public class SubscriptionAuthorizerTask
         } catch (final Throwable e) {
             log.warn(
                     "Uncaught exception was thrown from extension with id \"{}\" at subscription authorization. Extensions are responsible on their own to handle exceptions.",
-                    pluginId, e);
+                    pluginId,
+                    e);
             Exceptions.rethrowError(e);
         }
 

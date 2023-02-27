@@ -41,14 +41,14 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_get_whenReferenceCounterIsPresent_thenReturnCorrectCount() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L,1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
         final int referenceCounter = payloadReferenceCounterRegistry.get(1L);
         assertEquals(1, referenceCounter);
     }
 
     @Test
     public void test_increment_whenNodeIsUnknown_thenAddNewEntry() {
-        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrementBy(1L,1 );
+        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
         assertEquals(UNKNOWN_PAYLOAD, referenceCounter);
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(1L);
         assertEquals(1, referenceCounter2);
@@ -56,7 +56,7 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_increment_whenNodeIsKnownButUniqueIsUnknown_thenAddNewEntry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L,1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
         final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrementBy(2L, 1);
         assertEquals(UNKNOWN_PAYLOAD, referenceCounter);
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(2L);
@@ -132,14 +132,14 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_size_whenMultipleNodesArePresent_thenSizeCoversAll() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L,1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
 
-        payloadReferenceCounterRegistry.getAndIncrementBy(2L,1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(3L,1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(2L, 1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(3L, 1);
 
-        payloadReferenceCounterRegistry.getAndIncrementBy(4L,1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(5L,1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(6L,1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(4L, 1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(5L, 1);
+        payloadReferenceCounterRegistry.getAndIncrementBy(6L, 1);
 
         final int size = payloadReferenceCounterRegistry.size();
         assertEquals(6, size);

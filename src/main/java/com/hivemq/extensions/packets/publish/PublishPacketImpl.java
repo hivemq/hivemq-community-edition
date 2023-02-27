@@ -89,8 +89,7 @@ public class PublishPacketImpl implements PublishPacket {
     }
 
     public PublishPacketImpl(final @NotNull PUBLISH publish) {
-        this(
-                publish.getTopic(),
+        this(publish.getTopic(),
                 publish.getQoS().toQos(),
                 publish.getOnwardQoS().toQos(),
                 publish.getPacketIdentifier(),
@@ -98,12 +97,14 @@ public class PublishPacketImpl implements PublishPacket {
                 (publish.getPayload() == null) ? null : ByteBuffer.wrap(publish.getPayload()),
                 publish.isRetain(),
                 publish.getMessageExpiryInterval(),
-                (publish.getPayloadFormatIndicator() == null) ? null :
+                (publish.getPayloadFormatIndicator() == null) ?
+                        null :
                         publish.getPayloadFormatIndicator().toPayloadFormatIndicator(),
                 publish.getContentType(),
                 publish.getResponseTopic(),
                 publish.getCorrelationData() == null ? null : ByteBuffer.wrap(publish.getCorrelationData()),
-                (publish.getSubscriptionIdentifiers() == null) ? ImmutableIntArray.of() :
+                (publish.getSubscriptionIdentifiers() == null) ?
+                        ImmutableIntArray.of() :
                         publish.getSubscriptionIdentifiers(),
                 UserPropertiesImpl.of(publish.getUserProperties().asList()),
                 publish.getTimestamp());
@@ -220,8 +221,20 @@ public class PublishPacketImpl implements PublishPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
-                payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties, timestamp);
+        return Objects.hash(topic,
+                qos,
+                onwardQos,
+                packetId,
+                dupFlag,
+                payload,
+                retain,
+                messageExpiryInterval,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                correlationData,
+                subscriptionIdentifiers,
+                userProperties,
+                timestamp);
     }
 }

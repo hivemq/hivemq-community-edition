@@ -40,15 +40,13 @@ public final class DefaultPermissionsEvaluator {
     }
 
     public static boolean checkWillPublish(
-            final @Nullable ModifiableDefaultPermissions permissions,
-            final @NotNull MqttWillPublish willPublish) {
+            final @Nullable ModifiableDefaultPermissions permissions, final @NotNull MqttWillPublish willPublish) {
 
         return checkPublish(permissions, willPublish.getTopic(), willPublish.getQos(), willPublish.isRetain());
     }
 
     public static boolean checkPublish(
-            final @Nullable ModifiableDefaultPermissions permissions,
-            final @NotNull PUBLISH publish) {
+            final @Nullable ModifiableDefaultPermissions permissions, final @NotNull PUBLISH publish) {
 
         return checkPublish(permissions, publish.getTopic(), publish.getQoS(), publish.isRetain());
     }
@@ -87,8 +85,7 @@ public final class DefaultPermissionsEvaluator {
     }
 
     public static boolean checkSubscription(
-            final @Nullable ModifiableDefaultPermissions permissions,
-            final @NotNull Topic subscription) {
+            final @Nullable ModifiableDefaultPermissions permissions, final @NotNull Topic subscription) {
 
         if (permissions == null) {
             //no permissions set -> default to ALLOW
@@ -127,8 +124,13 @@ public final class DefaultPermissionsEvaluator {
         }
         for (final TopicPermission topicPermission : permissions.asList()) {
 
-            final boolean isImplied = implied(topicPermission, stripedTopic, splitTopic, subscription.getQoS(),
-                    TopicPermission.MqttActivity.SUBSCRIBE, isShared, sharedGroup);
+            final boolean isImplied = implied(topicPermission,
+                    stripedTopic,
+                    splitTopic,
+                    subscription.getQoS(),
+                    TopicPermission.MqttActivity.SUBSCRIBE,
+                    isShared,
+                    sharedGroup);
 
             if (isImplied) {
                 return topicPermission.getType() == TopicPermission.PermissionType.ALLOW;
@@ -244,8 +246,10 @@ public final class DefaultPermissionsEvaluator {
                 return PermissionTopicMatcherUtils.matches(StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
                         ((InternalTopicPermission) topicPermission).getSplitTopic(),
                         !internalTopicPermission.containsWildcardCharacter(),
-                        internalTopicPermission.endsWithWildcard(), internalTopicPermission.isRootWildcard(),
-                        topic, splitTopic);
+                        internalTopicPermission.endsWithWildcard(),
+                        internalTopicPermission.isRootWildcard(),
+                        topic,
+                        splitTopic);
             }
 
             //fallback, should never be needed

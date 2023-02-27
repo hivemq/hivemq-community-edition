@@ -85,8 +85,25 @@ class EmbeddedExtensionImpl implements EmbeddedExtension {
     @NotNull
     @Override
     public String toString() {
-        return "EmbeddedExtension{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", version='" + version +
-                '\'' + ", author='" + author + '\'' + ", priority=" + priority + ", startPriority=" + startPriority +
-                ", extensionMain=" + extensionMain.getClass().getSimpleName() + '}';
+        return "EmbeddedExtension{" +
+                "id='" +
+                id +
+                '\'' +
+                ", name='" +
+                name +
+                '\'' +
+                ", version='" +
+                version +
+                '\'' +
+                ", author='" +
+                author +
+                '\'' +
+                ", priority=" +
+                priority +
+                ", startPriority=" +
+                startPriority +
+                ", extensionMain=" +
+                extensionMain.getClass().getSimpleName() +
+                '}';
     }
 }

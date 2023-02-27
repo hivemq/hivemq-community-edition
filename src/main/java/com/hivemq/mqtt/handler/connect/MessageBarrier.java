@@ -105,9 +105,8 @@ public class MessageBarrier extends ChannelDuplexHandler {
     private static void suspendRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
             final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-            final Optional<String> channelIP = (clientConnection == null)
-                    ? Optional.empty()
-                    : clientConnection.getChannelIP();
+            final Optional<String> channelIP =
+                    (clientConnection == null) ? Optional.empty() : clientConnection.getChannelIP();
 
             log.trace("Suspending read operations for MQTT client with id {} and IP {}",
                     clientConnection.getClientId(),
@@ -119,9 +118,8 @@ public class MessageBarrier extends ChannelDuplexHandler {
     private static void resumeRead(final @NotNull Channel channel) {
         if (log.isTraceEnabled()) {
             final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-            final Optional<String> channelIP = (clientConnection == null)
-                    ? Optional.empty()
-                    : clientConnection.getChannelIP();
+            final Optional<String> channelIP =
+                    (clientConnection == null) ? Optional.empty() : clientConnection.getChannelIP();
 
             log.trace("Restarting read operations for MQTT client with id {} and IP {}",
                     clientConnection.getClientId(),

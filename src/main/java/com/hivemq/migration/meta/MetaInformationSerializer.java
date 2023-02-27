@@ -31,27 +31,35 @@ public class MetaInformationSerializer {
     public byte[] serialize(final @NotNull MetaInformation metaInformation) {
 
 
-        final byte[] hivemqVersion =
-                metaInformation.getHivemqVersion() != null ? metaInformation.getHivemqVersion().getBytes(UTF_8) :
-                        new byte[0];
+        final byte[] hivemqVersion = metaInformation.getHivemqVersion() != null ?
+                metaInformation.getHivemqVersion().getBytes(UTF_8) :
+                new byte[0];
         final byte[] publishPayloadPersistenceVersion = metaInformation.getPublishPayloadPersistenceVersion() != null ?
-                metaInformation.getPublishPayloadPersistenceVersion().getBytes(UTF_8) : new byte[0];
+                metaInformation.getPublishPayloadPersistenceVersion().getBytes(UTF_8) :
+                new byte[0];
         final byte[] retainedMessagesPersistenceVersion =
                 metaInformation.getRetainedMessagesPersistenceVersion() != null ?
-                        metaInformation.getRetainedMessagesPersistenceVersion().getBytes(UTF_8) : new byte[0];
+                        metaInformation.getRetainedMessagesPersistenceVersion().getBytes(UTF_8) :
+                        new byte[0];
         final byte[] subscriptionPersistenceVersion = metaInformation.getSubscriptionPersistenceVersion() != null ?
-                metaInformation.getSubscriptionPersistenceVersion().getBytes(UTF_8) : new byte[0];
+                metaInformation.getSubscriptionPersistenceVersion().getBytes(UTF_8) :
+                new byte[0];
         final byte[] clientSessionPersistenceVersion = metaInformation.getClientSessionPersistenceVersion() != null ?
-                metaInformation.getClientSessionPersistenceVersion().getBytes(UTF_8) : new byte[0];
+                metaInformation.getClientSessionPersistenceVersion().getBytes(UTF_8) :
+                new byte[0];
         final byte[] queuedMessagesPersistenceVersion = metaInformation.getQueuedMessagesPersistenceVersion() != null ?
-                metaInformation.getQueuedMessagesPersistenceVersion().getBytes(UTF_8) : new byte[0];
+                metaInformation.getQueuedMessagesPersistenceVersion().getBytes(UTF_8) :
+                new byte[0];
 
         final byte retainedMessagesPersistenceType = metaInformation.getRetainedMessagesPersistenceType() != null ?
-                (byte) metaInformation.getRetainedMessagesPersistenceType().ordinal() : -1;
+                (byte) metaInformation.getRetainedMessagesPersistenceType().ordinal() :
+                -1;
         final byte publishPayloadPersistenceType = metaInformation.getPublishPayloadPersistenceType() != null ?
-                (byte) metaInformation.getPublishPayloadPersistenceType().ordinal() : -1;
+                (byte) metaInformation.getPublishPayloadPersistenceType().ordinal() :
+                -1;
 
-        final int bufferSize = 6 * 4 + //6 * int(4 byte) for byte[] length.
+        final int bufferSize = 6 * 4 +
+                //6 * int(4 byte) for byte[] length.
                 hivemqVersion.length +
                 publishPayloadPersistenceVersion.length +
                 retainedMessagesPersistenceVersion.length +

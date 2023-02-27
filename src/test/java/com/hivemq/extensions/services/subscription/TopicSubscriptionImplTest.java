@@ -33,8 +33,12 @@ public class TopicSubscriptionImplTest {
     @Test
     public void test_from_topic() {
 
-        final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE, true,
-                true, Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1);
+        final Topic topic = new Topic("topic",
+                QoS.AT_LEAST_ONCE,
+                true,
+                true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                1);
 
         final TopicSubscriptionImpl subscription = new TopicSubscriptionImpl(topic);
 
@@ -50,8 +54,12 @@ public class TopicSubscriptionImplTest {
     @Test
     public void test_convert_to_topic_do_not_send() {
 
-        final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE, true,
-                true, Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1);
+        final Topic topic = new Topic("topic",
+                QoS.AT_LEAST_ONCE,
+                true,
+                true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                1);
 
         final TopicSubscriptionImpl subscription = new TopicSubscriptionImpl(topic);
 

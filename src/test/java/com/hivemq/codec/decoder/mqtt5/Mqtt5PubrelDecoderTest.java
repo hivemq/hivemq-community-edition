@@ -26,7 +26,10 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Waldemar Ruck
@@ -45,15 +48,13 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   type, flags
                 (byte) 0b0110_0001,
                 //   remaining length
-                8,
-                0, 5,
+                8, 0, 5,
                 //   reason code (continue)
                 (byte) reasonCode.getCode(),
                 //   properties
                 4,
                 //     reason string
-                0x1F, 0, 1, 'x'
-        };
+                0x1F, 0, 1, 'x'};
 
         decodeNullExpected(encoded0001);
     }
@@ -84,8 +85,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '5', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '6', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '7', 0, 5, 'v', 'a', 'l', 'u', 'e', //
-                0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',
-        };
+                0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',};
 
         final PUBREL pubRel = decode(encoded);
         assertNotNull(pubRel);
@@ -159,8 +159,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   reason code (success)
                 (byte) reasonCode.getCode(),
                 //   properties
-                0
-        };
+                0};
 
         final PUBREL pubRel = decode(encoded);
 
@@ -185,8 +184,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   reason code (success)
                 (byte) reasonCode.getCode(),
                 //   properties
-                0
-        };
+                0};
 
         decodeNullExpected(encoded);
     }
@@ -206,9 +204,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   reason code (success)
                 (byte) reasonCode.getCode(),
                 //   properties
-                4,
-                0x15, 0, 1, 'x'
-        };
+                4, 0x15, 0, 1, 'x'};
 
         decodeNullExpected(encoded);
     }
@@ -323,8 +319,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //     reason string
                 0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         final PUBREL pubRel = decode(encoded);
         assertNotNull(pubRel);
@@ -351,8 +346,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //     reason string
                 0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         decodeNullExpected(encoded);
     }
@@ -374,8 +368,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //     reason string
                 0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         decodeNullExpected(encoded);
     }
@@ -396,8 +389,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 8,
                 //     reason string
-                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'
-        };
+                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'};
 
         decodeNullExpected(encoded);
     }
@@ -417,8 +409,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 10,
                 //     reason string
-                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'
-        };
+                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'};
 
         decodeChannelOpen(encoded);
     }
@@ -438,8 +429,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 -3,
                 //     reason string
-                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'
-        };
+                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'};
 
         decodeChannelOpen(encoded);
     }
@@ -459,8 +449,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 9,
                 //     reason string
-                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'
-        };
+                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'};
 
         decodeNullExpected(encoded);
     }
@@ -480,8 +469,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 10,
                 //     reason string
-                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'
-        };
+                0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's'};
 
         decodeNullExpected(encoded);
     }
@@ -501,8 +489,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 15,
                 //     reason string
-                0x1F, 0, 8, 's', 'u', 'c', 'c', 'e', 's', 's', 's'
-        };
+                0x1F, 0, 8, 's', 'u', 'c', 'c', 'e', 's', 's', 's'};
 
         decodeNullExpected(encoded);
     }

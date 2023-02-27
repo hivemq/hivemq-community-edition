@@ -34,7 +34,8 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_MET
  * @author Florian Limpöck
  * @since 4.0
  */
-public class Mqtt5AuthEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithOmissibleReasonCodeEncoder<AUTH, Mqtt5AuthReasonCode> {
+public class Mqtt5AuthEncoder extends
+        Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithOmissibleReasonCodeEncoder<AUTH, Mqtt5AuthReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.AUTH.ordinal() << 4;
 

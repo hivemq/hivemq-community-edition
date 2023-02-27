@@ -151,7 +151,8 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
             allClientsClosedFuture.set(null);
             return;
         }
-        final List<List<ClientConnection>> connectionPartitions = Lists.partition(allConnections, shutdownPartitionSize);
+        final List<List<ClientConnection>> connectionPartitions =
+                Lists.partition(allConnections, shutdownPartitionSize);
         shutDownPartition(connectionPartitions, 0, allClientsClosedFuture);
     }
 

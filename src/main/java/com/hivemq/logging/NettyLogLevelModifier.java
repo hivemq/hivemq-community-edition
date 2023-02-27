@@ -28,7 +28,13 @@ import org.slf4j.Marker;
 public class NettyLogLevelModifier extends TurboFilter {
 
     @Override
-    public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format, final Object[] params, final Throwable t) {
+    public FilterReply decide(
+            final Marker marker,
+            final Logger logger,
+            final Level level,
+            final String format,
+            final Object[] params,
+            final Throwable t) {
 
         if (format == null || logger == null) {
             return FilterReply.NEUTRAL;
@@ -72,8 +78,8 @@ public class NettyLogLevelModifier extends TurboFilter {
     }
 
     @NotNull
-    private FilterReply traceAndSortOutUnsupportedOperationException(final Marker marker, final Logger logger,
-                                                                     final String format, final Object[] params, final Throwable t) {
+    private FilterReply traceAndSortOutUnsupportedOperationException(
+            final Marker marker, final Logger logger, final String format, final Object[] params, final Throwable t) {
         if (t instanceof UnsupportedOperationException) {
             return FilterReply.DENY;
         }

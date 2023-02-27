@@ -61,16 +61,15 @@ public class PersistenceMigrationModuleTest {
 
     @Test
     public void test_startup_singleton() {
-        final Injector injector = Guice.createInjector(
-                new PersistenceMigrationModule(new MetricRegistry(), persistenceConfigurationService),
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(SystemInformation.class).toInstance(systemInformation);
-                        bindScope(LazySingleton.class, LazySingletonScope.get());
-                        bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
-                    }
-                });
+        final Injector injector = Guice.createInjector(new PersistenceMigrationModule(new MetricRegistry(),
+                persistenceConfigurationService), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(SystemInformation.class).toInstance(systemInformation);
+                bindScope(LazySingleton.class, LazySingletonScope.get());
+                bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
+            }
+        });
 
         final PersistenceStartup instance1 = injector.getInstance(PersistenceStartup.class);
         final PersistenceStartup instance2 = injector.getInstance(PersistenceStartup.class);
@@ -82,16 +81,15 @@ public class PersistenceMigrationModuleTest {
     public void test_memory_persistence() {
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceConfigurationService.PersistenceMode.IN_MEMORY);
 
-        final Injector injector = Guice.createInjector(
-                new PersistenceMigrationModule(new MetricRegistry(), persistenceConfigurationService),
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(SystemInformation.class).toInstance(systemInformation);
-                        bindScope(LazySingleton.class, LazySingletonScope.get());
-                        bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
-                    }
-                });
+        final Injector injector = Guice.createInjector(new PersistenceMigrationModule(new MetricRegistry(),
+                persistenceConfigurationService), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(SystemInformation.class).toInstance(systemInformation);
+                bindScope(LazySingleton.class, LazySingletonScope.get());
+                bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
+            }
+        });
         assertTrue(injector.getInstance(PublishPayloadPersistence.class) instanceof PublishPayloadNoopPersistenceImpl);
         assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
     }

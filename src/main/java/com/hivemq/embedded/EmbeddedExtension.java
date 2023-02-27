@@ -61,7 +61,8 @@ public interface EmbeddedExtension {
     @NotNull String getVersion();
 
     /**
-     * @return The author of the extension or <code>null</code> if the extension does not provide information about the author.
+     * @return The author of the extension or <code>null</code> if the extension does not provide information about the
+     *         author.
      * @since CE 2020.5
      */
     @Nullable String getAuthor();
@@ -73,16 +74,16 @@ public interface EmbeddedExtension {
     int getPriority();
 
     /**
-     * @return the extension's start priority. All extensions are started in the order of their priority (highest to lowest).
+     * @return the extension's start priority. All extensions are started in the order of their priority (highest to
+     *         lowest).
      * @since CE 2020.5
      */
     int getStartPriority();
 
     /**
      * @return the object of the {@link ExtensionMain} implementation of the extension.
-     * It must override the {@link ExtensionMain#extensionStart(ExtensionStartInput, ExtensionStartOutput)}
-     * and the {@link ExtensionMain#extensionStop(ExtensionStopInput, ExtensionStopOutput)} )} methods.
-     *
+     *         It must override the {@link ExtensionMain#extensionStart(ExtensionStartInput, ExtensionStartOutput)}
+     *         and the {@link ExtensionMain#extensionStop(ExtensionStopInput, ExtensionStopOutput)} )} methods.
      * @since CE 2020.5
      */
     @NotNull ExtensionMain getExtensionMain();
