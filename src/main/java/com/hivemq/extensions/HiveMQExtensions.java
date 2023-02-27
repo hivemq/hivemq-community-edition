@@ -33,7 +33,11 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -170,8 +174,7 @@ public class HiveMQExtensions {
     }
 
     private void addClassLoaderMapping(
-            final @NotNull ClassLoader classloader,
-            final @NotNull HiveMQExtension extension) {
+            final @NotNull ClassLoader classloader, final @NotNull HiveMQExtension extension) {
         final Lock loaderLock = classloaderLock.writeLock();
         try {
             loaderLock.lock();
@@ -228,8 +231,7 @@ public class HiveMQExtensions {
                         output.getReason().get());
                 extensionStartFailed(extension, extensionClassloader);
             } else {
-                log.info(
-                        "{}xtension \"{}\" version {} started successfully.",
+                log.info("{}xtension \"{}\" version {} started successfully.",
                         extension.isEmbedded() ? "Embedded e" : "E",
                         extension.getName(),
                         extension.getVersion());
@@ -291,13 +293,13 @@ public class HiveMQExtensions {
             Thread.currentThread().setContextClassLoader(extensionClassloader);
             extension.stop(input, output);
 
-            log.info(
-                    "{}xtension \"{}\" version {} stopped successfully.",
+            log.info("{}xtension \"{}\" version {} stopped successfully.",
                     extension.isEmbedded() ? "Embedded e" : "E",
                     extension.getName(),
                     extension.getVersion());
         } catch (final Throwable t) {
-            log.warn("Uncaught exception was thrown from extension with id \"" + extension.getId() +
+            log.warn("Uncaught exception was thrown from extension with id \"" +
+                    extension.getId() +
                     "\" on extension stop. Extensions are responsible on their own to handle exceptions.", t);
             disable = true;
 

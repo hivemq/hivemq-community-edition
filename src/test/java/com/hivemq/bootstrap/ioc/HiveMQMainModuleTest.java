@@ -35,14 +35,12 @@ public class HiveMQMainModuleTest {
     @Test
     public void test_topic_matcher_not_same() {
 
-        final Injector injector = Guice.createInjector(Stage.PRODUCTION,
-                new HiveMQMainModule(),
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(EventExecutorGroup.class).toInstance(Mockito.mock(EventExecutorGroup.class));
-                    }
-                });
+        final Injector injector = Guice.createInjector(Stage.PRODUCTION, new HiveMQMainModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(EventExecutorGroup.class).toInstance(Mockito.mock(EventExecutorGroup.class));
+            }
+        });
 
         final TopicMatcher instance1 = injector.getInstance(TopicMatcher.class);
         final TopicMatcher instance2 = injector.getInstance(TopicMatcher.class);

@@ -15,10 +15,10 @@
  */
 package com.hivemq.throttling.ioc;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.throttling.GlobalTrafficShaperExecutorShutdownHook;
 import com.hivemq.util.ThreadFactoryUtil;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
@@ -47,8 +47,9 @@ public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapi
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
 
     @Inject
-    GlobalTrafficShapingProvider(final @NotNull ShutdownHooks registry,
-                                 final @NotNull RestrictionsConfigurationService restrictionsConfigurationService) {
+    GlobalTrafficShapingProvider(
+            final @NotNull ShutdownHooks registry,
+            final @NotNull RestrictionsConfigurationService restrictionsConfigurationService) {
 
         this.registry = registry;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
@@ -58,9 +59,11 @@ public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapi
     public @NotNull GlobalTrafficShapingHandler get() {
 
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("global-traffic-shaper-executor-%d");
-        final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(threadFactory);
+        final ScheduledExecutorService scheduledExecutorService =
+                Executors.newSingleThreadScheduledExecutor(threadFactory);
 
-        final GlobalTrafficShaperExecutorShutdownHook shutdownHook = new GlobalTrafficShaperExecutorShutdownHook(scheduledExecutorService);
+        final GlobalTrafficShaperExecutorShutdownHook shutdownHook =
+                new GlobalTrafficShaperExecutorShutdownHook(scheduledExecutorService);
         registry.add(shutdownHook);
 
         final long incomingLimit = restrictionsConfigurationService.incomingLimit();

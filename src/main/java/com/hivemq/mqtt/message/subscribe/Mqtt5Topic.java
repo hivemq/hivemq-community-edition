@@ -43,25 +43,23 @@ public interface Mqtt5Topic {
     /**
      * @return the topic as String representation
      */
-    @NotNull
-    String getTopic();
+    @NotNull String getTopic();
 
     /**
      * @return the QoS of a Topic
      */
-    @NotNull
-    QoS getQoS();
+    @NotNull QoS getQoS();
 
     /**
-     * @return whether the client must not receive messages published by itself. The default is {@link #DEFAULT_NO_LOCAL}.
+     * @return whether the client must not receive messages published by itself. The default is
+     *         {@link #DEFAULT_NO_LOCAL}.
      */
     boolean isNoLocal();
 
     /**
      * @return the handling of retained message for this subscription. The default is {@link #DEFAULT_RETAIN_HANDLING}.
      */
-    @NotNull
-    Mqtt5RetainHandling getRetainHandling();
+    @NotNull Mqtt5RetainHandling getRetainHandling();
 
     /**
      * @return whether the retain flag for incoming publishes must be set to its original value.

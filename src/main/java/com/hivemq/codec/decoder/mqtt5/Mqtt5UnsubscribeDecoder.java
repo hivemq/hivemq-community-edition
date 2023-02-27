@@ -84,7 +84,8 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
             final int propertyIdentifier = buf.readByte();
             if (propertyIdentifier == USER_PROPERTY) {
-                userPropertiesBuilder = readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.UNSUBSCRIBE);
+                userPropertiesBuilder =
+                        readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.UNSUBSCRIBE);
                 if (userPropertiesBuilder == null) {
                     return null;
                 }
@@ -129,7 +130,8 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
         if (packetIdentifier == 0) {
             disconnector.disconnect(clientConnection.getChannel(),
                     "A client (IP: {}) sent an UNSUBSCRIBE with message id = '0'. This is not allowed. Disconnecting client.",
-                    "Sent UNSUBSCRIBE with message id = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    "Sent UNSUBSCRIBE with message id = '0'",
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_PACKET_ID_0);
         }
 

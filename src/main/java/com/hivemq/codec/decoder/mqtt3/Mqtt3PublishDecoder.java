@@ -101,8 +101,7 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
         final byte[] payload = new byte[buf.readableBytes()];
         buf.readBytes(payload);
 
-        return new PUBLISHFactory.Mqtt3Builder()
-                .withHivemqId(hivemqId.get())
+        return new PUBLISHFactory.Mqtt3Builder().withHivemqId(hivemqId.get())
                 .withMessageExpiryInterval(maxMessageExpiryInterval)
                 .withQoS(QoS.valueOf(qos))
                 .withOnwardQos(QoS.valueOf(qos))

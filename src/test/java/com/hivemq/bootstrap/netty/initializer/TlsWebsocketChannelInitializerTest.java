@@ -107,7 +107,8 @@ public class TlsWebsocketChannelInitializerTest {
         when(socketChannel.isActive()).thenReturn(true);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(sslFactory.getSslContext(any(Tls.class))).thenReturn(sslContext);
-        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(sslHandler);
+        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(
+                sslHandler);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(mockListener.getTls()).thenReturn(tls);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
@@ -122,13 +123,13 @@ public class TlsWebsocketChannelInitializerTest {
     @Test
     public void test_add_special_handlers() {
 
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder()
-                .bindAddress("")
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("")
                 .port(0)
                 .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(0).build())
                 .build();
 
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer =
+                new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
 
 
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
@@ -149,13 +150,13 @@ public class TlsWebsocketChannelInitializerTest {
     @Test
     public void test_add_special_handlers_with_timeout() {
 
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder()
-                .bindAddress("")
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("")
                 .port(0)
                 .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(10).build())
                 .build();
 
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer =
+                new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
 
 
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);

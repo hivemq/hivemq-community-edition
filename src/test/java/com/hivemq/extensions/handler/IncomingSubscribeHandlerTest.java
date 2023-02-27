@@ -52,7 +52,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.subscribe.Topic;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -76,7 +75,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -177,7 +178,8 @@ public class IncomingSubscribeHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_subscribe_context_has_interceptors_change_topic_mqtt5() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
@@ -190,7 +192,8 @@ public class IncomingSubscribeHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
+        channel.writeInbound(new SUBSCRIBE(1,
+                new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
         while (messageAtomicReference.get() == null) {
             channel.runPendingTasks();
@@ -204,7 +207,8 @@ public class IncomingSubscribeHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_subscribe_context_has_interceptors_change_topic_mqtt3() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
@@ -217,7 +221,8 @@ public class IncomingSubscribeHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
+        channel.writeInbound(new SUBSCRIBE(1,
+                new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
         while (messageAtomicReference.get() == null) {
             channel.runPendingTasks();
@@ -231,7 +236,8 @@ public class IncomingSubscribeHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_subscribe_context_has_interceptors_throws_exception_mqtt5() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
@@ -246,9 +252,13 @@ public class IncomingSubscribeHandlerTest {
 
         channel.pipeline().addFirst(new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) throws Exception {
 
-                if (msg instanceof SUBACK && ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
+                if (msg instanceof SUBACK &&
+                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
                     subackLatch.countDown();
                 }
 
@@ -258,7 +268,8 @@ public class IncomingSubscribeHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
+        channel.writeInbound(new SUBSCRIBE(1,
+                new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
         while (subackLatch.getCount() != 0) {
             channel.runPendingTasks();
@@ -314,7 +325,8 @@ public class IncomingSubscribeHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_subscribe_context_has_interceptors_timeouts_failure_mqtt3() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
@@ -329,9 +341,13 @@ public class IncomingSubscribeHandlerTest {
 
         channel.pipeline().addFirst(new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) throws Exception {
 
-                if (msg instanceof SUBACK && ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
+                if (msg instanceof SUBACK &&
+                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
                     subackLatch.countDown();
                 }
 
@@ -341,7 +357,8 @@ public class IncomingSubscribeHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
+        channel.writeInbound(new SUBSCRIBE(1,
+                new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
         while (subackLatch.getCount() != 0) {
             channel.runPendingTasks();
@@ -353,7 +370,8 @@ public class IncomingSubscribeHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_subscribe_context_has_interceptors_timeouts_failure() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
@@ -368,9 +386,13 @@ public class IncomingSubscribeHandlerTest {
 
         channel.pipeline().addFirst(new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) throws Exception {
 
-                if (msg instanceof SUBACK && ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
+                if (msg instanceof SUBACK &&
+                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
                     subackLatch.countDown();
                 }
 
@@ -380,7 +402,8 @@ public class IncomingSubscribeHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
 
-        channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
+        channel.writeInbound(new SUBSCRIBE(1,
+                new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
         while (subackLatch.getCount() != 0) {
             channel.runPendingTasks();
@@ -391,7 +414,8 @@ public class IncomingSubscribeHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_subscribe_extension_null() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
@@ -406,9 +430,13 @@ public class IncomingSubscribeHandlerTest {
 
         channel.pipeline().addFirst(new ChannelOutboundHandlerAdapter() {
             @Override
-            public void write(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) throws Exception {
+            public void write(
+                    final @NotNull ChannelHandlerContext ctx,
+                    final @NotNull Object msg,
+                    final @NotNull ChannelPromise promise) throws Exception {
 
-                if (msg instanceof SUBACK && ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.GRANTED_QOS_1)) {
+                if (msg instanceof SUBACK &&
+                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.GRANTED_QOS_1)) {
                     subackLatch.countDown();
                 }
 
@@ -418,7 +446,8 @@ public class IncomingSubscribeHandlerTest {
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(null);
 
-        channel.writeInbound(new SUBSCRIBE(1, new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
+        channel.writeInbound(new SUBSCRIBE(1,
+                new Topic("topic", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.SEND, 1)));
 
         while (messageAtomicReference.get() == null) {
             channel.runPendingTasks();
@@ -431,8 +460,7 @@ public class IncomingSubscribeHandlerTest {
 
     private List<SubscribeInboundInterceptor> getIsolatedInterceptor() throws Exception {
         final Class<?>[] classes = {
-                TestInterceptorChangeTopic.class, TestInterceptorThrowsException.class, TestInterceptorTimeout.class
-        };
+                TestInterceptorChangeTopic.class, TestInterceptorThrowsException.class, TestInterceptorTimeout.class};
 
         final IsolatedExtensionClassloader cl1 =
                 IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
@@ -455,8 +483,7 @@ public class IncomingSubscribeHandlerTest {
 
         @Override
         public void onInboundSubscribe(
-                final @NotNull SubscribeInboundInput input,
-                final @NotNull SubscribeInboundOutput output) {
+                final @NotNull SubscribeInboundInput input, final @NotNull SubscribeInboundOutput output) {
             output.getSubscribePacket()
                     .getSubscriptions()
                     .get(0)
@@ -468,8 +495,7 @@ public class IncomingSubscribeHandlerTest {
 
         @Override
         public void onInboundSubscribe(
-                final @NotNull SubscribeInboundInput input,
-                final @NotNull SubscribeInboundOutput output) {
+                final @NotNull SubscribeInboundInput input, final @NotNull SubscribeInboundOutput output) {
             final Async<SubscribeInboundOutput> async = output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
             try {
                 Thread.sleep(100);
@@ -484,8 +510,7 @@ public class IncomingSubscribeHandlerTest {
 
         @Override
         public void onInboundSubscribe(
-                final @NotNull SubscribeInboundInput input,
-                final @NotNull SubscribeInboundOutput output) {
+                final @NotNull SubscribeInboundInput input, final @NotNull SubscribeInboundOutput output) {
             throw new NullPointerException();
         }
     }

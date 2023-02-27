@@ -23,8 +23,8 @@ import com.hivemq.mqtt.message.MessageType;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.mqtt.message.publish.PUBLISH;
+import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.util.ObjectMemoryEstimation;
 
 /**
@@ -45,7 +45,10 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         super(packetIdentifier, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    public PUBREL(final int packetIdentifier, final @Nullable Long publishTimestamp, final @Nullable Long messageExpiryInterval) {
+    public PUBREL(
+            final int packetIdentifier,
+            final @Nullable Long publishTimestamp,
+            final @Nullable Long messageExpiryInterval) {
         super(packetIdentifier, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         this.publishTimestamp = publishTimestamp;
         this.messageExpiryInterval = messageExpiryInterval;
@@ -117,8 +120,7 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     }
 
     public static @NotNull PUBREL from(final @NotNull PubrelPacketImpl packet) {
-        return new PUBREL(
-                packet.getPacketIdentifier(),
+        return new PUBREL(packet.getPacketIdentifier(),
                 Mqtt5PubRelReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));

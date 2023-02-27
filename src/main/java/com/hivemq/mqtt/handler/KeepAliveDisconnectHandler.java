@@ -42,9 +42,10 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     private boolean reading;
     private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService;
 
-    public KeepAliveDisconnectHandler(final long readerIdleTime,
-                                      final @NotNull TimeUnit unit,
-                                      final @NotNull KeepAliveDisconnectService keepAliveDisconnectService) {
+    public KeepAliveDisconnectHandler(
+            final long readerIdleTime,
+            final @NotNull TimeUnit unit,
+            final @NotNull KeepAliveDisconnectService keepAliveDisconnectService) {
         this.keepAliveDisconnectService = keepAliveDisconnectService;
         if (readerIdleTime <= 0) {
             readerIdleTimeNanos = 0;
@@ -117,7 +118,8 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
         state = INITIATED;
         lastReadTime = ticksInNanos();
         if (readerIdleTimeNanos > 0) {
-            timeoutTaskFuture = channel.eventLoop().schedule(new ReaderIdleTimeoutTask(channel), readerIdleTimeNanos, TimeUnit.NANOSECONDS);
+            timeoutTaskFuture = channel.eventLoop()
+                    .schedule(new ReaderIdleTimeoutTask(channel), readerIdleTimeNanos, TimeUnit.NANOSECONDS);
         }
     }
 

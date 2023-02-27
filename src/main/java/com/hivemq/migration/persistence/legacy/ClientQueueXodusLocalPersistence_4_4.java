@@ -89,8 +89,11 @@ public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence 
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
 
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
-                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), false);
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+                false);
 
         this.serializer = new ClientQueuePersistenceSerializer_4_4(payloadPersistence);
         this.queueSizeBuckets = new ConcurrentHashMap<>();
@@ -135,8 +138,12 @@ public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence 
         //noop
     }
 
-    public void add(@NotNull final String queueId, final boolean shared, @NotNull final PUBLISH_4_4 publish,
-                    final boolean retained, final int bucketIndex) {
+    public void add(
+            @NotNull final String queueId,
+            final boolean shared,
+            @NotNull final PUBLISH_4_4 publish,
+            final boolean retained,
+            final int bucketIndex) {
         checkNotNull(queueId, "Queue ID must not be null");
         checkNotNull(publish, "Publish must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);

@@ -17,7 +17,11 @@ package com.hivemq.extensions.iteration;
 
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Queue;
 
 import static org.junit.Assert.assertEquals;
 

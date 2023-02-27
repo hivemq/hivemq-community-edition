@@ -93,8 +93,8 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
         responseInformation = packet.responseInformation;
         serverReference = packet.serverReference;
         reasonString = packet.reasonString;
-        userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
         this.requestResponseInformation = requestResponseInformation;
@@ -108,9 +108,11 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     @Override
     public void setReasonCode(final @NotNull ConnackReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
-        final boolean switched = (reasonCode == ConnackReasonCode.SUCCESS && this.reasonCode != ConnackReasonCode.SUCCESS) ||
-                (reasonCode != ConnackReasonCode.SUCCESS && this.reasonCode == ConnackReasonCode.SUCCESS);
-        Preconditions.checkState(!switched, "Reason code must not switch from successful to unsuccessful or vice versa");
+        final boolean switched =
+                (reasonCode == ConnackReasonCode.SUCCESS && this.reasonCode != ConnackReasonCode.SUCCESS) ||
+                        (reasonCode != ConnackReasonCode.SUCCESS && this.reasonCode == ConnackReasonCode.SUCCESS);
+        Preconditions.checkState(!switched,
+                "Reason code must not switch from successful to unsuccessful or vice versa");
         if (this.reasonCode == reasonCode) {
             return;
         }
@@ -146,7 +148,8 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     @Override
     public void setAssignedClientIdentifier(final @Nullable String assignedClientIdentifier) {
-        PluginBuilderUtil.checkClientIdentifier(assignedClientIdentifier, configurationService.securityConfiguration().validateUTF8());
+        PluginBuilderUtil.checkClientIdentifier(assignedClientIdentifier,
+                configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.assignedClientId, assignedClientIdentifier)) {
             return;
         }
@@ -212,8 +215,8 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     @Override
     public void setResponseInformation(final @Nullable String responseInformation) {
-        PluginBuilderUtil.checkResponseInformation(
-                responseInformation, requestResponseInformation,
+        PluginBuilderUtil.checkResponseInformation(responseInformation,
+                requestResponseInformation,
                 configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.responseInformation, responseInformation)) {
             return;
@@ -229,8 +232,8 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     @Override
     public void setServerReference(final @Nullable String serverReference) {
-        PluginBuilderUtil.checkServerReference(
-                serverReference, configurationService.securityConfiguration().validateUTF8());
+        PluginBuilderUtil.checkServerReference(serverReference,
+                configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.serverReference, serverReference)) {
             return;
         }
@@ -246,8 +249,7 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     @Override
     public void setReasonString(final @Nullable String reasonString) {
         if (reasonString != null) {
-            Preconditions.checkState(
-                    reasonCode != ConnackReasonCode.SUCCESS,
+            Preconditions.checkState(reasonCode != ConnackReasonCode.SUCCESS,
                     "Reason string must not be set when reason code is successful");
         }
         PluginBuilderUtil.checkReasonString(reasonString, configurationService.securityConfiguration().validateUTF8());
@@ -268,11 +270,25 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
     }
 
     public @NotNull ConnackPacketImpl copy() {
-        return new ConnackPacketImpl(reasonCode, sessionPresent, sessionExpiryInterval, serverKeepAlive,
-                assignedClientId, authenticationMethod, authenticationData, receiveMaximum, maximumPacketSize,
-                topicAliasMaximum, maximumQos, retainAvailable, wildCardSubscriptionAvailable,
-                sharedSubscriptionsAvailable, subscriptionIdentifiersAvailable, responseInformation, serverReference,
-                reasonString, userProperties.copy());
+        return new ConnackPacketImpl(reasonCode,
+                sessionPresent,
+                sessionExpiryInterval,
+                serverKeepAlive,
+                assignedClientId,
+                authenticationMethod,
+                authenticationData,
+                receiveMaximum,
+                maximumPacketSize,
+                topicAliasMaximum,
+                maximumQos,
+                retainAvailable,
+                wildCardSubscriptionAvailable,
+                sharedSubscriptionsAvailable,
+                subscriptionIdentifiersAvailable,
+                responseInformation,
+                serverReference,
+                reasonString,
+                userProperties.copy());
     }
 
     public @NotNull ModifiableConnackPacketImpl update(final @NotNull ConnackPacketImpl packet) {

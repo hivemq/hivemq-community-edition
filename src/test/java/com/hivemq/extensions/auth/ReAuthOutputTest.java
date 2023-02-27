@@ -32,7 +32,10 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.List;
 
-import static com.hivemq.extensions.auth.AuthenticationState.*;
+import static com.hivemq.extensions.auth.AuthenticationState.CONTINUE;
+import static com.hivemq.extensions.auth.AuthenticationState.FAILED;
+import static com.hivemq.extensions.auth.AuthenticationState.NEXT_EXTENSION_OR_DEFAULT;
+import static com.hivemq.extensions.auth.AuthenticationState.SUCCESS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -49,8 +52,11 @@ public class ReAuthOutputTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        authTaskOutput = new ReAuthOutput(asyncer, true, new ModifiableDefaultPermissionsImpl(),
-                new ModifiableClientSettingsImpl(10, null), 30);
+        authTaskOutput = new ReAuthOutput(asyncer,
+                true,
+                new ModifiableDefaultPermissionsImpl(),
+                new ModifiableClientSettingsImpl(10, null),
+                30);
     }
 
     @Test(timeout = 5000)
@@ -186,8 +192,9 @@ public class ReAuthOutputTest {
     @Test(timeout = 5000)
     public void test_async_duration_fallback_code() {
 
-        authTaskOutput.async(
-                Duration.ofSeconds(10), TimeoutFallback.FAILURE, DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD);
+        authTaskOutput.async(Duration.ofSeconds(10),
+                TimeoutFallback.FAILURE,
+                DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD);
         authTaskOutput.failByTimeout();
 
         assertEquals(Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD, authTaskOutput.getReasonCode());
@@ -209,16 +216,20 @@ public class ReAuthOutputTest {
     @Test(timeout = 5000, expected = IllegalArgumentException.class)
     public void test_async_success_reason_code() {
 
-        authTaskOutput.async(
-                Duration.ofSeconds(10), TimeoutFallback.SUCCESS, DisconnectedReasonCode.SUCCESS, "Failed by me");
+        authTaskOutput.async(Duration.ofSeconds(10),
+                TimeoutFallback.SUCCESS,
+                DisconnectedReasonCode.SUCCESS,
+                "Failed by me");
 
     }
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback_code_string() {
 
-        authTaskOutput.async(
-                Duration.ofSeconds(10), TimeoutFallback.FAILURE, DisconnectedReasonCode.SERVER_BUSY, "Failed by me");
+        authTaskOutput.async(Duration.ofSeconds(10),
+                TimeoutFallback.FAILURE,
+                DisconnectedReasonCode.SERVER_BUSY,
+                "Failed by me");
         authTaskOutput.failByTimeout();
 
         assertEquals(Mqtt5DisconnectReasonCode.SERVER_BUSY, authTaskOutput.getReasonCode());

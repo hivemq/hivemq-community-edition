@@ -33,7 +33,9 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class TopicSubscriptionBuilderImplTest {
@@ -54,12 +56,15 @@ public class TopicSubscriptionBuilderImplTest {
     @Test
     public void test_from_subscription() {
 
-        final SubscriptionImpl subscription = new SubscriptionImpl(
-                new Topic("topic", QoS.AT_LEAST_ONCE, false, true, Mqtt5RetainHandling.DO_NOT_SEND, null));
+        final SubscriptionImpl subscription = new SubscriptionImpl(new Topic("topic",
+                QoS.AT_LEAST_ONCE,
+                false,
+                true,
+                Mqtt5RetainHandling.DO_NOT_SEND,
+                null));
 
-        final TopicSubscription topic = topicSubscriptionBuilder.fromSubscription(subscription)
-                .subscriptionIdentifier(1)
-                .build();
+        final TopicSubscription topic =
+                topicSubscriptionBuilder.fromSubscription(subscription).subscriptionIdentifier(1).build();
 
         assertEquals("topic", topic.getTopicFilter());
         assertEquals(Qos.AT_LEAST_ONCE, topic.getQos());
@@ -298,8 +303,7 @@ public class TopicSubscriptionBuilderImplTest {
     @Test(expected = NullPointerException.class)
     public void test_without_topic() {
 
-        topicSubscriptionBuilder
-                .qos(Qos.AT_LEAST_ONCE)
+        topicSubscriptionBuilder.qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
                 .noLocal(false)
                 .subscriptionIdentifier(1)

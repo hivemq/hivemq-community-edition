@@ -22,7 +22,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_CLIENT_ID_LENGTH_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_CONNECTIONS_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_TOPIC_LENGTH_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.NO_CONNECT_IDLE_TIMEOUT_DEFAULT;
 
 /**
  * @author Dominik Obermaier

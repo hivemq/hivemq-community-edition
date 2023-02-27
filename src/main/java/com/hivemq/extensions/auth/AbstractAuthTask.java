@@ -56,9 +56,8 @@ abstract class AbstractAuthTask<I extends PluginTaskInput, O extends AuthOutput<
         } catch (final Throwable throwable) {
             output.failByThrowable(throwable);
             Exceptions.rethrowError(throwable);
-            log.warn(
-                    "Uncaught exception was thrown from extension with id \"{}\" in authenticator. " +
-                            "Extensions are responsible for their own exception handling.", extensionId, throwable);
+            log.warn("Uncaught exception was thrown from extension with id \"{}\" in authenticator. " +
+                    "Extensions are responsible for their own exception handling.", extensionId, throwable);
         }
         return output;
     }

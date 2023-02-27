@@ -61,8 +61,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
         final Channel channel = ctx.channel();
         applyClientSettings(output.getClientSettings(), channel);
 
-        final ChannelFuture authFuture = authSender.sendAuth(
-                channel,
+        final ChannelFuture authFuture = authSender.sendAuth(channel,
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.SUCCESS,
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
@@ -79,8 +78,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
 
     @Override
     void failAuthentication(final @NotNull ReAuthOutput output) {
-        disconnector.disconnect(
-                ctx.channel(),
+        disconnector.disconnect(ctx.channel(),
                 PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
                 ReasonStrings.RE_AUTH_FAILED,
                 output.getReasonCode(),
@@ -92,8 +90,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
 
     @Override
     void undecidedAuthentication(final @NotNull ReAuthOutput output) {
-        disconnector.disconnect(
-                ctx.channel(),
+        disconnector.disconnect(ctx.channel(),
                 PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
                 ReasonStrings.RE_AUTH_FAILED_NO_AUTHENTICATOR,
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
@@ -105,8 +102,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
 
     @Override
     void onTimeout() {
-        disconnector.disconnect(
-                ctx.channel(),
+        disconnector.disconnect(ctx.channel(),
                 PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
                 ReasonStrings.RE_AUTH_FAILED_CLIENT_TIMEOUT,
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
@@ -118,8 +114,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
 
     @Override
     void onSendException(final @NotNull Throwable cause) {
-        disconnector.disconnect(
-                ctx.channel(),
+        disconnector.disconnect(ctx.channel(),
                 PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG,
                 ReasonStrings.RE_AUTH_FAILED_SEND_EXCEPTION,
                 Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
@@ -130,8 +125,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
     }
 
     private void applyClientSettings(
-            final @NotNull ModifiableClientSettingsImpl clientSettings,
-            final @NotNull Channel channel) {
+            final @NotNull ModifiableClientSettingsImpl clientSettings, final @NotNull Channel channel) {
 
         final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
         clientConnection.setClientReceiveMaximum(clientSettings.getClientReceiveMaximum());

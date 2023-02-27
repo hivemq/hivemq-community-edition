@@ -43,15 +43,17 @@ public class Chunker {
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
     }
 
-    public <T> @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull T>>> getAllLocalChunk(final @NotNull ChunkCursor cursor,
-                                                                                                        final int maxChunkSize,
-                                                                                                        final @NotNull SingleWriterCall<T> singleWriterCall) {
+    public <T> @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull T>>> getAllLocalChunk(
+            final @NotNull ChunkCursor cursor,
+            final int maxChunkSize,
+            final @NotNull SingleWriterCall<T> singleWriterCall) {
         try {
             checkNotNull(cursor, "Cursor must not be null");
             checkNotNull(singleWriterCall, "Single writer call must not be null");
 
 
-            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, T>>>> builder = ImmutableList.builder();
+            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, T>>>> builder =
+                    ImmutableList.builder();
 
             final int maxResults = maxChunkSize / (bucketCount - cursor.getFinishedBuckets().size());
             for (int i = 0; i < bucketCount; i++) {
@@ -66,13 +68,18 @@ public class Chunker {
             return Futures.transform(Futures.allAsList(builder.build()), allBucketsResult -> {
                 Preconditions.checkNotNull(allBucketsResult, "Iteration result from all buckets cannot be null");
 
-                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, T>>> resultBuilder = ImmutableMap.builder();
+                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, T>>> resultBuilder =
+                        ImmutableMap.builder();
                 for (final BucketChunkResult<Map<String, T>> bucketResult : allBucketsResult) {
                     resultBuilder.put(bucketResult.getBucketIndex(), bucketResult);
                 }
 
                 for (final Integer finishedBucketId : cursor.getFinishedBuckets()) {
-                    resultBuilder.put(finishedBucketId, new BucketChunkResult<>(Map.of(), true, cursor.getLastKeys().get(finishedBucketId), finishedBucketId));
+                    resultBuilder.put(finishedBucketId,
+                            new BucketChunkResult<>(Map.of(),
+                                    true,
+                                    cursor.getLastKeys().get(finishedBucketId),
+                                    finishedBucketId));
                 }
 
                 return new MultipleChunkResult<>(resultBuilder.build());
@@ -85,6 +92,7 @@ public class Chunker {
     }
 
     public interface SingleWriterCall<T> {
-        ListenableFuture<@NotNull BucketChunkResult<Map<String, T>>> call(final int bucket, final @NotNull String lastKey, final int maxResults);
+        ListenableFuture<@NotNull BucketChunkResult<Map<String, T>>> call(
+                final int bucket, final @NotNull String lastKey, final int maxResults);
     }
 }

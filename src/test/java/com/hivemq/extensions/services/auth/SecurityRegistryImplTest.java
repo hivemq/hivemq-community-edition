@@ -65,9 +65,12 @@ public class SecurityRegistryImplTest {
     public void setUp() throws Exception {
         try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
                 .toPath(), new Class[]{
-                TestProvider1.class, TestProvider2.class, TestSimpleAuthenticator.class, EnhancedTestProvider1.class,
-                EnhancedTestProvider2.class, TestEnhancedAuthenticator.class
-        })) {
+                TestProvider1.class,
+                TestProvider2.class,
+                TestSimpleAuthenticator.class,
+                EnhancedTestProvider1.class,
+                EnhancedTestProvider2.class,
+                TestEnhancedAuthenticator.class})) {
             final HiveMQExtension hiveMQExtension = mock(HiveMQExtension.class);
             when(hiveMQExtension.getId()).thenReturn("extension");
             when(hiveMQExtension.getPriority()).thenReturn(1);

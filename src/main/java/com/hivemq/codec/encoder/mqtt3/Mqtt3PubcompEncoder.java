@@ -32,9 +32,7 @@ public class Mqtt3PubcompEncoder implements MqttEncoder<PUBCOMP> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
-            final @NotNull PUBCOMP msg,
-            final @NotNull ByteBuf out) {
+            final @NotNull ClientConnection clientConnection, final @NotNull PUBCOMP msg, final @NotNull ByteBuf out) {
 
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");

@@ -47,8 +47,7 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
     }
 
     public UnsubscribePacketImpl(final @NotNull UNSUBSCRIBE unsubscribe) {
-        this(
-                unsubscribe.getTopics(),
+        this(unsubscribe.getTopics(),
                 UserPropertiesImpl.of(unsubscribe.getUserProperties().asList()),
                 unsubscribe.getPacketIdentifier());
     }

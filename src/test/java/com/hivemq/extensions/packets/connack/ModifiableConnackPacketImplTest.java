@@ -28,7 +28,9 @@ import util.TestConfigurationBootstrap;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -45,8 +47,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setReasonString() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -78,8 +79,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setReasonString_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -111,8 +111,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = IllegalStateException.class)
     public void setReasonString_successCode() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.SUCCESS,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS,
                 true,
                 10,
                 60,
@@ -139,8 +138,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setReasonString_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -172,8 +170,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setReasonCode_error() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -205,8 +202,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setReasonCode_sameError() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -238,8 +234,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setReasonCode_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -266,8 +261,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = IllegalStateException.class)
     public void setReasonString_switchToError() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.SUCCESS,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS,
                 true,
                 10,
                 60,
@@ -294,8 +288,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = IllegalStateException.class)
     public void setReasonString_switchFromError() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -322,8 +315,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setResponseInformation() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -355,8 +347,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setResponseInformation_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -388,8 +379,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setResponseInformation_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -421,8 +411,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = IllegalStateException.class)
     public void setResponseInformation_notAllowed() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -449,8 +438,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setServerReference() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -482,8 +470,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setServerReference_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -515,8 +502,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setServerReference_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -548,8 +534,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setAssignedClientIdentifier_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -581,8 +566,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setAssignedClientIdentifier_different() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -614,8 +598,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setAssignedClientIdentifier_invalid() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -642,8 +625,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setAssignedClientIdentifier_empty() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -670,8 +652,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void modifyUserProperties() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -703,8 +684,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.SUCCESS,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS,
                 true,
                 10,
                 60,
@@ -733,8 +713,7 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void copy_changes() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(
-                ConnackReasonCode.UNSPECIFIED_ERROR,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
                 true,
                 10,
                 60,
@@ -763,8 +742,7 @@ public class ModifiableConnackPacketImplTest {
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final ConnackPacketImpl copy = modifiablePacket.copy();
 
-        final ConnackPacketImpl expectedPacket = new ConnackPacketImpl(
-                ConnackReasonCode.NOT_AUTHORIZED,
+        final ConnackPacketImpl expectedPacket = new ConnackPacketImpl(ConnackReasonCode.NOT_AUTHORIZED,
                 true,
                 10,
                 60,

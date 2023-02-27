@@ -31,7 +31,8 @@ import java.util.function.Supplier;
 /**
  * @author Lukas Brandl
  */
-public class SubscriptionAuthorizerOutputImpl extends AbstractAsyncOutput<SubscriptionAuthorizerOutput> implements SubscriptionAuthorizerOutput, PluginTaskOutput, Supplier<SubscriptionAuthorizerOutputImpl> {
+public class SubscriptionAuthorizerOutputImpl extends AbstractAsyncOutput<SubscriptionAuthorizerOutput>
+        implements SubscriptionAuthorizerOutput, PluginTaskOutput, Supplier<SubscriptionAuthorizerOutputImpl> {
 
     private @Nullable SubackReasonCode subackReasonCode;
     private @Nullable String reasonString;
@@ -43,7 +44,11 @@ public class SubscriptionAuthorizerOutputImpl extends AbstractAsyncOutput<Subscr
     private final @NotNull AtomicBoolean authorizerPresent = new AtomicBoolean(false);
 
     public enum AuthorizationState {
-        SUCCESS, CONTINUE, FAIL, DISCONNECT, UNDECIDED
+        SUCCESS,
+        CONTINUE,
+        FAIL,
+        DISCONNECT,
+        UNDECIDED
     }
 
     public SubscriptionAuthorizerOutputImpl(final @NotNull PluginOutPutAsyncer asyncer) {
@@ -68,7 +73,7 @@ public class SubscriptionAuthorizerOutputImpl extends AbstractAsyncOutput<Subscr
         authorizationState = AuthorizationState.FAIL;
     }
 
-    public void forceFailedAuthorization(){
+    public void forceFailedAuthorization() {
         completed.set(true);
         this.subackReasonCode = SubackReasonCode.NOT_AUTHORIZED;
         authorizationState = AuthorizationState.FAIL;
@@ -130,8 +135,9 @@ public class SubscriptionAuthorizerOutputImpl extends AbstractAsyncOutput<Subscr
     @Override
     public void nextExtensionOrDefault() {
         if (completed.get()) {
-            throw new UnsupportedOperationException("nextExtensionOrDefault must not be called if authorizeSuccessfully, " +
-                    "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called or if the async output has already timed out");
+            throw new UnsupportedOperationException(
+                    "nextExtensionOrDefault must not be called if authorizeSuccessfully, " +
+                            "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called or if the async output has already timed out");
         }
         authorizationState = AuthorizationState.CONTINUE;
     }
@@ -154,7 +160,8 @@ public class SubscriptionAuthorizerOutputImpl extends AbstractAsyncOutput<Subscr
 
     private void checkCompleted(final @NotNull String method) {
         if (!completed.compareAndSet(false, true)) {
-            throw new UnsupportedOperationException(method + " must not be called if authorizeSuccessfully, " +
+            throw new UnsupportedOperationException(method +
+                    " must not be called if authorizeSuccessfully, " +
                     "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
         }
     }

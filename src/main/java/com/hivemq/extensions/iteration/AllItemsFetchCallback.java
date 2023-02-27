@@ -36,7 +36,8 @@ public abstract class AllItemsFetchCallback<R, I> implements FetchCallback<R> {
     @Override
     public @NotNull ListenableFuture<ChunkResult<R>> fetchNextResults(final @Nullable ChunkCursor cursor) {
 
-        final ListenableFuture<MultipleChunkResult<I>> persistenceFuture = persistenceCall(cursor != null ? cursor : new ChunkCursor());
+        final ListenableFuture<MultipleChunkResult<I>> persistenceFuture =
+                persistenceCall(cursor != null ? cursor : new ChunkCursor());
 
         return Futures.transform(persistenceFuture, input -> {
             Preconditions.checkNotNull(input, "Chunk result cannot be null");

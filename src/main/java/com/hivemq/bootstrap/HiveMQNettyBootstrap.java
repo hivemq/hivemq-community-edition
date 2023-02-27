@@ -24,14 +24,23 @@ import com.hivemq.bootstrap.netty.ChannelInitializerFactory;
 import com.hivemq.bootstrap.netty.NettyConfiguration;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.InternalConfigurations;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.configuration.service.entity.ClientWriteBufferProperties;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,8 +85,7 @@ public class HiveMQNettyBootstrap {
         //Adding shutdown hook for graceful shutdown
         final int shutdownTimeout = InternalConfigurations.EVENT_LOOP_GROUP_SHUTDOWN_TIMEOUT_SEC;
         final int channelsShutdownTimeout = InternalConfigurations.CONNECTION_PERSISTENCE_SHUTDOWN_TIMEOUT_SEC;
-        shutdownHooks.add(new NettyShutdownHook(
-                nettyConfiguration.getChildEventLoopGroup(),
+        shutdownHooks.add(new NettyShutdownHook(nettyConfiguration.getChildEventLoopGroup(),
                 nettyConfiguration.getParentEventLoopGroup(),
                 shutdownTimeout,
                 channelsShutdownTimeout,
@@ -107,7 +115,9 @@ public class HiveMQNettyBootstrap {
 
         for (final TcpListener listener : tcpListeners) {
 
-            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
+            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(),
+                    nettyConfiguration.getChildEventLoopGroup(),
+                    listener);
             log.info("Starting TCP listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
             connectionPersistence.addServerChannel(listener.getName(), bind.channel());
@@ -122,8 +132,12 @@ public class HiveMQNettyBootstrap {
 
         for (final TlsTcpListener listener : tlsTcpListeners) {
 
-            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
-            log.info("Starting TLS TCP listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
+            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(),
+                    nettyConfiguration.getChildEventLoopGroup(),
+                    listener);
+            log.info("Starting TLS TCP listener on address {} and port {}",
+                    listener.getBindAddress(),
+                    listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
             connectionPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
@@ -137,8 +151,12 @@ public class HiveMQNettyBootstrap {
 
         for (final WebsocketListener listener : websocketListeners) {
 
-            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
-            log.info("Starting Websocket listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
+            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(),
+                    nettyConfiguration.getChildEventLoopGroup(),
+                    listener);
+            log.info("Starting Websocket listener on address {} and port {}",
+                    listener.getBindAddress(),
+                    listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
             connectionPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
@@ -153,8 +171,12 @@ public class HiveMQNettyBootstrap {
         final ImmutableList.Builder<BindInformation> futures = ImmutableList.builder();
         for (final TlsWebsocketListener listener : tlsWebsocketListeners) {
 
-            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(), nettyConfiguration.getChildEventLoopGroup(), listener);
-            log.info("Starting Websocket TLS listener on address {} and port {}", listener.getBindAddress(), listener.getPort());
+            final ServerBootstrap b = createServerBootstrap(nettyConfiguration.getParentEventLoopGroup(),
+                    nettyConfiguration.getChildEventLoopGroup(),
+                    listener);
+            log.info("Starting Websocket TLS listener on address {} and port {}",
+                    listener.getBindAddress(),
+                    listener.getPort());
             final ChannelFuture bind = b.bind(listener.getBindAddress(), listener.getPort());
             connectionPersistence.addServerChannel(listener.getName(), bind.channel());
             futures.add(new BindInformation(listener, bind));
@@ -167,13 +189,13 @@ public class HiveMQNettyBootstrap {
      *
      * @param bindInformation a list of futures to aggregate
      * @return a {@link com.google.common.util.concurrent.ListenableFuture} which aggregates
-     * all given {@link io.netty.channel.ChannelFuture}s
+     *         all given {@link io.netty.channel.ChannelFuture}s
      */
     private @NotNull ListenableFuture<List<ListenerStartupInformation>> aggregatedFuture(
             final @NotNull List<BindInformation> bindInformation) {
 
-        final List<ListenableFuture<ListenerStartupInformation>> listenableFutures = bindInformation.stream()
-                .map(input -> {
+        final List<ListenableFuture<ListenerStartupInformation>> listenableFutures =
+                bindInformation.stream().map(input -> {
                     final SettableFuture<ListenerStartupInformation> objectSettableFuture = SettableFuture.create();
                     input.getBindFuture().addListener(new UpdateGivenFutureListener(input, objectSettableFuture));
                     return objectSettableFuture;
@@ -186,8 +208,7 @@ public class HiveMQNettyBootstrap {
             final @NotNull EventLoopGroup workerGroup,
             final @NotNull Listener listener) {
 
-        final ServerBootstrap b = new ServerBootstrap()
-                .group(bossGroup, workerGroup)
+        final ServerBootstrap b = new ServerBootstrap().group(bossGroup, workerGroup)
                 .channel(nettyConfiguration.getServerSocketChannelClass())
                 .childHandler(channelInitializerFactory.getChannelInitializer(listener))
                 .option(ChannelOption.SO_BACKLOG, 128)
@@ -221,10 +242,12 @@ public class HiveMQNettyBootstrap {
         final int writeBufferHigh = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_HIGH_THRESHOLD_BYTES;
         final int writeBufferLow = InternalConfigurations.LISTENER_CLIENT_WRITE_BUFFER_LOW_THRESHOLD_BYTES;
 
-        final ClientWriteBufferProperties properties = validateWriteBufferProperties(new ClientWriteBufferProperties(writeBufferHigh, writeBufferLow));
+        final ClientWriteBufferProperties properties =
+                validateWriteBufferProperties(new ClientWriteBufferProperties(writeBufferHigh, writeBufferLow));
 
         //it is assumed that the ClientWriteBufferProperties that the listener returns was validated by Validators.validateWriteBufferProperties()
-        b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(properties.getLowThresholdBytes(), properties.getHighThresholdBytes()));
+        b.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
+                new WriteBufferWaterMark(properties.getLowThresholdBytes(), properties.getHighThresholdBytes()));
     }
 
     @VisibleForTesting
@@ -233,7 +256,8 @@ public class HiveMQNettyBootstrap {
 
         checkNotNull(writeBufferProperties, "writeBufferProperties must not be null");
 
-        if (validateWriteBufferThresholds(writeBufferProperties.getHighThresholdBytes(), writeBufferProperties.getLowThresholdBytes())) {
+        if (validateWriteBufferThresholds(writeBufferProperties.getHighThresholdBytes(),
+                writeBufferProperties.getLowThresholdBytes())) {
             return writeBufferProperties;
         }
         return DEFAULT_WRITE_BUFFER_PROPERTIES;
@@ -272,7 +296,9 @@ public class HiveMQNettyBootstrap {
             if (future.isSuccess()) {
                 settableFuture.set(ListenerStartupInformation.successfulListenerStartup(bindPort, listener));
             } else {
-                settableFuture.set(ListenerStartupInformation.failedListenerStartup(bindPort, listener, future.cause()));
+                settableFuture.set(ListenerStartupInformation.failedListenerStartup(bindPort,
+                        listener,
+                        future.cause()));
             }
         }
     }

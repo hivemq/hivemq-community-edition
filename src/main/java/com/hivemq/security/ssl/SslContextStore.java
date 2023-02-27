@@ -16,11 +16,7 @@
 package com.hivemq.security.ssl;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.hash.Funnel;
-import com.google.common.hash.Funnels;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-import com.google.common.hash.PrimitiveSink;
+import com.google.common.hash.*;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.entity.Tls;
@@ -37,11 +33,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 import static com.hivemq.configuration.service.InternalConfigurations.SSL_RELOAD_ENABLED;
@@ -118,8 +110,7 @@ public class SslContextStore {
                     throw new UnrecoverableException();
                 }
                 //only start scheduled execution if first hash went through
-                executorService.scheduleAtFixedRate(
-                        new SslContextScheduledRunnable(tls),
+                executorService.scheduleAtFixedRate(new SslContextScheduledRunnable(tls),
                         SSL_RELOAD_INTERVAL_SEC,
                         SSL_RELOAD_INTERVAL_SEC,
                         TimeUnit.SECONDS);

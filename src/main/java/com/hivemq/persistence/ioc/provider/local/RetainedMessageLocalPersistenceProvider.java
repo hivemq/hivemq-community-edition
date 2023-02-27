@@ -15,9 +15,9 @@
  */
 package com.hivemq.persistence.ioc.provider.local;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
@@ -40,8 +40,9 @@ public class RetainedMessageLocalPersistenceProvider implements Provider<Retaine
     private final @NotNull PersistenceType persistenceType;
 
     @Inject
-    public RetainedMessageLocalPersistenceProvider(final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBProvider,
-                                                   final @NotNull Provider<RetainedMessageXodusLocalPersistence> xodusProvider) {
+    public RetainedMessageLocalPersistenceProvider(
+            final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBProvider,
+            final @NotNull Provider<RetainedMessageXodusLocalPersistence> xodusProvider) {
         this.rocksDBProvider = rocksDBProvider;
         this.xodusProvider = xodusProvider;
         this.persistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
@@ -50,7 +51,7 @@ public class RetainedMessageLocalPersistenceProvider implements Provider<Retaine
     @NotNull
     @Override
     public RetainedMessageLocalPersistence get() {
-        if(persistenceType == PersistenceType.FILE_NATIVE) {
+        if (persistenceType == PersistenceType.FILE_NATIVE) {
             return rocksDBProvider.get();
         } else {
             return xodusProvider.get();

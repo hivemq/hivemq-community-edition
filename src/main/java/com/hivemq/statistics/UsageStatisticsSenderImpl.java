@@ -23,7 +23,11 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -53,7 +57,9 @@ public class UsageStatisticsSenderImpl implements UsageStatisticsSender {
 
             connection.setDoOutput(true);
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("hmq-digest", BaseEncoding.base64().encode(Hashing.sha256().hashString(jsonPayload, StandardCharsets.UTF_8).asBytes()));
+            connection.setRequestProperty("hmq-digest",
+                    BaseEncoding.base64()
+                            .encode(Hashing.sha256().hashString(jsonPayload, StandardCharsets.UTF_8).asBytes()));
             connection.setRequestProperty("Content-Type", "application/json");
 
             try (final DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
@@ -100,14 +106,18 @@ public class UsageStatisticsSenderImpl implements UsageStatisticsSender {
 
                 try {
                     final OutputStream outputStream = connection.getOutputStream();
-                    if (outputStream != null) outputStream.close();
+                    if (outputStream != null) {
+                        outputStream.close();
+                    }
                 } catch (final Exception ex) {
                     //ignore
                 }
 
                 try {
                     final InputStream inputStream = connection.getInputStream();
-                    if (inputStream != null) inputStream.close();
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
                 } catch (final Exception ex) {
                     //ignore
                 }

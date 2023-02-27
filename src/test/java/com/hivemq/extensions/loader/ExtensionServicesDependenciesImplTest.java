@@ -46,8 +46,7 @@ public class ExtensionServicesDependenciesImplTest {
 
     @Before
     public void before() {
-        extensionServicesDependencies = new ExtensionServicesDependenciesImpl(
-                new MetricRegistry(),
+        extensionServicesDependencies = new ExtensionServicesDependenciesImpl(new MetricRegistry(),
                 mock(InitializerRegistry.class),
                 mock(RetainedMessageStore.class),
                 mock(ClientService.class),

@@ -17,11 +17,8 @@
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.ReadOnly;
 import com.hivemq.embedded.EmbeddedExtension;
-import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extensions.HiveMQExtension;
@@ -45,15 +42,16 @@ public interface ExtensionLoader {
      * Note that only valid extension folders are considered,
      * it's not possible to add .class files or other resources from the given folder.
      *
-     * @param extensionFolder       the folder to search extension folders from
-     * @param permissive            is a not existing extension folder allowed
+     * @param extensionFolder the folder to search extension folders from
+     * @param permissive      is a not existing extension folder allowed
      * @return a Collection of {@link HiveMQExtension} from the extension folder.
      * @throws java.lang.NullPointerException     if <code>null</code> is passed to any parameter
      * @throws java.lang.IllegalArgumentException If the folder does not exist HiveMQ is not able to read the contents
      *                                            of the folder
      */
     @ReadOnly
-    @NotNull ImmutableCollection<HiveMQExtensionEvent> loadExtensions(final @NotNull Path extensionFolder, boolean permissive);
+    @NotNull ImmutableCollection<HiveMQExtensionEvent> loadExtensions(
+            final @NotNull Path extensionFolder, boolean permissive);
 
     /**
      * Loads a single extension.

@@ -39,12 +39,11 @@ public class ModifiableUnsubscribePacketImpl implements ModifiableUnsubscribePac
     private boolean modified = false;
 
     public ModifiableUnsubscribePacketImpl(
-            final @NotNull UnsubscribePacketImpl packet,
-            final @NotNull FullConfigurationService configurationService) {
+            final @NotNull UnsubscribePacketImpl packet, final @NotNull FullConfigurationService configurationService) {
 
         topicFilters = packet.topicFilters;
-        userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
         packetIdentifier = packet.packetIdentifier;
 
         this.configurationService = configurationService;

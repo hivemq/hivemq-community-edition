@@ -24,7 +24,12 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
-import com.hivemq.extensions.*;
+import com.hivemq.extensions.AbstractExtensionTest;
+import com.hivemq.extensions.HiveMQExtension;
+import com.hivemq.extensions.HiveMQExtensionEntity;
+import com.hivemq.extensions.HiveMQExtensionEvent;
+import com.hivemq.extensions.HiveMQExtensionImpl;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.config.HiveMQExtensionXMLReader;
 import net.bytebuddy.ByteBuddy;
@@ -43,30 +48,56 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
 
-    private static final @NotNull String invalidExtensionXML =
-            "<hivemq-extension>" + "<id>invalid-extension1</id>" + "<name>Some Name</name>" +
-                    "<version>1.2.3-Version</version>" + "<priority>1000</priority>" + "</hivemq-extension>";
+    private static final @NotNull String invalidExtensionXML = "<hivemq-extension>" +
+            "<id>invalid-extension1</id>" +
+            "<name>Some Name</name>" +
+            "<version>1.2.3-Version</version>" +
+            "<priority>1000</priority>" +
+            "</hivemq-extension>";
 
-    private static final @NotNull String invalidExtensionXML2 =
-            "<hivemq-extension>" + "<id></id>" + "<name>Some Name</name>" + "<version>1.2.3-Version</version>" +
-                    "<priority>1000</priority>" + "</hivemq-extension>";
+    private static final @NotNull String invalidExtensionXML2 = "<hivemq-extension>" +
+            "<id></id>" +
+            "<name>Some Name</name>" +
+            "<version>1.2.3-Version</version>" +
+            "<priority>1000</priority>" +
+            "</hivemq-extension>";
 
-    private static final @NotNull String validExtensionXML1 =
-            "<hivemq-extension>" + "<id>extension1</id>" + "<name>Some Name</name>" +
-                    "<version>1.2.3-Version</version>" + "<priority>1000</priority>" + "</hivemq-extension>";
+    private static final @NotNull String validExtensionXML1 = "<hivemq-extension>" +
+            "<id>extension1</id>" +
+            "<name>Some Name</name>" +
+            "<version>1.2.3-Version</version>" +
+            "<priority>1000</priority>" +
+            "</hivemq-extension>";
 
-    private static final @NotNull String validExtensionXML2 =
-            "<hivemq-extension>" + "<id>extension2</id>" + "<name>Some Name</name>" +
-                    "<version>1.2.3-Version</version>" + "<priority>1000</priority>" + "</hivemq-extension>";
+    private static final @NotNull String validExtensionXML2 = "<hivemq-extension>" +
+            "<id>extension2</id>" +
+            "<name>Some Name</name>" +
+            "<version>1.2.3-Version</version>" +
+            "<priority>1000</priority>" +
+            "</hivemq-extension>";
 
     @Rule
     public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -428,10 +459,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
                 "1.0.0",
                 1,
                 1,
-                "author"),
-                extensionFolder.toPath(),
-                new TestExtensionMainImpl(),
-                true));
+                "author"), extensionFolder.toPath(), new TestExtensionMainImpl(), true));
 
         final HiveMQExtensionEvent event = extensionLoader.processSingleExtensionFolder(extensionFolder.toPath());
         assertNull(event);
@@ -460,10 +488,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
                 "1.0.0",
                 1,
                 1,
-                "author"),
-                extensionFolder.toPath(),
-                new TestExtensionMainImpl(),
-                false));
+                "author"), extensionFolder.toPath(), new TestExtensionMainImpl(), false));
 
         final HiveMQExtensionEvent event = extensionLoader.processSingleExtensionFolder(extensionFolder.toPath());
         assertNull(event);
@@ -481,10 +506,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
                 "1.0.0",
                 1,
                 1,
-                "author"),
-                extensionFolder1.toPath(),
-                new TestExtensionMainImpl(),
-                false));
+                "author"), extensionFolder1.toPath(), new TestExtensionMainImpl(), false));
 
         final File file = new File(extensionFolder2, "extension.jar");
 
@@ -513,10 +535,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
                 "1.0.0",
                 1,
                 1,
-                "author"),
-                extensionFolder1.toPath(),
-                new TestExtensionMainImpl(),
-                true));
+                "author"), extensionFolder1.toPath(), new TestExtensionMainImpl(), true));
 
         final File file = new File(extensionFolder2, "extension.jar");
 
@@ -558,10 +577,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
                 "1.0.0",
                 1,
                 1,
-                "author"),
-                extensionFolder.toPath(),
-                new TestExtensionMainImpl(),
-                true));
+                "author"), extensionFolder.toPath(), new TestExtensionMainImpl(), true));
 
         final HiveMQExtensionEvent event = extensionLoader.processSingleExtensionFolder(extensionFolder.toPath());
         assertNotNull(event);
@@ -684,8 +700,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     public void test_load_single_extension_when_load_constructor_throws_exception_then_extension_is_not_loaded()
             throws Exception {
         final File extensionFolder = temporaryFolder.newFolder("extension", "extension1");
-        FileUtils.writeStringToFile(
-                extensionFolder.toPath().resolve("hivemq-extension.xml").toFile(),
+        FileUtils.writeStringToFile(extensionFolder.toPath().resolve("hivemq-extension.xml").toFile(),
                 validExtensionXML1,
                 Charset.defaultCharset());
         final File file = new File(extensionFolder, "extension.jar");
@@ -706,8 +721,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     public void test_load_single_extension_when_load_constructor_throws_error_then_extension_is_not_loaded()
             throws Exception {
         final File extensionFolder = temporaryFolder.newFolder("extension", "extension1");
-        FileUtils.writeStringToFile(
-                extensionFolder.toPath().resolve("hivemq-extension.xml").toFile(),
+        FileUtils.writeStringToFile(extensionFolder.toPath().resolve("hivemq-extension.xml").toFile(),
                 validExtensionXML1,
                 Charset.defaultCharset());
         final File file = new File(extensionFolder, "extension.jar");
@@ -729,8 +743,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
     public void test_load_single_extension_when_init_class_throws_error_then_extension_is_not_loaded()
             throws Exception {
         final File extensionFolder = temporaryFolder.newFolder("extension", "extension1");
-        FileUtils.writeStringToFile(
-                extensionFolder.toPath().resolve("hivemq-extension.xml").toFile(),
+        FileUtils.writeStringToFile(extensionFolder.toPath().resolve("hivemq-extension.xml").toFile(),
                 validExtensionXML1,
                 Charset.defaultCharset());
         final File file = new File(extensionFolder, "extension.jar");

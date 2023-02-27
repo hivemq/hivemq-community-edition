@@ -137,9 +137,9 @@ public class PingInterceptorHandlerTest {
     public void test_read_simple_pingreq() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final PingReqInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                SimplePingReqTestInterceptor.class);
+        final PingReqInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        SimplePingReqTestInterceptor.class);
         clientContext.addPingReqInboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -162,9 +162,9 @@ public class PingInterceptorHandlerTest {
     public void test_read_advanced_pingreq() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final PingReqInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                AdvancedPingReqTestInterceptor.class);
+        final PingReqInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        AdvancedPingReqTestInterceptor.class);
         clientContext.addPingReqInboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -187,9 +187,9 @@ public class PingInterceptorHandlerTest {
     public void test_read_simple_pingresp() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final PingRespOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                SimplePingRespTestInterceptor.class);
+        final PingRespOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        SimplePingRespTestInterceptor.class);
         clientContext.addPingRespOutboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -212,9 +212,9 @@ public class PingInterceptorHandlerTest {
     public void test_read_advanced_pingresp() throws Exception {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final PingRespOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                AdvancedPingRespTestInterceptor.class);
+        final PingRespOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        AdvancedPingRespTestInterceptor.class);
         clientContext.addPingRespOutboundInterceptor(interceptor);
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
@@ -261,8 +261,8 @@ public class PingInterceptorHandlerTest {
         public void onInboundPingReq(
                 final @NotNull PingReqInboundInput pingReqInboundInput,
                 final @NotNull PingReqInboundOutput pingReqInboundOutput) {
-            System.out.println(
-                    "Intercepted PINGREQ for client: " + pingReqInboundInput.getClientInformation().getClientId());
+            System.out.println("Intercepted PINGREQ for client: " +
+                    pingReqInboundInput.getClientInformation().getClientId());
             isTriggered.set(true);
         }
     }

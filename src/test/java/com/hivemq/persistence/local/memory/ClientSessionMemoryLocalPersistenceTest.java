@@ -48,14 +48,27 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.TestBucketUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ClientSessionMemoryLocalPersistenceTest {
 
@@ -90,7 +103,8 @@ public class ClientSessionMemoryLocalPersistenceTest {
         when(metricsHolder.getStoredWillMessagesCount()).thenReturn(mock(Counter.class));
 
         metricRegistry = new MetricRegistry();
-        persistence = new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, metricsHolder, eventLog);
+        persistence =
+                new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, metricsHolder, eventLog);
         memoryGauge = metricRegistry.gauge(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(), null);
     }
 
@@ -119,18 +133,13 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         final int bucket = BucketUtils.getBucket("clientid", BUCKET_COUNT);
 
-        persistence.put("clientid",
-                new ClientSession(true, SESSION_EXPIRY_MAX),
-                123L, bucket);
+        persistence.put("clientid", new ClientSession(true, SESSION_EXPIRY_MAX), 123L, bucket);
 
         persistence.disconnect("clientid", 124L, false, bucket, SESSION_EXPIRY_MAX);
 
-        persistence.put("clientid",
-                new ClientSession(true, 500),
-                125L, bucket);
+        persistence.put("clientid", new ClientSession(true, 500), 125L, bucket);
 
-        final ClientSession clientSession =
-                persistence.getSession("clientid", bucket);
+        final ClientSession clientSession = persistence.getSession("clientid", bucket);
 
         assertEquals(true, clientSession.isConnected());
 
@@ -148,18 +157,13 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         final int bucket = BucketUtils.getBucket("clientid", BUCKET_COUNT);
 
-        persistence.put("clientid",
-                new ClientSession(true, SESSION_EXPIRE_ON_DISCONNECT),
-                123L, bucket);
+        persistence.put("clientid", new ClientSession(true, SESSION_EXPIRE_ON_DISCONNECT), 123L, bucket);
 
         persistence.disconnect("clientid", 124L, false, bucket, SESSION_EXPIRE_ON_DISCONNECT);
 
-        persistence.put("clientid",
-                new ClientSession(true, 500),
-                125L, bucket);
+        persistence.put("clientid", new ClientSession(true, 500), 125L, bucket);
 
-        final ClientSession clientSession =
-                persistence.getSession("clientid", bucket);
+        final ClientSession clientSession = persistence.getSession("clientid", bucket);
 
         assertEquals(true, clientSession.isConnected());
 
@@ -269,7 +273,8 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertEquals(321L, persistence.getTimestamp("clientid").longValue());
 
         assertFalse(persistence.getSession("clientid2", false).isConnected());
-        assertEquals(SESSION_EXPIRE_ON_DISCONNECT, persistence.getSession("clientid2", false).getSessionExpiryIntervalSec());
+        assertEquals(SESSION_EXPIRE_ON_DISCONNECT,
+                persistence.getSession("clientid2", false).getSessionExpiryIntervalSec());
         assertEquals(4321L, persistence.getTimestamp("clientid2").longValue());
     }
 
@@ -281,7 +286,11 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 System.currentTimeMillis() - 100000,
                 BucketUtils.getBucket("clientid1", BUCKET_COUNT));
 
-        persistence.disconnect("clientid1", System.currentTimeMillis() - 100000, false, BucketUtils.getBucket("clientid1", BUCKET_COUNT), 10);
+        persistence.disconnect("clientid1",
+                System.currentTimeMillis() - 100000,
+                false,
+                BucketUtils.getBucket("clientid1", BUCKET_COUNT),
+                10);
 
         final Set<String> expiredSessions = persistence.cleanUp(BucketUtils.getBucket("clientid1", BUCKET_COUNT));
         assertTrue(expiredSessions.contains("clientid1"));
@@ -291,7 +300,11 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 System.currentTimeMillis(),
                 BucketUtils.getBucket("clientid2", BUCKET_COUNT));
 
-        persistence.disconnect("clientid2", System.currentTimeMillis(), false, BucketUtils.getBucket("clientid2", BUCKET_COUNT), 100000);
+        persistence.disconnect("clientid2",
+                System.currentTimeMillis(),
+                false,
+                BucketUtils.getBucket("clientid2", BUCKET_COUNT),
+                100000);
 
         final Set<String> result2 = persistence.cleanUp(BucketUtils.getBucket("clientid2", BUCKET_COUNT));
         assertFalse(result2.contains("clientid2"));
@@ -316,7 +329,11 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 System.currentTimeMillis() - 10000,
                 BucketUtils.getBucket("clientid1", BUCKET_COUNT));
 
-        persistence.disconnect("clientid1", System.currentTimeMillis() - 100000, false, BucketUtils.getBucket("clientid1", BUCKET_COUNT), 10);
+        persistence.disconnect("clientid1",
+                System.currentTimeMillis() - 100000,
+                false,
+                BucketUtils.getBucket("clientid1", BUCKET_COUNT),
+                10);
 
         ClientSession expiredSession = persistence.getSession("clientid1");
         assertNull(expiredSession);
@@ -341,7 +358,11 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 System.currentTimeMillis() - 10000,
                 BucketUtils.getBucket("clientid1", BUCKET_COUNT));
 
-        persistence.disconnect("clientid1", System.currentTimeMillis() - 10000, false, BucketUtils.getBucket("clientid1", BUCKET_COUNT), 10);
+        persistence.disconnect("clientid1",
+                System.currentTimeMillis() - 10000,
+                false,
+                BucketUtils.getBucket("clientid1", BUCKET_COUNT),
+                10);
 
         final ClientSession expiredSession = persistence.getSession("clientid1");
         assertNull(expiredSession);
@@ -357,15 +378,19 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 .withRetain(true)
                 .withHivemqId("hivemqId")
                 .build();
-        final ClientSession clientSession = new ClientSession(true, 10,
-                new ClientSessionWill(mqttWillPublish, 1L), 234L);
+        final ClientSession clientSession =
+                new ClientSession(true, 10, new ClientSessionWill(mqttWillPublish, 1L), 234L);
 
         persistence.put("clientid1",
                 clientSession,
                 System.currentTimeMillis() - 10000,
                 BucketUtils.getBucket("clientid1", BUCKET_COUNT));
 
-        persistence.disconnect("clientid1", System.currentTimeMillis() - 10000, false, BucketUtils.getBucket("clientid1", BUCKET_COUNT), 10);
+        persistence.disconnect("clientid1",
+                System.currentTimeMillis() - 10000,
+                false,
+                BucketUtils.getBucket("clientid1", BUCKET_COUNT),
+                10);
 
         final Set<String> result1 = persistence.cleanUp(BucketUtils.getBucket("clientid1", BUCKET_COUNT));
         assertTrue(result1.contains("clientid1"));
@@ -470,15 +495,19 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
-        persistence.put(client1, new ClientSession(true,
-                SESSION_EXPIRY_MAX,
-                new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                        .withQos(QoS.AT_MOST_ONCE)
-                        .withPayload("message".getBytes())
-                        .withDelayInterval(0)
-                        .withHivemqId("HiveMQId")
-                        .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                        .build(), 1L), 234L), 123L, 1);
+        persistence.put(client1,
+                new ClientSession(true,
+                        SESSION_EXPIRY_MAX,
+                        new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                                .withQos(QoS.AT_MOST_ONCE)
+                                .withPayload("message".getBytes())
+                                .withDelayInterval(0)
+                                .withHivemqId("HiveMQId")
+                                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                                .build(), 1L),
+                        234L),
+                123L,
+                1);
 
         final ClientSession clientSession = persistence.disconnect(client1, 124L, false, 1, 0L);
 
@@ -494,15 +523,19 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
-        persistence.put(client1, new ClientSession(true,
-                SESSION_EXPIRY_MAX,
-                new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                        .withQos(QoS.AT_MOST_ONCE)
-                        .withPayload("message".getBytes())
-                        .withDelayInterval(0)
-                        .withHivemqId("HiveMQId")
-                        .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                        .build(), 1L), 234L), 123L, 1);
+        persistence.put(client1,
+                new ClientSession(true,
+                        SESSION_EXPIRY_MAX,
+                        new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                                .withQos(QoS.AT_MOST_ONCE)
+                                .withPayload("message".getBytes())
+                                .withDelayInterval(0)
+                                .withHivemqId("HiveMQId")
+                                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                                .build(), 1L),
+                        234L),
+                123L,
+                1);
 
         final ClientSession clientSession = persistence.disconnect(client1, 124L, true, 1, 0L);
 
@@ -516,15 +549,19 @@ public class ClientSessionMemoryLocalPersistenceTest {
         when(payloadPersistence.getPayloadOrNull(anyLong())).thenReturn(new byte[]{});
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
-        persistence.put(client1, new ClientSession(true,
-                SESSION_EXPIRY_MAX,
-                new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                        .withQos(QoS.AT_MOST_ONCE)
-                        .withPayload("message".getBytes())
-                        .withDelayInterval(0)
-                        .withHivemqId("HiveMQId")
-                        .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                        .build(), 1L), 234L), 123L, 1);
+        persistence.put(client1,
+                new ClientSession(true,
+                        SESSION_EXPIRY_MAX,
+                        new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                                .withQos(QoS.AT_MOST_ONCE)
+                                .withPayload("message".getBytes())
+                                .withDelayInterval(0)
+                                .withHivemqId("HiveMQId")
+                                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                                .build(), 1L),
+                        234L),
+                123L,
+                1);
 
         persistence.disconnect(client1, 124L, true, 1, 0L);
         final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
@@ -539,15 +576,19 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
-        persistence.put(client1, new ClientSession(true,
-                SESSION_EXPIRY_MAX,
-                new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                        .withQos(QoS.AT_MOST_ONCE)
-                        .withPayload("message".getBytes())
-                        .withDelayInterval(0)
-                        .withHivemqId("HiveMQId")
-                        .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                        .build(), 1L), 234L), 123L, 1);
+        persistence.put(client1,
+                new ClientSession(true,
+                        SESSION_EXPIRY_MAX,
+                        new ClientSessionWill(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                                .withQos(QoS.AT_MOST_ONCE)
+                                .withPayload("message".getBytes())
+                                .withDelayInterval(0)
+                                .withHivemqId("HiveMQId")
+                                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                                .build(), 1L),
+                        234L),
+                123L,
+                1);
 
         final PersistenceEntry<ClientSession> entry = persistence.deleteWill(client1, 1);
 
@@ -580,9 +621,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(1,
-                    chunk != null ? chunk.getLastKey() : null,
-                    16);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 16);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -612,9 +651,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
             if (chunk != null && chunk.getLastKey() != null) {
                 persistence.removeWithTimestamp(chunk.getLastKey(), 1);
             }
-            chunk = persistence.getAllClientsChunk(1,
-                    chunk != null ? chunk.getLastKey() : null,
-                    1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -642,9 +679,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(1,
-                    chunk != null ? chunk.getLastKey() : null,
-                    1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -664,9 +699,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(1,
-                    chunk != null ? chunk.getLastKey() : null,
-                    1);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 1);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -688,9 +721,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         BucketChunkResult<Map<String, ClientSession>> chunk = null;
 
         do {
-            chunk = persistence.getAllClientsChunk(1,
-                    chunk != null ? chunk.getLastKey() : null,
-                    16);
+            chunk = persistence.getAllClientsChunk(1, chunk != null ? chunk.getLastKey() : null, 16);
             clientIds.addAll(chunk.getValue().keySet());
         } while (!chunk.isFinished());
 
@@ -717,8 +748,8 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 .withHivemqId("hivemqId")
                 .build();
 
-        final ClientSession clientSession = new ClientSession(true, 10,
-                new ClientSessionWill(mqttWillPublish, 1L), 234L);
+        final ClientSession clientSession =
+                new ClientSession(true, 10, new ClientSessionWill(mqttWillPublish, 1L), 234L);
 
         persistence.put("client", clientSession, System.currentTimeMillis(), 1);
         final long peak = memoryGauge.getValue();
@@ -747,8 +778,8 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 .withHivemqId("hivemqId")
                 .build();
 
-        final ClientSession clientSession = new ClientSession(true, 10,
-                new ClientSessionWill(mqttWillPublish, 1L), 234L);
+        final ClientSession clientSession =
+                new ClientSession(true, 10, new ClientSessionWill(mqttWillPublish, 1L), 234L);
 
         persistence.put("client", clientSession, System.currentTimeMillis(), 1);
         final long peak = memoryGauge.getValue();
@@ -760,8 +791,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
     @Test(timeout = 10_000)
     public void test_queue_limit() {
-        persistence.put("clientId", new ClientSession(true, 1000L, null, 10L),
-                System.currentTimeMillis(), 0);
+        persistence.put("clientId", new ClientSession(true, 1000L, null, 10L), System.currentTimeMillis(), 0);
 
         final ClientSession session = persistence.getSession("clientId", 0);
 

@@ -24,15 +24,44 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import io.netty.buffer.ByteBuf;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.*;
-import static com.hivemq.mqtt.message.connack.CONNACK.*;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.booleanPropertyEncodedLength;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeBooleanProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeIntProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeNullableProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeShortProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.intPropertyEncodedLength;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.nullablePropertyEncodedLength;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.shortPropertyEncodedLength;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_RETAIN_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.connack.CONNACK.DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE;
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.ASSIGNED_CLIENT_IDENTIFIER;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_DATA;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.AUTHENTICATION_METHOD;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.MAXIMUM_PACKET_SIZE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.MAXIMUM_QOS;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RESPONSE_INFORMATION;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RETAIN_AVAILABLE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SERVER_KEEP_ALIVE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SERVER_REFERENCE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SESSION_EXPIRY_INTERVAL;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SHARED_SUBSCRIPTION_AVAILABLE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SUBSCRIPTION_IDENTIFIER_AVAILABLE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.WILDCARD_SUBSCRIPTION_AVAILABLE;
+
 /**
  * @author Florian Limpöck
  */
-public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<CONNACK> {
+public class Mqtt5ConnackEncoder
+        extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<CONNACK> {
 
     private static final int CONNACK_FIXED_HEADER = MessageType.CONNACK.ordinal() << 4;
 
@@ -82,12 +111,16 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         propertyLength += shortPropertyEncodedLength(connack.getReceiveMaximum(), DEFAULT_RECEIVE_MAXIMUM);
         propertyLength += nullablePropertyEncodedLength(connack.getMaximumQoS());
         propertyLength += booleanPropertyEncodedLength(connack.isRetainAvailable(), DEFAULT_RETAIN_AVAILABLE);
-        propertyLength += intPropertyEncodedLength(connack.getMaximumPacketSize(), DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
+        propertyLength +=
+                intPropertyEncodedLength(connack.getMaximumPacketSize(), DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
         propertyLength += nullablePropertyEncodedLength(connack.getAssignedClientIdentifier());
         propertyLength += shortPropertyEncodedLength(connack.getTopicAliasMaximum(), DEFAULT_TOPIC_ALIAS_MAXIMUM);
-        propertyLength += booleanPropertyEncodedLength(connack.isWildcardSubscriptionAvailable(), DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE);
-        propertyLength += booleanPropertyEncodedLength(connack.isSubscriptionIdentifierAvailable(), DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE);
-        propertyLength += booleanPropertyEncodedLength(connack.isSharedSubscriptionAvailable(), DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE);
+        propertyLength += booleanPropertyEncodedLength(connack.isWildcardSubscriptionAvailable(),
+                DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE);
+        propertyLength += booleanPropertyEncodedLength(connack.isSubscriptionIdentifierAvailable(),
+                DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE);
+        propertyLength += booleanPropertyEncodedLength(connack.isSharedSubscriptionAvailable(),
+                DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE);
 
         propertyLength += shortPropertyEncodedLength(connack.getServerKeepAlive(), KEEP_ALIVE_NOT_SET);
 
@@ -137,12 +170,24 @@ public class Mqtt5ConnackEncoder extends Mqtt5MessageWithUserPropertiesEncoder.M
         encodeShortProperty(RECEIVE_MAXIMUM, connack.getReceiveMaximum(), DEFAULT_RECEIVE_MAXIMUM, out);
         encodeNullableProperty(MAXIMUM_QOS, connack.getMaximumQoS(), out);
         encodeBooleanProperty(RETAIN_AVAILABLE, connack.isRetainAvailable(), DEFAULT_RETAIN_AVAILABLE, out);
-        encodeIntProperty(MAXIMUM_PACKET_SIZE, connack.getMaximumPacketSize(), DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT, out);
+        encodeIntProperty(MAXIMUM_PACKET_SIZE,
+                connack.getMaximumPacketSize(),
+                DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
+                out);
         encodeNullableProperty(ASSIGNED_CLIENT_IDENTIFIER, connack.getAssignedClientIdentifier(), out);
         encodeShortProperty(TOPIC_ALIAS_MAXIMUM, connack.getTopicAliasMaximum(), DEFAULT_TOPIC_ALIAS_MAXIMUM, out);
-        encodeBooleanProperty(WILDCARD_SUBSCRIPTION_AVAILABLE, connack.isWildcardSubscriptionAvailable(), DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE, out);
-        encodeBooleanProperty(SUBSCRIPTION_IDENTIFIER_AVAILABLE, connack.isSubscriptionIdentifierAvailable(), DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE, out);
-        encodeBooleanProperty(SHARED_SUBSCRIPTION_AVAILABLE, connack.isSharedSubscriptionAvailable(), DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE, out);
+        encodeBooleanProperty(WILDCARD_SUBSCRIPTION_AVAILABLE,
+                connack.isWildcardSubscriptionAvailable(),
+                DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE,
+                out);
+        encodeBooleanProperty(SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+                connack.isSubscriptionIdentifierAvailable(),
+                DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+                out);
+        encodeBooleanProperty(SHARED_SUBSCRIPTION_AVAILABLE,
+                connack.isSharedSubscriptionAvailable(),
+                DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE,
+                out);
 
         encodeShortProperty(SERVER_KEEP_ALIVE, connack.getServerKeepAlive(), KEEP_ALIVE_NOT_SET, out);
 

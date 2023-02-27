@@ -36,7 +36,10 @@ import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
 import util.encoder.TestMessageEncoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -85,8 +88,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '7', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //     server reference
-                0x1C, 0, 9, 'r', 'e', 'f', 'e', 'r', 'e', 'n', 'c', 'e'
-        };
+                0x1C, 0, 9, 'r', 'e', 'f', 'e', 'r', 'e', 'n', 'c', 'e'};
 
         final DISCONNECT disconnect = decode(encoded);
 
@@ -132,8 +134,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '5', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '6', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '7', 0, 5, 'v', 'a', 'l', 'u', 'e', //
-                0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',
-        };
+                0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',};
 
         final DISCONNECT disconnect = decode(encoded);
 
@@ -360,11 +361,13 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x11, 0, 0, 0, 100,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
-        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("session expiry interval was set to zero"));
+        assertTrue(logCapture.getLastCapturedLog()
+                .getFormattedMessage()
+                .contains("session expiry interval was set to zero"));
 
     }
 
@@ -396,7 +399,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x11, 0, 0, 0, 100,
 
 
-        };
+                };
 
         final DISCONNECT disconnect = decode(encoded);
         assertEquals(80, disconnect.getSessionExpiryInterval());
@@ -419,11 +422,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //  properties length
                 10,
                 //  session expiry interval
-                0x11, 0, 0, 0, 100,
-                0x11, 0, 0, 0, 100,
+                0x11, 0, 0, 0, 100, 0x11, 0, 0, 0, 100,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -474,11 +476,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //  properties length
                 12,
                 //  server reference
-                0x1C, 0, 3, 'r', 'e', 'f',
-                0x1C, 0, 3, 'r', 'e', 'f',
+                0x1C, 0, 3, 'r', 'e', 'f', 0x1C, 0, 3, 'r', 'e', 'f',
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -505,7 +506,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1C, 0, 3, 'r', 'e', 0,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -532,7 +533,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1C, 0, 3, 'r', 'e', 0x7F,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -610,11 +611,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //  properties length
                 18,
                 //  reason string
-                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n',
-                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n',
+                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n', 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n',
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -641,7 +641,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 0,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -668,7 +668,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 0x7F,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -747,7 +747,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -795,7 +795,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
 

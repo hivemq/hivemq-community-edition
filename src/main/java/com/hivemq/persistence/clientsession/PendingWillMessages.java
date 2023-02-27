@@ -16,7 +16,11 @@
 package com.hivemq.persistence.clientsession;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.publish.PublishReturnCode;
@@ -68,7 +72,10 @@ public class PendingWillMessages {
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         this.metricsHolder = metricsHolder;
-        executorService.scheduleAtFixedRate(new CheckWillsTask(), WILL_DELAY_CHECK_INTERVAL_SEC, WILL_DELAY_CHECK_INTERVAL_SEC, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new CheckWillsTask(),
+                WILL_DELAY_CHECK_INTERVAL_SEC,
+                WILL_DELAY_CHECK_INTERVAL_SEC,
+                TimeUnit.SECONDS);
     }
 
     public void sendOrEnqueueWillIfAvailable(final @NotNull String clientId, final @NotNull ClientSession session) {
@@ -78,11 +85,14 @@ public class PendingWillMessages {
         if (session.getWillPublish() == null) {
             return;
         }
-        if (sessionWill.getDelayInterval() == 0 || session.getSessionExpiryIntervalSec() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
+        if (sessionWill.getDelayInterval() == 0 ||
+                session.getSessionExpiryIntervalSec() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
             sendWill(clientId, publishFromWill(sessionWill));
             return;
         }
-        pendingWills.put(clientId, new PendingWill(Math.min(sessionWill.getDelayInterval(), session.getSessionExpiryIntervalSec()), System.currentTimeMillis()));
+        pendingWills.put(clientId,
+                new PendingWill(Math.min(sessionWill.getDelayInterval(), session.getSessionExpiryIntervalSec()),
+                        System.currentTimeMillis()));
     }
 
     public void sendWillIfPending(final @NotNull String clientId) {
@@ -173,11 +183,19 @@ public class PendingWillMessages {
     }
 
     private static @NotNull PUBLISH publishFromWill(final @NotNull ClientSessionWill sessionWill) {
-        return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic()).withQoS(sessionWill.getQos()).withOnwardQos(sessionWill.getQos()).withPayload(sessionWill.getPayload())
-                .withRetain(sessionWill.isRetain()).withHivemqId(sessionWill.getHivemqId()).withUserProperties(sessionWill.getUserProperties())
-                .withResponseTopic(sessionWill.getResponseTopic()).withCorrelationData(sessionWill.getCorrelationData())
-                .withContentType(sessionWill.getContentType()).withPayloadFormatIndicator(sessionWill.getPayloadFormatIndicator())
-                .withMessageExpiryInterval(sessionWill.getMessageExpiryInterval()).build();
+        return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic())
+                .withQoS(sessionWill.getQos())
+                .withOnwardQos(sessionWill.getQos())
+                .withPayload(sessionWill.getPayload())
+                .withRetain(sessionWill.isRetain())
+                .withHivemqId(sessionWill.getHivemqId())
+                .withUserProperties(sessionWill.getUserProperties())
+                .withResponseTopic(sessionWill.getResponseTopic())
+                .withCorrelationData(sessionWill.getCorrelationData())
+                .withContentType(sessionWill.getContentType())
+                .withPayloadFormatIndicator(sessionWill.getPayloadFormatIndicator())
+                .withMessageExpiryInterval(sessionWill.getMessageExpiryInterval())
+                .build();
     }
 
     @VisibleForTesting
@@ -194,7 +212,8 @@ public class PendingWillMessages {
                     // treat a PendingWill because there could be concurrent calls to sendWillIfPending which remove and
                     // treat an entry.
                     pendingWills.computeIfPresent(clientId, (clientIdKey, pendingWill) -> {
-                        if (pendingWill.getStartTime() + pendingWill.getDelayInterval() * 1000 < System.currentTimeMillis()) {
+                        if (pendingWill.getStartTime() + pendingWill.getDelayInterval() * 1000 <
+                                System.currentTimeMillis()) {
                             getAndSendPendingWill(clientIdKey);
                             return null;
                         }

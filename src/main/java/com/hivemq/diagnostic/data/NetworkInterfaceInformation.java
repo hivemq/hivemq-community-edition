@@ -48,7 +48,8 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    private StringBuilder addInterfaceInformation(final StringBuilder stringBuilder, final NetworkInterface networkInterface) throws SocketException {
+    private StringBuilder addInterfaceInformation(
+            final StringBuilder stringBuilder, final NetworkInterface networkInterface) throws SocketException {
         stringBuilder.append(String.format("┌[%s]\n", networkInterface.getName()));
         addNetworkInformation(stringBuilder, "Display Name", networkInterface.getDisplayName());
         addNetworkInformation(stringBuilder, "MAC Address", getMacAddress(networkInterface));
@@ -160,7 +161,10 @@ class NetworkInterfaceInformation extends AbstractInformation {
     public static String formatMACAddress(final byte[] hardwareAddress) {
 
         checkNotNull(hardwareAddress);
-        checkArgument(hardwareAddress.length == ADDRESS_LENGTH, "Hardware address must be of length %s but was %s", ADDRESS_LENGTH, hardwareAddress.length);
+        checkArgument(hardwareAddress.length == ADDRESS_LENGTH,
+                "Hardware address must be of length %s but was %s",
+                ADDRESS_LENGTH,
+                hardwareAddress.length);
 
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < hardwareAddress.length; i++) {

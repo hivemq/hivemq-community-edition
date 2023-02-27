@@ -57,8 +57,7 @@ public class AbstractOutput implements PluginTaskOutput {
     }
 
     @Override
-    public @NotNull
-    TimeoutFallback getTimeoutFallback() {
+    public @NotNull TimeoutFallback getTimeoutFallback() {
         return TimeoutFallback.FAILURE;
     }
 }

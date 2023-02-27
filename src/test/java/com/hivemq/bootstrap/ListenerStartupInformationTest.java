@@ -32,7 +32,8 @@ public class ListenerStartupInformationTest {
     @Test
     public void test_successful_listener() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
-        final ListenerStartupInformation info = ListenerStartupInformation.successfulListenerStartup(listener.getPort(), listener);
+        final ListenerStartupInformation info =
+                ListenerStartupInformation.successfulListenerStartup(listener.getPort(), listener);
 
         assertEquals(true, info.isSuccessful());
         assertEquals(1883, info.getPort());
@@ -48,7 +49,8 @@ public class ListenerStartupInformationTest {
     @Test
     public void test_failed_listener_no_exception() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
-        final ListenerStartupInformation info = ListenerStartupInformation.failedListenerStartup(listener.getPort(), listener, null);
+        final ListenerStartupInformation info =
+                ListenerStartupInformation.failedListenerStartup(listener.getPort(), listener, null);
 
         assertEquals(false, info.isSuccessful());
         assertEquals(1883, info.getPort());
@@ -59,7 +61,9 @@ public class ListenerStartupInformationTest {
     @Test
     public void test_failed_listener_exception() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
-        final ListenerStartupInformation info = ListenerStartupInformation.failedListenerStartup(listener.getPort(), listener, new IllegalArgumentException("illegal"));
+        final ListenerStartupInformation info = ListenerStartupInformation.failedListenerStartup(listener.getPort(),
+                listener,
+                new IllegalArgumentException("illegal"));
 
         assertEquals(false, info.isSuccessful());
         assertEquals(1883, info.getPort());

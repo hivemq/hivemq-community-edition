@@ -34,7 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -74,8 +78,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             topicTrees[i] = new PublishTopicTree();
         }
 
-        metricRegistry.register(
-                HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+        metricRegistry.register(HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) currentMemorySize::get);
     }
 
@@ -185,32 +188,34 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
     // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.
     @Override
-    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
-                                                                                                         final @Nullable String ignored,
-                                                                                                         final int alsoIgnored) {
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
+            final int bucketIndex, final @Nullable String ignored, final int alsoIgnored) {
 
-        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages = buckets[bucketIndex].entrySet()
-                .stream()
-                .map(entry -> {
-                    final String topic = entry.getKey();
-                    final RetainedMessage retainedMessage = entry.getValue();
+        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages =
+                buckets[bucketIndex].entrySet()
+                        .stream()
+                        .map(entry -> {
+                            final String topic = entry.getKey();
+                            final RetainedMessage retainedMessage = entry.getValue();
 
-                    // ignore messages with exceeded message expiry interval
-                    if (retainedMessage.hasExpired()) {
-                        return null;
-                    }
+                            // ignore messages with exceeded message expiry interval
+                            if (retainedMessage.hasExpired()) {
+                                return null;
+                            }
 
-                    final Long payloadId = retainedMessage.getPublishId();
-                    if (payloadId == null) {
-                        log.warn("Could not dereference payload for retained message on topic \"{}\" as payload was null.", topic);
-                        return null;
-                    }
+                            final Long payloadId = retainedMessage.getPublishId();
+                            if (payloadId == null) {
+                                log.warn(
+                                        "Could not dereference payload for retained message on topic \"{}\" as payload was null.",
+                                        topic);
+                                return null;
+                            }
 
-                    return new AbstractMap.SimpleEntry<>(topic, retainedMessage);
+                            return new AbstractMap.SimpleEntry<>(topic, retainedMessage);
 
-                })
-                .filter(entry -> !Objects.isNull(entry))
-                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+                        })
+                        .filter(entry -> !Objects.isNull(entry))
+                        .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return new BucketChunkResult<>(collectedRetainedMessages, true, null, bucketIndex);
     }

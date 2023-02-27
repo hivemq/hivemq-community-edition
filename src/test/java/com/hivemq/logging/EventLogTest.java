@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import util.LogbackCapturingAppender;
 
 import java.net.InetSocketAddress;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,10 +45,14 @@ public class EventLogTest {
 
     private final EventLog eventLog = new EventLog();
 
-    private final LogbackCapturingAppender clientConnectedAppender = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_CONNECTED));
-    private final LogbackCapturingAppender clientDisconnectedAppender = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_DISCONNECTED));
-    private final LogbackCapturingAppender messageDroppedAppender = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_MESSAGE_DROPPED));
-    private final LogbackCapturingAppender sessionExpiredAppender = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_SESSION_EXPIRED));
+    private final LogbackCapturingAppender clientConnectedAppender =
+            LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_CONNECTED));
+    private final LogbackCapturingAppender clientDisconnectedAppender =
+            LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_DISCONNECTED));
+    private final LogbackCapturingAppender messageDroppedAppender =
+            LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_MESSAGE_DROPPED));
+    private final LogbackCapturingAppender sessionExpiredAppender =
+            LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_SESSION_EXPIRED));
 
     private StringBuffer logMessageBuffer;
 
@@ -90,10 +93,15 @@ public class EventLogTest {
     public void messageDropped() {
         eventLog.messageDropped(clientId, topic, qos, reason);
 
-        logMessageBuffer.append("Outgoing publish message was dropped. Receiving client: ").append(clientId)
-                .append(", topic: ").append(topic)
-                .append(", qos: ").append(qos)
-                .append(", reason: ").append(reason).append(".");
+        logMessageBuffer.append("Outgoing publish message was dropped. Receiving client: ")
+                .append(clientId)
+                .append(", topic: ")
+                .append(topic)
+                .append(", qos: ")
+                .append(qos)
+                .append(", reason: ")
+                .append(reason)
+                .append(".");
 
         assertLogging(messageDroppedAppender);
     }
@@ -103,10 +111,15 @@ public class EventLogTest {
         final String group = "hiveMQ";
         eventLog.sharedSubscriptionMessageDropped(group, topic, qos, reason);
 
-        logMessageBuffer.append("Outgoing publish message was dropped. Receiving shared subscription group: ").append(group)
-                .append(", topic: ").append(topic)
-                .append(", qos: ").append(qos)
-                .append(", reason: ").append(reason).append(".");
+        logMessageBuffer.append("Outgoing publish message was dropped. Receiving shared subscription group: ")
+                .append(group)
+                .append(", topic: ")
+                .append(topic)
+                .append(", qos: ")
+                .append(qos)
+                .append(", reason: ")
+                .append(reason)
+                .append(".");
 
         assertLogging(messageDroppedAppender);
     }
@@ -116,9 +129,13 @@ public class EventLogTest {
         final String messageType = "myType";
         eventLog.mqttMessageDropped(clientId, messageType, reason);
 
-        logMessageBuffer.append("Outgoing MQTT packet was dropped. Receiving client: ").append(clientId)
-                .append(", messageType: ").append(messageType)
-                .append(", reason: ").append(reason).append(".");
+        logMessageBuffer.append("Outgoing MQTT packet was dropped. Receiving client: ")
+                .append(clientId)
+                .append(", messageType: ")
+                .append(messageType)
+                .append(", reason: ")
+                .append(reason)
+                .append(".");
 
         assertLogging(messageDroppedAppender);
     }
@@ -127,10 +144,15 @@ public class EventLogTest {
     public void clientConnected_unknown() {
         eventLog.clientConnected(channel);
 
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(", IP: ").append("UNKNOWN")
-                .append(", Clean Start: ").append(cleanStart)
-                .append(", Session Expiry: ").append(sessionExpiry).append(" connected.");
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(", IP: ")
+                .append("UNKNOWN")
+                .append(", Clean Start: ")
+                .append(cleanStart)
+                .append(", Session Expiry: ")
+                .append(sessionExpiry)
+                .append(" connected.");
 
         assertLogging(clientConnectedAppender);
     }
@@ -142,10 +164,15 @@ public class EventLogTest {
 
         eventLog.clientConnected(channel);
 
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(", IP: ").append("127.0.0.1")
-                .append(", Clean Start: ").append(cleanStart)
-                .append(", Session Expiry: ").append(sessionExpiry).append(" connected.");
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(", IP: ")
+                .append("127.0.0.1")
+                .append(", Clean Start: ")
+                .append(cleanStart)
+                .append(", Session Expiry: ")
+                .append(sessionExpiry)
+                .append(" connected.");
 
         assertLogging(clientConnectedAppender);
     }
@@ -155,8 +182,11 @@ public class EventLogTest {
 
         eventLog.clientDisconnectedGracefully(clientConnection, null);
 
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(", IP: ").append("UNKNOWN").append(" disconnected gracefully.");
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(", IP: ")
+                .append("UNKNOWN")
+                .append(" disconnected gracefully.");
 
         assertLogging(clientDisconnectedAppender);
     }
@@ -166,8 +196,11 @@ public class EventLogTest {
 
         eventLog.clientDisconnectedUngracefully(clientConnection);
 
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(", IP: ").append("UNKNOWN").append(" disconnected ungracefully.");
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(", IP: ")
+                .append("UNKNOWN")
+                .append(" disconnected ungracefully.");
 
         assertLogging(clientDisconnectedAppender);
     }
@@ -176,10 +209,14 @@ public class EventLogTest {
     public void clientWasDisconnected() {
         eventLog.clientWasDisconnected(channel, reason);
 
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(", IP: ").append("UNKNOWN")
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(", IP: ")
+                .append("UNKNOWN")
                 .append(" was disconnected.")
-                .append(" reason: ").append(reason).append(".");
+                .append(" reason: ")
+                .append(reason)
+                .append(".");
 
         assertLogging(clientDisconnectedAppender);
     }
@@ -191,10 +228,14 @@ public class EventLogTest {
 
         eventLog.clientWasDisconnected(channel, reason);
 
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(", IP: ").append("127.0.0.1")
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(", IP: ")
+                .append("127.0.0.1")
                 .append(" was disconnected.")
-                .append(" reason: ").append(reason).append(".");
+                .append(" reason: ")
+                .append(reason)
+                .append(".");
 
         assertLogging(clientDisconnectedAppender);
     }
@@ -205,9 +246,12 @@ public class EventLogTest {
         eventLog.clientSessionExpired(disconnectedSince, clientId);
 
         final ZoneId zoneId = ZoneId.of("UTC");
-        final String localizedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(disconnectedSince), zoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        logMessageBuffer.append("Client ID: ").append(clientId)
-                .append(" session has expired at ").append(localizedDateTime)
+        final String localizedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(disconnectedSince), zoneId)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        logMessageBuffer.append("Client ID: ")
+                .append(clientId)
+                .append(" session has expired at ")
+                .append(localizedDateTime)
                 .append(". All persistent data for this client has been removed.");
 
         assertLogging(sessionExpiredAppender);

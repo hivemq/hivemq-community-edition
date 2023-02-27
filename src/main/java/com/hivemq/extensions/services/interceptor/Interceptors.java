@@ -40,8 +40,7 @@ public interface Interceptors {
      *
      * @return An immutable copy of the connect interceptor providers
      */
-    @NotNull
-    ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders();
+    @NotNull ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders();
 
     /**
      * Add an connack outbound interceptor provider to the connack outbound interceptor provider map
@@ -56,6 +55,5 @@ public interface Interceptors {
      *
      * @return An immutable copy of the connack outbound interceptor providers
      */
-    @NotNull
-    ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders();
+    @NotNull ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders();
 }

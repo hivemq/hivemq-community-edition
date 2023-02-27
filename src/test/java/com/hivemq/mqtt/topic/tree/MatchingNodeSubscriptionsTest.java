@@ -34,8 +34,9 @@ public class MatchingNodeSubscriptionsTest {
         subscriptions.addSubscriber(new SubscriberWithQoS("sub1", 0, (byte) 0, null, 0, null), "topic", counters, 16);
         subscriptions.addSubscriber(new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null), "topic", counters, 16);
         assertEquals(2, subscriptions.getSubscriberCount());
-        assertThat(subscriptions.getSubscribers(), hasItems(new SubscriberWithQoS("sub1", 0, (byte) 0, null, 0, null),
-                new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null)));
+        assertThat(subscriptions.getSubscribers(),
+                hasItems(new SubscriberWithQoS("sub1", 0, (byte) 0, null, 0, null),
+                        new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null)));
     }
 
     @Test
@@ -44,8 +45,9 @@ public class MatchingNodeSubscriptionsTest {
         subscriptions.addSubscriber(new SubscriberWithQoS("sub1", 0, (byte) 0, null, 0, null), "topic", counters, 0);
         subscriptions.addSubscriber(new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null), "topic", counters, 0);
         assertEquals(2, subscriptions.getSubscriberCount());
-        assertThat(subscriptions.getSubscribers(), hasItems(new SubscriberWithQoS("sub1", 0, (byte) 0, null, 0, null),
-                new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null)));
+        assertThat(subscriptions.getSubscribers(),
+                hasItems(new SubscriberWithQoS("sub1", 0, (byte) 0, null, 0, null),
+                        new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null)));
     }
 
     @Test

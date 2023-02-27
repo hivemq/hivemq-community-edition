@@ -45,10 +45,11 @@ public class ChannelInitializerFactoryImpl implements ChannelInitializerFactory 
     private final EventLog eventLog;
 
     @Inject
-    public ChannelInitializerFactoryImpl(@NotNull final ChannelDependencies channelDependencies,
-                                         @NotNull final SslFactory sslFactory,
-                                         @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
-                                         @NotNull final EventLog eventLog) {
+    public ChannelInitializerFactoryImpl(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final SslFactory sslFactory,
+            @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
+            @NotNull final EventLog eventLog) {
         this.channelDependencies = channelDependencies;
         this.sslFactory = sslFactory;
         this.nonSslHandlerProvider = nonSslHandlerProvider;

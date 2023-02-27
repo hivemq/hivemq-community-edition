@@ -25,7 +25,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -87,7 +92,8 @@ public class AsyncLocalChunkIteratorTest {
     @Test(timeout = 15_000, expected = NullPointerException.class)
     public void test_fetch_result_null() throws Throwable {
 
-        asyncIterator = new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback, executorService);
+        asyncIterator =
+                new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback, executorService);
 
         asyncIterator.fetchAndIterate();
 
@@ -135,7 +141,8 @@ public class AsyncLocalChunkIteratorTest {
 
         asyncIterator.getFinishedFuture().get();
 
-        assertTrue("Should only contain max 3 item, was " + itemCallback.getItems().size() + " items", itemCallback.getItems().size() <= 3);
+        assertTrue("Should only contain max 3 item, was " + itemCallback.getItems().size() + " items",
+                itemCallback.getItems().size() <= 3);
     }
 
     private static class TestItemCallback implements AsyncIterator.ItemCallback<String> {

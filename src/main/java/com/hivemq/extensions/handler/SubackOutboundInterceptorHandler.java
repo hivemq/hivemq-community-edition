@@ -108,12 +108,17 @@ public class SubackOutboundInterceptorHandler {
         final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<SubackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
 
-        final SubAckOutboundInterceptorContext context = new SubAckOutboundInterceptorContext(
-                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+        final SubAckOutboundInterceptorContext context = new SubAckOutboundInterceptorContext(clientId,
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
 
         for (final SubackOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
@@ -200,9 +205,8 @@ public class SubackOutboundInterceptorHandler {
             try {
                 interceptor.onOutboundSuback(input, output);
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound SUBACK interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound SUBACK interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

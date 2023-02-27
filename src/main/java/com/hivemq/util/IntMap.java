@@ -227,8 +227,12 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final IntMap that = (IntMap) o;
 
@@ -300,12 +304,18 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
 
         @Override
         public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             final IntMapEntry that = (IntMapEntry) o;
 
-            if (key != that.key) return false;
+            if (key != that.key) {
+                return false;
+            }
             return value == that.value;
         }
 

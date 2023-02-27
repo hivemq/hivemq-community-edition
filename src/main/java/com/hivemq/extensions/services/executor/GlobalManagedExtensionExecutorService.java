@@ -29,7 +29,15 @@ import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.hivemq.configuration.service.InternalConfigurations.MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC;
 
@@ -71,7 +79,8 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
         //for instrumentation (metrics)
         scheduledExecutorService = scheduledThreadPoolExecutor;
 
-        shutdownHooks.add(new ManagedPluginExecutorShutdownHook(this, MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC.get()));
+        shutdownHooks.add(new ManagedPluginExecutorShutdownHook(this,
+                MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC.get()));
     }
 
     public int getCorePoolSize() {

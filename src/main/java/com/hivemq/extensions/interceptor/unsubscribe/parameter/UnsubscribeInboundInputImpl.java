@@ -60,7 +60,8 @@ public class UnsubscribeInboundInputImpl implements UnsubscribeInboundInput, Plu
     }
 
     public @NotNull UnsubscribeInboundInputImpl update(final @NotNull UnsubscribeInboundOutputImpl output) {
-        return new UnsubscribeInboundInputImpl(
-                clientInformation, connectionInformation, output.getUnsubscribePacket().copy());
+        return new UnsubscribeInboundInputImpl(clientInformation,
+                connectionInformation,
+                output.getUnsubscribePacket().copy());
     }
 }

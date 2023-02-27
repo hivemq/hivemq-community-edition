@@ -97,8 +97,7 @@ public class LifecycleEventListenersImplTest {
     @Test
     public void test_add_two_different_priorities() throws Exception {
         final Class<?>[] classes = {
-                TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class
-        };
+                TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class};
 
         try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
                 .toPath(), classes);
@@ -137,8 +136,7 @@ public class LifecycleEventListenersImplTest {
     @Test
     public void test_add_two_equal_priorities() throws Exception {
         final Class<?>[] classes = {
-                TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class
-        };
+                TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class};
 
         try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
                 .toPath(), classes);

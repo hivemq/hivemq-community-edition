@@ -94,7 +94,8 @@ public class LifecycleRegistry {
 
     /**
      * Executes the preDestroy methods in parallel. This method does not block and
-     * you have to synchronize yourself if you want so with the returned {@link com.google.common.util.concurrent.ListenableFuture}
+     * you have to synchronize yourself if you want so with the returned
+     * {@link com.google.common.util.concurrent.ListenableFuture}
      * <p>
      * There are no guarantees of the return type when you wait for the future. Most likely you'll get Void or null,
      * though.
@@ -116,7 +117,9 @@ public class LifecycleRegistry {
                     try {
                         preDestroyInvokable.getPreDestroyMethod().invoke(preDestroyInvokable.getOnObject());
                     } catch (final IllegalAccessException | InvocationTargetException e) {
-                        log.error("Could not execute preDestroy method for class {}", preDestroyInvokable.getOnObject().getClass(), e);
+                        log.error("Could not execute preDestroy method for class {}",
+                                preDestroyInvokable.getOnObject().getClass(),
+                                e);
                     }
                 }
             }));

@@ -22,8 +22,7 @@ public class Mqtt3ConnAckReturnCodeTest {
 
     @Test
     public void test_all_fromCode() {
-        EnumTestUtil.assertAllValueOf(
-                Mqtt3ConnAckReturnCode.class,
+        EnumTestUtil.assertAllValueOf(Mqtt3ConnAckReturnCode.class,
                 Mqtt3ConnAckReturnCode::getCode,
                 Mqtt3ConnAckReturnCode::fromCode);
     }

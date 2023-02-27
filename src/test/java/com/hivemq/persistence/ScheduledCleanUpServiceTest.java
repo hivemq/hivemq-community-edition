@@ -36,10 +36,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.hivemq.persistence.ScheduledCleanUpService.*;
+import static com.hivemq.persistence.ScheduledCleanUpService.CLIENT_QUEUE_PERSISTENCE_INDEX;
+import static com.hivemq.persistence.ScheduledCleanUpService.RETAINED_MESSAGES_PERSISTENCE_INDEX;
+import static com.hivemq.persistence.ScheduledCleanUpService.SUBSCRIPTION_PERSISTENCE_INDEX;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Lukas Brandl
@@ -47,7 +55,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings({"unchecked", "NullabilityAnnotations"})
 public class ScheduledCleanUpServiceTest {
 
-    private final ListeningScheduledExecutorService scheduledExecutorService = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
+    private final ListeningScheduledExecutorService scheduledExecutorService =
+            MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
 
     @Mock
     private ClientSessionPersistence clientSessionPersistence;
@@ -66,16 +75,19 @@ public class ScheduledCleanUpServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService, clientSessionPersistence,
-                subscriptionPersistence, retainedMessagePersistence, clientQueuePersistence);
+        scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService,
+                clientSessionPersistence,
+                subscriptionPersistence,
+                retainedMessagePersistence,
+                clientQueuePersistence);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
     }
 
     @Test
     public void cleanUp_invokesRespectivePersistenceCleanUps() {
-            scheduledCleanUpService.cleanUp(0, ScheduledCleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX);
-            verify(clientSessionPersistence).cleanUp(eq(ScheduledCleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX));
+        scheduledCleanUpService.cleanUp(0, ScheduledCleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX);
+        verify(clientSessionPersistence).cleanUp(eq(ScheduledCleanUpService.CLIENT_SESSION_PERSISTENCE_INDEX));
 
         scheduledCleanUpService.cleanUp(1, SUBSCRIPTION_PERSISTENCE_INDEX);
         verify(subscriptionPersistence).cleanUp(eq(SUBSCRIPTION_PERSISTENCE_INDEX));
@@ -89,15 +101,23 @@ public class ScheduledCleanUpServiceTest {
 
     @Test
     public void scheduleCleanUpTask_whenCalledRepeatedly_iteratesThroughBucketsAndPersistences() {
-        final ListeningScheduledExecutorService scheduledExecutorService = mock(ListeningScheduledExecutorService.class);
-        scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService, clientSessionPersistence,
-                subscriptionPersistence, retainedMessagePersistence, clientQueuePersistence);
+        final ListeningScheduledExecutorService scheduledExecutorService =
+                mock(ListeningScheduledExecutorService.class);
+        scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService,
+                clientSessionPersistence,
+                subscriptionPersistence,
+                retainedMessagePersistence,
+                clientQueuePersistence);
 
-        final ArgumentCaptor<ScheduledCleanUpService.CleanUpTask> argumentCaptor = ArgumentCaptor.forClass(ScheduledCleanUpService.CleanUpTask.class);
-        when(scheduledExecutorService.schedule(argumentCaptor.capture(), anyLong(), any(TimeUnit.class))).thenReturn(mock(ListenableScheduledFuture.class));
+        final ArgumentCaptor<ScheduledCleanUpService.CleanUpTask> argumentCaptor =
+                ArgumentCaptor.forClass(ScheduledCleanUpService.CleanUpTask.class);
+        when(scheduledExecutorService.schedule(argumentCaptor.capture(), anyLong(), any(TimeUnit.class))).thenReturn(
+                mock(ListenableScheduledFuture.class));
 
         for (int bucketIndex = 0; bucketIndex < 64; bucketIndex++) {
-            for (int persistenceIndex = 0; persistenceIndex < ScheduledCleanUpService.NUMBER_OF_PERSISTENCES; persistenceIndex++) {
+            for (int persistenceIndex = 0;
+                 persistenceIndex < ScheduledCleanUpService.NUMBER_OF_PERSISTENCES;
+                 persistenceIndex++) {
                 scheduledCleanUpService.scheduleCleanUpTask();
                 final ScheduledCleanUpService.CleanUpTask value = argumentCaptor.getValue();
                 assertEquals(bucketIndex, value.getBucketIndex());
@@ -117,15 +137,16 @@ public class ScheduledCleanUpServiceTest {
         when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenAnswer(invocation -> {
             throw new Throwable();
         });
-        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(
-                scheduledCleanUpService,
-                scheduledExecutorService,
-                Integer.MAX_VALUE,
-                0,
-                0);
+        final ScheduledCleanUpService.CleanUpTask task =
+                new ScheduledCleanUpService.CleanUpTask(scheduledCleanUpService,
+                        scheduledExecutorService,
+                        Integer.MAX_VALUE,
+                        0,
+                        0);
         task.call();
         verify(scheduledCleanUpService).scheduleCleanUpTask();
     }
+
     @Test
     public void cleanUpTask_whenHittingTheTimeout_thenTheNextCleanUpTaskIsScheduled() {
         final Duration timeout = Duration.ofSeconds(30);
@@ -135,19 +156,13 @@ public class ScheduledCleanUpServiceTest {
             scheduledNextTask.set(true);
             return null;
         }).when(scheduledCleanUpService).scheduleCleanUpTask();
-        when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenReturn(Futures.submit(
-                () -> {
-                    // Because the actual tasks likely ignore being interrupted, just wait here and never terminate
-                    // until we verified that the next task was scheduled;
-                    Awaitility.waitAtMost(timeout).until(scheduledNextTask::get);
-                },
-                Executors.newSingleThreadScheduledExecutor()));
-        final ScheduledCleanUpService.CleanUpTask task = new ScheduledCleanUpService.CleanUpTask(
-                scheduledCleanUpService,
-                scheduledExecutorService,
-                1,
-                1,
-                1);
+        when(scheduledCleanUpService.cleanUp(anyInt(), anyInt())).thenReturn(Futures.submit(() -> {
+            // Because the actual tasks likely ignore being interrupted, just wait here and never terminate
+            // until we verified that the next task was scheduled;
+            Awaitility.waitAtMost(timeout).until(scheduledNextTask::get);
+        }, Executors.newSingleThreadScheduledExecutor()));
+        final ScheduledCleanUpService.CleanUpTask task =
+                new ScheduledCleanUpService.CleanUpTask(scheduledCleanUpService, scheduledExecutorService, 1, 1, 1);
         task.call();
         Awaitility.waitAtMost(timeout).until(scheduledNextTask::get);
     }

@@ -20,7 +20,11 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.hivemq.configuration.service.RestrictionsConfigurationService.*;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_CLIENT_ID_LENGTH_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_CONNECTIONS_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_TOPIC_LENGTH_DEFAULT;
+import static com.hivemq.configuration.service.RestrictionsConfigurationService.NO_CONNECT_IDLE_TIMEOUT_DEFAULT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
@@ -30,16 +34,15 @@ public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
     @Test
     public void test_restrictions_xml() throws Exception {
 
-        final String contents =
-                "<hivemq>" +
-                        "<restrictions>" +
-                        "<max-connections>500</max-connections>" +
-                        "<max-client-id-length>400</max-client-id-length>" +
-                        "<max-topic-length>400</max-topic-length>" +
-                        "<no-connect-idle-timeout>300</no-connect-idle-timeout>" +
-                        "<incoming-bandwidth-throttling>200</incoming-bandwidth-throttling>" +
-                        "</restrictions>" +
-                        "</hivemq>";
+        final String contents = "<hivemq>" +
+                "<restrictions>" +
+                "<max-connections>500</max-connections>" +
+                "<max-client-id-length>400</max-client-id-length>" +
+                "<max-topic-length>400</max-topic-length>" +
+                "<no-connect-idle-timeout>300</no-connect-idle-timeout>" +
+                "<incoming-bandwidth-throttling>200</incoming-bandwidth-throttling>" +
+                "</restrictions>" +
+                "</hivemq>";
         Files.write(contents.getBytes(UTF_8), xmlFile);
 
         reader.applyConfig();
@@ -55,16 +58,15 @@ public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
     @Test
     public void test_restriction_negative_values() throws Exception {
 
-        final String contents =
-                "<hivemq>" +
-                        "<restrictions>" +
-                        "<max-connections>-100</max-connections>" +
-                        "<max-client-id-length>-100</max-client-id-length>" +
-                        "<max-topic-length>-100</max-topic-length>" +
-                        "<no-connect-idle-timeout>-100</no-connect-idle-timeout>" +
-                        "<incoming-bandwidth-throttling>-100</incoming-bandwidth-throttling>" +
-                        "</restrictions>" +
-                        "</hivemq>";
+        final String contents = "<hivemq>" +
+                "<restrictions>" +
+                "<max-connections>-100</max-connections>" +
+                "<max-client-id-length>-100</max-client-id-length>" +
+                "<max-topic-length>-100</max-topic-length>" +
+                "<no-connect-idle-timeout>-100</no-connect-idle-timeout>" +
+                "<incoming-bandwidth-throttling>-100</incoming-bandwidth-throttling>" +
+                "</restrictions>" +
+                "</hivemq>";
         Files.write(contents.getBytes(UTF_8), xmlFile);
 
         reader.applyConfig();
@@ -79,16 +81,15 @@ public class RestrictionConfiguratorTest extends AbstractConfigurationTest {
 
     @Test
     public void test_tooHigh() throws IOException {
-        final String contents =
-                "<hivemq>" +
-                        "<restrictions>" +
-                        "<max-connections>500</max-connections>" +
-                        "<max-client-id-length>123456</max-client-id-length>" +
-                        "<max-topic-length>123456</max-topic-length>" +
-                        "<no-connect-idle-timeout>300</no-connect-idle-timeout>" +
-                        "<incoming-bandwidth-throttling>200</incoming-bandwidth-throttling>" +
-                        "</restrictions>" +
-                        "</hivemq>";
+        final String contents = "<hivemq>" +
+                "<restrictions>" +
+                "<max-connections>500</max-connections>" +
+                "<max-client-id-length>123456</max-client-id-length>" +
+                "<max-topic-length>123456</max-topic-length>" +
+                "<no-connect-idle-timeout>300</no-connect-idle-timeout>" +
+                "<incoming-bandwidth-throttling>200</incoming-bandwidth-throttling>" +
+                "</restrictions>" +
+                "</hivemq>";
         Files.write(contents.getBytes(UTF_8), xmlFile);
 
         reader.applyConfig();

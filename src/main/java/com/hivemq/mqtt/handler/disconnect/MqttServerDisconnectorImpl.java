@@ -80,7 +80,13 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         if (!clientConnection.getClientState().disconnected()) {
             log(clientConnection, logMessage, eventLogMessage);
             fireEvents(clientConnection, oldClientState, reasonCode, reasonString, userProperties, isAuthentication);
-            closeConnection(clientConnection, disconnectWithReasonCode, disconnectWithReasonString, reasonCode, reasonString, userProperties, forceClose);
+            closeConnection(clientConnection,
+                    disconnectWithReasonCode,
+                    disconnectWithReasonString,
+                    reasonCode,
+                    reasonString,
+                    userProperties,
+                    forceClose);
         }
     }
 
@@ -96,9 +102,11 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
-            clientConnection.getChannel().pipeline().fireUserEventTriggered(isAuthentication ?
-                    new OnAuthFailedEvent(disconnectedReasonCode, reasonString, userProperties) :
-                    new OnServerDisconnectEvent(disconnectedReasonCode, reasonString, userProperties));
+            clientConnection.getChannel()
+                    .pipeline()
+                    .fireUserEventTriggered(isAuthentication ?
+                            new OnAuthFailedEvent(disconnectedReasonCode, reasonString, userProperties) :
+                            new OnServerDisconnectEvent(disconnectedReasonCode, reasonString, userProperties));
         }
     }
 
@@ -151,7 +159,8 @@ public class MqttServerDisconnectorImpl implements MqttServerDisconnector {
         }
 
         if (reasonCode != null && version == ProtocolVersion.MQTTv5) {
-            final DISCONNECT disconnect = new DISCONNECT(reasonCode, reasonString, userProperties, null, SESSION_EXPIRY_NOT_SET);
+            final DISCONNECT disconnect =
+                    new DISCONNECT(reasonCode, reasonString, userProperties, null, SESSION_EXPIRY_NOT_SET);
             clientConnection.getChannel().writeAndFlush(disconnect).addListener(ChannelFutureListener.CLOSE);
         } else {
             // close channel without sending DISCONNECT (Mqtt 3)

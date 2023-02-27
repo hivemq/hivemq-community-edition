@@ -22,7 +22,15 @@ import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-import javax.tools.*;
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
+import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +38,11 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Various utilities for compilation of Java classes on the fly
@@ -49,11 +61,16 @@ public class OnTheFlyCompilationUtil {
 
 
         // Compile the file
-        compiler.getTask(null, fileManager, null, null, null,
+        compiler.getTask(null,
+                fileManager,
+                null,
+                null,
+                null,
                 fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(javaFile))).call();
         fileManager.close();
 
-        final Collection<File> files = FileUtils.listFiles(toFolder, new SuffixFileFilter("class"), TrueFileFilter.INSTANCE);
+        final Collection<File> files =
+                FileUtils.listFiles(toFolder, new SuffixFileFilter("class"), TrueFileFilter.INSTANCE);
 
         return Iterables.getOnlyElement(files);
     }
@@ -153,8 +170,7 @@ public class OnTheFlyCompilationUtil {
         private final String className;
 
         MemJavaFileObject(final String className) {
-            super(URI.create("string:///" + className.replace('.', '/') + Kind.CLASS.extension),
-                    Kind.CLASS);
+            super(URI.create("string:///" + className.replace('.', '/') + Kind.CLASS.extension), Kind.CLASS);
             this.className = className;
         }
 
@@ -185,10 +201,11 @@ public class OnTheFlyCompilationUtil {
 
 
         @Override
-        public JavaFileObject getJavaFileForOutput(final Location location,
-                                                   final String className,
-                                                   final JavaFileObject.Kind kind,
-                                                   final FileObject sibling) throws IOException {
+        public JavaFileObject getJavaFileForOutput(
+                final Location location,
+                final String className,
+                final JavaFileObject.Kind kind,
+                final FileObject sibling) throws IOException {
             final MemJavaFileObject fileObject = new MemJavaFileObject(className);
             classLoader.addClassFile(fileObject);
             return fileObject;

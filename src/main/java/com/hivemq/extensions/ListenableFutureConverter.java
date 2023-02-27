@@ -38,7 +38,11 @@ public class ListenableFutureConverter {
      * objects may be null or not
      */
     @NotNull
-    public static <T, U> CompletableFuture<U> toCompletable(@NotNull final ListenableFuture<T> listenableFuture, @NotNull final Function<T, U> converter, final boolean nullableResult, final @NotNull Executor executor) {
+    public static <T, U> CompletableFuture<U> toCompletable(
+            @NotNull final ListenableFuture<T> listenableFuture,
+            @NotNull final Function<T, U> converter,
+            final boolean nullableResult,
+            final @NotNull Executor executor) {
         return createCompletable(listenableFuture, converter, nullableResult, executor);
     }
 
@@ -50,7 +54,10 @@ public class ListenableFutureConverter {
      * objects may be null
      */
     @NotNull
-    public static <T, U> CompletableFuture<U> toCompletable(@NotNull final ListenableFuture<T> listenableFuture, @NotNull final Function<T, U> converter, final @NotNull Executor executor) {
+    public static <T, U> CompletableFuture<U> toCompletable(
+            @NotNull final ListenableFuture<T> listenableFuture,
+            @NotNull final Function<T, U> converter,
+            final @NotNull Executor executor) {
         return createCompletable(listenableFuture, converter, true, executor);
 
     }
@@ -63,7 +70,8 @@ public class ListenableFutureConverter {
      * objects may be null
      */
     @NotNull
-    public static <T> CompletableFuture<T> toCompletable(@NotNull final ListenableFuture<T> listenableFuture, final @NotNull Executor executor) {
+    public static <T> CompletableFuture<T> toCompletable(
+            @NotNull final ListenableFuture<T> listenableFuture, final @NotNull Executor executor) {
         return createCompletable(listenableFuture, Function.identity(), true, executor);
     }
 
@@ -72,12 +80,17 @@ public class ListenableFutureConverter {
      * This method converts any ListenableFuture to a CompletableFuture<Void>
      */
     @NotNull
-    public static <T> CompletableFuture<Void> toVoidCompletable(@NotNull final ListenableFuture<T> listenableFuture, final @NotNull Executor executor) {
+    public static <T> CompletableFuture<Void> toVoidCompletable(
+            @NotNull final ListenableFuture<T> listenableFuture, final @NotNull Executor executor) {
         return createCompletable(listenableFuture, result -> null, true, executor);
     }
 
     @NotNull
-    private static <T, U> CompletableFuture<U> createCompletable(@NotNull final ListenableFuture<T> listenableFuture, @NotNull final Function<T, U> converter, final boolean nullableResult, final @NotNull Executor executor) {
+    private static <T, U> CompletableFuture<U> createCompletable(
+            @NotNull final ListenableFuture<T> listenableFuture,
+            @NotNull final Function<T, U> converter,
+            final boolean nullableResult,
+            final @NotNull Executor executor) {
 
         final ClassLoader callingThreadClassLoader = Thread.currentThread().getContextClassLoader();
         final CompletableFuture<U> completableFuture = new CompletableFuture<>() {

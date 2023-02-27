@@ -91,7 +91,7 @@ public interface ClientSessionPersistence {
      * @param preventLwtMessage The flag if the will message should be prevented or delivered.
      * @param source            The source of the enforce call.
      * @return a future of a boolean which gives the information that a client was disconnected (true) or wasn't
-     * connected (false).
+     *         connected (false).
      */
     @NotNull ListenableFuture<Boolean> forceDisconnectClient(
             @NotNull String clientId, boolean preventLwtMessage, @NotNull DisconnectSource source);
@@ -105,7 +105,7 @@ public interface ClientSessionPersistence {
      * @param reasonCode        The reason code for the enforced disconnect.
      * @param reasonString      The reason string for the enforced disconnect.
      * @return a future of a boolean which gives the information that a client was disconnected (true) or wasn't
-     * connected (false).
+     *         connected (false).
      */
     @NotNull ListenableFuture<Boolean> forceDisconnectClient(
             @NotNull String clientId,
@@ -132,8 +132,8 @@ public interface ClientSessionPersistence {
      * @param clientId              the client identifier of the client
      * @param sessionExpiryInterval session expiry interval for the client in seconds
      * @return a {@link com.google.common.util.concurrent.ListenableFuture} which is returned when the Session Expiry
-     * Interval is set
-     * successfully or a Exception was caught.
+     *         Interval is set
+     *         successfully or a Exception was caught.
      */
     @NotNull ListenableFuture<Boolean> setSessionExpiryInterval(@NotNull String clientId, long sessionExpiryInterval);
 
@@ -155,7 +155,7 @@ public interface ClientSessionPersistence {
      * @param clientId         The client identifier of the client which session should be invalidated
      * @param disconnectSource The source of the invalidate session call.
      * @return a {@link com.google.common.util.concurrent.ListenableFuture} succeeding with a {@link Boolean} which is
-     * true when the client has been actively disconnected by the broker otherwise false,
+     *         true when the client has been actively disconnected by the broker otherwise false,
      * @since 3.4
      */
     @NotNull ListenableFuture<Boolean> invalidateSession(

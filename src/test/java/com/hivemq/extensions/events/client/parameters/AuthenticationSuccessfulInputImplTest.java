@@ -39,7 +39,8 @@ public class AuthenticationSuccessfulInputImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final AuthenticationSuccessfulInputImpl successfulInput = new AuthenticationSuccessfulInputImpl("client", channel);
+        final AuthenticationSuccessfulInputImpl successfulInput =
+                new AuthenticationSuccessfulInputImpl("client", channel);
         assertNotNull(successfulInput);
         assertNotNull(successfulInput.get());
         assertNotNull(successfulInput.getClientInformation());

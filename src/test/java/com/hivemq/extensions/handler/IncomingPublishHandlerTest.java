@@ -54,7 +54,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -78,9 +77,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @since 4.0.0
@@ -624,10 +629,11 @@ public class IncomingPublishHandlerTest {
 
     private List<PublishInboundInterceptor> getIsolatedInterceptor() throws Exception {
         final Class<?>[] classes = {
-                TestInterceptorPrevent.class, TestInterceptorChangeTopic.class,
-                TestInterceptorPreventWithReasonCode.class, TestInterceptorThrowsException.class,
-                TestInterceptorTimeout.class
-        };
+                TestInterceptorPrevent.class,
+                TestInterceptorChangeTopic.class,
+                TestInterceptorPreventWithReasonCode.class,
+                TestInterceptorThrowsException.class,
+                TestInterceptorTimeout.class};
 
         final IsolatedExtensionClassloader cl1 =
                 IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
@@ -658,8 +664,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             System.out.println("INTERCEPT " + System.currentTimeMillis());
             output.getPublishPacket().setTopic(input.getPublishPacket().getTopic() + "modified");
         }
@@ -669,8 +674,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             output.preventPublishDelivery();
         }
     }
@@ -679,8 +683,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             output.preventPublishDelivery(AckReasonCode.UNSPECIFIED_ERROR, "reason");
         }
     }
@@ -689,8 +692,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             final Async<PublishInboundOutput> async = output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
             try {
                 Thread.sleep(100);
@@ -705,8 +707,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             throw new NullPointerException();
         }
     }

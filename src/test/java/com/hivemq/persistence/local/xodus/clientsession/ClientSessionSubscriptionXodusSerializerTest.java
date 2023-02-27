@@ -22,7 +22,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dominik Obermaier
@@ -55,8 +58,12 @@ public class ClientSessionSubscriptionXodusSerializerTest {
     @Test
     public void test_serialize_deserialize_value() throws Exception {
 
-        final byte[] bytes = serializer.serializeValue(new Topic("topic", QoS.AT_MOST_ONCE, false,
-                true, Mqtt5RetainHandling.SEND, 1), 123456790L, 3L);
+        final byte[] bytes = serializer.serializeValue(new Topic("topic",
+                QoS.AT_MOST_ONCE,
+                false,
+                true,
+                Mqtt5RetainHandling.SEND,
+                1), 123456790L, 3L);
 
         final Topic topic = serializer.deserializeValue(bytes);
 
@@ -89,8 +96,12 @@ public class ClientSessionSubscriptionXodusSerializerTest {
 
         final String topicString = RandomStringUtils.randomAlphanumeric(65535);
 
-        final byte[] bytes = serializer.serializeValue(new Topic(topicString, QoS.EXACTLY_ONCE, true, false,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1), 123456790L, 1L);
+        final byte[] bytes = serializer.serializeValue(new Topic(topicString,
+                QoS.EXACTLY_ONCE,
+                true,
+                false,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                1), 123456790L, 1L);
 
         final Topic topic = serializer.deserializeValue(bytes);
 

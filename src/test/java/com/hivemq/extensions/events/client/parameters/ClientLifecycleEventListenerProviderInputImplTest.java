@@ -39,7 +39,8 @@ public class ClientLifecycleEventListenerProviderInputImplTest {
         final ClientConnection clientConnection = new ClientConnection(channel, null);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ClientLifecycleEventListenerProviderInputImpl successfulInput = new ClientLifecycleEventListenerProviderInputImpl("client", channel);
+        final ClientLifecycleEventListenerProviderInputImpl successfulInput =
+                new ClientLifecycleEventListenerProviderInputImpl("client", channel);
         assertNotNull(successfulInput);
         assertNotNull(successfulInput.getClientInformation());
         assertNotNull(successfulInput.getConnectionInformation());

@@ -157,7 +157,8 @@ public class SingleWriterServiceImplTest {
         @NotNull
         @Override
         public <T> List<Future<T>> invokeAll(
-                @NotNull final Collection<? extends Callable<T>> tasks, final long timeout,
+                @NotNull final Collection<? extends Callable<T>> tasks,
+                final long timeout,
                 @NotNull final TimeUnit unit) throws InterruptedException {
             return null;
         }
@@ -171,7 +172,8 @@ public class SingleWriterServiceImplTest {
 
         @Override
         public <T> T invokeAny(
-                @NotNull final Collection<? extends Callable<T>> tasks, final long timeout,
+                @NotNull final Collection<? extends Callable<T>> tasks,
+                final long timeout,
                 @NotNull final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return null;
         }

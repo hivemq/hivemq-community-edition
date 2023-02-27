@@ -16,7 +16,18 @@
 package com.hivemq.mqtt.handler;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.handler.*;
+import com.hivemq.extensions.handler.ConnackOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.ConnectInboundInterceptorHandler;
+import com.hivemq.extensions.handler.DisconnectInterceptorHandler;
+import com.hivemq.extensions.handler.PingInterceptorHandler;
+import com.hivemq.extensions.handler.PubackInterceptorHandler;
+import com.hivemq.extensions.handler.PubcompInterceptorHandler;
+import com.hivemq.extensions.handler.PublishOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.PubrecInterceptorHandler;
+import com.hivemq.extensions.handler.PubrelInterceptorHandler;
+import com.hivemq.extensions.handler.SubackOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.UnsubackOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.UnsubscribeInboundInterceptorHandler;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.mqtt.message.auth.AUTH;
@@ -38,7 +49,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Daniel Krüger
@@ -79,8 +93,7 @@ public class InterceptorHandlerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        interceptorHandler = new InterceptorHandler(
-                connectInboundInterceptorHandler,
+        interceptorHandler = new InterceptorHandler(connectInboundInterceptorHandler,
                 connackOutboundInterceptorHandler,
                 publishOutboundInterceptorHandler,
                 pubackInterceptorHandler,

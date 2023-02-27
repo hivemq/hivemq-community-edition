@@ -37,7 +37,8 @@ public class WrappedCallable<V> implements Callable<V> {
     private final CompletableFuture<V> completableFuture;
 
     WrappedCallable(
-            @NotNull final Callable<V> callable, @NotNull final ClassLoader classLoader,
+            @NotNull final Callable<V> callable,
+            @NotNull final ClassLoader classLoader,
             @Nullable final CompletableFuture<V> completableFuture) {
         this.callable = callable;
         this.classLoader = classLoader;

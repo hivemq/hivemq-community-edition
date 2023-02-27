@@ -42,7 +42,10 @@ public class DiagnosticDataTest {
         systemInformation = new HiveMQSystemInformation();
         networkInterfaceInformation = new NetworkInterfaceInformation();
 
-        data = new DiagnosticData(systemPropertyInformation, hiveMQInformation, systemInformation, networkInterfaceInformation);
+        data = new DiagnosticData(systemPropertyInformation,
+                hiveMQInformation,
+                systemInformation,
+                networkInterfaceInformation);
 
     }
 

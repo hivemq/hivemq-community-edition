@@ -16,7 +16,18 @@
 package com.hivemq.mqtt.handler;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extensions.handler.*;
+import com.hivemq.extensions.handler.ConnackOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.ConnectInboundInterceptorHandler;
+import com.hivemq.extensions.handler.DisconnectInterceptorHandler;
+import com.hivemq.extensions.handler.PingInterceptorHandler;
+import com.hivemq.extensions.handler.PubackInterceptorHandler;
+import com.hivemq.extensions.handler.PubcompInterceptorHandler;
+import com.hivemq.extensions.handler.PublishOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.PubrecInterceptorHandler;
+import com.hivemq.extensions.handler.PubrelInterceptorHandler;
+import com.hivemq.extensions.handler.SubackOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.UnsubackOutboundInterceptorHandler;
+import com.hivemq.extensions.handler.UnsubscribeInboundInterceptorHandler;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import com.hivemq.mqtt.message.connack.CONNACK;
@@ -30,7 +41,10 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import io.netty.channel.*;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

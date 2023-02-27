@@ -43,10 +43,7 @@ public class WebSocketInitializerTest {
 
         channel.pipeline().addLast("dummy", new DummyHandler());
 
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
-                .bindAddress("0.0.0.0")
-                .build();
+        websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
     }
 
     @Test
@@ -92,8 +89,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_no_subprotocols() throws Exception {
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
+        websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(new ArrayList<String>())
                 .build();
@@ -104,8 +100,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_one_subprotocol() throws Exception {
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
+        websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1"))
                 .build();
@@ -117,8 +112,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_multiple_subprotocols() throws Exception {
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
+        websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
                 .build();

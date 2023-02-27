@@ -26,9 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Daniel Krüger
- * <p>
- * Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller
- * The reason is that the caller (primarly PublishPayloadPersistence) calls often multiple methods and the lock must cover all sequential calls to methods
+ *         <p>
+ *         Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller
+ *         The reason is that the caller (primarly PublishPayloadPersistence) calls often multiple methods and the lock
+ *         must cover all sequential calls to methods
  */
 @NotThreadSafe
 public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCounterRegistry {
@@ -106,9 +107,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
         final AtomicInteger sum = new AtomicInteger();
         for (int i = 0; i < buckets.length; i++) {
             final int bucketIndex = i;
-            bucketLock.accessBucket(bucketIndex, () ->
-                    sum.addAndGet(buckets[bucketIndex].size())
-            );
+            bucketLock.accessBucket(bucketIndex, () -> sum.addAndGet(buckets[bucketIndex].size()));
         }
         return sum.get();
     }

@@ -17,7 +17,6 @@ package com.hivemq.persistence.payload;
 
 import com.google.common.primitives.Longs;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.util.Bytes;
 
 /**
  * @author Florian Limpöck

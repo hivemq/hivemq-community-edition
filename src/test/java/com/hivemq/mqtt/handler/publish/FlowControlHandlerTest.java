@@ -36,7 +36,9 @@ import util.TestMqttDecoder;
 
 import java.nio.channels.ClosedChannelException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -73,8 +75,12 @@ public class FlowControlHandlerTest {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -95,8 +101,12 @@ public class FlowControlHandlerTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -113,8 +123,12 @@ public class FlowControlHandlerTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -143,8 +157,12 @@ public class FlowControlHandlerTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -170,8 +188,12 @@ public class FlowControlHandlerTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -200,8 +222,12 @@ public class FlowControlHandlerTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -210,7 +236,10 @@ public class FlowControlHandlerTest {
         }
 
         for (int i = 0; i < 10; i++) {
-            channel.writeOutbound(new PUBREC(i, Mqtt5PubRecReasonCode.QUOTA_EXCEEDED, null, Mqtt5UserProperties.NO_USER_PROPERTIES));
+            channel.writeOutbound(new PUBREC(i,
+                    Mqtt5PubRecReasonCode.QUOTA_EXCEEDED,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES));
         }
 
         for (int i = 0; i < 10; i++) {
@@ -230,8 +259,12 @@ public class FlowControlHandlerTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
 
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0]).withHivemqId("hivemqId1");
+        builder.withTopic("topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload(new byte[0])
+                .withHivemqId("hivemqId1");
 
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientReceiveMaximum(10);
 
@@ -240,7 +273,10 @@ public class FlowControlHandlerTest {
         }
 
         for (int i = 0; i < 10; i++) {
-            channel.writeOutbound(new PUBREC(i, Mqtt5PubRecReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES));
+            channel.writeOutbound(new PUBREC(i,
+                    Mqtt5PubRecReasonCode.SUCCESS,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES));
         }
 
         channel.writeInbound(builder.build());

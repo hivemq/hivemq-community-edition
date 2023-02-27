@@ -71,7 +71,10 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBCOMP(packetIdentifier, Mqtt5PUBCOMP.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBCOMP(packetIdentifier,
+                    Mqtt5PUBCOMP.DEFAULT_REASON_CODE,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubCompReasonCode reasonCode = Mqtt5PubCompReasonCode.fromCode(buf.readUnsignedByte());
@@ -104,7 +107,8 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBCOMP);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnection, buf, userPropertiesBuilder, MessageType.PUBCOMP);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }

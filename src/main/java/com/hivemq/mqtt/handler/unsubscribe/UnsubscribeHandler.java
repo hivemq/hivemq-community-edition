@@ -63,16 +63,14 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
 
     @Override
     protected void channelRead0(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull UNSUBSCRIBE msg) throws Exception {
+            final @NotNull ChannelHandlerContext ctx, final @NotNull UNSUBSCRIBE msg) throws Exception {
         SubscribeMessageBarrier.addToPipeline(ctx);
 
         final ClientConnection clientConnection = ctx.channel().attr(CHANNEL_ATTRIBUTE_NAME).get();
         final String clientId = checkNotNull(clientConnection.getClientId());
 
         final UnsubscribeOperationCompletionCallback unsubscribeOperationCompletionCallback =
-                new UnsubscribeOperationCompletionCallback(
-                        ctx,
+                new UnsubscribeOperationCompletionCallback(ctx,
                         sharedSubscriptionService,
                         clientConnection.getProtocolVersion(),
                         clientId,
@@ -99,7 +97,8 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
         }
 
         // Batch unsubscribe. The decoded UNSUBSCRIBE message is guaranteed to have at least one topic filter.
-        final ListenableFuture<Void> future = clientSessionSubscriptionPersistence.removeSubscriptions(clientId, ImmutableSet.copyOf(msg.getTopics()));
+        final ListenableFuture<Void> future = clientSessionSubscriptionPersistence.removeSubscriptions(clientId,
+                ImmutableSet.copyOf(msg.getTopics()));
 
         future.addListener(() -> msg.getTopics().forEach(topic -> {
             if (log.isTraceEnabled()) {
@@ -146,8 +145,9 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
                 final SharedSubscriptionService.SharedSubscription sharedSubscription =
                         SharedSubscriptionService.checkForSharedSubscription(topicFilter);
                 if (sharedSubscription != null) {
-                    sharedSubscriptionService.invalidateSharedSubscriberCache(
-                            sharedSubscription.getShareName() + "/" + sharedSubscription.getTopicFilter());
+                    sharedSubscriptionService.invalidateSharedSubscriberCache(sharedSubscription.getShareName() +
+                            "/" +
+                            sharedSubscription.getTopicFilter());
                     sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
                 }
             }

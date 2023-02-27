@@ -27,7 +27,8 @@ import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
 public class TestTopicPermissionsUtil {
 
     public static TopicPermission getTopicPermission() {
-        return new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").build();
+        return new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").build();
     }
 
 

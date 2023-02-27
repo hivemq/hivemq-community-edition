@@ -46,9 +46,8 @@ public interface AsyncIterator<V> {
         /**
          * @param item the item for this step of the iteration
          * @return a Future that completes when this step of the iteration is done and contains a {@link Boolean} if the
-         * iteration should be continued
+         *         iteration should be continued
          */
-        @NotNull
-        ListenableFuture<Boolean> onItems(@NotNull Collection<V> item);
+        @NotNull ListenableFuture<Boolean> onItems(@NotNull Collection<V> item);
     }
 }

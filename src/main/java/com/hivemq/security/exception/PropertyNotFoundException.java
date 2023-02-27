@@ -36,10 +36,11 @@ public class PropertyNotFoundException extends RuntimeException {
         super(message, throwable);
     }
 
-    public PropertyNotFoundException(final String message,
-                                     final Throwable cause,
-                                     final boolean enableSuppression,
-                                     final boolean writableStackTrace) {
+    public PropertyNotFoundException(
+            final String message,
+            final Throwable cause,
+            final boolean enableSuppression,
+            final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

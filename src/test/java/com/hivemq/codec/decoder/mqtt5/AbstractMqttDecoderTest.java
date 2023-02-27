@@ -35,7 +35,8 @@ public class AbstractMqttDecoderTest {
 
     @Before
     public void setUp() {
-        logCapture = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttServerDisconnectorImpl.class));
+        logCapture =
+                LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttServerDisconnectorImpl.class));
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new ClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);

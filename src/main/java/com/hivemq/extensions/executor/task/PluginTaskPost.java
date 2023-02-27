@@ -18,7 +18,8 @@ package com.hivemq.extensions.executor.task;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
- * Class containing the necessary callback, for the processing of an extension result in form of a {@link PluginTaskOutput}.
+ * Class containing the necessary callback, for the processing of an extension result in form of a
+ * {@link PluginTaskOutput}.
  *
  * @author Georg Held
  * @author Christoph Schäbel
@@ -39,6 +40,5 @@ public interface PluginTaskPost<O extends PluginTaskOutput> {
      *
      * @return the string that is used to calculate the Thread number, e.g. a ClientId.
      */
-    @NotNull
-    String getIdentifier();
+    @NotNull String getIdentifier();
 }

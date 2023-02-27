@@ -77,7 +77,8 @@ public interface EmbeddedHiveMQBuilder {
     /**
      * Concludes the EmbeddedHiveMQ build process.
      * <p>
-     * Beware that this method sets the {@link com.hivemq.configuration.service.InternalConfigurations#AUTH_DENY_UNAUTHENTICATED_CONNECTIONS}
+     * Beware that this method sets the
+     * {@link com.hivemq.configuration.service.InternalConfigurations#AUTH_DENY_UNAUTHENTICATED_CONNECTIONS}
      * to false. If you do not want to start EmbeddedHiveMQ in this permissive mode, reset it to true before calling
      * {@link EmbeddedHiveMQ#start()}.
      *

@@ -113,8 +113,7 @@ public class PermissionTopicMatcherUtilsTest {
     }
 
     private boolean matches(
-            final @NotNull String permissionTopic,
-            final @NotNull String actualTopic) throws InvalidTopicException {
+            final @NotNull String permissionTopic, final @NotNull String actualTopic) throws InvalidTopicException {
 
         final String stripedPermissionTopic = StringUtils.stripEnd(permissionTopic, "/");
         final String[] splitPermissionTopic = StringUtils.splitPreserveAllTokens(stripedPermissionTopic, "/");
@@ -124,7 +123,12 @@ public class PermissionTopicMatcherUtilsTest {
 
         final String stripedActualTopic = StringUtils.stripEnd(actualTopic, "/");
         final String[] splitActualTopic = StringUtils.splitPreserveAllTokens(stripedActualTopic, "/");
-        return PermissionTopicMatcherUtils.matches(stripedPermissionTopic, splitPermissionTopic, nonWildCard,
-                endsWithWildCard, rootWildCard, stripedActualTopic, splitActualTopic);
+        return PermissionTopicMatcherUtils.matches(stripedPermissionTopic,
+                splitPermissionTopic,
+                nonWildCard,
+                endsWithWildCard,
+                rootWildCard,
+                stripedActualTopic,
+                splitActualTopic);
     }
 }

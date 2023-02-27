@@ -48,8 +48,7 @@ public interface PublishPayloadPersistence {
      * @return The payload that is persisted.
      * @throws PayloadPersistenceException if {@link PublishPayloadLocalPersistence} returns null reference for id.
      */
-    @NotNull
-    byte[] get(long id);
+    @NotNull byte[] get(long id);
 
     /**
      * Get the persisted payload for an id or null.
@@ -58,8 +57,7 @@ public interface PublishPayloadPersistence {
      * @return The payload that is persisted for the given id or null if the reference was deleted.
      */
     @Nullable("There is a race condition case with retained messages where retained messages are overwritten. " +
-            "In this case this method may return null")
-    byte[] getPayloadOrNull(long id);
+            "In this case this method may return null") byte[] getPayloadOrNull(long id);
 
     /**
      * Increments the current reference count for an id.
@@ -87,6 +85,5 @@ public interface PublishPayloadPersistence {
      * @return all reference counts for all publish payloads in a readonly map.
      */
     @VisibleForTesting
-    @NotNull
-    ImmutableMap<Long, Integer> getReferenceCountersAsMap();
+    @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap();
 }

@@ -22,9 +22,6 @@ public class PublishReturnCodeTest {
 
     @Test
     public void test_all_value_of() {
-        EnumTestUtil.assertAllValueOf(
-                PublishReturnCode.class,
-                PublishReturnCode::getId,
-                PublishReturnCode::valueOf);
+        EnumTestUtil.assertAllValueOf(PublishReturnCode.class, PublishReturnCode::getId, PublishReturnCode::valueOf);
     }
 }

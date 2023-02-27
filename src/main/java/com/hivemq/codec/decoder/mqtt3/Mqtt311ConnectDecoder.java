@@ -111,7 +111,8 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
 
         final int utf8StringLength;
 
-        if (buf.readableBytes() < 2 || (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()) && utf8StringLength > 0)) {
+        if (buf.readableBytes() < 2 ||
+                (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()) && utf8StringLength > 0)) {
             mqttConnacker.connackError(clientConnection.getChannel(),
                     "A client (IP: {}) sent a CONNECT message with an incorrect client id length. Disconnecting client.",
                     "Sent CONNECT with incorrect client id length",
@@ -219,6 +220,7 @@ public class Mqtt311ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withCleanStart(isCleanSessionFlag)
                 .withSessionExpiryInterval(sessionExpiryInterval)
                 .withKeepAlive(keepAlive)
-                .withWillPublish(willPublish).build();
+                .withWillPublish(willPublish)
+                .build();
     }
 }

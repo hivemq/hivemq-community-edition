@@ -50,7 +50,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,7 +81,8 @@ public class PublishServiceImplTest {
     private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
     private final HivemqId hiveMQId = new HivemqId();
-    private final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
+    private final FullConfigurationService fullConfigurationService =
+            new TestConfigurationBootstrap().getFullConfigurationService();
     private PublishServiceImpl publishService;
 
     @Before
@@ -86,7 +91,12 @@ public class PublishServiceImplTest {
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
         managedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
         managedPluginExecutorService.postConstruct();
-        publishService = new PublishServiceImpl(rateLimitService, managedPluginExecutorService, internalPublishService, publishDistributor, hiveMQId, topicTree);
+        publishService = new PublishServiceImpl(rateLimitService,
+                managedPluginExecutorService,
+                internalPublishService,
+                publishDistributor,
+                hiveMQId,
+                topicTree);
     }
 
     @Test(expected = DoNotImplementException.class)
@@ -101,7 +111,9 @@ public class PublishServiceImplTest {
     @Test(expected = RateLimitExceededException.class)
     public void test_publish_rate_limit_exceeded() throws Throwable {
         when(rateLimitService.rateLimitExceeded()).thenReturn(true);
-        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
+        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic")
+                .payload(ByteBuffer.wrap("message".getBytes()))
+                .build();
         try {
             publishService.publish(publish).get();
         } catch (final ExecutionException e) {
@@ -121,7 +133,9 @@ public class PublishServiceImplTest {
     @Test(expected = RateLimitExceededException.class)
     public void test_publish_to_client_rate_limit_exceeded() throws Throwable {
         when(rateLimitService.rateLimitExceeded()).thenReturn(true);
-        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
+        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic")
+                .payload(ByteBuffer.wrap("message".getBytes()))
+                .build();
         try {
             publishService.publishToClient(publish, "client").get();
         } catch (final ExecutionException e) {
@@ -131,9 +145,11 @@ public class PublishServiceImplTest {
 
     @Test(timeout = 10000)
     public void test_publish() throws Throwable {
-        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
-        when(internalPublishService.publish(any(PUBLISH.class), any(ExecutorService.class), isNull()))
-                .thenReturn(Futures.immediateFuture(PublishReturnCode.DELIVERED));
+        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic")
+                .payload(ByteBuffer.wrap("message".getBytes()))
+                .build();
+        when(internalPublishService.publish(any(PUBLISH.class), any(ExecutorService.class), isNull())).thenReturn(
+                Futures.immediateFuture(PublishReturnCode.DELIVERED));
 
         publishService.publish(publish).get();
         verify(internalPublishService).publish(any(PUBLISH.class), any(ExecutorService.class), isNull());
@@ -142,10 +158,18 @@ public class PublishServiceImplTest {
     @Test(timeout = 10000)
     public void test_publish_to_client() throws Exception {
         final byte subscriptionFlags = SubscriptionFlag.getDefaultFlags(false, false, false);
-        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
-        when(topicTree.findSubscriber("client", "topic")).thenReturn(
-                new SubscriberWithIdentifiers("client", 1, subscriptionFlags, null));
-        when(publishDistributor.sendMessageToSubscriber(any(PUBLISH.class), anyString(), anyInt(), anyBoolean(), anyBoolean(),
+        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic")
+                .payload(ByteBuffer.wrap("message".getBytes()))
+                .build();
+        when(topicTree.findSubscriber("client", "topic")).thenReturn(new SubscriberWithIdentifiers("client",
+                1,
+                subscriptionFlags,
+                null));
+        when(publishDistributor.sendMessageToSubscriber(any(PUBLISH.class),
+                anyString(),
+                anyInt(),
+                anyBoolean(),
+                anyBoolean(),
                 any(ImmutableIntArray.class))).thenReturn(Futures.immediateFuture(PublishStatus.DELIVERED));
         final PublishToClientResult result = publishService.publishToClient(publish, "client").get();
         assertEquals(PublishToClientResult.SUCCESSFUL, result);
@@ -153,7 +177,9 @@ public class PublishServiceImplTest {
 
     @Test(timeout = 10000)
     public void test_publish_to_client_not_subscribed() throws Exception {
-        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic").payload(ByteBuffer.wrap("message".getBytes())).build();
+        final Publish publish = new PublishBuilderImpl(fullConfigurationService).topic("topic")
+                .payload(ByteBuffer.wrap("message".getBytes()))
+                .build();
         when(topicTree.findSubscriber("client", "topic")).thenReturn(null);
         final PublishToClientResult result = publishService.publishToClient(publish, "client").get();
         assertEquals(PublishToClientResult.NOT_SUBSCRIBED, result);

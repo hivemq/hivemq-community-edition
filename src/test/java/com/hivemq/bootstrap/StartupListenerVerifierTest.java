@@ -30,22 +30,31 @@ public class StartupListenerVerifierTest {
 
     @Test(expected = UnrecoverableException.class)
     public void test_verifier_verify_only_listener_failed() throws Exception {
-        final ListenerStartupInformation failed = ListenerStartupInformation.failedListenerStartup(2000, new TcpListener(2000, "0.0.0.0"), new RuntimeException("reason"));
+        final ListenerStartupInformation failed = ListenerStartupInformation.failedListenerStartup(2000,
+                new TcpListener(2000, "0.0.0.0"),
+                new RuntimeException("reason"));
         new StartupListenerVerifier(Lists.newArrayList(failed)).verifyAndPrint();
     }
 
     @Test(expected = UnrecoverableException.class)
     public void test_verifier_verify_all_listeners_failed() throws Exception {
-        final ListenerStartupInformation failed = ListenerStartupInformation.failedListenerStartup(2000, new TcpListener(2000, "0.0.0.0"), new RuntimeException("reason"));
-        final ListenerStartupInformation failed2 = ListenerStartupInformation.failedListenerStartup(1234, new TcpListener(1234, "0.0.0.0"), new RuntimeException("anotherreason"));
+        final ListenerStartupInformation failed = ListenerStartupInformation.failedListenerStartup(2000,
+                new TcpListener(2000, "0.0.0.0"),
+                new RuntimeException("reason"));
+        final ListenerStartupInformation failed2 = ListenerStartupInformation.failedListenerStartup(1234,
+                new TcpListener(1234, "0.0.0.0"),
+                new RuntimeException("anotherreason"));
 
         new StartupListenerVerifier(Lists.newArrayList(failed, failed2)).verifyAndPrint();
     }
 
     @Test
     public void test_verifier_verify_some_listeners_failed() throws Exception {
-        final ListenerStartupInformation failed = ListenerStartupInformation.failedListenerStartup(2000, new TcpListener(2000, "0.0.0.0"), new RuntimeException("reason"));
-        final ListenerStartupInformation success = ListenerStartupInformation.successfulListenerStartup(1234, new TcpListener(1234, "0.0.0.0"));
+        final ListenerStartupInformation failed = ListenerStartupInformation.failedListenerStartup(2000,
+                new TcpListener(2000, "0.0.0.0"),
+                new RuntimeException("reason"));
+        final ListenerStartupInformation success =
+                ListenerStartupInformation.successfulListenerStartup(1234, new TcpListener(1234, "0.0.0.0"));
 
         new StartupListenerVerifier(Lists.newArrayList(failed, success)).verifyAndPrint();
 

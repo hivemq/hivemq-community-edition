@@ -16,8 +16,8 @@
 package com.hivemq.bootstrap.netty.ioc;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.netty.NettyConfiguration;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -79,8 +79,6 @@ public class NettyConfigurationProvider implements Provider<NettyConfiguration> 
     private ThreadFactory createThreadFactory(final @NotNull String nameFormat) {
 
         checkNotNull(nameFormat, "Thread Factory Name Format must not be null");
-        return new ThreadFactoryBuilder().
-                setNameFormat(nameFormat).
-                build();
+        return new ThreadFactoryBuilder().setNameFormat(nameFormat).build();
     }
 }

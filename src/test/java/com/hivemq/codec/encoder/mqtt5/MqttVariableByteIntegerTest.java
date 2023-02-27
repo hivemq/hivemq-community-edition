@@ -19,7 +19,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Silvio Giebl
@@ -87,8 +89,7 @@ public class MqttVariableByteIntegerTest {
                             continue;
                         }
                         byteBuf.writeByte(128 + i).writeByte(128 + j).writeByte(128 + k).writeByte(l);
-                        assertEquals(
-                                i + j * 128 + k * 128 * 128 + l * 128 * 128 * 128,
+                        assertEquals(i + j * 128 + k * 128 * 128 + l * 128 * 128 * 128,
                                 MqttVariableByteInteger.decode(byteBuf));
                         byteBuf.clear();
                     }

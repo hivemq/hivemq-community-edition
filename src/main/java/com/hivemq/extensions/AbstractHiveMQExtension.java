@@ -134,7 +134,8 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
 
     @Override
     public void start(
-            final @NotNull ExtensionStartInput extensionStartInput, final @NotNull ExtensionStartOutput extensionStartOutput) {
+            final @NotNull ExtensionStartInput extensionStartInput,
+            final @NotNull ExtensionStartOutput extensionStartOutput) {
 
         if (extensionMain != null) {
             extensionMain.extensionStart(extensionStartInput, extensionStartOutput);
@@ -142,7 +143,9 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     }
 
     @Override
-    public void stop(final @NotNull ExtensionStopInput extensionStopInput, final @NotNull ExtensionStopOutput extensionStopOutput) {
+    public void stop(
+            final @NotNull ExtensionStopInput extensionStopInput,
+            final @NotNull ExtensionStopOutput extensionStopOutput) {
         if (extensionMain != null) {
             extensionMain.extensionStop(extensionStopInput, extensionStopOutput);
         }
@@ -167,7 +170,9 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
                     getLogger().warn("Could not disable extension folder {}.", extensionFolderPath);
                 }
             } catch (final IOException e) {
-                getLogger().warn("Could not disable extension folder {}, reason {}", extensionFolderPath, e.getMessage());
+                getLogger().warn("Could not disable extension folder {}, reason {}",
+                        extensionFolderPath,
+                        e.getMessage());
                 getLogger().trace("Original exception", e);
             }
             Checkpoints.checkpoint("extension-disabled");

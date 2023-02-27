@@ -35,7 +35,11 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class IsolatedExtensionClassloaderTest {
 
@@ -69,7 +73,8 @@ public class IsolatedExtensionClassloaderTest {
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
 
         final Class<?> aClass;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             aClass = loader.loadClass(ClassLoadedClass.class.getCanonicalName());
         }
 
@@ -111,7 +116,8 @@ public class IsolatedExtensionClassloaderTest {
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
 
         final Class<?> aClass;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             aClass = loader.loadClass(ClassLoaderTestClass.class.getCanonicalName());
         }
 
@@ -133,14 +139,17 @@ public class IsolatedExtensionClassloaderTest {
         final File file = temporaryFolder.newFile(ClassLoadedClass.class.getSimpleName() + ".java");
         FileUtils.copyFile(javaSrcFile, file);
 
-        replaceFileContent(file, "package com.hivemq.extensions.classloader;", "package com.hivemq.extensions.api.test;");
+        replaceFileContent(file,
+                "package com.hivemq.extensions.classloader;",
+                "package com.hivemq.extensions.api.test;");
         replaceFileContent(file, "original", "modified");
 
         // actually compile the file
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
 
         final Class<?> aClass;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             aClass = loader.loadClass("com.hivemq.extensions.api.test.ClassLoadedClass");
         }
 
@@ -171,10 +180,12 @@ public class IsolatedExtensionClassloaderTest {
         final URL serviceUrl = Services.class.getResource("Services.class");
         assertNotNull(serviceUrl);
         final String path = serviceUrl.toExternalForm();
-        final URL folder = new URL(path.replace(Services.class.getCanonicalName().replace(".", File.separator) + ".class", ""));
+        final URL folder =
+                new URL(path.replace(Services.class.getCanonicalName().replace(".", File.separator) + ".class", ""));
 
         final Class<?> servicesClassIsolated;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             servicesClassIsolated = loader.loadClass(Services.class.getCanonicalName());
         }
 
@@ -193,7 +204,8 @@ public class IsolatedExtensionClassloaderTest {
 
     @Test
     public void test_get_resource() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             final URL resource = loader.getResource("logback-test.xml");
             assertNotNull(resource);
         }
@@ -202,7 +214,8 @@ public class IsolatedExtensionClassloaderTest {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void test_get_resource_delegate() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(), null)) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(),
+                null)) {
             final URL resource = loader.getResource("logback-test.xml");
             assertNotNull(resource);
         }
@@ -210,7 +223,8 @@ public class IsolatedExtensionClassloaderTest {
 
     @Test
     public void test_get_resources() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             final Enumeration<URL> resource = loader.getResources("logback-test.xml");
             assertNotNull(resource);
             assertTrue(resource.hasMoreElements());
@@ -221,7 +235,8 @@ public class IsolatedExtensionClassloaderTest {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void test_get_resources_delegate() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(), null)) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(),
+                null)) {
             final Enumeration<URL> resource = loader.getResources("logback-test.xml");
             assertNotNull(resource);
             assertTrue(resource.hasMoreElements());
@@ -231,7 +246,8 @@ public class IsolatedExtensionClassloaderTest {
 
     @Test
     public void test_get_resources_as_stream() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
+                getClass().getClassLoader())) {
             final InputStream resource = loader.getResourceAsStream("logback-test.xml");
             assertNotNull(resource);
         }
@@ -240,16 +256,15 @@ public class IsolatedExtensionClassloaderTest {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void test_get_resources_as_stream_delegate() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(), null)) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(),
+                null)) {
             final InputStream resource = loader.getResourceAsStream("logback-test.xml");
             assertNotNull(resource);
         }
     }
 
     private void replaceFileContent(
-            final @NotNull File file,
-            final @NotNull String original,
-            final @NotNull String modified) throws Exception {
+            final @NotNull File file, final @NotNull String original, final @NotNull String modified) throws Exception {
         String content = FileUtils.readFileToString(file, UTF_8);
         content = content.replaceAll(original, modified);
         FileUtils.writeStringToFile(file, content, UTF_8);
@@ -258,7 +273,8 @@ public class IsolatedExtensionClassloaderTest {
     private File getJavaSrcFileForClassFile(final Class<?> clazz) {
         final File f = new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());
         File gradleHivemqParentFolder = f.getParentFile();
-        while (!gradleHivemqParentFolder.getAbsolutePath().equals("/") && !gradleHivemqParentFolder.getAbsolutePath().endsWith("out")) {
+        while (!gradleHivemqParentFolder.getAbsolutePath().equals("/") &&
+                !gradleHivemqParentFolder.getAbsolutePath().endsWith("out")) {
             gradleHivemqParentFolder = gradleHivemqParentFolder.getParentFile();
         }
         gradleHivemqParentFolder = gradleHivemqParentFolder.getParentFile();
@@ -269,7 +285,8 @@ public class IsolatedExtensionClassloaderTest {
         }
         final File gradleJavaFolder = new File(gradleTestFolder, "java");
 
-        final File gradleFile = new File(gradleJavaFolder, clazz.getCanonicalName().replace(".", File.separator) + ".java");
+        final File gradleFile =
+                new File(gradleJavaFolder, clazz.getCanonicalName().replace(".", File.separator) + ".java");
         if (gradleFile.exists()) {
             return gradleFile;
         }

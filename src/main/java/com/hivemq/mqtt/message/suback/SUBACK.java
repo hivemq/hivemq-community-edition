@@ -85,8 +85,7 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
         final ImmutableList.Builder<Mqtt5SubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
         packet.getReasonCodes().forEach(reasonCode -> reasonCodesBuilder.add(Mqtt5SubAckReasonCode.from(reasonCode)));
 
-        return new SUBACK(
-                packet.getPacketIdentifier(),
+        return new SUBACK(packet.getPacketIdentifier(),
                 reasonCodesBuilder.build(),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));

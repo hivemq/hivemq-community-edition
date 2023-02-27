@@ -17,9 +17,20 @@ package com.hivemq.configuration;
 
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.ioc.ConfigurationFileProvider;
-import com.hivemq.configuration.reader.*;
+import com.hivemq.configuration.reader.ConfigFileReader;
+import com.hivemq.configuration.reader.ConfigurationFile;
+import com.hivemq.configuration.reader.ListenerConfigurator;
+import com.hivemq.configuration.reader.MqttConfigurator;
+import com.hivemq.configuration.reader.PersistenceConfigurator;
+import com.hivemq.configuration.reader.RestrictionConfigurator;
+import com.hivemq.configuration.reader.SecurityConfigurator;
+import com.hivemq.configuration.reader.UsageStatisticsConfigurator;
 import com.hivemq.configuration.service.FullConfigurationService;
-import com.hivemq.configuration.service.impl.*;
+import com.hivemq.configuration.service.impl.ConfigurationServiceImpl;
+import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
+import com.hivemq.configuration.service.impl.PersistenceConfigurationServiceImpl;
+import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
+import com.hivemq.configuration.service.impl.SecurityConfigurationServiceImpl;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServiceImpl;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.statistics.UsageStatisticsConfigImpl;
@@ -32,18 +43,17 @@ public class ConfigurationBootstrap {
 
     public static @NotNull FullConfigurationService bootstrapConfig(final @NotNull SystemInformation systemInformation) {
 
-        final ConfigurationServiceImpl configurationService = new ConfigurationServiceImpl(
-                new ListenerConfigurationServiceImpl(),
-                new MqttConfigurationServiceImpl(),
-                new RestrictionsConfigurationServiceImpl(),
-                new SecurityConfigurationServiceImpl(),
-                new UsageStatisticsConfigImpl(),
-                new PersistenceConfigurationServiceImpl());
+        final ConfigurationServiceImpl configurationService =
+                new ConfigurationServiceImpl(new ListenerConfigurationServiceImpl(),
+                        new MqttConfigurationServiceImpl(),
+                        new RestrictionsConfigurationServiceImpl(),
+                        new SecurityConfigurationServiceImpl(),
+                        new UsageStatisticsConfigImpl(),
+                        new PersistenceConfigurationServiceImpl());
 
         final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
 
-        final ConfigFileReader configFileReader = new ConfigFileReader(
-                configurationFile,
+        final ConfigFileReader configFileReader = new ConfigFileReader(configurationFile,
                 new RestrictionConfigurator(configurationService.restrictionsConfiguration()),
                 new SecurityConfigurator(configurationService.securityConfiguration()),
                 new EnvVarUtil(),

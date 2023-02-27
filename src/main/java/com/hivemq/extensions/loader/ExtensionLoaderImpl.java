@@ -27,7 +27,12 @@ import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.extensions.*;
+import com.hivemq.extensions.ExtensionUtil;
+import com.hivemq.extensions.HiveMQEmbeddedExtensionImpl;
+import com.hivemq.extensions.HiveMQExtension;
+import com.hivemq.extensions.HiveMQExtensionEntity;
+import com.hivemq.extensions.HiveMQExtensionEvent;
+import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import com.hivemq.extensions.config.HiveMQExtensionXMLReader;
 import com.hivemq.extensions.exception.ExtensionLoadingException;
@@ -75,8 +80,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
     @ReadOnly
     @Override
     public @NotNull ImmutableSet<HiveMQExtensionEvent> loadExtensions(
-            final @NotNull Path extensionFolder,
-            final boolean permissive) {
+            final @NotNull Path extensionFolder, final boolean permissive) {
         checkNotNull(extensionFolder, "extension folder must not be null");
 
         try {
@@ -140,8 +144,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
 
         // check for matching directory name and extensionId
         if (!fileName.equals(xmlEntity.getId())) {
-            log.warn(
-                    "Found extension directory name not matching to id, ignoring extension with id \"{}\" at {}",
+            log.warn("Found extension directory name not matching to id, ignoring extension with id \"{}\" at {}",
                     xmlEntity.getId(),
                     extensionFolder);
             return null;
@@ -212,8 +215,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
         try {
             staticInitializer.initialize(embeddedExtension.getId(), extensionClassloader);
         } catch (final ExtensionLoadingException e) {
-            log.warn(
-                    "Embedded extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
+            log.warn("Embedded extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
                     embeddedExtension.getId(),
                     e.getMessage());
             log.debug("Original exception", e);
@@ -225,8 +227,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
 
     @VisibleForTesting
     @Nullable HiveMQExtension loadSingleExtension(
-            final @NotNull Path extensionFolder,
-            final @NotNull HiveMQExtensionEntity xmlEntity) {
+            final @NotNull Path extensionFolder, final @NotNull HiveMQExtensionEntity xmlEntity) {
         final ImmutableList.Builder<Path> jarPaths = ImmutableList.builder();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(extensionFolder)) {
             for (final Path path : stream) {
@@ -247,7 +248,8 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
             try {
                 urls.add(path.toUri().toURL());
             } catch (final MalformedURLException e) {
-                log.warn("Could not add " + path.toAbsolutePath() +
+                log.warn("Could not add " +
+                        path.toAbsolutePath() +
                         " to the list of files considered for extension discovery");
                 log.debug("Original exception:", e);
             }
@@ -290,8 +292,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
 
     @VisibleForTesting
     @NotNull Optional<Class<? extends ExtensionMain>> loadFromUrls(
-            final @NotNull Collection<URL> urls,
-            final @NotNull String extensionId) {
+            final @NotNull Collection<URL> urls, final @NotNull String extensionId) {
         checkNotNull(urls, "urls must not be null");
 
         if (urls.isEmpty()) {
@@ -369,13 +370,11 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
     }
 
     private boolean initializeStaticContext(
-            final @NotNull String hiveMQExtensionID,
-            final @NotNull IsolatedExtensionClassloader classloader) {
+            final @NotNull String hiveMQExtensionID, final @NotNull IsolatedExtensionClassloader classloader) {
         try {
             staticInitializer.initialize(hiveMQExtensionID, classloader);
         } catch (final Throwable e) {
-            log.warn(
-                    "Extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
+            log.warn("Extension with id \"{}\" cannot be started, the extension will be disabled. reason: {}",
                     hiveMQExtensionID,
                     e.getMessage());
             log.debug("Original exception", e);

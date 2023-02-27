@@ -38,7 +38,9 @@ public class NonSslHandler extends ByteToMessageDecoder {
     }
 
     @Override
-    protected void decode(final @NotNull ChannelHandlerContext ctx, final @NotNull ByteBuf in, final @NotNull List<Object> out) throws Exception {
+    protected void decode(
+            final @NotNull ChannelHandlerContext ctx, final @NotNull ByteBuf in, final @NotNull List<Object> out)
+            throws Exception {
 
         //Needs minimum 5 bytes to be able to tell what it is.
         if (in.readableBytes() < 11) {

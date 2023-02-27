@@ -53,10 +53,9 @@ public class ShutdownHooks {
     public ShutdownHooks() {
         shuttingDown = new AtomicBoolean(false);
 
-        synchronousHooks = MultimapBuilder.SortedSetMultimapBuilder
-                .treeKeys(Ordering.natural().reverse()) //High priorities first
-                .arrayListValues()
-                .build();
+        synchronousHooks =
+                MultimapBuilder.SortedSetMultimapBuilder.treeKeys(Ordering.natural().reverse()) //High priorities first
+                        .arrayListValues().build();
     }
 
     public boolean isShuttingDown() {
@@ -73,8 +72,7 @@ public class ShutdownHooks {
             return;
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");
-        log.trace("Adding shutdown hook {} with priority {}", hiveMQShutdownHook.name(),
-                hiveMQShutdownHook.priority());
+        log.trace("Adding shutdown hook {} with priority {}", hiveMQShutdownHook.name(), hiveMQShutdownHook.priority());
         synchronousHooks.put(hiveMQShutdownHook.priority().getValue(), hiveMQShutdownHook);
     }
 
@@ -89,7 +87,8 @@ public class ShutdownHooks {
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");
 
-        log.trace("Removing shutdown hook {} with priority {}", hiveMQShutdownHook.name(),
+        log.trace("Removing shutdown hook {} with priority {}",
+                hiveMQShutdownHook.name(),
                 hiveMQShutdownHook.priority());
         synchronousHooks.values().remove(hiveMQShutdownHook);
     }
@@ -106,10 +105,11 @@ public class ShutdownHooks {
         log.info("Shutting down HiveMQ. Please wait, this could take a while...");
         final ScheduledExecutorService executorService =
                 Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create("shutdown-log-executor"));
-        executorService.scheduleAtFixedRate(
-                () -> log.info(
+        executorService.scheduleAtFixedRate(() -> log.info(
                         "Still shutting down HiveMQ. Waiting for remaining tasks to be executed. Do not shutdown HiveMQ."),
-                10, 10, TimeUnit.SECONDS);
+                10,
+                10,
+                TimeUnit.SECONDS);
         for (final HiveMQShutdownHook runnable : synchronousHooks.values()) {
             log.trace(MarkerFactory.getMarker("SHUTDOWN_HOOK"), "Running shutdown hook {}", runnable.name());
             runnable.run();

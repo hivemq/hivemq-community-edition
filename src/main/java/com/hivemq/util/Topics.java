@@ -16,7 +16,6 @@
 package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService.SharedSubscription;
 
 import java.util.regex.Matcher;
@@ -130,9 +129,9 @@ public class Topics {
             }
 
             // finally, is it a shared subscription?
-            if (i == SHARED_SUBSCRIPTION_LENGTH
-                    && sharedCounter == SHARED_SUBSCRIPTION_LENGTH
-                    && currentChar == SHARED_SUBSCRIPTION_DELIMITER) {
+            if (i == SHARED_SUBSCRIPTION_LENGTH &&
+                    sharedCounter == SHARED_SUBSCRIPTION_LENGTH &&
+                    currentChar == SHARED_SUBSCRIPTION_DELIMITER) {
                 isSharedSubscription = true;
             }
 
@@ -166,7 +165,9 @@ public class Topics {
             //Let's check if the + sign is in the middle of a string
             if (currentChar == '+' && lastChar != '/') {
 
-                if (sharedSubscriptionDelimiterCharCount != 2 || !isSharedSubscription || lastChar != SHARED_SUBSCRIPTION_DELIMITER) {
+                if (sharedSubscriptionDelimiterCharCount != 2 ||
+                        !isSharedSubscription ||
+                        lastChar != SHARED_SUBSCRIPTION_DELIMITER) {
                     return false;
                 }
             }
@@ -198,8 +199,7 @@ public class Topics {
      * @return true if it contains a wildcard character, else false.
      */
     public static boolean containsWildcard(final String topic) {
-        return (topic.indexOf(MULTI_LEVEL_WILDCARD) != -1) ||
-                (topic.indexOf(SINGLE_LEVEL_WILDCARD) != -1);
+        return (topic.indexOf(MULTI_LEVEL_WILDCARD) != -1) || (topic.indexOf(SINGLE_LEVEL_WILDCARD) != -1);
     }
 
 

@@ -39,14 +39,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * The send quota is incremented by 1:
  * <p>
- * - Each time a PUBACK or PUBCOMP packet is sent by the server, regardless of whether the PUBACK or PUBCOMP carried an error code.
+ * - Each time a PUBACK or PUBCOMP packet is sent by the server, regardless of whether the PUBACK or PUBCOMP carried an
+ * error code.
  * <p>
  * - Each time a PUBREC packet is sent by the server with a {@link Mqtt5PubRecReasonCode} of 0x80 or greater.
  * <p>
  * A Client gets disconnected if its send quota is '-1'.
  *
  * @author Florian Limpöck
- *
  * @since 4.0.0
  */
 public class FlowControlHandler extends ChannelDuplexHandler {
@@ -56,7 +56,8 @@ public class FlowControlHandler extends ChannelDuplexHandler {
     private final MqttServerDisconnector serverDisconnector;
 
     @Inject
-    public FlowControlHandler(final MqttConfigurationService mqttConfigurationService, final MqttServerDisconnector serverDisconnector) {
+    public FlowControlHandler(
+            final MqttConfigurationService mqttConfigurationService, final MqttServerDisconnector serverDisconnector) {
         this.serverReceiveMaximum = mqttConfigurationService.serverReceiveMaximum();
         this.serverDisconnector = serverDisconnector;
         this.serverSendQuota = new AtomicInteger(serverReceiveMaximum);
@@ -88,7 +89,8 @@ public class FlowControlHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void write(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) throws Exception {
+    public void write(final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise)
+            throws Exception {
 
         //do not check msg instance and increment quota if its already at maximum
         if (serverSendQuota.get() == serverReceiveMaximum) {

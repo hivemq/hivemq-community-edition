@@ -54,8 +54,7 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
     private final @NotNull ClientContextImpl clientContext;
 
     public ClientContextPluginImpl(
-            final @NotNull ClassLoader pluginClassloader,
-            final @NotNull ClientContextImpl clientContext) {
+            final @NotNull ClassLoader pluginClassloader, final @NotNull ClientContextImpl clientContext) {
 
         this.pluginClassloader = pluginClassloader;
         this.clientContext = clientContext;
@@ -203,7 +202,8 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     @Override
     public void removeSubscribeInboundInterceptor(final @NotNull SubscribeInboundInterceptor interceptor) {
-        clientContext.removeSubscribeInboundInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+        clientContext.removeSubscribeInboundInterceptor(checkNotNull(interceptor,
+                "The interceptor must never be null"));
     }
 
     @Override
@@ -213,22 +213,26 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     @Override
     public void removeUnsubscribeInboundInterceptor(final @NotNull UnsubscribeInboundInterceptor interceptor) {
-        clientContext.removeUnsubscribeInboundInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+        clientContext.removeUnsubscribeInboundInterceptor(checkNotNull(interceptor,
+                "The interceptor must never be null"));
     }
 
     @Override
     public void removeUnsubackOutboundInterceptor(final @NotNull UnsubackOutboundInterceptor interceptor) {
-        clientContext.removeUnsubackOutboundInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+        clientContext.removeUnsubackOutboundInterceptor(checkNotNull(interceptor,
+                "The interceptor must never be null"));
     }
 
     @Override
     public void removeDisconnectInboundInterceptor(final @NotNull DisconnectInboundInterceptor interceptor) {
-        clientContext.removeDisconnectInboundInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+        clientContext.removeDisconnectInboundInterceptor(checkNotNull(interceptor,
+                "The interceptor must never be null"));
     }
 
     @Override
     public void removeDisconnectOutboundInterceptor(final @NotNull DisconnectOutboundInterceptor interceptor) {
-        clientContext.removeDisconnectOutboundInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+        clientContext.removeDisconnectOutboundInterceptor(checkNotNull(interceptor,
+                "The interceptor must never be null"));
     }
 
     @Override
@@ -238,7 +242,8 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     @Override
     public void removePingRespOutboundInterceptor(final @NotNull PingRespOutboundInterceptor interceptor) {
-        clientContext.removePingRespOutboundInterceptor(checkNotNull(interceptor, "The interceptor must never be null"));
+        clientContext.removePingRespOutboundInterceptor(checkNotNull(interceptor,
+                "The interceptor must never be null"));
     }
 
     @Override

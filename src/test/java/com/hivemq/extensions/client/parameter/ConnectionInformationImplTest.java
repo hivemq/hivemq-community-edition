@@ -18,7 +18,11 @@ package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.Lists;
 import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.Tls;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ClientTlsInformation;
 import com.hivemq.extension.sdk.api.client.parameter.Listener;
@@ -41,7 +45,11 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -135,8 +143,7 @@ public class ConnectionInformationImplTest {
     @Test
     public void test_tls_tcp_listener() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        clientConnection.setConnectedListener(new TlsTcpListener(
-                1337,
+        clientConnection.setConnectedListener(new TlsTcpListener(1337,
                 "127.0.0.1",
                 createDefaultTls().build(),
                 "test"));

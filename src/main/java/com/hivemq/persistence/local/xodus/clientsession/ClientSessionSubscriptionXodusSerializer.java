@@ -35,7 +35,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * <p>
  * timestamp (8 byte) | list of several topics (0 - n)
  * <p>
- * one topic is serialized as: <br/> Topiclength(4bytes)|Topicstring(UTF-8)(n-bytes)|Timestamp(8bytes)|QoS(2byte)|ID(8bytes)|Flags(1byte)|RetainHandling(1byte)
+ * one topic is serialized as: <br/>
+ * Topiclength(4bytes)|Topicstring(UTF-8)(n-bytes)|Timestamp(8bytes)|QoS(2byte)|ID(8bytes)|Flags(1byte)|RetainHandling(1byte)
  * <p>
  * flags: <br/> bit 1: no local <br/> bit 2: retain as published
  *
@@ -49,7 +50,8 @@ public class ClientSessionSubscriptionXodusSerializer {
      * Serializes a Topic object to a byte array.
      *
      * @param topic the topic to serialize. Must not be <code>null</code>
-     * @return a byte array with the layout of <code>Topiclength|Topicstring(UTF-8)|Timestamp|QoS|ID|Flags|RetainHandling</code>
+     * @return a byte array with the layout of
+     *         <code>Topiclength|Topicstring(UTF-8)|Timestamp|QoS|ID|Flags|RetainHandling</code>
      * @throws NullPointerException if the given Topic is <code>null</code>
      */
     @ThreadSafe
@@ -174,7 +176,12 @@ public class ClientSessionSubscriptionXodusSerializer {
         }
         cursor += 4;
 
-        return new Topic(topic, QoS.valueOf(qos), noLocal, retainAsPublished, mqtt5RetainHandling, subscriptionIdetifier);
+        return new Topic(topic,
+                QoS.valueOf(qos),
+                noLocal,
+                retainAsPublished,
+                mqtt5RetainHandling,
+                subscriptionIdetifier);
     }
 
     public long deserializeId(final byte[] bytes) {

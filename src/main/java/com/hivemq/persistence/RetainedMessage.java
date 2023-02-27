@@ -63,8 +63,7 @@ public class RetainedMessage {
             @NotNull final QoS qos,
             final long publishId,
             final long messageExpiryInterval) {
-        this(
-                message,
+        this(message,
                 qos,
                 publishId,
                 messageExpiryInterval,
@@ -101,8 +100,7 @@ public class RetainedMessage {
     }
 
     public RetainedMessage(
-            @NotNull final PUBLISH publish,
-            final long messageExpiryInterval) {
+            @NotNull final PUBLISH publish, final long messageExpiryInterval) {
         this.message = publish.getPayload();
         this.qos = publish.getQoS();
         this.publishId = publish.getPublishId();
@@ -116,8 +114,7 @@ public class RetainedMessage {
     }
 
     public RetainedMessage copyWithoutPayload() {
-        return new RetainedMessage(
-                null,
+        return new RetainedMessage(null,
                 qos,
                 publishId,
                 messageExpiryInterval,

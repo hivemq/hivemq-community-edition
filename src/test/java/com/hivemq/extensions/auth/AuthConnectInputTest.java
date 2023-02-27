@@ -46,8 +46,7 @@ public class AuthConnectInputTest {
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setConnectReceivedTimestamp(12345L);
 
-        connect = new CONNECT.Mqtt5Builder()
-                .withClientIdentifier("client")
+        connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                 .withUsername("user")
                 .withPassword("password".getBytes(Charset.defaultCharset()))
                 .withAuthMethod("method")

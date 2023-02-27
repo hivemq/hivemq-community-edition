@@ -123,7 +123,8 @@ public class SslClientCertificateImpl implements SslClientCertificate {
     }
 
     @Nullable
-    private String subjectProperty(final ASN1ObjectIdentifier objectIdentifier, final X509Certificate cert) throws CertificateEncodingException {
+    private String subjectProperty(final ASN1ObjectIdentifier objectIdentifier, final X509Certificate cert)
+            throws CertificateEncodingException {
         final X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
         final RDN[] rdNs = x500name.getRDNs(objectIdentifier);
         if (rdNs.length < 1) {

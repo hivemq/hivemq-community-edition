@@ -45,8 +45,9 @@ public class MQTTHandlerModule extends SingletonModule<Class<MQTTHandlerModule>>
 
     @Override
     protected void configure() {
-        final DefaultEventExecutorGroup mqttHandlerWorker = new DefaultEventExecutorGroup(MQTT_EVENT_EXECUTOR_THREAD_COUNT.get(), new ThreadFactoryBuilder().
-                setNameFormat("hivemq-event-executor-%d").build());
+        final DefaultEventExecutorGroup mqttHandlerWorker = new DefaultEventExecutorGroup(
+                MQTT_EVENT_EXECUTOR_THREAD_COUNT.get(),
+                new ThreadFactoryBuilder().setNameFormat("hivemq-event-executor-%d").build());
 
         bind(EventExecutorGroup.class).toInstance(mqttHandlerWorker);
 

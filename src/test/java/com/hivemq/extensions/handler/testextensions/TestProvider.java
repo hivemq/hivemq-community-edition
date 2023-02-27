@@ -19,7 +19,14 @@ package com.hivemq.extensions.handler.testextensions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListener;
 import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerProvider;
-import com.hivemq.extension.sdk.api.events.client.parameters.*;
+import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationFailedInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.AuthenticationSuccessfulInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ClientInitiatedDisconnectInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEventListenerProviderInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionLostInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
+import com.hivemq.extension.sdk.api.events.client.parameters.ServerInitiatedDisconnectInput;
 
 import java.util.concurrent.CountDownLatch;
 

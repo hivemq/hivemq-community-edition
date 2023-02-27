@@ -164,9 +164,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_modify() throws Exception {
-        final PubackInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifyInboundInterceptor.class);
+        final PubackInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifyInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
@@ -186,9 +186,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_plugin_null() throws Exception {
-        final PubackInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifyInboundInterceptor.class);
+        final PubackInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifyInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
@@ -225,9 +225,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_inbound_exception() throws Exception {
-        final PubackInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestExceptionInboundInterceptor.class);
+        final PubackInboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestExceptionInboundInterceptor.class);
         final List<PubackInboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackInboundInterceptors()).thenReturn(list);
@@ -305,9 +305,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_modify() throws Exception {
-        final PubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifyOutboundInterceptor.class);
+        final PubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifyOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
@@ -327,9 +327,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_plugin_null() throws Exception {
-        final PubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestModifyOutboundInterceptor.class);
+        final PubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestModifyOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
@@ -367,9 +367,9 @@ public class PubackInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_exception() throws Exception {
-        final PubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil.loadInstance(
-                temporaryFolder.getRoot().toPath(),
-                TestExceptionOutboundInterceptor.class);
+        final PubackOutboundInterceptor interceptor =
+                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
+                        TestExceptionOutboundInterceptor.class);
         final List<PubackOutboundInterceptor> list = ImmutableList.of(interceptor);
 
         when(clientContext.getPubackOutboundInterceptors()).thenReturn(list);

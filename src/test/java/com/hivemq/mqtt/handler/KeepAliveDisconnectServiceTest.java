@@ -34,7 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class KeepAliveDisconnectServiceTest {
 
@@ -49,7 +51,8 @@ public class KeepAliveDisconnectServiceTest {
     @Before
     public void setUp() {
         keepAliveDisconnectService = new KeepAliveDisconnectService(mqttServerDisconnector, shutdownHooks);
-        doAnswer(invocation -> null).when(mqttServerDisconnector).disconnect(channelArgumentCaptor.capture(), any(), any(), any(), any());
+        doAnswer(invocation -> null).when(mqttServerDisconnector)
+                .disconnect(channelArgumentCaptor.capture(), any(), any(), any(), any());
     }
 
     @After
@@ -94,7 +97,8 @@ public class KeepAliveDisconnectServiceTest {
         }
 
         try {
-            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
+            await().pollInterval(1, TimeUnit.MILLISECONDS)
+                    .timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() == 2000);
         } finally {
             executorService.shutdown();
@@ -126,7 +130,8 @@ public class KeepAliveDisconnectServiceTest {
         }).start();
 
         try {
-            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
+            await().pollInterval(1, TimeUnit.MILLISECONDS)
+                    .timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() == 2000);
         } finally {
             executorService.shutdown();
@@ -166,7 +171,8 @@ public class KeepAliveDisconnectServiceTest {
         }).start();
 
         try {
-            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
+            await().pollInterval(1, TimeUnit.MILLISECONDS)
+                    .timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() >= 100);
         } finally {
             executorService.shutdown();

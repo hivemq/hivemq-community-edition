@@ -255,7 +255,8 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
 
         if (isInvalidTopic(clientConnection, willTopic)) {
             mqttConnacker.connackError(clientConnection.getChannel(),
-                    null, //already logged
+                    null,
+                    //already logged
                     "Sent CONNECT with invalid will-topic",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     ReasonStrings.CONNACK_MALFORMED_PACKET_INVALID_WILL_TOPIC);

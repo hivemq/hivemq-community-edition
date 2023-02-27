@@ -16,8 +16,23 @@
 package com.hivemq.codec.decoder;
 
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
-import com.hivemq.codec.decoder.mqtt3.*;
-import com.hivemq.codec.decoder.mqtt5.*;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3DisconnectDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3PubackDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3PubcompDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3PublishDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3PubrecDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3PubrelDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3SubscribeDecoder;
+import com.hivemq.codec.decoder.mqtt3.Mqtt3UnsubscribeDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5AuthDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5DisconnectDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5PubackDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5PubcompDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5PublishDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5PubrecDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5PubrelDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5SubscribeDecoder;
+import com.hivemq.codec.decoder.mqtt5.Mqtt5UnsubscribeDecoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageType;

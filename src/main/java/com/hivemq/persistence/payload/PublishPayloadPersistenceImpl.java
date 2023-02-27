@@ -59,8 +59,9 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     private @Nullable ListenableScheduledFuture<?> removeTaskFuture;
 
     @Inject
-    PublishPayloadPersistenceImpl(final @NotNull PublishPayloadLocalPersistence localPersistence,
-                                  final @NotNull @PayloadPersistence ListeningScheduledExecutorService scheduledExecutorService) {
+    PublishPayloadPersistenceImpl(
+            final @NotNull PublishPayloadLocalPersistence localPersistence,
+            final @NotNull @PayloadPersistence ListeningScheduledExecutorService scheduledExecutorService) {
         this.localPersistence = localPersistence;
         this.scheduledExecutorService = scheduledExecutorService;
 
@@ -82,9 +83,12 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             // The rate is a configured value multiplied by the thread count.
             // Therefore, all threads in the pool should be running simultaneously on high load.
             if (!scheduledExecutorService.isShutdown()) {
-                removeTaskFuture = scheduledExecutorService.scheduleAtFixedRate(
-                        new RemoveEntryTask(localPersistence, bucketLock, removablePayloads, removeDelay,
-                                payloadReferenceCounterRegistry, taskSchedule), initialSchedule, taskSchedule, TimeUnit.MILLISECONDS);
+                removeTaskFuture = scheduledExecutorService.scheduleAtFixedRate(new RemoveEntryTask(localPersistence,
+                        bucketLock,
+                        removablePayloads,
+                        removeDelay,
+                        payloadReferenceCounterRegistry,
+                        taskSchedule), initialSchedule, taskSchedule, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -128,7 +132,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore, locking is not an issue here.
-        bucketLock.accessBucketByPaloadId(payloadId, () -> payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1));
+        bucketLock.accessBucketByPaloadId(payloadId,
+                () -> payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1));
     }
 
     /**

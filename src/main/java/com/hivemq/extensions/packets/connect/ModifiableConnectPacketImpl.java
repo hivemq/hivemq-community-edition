@@ -86,10 +86,11 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
         authenticationMethod = packet.authenticationMethod;
         authenticationData = packet.authenticationData;
 
-        willPublish = (packet.willPublish == null) ? null :
+        willPublish = (packet.willPublish == null) ?
+                null :
                 new ModifiableWillPublishImpl(packet.willPublish, configurationService);
-        userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
     }
@@ -141,8 +142,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     public void setSessionExpiryInterval(final long sessionExpiryInterval) {
         final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
         checkArgument(sessionExpiryInterval >= 0, "Session expiry interval must NOT be less than 0");
-        checkArgument(
-                sessionExpiryInterval < configuredMaximum,
+        checkArgument(sessionExpiryInterval < configuredMaximum,
                 "Expiry interval must be less than the configured maximum of" + configuredMaximum);
         if (this.sessionExpiryInterval == sessionExpiryInterval) {
             return;
@@ -160,8 +160,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     public void setKeepAlive(final int keepAlive) {
         final int configuredMaximum = configurationService.mqttConfiguration().keepAliveMax();
         checkArgument(keepAlive >= 0, "Keep alive must NOT be less than 0");
-        checkArgument(
-                keepAlive < configuredMaximum,
+        checkArgument(keepAlive < configuredMaximum,
                 "Keep alive must be less than the configured maximum of " + configuredMaximum);
         if (this.keepAlive == keepAlive) {
             return;
@@ -178,8 +177,8 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     @Override
     public void setReceiveMaximum(final int receiveMaximum) {
         checkArgument(receiveMaximum > 0, "Receive maximum must be bigger than 0");
-        checkArgument(
-                receiveMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "Receive maximum must be less than 65535");
+        checkArgument(receiveMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+                "Receive maximum must be less than 65535");
         if (this.receiveMaximum == receiveMaximum) {
             return;
         }
@@ -196,8 +195,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     public void setMaximumPacketSize(final int maximumPacketSize) {
         final int configuredMaximum = configurationService.mqttConfiguration().maxPacketSize();
         checkArgument(maximumPacketSize > 0, "Maximum packet size must be bigger than 0");
-        checkArgument(
-                maximumPacketSize < configuredMaximum,
+        checkArgument(maximumPacketSize < configuredMaximum,
                 "Maximum packet must be less than the configured maximum of " + configuredMaximum);
         if (this.maximumPacketSize == maximumPacketSize) {
             return;
@@ -214,8 +212,7 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     @Override
     public void setTopicAliasMaximum(final int topicAliasMaximum) {
         checkArgument(topicAliasMaximum >= 0, "Topic alias must NOT be less than 0");
-        checkArgument(
-                topicAliasMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+        checkArgument(topicAliasMaximum < UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
                 "Maximum packet must be less than 65535");
         if (mqttVersion != MqttVersion.V_5) {
             return;
@@ -297,11 +294,9 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     @Override
     public void setAuthenticationMethod(final @Nullable String authenticationMethod) {
         if (authenticationMethod != null) {
-            checkArgument(
-                    !Utf8Utils.containsMustNotCharacters(authenticationMethod),
+            checkArgument(!Utf8Utils.containsMustNotCharacters(authenticationMethod),
                     authenticationMethod + " is not a valid authentication method");
-            checkArgument(
-                    !Utf8Utils.hasControlOrNonCharacter(authenticationMethod),
+            checkArgument(!Utf8Utils.hasControlOrNonCharacter(authenticationMethod),
                     authenticationMethod + " is not a valid authentication method");
         }
         if (Objects.equals(this.authenticationMethod, authenticationMethod)) {
@@ -365,10 +360,22 @@ public class ModifiableConnectPacketImpl implements ModifiableConnectPacket {
     }
 
     public @NotNull ConnectPacketImpl copy() {
-        return new ConnectPacketImpl(mqttVersion, clientId, cleanStart, sessionExpiryInterval, keepAlive,
-                receiveMaximum, maximumPacketSize, topicAliasMaximum, requestProblemInformation,
-                requestResponseInformation, userName, password, authenticationMethod, authenticationData,
-                (willPublish == null) ? null : willPublish.copy(), userProperties.copy());
+        return new ConnectPacketImpl(mqttVersion,
+                clientId,
+                cleanStart,
+                sessionExpiryInterval,
+                keepAlive,
+                receiveMaximum,
+                maximumPacketSize,
+                topicAliasMaximum,
+                requestProblemInformation,
+                requestResponseInformation,
+                userName,
+                password,
+                authenticationMethod,
+                authenticationData,
+                (willPublish == null) ? null : willPublish.copy(),
+                userProperties.copy());
     }
 
     public @NotNull ModifiableConnectPacketImpl update(final @NotNull ConnectPacketImpl packet) {

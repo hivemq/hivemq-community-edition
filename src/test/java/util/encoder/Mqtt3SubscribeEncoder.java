@@ -35,7 +35,9 @@ public class Mqtt3SubscribeEncoder extends AbstractVariableHeaderLengthEncoder<S
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection, final @NotNull SUBSCRIBE msg, final @NotNull ByteBuf out) {
+            final @NotNull ClientConnection clientConnection,
+            final @NotNull SUBSCRIBE msg,
+            final @NotNull ByteBuf out) {
 
         out.writeByte(SUBSCRIBE_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);

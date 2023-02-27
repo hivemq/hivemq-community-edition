@@ -54,8 +54,7 @@ public class PUBREC extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     }
 
     public static @NotNull PUBREC from(final @NotNull PubrecPacketImpl packet) {
-        return new PUBREC(
-                packet.getPacketIdentifier(),
+        return new PUBREC(packet.getPacketIdentifier(),
                 Mqtt5PubRecReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));

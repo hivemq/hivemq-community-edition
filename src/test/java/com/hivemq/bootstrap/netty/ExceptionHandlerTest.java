@@ -21,7 +21,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.CorruptedFrameException;
-import io.netty.util.Attribute;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -33,7 +32,11 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ExceptionHandlerTest {
 
@@ -60,7 +63,8 @@ public class ExceptionHandlerTest {
 
         when(ctx.pipeline()).thenReturn(pipeline);
         when(channel.pipeline()).thenReturn(pipeline);
-        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
+                clientConnection));
         when(clientConnection.getChannelIP()).thenReturn(Optional.of("0.0.0.0"));
         when(ctx.channel()).thenReturn(channel);
 

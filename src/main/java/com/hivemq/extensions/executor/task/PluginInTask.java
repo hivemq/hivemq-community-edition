@@ -18,7 +18,8 @@ package com.hivemq.extensions.executor.task;
 import java.util.function.Consumer;
 
 /**
- * A wrapper for an extension task that only provides information for the extension developer, but can not affect HiveMQ.
+ * A wrapper for an extension task that only provides information for the extension developer, but can not affect
+ * HiveMQ.
  *
  * @author Georg Held
  */

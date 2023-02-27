@@ -30,8 +30,7 @@ public abstract class AbstractPersistence {
 
     @NotNull
     protected ListenableFuture<Void> closeDB(
-            final @NotNull LocalPersistence localPersistence,
-            final @NotNull ProducerQueues singleWriter) {
+            final @NotNull LocalPersistence localPersistence, final @NotNull ProducerQueues singleWriter) {
         return singleWriter.shutdown((bucketIndex) -> {
             try {
                 localPersistence.closeDB(bucketIndex);

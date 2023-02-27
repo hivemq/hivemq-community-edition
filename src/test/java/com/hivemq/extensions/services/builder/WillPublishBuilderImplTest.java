@@ -76,8 +76,7 @@ public class WillPublishBuilderImplTest {
         assertEquals(0, willPublishPacket.getSubscriptionIdentifiers().size());
         assertEquals(testPublishPacket.getContentType(), willPublishPacket.getContentType());
         assertEquals(testPublishPacket.getPayload(), willPublishPacket.getPayload());
-        assertEquals(
-                testPublishPacket.getUserProperties().asList().size(),
+        assertEquals(testPublishPacket.getUserProperties().asList().size(),
                 willPublishPacket.getUserProperties().asList().size());
 
     }
@@ -93,17 +92,18 @@ public class WillPublishBuilderImplTest {
     @Test
     public void test_from_publish() {
 
-        final Publish publish = new PublishBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topic("topic")
-                .payload(ByteBuffer.wrap(new byte[]{1, 2, 3}))
-                .qos(Qos.EXACTLY_ONCE)
-                .retain(true)
-                .contentType("TYPE")
-                .correlationData(ByteBuffer.wrap(new byte[]{1, 2, 3, 4}))
-                .responseTopic("responseTopic")
-                .messageExpiryInterval(10)
-                .payloadFormatIndicator(PayloadFormatIndicator.UTF_8)
-                .userProperty("key", "value").build();
+        final Publish publish =
+                new PublishBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topic("topic")
+                        .payload(ByteBuffer.wrap(new byte[]{1, 2, 3}))
+                        .qos(Qos.EXACTLY_ONCE)
+                        .retain(true)
+                        .contentType("TYPE")
+                        .correlationData(ByteBuffer.wrap(new byte[]{1, 2, 3, 4}))
+                        .responseTopic("responseTopic")
+                        .messageExpiryInterval(10)
+                        .payloadFormatIndicator(PayloadFormatIndicator.UTF_8)
+                        .userProperty("key", "value")
+                        .build();
 
         final WillPublishPacket willPublishPacket = willPublishBuilder.fromPublish(publish).build();
 
@@ -130,8 +130,8 @@ public class WillPublishBuilderImplTest {
         assertEquals(0, willPublishPacket.getSubscriptionIdentifiers().size());
         assertEquals(publish.getContentType(), willPublishPacket.getContentType());
         assertEquals(publish.getPayload(), willPublishPacket.getPayload());
-        assertEquals(
-                publish.getUserProperties().asList().size(), willPublishPacket.getUserProperties().asList().size());
+        assertEquals(publish.getUserProperties().asList().size(),
+                willPublishPacket.getUserProperties().asList().size());
 
     }
 
@@ -156,13 +156,11 @@ public class WillPublishBuilderImplTest {
         assertEquals(willPublishPacket1.getMessageExpiryInterval(), willPublishPacket2.getMessageExpiryInterval());
         assertEquals(willPublishPacket1.getResponseTopic(), willPublishPacket2.getResponseTopic());
         assertEquals(willPublishPacket1.getCorrelationData(), willPublishPacket2.getCorrelationData());
-        assertEquals(
-                willPublishPacket1.getSubscriptionIdentifiers().size(),
+        assertEquals(willPublishPacket1.getSubscriptionIdentifiers().size(),
                 willPublishPacket2.getSubscriptionIdentifiers().size());
         assertEquals(willPublishPacket1.getContentType(), willPublishPacket2.getContentType());
         assertEquals(willPublishPacket1.getPayload(), willPublishPacket2.getPayload());
-        assertEquals(
-                willPublishPacket1.getUserProperties().asList().size(),
+        assertEquals(willPublishPacket1.getUserProperties().asList().size(),
                 willPublishPacket2.getUserProperties().asList().size());
 
     }
@@ -170,8 +168,7 @@ public class WillPublishBuilderImplTest {
     @Test
     public void test_all_values() {
 
-        final WillPublishPacket willPublishPacket = willPublishBuilder
-                .topic("topic")
+        final WillPublishPacket willPublishPacket = willPublishBuilder.topic("topic")
                 .payload(ByteBuffer.wrap(new byte[]{1, 2, 3}))
                 .qos(Qos.EXACTLY_ONCE)
                 .retain(true)
@@ -189,8 +186,8 @@ public class WillPublishBuilderImplTest {
         assertEquals(2, willPublishPacket.getQos().getQosNumber());
         assertEquals(true, willPublishPacket.getRetain());
         assertEquals("TYPE", willPublishPacket.getContentType().get());
-        assertArrayEquals(
-                new byte[]{1, 2, 3, 4}, Bytes.getBytesFromReadOnlyBuffer(willPublishPacket.getCorrelationData()));
+        assertArrayEquals(new byte[]{1, 2, 3, 4},
+                Bytes.getBytesFromReadOnlyBuffer(willPublishPacket.getCorrelationData()));
         assertEquals("responseTopic", willPublishPacket.getResponseTopic().get());
         assertEquals(10L, willPublishPacket.getMessageExpiryInterval().get().longValue());
         assertEquals(PayloadFormatIndicator.UTF_8, willPublishPacket.getPayloadFormatIndicator().get());
@@ -405,8 +402,7 @@ public class WillPublishBuilderImplTest {
         @NotNull
         @Override
         public UserProperties getUserProperties() {
-            return UserPropertiesImpl.of(ImmutableList.of(
-                    new MqttUserProperty("name", "value"),
+            return UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"),
                     new MqttUserProperty("name", "value2"),
                     new MqttUserProperty("name2", "val")));
         }

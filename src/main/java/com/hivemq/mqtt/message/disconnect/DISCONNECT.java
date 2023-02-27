@@ -73,8 +73,7 @@ public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithRea
     }
 
     public static @NotNull DISCONNECT from(final @NotNull DisconnectPacketImpl packet) {
-        return new DISCONNECT(
-                Mqtt5DisconnectReasonCode.from(packet.getReasonCode()),
+        return new DISCONNECT(Mqtt5DisconnectReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()),
                 packet.getServerReference().orElse(null),

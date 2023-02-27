@@ -28,7 +28,9 @@ import org.mockito.MockitoAnnotations;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 /**

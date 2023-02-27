@@ -38,7 +38,12 @@ import com.hivemq.extension.sdk.api.services.subscription.SubscriptionStore;
 import com.hivemq.extensions.ExtensionBootstrap;
 import com.hivemq.extensions.HiveMQExtensions;
 import com.hivemq.extensions.ioc.annotation.PluginStartStop;
-import com.hivemq.extensions.loader.*;
+import com.hivemq.extensions.loader.ExtensionBuilderDependencies;
+import com.hivemq.extensions.loader.ExtensionLifecycleHandler;
+import com.hivemq.extensions.loader.ExtensionLoader;
+import com.hivemq.extensions.loader.ExtensionServicesDependencies;
+import com.hivemq.extensions.loader.ExtensionStaticInitializer;
+import com.hivemq.extensions.loader.HiveMQExtensionFactory;
 import com.hivemq.extensions.services.auth.Authenticators;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.metrics.MetricsHolder;
@@ -68,7 +73,9 @@ import util.TestConfigurationBootstrap;
 
 import java.util.concurrent.ExecutorService;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

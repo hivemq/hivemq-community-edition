@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence;
 
-import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import java.util.concurrent.Executor;

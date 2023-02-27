@@ -123,11 +123,15 @@ public class XodusUtils {
         return Short.BYTES + ((bytes == null) ? 0 : bytes.length);
     }
 
-    public static int serializeShortLengthString(@Nullable final String string, @NotNull final byte[] serialized, final int offset) {
-        return serializeShortLengthArray((string == null) ? null : string.getBytes(StandardCharsets.UTF_8), serialized, offset);
+    public static int serializeShortLengthString(
+            @Nullable final String string, @NotNull final byte[] serialized, final int offset) {
+        return serializeShortLengthArray((string == null) ? null : string.getBytes(StandardCharsets.UTF_8),
+                serialized,
+                offset);
     }
 
-    public static int serializeShortLengthArray(@Nullable final byte[] bytes, @NotNull final byte[] serialized, int offset) {
+    public static int serializeShortLengthArray(
+            @Nullable final byte[] bytes, @NotNull final byte[] serialized, int offset) {
         final int length = (bytes == null) ? 0 : bytes.length;
         Bytes.copyUnsignedShortToByteArray(length, serialized, offset);
         offset += Short.BYTES;

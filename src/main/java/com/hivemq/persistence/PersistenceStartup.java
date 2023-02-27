@@ -15,8 +15,8 @@
  */
 package com.hivemq.persistence;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,10 +91,12 @@ public class PersistenceStartup implements HiveMQShutdownHook {
         environmentCreateExecutor.shutdown();
 
         try {
-            if (!persistenceStartExecutor.awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(), TimeUnit.SECONDS)) {
+            if (!persistenceStartExecutor.awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(),
+                    TimeUnit.SECONDS)) {
                 persistenceStartExecutor.shutdownNow();
             }
-            if (!environmentCreateExecutor.awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(), TimeUnit.SECONDS)) {
+            if (!environmentCreateExecutor.awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(),
+                    TimeUnit.SECONDS)) {
                 environmentCreateExecutor.shutdownNow();
             }
         } catch (final InterruptedException e) {

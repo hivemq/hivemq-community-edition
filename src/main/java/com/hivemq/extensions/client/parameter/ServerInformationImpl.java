@@ -16,10 +16,10 @@
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableSet;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.Listener;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 
@@ -42,7 +42,9 @@ public class ServerInformationImpl implements ServerInformation {
     private final ListenerConfigurationService listenerConfigurationService;
 
     @Inject
-    public ServerInformationImpl(@NotNull final SystemInformation systemInformation, @NotNull final ListenerConfigurationService listenerConfigurationService) {
+    public ServerInformationImpl(
+            @NotNull final SystemInformation systemInformation,
+            @NotNull final ListenerConfigurationService listenerConfigurationService) {
         this.systemInformation = systemInformation;
         this.listenerConfigurationService = listenerConfigurationService;
     }
@@ -80,7 +82,8 @@ public class ServerInformationImpl implements ServerInformation {
     @NotNull
     @Override
     public Set<Listener> getListener() {
-        final List<com.hivemq.configuration.service.entity.Listener> listeners = listenerConfigurationService.getListeners();
+        final List<com.hivemq.configuration.service.entity.Listener> listeners =
+                listenerConfigurationService.getListeners();
         final ImmutableSet.Builder<Listener> builder = ImmutableSet.builder();
         for (final com.hivemq.configuration.service.entity.Listener listener : listeners) {
             builder.add(new ListenerImpl(listener));

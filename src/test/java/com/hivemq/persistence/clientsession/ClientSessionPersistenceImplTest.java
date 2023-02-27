@@ -42,9 +42,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ClientSessionPersistenceImplTest {
 
@@ -68,9 +77,15 @@ public class ClientSessionPersistenceImplTest {
         clientSessionPersistence = mock(ClientSessionPersistenceImpl.class);
 
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence, subscriptionPersistence,
-                clientQueuePersistence, singleWriterService, connectionPersistence, mock(EventLog.class), pendingWillMessages,
-                mqttServerDisconnector, new Chunker());
+        clientSessionPersistence = new ClientSessionPersistenceImpl(localPersistence,
+                subscriptionPersistence,
+                clientQueuePersistence,
+                singleWriterService,
+                connectionPersistence,
+                mock(EventLog.class),
+                pendingWillMessages,
+                mqttServerDisconnector,
+                new Chunker());
     }
 
     @After
@@ -81,15 +96,19 @@ public class ClientSessionPersistenceImplTest {
 
     @Test
     public void test_is_existent() {
-        when(localPersistence.getSession(eq("client1"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
+        when(localPersistence.getSession(eq("client1"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true,
+                0));
         assertTrue(clientSessionPersistence.isExistent("client1"));
-        when(localPersistence.getSession(eq("client2"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(false, 1));
+        when(localPersistence.getSession(eq("client2"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(false,
+                1));
         assertTrue(clientSessionPersistence.isExistent("client2"));
-        when(localPersistence.getSession(eq("client3"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(false, 0));
+        when(localPersistence.getSession(eq("client3"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(false,
+                0));
         assertFalse(clientSessionPersistence.isExistent("client3"));
         assertFalse(clientSessionPersistence.isExistent("client4"));
 
-        final Map<String, Boolean> existentClients = clientSessionPersistence.isExistent(ImmutableSet.of("client1", "client2", "client3", "client4"));
+        final Map<String, Boolean> existentClients =
+                clientSessionPersistence.isExistent(ImmutableSet.of("client1", "client2", "client3", "client4"));
         assertTrue(existentClients.get("client1"));
         assertTrue(existentClients.get("client2"));
         assertFalse(existentClients.get("client3"));
@@ -101,8 +120,8 @@ public class ClientSessionPersistenceImplTest {
         final ClientSession previousSession = new ClientSession(false, 0);
         when(clientQueuePersistence.removeAllQos0Messages("client", false)).thenReturn(Futures.immediateFuture(null));
         when(subscriptionPersistence.removeAll("client")).thenReturn(Futures.immediateFuture(null));
-        when(localPersistence.disconnect(eq("client"), anyLong(), eq(true), anyInt(), eq(10L))).
-                thenReturn(previousSession);
+        when(localPersistence.disconnect(eq("client"), anyLong(), eq(true), anyInt(), eq(10L))).thenReturn(
+                previousSession);
         clientSessionPersistence.clientDisconnected("client", true, 10).get();
         verify(pendingWillMessages).sendOrEnqueueWillIfAvailable("client", previousSession);
     }
@@ -124,15 +143,20 @@ public class ClientSessionPersistenceImplTest {
     @Test
     public void force_client_disconnect_session_null() throws ExecutionException, InterruptedException {
         when(localPersistence.getSession("client", true)).thenReturn(null);
-        final Boolean result = clientSessionPersistence.forceDisconnectClient("client", false, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
+        final Boolean result = clientSessionPersistence.forceDisconnectClient("client",
+                false,
+                ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
         assertFalse(result);
     }
 
     @Test
     public void force_client_disconnect_not_connected() throws ExecutionException, InterruptedException {
-        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
+        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true,
+                0));
         when(connectionPersistence.get("client")).thenReturn(null);
-        final Boolean result = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
+        final Boolean result = clientSessionPersistence.forceDisconnectClient("client",
+                true,
+                ClientSessionPersistenceImpl.DisconnectSource.EXTENSION).get();
         assertFalse(result);
         verify(pendingWillMessages).cancelWillIfPending("client");
     }
@@ -144,13 +168,20 @@ public class ClientSessionPersistenceImplTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
-        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
-        final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION);
+        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true,
+                0));
+        final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client",
+                true,
+                ClientSessionPersistenceImpl.DisconnectSource.EXTENSION);
         channel.disconnect();
         final Boolean result = future.get();
         assertTrue(result);
         verify(pendingWillMessages).cancelWillIfPending("client");
-        verify(mqttServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION), any());
+        verify(mqttServerDisconnector).disconnect(any(Channel.class),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION),
+                any());
     }
 
     @Test
@@ -160,13 +191,22 @@ public class ClientSessionPersistenceImplTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
-        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true, 0));
-        final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client", true, ClientSessionPersistenceImpl.DisconnectSource.EXTENSION, Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER, "reason-string");
+        when(localPersistence.getSession(eq("client"), anyBoolean(), anyBoolean())).thenReturn(new ClientSession(true,
+                0));
+        final ListenableFuture<Boolean> future = clientSessionPersistence.forceDisconnectClient("client",
+                true,
+                ClientSessionPersistenceImpl.DisconnectSource.EXTENSION,
+                Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER,
+                "reason-string");
         channel.disconnect();
         final Boolean result = future.get();
         assertTrue(result);
         verify(pendingWillMessages).cancelWillIfPending("client");
-        verify(mqttServerDisconnector).disconnect(any(Channel.class), anyString(), anyString(), eq(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER), eq("reason-string"));
+        verify(mqttServerDisconnector).disconnect(any(Channel.class),
+                anyString(),
+                anyString(),
+                eq(Mqtt5DisconnectReasonCode.SESSION_TAKEN_OVER),
+                eq("reason-string"));
     }
 
     @Test
@@ -214,19 +254,28 @@ public class ClientSessionPersistenceImplTest {
 
     @Test
     public void test_pending_wills() throws ExecutionException, InterruptedException {
-        final ImmutableMap<String, PendingWillMessages.PendingWill> bucket1 = ImmutableMap.of("client1", new PendingWillMessages.PendingWill(1, 1), "client2",
+        final ImmutableMap<String, PendingWillMessages.PendingWill> bucket1 = ImmutableMap.of("client1",
+                new PendingWillMessages.PendingWill(1, 1),
+                "client2",
                 new PendingWillMessages.PendingWill(2, 2));
-        final ImmutableMap<String, PendingWillMessages.PendingWill> bucket2 = ImmutableMap.of("client3", new PendingWillMessages.PendingWill(3, 3));
+        final ImmutableMap<String, PendingWillMessages.PendingWill> bucket2 =
+                ImmutableMap.of("client3", new PendingWillMessages.PendingWill(3, 3));
 
         when(localPersistence.getPendingWills(eq(0))).thenReturn(bucket1);
         when(localPersistence.getPendingWills(eq(1))).thenReturn(bucket2);
-        final ListenableFuture<Map<String, PendingWillMessages.PendingWill>> listenableFuture = clientSessionPersistence.pendingWills();
+        final ListenableFuture<Map<String, PendingWillMessages.PendingWill>> listenableFuture =
+                clientSessionPersistence.pendingWills();
         final Map<String, PendingWillMessages.PendingWill> willMap = listenableFuture.get();
         assertEquals(3, willMap.size());
     }
 
     private MqttWillPublish createWillPublish() {
-        return new MqttWillPublish.Mqtt3Builder().withTopic("topic").withPayload("message".getBytes()).withHivemqId("hivemqId").withRetain(false).withQos(QoS.AT_LEAST_ONCE).build();
+        return new MqttWillPublish.Mqtt3Builder().withTopic("topic")
+                .withPayload("message".getBytes())
+                .withHivemqId("hivemqId")
+                .withRetain(false)
+                .withQos(QoS.AT_LEAST_ONCE)
+                .build();
     }
 
 }

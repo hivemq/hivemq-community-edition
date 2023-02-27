@@ -87,8 +87,10 @@ public class UsageStatistics {
         }
 
         //schedule first task
-        scheduledExecutorService.execute(new SendStatisticsTask(statisticsSender, statisticsCollector,
-                scheduledExecutorService, "startup"));
+        scheduledExecutorService.execute(new SendStatisticsTask(statisticsSender,
+                statisticsCollector,
+                scheduledExecutorService,
+                "startup"));
     }
 
     public void stop() {
@@ -103,10 +105,11 @@ public class UsageStatistics {
         private final @NotNull String statisticType;
 
 
-        private SendStatisticsTask(final @NotNull UsageStatisticsSender statisticsSender,
-                                   final @NotNull UsageStatisticsCollector statisticsCollector,
-                                   final @NotNull ScheduledExecutorService scheduledExecutorService,
-                                   final @NotNull String statisticType) {
+        private SendStatisticsTask(
+                final @NotNull UsageStatisticsSender statisticsSender,
+                final @NotNull UsageStatisticsCollector statisticsCollector,
+                final @NotNull ScheduledExecutorService scheduledExecutorService,
+                final @NotNull String statisticType) {
             this.statisticsSender = statisticsSender;
             this.statisticsCollector = statisticsCollector;
             this.scheduledExecutorService = scheduledExecutorService;
@@ -123,8 +126,10 @@ public class UsageStatistics {
                 log.trace("original exception", e);
             } finally {
                 //reschedule
-                scheduledExecutorService.schedule(new SendStatisticsTask(statisticsSender, statisticsCollector,
-                        scheduledExecutorService, "runtime"), InternalConfigurations.USAGE_STATISTICS_SEND_INTERVAL_MINUTES, TimeUnit.MINUTES);
+                scheduledExecutorService.schedule(new SendStatisticsTask(statisticsSender,
+                        statisticsCollector,
+                        scheduledExecutorService,
+                        "runtime"), InternalConfigurations.USAGE_STATISTICS_SEND_INTERVAL_MINUTES, TimeUnit.MINUTES);
             }
         }
     }

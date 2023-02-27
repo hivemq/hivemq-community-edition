@@ -31,7 +31,11 @@ import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
 import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl.AuthorizeWillResultEvent;
-import com.hivemq.extensions.handler.testextensions.*;
+import com.hivemq.extensions.handler.testextensions.TestAuthorizerDisconnectProvider;
+import com.hivemq.extensions.handler.testextensions.TestAuthorizerForgetProvider;
+import com.hivemq.extensions.handler.testextensions.TestAuthorizerNextProvider;
+import com.hivemq.extensions.handler.testextensions.TestPubAuthorizerNextProvider;
+import com.hivemq.extensions.handler.testextensions.TestTimeoutAuthorizerProvider;
 import com.hivemq.extensions.services.auth.Authorizers;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -44,7 +48,6 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -65,10 +68,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @since 4.0.0
@@ -517,8 +527,7 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private AuthorizerProvider getTestAuthorizerProvider(
-            final @NotNull Class<?> clazz,
-            final @NotNull CountDownLatch countDownLatch) throws Exception {
+            final @NotNull Class<?> clazz, final @NotNull CountDownLatch countDownLatch) throws Exception {
         final Class<?> providerClass =
                 IsolatedExtensionClassloaderUtil.loadClass(temporaryFolder.getRoot().toPath(), clazz);
         return (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)

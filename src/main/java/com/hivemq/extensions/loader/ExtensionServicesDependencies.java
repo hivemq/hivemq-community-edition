@@ -27,8 +27,7 @@ public interface ExtensionServicesDependencies {
 
     /**
      * @return a {@link ImmutableMap} which contains all dependencies which are accessible
-     * via {@link Services} in an extension
+     *         via {@link Services} in an extension
      */
-    @NotNull
-    ImmutableMap<String, Object> getDependenciesMap(@NotNull ClassLoader classLoader);
+    @NotNull ImmutableMap<String, Object> getDependenciesMap(@NotNull ClassLoader classLoader);
 }

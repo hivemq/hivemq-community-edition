@@ -85,9 +85,12 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
             final long currentCount = openConnectionsGauge.getValue();
 
             if (currentCount > maxConnections) {
-                log.warn("The connection limit ({}) is reached. ClientID ({}) connection denied.", maxConnections, connect.getClientIdentifier());
+                log.warn("The connection limit ({}) is reached. ClientID ({}) connection denied.",
+                        maxConnections,
+                        connect.getClientIdentifier());
                 mqttConnacker.connackError(ctx.channel(),
-                        null, // logged on warn
+                        null,
+                        // logged on warn
                         "The configured maximum amount of connections is reached",
                         Mqtt5ConnAckReasonCode.QUOTA_EXCEEDED,
                         null);

@@ -15,8 +15,8 @@
  */
 package com.hivemq.extensions.parameter;
 
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 
 import java.util.Optional;

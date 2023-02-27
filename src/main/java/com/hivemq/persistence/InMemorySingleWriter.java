@@ -26,10 +26,11 @@ import java.util.concurrent.Executor;
 
 /**
  * @author Daniel Krüger
- * <p>
- * This SingleWriterService implementation does not use ExecutorThreadpools, but a trampoline approach like RxJava Schedulers.trampoline()
- * The advantage is that there are less thread switches (resulting in context switches).
- * The requirement is that no submitted task is blocking (that is only true for in-memory persistences)
+ *         <p>
+ *         This SingleWriterService implementation does not use ExecutorThreadpools, but a trampoline approach like
+ *         RxJava Schedulers.trampoline()
+ *         The advantage is that there are less thread switches (resulting in context switches).
+ *         The requirement is that no submitted task is blocking (that is only true for in-memory persistences)
  */
 public class InMemorySingleWriter implements SingleWriterService {
 
@@ -42,7 +43,8 @@ public class InMemorySingleWriter implements SingleWriterService {
     private static final int QUEUED_MESSAGES_QUEUE_INDEX = 3;
     private static final int ATTRIBUTE_STORE_QUEUE_INDEX = 4;
 
-    private final @NotNull InMemoryProducerQueues @NotNull [] producers = new InMemoryProducerQueues[AMOUNT_OF_PRODUCERS];
+    private final @NotNull InMemoryProducerQueues @NotNull [] producers =
+            new InMemoryProducerQueues[AMOUNT_OF_PRODUCERS];
     private final @NotNull InMemoryProducerQueues callbackProducerQueue;
 
     private final int persistenceBucketCount;
@@ -95,10 +97,9 @@ public class InMemorySingleWriter implements SingleWriterService {
 
     public @NotNull Executor callbackExecutor(final @NotNull String key) {
         return command -> callbackProducerQueue.submit(key, (bucketIndex) -> {
-                    command.run();
-                    return null; // this is fine, because Executors dont return anything. The return value will not be used.
-                }
-        );
+            command.run();
+            return null; // this is fine, because Executors dont return anything. The return value will not be used.
+        });
     }
 
     public int getPersistenceBucketCount() {

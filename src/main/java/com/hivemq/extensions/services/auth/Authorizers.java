@@ -33,12 +33,11 @@ public interface Authorizers {
      *
      * @return a priority ordered map of instantiated Authorizers with their extension id
      */
-    @Immutable
-    @NotNull Map<@NotNull String, @NotNull AuthorizerProvider> getAuthorizerProviderMap();
+    @Immutable @NotNull Map<@NotNull String, @NotNull AuthorizerProvider> getAuthorizerProviderMap();
 
     /**
      * @return true if any {@link AuthorizerProvider} have been
-     * registered, false otherwise.
+     *         registered, false otherwise.
      */
     boolean areAuthorizersAvailable();
 

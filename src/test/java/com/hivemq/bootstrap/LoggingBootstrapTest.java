@@ -35,7 +35,10 @@ import util.LogbackCapturingAppender;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dominik Obermaier
@@ -152,7 +155,8 @@ public class LoggingBootstrapTest {
 
             assertTrue(testAppender.isLogCaptured());
 
-            final ImmutableList<Appender<ILoggingEvent>> appenders = ImmutableList.copyOf(logger.iteratorForAppenders());
+            final ImmutableList<Appender<ILoggingEvent>> appenders =
+                    ImmutableList.copyOf(logger.iteratorForAppenders());
 
 
             for (final Appender<ILoggingEvent> appender : appenders) {
@@ -198,12 +202,14 @@ public class LoggingBootstrapTest {
 
             LoggingBootstrap.initLogging(configFolder);
 
-            final ImmutableList<Appender<ILoggingEvent>> appenders = ImmutableList.copyOf(logger.iteratorForAppenders());
+            final ImmutableList<Appender<ILoggingEvent>> appenders =
+                    ImmutableList.copyOf(logger.iteratorForAppenders());
 
             //We expect only 2 Appenders: The Instrumented Appender and a Console Appender we created above
 
             for (final Appender<ILoggingEvent> appender : appenders) {
-                assertTrue(appender + " was not expected", appender.getName().equals("com.hivemq.logging") || appender.getName().equals("APP"));
+                assertTrue(appender + " was not expected",
+                        appender.getName().equals("com.hivemq.logging") || appender.getName().equals("APP"));
             }
 
         } finally {

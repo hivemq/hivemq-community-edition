@@ -76,7 +76,9 @@ public class RestrictionsConfigurationServiceImpl implements RestrictionsConfigu
 
     @Override
     public void setNoConnectIdleTimeout(final long noConnectIdleTimeout) {
-        log.debug("Setting the timeout for disconnecting idle tcp connections before a connect message was received to {} milliseconds", noConnectIdleTimeout);
+        log.debug(
+                "Setting the timeout for disconnecting idle tcp connections before a connect message was received to {} milliseconds",
+                noConnectIdleTimeout);
         this.noConnectIdleTimeout.set(noConnectIdleTimeout);
     }
 

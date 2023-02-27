@@ -79,9 +79,9 @@ public class OrderedTopicService {
         }
 
         final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final int maxInflightWindow = (clientConnection == null)
-                ? InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES
-                : clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
+        final int maxInflightWindow = (clientConnection == null) ?
+                InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES :
+                clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
 
         do {
             final QueuedMessage poll = queue.poll();
@@ -93,7 +93,8 @@ public class OrderedTopicService {
         } while (unacknowledgedMessages.size() < maxInflightWindow);
     }
 
-    public boolean handlePublish(final @NotNull Channel channel, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
+    public boolean handlePublish(
+            final @NotNull Channel channel, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
 
         if (msg instanceof PubrelWithFuture) {
             final PubrelWithFuture pubrelWithFuture = (PubrelWithFuture) msg;
@@ -124,7 +125,10 @@ public class OrderedTopicService {
         final PUBLISH publish = (PUBLISH) msg;
         final int qosNumber = publish.getQoS().getQosNumber();
         if (log.isTraceEnabled()) {
-            log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}", clientId, publish.getQoS().getQosNumber(), publish.getPacketIdentifier());
+            log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}",
+                    clientId,
+                    publish.getQoS().getQosNumber(),
+                    publish.getPacketIdentifier());
         }
 
         if (qosNumber < 1) {
@@ -145,7 +149,8 @@ public class OrderedTopicService {
         }
 
 
-        if (unacknowledgedMessages.size() >= clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES)) {
+        if (unacknowledgedMessages.size() >=
+                clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES)) {
             queueMessage(promise, publish, clientId);
             return true;
         } else {
@@ -174,13 +179,18 @@ public class OrderedTopicService {
         }
     }
 
-    private void queueMessage(final @NotNull ChannelPromise promise, final @NotNull PUBLISH publish, final @NotNull String clientId) {
+    private void queueMessage(
+            final @NotNull ChannelPromise promise, final @NotNull PUBLISH publish, final @NotNull String clientId) {
 
         if (log.isTraceEnabled()) {
             final String topic = publish.getTopic();
             final int messageId = publish.getPacketIdentifier();
-            log.trace("Buffered publish message with qos {} packetIdentifier {} and topic {} for client {}, because the receive maximum is exceeded",
-                    publish.getQoS().name(), messageId, topic, clientId);
+            log.trace(
+                    "Buffered publish message with qos {} packetIdentifier {} and topic {} for client {}, because the receive maximum is exceeded",
+                    publish.getQoS().name(),
+                    messageId,
+                    topic,
+                    clientId);
         }
 
         queue.add(new QueuedMessage(publish, promise));

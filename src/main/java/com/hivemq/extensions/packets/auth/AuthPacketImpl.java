@@ -57,8 +57,7 @@ public class AuthPacketImpl implements AuthPacket {
     }
 
     public AuthPacketImpl(final @NotNull AUTH auth) {
-        this(
-                auth.getReasonCode().toAuthReasonCode(),
+        this(auth.getReasonCode().toAuthReasonCode(),
                 auth.getAuthMethod(),
                 auth.getAuthData(),
                 auth.getReasonString(),
