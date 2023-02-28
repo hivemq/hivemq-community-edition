@@ -15,7 +15,11 @@
  */
 package com.hivemq.lifecycle;
 
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.ConfigurationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.ProvisionException;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.configuration.info.SystemInformation;

@@ -26,7 +26,12 @@ import util.DummyHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.HTTP_OBJECT_AGGREGATOR;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.HTTP_SERVER_CODEC;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_WEBSOCKET_ENCODER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.WEBSOCKET_BINARY_FRAME_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.WEBSOCKET_SERVER_PROTOCOL_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.WEBSOCKET_TEXT_FRAME_HANDLER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

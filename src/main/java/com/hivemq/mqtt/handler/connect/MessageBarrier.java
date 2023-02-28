@@ -24,11 +24,19 @@ import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
 
 /**
  * A message barrier which blocks (or queues) messages if they are sent before the connection was approved

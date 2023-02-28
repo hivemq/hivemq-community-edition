@@ -21,7 +21,12 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.Authenticator;
 import com.hivemq.extension.sdk.api.auth.EnhancedAuthenticator;
 import com.hivemq.extension.sdk.api.auth.SimpleAuthenticator;
-import com.hivemq.extension.sdk.api.auth.parameter.*;
+import com.hivemq.extension.sdk.api.auth.parameter.AuthenticatorProviderInput;
+import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthConnectInput;
+import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthInput;
+import com.hivemq.extension.sdk.api.auth.parameter.EnhancedAuthOutput;
+import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthInput;
+import com.hivemq.extension.sdk.api.auth.parameter.SimpleAuthOutput;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthenticatorProvider;
 import com.hivemq.extension.sdk.api.services.auth.provider.EnhancedAuthenticatorProvider;
 import com.hivemq.extensions.HiveMQExtension;
@@ -35,7 +40,9 @@ import util.IsolatedExtensionClassloaderUtil;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;

@@ -61,7 +61,12 @@ import com.hivemq.util.Bytes;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.ReasonStrings;
 import com.hivemq.util.Topics;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +78,12 @@ import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.AUTH_IN_PROGRESS_MESSAGE_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MESSAGE_EXPIRY_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_5_FLOW_CONTROL_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_KEEPALIVE_IDLE_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_BARRIER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_PUBLISH_FLOW_HANDLER;
 import static com.hivemq.configuration.service.InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS;
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
