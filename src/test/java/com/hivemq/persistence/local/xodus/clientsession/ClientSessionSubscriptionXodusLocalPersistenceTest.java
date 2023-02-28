@@ -39,14 +39,24 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.*;
+import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.DEFAULT_NO_LOCAL;
+import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.DEFAULT_RETAIN_AS_PUBLISHED;
+import static com.hivemq.mqtt.message.subscribe.Mqtt5Topic.DEFAULT_RETAIN_HANDLING;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 

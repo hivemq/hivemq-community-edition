@@ -29,7 +29,11 @@ import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInpu
 import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.events.*;
+import com.hivemq.extensions.events.LifecycleEventListeners;
+import com.hivemq.extensions.events.OnAuthFailedEvent;
+import com.hivemq.extensions.events.OnAuthSuccessEvent;
+import com.hivemq.extensions.events.OnClientDisconnectEvent;
+import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
@@ -56,7 +60,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

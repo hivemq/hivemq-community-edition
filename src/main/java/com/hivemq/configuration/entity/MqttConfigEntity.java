@@ -15,7 +15,18 @@
  */
 package com.hivemq.configuration.entity;
 
-import com.hivemq.configuration.entity.mqtt.*;
+import com.hivemq.configuration.entity.mqtt.KeepAliveConfigEntity;
+import com.hivemq.configuration.entity.mqtt.MessageExpiryConfigEntity;
+import com.hivemq.configuration.entity.mqtt.PacketsConfigEntity;
+import com.hivemq.configuration.entity.mqtt.QoSConfigEntity;
+import com.hivemq.configuration.entity.mqtt.QueuedMessagesConfigEntity;
+import com.hivemq.configuration.entity.mqtt.ReceiveMaximumConfigEntity;
+import com.hivemq.configuration.entity.mqtt.RetainedMessagesConfigEntity;
+import com.hivemq.configuration.entity.mqtt.SessionExpiryConfigEntity;
+import com.hivemq.configuration.entity.mqtt.SharedSubscriptionsConfigEntity;
+import com.hivemq.configuration.entity.mqtt.SubscriptionIdentifierConfigEntity;
+import com.hivemq.configuration.entity.mqtt.TopicAliasConfigEntity;
+import com.hivemq.configuration.entity.mqtt.WildcardSubscriptionsConfigEntity;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import javax.xml.bind.annotation.XmlAccessType;
