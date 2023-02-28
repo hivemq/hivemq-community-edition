@@ -53,7 +53,9 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
     @Override
     public @Nullable UNSUBSCRIBE decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if ((header & 0b0000_1111) != 2) {
             disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.UNSUBSCRIBE);
@@ -84,12 +86,15 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
             final int propertyIdentifier = buf.readByte();
             if (propertyIdentifier == USER_PROPERTY) {
-                userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.UNSUBSCRIBE);
+                userPropertiesBuilder =
+                        readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.UNSUBSCRIBE);
                 if (userPropertiesBuilder == null) {
                     return null;
                 }
             } else {
-                disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.UNSUBSCRIBE);
+                disconnectByInvalidPropertyIdentifier(clientConnectionContext,
+                        propertyIdentifier,
+                        MessageType.UNSUBSCRIBE);
                 return null;
             }
         }
@@ -124,12 +129,15 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
         return new UNSUBSCRIBE(Objects.requireNonNull(topicFilterBuilder).build(), packetIdentifier, userProperties);
     }
 
-    private int decodePacketIdentifier(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
+    private int decodePacketIdentifier(
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf) {
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
             disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent an UNSUBSCRIBE with message id = '0'. This is not allowed. Disconnecting client.",
-                    "Sent UNSUBSCRIBE with message id = '0'", Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
+                    "Sent UNSUBSCRIBE with message id = '0'",
+                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                     ReasonStrings.DISCONNECT_PROTOCOL_ERROR_UNSUBSCRIBE_PACKET_ID_0);
         }
 
@@ -137,7 +145,9 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
     }
 
     private boolean propertiesLengthInvalid(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final int propertyLength) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final int propertyLength) {
 
         if (propertyLength < 0) {
             disconnectByMalformedPropertyLength(clientConnectionContext, MessageType.UNSUBSCRIBE);
@@ -155,7 +165,8 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
             final @NotNull ByteBuf buf,
             @Nullable ImmutableList.Builder<String> topicFilterBuilder) {
 
-        final String topicFilter = decodeUTF8Topic(clientConnectionContext, buf, "topic filter", MessageType.UNSUBSCRIBE);
+        final String topicFilter =
+                decodeUTF8Topic(clientConnectionContext, buf, "topic filter", MessageType.UNSUBSCRIBE);
         if (topicFilter == null) {
             return null;
         }

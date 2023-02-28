@@ -83,14 +83,23 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
         final Topic[] topicBatch = new Topic[batchSize];
         for (int i = 0; i < batchSize; i++) {
             final String nextTopic = topics.poll();
-            topicBatch[i] = new Topic(nextTopic, subscription.getQoS(), subscription.isNoLocal(),
-                    subscription.isRetainAsPublished(), subscription.getRetainHandling(),
+            topicBatch[i] = new Topic(nextTopic,
+                    subscription.getQoS(),
+                    subscription.isNoLocal(),
+                    subscription.isRetainAsPublished(),
+                    subscription.getRetainHandling(),
                     subscription.getSubscriptionIdentifier());
         }
 
         final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessages(channel, topicBatch);
 
-        Futures.addCallback(sentFuture, new SendRetainedMessageListenerAndScheduleNext(subscription, topics, channel, retainedMessagesSender, batchSizeMax), channel.eventLoop());
+        Futures.addCallback(sentFuture,
+                new SendRetainedMessageListenerAndScheduleNext(subscription,
+                        topics,
+                        channel,
+                        retainedMessagesSender,
+                        batchSizeMax),
+                channel.eventLoop());
     }
 
     @Override
@@ -106,15 +115,19 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
                 channel.eventLoop().schedule(() -> {
                     if (log.isTraceEnabled()) {
                         log.trace("Retrying retained message for client '{}' on topic '{}'.",
-                                ClientConnection.of(channel).getClientId(), subscription.getTopic());
+                                ClientConnection.of(channel).getClientId(),
+                                subscription.getTopic());
                     }
                     send();
                 }, 1, TimeUnit.SECONDS);
             }
 
         } else {
-            Exceptions.rethrowError("Unable to send retained message for subscription " + subscription.getTopic() +
-                    " to client " + ClientConnection.of(channel).getClientId() + ".", throwable);
+            Exceptions.rethrowError("Unable to send retained message for subscription " +
+                    subscription.getTopic() +
+                    " to client " +
+                    ClientConnection.of(channel).getClientId() +
+                    ".", throwable);
             channel.disconnect();
         }
     }

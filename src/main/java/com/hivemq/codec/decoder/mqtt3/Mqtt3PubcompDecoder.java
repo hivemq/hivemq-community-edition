@@ -43,7 +43,9 @@ public class Mqtt3PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
     @Override
     public @Nullable PUBCOMP decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {

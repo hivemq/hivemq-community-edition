@@ -59,7 +59,9 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
 
     @Override
     public @Nullable CONNECT decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (buf.readableBytes() < 12) {
             disconnectByInvalidHeader(clientConnectionContext);
@@ -103,7 +105,8 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
 
         final int utf8StringLength;
 
-        if (buf.readableBytes() < 2 || (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()) && utf8StringLength > 0)) {
+        if (buf.readableBytes() < 2 ||
+                (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()) && utf8StringLength > 0)) {
             mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a CONNECT message with an incorrect client id length. Disconnecting client.",
                     "Sent CONNECT with incorrect client id length",
@@ -188,6 +191,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withCleanStart(isCleanSessionFlag)
                 .withSessionExpiryInterval(sessionExpiryInterval)
                 .withKeepAlive(keepAlive)
-                .withWillPublish(willPublish).build();
+                .withWillPublish(willPublish)
+                .build();
     }
 }

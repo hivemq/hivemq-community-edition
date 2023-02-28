@@ -51,8 +51,7 @@ public class MqttAuthSender {
             final @NotNull Mqtt5UserProperties userProperties,
             final @Nullable String reasonString) {
 
-        final AUTH auth = new AUTH(
-                ClientConnectionContext.of(channel).getAuthMethod(),
+        final AUTH auth = new AUTH(ClientConnectionContext.of(channel).getAuthMethod(),
                 Bytes.fromReadOnlyBuffer(authData),
                 reasonCode,
                 userProperties,
@@ -63,9 +62,7 @@ public class MqttAuthSender {
     }
 
     public void logAuth(
-            final @NotNull Channel channel,
-            final @NotNull Mqtt5AuthReasonCode reasonCode,
-            final boolean received) {
+            final @NotNull Channel channel, final @NotNull Mqtt5AuthReasonCode reasonCode, final boolean received) {
 
         eventLog.clientAuthentication(channel, reasonCode, received);
     }

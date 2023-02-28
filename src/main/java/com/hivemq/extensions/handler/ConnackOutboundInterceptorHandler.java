@@ -201,8 +201,8 @@ public class ConnackOutboundInterceptorHandler {
                 final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
                 clientConnectionContext.proposeClientState(ClientState.DISCONNECTING);
 
-                eventLog.clientWasDisconnected(
-                        ctx.channel(), "Connection prevented by extension in CONNACK outbound interceptor");
+                eventLog.clientWasDisconnected(ctx.channel(),
+                        "Connection prevented by extension in CONNACK outbound interceptor");
                 clientConnectionContext.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
                 ctx.channel().close();
             } else {
@@ -244,7 +244,9 @@ public class ConnackOutboundInterceptorHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on outbound CONNACK interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.prevent();
                 Exceptions.rethrowError(e);
             }

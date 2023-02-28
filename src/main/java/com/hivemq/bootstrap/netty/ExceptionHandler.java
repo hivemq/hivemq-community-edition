@@ -80,8 +80,7 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
                     "A client (IP: {}) sent illegal websocket data. Disconnecting client.",
                     "Illegal websocket data sent by client: " + cause.getMessage(),
                     Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
-                    null
-            );
+                    null);
             return;
 
 
@@ -94,16 +93,13 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
 
             log.error("An unexpected error occurred for client with IP {}: {}",
-                    channelIP.orElse("UNKNOWN"), ExceptionUtils.getStackTrace(cause));
+                    channelIP.orElse("UNKNOWN"),
+                    ExceptionUtils.getStackTrace(cause));
         }
 
         if (channel != null) {
-            mqttServerDisconnector.disconnect(channel,
-                    null, // already logged
-                    "Channel exception: " + cause.getMessage(),
-                    Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
-                    null
-            );
+            mqttServerDisconnector.disconnect(channel, null, // already logged
+                    "Channel exception: " + cause.getMessage(), Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR, null);
         }
     }
 }

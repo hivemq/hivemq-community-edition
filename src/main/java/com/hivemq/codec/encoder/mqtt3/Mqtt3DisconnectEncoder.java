@@ -41,7 +41,9 @@ public class Mqtt3DisconnectEncoder implements MqttEncoder<DISCONNECT> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull DISCONNECT msg) {
+    public int bufferSize(
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull DISCONNECT msg) {
         return ENCODED_DISCONNECT_SIZE;
     }
 }

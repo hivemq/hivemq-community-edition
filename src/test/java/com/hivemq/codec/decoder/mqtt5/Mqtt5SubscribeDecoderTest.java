@@ -32,7 +32,11 @@ import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -71,8 +75,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // payload topic filter
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
-                0b0001_1101
-        };
+                0b0001_1101};
 
         final SUBSCRIBE subscribe = decode(encoded);
 
@@ -108,25 +111,90 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 76,
                 // packet identifier
-                0, 1,
+                0,
+                1,
                 // variable header
                 // properties length
                 53,
                 // subscription identifier
-                0x0B, 123,
+                0x0B,
+                123,
                 // user properties
-                0x26, 0, 4, 'u', 's', 'e', '1', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', '1',
-                0x26, 0, 4, 'u', 's', 'e', '2', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', '2',
-                0x26, 0, 4, 'u', 's', 'e', '3', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', '3',
+                0x26,
+                0,
+                4,
+                'u',
+                's',
+                'e',
+                '1',
+                0,
+                8,
+                'p',
+                'r',
+                'o',
+                'p',
+                'e',
+                'r',
+                't',
+                '1',
+                0x26,
+                0,
+                4,
+                'u',
+                's',
+                'e',
+                '2',
+                0,
+                8,
+                'p',
+                'r',
+                'o',
+                'p',
+                'e',
+                'r',
+                't',
+                '2',
+                0x26,
+                0,
+                4,
+                'u',
+                's',
+                'e',
+                '3',
+                0,
+                8,
+                'p',
+                'r',
+                'o',
+                'p',
+                'e',
+                'r',
+                't',
+                '3',
                 // payload topic filter
-                0, 7, 't', 'o', 'p', 'i', 'c', '/', '#',
+                0,
+                7,
+                't',
+                'o',
+                'p',
+                'i',
+                'c',
+                '/',
+                '#',
                 // subscription options
                 0b0001_1101,
                 // payload topic filter
-                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
+                0,
+                7,
+                't',
+                'o',
+                'p',
+                'i',
+                'd',
+                '/',
+                '#',
                 // subscription options
-                0b0001_1101
-        };
+                0b0001_1101};
 
         final SUBSCRIBE subscribe = decode(encoded);
 
@@ -176,8 +244,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // payload topic filter
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
-                0b0001_1101
-        };
+                0b0001_1101};
 
         decodeNullExpected(encoded);
 
@@ -200,8 +267,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // payload topic filter
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
-                0b0001_1101
-        };
+                0b0001_1101};
 
         decodeNullExpected(encoded1);
 
@@ -224,8 +290,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // payload topic filter
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
-                0b0001_1101
-        };
+                0b0001_1101};
 
         decodeNullExpected(encoded2);
 
@@ -248,8 +313,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // payload topic filter
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
-                0b0001_1101
-        };
+                0b0001_1101};
 
         decodeNullExpected(encoded3);
 
@@ -265,8 +329,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 1,
                 // packet identifier
-                0
-        };
+                0};
 
         decodeNullExpected(encoded);
 
@@ -284,8 +347,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // packet identifier
                 0, 0,
                 //property length
-                0
-        };
+                0};
 
         decodeNullExpected(encoded);
 
@@ -301,8 +363,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 2,
                 // packet identifier
-                0, 1,
-        };
+                0, 1,};
 
         decodeNullExpected(encoded);
 
@@ -363,10 +424,9 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 4,
                 // subscription identifier
-                0x0B, 123,
-                0x0B, 123,
+                0x0B, 123, 0x0B, 123,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -388,7 +448,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // subscription identifier
                 0x0B, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -410,7 +470,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // invalid identifier
                 (byte) 0xBB, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -432,7 +492,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // subscription identifier
                 0x0B, 1,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -454,7 +514,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // subscription identifier
                 0x0B, 1,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -708,7 +768,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -752,7 +812,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
     }
@@ -865,7 +925,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // subscription identifier
                 0x0B, 1,
 
-        };
+                };
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(protocolVersion);
 

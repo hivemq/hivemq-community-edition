@@ -42,7 +42,9 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
 
     @Override
     public @Nullable PINGREQ decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         final ProtocolVersion protocolVersion = clientConnectionContext.getProtocolVersion();
 

@@ -51,7 +51,9 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
 
     @Override
     public @Nullable Mqtt3PUBLISH decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         final int qos = decodeQoS(clientConnectionContext, header);
         if (qos == DISCONNECTED) {

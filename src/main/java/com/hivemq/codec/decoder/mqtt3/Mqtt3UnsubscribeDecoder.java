@@ -49,7 +49,9 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
     @Override
     public @Nullable UNSUBSCRIBE decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             //Must match 0b0000_0010

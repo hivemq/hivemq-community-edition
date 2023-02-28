@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.*;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_0;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_1;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_2;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
 
 public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBACK> {
 
@@ -70,7 +73,9 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
         }
     }
 
-    private boolean closedIfNotAllowed(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull SUBACK msg) {
+    private boolean closedIfNotAllowed(
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull SUBACK msg) {
         final ProtocolVersion protocolVersion = clientConnectionContext.getProtocolVersion();
         final List<Mqtt5SubAckReasonCode> grantedQos = msg.getReasonCodes();
 
@@ -78,7 +83,8 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
             log.error("Tried to write a SUBACK with empty payload to a client. Disconnecting client (IP: {}).",
                     clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
             mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
-                    null, //already logged
+                    null,
+                    //already logged
                     "Tried to write a SUBACK with empty payload to a client.",
                     Mqtt5DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
                     null,
@@ -90,10 +96,12 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
 
         for (final Mqtt5SubAckReasonCode granted : grantedQos) {
             if ((granted.getCode() >= 128) && (protocolVersion == ProtocolVersion.MQTTv3_1)) {
-                log.error("Tried to write a failure code (0x80) to a MQTT 3.1 subscriber. Disconnecting client (IP: {}).",
+                log.error(
+                        "Tried to write a failure code (0x80) to a MQTT 3.1 subscriber. Disconnecting client (IP: {}).",
                         clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
                 mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
-                        null, //already logged
+                        null,
+                        //already logged
                         "Tried to write a failure code (0x80) to a MQTT 3.1 subscriber.",
                         Mqtt5DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
                         null,
@@ -108,7 +116,8 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
                 log.error("Tried to write an invalid SUBACK return code to a subscriber. Disconnecting client (IP: {}).",
                         clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
                 mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
-                        null, //already logged
+                        null,
+                        //already logged
                         "Tried to write an invalid SUBACK return code to a subscriber.",
                         Mqtt5DisconnectReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
                         null,

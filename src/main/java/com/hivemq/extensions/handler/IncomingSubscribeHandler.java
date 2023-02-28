@@ -132,7 +132,8 @@ public class IncomingSubscribeHandler {
 
         for (final SubscribeInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -226,8 +227,7 @@ public class IncomingSubscribeHandler {
                 reasonCodesBuilder.add(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR);
             }
             // no need to check mqtt version since the mqtt 3 encoder will just not encode reason string and properties.
-            ctx.writeAndFlush(new SUBACK(
-                    output.getSubscribePacket().getPacketId(),
+            ctx.writeAndFlush(new SUBACK(output.getSubscribePacket().getPacketId(),
                     reasonCodesBuilder,
                     ReasonStrings.SUBACK_EXTENSION_PREVENTED));
         }
@@ -259,7 +259,9 @@ public class IncomingSubscribeHandler {
             } catch (final Throwable e) {
                 log.warn(
                         "Uncaught exception was thrown from extension with id \"{}\" on inbound SUBSCRIBE interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                                "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.forciblyPreventSubscribeDelivery();
                 Exceptions.rethrowError(e);
             }

@@ -41,7 +41,9 @@ import java.util.Queue;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,8 +69,8 @@ public class UnsubscribeHandlerTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
         ClientConnection.of(channel).setClientId("myTestClient");
-        when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class)))
-                .thenReturn(Futures.immediateFuture(null));
+        when(clientSessionSubscriptionPersistence.remove(anyString(),
+                any(String.class))).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(
                 Futures.<Void>immediateFuture(null));
     }
@@ -113,8 +115,9 @@ public class UnsubscribeHandlerTest {
 
     @Test
     public void writeInbound_whenTheSubscriptionRemovalFailsForASingleTopicAndMqtt5_thenAcknowledgeWithAnUnspecifiedError() {
-        when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class))).thenReturn(
-                Futures.immediateFailedFuture(new NullPointerException("something is missing")));
+        when(clientSessionSubscriptionPersistence.remove(anyString(),
+                any(String.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException(
+                "something is missing")));
 
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
@@ -191,7 +194,8 @@ public class UnsubscribeHandlerTest {
 
     @Test
     public void writeInbound_whenTheSubscriptionRemovalFailsForMultipleTopicsAndMqtt5_thenAcknowledgeWithAnUnspecifiedError() {
-        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
+        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(
+                Futures.immediateFailedFuture(new NullPointerException("something is missing")));
 
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 

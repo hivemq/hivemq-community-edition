@@ -43,10 +43,18 @@ import util.TestConfigurationBootstrap;
 
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class Mqtt311ConnectDecoderTest {
 
@@ -74,7 +82,8 @@ public class Mqtt311ConnectDecoderTest {
         MockitoAnnotations.initMocks(this);
 
         clientConnection = new DummyClientConnection(channel, null);
-        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
+                clientConnection));
 
         when(fullConfiguration.securityConfiguration()).thenReturn(securityConfigurationService);
         when(securityConfigurationService.validateUTF8()).thenReturn(true);
@@ -292,7 +301,11 @@ public class Mqtt311ConnectDecoderTest {
         final CONNECT connectPacket = decoder.decode(clientConnection, buf, fixedHeader);
 
         assertNull(connectPacket);
-        verify(connacker).connackError(any(Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
+        verify(connacker).connackError(any(Channel.class),
+                isNull(),
+                anyString(),
+                eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET),
+                anyString());
     }
 
     @Test

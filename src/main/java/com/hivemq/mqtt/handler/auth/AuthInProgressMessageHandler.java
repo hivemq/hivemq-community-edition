@@ -58,10 +58,10 @@ public class AuthInProgressMessageHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        final String reasonString = "Client must not send a message other than AUTH or DISCONNECT during enhanced authentication";
+        final String reasonString =
+                "Client must not send a message other than AUTH or DISCONNECT during enhanced authentication";
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
-        connacker.connackError(
-                ctx.channel(),
+        connacker.connackError(ctx.channel(),
                 String.format(DISCONNECT_LOG_MESSAGE, clientConnectionContext.getClientId()),
                 "Sent message other than AUTH or DISCONNECT during enhanced authentication",
                 Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,

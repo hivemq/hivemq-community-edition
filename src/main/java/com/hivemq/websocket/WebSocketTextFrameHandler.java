@@ -43,8 +43,10 @@ public class WebSocketTextFrameHandler extends SimpleChannelInboundHandler<TextW
             final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
 
-            log.debug("Sending websocket text frames is illegal, only binary frames are allowed for MQTT over websockets. " +
-                    "Disconnecting client with IP{}.", channelIP);
+            log.debug(
+                    "Sending websocket text frames is illegal, only binary frames are allowed for MQTT over websockets. " +
+                            "Disconnecting client with IP{}.",
+                    channelIP);
         }
     }
 }

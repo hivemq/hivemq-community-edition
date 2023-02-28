@@ -36,8 +36,7 @@ public class WebSocketTextFrameHandlerTest {
         final WebSocketTextFrameHandler webSocketTextFrameHandler = new WebSocketTextFrameHandler();
         channel = new EmbeddedChannel(webSocketTextFrameHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
-                .set(new UndefinedClientConnection(channel, mock(PublishFlushHandler.class),
-                        mock(Listener.class)));
+                .set(new UndefinedClientConnection(channel, mock(PublishFlushHandler.class), mock(Listener.class)));
     }
 
     @Test

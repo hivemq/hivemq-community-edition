@@ -38,6 +38,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_0;
 import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_1;
 import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.GRANTED_QOS_2;
+import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR;
 import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
