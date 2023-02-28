@@ -30,7 +30,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
-import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.*;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_RETAIN_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE;
 
 public class CONNACKBuilder {
 

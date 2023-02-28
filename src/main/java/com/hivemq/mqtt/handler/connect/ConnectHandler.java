@@ -613,7 +613,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             final @NotNull CONNECT msg,
             final boolean sessionPresent) {
 
-        final CONNACK.Mqtt5Builder builder = CONNACK.builder()
+        final CONNACKBuilder builder = CONNACK.builder()
                 .withSessionPresent(sessionPresent)
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
                 .withReceiveMaximum(configurationService.mqttConfiguration().serverReceiveMaximum())

@@ -130,8 +130,7 @@ public class Mqtt5UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
     }
 
     private int decodePacketIdentifier(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull ByteBuf buf) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
             disconnector.disconnect(clientConnectionContext.getChannel(),

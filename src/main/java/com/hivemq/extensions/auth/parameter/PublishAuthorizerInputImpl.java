@@ -44,9 +44,7 @@ public class PublishAuthorizerInputImpl
     private final @NotNull ClientInformation clientInformation;
 
     public PublishAuthorizerInputImpl(
-            final @NotNull PUBLISH publish,
-            final @NotNull Channel channel,
-            final @NotNull String clientId) {
+            final @NotNull PUBLISH publish, final @NotNull Channel channel, final @NotNull String clientId) {
         Preconditions.checkNotNull(publish, "publish must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");
@@ -57,9 +55,7 @@ public class PublishAuthorizerInputImpl
     }
 
     public PublishAuthorizerInputImpl(
-            final @NotNull MqttWillPublish publish,
-            final @NotNull Channel channel,
-            final @NotNull String clientId) {
+            final @NotNull MqttWillPublish publish, final @NotNull Channel channel, final @NotNull String clientId) {
         Preconditions.checkNotNull(publish, "publish must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");

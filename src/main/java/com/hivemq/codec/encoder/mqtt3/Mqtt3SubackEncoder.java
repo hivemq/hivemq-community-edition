@@ -74,8 +74,7 @@ public class Mqtt3SubackEncoder extends AbstractVariableHeaderLengthEncoder<SUBA
     }
 
     private boolean closedIfNotAllowed(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull SUBACK msg) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull SUBACK msg) {
         final ProtocolVersion protocolVersion = clientConnectionContext.getProtocolVersion();
         final List<Mqtt5SubAckReasonCode> grantedQos = msg.getReasonCodes();
 

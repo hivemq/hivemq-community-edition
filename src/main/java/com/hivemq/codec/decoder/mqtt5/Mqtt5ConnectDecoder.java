@@ -735,8 +735,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
      * @return the length of the string or -1 for malformed packet
      */
     protected int decodeUTF8StringLength(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final ByteBuf buf) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final ByteBuf buf) {
 
         final int utf8StringLength;
 
@@ -1144,8 +1143,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
     }
 
     private void connackByMoreThanOnce(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull String key) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull String key) {
         mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (IP: {}) sent a CONNECT with '" + key + "' included more than once. This is not allowed.",
                 "Sent a CONNECT with '" + key + "' included more than once",

@@ -93,8 +93,7 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
     }
 
     private static void logSSLHandshakeException(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Throwable cause) {
+            final @NotNull ChannelHandlerContext ctx, final @NotNull Throwable cause) {
         if (log.isDebugEnabled()) {
 
             final Throwable rootCause = ExceptionUtils.getRootCause(cause);

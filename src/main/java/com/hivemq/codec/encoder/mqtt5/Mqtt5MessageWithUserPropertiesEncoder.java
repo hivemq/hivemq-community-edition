@@ -172,9 +172,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
     abstract void encode(@NotNull T message, @NotNull ByteBuf out);
 
     public int remainingLength(
-            final @NotNull T message,
-            final int remainingLengthWithoutProperties,
-            final int propertyLength) {
+            final @NotNull T message, final int remainingLengthWithoutProperties, final int propertyLength) {
         return remainingLengthWithoutProperties + encodedPropertyLengthWithHeader(message, propertyLength);
     }
 

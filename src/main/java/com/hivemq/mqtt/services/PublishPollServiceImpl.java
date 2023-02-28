@@ -455,8 +455,7 @@ public class PublishPollServiceImpl implements PublishPollService {
     @NotNull
     @Override
     public ListenableFuture<Void> removeMessageFromSharedQueue(
-            final @NotNull String sharedSubscription,
-            final @NotNull String uniqueId) {
+            final @NotNull String sharedSubscription, final @NotNull String uniqueId) {
         return clientQueuePersistence.removeShared(sharedSubscription, uniqueId);
     }
 
@@ -469,8 +468,7 @@ public class PublishPollServiceImpl implements PublishPollService {
     @NotNull
     @Override
     public ListenableFuture<Void> removeInflightMarker(
-            final @NotNull String sharedSubscription,
-            final @NotNull String uniqueId) {
+            final @NotNull String sharedSubscription, final @NotNull String uniqueId) {
         return clientQueuePersistence.removeInFlightMarker(sharedSubscription, uniqueId);
     }
 

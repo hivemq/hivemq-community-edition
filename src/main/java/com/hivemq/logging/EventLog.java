@@ -106,9 +106,7 @@ public class EventLog {
      * @param reason      why the message was dropped
      */
     public void mqttMessageDropped(
-            @Nullable final String client,
-            @Nullable final String messageType,
-            @NotNull final String reason) {
+            @Nullable final String client, @Nullable final String messageType, @NotNull final String reason) {
         logMessageDropped.debug("Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
                 valueOrUnknown(client),
                 valueOrUnknown(messageType),
@@ -206,9 +204,7 @@ public class EventLog {
      * @param reasonCode of the AUTH packet.
      */
     public void clientAuthentication(
-            @NotNull final Channel channel,
-            @NotNull final Mqtt5AuthReasonCode reasonCode,
-            final boolean received) {
+            @NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);

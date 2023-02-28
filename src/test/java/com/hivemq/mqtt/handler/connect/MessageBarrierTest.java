@@ -152,10 +152,8 @@ public class MessageBarrierTest {
             }
         });
 
-        final CONNACK connack = CONNACK.builder()
-                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
-                .withSessionPresent(false)
-                .build();
+        final CONNACK connack =
+                CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).withSessionPresent(false).build();
         channel.writeOutbound(connack);
 
         assertEquals(2, counter.get());
