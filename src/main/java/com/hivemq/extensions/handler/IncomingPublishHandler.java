@@ -118,9 +118,7 @@ public class IncomingPublishHandler {
      * @param publish the publish to process
      */
     public void interceptOrDelegate(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull PUBLISH publish,
-            final @NotNull String clientId) {
+            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String clientId) {
         final Channel channel = ctx.channel();
 
         final ClientContextImpl clientContext = ClientConnection.of(channel).getExtensionClientContext();

@@ -28,9 +28,7 @@ public abstract class MqttDecoder<T extends Message> {
     private static final Logger log = LoggerFactory.getLogger(MqttDecoder.class);
 
     public abstract @Nullable T decode(
-            @NotNull ClientConnectionContext clientConnectionContext,
-            @NotNull ByteBuf buf,
-            byte header);
+            @NotNull ClientConnectionContext clientConnectionContext, @NotNull ByteBuf buf, byte header);
 
     /**
      * Checks if the last 4 bits are actually zeroed out

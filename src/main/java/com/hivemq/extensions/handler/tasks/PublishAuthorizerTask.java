@@ -61,8 +61,7 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
 
     @Override
     public @NotNull PublishAuthorizerOutputImpl apply(
-            final @NotNull PublishAuthorizerInputImpl input,
-            final @NotNull PublishAuthorizerOutputImpl output) {
+            final @NotNull PublishAuthorizerInputImpl input, final @NotNull PublishAuthorizerOutputImpl output) {
 
         if (output.isCompleted()) {
             return output;

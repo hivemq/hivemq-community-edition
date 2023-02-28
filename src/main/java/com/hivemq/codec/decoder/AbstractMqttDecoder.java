@@ -688,8 +688,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param messageType             the type of the message
      */
     protected void disconnectByInvalidReasonCode(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull MessageType messageType) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
         disconnector.disconnect(clientConnectionContext.getChannel(),
                 "A client (IP: {}) sent a " + messageType.name() + " with invalid reason code. Disconnecting client.",
                 "Sent a " + messageType.name() + " with invalid reason code",

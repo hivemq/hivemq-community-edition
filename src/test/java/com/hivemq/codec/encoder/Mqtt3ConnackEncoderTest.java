@@ -21,7 +21,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connack.CONNACK;
 import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
-import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -80,10 +79,8 @@ public class Mqtt3ConnackEncoderTest {
 
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
-        final CONNACK connack = CONNACK.builder()
-                .withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED)
-                .withSessionPresent(true)
-                .build();
+        final CONNACK connack =
+                CONNACK.builder().withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED).withSessionPresent(true).build();
         channel.writeOutbound(connack);
 
         final ByteBuf buf = channel.readOutbound();

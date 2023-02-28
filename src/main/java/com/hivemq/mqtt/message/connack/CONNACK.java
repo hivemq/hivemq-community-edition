@@ -46,8 +46,7 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
         final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
         final QoS qoS = (extensionMaxQos != null) ? QoS.valueOf(extensionMaxQos.getQosNumber()) : null;
 
-        return new CONNACKBuilder()
-                .withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
+        return new CONNACKBuilder().withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
                 .withSessionPresent(packet.getSessionPresent())
                 .withSessionExpiryInterval(packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET))
                 .withServerKeepAlive(packet.getServerKeepAlive().orElse(KEEP_ALIVE_NOT_SET))
@@ -96,7 +95,8 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
     private final @Nullable String responseInformation;
     private final @Nullable String serverReference;
 
-    CONNACK(final @NotNull Mqtt5ConnAckReasonCode reasonCode,
+    CONNACK(
+            final @NotNull Mqtt5ConnAckReasonCode reasonCode,
             final @Nullable String reasonString,
             final @NotNull Mqtt5UserProperties userProperties,
             final boolean sessionPresent,

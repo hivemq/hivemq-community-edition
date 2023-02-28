@@ -29,9 +29,15 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.*;
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_RETAIN_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_TOPIC_ALIAS_MAXIMUM;
+import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE;
 
 /**
  * @author Florian Limpöck
@@ -101,8 +107,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e', //
         };
 
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("test", "value"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("test", "value"),
                 new MqttUserProperty("test", "value2"),
                 new MqttUserProperty("test2", "value"));
 
@@ -146,8 +151,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   reason code Malformed Packet
                 (byte) 0x00,
                 // properties length
-                0
-        };
+                0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -191,8 +195,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 9,
                 // reason string
-                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'
-        };
+                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -238,8 +241,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 9,
                 // reason string
-                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'
-        };
+                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -291,8 +293,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e', //
         };
 
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("test", "value"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("test", "value"),
                 new MqttUserProperty("test", "value2"),
                 new MqttUserProperty("test2", "value"));
 
@@ -344,8 +345,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e', //
         };
 
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("test", "value"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("test", "value"),
                 new MqttUserProperty("test", "value2"),
                 new MqttUserProperty("test2", "value"));
 
@@ -389,8 +389,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   reason code Malformed Packet
                 (byte) 0x00,
                 // properties length
-                0
-        };
+                0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -434,8 +433,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 5,
                 // session expiry interval
-                0x11, 0, 0, 0, 100
-        };
+                0x11, 0, 0, 0, 100};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -479,8 +477,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 3,
                 // receive maximum
-                0x21, 0, 100
-        };
+                0x21, 0, 100};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -524,8 +521,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 2,
                 // maximum qos
-                0x24, 1
-        };
+                0x24, 1};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -567,8 +563,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   reason code
                 (byte) 0x00,
                 // properties length
-                0
-        };
+                0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -612,8 +607,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 2,
                 // retain available
-                0x25, 0
-        };
+                0x25, 0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -657,8 +651,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 2,
                 // wildcard subs available
-                0x28, 0
-        };
+                0x28, 0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -702,8 +695,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 2,
                 // shared subs available
-                0x2A, 0
-        };
+                0x2A, 0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -747,8 +739,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 2,
                 // sub identifier available
-                0x29, 0
-        };
+                0x29, 0};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -792,8 +783,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 5,
                 // maximum packet size
-                0x27, 0, 0, 0, 100
-        };
+                0x27, 0, 0, 0, 100};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -837,8 +827,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 7,
                 // maximum packet size
-                0x12, 0, 4, 't', 'e', 's', 't'
-        };
+                0x12, 0, 4, 't', 'e', 's', 't'};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -882,8 +871,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 3,
                 // topic alias maximum
-                0x22, 0, 5,
-        };
+                0x22, 0, 5,};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -927,8 +915,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 3,
                 // server keep alive
-                0x13, 0, 120,
-        };
+                0x13, 0, 120,};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -972,8 +959,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 11,
                 // response information
-                0x1A, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e',
-        };
+                0x1A, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e',};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -1017,8 +1003,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // properties length
                 9,
                 // server reference
-                0x1C, 0, 6, 's', 'e', 'r', 'v', 'e', 'r',
-        };
+                0x1C, 0, 6, 's', 'e', 'r', 'v', 'e', 'r',};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -1063,8 +1048,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 //     auth method
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 //     auth data
-                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-        };
+                0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
         final CONNACK connack = CONNACK.builder()
                 .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
@@ -1108,8 +1092,7 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                     //   reason code placeholder
                     (byte) 0xFF,
                     // properties length
-                    0
-            };
+                    0};
 
             expected[3] = (byte) reasonCode.getCode();
             final CONNACK connack = CONNACK.builder()
@@ -1169,28 +1152,27 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
         // user properties
         maxUserProperties.encode(expected);
 
-        final CONNACK connack =
-                CONNACK.builder()
-                        .withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET)
-                        .withReasonString(reasonString)
-                        .withUserProperties(maxUserProperties)
-                        .withSessionPresent(false)
-                        .withSessionExpiryInterval(SESSION_EXPIRY_NOT_SET)
-                        .withServerKeepAlive(KEEP_ALIVE_NOT_SET)
-                        .withAssignedClientIdentifier(null)
-                        .withAuthMethod(null)
-                        .withAuthData(null)
-                        .withReceiveMaximum(DEFAULT_RECEIVE_MAXIMUM)
-                        .withTopicAliasMaximum(DEFAULT_TOPIC_ALIAS_MAXIMUM)
-                        .withMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT)
-                        .withMaximumQoS(null)
-                        .withRetainAvailable(DEFAULT_RETAIN_AVAILABLE)
-                        .withWildcardSubscriptionAvailable(DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE)
-                        .withSubscriptionIdentifierAvailable(DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE)
-                        .withSharedSubscriptionAvailable(DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE)
-                        .withResponseInformation(null)
-                        .withServerReference(null)
-                        .build();
+        final CONNACK connack = CONNACK.builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET)
+                .withReasonString(reasonString)
+                .withUserProperties(maxUserProperties)
+                .withSessionPresent(false)
+                .withSessionExpiryInterval(SESSION_EXPIRY_NOT_SET)
+                .withServerKeepAlive(KEEP_ALIVE_NOT_SET)
+                .withAssignedClientIdentifier(null)
+                .withAuthMethod(null)
+                .withAuthData(null)
+                .withReceiveMaximum(DEFAULT_RECEIVE_MAXIMUM)
+                .withTopicAliasMaximum(DEFAULT_TOPIC_ALIAS_MAXIMUM)
+                .withMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT)
+                .withMaximumQoS(null)
+                .withRetainAvailable(DEFAULT_RETAIN_AVAILABLE)
+                .withWildcardSubscriptionAvailable(DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE)
+                .withSubscriptionIdentifierAvailable(DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE)
+                .withSharedSubscriptionAvailable(DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE)
+                .withResponseInformation(null)
+                .withServerReference(null)
+                .build();
 
         encodeTestBufferSize(expected.array(), connack);
         expected.release();
@@ -1213,33 +1195,31 @@ public class Mqtt5ConnackEncoderTest extends AbstractMqtt5EncoderTest {
                 // reason code
                 (byte) 0x82,
                 // property length
-                0
-        };
+                0};
 
         final Mqtt5UserProperties userProperties = getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1);
 
-        final CONNACK connack =
-                CONNACK.builder()
-                        .withReasonCode(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR)
-                        .withReasonString(null)
-                        .withUserProperties(userProperties)
-                        .withSessionPresent(false)
-                        .withSessionExpiryInterval(SESSION_EXPIRY_NOT_SET)
-                        .withServerKeepAlive(KEEP_ALIVE_NOT_SET)
-                        .withAssignedClientIdentifier(null)
-                        .withAuthMethod(null)
-                        .withAuthData(null)
-                        .withReceiveMaximum(DEFAULT_RECEIVE_MAXIMUM)
-                        .withTopicAliasMaximum(DEFAULT_TOPIC_ALIAS_MAXIMUM)
-                        .withMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT)
-                        .withMaximumQoS(null)
-                        .withRetainAvailable(DEFAULT_RETAIN_AVAILABLE)
-                        .withWildcardSubscriptionAvailable(DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE)
-                        .withSubscriptionIdentifierAvailable(DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE)
-                        .withSharedSubscriptionAvailable(DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE)
-                        .withResponseInformation(null)
-                        .withServerReference(null)
-                        .build();
+        final CONNACK connack = CONNACK.builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR)
+                .withReasonString(null)
+                .withUserProperties(userProperties)
+                .withSessionPresent(false)
+                .withSessionExpiryInterval(SESSION_EXPIRY_NOT_SET)
+                .withServerKeepAlive(KEEP_ALIVE_NOT_SET)
+                .withAssignedClientIdentifier(null)
+                .withAuthMethod(null)
+                .withAuthData(null)
+                .withReceiveMaximum(DEFAULT_RECEIVE_MAXIMUM)
+                .withTopicAliasMaximum(DEFAULT_TOPIC_ALIAS_MAXIMUM)
+                .withMaximumPacketSize(DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT)
+                .withMaximumQoS(null)
+                .withRetainAvailable(DEFAULT_RETAIN_AVAILABLE)
+                .withWildcardSubscriptionAvailable(DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE)
+                .withSubscriptionIdentifierAvailable(DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE)
+                .withSharedSubscriptionAvailable(DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE)
+                .withResponseInformation(null)
+                .withServerReference(null)
+                .build();
 
         encodeTestBufferSize(expected, connack);
     }

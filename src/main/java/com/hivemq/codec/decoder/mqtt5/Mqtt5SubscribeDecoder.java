@@ -251,8 +251,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
     }
 
     private int decodePacketIdentifier(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull ByteBuf buf) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
             disconnector.disconnect(clientConnectionContext.getChannel(),
@@ -295,8 +294,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
     }
 
     private Mqtt5RetainHandling decodeRetainHandling(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final byte flags) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final byte flags) {
         final int code = (flags & 0b0011_0000) >> 4;
 
         if (code == 3) {
