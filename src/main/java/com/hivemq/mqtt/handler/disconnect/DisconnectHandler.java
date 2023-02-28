@@ -15,7 +15,11 @@
  */
 package com.hivemq.mqtt.handler.disconnect;
 
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
@@ -90,12 +94,16 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
         if (log.isTraceEnabled()) {
             log.trace("The client [{}] sent a disconnect message.", clientId);
         }
-        eventLog.clientDisconnectedGracefully(clientConnectionContext, logClientReasonString ? msg.getReasonString() : null);
+        eventLog.clientDisconnectedGracefully(clientConnectionContext,
+                logClientReasonString ? msg.getReasonString() : null);
 
         clientConnectionContext.setSendWill(msg.getReasonCode() != NORMAL_DISCONNECTION);
 
-        ctx.pipeline().fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
-                msg.getReasonString(), UserPropertiesImpl.of(msg.getUserProperties().asList()), true));
+        ctx.pipeline()
+                .fireUserEventTriggered(new OnClientDisconnectEvent(msg.getReasonCode().toDisconnectedReasonCode(),
+                        msg.getReasonString(),
+                        UserPropertiesImpl.of(msg.getUserProperties().asList()),
+                        true));
 
         clientConnectionContext.proposeClientState(ClientState.DISCONNECTED_BY_CLIENT);
         ctx.channel().close();
@@ -159,15 +167,15 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             clientConnection.setSendWill(false);
 
             // ungraceful disconnect
-        } else if ((clientConnection.getClientState() == ClientState.DISCONNECTED_BY_SERVER)
-                || (clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED)) {
+        } else if ((clientConnection.getClientState() == ClientState.DISCONNECTED_BY_SERVER) ||
+                (clientConnection.getClientState() == ClientState.DISCONNECTED_UNSPECIFIED)) {
             clientConnection.setSendWill(true);
         }
 
-        final ListenableFuture<Void> persistenceFuture = clientSessionPersistence.clientDisconnected(
-                clientConnection.getClientId(),
-                clientConnection.isSendWill(),
-                clientConnection.getClientSessionExpiryInterval());
+        final ListenableFuture<Void> persistenceFuture =
+                clientSessionPersistence.clientDisconnected(clientConnection.getClientId(),
+                        clientConnection.isSendWill(),
+                        clientConnection.getClientSessionExpiryInterval());
         Futures.addCallback(persistenceFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(final @Nullable Void result) {
@@ -183,7 +191,10 @@ public class DisconnectHandler extends SimpleChannelInboundHandler<DISCONNECT> {
             public void onFailure(final @NotNull Throwable throwable) {
                 final boolean persistent = clientConnectionContext.getClientSessionExpiryInterval() > 0;
                 Exceptions.rethrowError("Unable to update client session data for disconnecting client " +
-                        clientConnectionContext.getClientId() + " with clean session set to " + !persistent + ".", throwable);
+                        clientConnectionContext.getClientId() +
+                        " with clean session set to " +
+                        !persistent +
+                        ".", throwable);
             }
         }, MoreExecutors.directExecutor());
     }

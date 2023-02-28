@@ -43,7 +43,9 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
 
     @Override
     public void encode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull CONNECT msg, final @NotNull ByteBuf out) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull CONNECT msg,
+            final @NotNull ByteBuf out) {
 
         out.writeByte(CONNECT_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);

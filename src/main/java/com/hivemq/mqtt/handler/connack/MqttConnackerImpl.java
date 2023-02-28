@@ -63,15 +63,12 @@ public class MqttConnackerImpl implements MqttConnacker {
 
     @Override
     public @NotNull ChannelFuture connackSuccess(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull CONNACK connack,
-            final @NotNull CONNECT connect) {
+            final @NotNull ChannelHandlerContext ctx, final @NotNull CONNACK connack, final @NotNull CONNECT connect) {
 
         Preconditions.checkNotNull(ctx, "ChannelHandlerContext must never be null");
         Preconditions.checkNotNull(connack, "CONNACK must never be null");
         Preconditions.checkNotNull(connect, "CONNECT must never be null");
-        Preconditions.checkArgument(connack.getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS,
-                "Error is no success");
+        Preconditions.checkArgument(connack.getReasonCode() == Mqtt5ConnAckReasonCode.SUCCESS, "Error is no success");
         ThreadPreConditions.inNettyChildEventloop();
 
         final ChannelFuture channelFuture = ctx.writeAndFlush(connack);
@@ -93,7 +90,13 @@ public class MqttConnackerImpl implements MqttConnacker {
             final @Nullable Mqtt5ConnAckReasonCode reasonCode,
             final @Nullable String reasonString) {
 
-        connackError(channel, logMessage, eventLogMessage, reasonCode, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES, false);
+        connackError(channel,
+                logMessage,
+                eventLogMessage,
+                reasonCode,
+                reasonString,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                false);
     }
 
     public void connackError(
@@ -127,14 +130,17 @@ public class MqttConnackerImpl implements MqttConnacker {
         if ((protocolVersion == ProtocolVersion.MQTTv3_1) || (protocolVersion == ProtocolVersion.MQTTv3_1_1)) {
             connackError3(clientConnectionContext, connackWithReasonCode, reasonCode);
         } else { // MQTT 5
-            connackError5(clientConnectionContext, connackWithReasonCode, connackWithReasonString, reasonCode, reasonString, userProperties);
+            connackError5(clientConnectionContext,
+                    connackWithReasonCode,
+                    connackWithReasonString,
+                    reasonCode,
+                    reasonString,
+                    userProperties);
         }
     }
 
     private void logConnack(
-            final @NotNull Channel channel,
-            final @Nullable String logMessage,
-            final @Nullable String eventLogMessage) {
+            final @NotNull Channel channel, final @Nullable String logMessage, final @Nullable String eventLogMessage) {
 
         if (log.isDebugEnabled() && logMessage != null && !logMessage.isEmpty()) {
             final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
@@ -156,7 +162,9 @@ public class MqttConnackerImpl implements MqttConnacker {
         clientConnectionContext.proposeClientState(ClientState.CONNECT_FAILED);
 
         if (returnCode != null && withReasonCode) {
-            clientConnectionContext.getChannel().writeAndFlush(new CONNACK(returnCode)).addListener(ChannelFutureListener.CLOSE);
+            clientConnectionContext.getChannel()
+                    .writeAndFlush(new CONNACK(returnCode))
+                    .addListener(ChannelFutureListener.CLOSE);
         } else {
             //Do not send connack to not let the client know its an mqtt server
             clientConnectionContext.getChannel().close();
@@ -184,8 +192,7 @@ public class MqttConnackerImpl implements MqttConnacker {
         clientConnectionContext.proposeClientState(ClientState.CONNECT_FAILED);
 
         if (reasonCode != null) {
-            final CONNACK.Mqtt5Builder connackBuilder = new CONNACK.Mqtt5Builder()
-                    .withReasonCode(reasonCode)
+            final CONNACK.Mqtt5Builder connackBuilder = new CONNACK.Mqtt5Builder().withReasonCode(reasonCode)
                     .withReasonString(reasonString)
                     .withUserProperties(userProperties);
 
@@ -202,7 +209,9 @@ public class MqttConnackerImpl implements MqttConnacker {
                 }
             }
 
-            clientConnectionContext.getChannel().writeAndFlush(connackBuilder.build()).addListener(ChannelFutureListener.CLOSE);
+            clientConnectionContext.getChannel()
+                    .writeAndFlush(connackBuilder.build())
+                    .addListener(ChannelFutureListener.CLOSE);
         } else {
             //Do not send connack to not let the client know its an mqtt server
             clientConnectionContext.getChannel().close();
@@ -221,9 +230,11 @@ public class MqttConnackerImpl implements MqttConnacker {
 
             final DisconnectedReasonCode disconnectedReasonCode =
                     (reasonCode == null) ? null : reasonCode.toDisconnectedReasonCode();
-            clientConnectionContext.getChannel().pipeline().fireUserEventTriggered(isAuthentication ?
-                    new OnAuthFailedEvent(disconnectedReasonCode, reasonString, userProperties) :
-                    new OnServerDisconnectEvent(disconnectedReasonCode, reasonString, userProperties));
+            clientConnectionContext.getChannel()
+                    .pipeline()
+                    .fireUserEventTriggered(isAuthentication ?
+                            new OnAuthFailedEvent(disconnectedReasonCode, reasonString, userProperties) :
+                            new OnServerDisconnectEvent(disconnectedReasonCode, reasonString, userProperties));
         }
     }
 

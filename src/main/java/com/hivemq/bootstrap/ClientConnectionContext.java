@@ -48,7 +48,8 @@ import java.util.concurrent.ScheduledFuture;
  * immutability of the context information. For example: The client id of a client should not be {@code null} anymore
  * after establishing successfully an MQTT connection.
  * <p>
- * Initially every client starts early in their connection with {@link UndefinedClientConnection} which has loose guarantees
+ * Initially every client starts early in their connection with {@link UndefinedClientConnection} which has loose
+ * guarantees
  * like the client id being nullable as they may have not yet been initialized.
  * <p>
  * At some point during the transition of the client lifecycle between connecting and connected which currently happens

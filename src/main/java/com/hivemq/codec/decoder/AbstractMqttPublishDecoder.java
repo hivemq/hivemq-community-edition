@@ -106,7 +106,8 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
      * @param header                  the publish header byte
      * @return whether the RETAIN flag is set or {@code null} if this method disconnected.
      */
-    protected @Nullable Boolean decodeRetain(final @NotNull ClientConnectionContext clientConnectionContext, final byte header) {
+    protected @Nullable Boolean decodeRetain(
+            final @NotNull ClientConnectionContext clientConnectionContext, final byte header) {
         final boolean retained = Bytes.isBitSet(header, 0);
 
         if (retained && !configurationService.mqttConfiguration().retainedMessagesEnabled()) {
@@ -133,7 +134,8 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
      * @param buf                     the encoded ByteBuf of the message
      * @return the packet identifier or 0 if this method disconnected.
      */
-    protected int decodePacketIdentifier(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
+    protected int decodePacketIdentifier(
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
 
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {

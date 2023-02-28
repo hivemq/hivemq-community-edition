@@ -128,8 +128,7 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
                     final ListenableFuture<Void> writeFuture =
                             retainedMessagesSender.writeRetainedMessages(channel, subscriptionTopic);
-                    Futures.addCallback(
-                            writeFuture,
+                    Futures.addCallback(writeFuture,
                             new SendRetainedMessageResultListener(channel, subscriptionTopic, retainedMessagesSender),
                             channel.eventLoop());
 
@@ -156,8 +155,7 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
             final ListenableFuture<Set<String>> future =
                     retainedMessagePersistence.getWithWildcards(subscribedTopic.getTopic());
-            Futures.addCallback(
-                    future,
+            Futures.addCallback(future,
                     new RetainedMessagesHandleWildcardsCallback(subscribedTopic, channel, retainedMessagesSender),
                     channel.eventLoop());
         }
@@ -192,31 +190,42 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
 
             final Integer clientReceiveMaximum = ClientConnection.of(channel).getClientReceiveMaximum();
 
-            int concurrentMessages = clientReceiveMaximum == null ? CONCURRENT_MESSAGES :
+            int concurrentMessages = clientReceiveMaximum == null ?
+                    CONCURRENT_MESSAGES :
                     Math.min(clientReceiveMaximum, CONCURRENT_MESSAGES);
             concurrentMessages = Math.min(concurrentMessages, retainedMessageTopics.size());
 
             final Topic[] topicBatch = new Topic[concurrentMessages];
             for (int i = 0; i < concurrentMessages; i++) {
                 final String nextTopic = topics.poll();
-                topicBatch[i] = new Topic(nextTopic, subscription.getQoS(), subscription.isNoLocal(),
-                        subscription.isRetainAsPublished(), subscription.getRetainHandling(),
+                topicBatch[i] = new Topic(nextTopic,
+                        subscription.getQoS(),
+                        subscription.isNoLocal(),
+                        subscription.isRetainAsPublished(),
+                        subscription.getRetainHandling(),
                         subscription.getSubscriptionIdentifier());
             }
 
 
             final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessages(channel, topicBatch);
 
-            Futures.addCallback(
-                    sentFuture, new SendRetainedMessageListenerAndScheduleNext(subscription, topics, channel,
-                            retainedMessagesSender, concurrentMessages), channel.eventLoop());
+            Futures.addCallback(sentFuture,
+                    new SendRetainedMessageListenerAndScheduleNext(subscription,
+                            topics,
+                            channel,
+                            retainedMessagesSender,
+                            concurrentMessages),
+                    channel.eventLoop());
         }
 
         @Override
         public void onFailure(final @NotNull Throwable throwable) {
             final ClientConnection clientConnection = ClientConnection.of(channel);
-            Exceptions.rethrowError("Unable to send retained messages on topic " + subscription.getTopic() +
-                    " to client " + clientConnection.getClientId() + ".", throwable);
+            Exceptions.rethrowError("Unable to send retained messages on topic " +
+                    subscription.getTopic() +
+                    " to client " +
+                    clientConnection.getClientId() +
+                    ".", throwable);
             channel.disconnect();
         }
     }

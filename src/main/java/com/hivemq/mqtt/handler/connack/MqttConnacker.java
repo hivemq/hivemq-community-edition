@@ -45,9 +45,7 @@ public interface MqttConnacker {
      * @return the connack sent future that completes when the CONNACK is sent
      */
     @NotNull ChannelFuture connackSuccess(
-            @NotNull ChannelHandlerContext ctx,
-            @NotNull CONNACK connack,
-            @NotNull CONNECT connect);
+            @NotNull ChannelHandlerContext ctx, @NotNull CONNACK connack, @NotNull CONNECT connect);
 
     /**
      * Send a connack with optional reason code and reason string.

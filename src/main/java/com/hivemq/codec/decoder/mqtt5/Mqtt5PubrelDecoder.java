@@ -52,7 +52,9 @@ public class Mqtt5PubrelDecoder extends AbstractMqttDecoder<PUBREL> {
 
     @Override
     public @Nullable PUBREL decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (!validateHeader(header)) {
             disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBREL);
@@ -71,7 +73,10 @@ public class Mqtt5PubrelDecoder extends AbstractMqttDecoder<PUBREL> {
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBREL(packetIdentifier, Mqtt5PUBREL.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBREL(packetIdentifier,
+                    Mqtt5PUBREL.DEFAULT_REASON_CODE,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubRelReasonCode reasonCode = Mqtt5PubRelReasonCode.fromCode(buf.readUnsignedByte());
@@ -104,14 +109,17 @@ public class Mqtt5PubrelDecoder extends AbstractMqttDecoder<PUBREL> {
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBREL);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBREL);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.PUBREL);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
+                            propertyIdentifier,
+                            MessageType.PUBREL);
                     return null;
             }
         }

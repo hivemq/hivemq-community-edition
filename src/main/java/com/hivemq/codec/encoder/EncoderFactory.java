@@ -17,8 +17,25 @@ package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ClientConnectionContext;
-import com.hivemq.codec.encoder.mqtt3.*;
-import com.hivemq.codec.encoder.mqtt5.*;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3ConnackEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3DisconnectEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubackEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubcompEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PublishEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubrecEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubrelEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3SubackEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3UnsubackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5AuthEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5ConnackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5DisconnectEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubCompEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PublishEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubrecEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubrelEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5SubackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5UnsubackEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -104,7 +121,9 @@ public class EncoderFactory {
     }
 
     protected @NotNull ByteBuf allocateBuffer(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull Message msg, final boolean preferDirect) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull Message msg,
+            final boolean preferDirect) {
 
         final MqttEncoder encoder = getEncoder(msg, clientConnectionContext);
         if (encoder != null) {

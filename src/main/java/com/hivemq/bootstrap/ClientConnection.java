@@ -122,8 +122,7 @@ public class ClientConnection implements ClientConnectionContext {
         checkNotNull(context.protocolVersion, "Protocol version must not be null.");
         checkNotNull(context.connectedListener, "Connected listener must not be null.");
 
-        final ClientConnection clientConnection = new ClientConnection(
-                context.channel,
+        final ClientConnection clientConnection = new ClientConnection(context.channel,
                 context.publishFlushHandler,
                 context.clientState,
                 context.protocolVersion,

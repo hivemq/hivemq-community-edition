@@ -52,7 +52,9 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
     @Override
     public @Nullable PUBCOMP decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (!validateHeader(header)) {
             disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBCOMP);
@@ -71,7 +73,10 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
 
         //nothing more to read
         if (!buf.isReadable()) {
-            return new PUBCOMP(packetIdentifier, Mqtt5PUBCOMP.DEFAULT_REASON_CODE, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new PUBCOMP(packetIdentifier,
+                    Mqtt5PUBCOMP.DEFAULT_REASON_CODE,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         final Mqtt5PubCompReasonCode reasonCode = Mqtt5PubCompReasonCode.fromCode(buf.readUnsignedByte());
@@ -104,14 +109,17 @@ public class Mqtt5PubcompDecoder extends AbstractMqttDecoder<PUBCOMP> {
                     break;
 
                 case USER_PROPERTY:
-                    userPropertiesBuilder = readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBCOMP);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBCOMP);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
 
                 default:
-                    disconnectByInvalidPropertyIdentifier(clientConnectionContext, propertyIdentifier, MessageType.PUBCOMP);
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
+                            propertyIdentifier,
+                            MessageType.PUBCOMP);
                     return null;
             }
         }

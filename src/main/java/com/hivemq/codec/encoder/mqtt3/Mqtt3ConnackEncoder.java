@@ -60,7 +60,9 @@ public class Mqtt3ConnackEncoder implements MqttEncoder<Mqtt3CONNACK> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull Mqtt3CONNACK connack) {
+    public int bufferSize(
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull Mqtt3CONNACK connack) {
         return ENCODED_CONNACK_SIZE;
     }
 }

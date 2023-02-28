@@ -54,9 +54,7 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
 
     @Override
     protected @NotNull ByteBuf allocateBuffer(
-            final @NotNull ChannelHandlerContext ctx,
-            final @NotNull Message msg,
-            final boolean preferDirect) {
+            final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final boolean preferDirect) {
 
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         return encoderFactory.allocateBuffer(clientConnectionContext, msg, preferDirect);

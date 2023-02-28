@@ -120,14 +120,14 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
             if (!ctx.executor().isShutdown()) {
                 final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
                 log.error("Execution of authentication was rejected for client with IP {}.",
-                        clientConnectionContext.getChannelIP().orElse("UNKNOWN"), ex);
+                        clientConnectionContext.getChannelIP().orElse("UNKNOWN"),
+                        ex);
             }
         }
     }
 
     private void continueAuthentication(final @NotNull T output) {
-        final ChannelFuture authFuture = authSender.sendAuth(
-                ctx.channel(),
+        final ChannelFuture authFuture = authSender.sendAuth(ctx.channel(),
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),

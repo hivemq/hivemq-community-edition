@@ -45,7 +45,9 @@ public class Mqtt3DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
     @Override
     public @Nullable DISCONNECT decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {

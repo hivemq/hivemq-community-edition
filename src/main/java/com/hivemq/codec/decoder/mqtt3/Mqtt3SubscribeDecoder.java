@@ -49,7 +49,9 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
     @Override
     public @Nullable SUBSCRIBE decode(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             //Must match 0b0000_0010
@@ -98,7 +100,8 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             final String topic = Strings.getPrefixedString(buf);
             if (isInvalidTopic(clientConnectionContext, topic)) {
                 disconnector.disconnect(clientConnectionContext.getChannel(),
-                        null, //already logged
+                        null,
+                        //already logged
                         "Sent SUBSCRIBE with an invalid topic filter",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                         ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);

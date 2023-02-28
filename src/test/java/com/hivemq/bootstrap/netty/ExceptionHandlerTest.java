@@ -33,7 +33,11 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ExceptionHandlerTest {
 
@@ -60,7 +64,8 @@ public class ExceptionHandlerTest {
 
         when(ctx.pipeline()).thenReturn(pipeline);
         when(channel.pipeline()).thenReturn(pipeline);
-        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(clientConnection));
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
+                clientConnection));
         when(clientConnection.getChannelIP()).thenReturn(Optional.of("0.0.0.0"));
         when(ctx.channel()).thenReturn(channel);
 

@@ -54,13 +54,15 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
     @Override
     public void pluginPost(final @NotNull PublishAuthorizerOutputImpl pluginOutput) {
 
-        if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+        if (pluginOutput.isAsync() &&
+                pluginOutput.isTimedOut() &&
+                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
             //Timeout fallback failure means publish delivery prevention
             pluginOutput.forceFailedAuthorization();
         }
 
-        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL
-                || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
+        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL ||
+                pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
             ClientConnectionContext.of(ctx.channel()).setIncomingPublishesSkipRest(true);
         }
 

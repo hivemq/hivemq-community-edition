@@ -63,7 +63,11 @@ public class MqttAuthSenderTest {
 
     @Test(expected = NullPointerException.class)
     public void test_send_auth_channel_null() {
-        mqttAuthSender.sendAuth(null, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
+        mqttAuthSender.sendAuth(null,
+                null,
+                Mqtt5AuthReasonCode.SUCCESS,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason");
     }
 
     @Test(expected = NullPointerException.class)
@@ -71,7 +75,11 @@ public class MqttAuthSenderTest {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).proposeClientState(ClientState.RE_AUTHENTICATING);
-        mqttAuthSender.sendAuth(channel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
+        mqttAuthSender.sendAuth(channel,
+                null,
+                Mqtt5AuthReasonCode.SUCCESS,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason");
     }
 
     @Test
@@ -80,7 +88,11 @@ public class MqttAuthSenderTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).proposeClientState(ClientState.RE_AUTHENTICATING);
         ClientConnection.of(channel).setAuthMethod("METHOD");
-        final ChannelFuture future = mqttAuthSender.sendAuth(channel, null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, "reason");
+        final ChannelFuture future = mqttAuthSender.sendAuth(channel,
+                null,
+                Mqtt5AuthReasonCode.SUCCESS,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason");
 
         assertNotNull(future);
         verify(eventLog).clientAuthentication(channel, Mqtt5AuthReasonCode.SUCCESS, false);

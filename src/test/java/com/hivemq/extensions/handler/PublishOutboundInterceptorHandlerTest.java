@@ -45,7 +45,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import util.*;
+import util.CollectUserEventsHandler;
+import util.DummyClientConnection;
+import util.IsolatedExtensionClassloaderUtil;
+import util.TestConfigurationBootstrap;
+import util.TestMessageUtil;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
