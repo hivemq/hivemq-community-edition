@@ -94,6 +94,9 @@ public class ClientQueueXodusLocalPersistenceTest {
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
 
+        // Return a non-null payload to ensure a PUBLISH isn't dropped during its lookup due to a missing payload.
+        when(payloadPersistence.get(anyLong())).thenReturn(new byte[0]);
+
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
@@ -1255,6 +1258,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_read_byte_limit_respected_qos1() {
 
+        when(payloadPersistence.get(anyLong())).thenReturn(null);
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         persistence.stop();
@@ -1300,6 +1304,7 @@ public class ClientQueueXodusLocalPersistenceTest {
     @Test
     public void test_read_byte_limit_respected_qos0_and_qos1() {
 
+        when(payloadPersistence.get(anyLong())).thenReturn(null);
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         persistence.stop();

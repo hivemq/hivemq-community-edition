@@ -38,6 +38,7 @@ import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
+import com.hivemq.persistence.payload.PayloadPersistenceException;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.Strings;
@@ -576,6 +577,38 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         payloadPersistence.decrementReferenceCounter(publish.getPublishId());
     }
 
+    private boolean setPayloadIfExistingElseDrop(
+            final @NotNull PUBLISH publish,
+            final @NotNull String queueId,
+            final boolean shared,
+            final int bucketIndex) {
+        try {
+            publish.dereferencePayload();
+        } catch (final PayloadPersistenceException e) {
+            messageDroppedService.failed(queueId, publish.getTopic(), publish.getQoS().getQosNumber());
+            // No payload exists: remove the PUBLISH from its persistent queue. (Not necessary for QoS 0.)
+            if (publish.getQoS() != QoS.AT_MOST_ONCE) {
+                // Because having no payload is an unexpected error case, we're keeping it simple here: We call the
+                // remove methods, which again roll a database transaction etc., even though we could already pass
+                // the relevant data (cursor, key, serialized value, ...) here from the caller's transaction. This
+                // works because any surrounding caller's transaction is not expected to also modify this PUBLISH,
+                // hence we don't get colliding transactions.
+                if (shared) {
+                    removeShared(queueId, publish.getUniqueId(), bucketIndex);
+                } else {
+                    remove(queueId, publish.getPacketIdentifier(), publish.getUniqueId(), bucketIndex);
+                }
+            }
+            return false;
+        }
+        if (publish.getQoS() == QoS.AT_MOST_ONCE) {
+            // We can decrement the persistence counter immediately because the QoS 0 PUBLISH has already been
+            // removed from its (in-memory) queue, hence we won't attempt to access its payload again anyway.
+            payloadPersistence.decrementReferenceCounter(publish.getPublishId());
+        }
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -606,7 +639,9 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             int qos0Bytes = 0;
             while (qos0MessagesFound < packetIds.length() && bytesLimit > qos0Bytes) {
                 final PUBLISH qos0Publish = pollQos0Message(key, bucketIndex);
-                if (!qos0Publish.hasExpired()) {
+                if (qos0Publish.hasExpired()) {
+                    payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
+                } else if (setPayloadIfExistingElseDrop(qos0Publish, queueId, shared, bucketIndex)) {
                     publishes.add(qos0Publish);
                     qos0MessagesFound++;
                     qos0Bytes += qos0Publish.getEstimatedSizeInMemory();
@@ -641,6 +676,9 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         }
                         //do not return here, because we could have a QoS 0 message left
                     } else {
+                        if (!setPayloadIfExistingElseDrop(publish, queueId, shared, bucketIndex)) {
+                            return true;
+                        }
 
                         final int packetId = packetIds.get(packetIdIndex[0]);
                         publish.setPacketIdentifier(packetId);
@@ -661,7 +699,9 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     // Add a qos 0 message
                     if (!qos0Messages.isEmpty()) {
                         final PUBLISH qos0Publish = pollQos0Message(key, bucketIndex);
-                        if (!qos0Publish.hasExpired()) {
+                        if (qos0Publish.hasExpired()) {
+                            payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
+                        } else if (setPayloadIfExistingElseDrop(qos0Publish, queueId, shared, bucketIndex)) {
                             publishes.add(qos0Publish);
                             messageCount[0]++;
                             bytes[0] += qos0Publish.getEstimatedSizeInMemory();
@@ -686,7 +726,6 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         }
         increaseQos0MessagesMemory(qos0Publish.getEstimatedSizeInMemory() * -1);
         increaseClientQos0MessagesMemory(key, qos0Publish.getEstimatedSizeInMemory() * -1);
-        payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
         return qos0Publish;
     }
 
@@ -721,14 +760,18 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         return false;
                     }
 
+                    if (message instanceof PUBLISH) {
+                        final PUBLISH publish = (PUBLISH) message;
+                        if (!setPayloadIfExistingElseDrop(publish, client, shared, bucketIndex)) {
+                            return true;
+                        }
+                        bytes[0] += publish.getEstimatedSizeInMemory();
+                        publish.setDuplicateDelivery(true);
+                    }
+
                     messages.add(message);
 
                     count[0]++;
-
-                    if (message instanceof PUBLISH) {
-                        bytes[0] += ((PUBLISH) message).getEstimatedSizeInMemory();
-                        ((PUBLISH) message).setDuplicateDelivery(true);
-                    }
 
                     return (count[0] != batchSize) && (bytes[0] <= bytesLimit);
                 });
