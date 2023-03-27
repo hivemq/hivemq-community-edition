@@ -23,7 +23,6 @@ import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.PublishPollService;
@@ -78,9 +77,6 @@ public class ClientQueuePersistenceImplTest {
     ClientSessionLocalPersistence clientSessionLocalPersistence;
 
     @Mock
-    MessageDroppedService messageDroppedService;
-
-    @Mock
     LocalTopicTree topicTree;
 
     @Mock
@@ -104,7 +100,6 @@ public class ClientQueuePersistenceImplTest {
                 singleWriterService,
                 mqttConfigurationService,
                 clientSessionLocalPersistence,
-                messageDroppedService,
                 topicTree,
                 connectionPersistence,
                 publishPollService);
@@ -127,7 +122,6 @@ public class ClientQueuePersistenceImplTest {
                 eq(QueuedMessagesStrategy.DISCARD),
                 anyBoolean(),
                 anyInt());
-        verify(messageDroppedService, never()).queueFull("client", "topic", 1);
     }
 
     @Test(timeout = 5000)
@@ -299,7 +293,6 @@ public class ClientQueuePersistenceImplTest {
                 anyInt());
         verify(clientSessionLocalPersistence,
                 never()).getSession("client"); // Get session because new publishes are available
-        verify(messageDroppedService, never()).queueFull("client", "topic", 1);
     }
 
     @Test(timeout = 5000)
@@ -316,7 +309,6 @@ public class ClientQueuePersistenceImplTest {
                 anyBoolean(),
                 anyInt());
         verify(clientSessionLocalPersistence).getSession("client"); // Get session because new publishes are available
-        verify(messageDroppedService, never()).queueFull("client", "topic", 1);
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic) {
