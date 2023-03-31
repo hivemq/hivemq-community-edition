@@ -65,11 +65,16 @@ public class DiagnosticMode {
     private @Nullable ConsoleReporter metricReporter;
 
     @Inject
-    DiagnosticMode(final @NotNull DiagnosticData diagnosticData,
+    DiagnosticMode(
+            final @NotNull DiagnosticData diagnosticData,
             final @NotNull SystemInformation systemInformation,
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull ShutdownHooks shutdownHooks) {
-        this(diagnosticData, systemInformation, metricRegistry, shutdownHooks, Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create(THREAD_NAME_FORMAT)));
+        this(diagnosticData,
+                systemInformation,
+                metricRegistry,
+                shutdownHooks,
+                Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create(THREAD_NAME_FORMAT)));
     }
 
     /**
@@ -78,7 +83,8 @@ public class DiagnosticMode {
      *                 can't be accessed.
      */
     @VisibleForTesting
-    DiagnosticMode(final @NotNull DiagnosticData diagnosticData,
+    DiagnosticMode(
+            final @NotNull DiagnosticData diagnosticData,
             final @NotNull SystemInformation systemInformation,
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull ShutdownHooks shutdownHooks,

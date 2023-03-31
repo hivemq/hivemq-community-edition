@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.publish;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
@@ -32,13 +33,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.LogbackCapturingAppender;
 import util.TestMessageUtil;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,10 +63,10 @@ public class MessageExpiryHandlerTest {
         MockitoAnnotations.initMocks(this);
         final MessageExpiryHandler messageExpiryHandler = new MessageExpiryHandler();
         channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("ClientId");
+        ClientConnection.of(channel).setClientId("ClientId");
         channel.pipeline().addLast(messageExpiryHandler);
         when(ctx.channel()).thenReturn(channel);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(MessageExpiryHandler.log);

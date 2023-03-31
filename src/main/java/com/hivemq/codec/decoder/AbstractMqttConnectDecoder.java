@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.decoder;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -63,16 +63,16 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
         allowAssignedClientId = configurationService.securityConfiguration().allowServerAssignedClientId();
     }
 
-    protected void disconnectByInvalidFixedHeader(final @NotNull ClientConnection clientConnection) {
-        mqttConnacker.connackError(clientConnection.getChannel(),
+    protected void disconnectByInvalidFixedHeader(final @NotNull ClientConnectionContext clientConnectionContext) {
+        mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (IP: {}) connected with an invalid fixed header.",
                 "Invalid CONNECT fixed header",
                 Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                 ReasonStrings.CONNACK_MALFORMED_PACKET_FIXED_HEADER);
     }
 
-    protected void disconnectByInvalidHeader(final @NotNull ClientConnection clientConnection) {
-        mqttConnacker.connackError(clientConnection.getChannel(),
+    protected void disconnectByInvalidHeader(final @NotNull ClientConnectionContext clientConnectionContext) {
+        mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (ID: {},IP: {}) connected with an invalid CONNECT header.",
                 "Invalid CONNECT header",
                 Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
@@ -91,21 +91,21 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
      * <p>
      * A Will QoS of 0 and a Will Retain of 1 is a malformed packet.
      *
-     * @param isWillFlag       will flag set
-     * @param isWillRetain     will retain set
-     * @param willQoS          quality of service of will
-     * @param clientConnection the connection of the mqtt client
+     * @param isWillFlag              will flag set
+     * @param isWillRetain            will retain set
+     * @param willQoS                 quality of service of will
+     * @param clientConnectionContext the connection of the mqtt client
      * @return true if valid, else false
      */
     protected boolean validateWill(
             final boolean isWillFlag,
             final boolean isWillRetain,
             final int willQoS,
-            final @NotNull ClientConnection clientConnection) {
+            final @NotNull ClientConnectionContext clientConnectionContext) {
 
         final boolean valid = (isWillFlag && willQoS < 3) || (!isWillRetain && willQoS == 0);
         if (!valid) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with an invalid willTopic flag combination. Disconnecting client.",
                     "Invalid will-topic/flag combination",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -119,15 +119,15 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
      * <p>
      * If the first bit of the connect flags byte is set, it is a malformed packet
      *
-     * @param connectFlagsByte the connect flags byte
-     * @param clientConnection the connection of the mqtt client
+     * @param connectFlagsByte        the connect flags byte
+     * @param clientConnectionContext the connection of the mqtt client
      * @return false if the reserved bit zero is set to 1, else true
      */
     protected boolean validateConnectFlagByte(
-            final byte connectFlagsByte, final @NotNull ClientConnection clientConnection) {
+            final byte connectFlagsByte, final @NotNull ClientConnectionContext clientConnectionContext) {
 
         if (isBitSet(connectFlagsByte, 0)) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with invalid CONNECT flags. Disconnecting client.",
                     "Invalid CONNECT flags",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -142,17 +142,17 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
      * <p>
      * If the validation fails it is an unsupported protocol version error.
      *
-     * @param variableHeader   the variable header of a mqtt connect message
-     * @param clientConnection the connection of the mqtt client
+     * @param variableHeader          the variable header of a mqtt connect message
+     * @param clientConnectionContext the connection of the mqtt client
      * @return true if valid, else false
      */
     protected boolean validateProtocolName(
             final @NotNull ByteBuf variableHeader,
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull String protocolName) {
 
         if (!protocolName.equals(Strings.getPrefixedString(variableHeader))) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with an invalid protocol name. Disconnecting client.",
                     "Invalid CONNECT protocol name",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
@@ -180,17 +180,17 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
      * <p>
      * if readable bytes less than length a connack with protocol error reason code will be sent.
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
      * @return a new ByteBuf of the fixed variable header part or {@code null} in an error case
      */
     protected @Nullable ByteBuf decodeFixedVariableHeaderConnect(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
 
         if (buf.readableBytes() >= VARIABLE_HEADER_LENGTH) {
             return buf.readSlice(VARIABLE_HEADER_LENGTH);
         } else {
-            disconnectByInvalidHeader(clientConnection);
+            disconnectByInvalidHeader(clientConnectionContext);
             return null;
         }
     }
@@ -208,16 +208,16 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
      * <p>
      * - topic contains null character
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the ByteBuf of the encoded will message
-     * @param willQoS          the quality of service of the will message
-     * @param isWillRetain     the retain flag of the will message
-     * @param hiveMQId         the HiveMQ identifier
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the ByteBuf of the encoded will message
+     * @param willQoS                 the quality of service of the will message
+     * @param isWillRetain            the retain flag of the will message
+     * @param hiveMQId                the HiveMQ identifier
      * @return a {@link MqttWillPublish} if valid, else {@code null}.
      */
     @Nullable
     protected MqttWillPublish readMqtt3WillPublish(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final int willQoS,
             final boolean isWillRetain,
@@ -231,7 +231,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
         final int utf8StringLengthWill;
 
         if (buf.readableBytes() < 2 || buf.readableBytes() < (utf8StringLengthWill = buf.readUnsignedShort())) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a CONNECT with an incorrect will-topic length. Disconnecting client.",
                     "Incorrect CONNECT will-topic length",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -242,7 +242,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
         if (validateUTF8) {
             willTopic = Strings.getValidatedPrefixedString(buf, utf8StringLengthWill, true);
             if (willTopic == null) {
-                mqttConnacker.connackError(clientConnection.getChannel(),
+                mqttConnacker.connackError(clientConnectionContext.getChannel(),
                         "The will-topic of the client (IP: {}) is not well formed. This is not allowed. Disconnecting client.",
                         "Sent CONNECT with bad UTF-8 character",
                         Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -253,9 +253,10 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
             willTopic = Strings.getPrefixedString(buf, utf8StringLengthWill);
         }
 
-        if (isInvalidTopic(clientConnection, willTopic)) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
-                    null, //already logged
+        if (isInvalidTopic(clientConnectionContext, willTopic)) {
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
+                    null,
+                    //already logged
                     "Sent CONNECT with invalid will-topic",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
                     ReasonStrings.CONNACK_MALFORMED_PACKET_INVALID_WILL_TOPIC);

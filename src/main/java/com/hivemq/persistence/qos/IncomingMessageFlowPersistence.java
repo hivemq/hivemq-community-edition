@@ -31,8 +31,7 @@ public interface IncomingMessageFlowPersistence {
      * @param messageId The identifier of the message.
      * @return the message with id.
      */
-    @Nullable
-    MessageWithID get(final @NotNull String client, final int messageId);
+    @Nullable MessageWithID get(final @NotNull String client, final int messageId);
 
     /**
      * Add or replace a {@link MessageWithID} for specific client id and message id.

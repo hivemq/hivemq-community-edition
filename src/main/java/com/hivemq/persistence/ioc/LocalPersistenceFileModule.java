@@ -57,9 +57,7 @@ class LocalPersistenceFileModule extends SingletonModule<Class<LocalPersistenceF
 
         /* Local */
         if (payloadPersistenceType == PersistenceType.FILE) {
-            bindLocalPersistence(PublishPayloadLocalPersistence.class,
-                    PublishPayloadXodusLocalPersistence.class,
-                    null);
+            bindLocalPersistence(PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class, null);
         }
         if (retainedPersistenceType == PersistenceType.FILE) {
             bindLocalPersistence(RetainedMessageLocalPersistence.class,
@@ -80,9 +78,7 @@ class LocalPersistenceFileModule extends SingletonModule<Class<LocalPersistenceF
                 ClientSessionSubscriptionXodusLocalPersistence.class,
                 ClientSessionSubscriptionLocalProvider.class);
 
-        bindLocalPersistence(ClientQueueLocalPersistence.class,
-                ClientQueueXodusLocalPersistence.class,
-                null);
+        bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueXodusLocalPersistence.class, null);
     }
 
     private void bindLocalPersistence(

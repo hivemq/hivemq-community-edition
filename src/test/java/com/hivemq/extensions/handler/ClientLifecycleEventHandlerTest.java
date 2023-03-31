@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.Maps;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -29,7 +30,11 @@ import com.hivemq.extension.sdk.api.events.client.parameters.ConnectionStartInpu
 import com.hivemq.extension.sdk.api.events.client.parameters.DisconnectEventInput;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.HiveMQExtensions;
-import com.hivemq.extensions.events.*;
+import com.hivemq.extensions.events.LifecycleEventListeners;
+import com.hivemq.extensions.events.OnAuthFailedEvent;
+import com.hivemq.extensions.events.OnAuthSuccessEvent;
+import com.hivemq.extensions.events.OnClientDisconnectEvent;
+import com.hivemq.extensions.events.OnServerDisconnectEvent;
 import com.hivemq.extensions.executor.PluginTaskExecutorService;
 import com.hivemq.extensions.executor.PluginTaskExecutorServiceImpl;
 import com.hivemq.extensions.executor.task.PluginTaskExecutor;
@@ -47,6 +52,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestMessageUtil;
 
@@ -56,7 +62,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -81,10 +89,10 @@ public class ClientLifecycleEventHandlerTest {
         executor.postConstruct();
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
+                .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
+        ClientConnection.of(channel).setClientId("test_client");
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
         when(channelHandlerContext.channel()).thenReturn(channel);
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
 
@@ -227,7 +235,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channelHandlerContext.channel()).setClientId(null);
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
@@ -240,7 +248,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channelHandlerContext.channel()).setClientId(null);
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
@@ -254,7 +262,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channelHandlerContext.channel()).setClientId(null);
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
@@ -268,7 +276,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channelHandlerContext.channel()).setClientId(null);
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
@@ -282,7 +290,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channelHandlerContext.channel()).setClientId(null);
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 
@@ -296,7 +304,7 @@ public class ClientLifecycleEventHandlerTest {
         final CountDownLatch latch1 = new CountDownLatch(1);
         final CountDownLatch latch2 = new CountDownLatch(1);
 
-        channelHandlerContext.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channelHandlerContext.channel()).setClientId(null);
         when(lifecycleEventListeners.getClientLifecycleEventListenerProviderMap()).thenReturn(createMap(latch1,
                 latch2));
 

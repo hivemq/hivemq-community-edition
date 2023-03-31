@@ -26,10 +26,8 @@ import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ExodusException;
-import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
-import org.rocksdb.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +36,10 @@ import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.migration.persistence.legacy.serializer.RetainedMessageDeserializer_4_4.*;
+import static com.hivemq.migration.persistence.legacy.serializer.RetainedMessageDeserializer_4_4.deserializeKey;
+import static com.hivemq.migration.persistence.legacy.serializer.RetainedMessageDeserializer_4_4.deserializeValue;
+import static com.hivemq.migration.persistence.legacy.serializer.RetainedMessageDeserializer_4_4.serializeKey;
+import static com.hivemq.migration.persistence.legacy.serializer.RetainedMessageDeserializer_4_4.serializeValue;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
 /**
@@ -57,9 +58,10 @@ public class RetainedMessageRocksDBLocalPersistence_4_4 extends RocksDBLocalPers
     private final @NotNull AtomicLong retainMessageCounter = new AtomicLong(0);
 
     @Inject
-    public RetainedMessageRocksDBLocalPersistence_4_4(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-                                                      final @NotNull PublishPayloadPersistence payloadPersistence,
-                                                      final @NotNull PersistenceStartup persistenceStartup) {
+    public RetainedMessageRocksDBLocalPersistence_4_4(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull PersistenceStartup persistenceStartup) {
 
         super(localPersistenceFileUtil,
                 persistenceStartup,
@@ -117,7 +119,8 @@ public class RetainedMessageRocksDBLocalPersistence_4_4 extends RocksDBLocalPers
         }
     }
 
-    public void put(@NotNull final RetainedMessage retainedMessage, @NotNull final String topic, final int bucketIndex) {
+    public void put(
+            @NotNull final RetainedMessage retainedMessage, @NotNull final String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);

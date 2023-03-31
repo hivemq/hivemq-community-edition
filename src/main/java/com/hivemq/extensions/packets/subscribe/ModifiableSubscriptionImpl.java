@@ -64,11 +64,13 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
     @Override
     public void setTopicFilter(final @NotNull String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter must never be null");
-        Preconditions.checkArgument(
-                topicFilter.length() <= configurationService.restrictionsConfiguration().maxTopicLength(),
+        Preconditions.checkArgument(topicFilter.length() <=
+                        configurationService.restrictionsConfiguration().maxTopicLength(),
                 "Topic filter length must not exceed '" +
-                        configurationService.restrictionsConfiguration().maxTopicLength() + "' characters, but has '" +
-                        topicFilter.length() + "' characters");
+                        configurationService.restrictionsConfiguration().maxTopicLength() +
+                        "' characters, but has '" +
+                        topicFilter.length() +
+                        "' characters");
         Preconditions.checkArgument(!(!configurationService.mqttConfiguration().wildcardSubscriptionsEnabled() &&
                 Topics.containsWildcard(topicFilter)), "Wildcard characters '+' or '#' are not allowed");
 
@@ -77,17 +79,16 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
         }
 
         final boolean shared = Topics.isSharedSubscriptionTopic(topicFilter);
-        Preconditions.checkArgument(
-                !(noLocal && shared), "Shared subscription is not allowed with no local flag set to true");
+        Preconditions.checkArgument(!(noLocal && shared),
+                "Shared subscription is not allowed with no local flag set to true");
         if (shared) {
-            Preconditions.checkArgument(
-                    configurationService.mqttConfiguration().sharedSubscriptionsEnabled(),
+            Preconditions.checkArgument(configurationService.mqttConfiguration().sharedSubscriptionsEnabled(),
                     "Shared subscriptions not allowed");
             final SharedSubscriptionService.SharedSubscription sharedSubscription =
                     Topics.checkForSharedSubscription(topicFilter);
             if (sharedSubscription != null) {
-                Preconditions.checkArgument(
-                        !sharedSubscription.getTopicFilter().isEmpty(), "Shared subscription topic must not be empty");
+                Preconditions.checkArgument(!sharedSubscription.getTopicFilter().isEmpty(),
+                        "Shared subscription topic must not be empty");
             }
         }
 
@@ -95,8 +96,8 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is invalid for subscriptions");
         }
 
-        if (!PluginBuilderUtil.isValidUtf8String(
-                topicFilter, configurationService.securityConfiguration().validateUTF8())) {
+        if (!PluginBuilderUtil.isValidUtf8String(topicFilter,
+                configurationService.securityConfiguration().validateUTF8())) {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is UTF-8 malformed");
         }
 
@@ -155,8 +156,7 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
 
     @Override
     public void setNoLocal(final boolean noLocal) {
-        Preconditions.checkArgument(
-                !(noLocal && Topics.isSharedSubscriptionTopic(topicFilter)),
+        Preconditions.checkArgument(!(noLocal && Topics.isSharedSubscriptionTopic(topicFilter)),
                 "No local is not allowed for shared subscriptions");
         if (this.noLocal == noLocal) {
             return;

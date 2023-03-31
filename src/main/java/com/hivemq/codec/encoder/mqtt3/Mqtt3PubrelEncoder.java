@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
@@ -32,7 +32,7 @@ public class Mqtt3PubrelEncoder implements MqttEncoder<PUBREL> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull PUBREL msg,
             final @NotNull ByteBuf out) {
 
@@ -47,7 +47,7 @@ public class Mqtt3PubrelEncoder implements MqttEncoder<PUBREL> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PUBREL msg) {
+    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull PUBREL msg) {
         return ENCODED_PUBREL_SIZE;
     }
 }

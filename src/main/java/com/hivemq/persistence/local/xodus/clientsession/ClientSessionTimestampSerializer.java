@@ -31,8 +31,7 @@ class ClientSessionTimestampSerializer {
                 (((long) b[3] & 0xff) << 24) |
                 (((long) b[2] & 0xff) << 16) |
                 (((long) b[1] & 0xff) << 8) |
-                (((long) b[0] & 0xff))
-        );
+                (((long) b[0] & 0xff)));
     }
 
     /**
@@ -50,7 +49,6 @@ class ClientSessionTimestampSerializer {
                 (byte) (timestamp >> 16),
                 (byte) (timestamp >> 24),
                 (byte) (timestamp >> 32),
-                (byte) (timestamp >> 40)
-        };
+                (byte) (timestamp >> 40)};
     }
 }

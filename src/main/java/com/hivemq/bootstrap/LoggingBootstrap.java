@@ -187,8 +187,7 @@ public class LoggingBootstrap {
             // Print internal status data in case of warnings or errors.
             return false;
         } else {
-            log.warn(
-                    "The logging configuration file {} does not exist. Using HiveMQ default logging configuration.",
+            log.warn("The logging configuration file {} does not exist. Using HiveMQ default logging configuration.",
                     file.getAbsolutePath());
             return false;
         }

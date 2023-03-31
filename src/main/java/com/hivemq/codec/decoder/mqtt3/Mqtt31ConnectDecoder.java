@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.decoder.mqtt3;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.decoder.AbstractMqttConnectDecoder;
 import com.hivemq.configuration.HivemqId;
@@ -59,16 +59,18 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
 
     @Override
     public @Nullable CONNECT decode(
-            final @NotNull ClientConnection clientConnection, final @NotNull ByteBuf buf, final byte header) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte header) {
 
         if (buf.readableBytes() < 12) {
-            disconnectByInvalidHeader(clientConnection);
+            disconnectByInvalidHeader(clientConnectionContext);
             return null;
         }
 
         final ByteBuf connectHeader = buf.readSlice(12);
 
-        if (!validateProtocolName(connectHeader, clientConnection, PROTOCOL_NAME)) {
+        if (!validateProtocolName(connectHeader, clientConnectionContext, PROTOCOL_NAME)) {
             return null;
         }
 
@@ -86,12 +88,12 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
 
         final int willQoS = (connectFlagsByte & 0b0001_1000) >> 3;
 
-        if (!validateWill(isWillFlag, isWillRetain, willQoS, clientConnection)) {
+        if (!validateWill(isWillFlag, isWillRetain, willQoS, clientConnectionContext)) {
             return null;
         }
 
         if (!validateUsernamePassword(isUsernameFlag, isPasswordFlag)) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with an invalid username/password combination. The password flag was set but the username flag was not set. Disconnecting client.",
                     "Sent a CONNECT with invalid username/password combination",
                     Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
@@ -103,8 +105,9 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
 
         final int utf8StringLength;
 
-        if (buf.readableBytes() < 2 || (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()) && utf8StringLength > 0)) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+        if (buf.readableBytes() < 2 ||
+                (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()) && utf8StringLength > 0)) {
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a CONNECT message with an incorrect client id length. Disconnecting client.",
                     "Sent CONNECT with incorrect client id length",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -113,7 +116,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         }
 
         if (utf8StringLength == 0) {
-            mqttConnacker.connackError(clientConnection.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected without clientID. This is not allowed. Disconnecting client.",
                     "Sent CONNECT without clientID",
                     Mqtt5ConnAckReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
@@ -126,7 +129,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         if (validateUTF8) {
             clientId = Strings.getValidatedPrefixedString(buf, utf8StringLength, true);
             if (clientId == null) {
-                mqttConnacker.connackError(clientConnection.getChannel(),
+                mqttConnacker.connackError(clientConnectionContext.getChannel(),
                         "The client id of the client (IP: {}) is not well formed. This is not allowed. Disconnecting client.",
                         "Sent CONNECT with malformed client id",
                         Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -137,12 +140,12 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         } else {
             clientId = Strings.getPrefixedString(buf, utf8StringLength);
         }
-        clientConnection.setClientId(clientId);
+        clientConnectionContext.setClientId(clientId);
 
         final MqttWillPublish willPublish;
 
         if (isWillFlag) {
-            willPublish = readMqtt3WillPublish(clientConnection, buf, willQoS, isWillRetain, hiveMQId);
+            willPublish = readMqtt3WillPublish(clientConnectionContext, buf, willQoS, isWillRetain, hiveMQId);
             if (willPublish == null) {
                 return null;
             }
@@ -154,7 +157,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         if (isUsernameFlag) {
             userName = Strings.getPrefixedString(buf);
             if (userName == null) {
-                mqttConnacker.connackError(clientConnection.getChannel(),
+                mqttConnacker.connackError(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a CONNECT with an incorrect username length. Disconnecting client.",
                         "Sent a CONNECT with an incorrect username length",
                         Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -162,7 +165,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
                 buf.clear();
                 return null;
             }
-            clientConnection.setAuthUsername(userName);
+            clientConnectionContext.setAuthUsername(userName);
         } else {
             userName = null;
         }
@@ -170,16 +173,16 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
         final byte[] password;
         if (isPasswordFlag) {
             password = Bytes.getPrefixedBytes(buf);
-            clientConnection.setAuthPassword(password);
+            clientConnectionContext.setAuthPassword(password);
         } else {
             password = null;
         }
 
-        clientConnection.setConnectKeepAlive(keepAlive);
-        clientConnection.setCleanStart(isCleanSessionFlag);
+        clientConnectionContext.setConnectKeepAlive(keepAlive);
+        clientConnectionContext.setCleanStart(isCleanSessionFlag);
 
         final long sessionExpiryInterval = isCleanSessionFlag ? 0 : maxSessionExpiryInterval;
-        clientConnection.setClientSessionExpiryInterval(sessionExpiryInterval);
+        clientConnectionContext.setClientSessionExpiryInterval(sessionExpiryInterval);
 
         return new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1)
                 .withClientIdentifier(clientId)
@@ -188,6 +191,7 @@ public class Mqtt31ConnectDecoder extends AbstractMqttConnectDecoder {
                 .withCleanStart(isCleanSessionFlag)
                 .withSessionExpiryInterval(sessionExpiryInterval)
                 .withKeepAlive(keepAlive)
-                .withWillPublish(willPublish).build();
+                .withWillPublish(willPublish)
+                .build();
     }
 }

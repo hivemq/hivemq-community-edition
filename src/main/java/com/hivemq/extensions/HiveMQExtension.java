@@ -48,7 +48,8 @@ public interface HiveMQExtension {
      * @param extensionStopInput  the {@link ExtensionStopInput} which is passed to the extension's extensionStart()
      * @param extensionStopOutput the {@link ExtensionStopOutput} which is passed to the extension's extensionStart()
      */
-    void stop(@NotNull ExtensionStopInput extensionStopInput, @NotNull ExtensionStopOutput extensionStopOutput) throws Throwable;
+    void stop(@NotNull ExtensionStopInput extensionStopInput, @NotNull ExtensionStopOutput extensionStopOutput)
+            throws Throwable;
 
     /**
      * Cleans the extensions resources and optionally disables the extension

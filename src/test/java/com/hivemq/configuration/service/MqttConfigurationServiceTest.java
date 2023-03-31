@@ -22,8 +22,7 @@ public class MqttConfigurationServiceTest {
 
     @Test
     public void test_all_queued_messages_strategy_value_of() {
-        EnumTestUtil.assertAllValueOf(
-                MqttConfigurationService.QueuedMessagesStrategy.class,
+        EnumTestUtil.assertAllValueOf(MqttConfigurationService.QueuedMessagesStrategy.class,
                 MqttConfigurationService.QueuedMessagesStrategy::getIndex,
                 MqttConfigurationService.QueuedMessagesStrategy::valueOf);
     }

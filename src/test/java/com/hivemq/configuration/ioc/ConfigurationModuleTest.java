@@ -51,9 +51,11 @@ public class ConfigurationModuleTest {
         MockitoAnnotations.initMocks(this);
 
         testConfigurationBootstrap = new TestConfigurationBootstrap();
-        final FullConfigurationService fullConfigurationService = testConfigurationBootstrap.getFullConfigurationService();
+        final FullConfigurationService fullConfigurationService =
+                testConfigurationBootstrap.getFullConfigurationService();
 
-        injector = Guice.createInjector(new SystemInformationModule(new SystemInformationImpl()), new ConfigurationModule(fullConfigurationService, new HivemqId()),
+        injector = Guice.createInjector(new SystemInformationModule(new SystemInformationImpl()),
+                new ConfigurationModule(fullConfigurationService, new HivemqId()),
                 new AbstractModule() {
                     @Override
                     protected void configure() {
@@ -117,8 +119,10 @@ public class ConfigurationModuleTest {
 
         final FullConfigurationService configurationService = injector.getInstance(FullConfigurationService.class);
 
-        assertSame(configurationService.listenerConfiguration(), injector.getInstance(ListenerConfigurationService.class));
+        assertSame(configurationService.listenerConfiguration(),
+                injector.getInstance(ListenerConfigurationService.class));
         assertSame(configurationService.mqttConfiguration(), injector.getInstance(MqttConfigurationService.class));
-        assertSame(configurationService.restrictionsConfiguration(), injector.getInstance(RestrictionsConfigurationService.class));
+        assertSame(configurationService.restrictionsConfiguration(),
+                injector.getInstance(RestrictionsConfigurationService.class));
     }
 }

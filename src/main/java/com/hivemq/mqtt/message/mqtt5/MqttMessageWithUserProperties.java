@@ -17,9 +17,9 @@ package com.hivemq.mqtt.message.mqtt5;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.reason.Mqtt5ReasonCode;
 
@@ -100,11 +100,12 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
 
         private final String reasonString;
 
-        protected MqttMessageWithReasonString(@Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
+        protected MqttMessageWithReasonString(
+                @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
             super(userProperties);
             if (reasonString != null) {
-                Preconditions.checkArgument(reasonString.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
-                        "A reason string must never exceed 65535 bytes");
+                Preconditions.checkArgument(reasonString.getBytes(StandardCharsets.UTF_8).length <=
+                        UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "A reason string must never exceed 65535 bytes");
 
             }
             this.reasonString = reasonString;
@@ -127,7 +128,10 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
 
         private final @NotNull R reasonCode;
 
-        protected MqttMessageWithReasonCode(@NotNull final R reasonCode, @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
+        protected MqttMessageWithReasonCode(
+                @NotNull final R reasonCode,
+                @Nullable final String reasonString,
+                @NotNull final Mqtt5UserProperties userProperties) {
 
             super(reasonString, userProperties);
             Preconditions.checkNotNull(reasonCode, "A reason code may never be null");
@@ -151,8 +155,11 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
             extends MqttMessageWithReasonCode<R> {
 
 
-        protected MqttMessageWithIdAndReasonCode(final int packetIdentifier, @NotNull final R reasonCode,
-                                                 @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
+        protected MqttMessageWithIdAndReasonCode(
+                final int packetIdentifier,
+                @NotNull final R reasonCode,
+                @Nullable final String reasonString,
+                @NotNull final Mqtt5UserProperties userProperties) {
 
             super(reasonCode, reasonString, userProperties);
             super.packetIdentifier = packetIdentifier;
@@ -176,8 +183,11 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
 
         private final ImmutableList<R> reasonCodes;
 
-        protected MqttMessageWithIdAndReasonCodes(final int packetIdentifier, @NotNull final ImmutableList<R> reasonCodes,
-                                                  @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
+        protected MqttMessageWithIdAndReasonCodes(
+                final int packetIdentifier,
+                @NotNull final ImmutableList<R> reasonCodes,
+                @Nullable final String reasonString,
+                @NotNull final Mqtt5UserProperties userProperties) {
 
             super(reasonString, userProperties);
             super.packetIdentifier = packetIdentifier;

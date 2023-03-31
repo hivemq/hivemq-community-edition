@@ -35,40 +35,34 @@ public interface SystemInformation {
     /**
      * @return the version string of HiveMQ
      */
-    @NotNull
-    String getHiveMQVersion();
+    @NotNull String getHiveMQVersion();
 
     /**
      * @return the home folder of HiveMQ
      */
-    @NotNull
-    File getHiveMQHomeFolder();
+    @NotNull File getHiveMQHomeFolder();
 
     /**
      * /**
      *
      * @return the config folder of HiveMQ
      */
-    @NotNull
-    File getConfigFolder();
+    @NotNull File getConfigFolder();
 
     /**
      * @return the log folder of HiveMQ
      */
-    @NotNull
-    File getLogFolder();
+    @NotNull File getLogFolder();
 
     /**
      * @return the data folder of HiveMQ
      */
-    @NotNull
-    File getDataFolder();
+    @NotNull File getDataFolder();
 
     /**
      * @return the extensions folder of HiveMQ
      */
-    @NotNull
-    File getExtensionsFolder();
+    @NotNull File getExtensionsFolder();
 
     /**
      * @return the timestamp of HiveMQ start

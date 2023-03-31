@@ -36,10 +36,7 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
     private final @Nullable String topicFilter;
 
     public SubscriberWithIdentifiers(
-            final @NotNull String subscriber,
-            final int qos,
-            final byte flags,
-            final @Nullable String sharedName) {
+            final @NotNull String subscriber, final int qos, final byte flags, final @Nullable String sharedName) {
 
         checkNotNull(subscriber, "Subscriber must not be null");
 
@@ -53,7 +50,8 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
 
     public SubscriberWithIdentifiers(
             final @NotNull String subscriber,
-            final int qos, final byte flags,
+            final int qos,
+            final byte flags,
             final @Nullable String sharedName,
             final @NotNull ImmutableList<Integer> subscriptionIdentifier,
             final @Nullable String topicFilter) {
@@ -76,8 +74,9 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         flags = subscriberWithQoS.getFlags();
         sharedName = subscriberWithQoS.getSharedName();
         final Integer subscriptionIdentifiers = subscriberWithQoS.getSubscriptionIdentifier();
-        this.subscriptionIdentifiers =
-                (subscriptionIdentifiers == null) ? ImmutableIntArray.of() : ImmutableIntArray.of(subscriptionIdentifiers);
+        this.subscriptionIdentifiers = (subscriptionIdentifiers == null) ?
+                ImmutableIntArray.of() :
+                ImmutableIntArray.of(subscriptionIdentifiers);
         topicFilter = subscriberWithQoS.getTopicFilter();
     }
 
@@ -136,8 +135,12 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final SubscriberWithIdentifiers that = (SubscriberWithIdentifiers) o;
         return qos == that.qos &&
                 flags == that.flags &&

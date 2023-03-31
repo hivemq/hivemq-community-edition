@@ -16,7 +16,6 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.Message;
@@ -25,7 +24,11 @@ import com.hivemq.mqtt.message.suback.SUBACK;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
-import io.netty.channel.*;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,9 +47,12 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
     private final @NotNull Queue<Message> messageQueue = new LinkedList<>();
 
     public static void addToPipeline(@NotNull ChannelHandlerContext ctx) {
-        if(!ctx.pipeline().names().contains(ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER)){
+        if (!ctx.pipeline().names().contains(ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER)) {
             final SubscribeMessageBarrier subscribeMessageBarrier = new SubscribeMessageBarrier();
-            ctx.pipeline().addAfter(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER, subscribeMessageBarrier);
+            ctx.pipeline()
+                    .addAfter(ChannelHandlerNames.MQTT_MESSAGE_ENCODER,
+                            ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER,
+                            subscribeMessageBarrier);
         }
     }
 
@@ -76,7 +82,7 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
                 public void operationComplete(final @NotNull ChannelFuture future) {
                     if (future.isSuccess()) {
                         final boolean allMessagesReleased = releaseQueuedMessages(ctx);
-                        if (allMessagesReleased){
+                        if (allMessagesReleased) {
                             ctx.channel().config().setAutoRead(true);
                             ctx.pipeline().remove(SubscribeMessageBarrier.this);
                         }

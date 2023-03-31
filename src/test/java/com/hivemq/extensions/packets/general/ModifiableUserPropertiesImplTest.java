@@ -30,7 +30,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.hivemq.extensions.services.builder.PluginBuilderUtil.UTF_8_STRING_MAX_LENGTH;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Georg Held
@@ -42,11 +45,9 @@ public class ModifiableUserPropertiesImplTest {
 
     @Before
     public void setUp() throws Exception {
-        filledProps = new ModifiableUserPropertiesImpl(ImmutableList.of(
-                MqttUserProperty.of("one", "one"),
+        filledProps = new ModifiableUserPropertiesImpl(ImmutableList.of(MqttUserProperty.of("one", "one"),
                 MqttUserProperty.of("one", "two"),
-                MqttUserProperty.of("two", "two")
-        ), true);
+                MqttUserProperty.of("two", "two")), true);
     }
 
     @Test(timeout = 5000)
@@ -223,9 +224,8 @@ public class ModifiableUserPropertiesImplTest {
 
     @Test
     public void copy_noChanges() {
-        final ImmutableList<MqttUserProperty> list = ImmutableList.of(
-                MqttUserProperty.of("name1", "value1"),
-                MqttUserProperty.of("name2", "value2"));
+        final ImmutableList<MqttUserProperty> list =
+                ImmutableList.of(MqttUserProperty.of("name1", "value1"), MqttUserProperty.of("name2", "value2"));
         final ModifiableUserPropertiesImpl modifiableUserProperties = new ModifiableUserPropertiesImpl(list, true);
 
         final UserPropertiesImpl copy = modifiableUserProperties.copy();
@@ -235,18 +235,16 @@ public class ModifiableUserPropertiesImplTest {
 
     @Test
     public void copy_changes() {
-        final ImmutableList<MqttUserProperty> list = ImmutableList.of(
-                MqttUserProperty.of("name1", "value1"),
-                MqttUserProperty.of("name2", "value2"));
+        final ImmutableList<MqttUserProperty> list =
+                ImmutableList.of(MqttUserProperty.of("name1", "value1"), MqttUserProperty.of("name2", "value2"));
         final ModifiableUserPropertiesImpl modifiableUserProperties = new ModifiableUserPropertiesImpl(list, true);
 
         modifiableUserProperties.removeName("name1");
         modifiableUserProperties.addUserProperty("name3", "value3");
         final UserPropertiesImpl copy = modifiableUserProperties.copy();
 
-        final ImmutableList<MqttUserProperty> expectedList = ImmutableList.of(
-                MqttUserProperty.of("name2", "value2"),
-                MqttUserProperty.of("name3", "value3"));
+        final ImmutableList<MqttUserProperty> expectedList =
+                ImmutableList.of(MqttUserProperty.of("name2", "value2"), MqttUserProperty.of("name3", "value3"));
         assertEquals(expectedList, copy.asInternalList());
     }
 

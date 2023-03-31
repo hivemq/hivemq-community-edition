@@ -80,7 +80,7 @@ public class PubackInterceptorHandler {
 
     public void handleInboundPuback(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBACK puback) {
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -114,7 +114,8 @@ public class PubackInterceptorHandler {
 
         for (final PubackInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
@@ -131,7 +132,7 @@ public class PubackInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -160,12 +161,17 @@ public class PubackInterceptorHandler {
         final PubackOutboundOutputImpl output = new PubackOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
 
-        final PubackOutboundInterceptorContext context = new PubackOutboundInterceptorContext(
-                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+        final PubackOutboundInterceptorContext context = new PubackOutboundInterceptorContext(clientId,
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
 
         for (final PubackOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
@@ -249,9 +255,8 @@ public class PubackInterceptorHandler {
             try {
                 interceptor.onInboundPuback(input, output);
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBACK interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound PUBACK interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -339,9 +344,8 @@ public class PubackInterceptorHandler {
             try {
                 interceptor.onOutboundPuback(input, output);
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBACK interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound PUBACK interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

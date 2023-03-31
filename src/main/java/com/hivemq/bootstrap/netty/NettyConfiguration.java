@@ -39,10 +39,11 @@ public class NettyConfiguration {
     private final EventLoopGroup childEventLoopGroup;
 
 
-    public NettyConfiguration(final Class<? extends ServerSocketChannel> serverSocketChannelClass,
-                              final Class<? extends SocketChannel> clientSocketChannelClass,
-                              final EventLoopGroup parentEventLoopGroup,
-                              final EventLoopGroup childEventLoopGroup) {
+    public NettyConfiguration(
+            final Class<? extends ServerSocketChannel> serverSocketChannelClass,
+            final Class<? extends SocketChannel> clientSocketChannelClass,
+            final EventLoopGroup parentEventLoopGroup,
+            final EventLoopGroup childEventLoopGroup) {
 
         checkNotNull(serverSocketChannelClass, "Server Socket Channel Class must not be null");
         checkNotNull(clientSocketChannelClass, "Client Socket Channel Class must not be null");

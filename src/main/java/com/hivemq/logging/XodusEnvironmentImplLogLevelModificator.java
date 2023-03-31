@@ -36,8 +36,13 @@ public class XodusEnvironmentImplLogLevelModificator extends TurboFilter {
     final static Logger environmentalLogger = LoggerFactory.getLogger(EnvironmentImpl.class);
 
     @Override
-    public FilterReply decide(final Marker marker, final ch.qos.logback.classic.Logger logger, final Level level,
-                              final String format, final Object[] params, final Throwable t) {
+    public FilterReply decide(
+            final Marker marker,
+            final ch.qos.logback.classic.Logger logger,
+            final Level level,
+            final String format,
+            final Object[] params,
+            final Throwable t) {
         if (level.isGreaterOrEqual(Level.INFO)) {
 
             if (logger.getName().equals(environmentalLogger.getName())) {
@@ -56,7 +61,10 @@ public class XodusEnvironmentImplLogLevelModificator extends TurboFilter {
         }
 
 
-        if (level.isGreaterOrEqual(Level.ERROR) && t != null && t.getMessage() != null && t instanceof ExodusException) {
+        if (level.isGreaterOrEqual(Level.ERROR) &&
+                t != null &&
+                t.getMessage() != null &&
+                t instanceof ExodusException) {
             if (t.getMessage().contains("cleanFile") || t.getMessage().contains("There is no file by address")) {
                 logger.trace(marker, "Xodus background job unable to cleanup stale data just now, trying again later");
                 return FilterReply.DENY;

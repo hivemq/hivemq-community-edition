@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
@@ -50,6 +51,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 
@@ -61,8 +63,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ConnectInboundInterceptorHandlerTest {
 
@@ -88,9 +96,10 @@ public class ConnectInboundInterceptorHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, publishFlushHandler));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("client");
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
+                .set(new DummyClientConnection(channel, publishFlushHandler));
+        ClientConnection.of(channel).setClientId("client");
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
         when(extension.getId()).thenReturn("extension");
 
         final FullConfigurationService configurationService =
@@ -118,7 +127,7 @@ public class ConnectInboundInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_client_id_not_set() {
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channel).setClientId(null);
 
         channel.writeInbound(testConnect());
 

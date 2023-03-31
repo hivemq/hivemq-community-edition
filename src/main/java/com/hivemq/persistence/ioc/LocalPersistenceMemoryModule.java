@@ -46,22 +46,19 @@ class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenc
     protected void configure() {
 
 
-        bindLocalPersistence(RetainedMessageLocalPersistence.class,
-                RetainedMessageMemoryLocalPersistence.class);
+        bindLocalPersistence(RetainedMessageLocalPersistence.class, RetainedMessageMemoryLocalPersistence.class);
 
         bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
                 ClientSessionSubscriptionMemoryLocalPersistence.class);
 
-        bindLocalPersistence(ClientSessionLocalPersistence.class,
-                ClientSessionMemoryLocalPersistence.class);
+        bindLocalPersistence(ClientSessionLocalPersistence.class, ClientSessionMemoryLocalPersistence.class);
 
-        bindLocalPersistence(ClientQueueLocalPersistence.class,
-                ClientQueueMemoryLocalPersistence.class);
+        bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueMemoryLocalPersistence.class);
 
     }
 
-    private void bindLocalPersistence(final @NotNull Class localPersistenceClass,
-                                      final @NotNull Class localPersistenceImplClass) {
+    private void bindLocalPersistence(
+            final @NotNull Class localPersistenceClass, final @NotNull Class localPersistenceImplClass) {
 
         final Object instance = injector == null ? null : injector.getInstance(localPersistenceImplClass);
         if (instance != null) {

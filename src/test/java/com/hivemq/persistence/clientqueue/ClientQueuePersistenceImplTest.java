@@ -19,10 +19,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.services.PublishPollService;
@@ -33,7 +33,6 @@ import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
-
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
@@ -41,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestSingleWriterFactory;
 
 import java.util.concurrent.ExecutionException;
@@ -48,8 +48,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientQueuePersistenceImplTest {
@@ -67,9 +75,6 @@ public class ClientQueuePersistenceImplTest {
 
     @Mock
     ClientSessionLocalPersistence clientSessionLocalPersistence;
-
-    @Mock
-    MessageDroppedService messageDroppedService;
 
     @Mock
     LocalTopicTree topicTree;
@@ -91,10 +96,13 @@ public class ClientQueuePersistenceImplTest {
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         when(mqttConfigurationService.maxQueuedMessages()).thenReturn(1000L);
         when(mqttConfigurationService.getQueuedMessagesStrategy()).thenReturn(QueuedMessagesStrategy.DISCARD);
-        clientQueuePersistence =
-                new ClientQueuePersistenceImpl(localPersistence, singleWriterService, mqttConfigurationService,
-                        clientSessionLocalPersistence, messageDroppedService, topicTree, connectionPersistence,
-                        publishPollService);
+        clientQueuePersistence = new ClientQueuePersistenceImpl(localPersistence,
+                singleWriterService,
+                mqttConfigurationService,
+                clientSessionLocalPersistence,
+                topicTree,
+                connectionPersistence,
+                publishPollService);
     }
 
     @After
@@ -107,28 +115,36 @@ public class ClientQueuePersistenceImplTest {
     @Test(timeout = 5000)
     public void test_add() throws ExecutionException, InterruptedException {
         clientQueuePersistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L).get();
-        verify(localPersistence).add(
-                eq("client"), eq(false), any(PUBLISH.class), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
-                anyBoolean(), anyInt());
-        verify(messageDroppedService, never()).queueFull("client", "topic", 1);
+        verify(localPersistence).add(eq("client"),
+                eq(false),
+                any(PUBLISH.class),
+                eq(1000L),
+                eq(QueuedMessagesStrategy.DISCARD),
+                anyBoolean(),
+                anyInt());
     }
 
     @Test(timeout = 5000)
     public void test_add_shared() throws ExecutionException, InterruptedException {
-        clientQueuePersistence.add("name/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L).get();
-        verify(localPersistence).add(
-                eq("name/topic"), eq(true), any(PUBLISH.class), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
-                anyBoolean(), anyInt());
+        clientQueuePersistence.add("name/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L)
+                .get();
+        verify(localPersistence).add(eq("name/topic"),
+                eq(true),
+                any(PUBLISH.class),
+                eq(1000L),
+                eq(QueuedMessagesStrategy.DISCARD),
+                anyBoolean(),
+                anyInt());
     }
 
     @Test(timeout = 5000)
     public void test_publish_avaliable() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnection.of(channel).setInFlightMessagesSent(true);
+        ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -142,10 +158,10 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_channel_inactive() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnection.of(channel).setInFlightMessagesSent(true);
+        ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(0));
 
         channel.close();
 
@@ -160,9 +176,9 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_not_sent() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(0));
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(0));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -176,10 +192,10 @@ public class ClientQueuePersistenceImplTest {
     public void test_publish_avaliable_inflight_messages_sending() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessagesSent(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setInFlightMessageCount(new AtomicInteger(10));
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnection.of(channel).setInFlightMessagesSent(true);
+        ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(10));
 
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
@@ -208,10 +224,12 @@ public class ClientQueuePersistenceImplTest {
     @Test(timeout = 5000)
     public void test_read_new() throws ExecutionException, InterruptedException {
 
-        when(localPersistence.readNew(
-                anyString(), anyBoolean(), any(ImmutableIntArray.class), anyLong(), anyInt())).thenReturn(
-                ImmutableList.of(
-                        createPublish(1, QoS.AT_MOST_ONCE, "topic"), createPublish(2, QoS.AT_LEAST_ONCE, "topic")));
+        when(localPersistence.readNew(anyString(),
+                anyBoolean(),
+                any(ImmutableIntArray.class),
+                anyLong(),
+                anyInt())).thenReturn(ImmutableList.of(createPublish(1, QoS.AT_MOST_ONCE, "topic"),
+                createPublish(2, QoS.AT_LEAST_ONCE, "topic")));
 
         final ImmutableList<PUBLISH> publishes =
                 clientQueuePersistence.readNew("client", false, ImmutableIntArray.of(1, 2), 1000).get();
@@ -263,30 +281,34 @@ public class ClientQueuePersistenceImplTest {
     @Test(timeout = 5000)
     public void test_batched_add_no_new_message() throws ExecutionException, InterruptedException {
         when(localPersistence.size(eq("client"), anyBoolean(), anyInt())).thenReturn(1);
-        final ImmutableList<PUBLISH> publishes = ImmutableList.of(
-                createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
+        final ImmutableList<PUBLISH> publishes = ImmutableList.of(createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
                 createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
         clientQueuePersistence.add("client", false, publishes, false, 1000L).get();
-        verify(localPersistence).add(
-                eq("client"), eq(false), eq(publishes), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
-                anyBoolean(), anyInt());
-        verify(clientSessionLocalPersistence, never()).getSession(
-                "client"); // Get session because new publishes are available
-        verify(messageDroppedService, never()).queueFull("client", "topic", 1);
+        verify(localPersistence).add(eq("client"),
+                eq(false),
+                eq(publishes),
+                eq(1000L),
+                eq(QueuedMessagesStrategy.DISCARD),
+                anyBoolean(),
+                anyInt());
+        verify(clientSessionLocalPersistence,
+                never()).getSession("client"); // Get session because new publishes are available
     }
 
     @Test(timeout = 5000)
     public void test_batched_add_new_message() throws ExecutionException, InterruptedException {
         when(localPersistence.size(eq("client"), anyBoolean(), anyInt())).thenReturn(0);
-        final ImmutableList<PUBLISH> publishes = ImmutableList.of(
-                createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
+        final ImmutableList<PUBLISH> publishes = ImmutableList.of(createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
                 createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
         clientQueuePersistence.add("client", false, publishes, false, 1000L).get();
-        verify(localPersistence).add(
-                eq("client"), eq(false), eq(publishes), eq(1000L), eq(QueuedMessagesStrategy.DISCARD),
-                anyBoolean(), anyInt());
+        verify(localPersistence).add(eq("client"),
+                eq(false),
+                eq(publishes),
+                eq(1000L),
+                eq(QueuedMessagesStrategy.DISCARD),
+                anyBoolean(),
+                anyInt());
         verify(clientSessionLocalPersistence).getSession("client"); // Get session because new publishes are available
-        verify(messageDroppedService, never()).queueFull("client", "topic", 1);
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic) {

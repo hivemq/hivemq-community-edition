@@ -51,8 +51,7 @@ public class PubackPacketImpl implements PubackPacket {
     }
 
     public PubackPacketImpl(final @NotNull PUBACK puback) {
-        this(
-                puback.getPacketIdentifier(),
+        this(puback.getPacketIdentifier(),
                 puback.getReasonCode().toAckReasonCode(),
                 puback.getReasonString(),
                 UserPropertiesImpl.of(puback.getUserProperties().asList()));

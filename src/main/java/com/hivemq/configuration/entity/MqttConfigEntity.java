@@ -15,8 +15,19 @@
  */
 package com.hivemq.configuration.entity;
 
+import com.hivemq.configuration.entity.mqtt.KeepAliveConfigEntity;
+import com.hivemq.configuration.entity.mqtt.MessageExpiryConfigEntity;
+import com.hivemq.configuration.entity.mqtt.PacketsConfigEntity;
+import com.hivemq.configuration.entity.mqtt.QoSConfigEntity;
+import com.hivemq.configuration.entity.mqtt.QueuedMessagesConfigEntity;
+import com.hivemq.configuration.entity.mqtt.ReceiveMaximumConfigEntity;
+import com.hivemq.configuration.entity.mqtt.RetainedMessagesConfigEntity;
+import com.hivemq.configuration.entity.mqtt.SessionExpiryConfigEntity;
+import com.hivemq.configuration.entity.mqtt.SharedSubscriptionsConfigEntity;
+import com.hivemq.configuration.entity.mqtt.SubscriptionIdentifierConfigEntity;
+import com.hivemq.configuration.entity.mqtt.TopicAliasConfigEntity;
+import com.hivemq.configuration.entity.mqtt.WildcardSubscriptionsConfigEntity;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.configuration.entity.mqtt.*;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -38,7 +49,8 @@ public class MqttConfigEntity {
     private @NotNull RetainedMessagesConfigEntity retainedMessagesConfigEntity = new RetainedMessagesConfigEntity();
 
     @XmlElementRef(required = false)
-    private @NotNull WildcardSubscriptionsConfigEntity wildcardSubscriptionsConfigEntity = new WildcardSubscriptionsConfigEntity();
+    private @NotNull WildcardSubscriptionsConfigEntity wildcardSubscriptionsConfigEntity =
+            new WildcardSubscriptionsConfigEntity();
 
     @XmlElementRef(required = false)
     private @NotNull QoSConfigEntity qoSConfigEntity = new QoSConfigEntity();
@@ -53,10 +65,12 @@ public class MqttConfigEntity {
     private @NotNull SessionExpiryConfigEntity sessionExpiryConfigEntity = new SessionExpiryConfigEntity();
 
     @XmlElementRef(required = false)
-    private @NotNull SubscriptionIdentifierConfigEntity subscriptionIdentifierConfigEntity = new SubscriptionIdentifierConfigEntity();
+    private @NotNull SubscriptionIdentifierConfigEntity subscriptionIdentifierConfigEntity =
+            new SubscriptionIdentifierConfigEntity();
 
     @XmlElementRef(required = false)
-    private @NotNull SharedSubscriptionsConfigEntity sharedSubscriptionsConfigEntity = new SharedSubscriptionsConfigEntity();
+    private @NotNull SharedSubscriptionsConfigEntity sharedSubscriptionsConfigEntity =
+            new SharedSubscriptionsConfigEntity();
 
     @XmlElementRef(required = false)
     private @NotNull KeepAliveConfigEntity keepAliveConfigEntity = new KeepAliveConfigEntity();

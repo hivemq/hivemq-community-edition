@@ -36,7 +36,11 @@ public final class PermissionTopicMatcherUtils {
         if (nonWildCard) {
             return permissionTopic.equals(actualTopic);
         }
-        return matchesWildcards(permissionTopic, splitPermissionTopic, endsWithWildCard, rootWildCard, splitActualTopic);
+        return matchesWildcards(permissionTopic,
+                splitPermissionTopic,
+                endsWithWildCard,
+                rootWildCard,
+                splitActualTopic);
     }
 
     private static boolean matchesWildcards(

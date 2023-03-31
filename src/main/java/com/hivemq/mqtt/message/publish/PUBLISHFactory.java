@@ -92,10 +92,25 @@ public class PUBLISHFactory {
             Preconditions.checkNotNull(topic, "Topic may never be null");
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
-            return new PUBLISH(hivemqId, topic, payload, qoS, onwardQos, retain, messageExpiryInterval,
-                    payloadFormatIndicator, contentType, responseTopic, correlationData,
-                    userProperties, packetIdentifier, duplicateDelivery, isNewTopicAlias, subscriptionIdentifiers,
-                    persistence, timestamp, publishId);
+            return new PUBLISH(hivemqId,
+                    topic,
+                    payload,
+                    qoS,
+                    onwardQos,
+                    retain,
+                    messageExpiryInterval,
+                    payloadFormatIndicator,
+                    contentType,
+                    responseTopic,
+                    correlationData,
+                    userProperties,
+                    packetIdentifier,
+                    duplicateDelivery,
+                    isNewTopicAlias,
+                    subscriptionIdentifiers,
+                    persistence,
+                    timestamp,
+                    publishId);
         }
 
         public @NotNull Mqtt5Builder withTimestamp(final long timestamp) {
@@ -235,8 +250,18 @@ public class PUBLISHFactory {
             Preconditions.checkNotNull(topic, "Topic may never be null");
             Preconditions.checkNotNull(qoS, "Quality of service may never be null");
 
-            return new PUBLISH(hivemqId, topic, payload, qoS, onwardQos, retain,
-                    messageExpiryInterval, persistence, packetIdentifier, duplicateDelivery, publishId, timestamp);
+            return new PUBLISH(hivemqId,
+                    topic,
+                    payload,
+                    qoS,
+                    onwardQos,
+                    retain,
+                    messageExpiryInterval,
+                    persistence,
+                    packetIdentifier,
+                    duplicateDelivery,
+                    publishId,
+                    timestamp);
         }
 
         public @NotNull Mqtt3Builder withTimestamp(final long timestamp) {
@@ -303,10 +328,10 @@ public class PUBLISHFactory {
     public static @NotNull PUBLISH merge(final @NotNull PublishPacketImpl packet, final @NotNull PUBLISH origin) {
 
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator = packet.getPayloadFormatIndicator().isPresent() ?
-                Mqtt5PayloadFormatIndicator.from(packet.getPayloadFormatIndicator().get()) : null;
+                Mqtt5PayloadFormatIndicator.from(packet.getPayloadFormatIndicator().get()) :
+                null;
 
-        return new Mqtt5Builder()
-                .withTimestamp(origin.getTimestamp())
+        return new Mqtt5Builder().withTimestamp(origin.getTimestamp())
                 .withPublishId(origin.getPublishId())
                 .withHivemqId(origin.getHivemqId())
                 .withTopic(packet.getTopic())

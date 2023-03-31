@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
@@ -25,9 +26,12 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class Mqtt3PubrelDecoderTest {
 
@@ -42,8 +46,8 @@ public class Mqtt3PubrelDecoderTest {
     @Test
     public void test_pubrel_received() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0110_0010);
         buf.writeByte(0b0000_0010);
@@ -60,8 +64,8 @@ public class Mqtt3PubrelDecoderTest {
     @Test
     public void test_pubrel_invalid_header_mqtt_311() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0110_0000);
         buf.writeByte(0b0000_0010);
@@ -77,8 +81,8 @@ public class Mqtt3PubrelDecoderTest {
     public void test_pubrel_invalid_header_mqtt_31() {
 
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv3_1);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0110_0010);
         buf.writeByte(0b0000_0010);

@@ -21,7 +21,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  * @author Florian Limpöck
  */
 public enum PersistenceType {
-    FILE, FILE_NATIVE;
+    FILE,
+    FILE_NATIVE;
 
     private static final @NotNull PersistenceType @NotNull [] VALUES = values();
 

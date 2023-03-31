@@ -30,7 +30,8 @@ import java.util.List;
  * <p>
  * <code>
  * <p>
- * final LogbackCapturingAppender capturing = LogbackCapturingAppender.Factory.weaveInto(LicensingConnectionLimiter.log);<br/>
+ * final LogbackCapturingAppender capturing =
+ * LogbackCapturingAppender.Factory.weaveInto(LicensingConnectionLimiter.log);<br/>
  * <br/>
  * .... fancy test logic here .... <br/>
  * <br/>

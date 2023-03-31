@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
@@ -58,16 +59,22 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.TestMessageUtil;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl.*;
+import static com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl.AUTH_FAILED_LOG;
+import static com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl.CONNACK_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT;
+import static com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl.DISCONNECT_BAD_AUTHENTICATION_METHOD_LOG_STATEMENT;
+import static com.hivemq.extensions.handler.PluginAuthenticatorServiceImpl.RE_AUTH_FAILED_LOG;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class PluginAuthenticatorServiceImplTest {
 
@@ -93,17 +100,17 @@ public class PluginAuthenticatorServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final SecurityConfigurationServiceImpl securityConfig = new SecurityConfigurationServiceImpl();
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, mock(PublishFlushHandler.class));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnection.setClientId("client");
         clientConnection.setClientReceiveMaximum(100);
 
-        channel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, Mockito.mock(MQTTMessageDecoder.class));
+        channel.pipeline().addLast(ChannelHandlerNames.MQTT_MESSAGE_DECODER, mock(MQTTMessageDecoder.class));
 
         when(channelHandlerContext.pipeline()).thenReturn(channel.pipeline());
         when(configurationService.securityConfiguration()).thenReturn(securityConfig);
@@ -137,14 +144,12 @@ public class PluginAuthenticatorServiceImplTest {
         final ModifiableClientSettingsImpl clientSettings =
                 new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(
-                channelHandlerContext,
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
 
-        verify(connectHandler).connectSuccessfulUndecided(
-                channelHandlerContext,
+        verify(connectHandler).connectSuccessfulUndecided(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
@@ -158,14 +163,12 @@ public class PluginAuthenticatorServiceImplTest {
         final ModifiableClientSettingsImpl clientSettings =
                 new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(
-                channelHandlerContext,
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
 
-        verify(connectHandler).connectSuccessfulUndecided(
-                channelHandlerContext,
+        verify(connectHandler).connectSuccessfulUndecided(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
@@ -179,8 +182,7 @@ public class PluginAuthenticatorServiceImplTest {
         final ModifiableClientSettingsImpl clientSettings =
                 new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(
-                channelHandlerContext,
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
@@ -196,8 +198,7 @@ public class PluginAuthenticatorServiceImplTest {
         final ModifiableClientSettingsImpl clientSettings =
                 new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(
-                channelHandlerContext,
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
@@ -213,8 +214,7 @@ public class PluginAuthenticatorServiceImplTest {
         final ModifiableClientSettingsImpl clientSettings =
                 new ModifiableClientSettingsImpl(fullMqtt5Connect.getReceiveMaximum(), null);
 
-        pluginAuthenticatorService.authenticateConnect(
-                channelHandlerContext,
+        pluginAuthenticatorService.authenticateConnect(channelHandlerContext,
                 clientConnection,
                 fullMqtt5Connect,
                 clientSettings);
@@ -385,16 +385,13 @@ public class PluginAuthenticatorServiceImplTest {
     }
 
     private Map<String, WrappedAuthenticatorProvider> createSimple() {
-        return ImmutableMap.of(
-                "extension1",
+        return ImmutableMap.of("extension1",
                 new WrappedAuthenticatorProvider((AuthenticatorProvider) (i -> simpleAuthenticator), classloader1));
     }
 
     private Map<String, WrappedAuthenticatorProvider> createEnhanced() {
-        return ImmutableMap.of(
-                "extension1",
-                new WrappedAuthenticatorProvider(
-                        (EnhancedAuthenticatorProvider) (i -> enhancedAuthenticator),
+        return ImmutableMap.of("extension1",
+                new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) (i -> enhancedAuthenticator),
                         classloader1));
     }
 
@@ -402,8 +399,7 @@ public class PluginAuthenticatorServiceImplTest {
         return ImmutableMap.of("extension1",
                 new WrappedAuthenticatorProvider((AuthenticatorProvider) (i -> simpleAuthenticator), classloader1),
                 "extension2",
-                new WrappedAuthenticatorProvider(
-                        (EnhancedAuthenticatorProvider) (i -> enhancedAuthenticator),
+                new WrappedAuthenticatorProvider((EnhancedAuthenticatorProvider) (i -> enhancedAuthenticator),
                         classloader2));
     }
 }

@@ -40,7 +40,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      *
      * @param clientId The id associated with the session
      * @return A {@link ClientSession} object or {@code null} if there is no
-     * session stored for the given id
+     *         session stored for the given id
      */
     @Nullable ClientSession getSession(@NotNull String clientId);
 
@@ -50,7 +50,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param clientId    The id associated with the session
      * @param bucketIndex The index of the bucket in which the session is stored
      * @return A {@link ClientSession} object or {@code null} if there is no
-     * session stored for the given id
+     *         session stored for the given id
      */
     @Nullable ClientSession getSession(@NotNull String clientId, int bucketIndex);
 
@@ -60,7 +60,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param clientId     The id associated with the session
      * @param checkExpired true => return null for expired session, false return tombstones and expired sessions
      * @return A {@link ClientSession} object or {@code null} if there is no
-     * session stored for the given id
+     *         session stored for the given id
      */
     @Nullable ClientSession getSession(@NotNull String clientId, boolean checkExpired);
 
@@ -71,7 +71,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param bucketIndex  The index of the bucket in which the session is stored
      * @param checkExpired true => return null for expired session, false return tombstones and expired sessions
      * @return A {@link ClientSession} object or {@code null} if there is no
-     * session stored for the given id
+     *         session stored for the given id
      */
     @Nullable ClientSession getSession(@NotNull String clientId, int bucketIndex, boolean checkExpired);
 
@@ -89,7 +89,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
     /**
      * @param clientId The id associated with the session
      * @return The timestamp of the client session (last connected/disconnected) or {@code null} if there is no session
-     * stored for the given id
+     *         stored for the given id
      */
     @Nullable Long getTimestamp(@NotNull String clientId);
 
@@ -97,7 +97,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param clientId    The id associated with the session
      * @param bucketIndex The index of the bucket in which the session is stored
      * @return The timestamp of the client session (last connected/disconnected) or null if there is no session stored
-     * for the given id
+     *         for the given id
      */
     @Nullable Long getTimestamp(@NotNull String clientId, int bucketIndex);
 

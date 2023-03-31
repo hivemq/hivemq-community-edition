@@ -238,28 +238,35 @@ public class ClientContextImpl {
     public @Immutable @NotNull List<@NotNull Interceptor> getAllInterceptorsOfExtension(
             final @NotNull ClassLoader extensionClassLoader) {
 
-        return streamAllInterceptors()
-                .filter(interceptor -> interceptor.getClass().getClassLoader().equals(extensionClassLoader))
-                .collect(ImmutableList.toImmutableList());
+        return streamAllInterceptors().filter(interceptor -> interceptor.getClass()
+                .getClassLoader()
+                .equals(extensionClassLoader)).collect(ImmutableList.toImmutableList());
     }
 
     public @Immutable @NotNull List<@NotNull Interceptor> getAllInterceptors() {
-        return streamAllInterceptors()
-                .sorted(Comparator.comparingInt(this::getExtensionPriority).reversed())
+        return streamAllInterceptors().sorted(Comparator.comparingInt(this::getExtensionPriority).reversed())
                 .collect(ImmutableList.toImmutableList());
     }
 
     private @NotNull Stream<Interceptor> streamAllInterceptors() {
-        return Streams.concat(
-                publishInbounds.stream(), publishOutbounds.stream(),
-                pubackInbounds.stream(), pubackOutbounds.stream(),
-                pubrecInbounds.stream(), pubrecOutbounds.stream(),
-                pubrelInbounds.stream(), pubrelOutbounds.stream(),
-                pubcompInbounds.stream(), pubcompOutbounds.stream(),
-                subscribeInbounds.stream(), subackOutbounds.stream(),
-                unsubscribeInbounds.stream(), unsubackOutbounds.stream(),
-                disconnectInbounds.stream(), disconnectOutbounds.stream(),
-                pingReqInbounds.stream(), pingRespOutbounds.stream());
+        return Streams.concat(publishInbounds.stream(),
+                publishOutbounds.stream(),
+                pubackInbounds.stream(),
+                pubackOutbounds.stream(),
+                pubrecInbounds.stream(),
+                pubrecOutbounds.stream(),
+                pubrelInbounds.stream(),
+                pubrelOutbounds.stream(),
+                pubcompInbounds.stream(),
+                pubcompOutbounds.stream(),
+                subscribeInbounds.stream(),
+                subackOutbounds.stream(),
+                unsubscribeInbounds.stream(),
+                unsubackOutbounds.stream(),
+                disconnectInbounds.stream(),
+                disconnectOutbounds.stream(),
+                pingReqInbounds.stream(),
+                pingRespOutbounds.stream());
     }
 
     public @Immutable @NotNull List<@NotNull PublishInboundInterceptor> getPublishInboundInterceptorsOfExtension(
@@ -518,8 +525,7 @@ public class ClientContextImpl {
     }
 
     private <T extends Interceptor> @NotNull ImmutableList<T> filterInterceptorsOfExtension(
-            final @NotNull ImmutableList<T> interceptors,
-            final @NotNull ClassLoader extensionClassloader) {
+            final @NotNull ImmutableList<T> interceptors, final @NotNull ClassLoader extensionClassloader) {
 
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
         for (int i = 0; i < interceptors.size(); i++) {
@@ -532,8 +538,7 @@ public class ClientContextImpl {
     }
 
     private <T extends Interceptor> @NotNull ImmutableList<T> removeInterceptorsOfExtension(
-            final @NotNull ImmutableList<T> interceptors,
-            final @NotNull ClassLoader extensionClassloader) {
+            final @NotNull ImmutableList<T> interceptors, final @NotNull ClassLoader extensionClassloader) {
 
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
         for (int i = 0; i < interceptors.size(); i++) {
@@ -546,7 +551,8 @@ public class ClientContextImpl {
     }
 
     private int getExtensionPriority(final @NotNull Object object) {
-        final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(object.getClass().getClassLoader());
+        final HiveMQExtension extension =
+                hiveMQExtensions.getExtensionForClassloader(object.getClass().getClassLoader());
         if (extension != null) {
             return extension.getPriority();
         } else {

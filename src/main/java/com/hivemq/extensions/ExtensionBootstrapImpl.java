@@ -99,8 +99,7 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
         final ImmutableList<HiveMQExtensionEvent> events = hiveMQExtensions.getEnabledHiveMQExtensions()
                 .values()
                 .stream()
-                .map(extension -> new HiveMQExtensionEvent(
-                        HiveMQExtensionEvent.Change.DISABLE,
+                .map(extension -> new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.DISABLE,
                         extension.getId(),
                         extension.getStartPriority(),
                         extension.getExtensionFolderPath(),

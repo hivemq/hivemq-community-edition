@@ -27,9 +27,19 @@ import io.netty.buffer.ByteBuf;
 
 import javax.inject.Singleton;
 
-import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.*;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeIntProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeNullableProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.encodeVariableByteIntegerProperty;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.intPropertyEncodedLength;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.nullablePropertyEncodedLength;
+import static com.hivemq.codec.encoder.mqtt5.Mqtt5MessageEncoderUtil.variableByteIntegerPropertyEncodedLength;
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT;
-import static com.hivemq.mqtt.message.mqtt5.MessageProperties.*;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CONTENT_TYPE;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.CORRELATION_DATA;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.MESSAGE_EXPIRY_INTERVAL;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.PAYLOAD_FORMAT_INDICATOR;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.RESPONSE_TOPIC;
+import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SUBSCRIPTION_IDENTIFIER;
 
 /**
  * @author Silvio Giebl
@@ -150,7 +160,10 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
     }
 
     private static void encodeFixedProperties(final @NotNull PUBLISH publish, final @NotNull ByteBuf out) {
-        encodeIntProperty(MESSAGE_EXPIRY_INTERVAL, publish.getMessageExpiryInterval(), MAX_EXPIRY_INTERVAL_DEFAULT, out);
+        encodeIntProperty(MESSAGE_EXPIRY_INTERVAL,
+                publish.getMessageExpiryInterval(),
+                MAX_EXPIRY_INTERVAL_DEFAULT,
+                out);
         encodeNullableProperty(PAYLOAD_FORMAT_INDICATOR, publish.getPayloadFormatIndicator(), out);
         encodeNullableProperty(CONTENT_TYPE, publish.getContentType(), out);
         encodeNullableProperty(RESPONSE_TOPIC, publish.getResponseTopic(), out);

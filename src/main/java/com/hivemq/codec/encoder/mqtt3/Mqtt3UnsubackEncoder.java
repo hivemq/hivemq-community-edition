@@ -15,7 +15,7 @@
  */
 package com.hivemq.codec.encoder.mqtt3;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.unsuback.UNSUBACK;
@@ -32,7 +32,7 @@ public class Mqtt3UnsubackEncoder implements MqttEncoder<UNSUBACK> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull UNSUBACK msg,
             final @NotNull ByteBuf out) {
 
@@ -44,7 +44,7 @@ public class Mqtt3UnsubackEncoder implements MqttEncoder<UNSUBACK> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull UNSUBACK msg) {
+    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull UNSUBACK msg) {
         return ENCODED_UNSUBACK_SIZE;
     }
 }

@@ -56,7 +56,7 @@ public class SecurityRegistryImpl implements SecurityRegistry {
         final HiveMQExtension extension =
                 hiveMQExtensions.getExtensionForClassloader(authenticatorProvider.getClass().getClassLoader());
 
-        if(extension == null || extension.getExtensionClassloader() == null){
+        if (extension == null || extension.getExtensionClassloader() == null) {
             return;
         }
 
@@ -74,7 +74,7 @@ public class SecurityRegistryImpl implements SecurityRegistry {
         final HiveMQExtension extension =
                 hiveMQExtensions.getExtensionForClassloader(enhancedAuthenticatorProvider.getClass().getClassLoader());
 
-        if(extension == null || extension.getExtensionClassloader() == null){
+        if (extension == null || extension.getExtensionClassloader() == null) {
             return;
         }
 

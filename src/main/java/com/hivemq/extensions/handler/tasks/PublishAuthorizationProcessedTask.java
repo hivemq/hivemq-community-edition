@@ -64,7 +64,8 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
                 disconnectClient(output);
                 return;
             case FAIL:
-                reasonCode = output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
+                reasonCode =
+                        output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
                 reasonString = output.getReasonString() != null ? output.getReasonString() : getReasonString(publish);
                 break;
             case UNDECIDED:
@@ -89,7 +90,12 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
         final AckReasonCode finalReasonCode = reasonCode;
         final String finalReasonString = reasonString;
         ctx.executor().execute(() -> {
-            incomingPublishService.processPublish(ctx, publish, new PublishAuthorizerResult(finalReasonCode, finalReasonString, output.isAuthorizerPresent(), output.getDisconnectReasonCode()));
+            incomingPublishService.processPublish(ctx,
+                    publish,
+                    new PublishAuthorizerResult(finalReasonCode,
+                            finalReasonString,
+                            output.isAuthorizerPresent(),
+                            output.getDisconnectReasonCode()));
         });
     }
 
@@ -100,20 +106,30 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
     }
 
     private void disconnectClient(@Nullable final PublishAuthorizerOutputImpl output) {
-        final String logMessage = "A client (IP: {}) sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "'. Disconnecting client from extension.";
-        final String eventLogMessage = "Sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "', extension requested disconnect";
+        final String logMessage = "A client (IP: {}) sent a PUBLISH to an unauthorized topic '" +
+                publish.getTopic() +
+                "'. Disconnecting client from extension.";
+        final String eventLogMessage =
+                "Sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "', extension requested disconnect";
 
         ctx.channel().eventLoop().execute(() -> {
             mqttServerDisconnector.disconnect(ctx.channel(),
                     logMessage,
                     eventLogMessage,
-                    output != null ? Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) : Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                    output != null ?
+                            Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) :
+                            Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                     output != null ? output.getReasonString() : null);
         });
     }
 
     private String getReasonString(@NotNull final PUBLISH publish) {
-        return "Not authorized to publish on topic '" + publish.getTopic() + "' with QoS '"
-                + publish.getQoS().getQosNumber() + "' and retain '" + publish.isRetain() + "'";
+        return "Not authorized to publish on topic '" +
+                publish.getTopic() +
+                "' with QoS '" +
+                publish.getQoS().getQosNumber() +
+                "' and retain '" +
+                publish.isRetain() +
+                "'";
     }
 }

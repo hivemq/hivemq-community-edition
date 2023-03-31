@@ -15,8 +15,8 @@
  */
 package com.hivemq.persistence.local.xodus;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.meta.PersistenceType;
 import jetbrains.exodus.env.EnvironmentConfig;
 import org.slf4j.Logger;
@@ -25,7 +25,15 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.configuration.service.InternalConfigurations.*;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_LOG_CACHE_USE_NIO;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES_ENABLED;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY_MSEC;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_GC_FILES_INTERVAL;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD_MSEC;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_GC_TYPE;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_JMX;
+import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD_MSEC;
 
 /**
  * @author Florian Limpöck
@@ -51,8 +59,7 @@ public class EnvironmentUtil {
 
         checkNotNull(name, "Name for environment config must not be null");
 
-        return createEnvironmentConfig(
-                XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE,
+        return createEnvironmentConfig(XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY_MSEC,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_FILES_INTERVAL,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD_MSEC,
@@ -60,8 +67,7 @@ public class EnvironmentUtil {
                 XODUS_PERSISTENCE_ENVIRONMENT_SYNC_PERIOD_MSEC,
                 XODUS_PERSISTENCE_ENVIRONMENT_DURABLE_WRITES_ENABLED,
                 XODUS_PERSISTENCE_ENVIRONMENT_JMX,
-                name
-        );
+                name);
     }
 
     /**
@@ -125,7 +131,8 @@ public class EnvironmentUtil {
         environmentConfig.setLogCacheUseNio(XODUS_LOG_CACHE_USE_NIO);
 
         final PersistenceType payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
-        final PersistenceType retainedMessagePersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
+        final PersistenceType retainedMessagePersistenceType =
+                InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
         // Use the default cache size if only xodus persistences are used.
         if (payloadPersistenceType != PersistenceType.FILE && retainedMessagePersistenceType != PersistenceType.FILE) {
             final int logCacheMemory = InternalConfigurations.XODUS_PERSISTENCE_LOG_MEMORY_HEAP_PERCENTAGE;

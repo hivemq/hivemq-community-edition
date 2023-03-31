@@ -25,7 +25,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public interface PluginTaskContext {
 
     /**
-     * @return a String for the internal scheduling of the {@link com.hivemq.extensions.executor.PluginTaskExecutorService}.
+     * @return a String for the internal scheduling of the
+     *         {@link com.hivemq.extensions.executor.PluginTaskExecutorService}.
      */
     @NotNull String getIdentifier();
 }

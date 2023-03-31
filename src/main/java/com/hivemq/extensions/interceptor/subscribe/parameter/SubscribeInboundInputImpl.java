@@ -61,7 +61,8 @@ public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginT
     }
 
     public @NotNull SubscribeInboundInputImpl update(final @NotNull SubscribeInboundOutputImpl output) {
-        return new SubscribeInboundInputImpl(
-                clientInformation, connectionInformation, output.getSubscribePacket().copy());
+        return new SubscribeInboundInputImpl(clientInformation,
+                connectionInformation,
+                output.getSubscribePacket().copy());
     }
 }

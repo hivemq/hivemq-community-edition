@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.handler;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.mqtt.message.auth.AUTH;
@@ -32,14 +32,14 @@ public interface PluginAuthenticatorService {
      * <p>
      * May cause CONNACK or AUTH sent to the client.
      *
-     * @param ctx              the context of the channel handler
-     * @param clientConnection the connection of the client.
-     * @param connect          the original CONNECT message.
-     * @param clientSettings   the client settings.
+     * @param ctx                     the context of the channel handler
+     * @param clientConnectionContext the connection of the client.
+     * @param connect                 the original CONNECT message.
+     * @param clientSettings          the client settings.
      */
     void authenticateConnect(
             @NotNull ChannelHandlerContext ctx,
-            @NotNull ClientConnection clientConnection,
+            @NotNull ClientConnectionContext clientConnectionContext,
             @NotNull CONNECT connect,
             @NotNull ModifiableClientSettingsImpl clientSettings);
 
@@ -48,12 +48,12 @@ public interface PluginAuthenticatorService {
      * <p>
      * May cause DISCONNECT or AUTH sent to the client.
      *
-     * @param ctx              the context of the channel handler
-     * @param clientConnection the connection of the client.
-     * @param auth             the original AUTH message.
+     * @param ctx                     the context of the channel handler
+     * @param clientConnectionContext the connection of the client.
+     * @param auth                    the original AUTH message.
      */
     void authenticateAuth(
             @NotNull ChannelHandlerContext ctx,
-            @NotNull ClientConnection clientConnection,
+            @NotNull ClientConnectionContext clientConnectionContext,
             @NotNull AUTH auth);
 }

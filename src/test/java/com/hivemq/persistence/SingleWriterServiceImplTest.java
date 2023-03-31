@@ -24,7 +24,12 @@ import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -157,7 +162,8 @@ public class SingleWriterServiceImplTest {
         @NotNull
         @Override
         public <T> List<Future<T>> invokeAll(
-                @NotNull final Collection<? extends Callable<T>> tasks, final long timeout,
+                @NotNull final Collection<? extends Callable<T>> tasks,
+                final long timeout,
                 @NotNull final TimeUnit unit) throws InterruptedException {
             return null;
         }
@@ -171,7 +177,8 @@ public class SingleWriterServiceImplTest {
 
         @Override
         public <T> T invokeAny(
-                @NotNull final Collection<? extends Callable<T>> tasks, final long timeout,
+                @NotNull final Collection<? extends Callable<T>> tasks,
+                final long timeout,
                 @NotNull final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return null;
         }

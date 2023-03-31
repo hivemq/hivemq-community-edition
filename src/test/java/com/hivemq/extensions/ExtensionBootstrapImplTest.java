@@ -44,7 +44,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Christoph Schäbel
@@ -88,7 +94,8 @@ public class ExtensionBootstrapImplTest {
     @Test
     public void test_startPluginSystem_with_embeddedExtensions() {
         when(extensionLoader.loadExtensions(any(Path.class), anyBoolean())).thenReturn(ImmutableList.of());
-        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(
+                HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension",
                 0,
                 new File("/tmp").toPath(),
@@ -101,14 +108,14 @@ public class ExtensionBootstrapImplTest {
 
     @Test
     public void test_startPluginSystem_mixed() {
-        when(extensionLoader.loadExtensions(
-                any(Path.class),
+        when(extensionLoader.loadExtensions(any(Path.class),
                 anyBoolean())).thenReturn(ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension-1",
                 0,
                 new File("/folder").toPath(),
                 false)));
-        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(new HiveMQExtensionEvent(
+                HiveMQExtensionEvent.Change.ENABLE,
                 "my-extension-2",
                 0,
                 new File("/tmp").toPath(),

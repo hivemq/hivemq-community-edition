@@ -59,7 +59,8 @@ public class ClientAuthenticatorsImpl implements ClientAuthenticators {
         final Lock lock = authenticatorLock.writeLock();
         lock.lock();
         try {
-            enhancedAuthenticatorMap.entrySet().removeIf(next -> next.getValue().getClass().getClassLoader().equals(pluginClassLoader));
+            enhancedAuthenticatorMap.entrySet()
+                    .removeIf(next -> next.getValue().getClass().getClassLoader().equals(pluginClassLoader));
         } finally {
             lock.unlock();
         }

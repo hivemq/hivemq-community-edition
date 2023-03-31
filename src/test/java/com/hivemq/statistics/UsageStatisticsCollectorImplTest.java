@@ -33,7 +33,9 @@ import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX
 import static com.hivemq.configuration.service.RestrictionsConfigurationService.MAX_CONNECTIONS_DEFAULT;
 import static com.hivemq.metrics.HiveMQMetrics.CONNECTIONS_OVERALL_CURRENT;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -59,10 +61,17 @@ public class UsageStatisticsCollectorImplTest {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         systemInformation.init();
         metricRegistry = new MetricRegistry();
-        collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService,
-                new MetricsHolder(metricRegistry), new HivemqId(systemInformation), extensions);
-        when(extensions.getEnabledHiveMQExtensions()).thenReturn(
-                ImmutableMap.of("1", customExtension, "2", officialExtensionDcSquare, "3", officialExtensionHivemq));
+        collector = new UsageStatisticsCollectorImpl(systemInformation,
+                configurationService,
+                new MetricsHolder(metricRegistry),
+                new HivemqId(systemInformation),
+                extensions);
+        when(extensions.getEnabledHiveMQExtensions()).thenReturn(ImmutableMap.of("1",
+                customExtension,
+                "2",
+                officialExtensionDcSquare,
+                "3",
+                officialExtensionHivemq));
 
         when(customExtension.getAuthor()).thenReturn("another company");
         when(officialExtensionDcSquare.getAuthor()).thenReturn("dc-square Gmbh");

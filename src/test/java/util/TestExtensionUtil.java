@@ -51,9 +51,7 @@ public class TestExtensionUtil {
         final File validExtensionsFolder = new File(extensionsFolder, extensionId + (enable ? "" : ".disabled"));
 
         final File xmlFile = new File(validExtensionsFolder, "hivemq-extension.xml");
-        FileUtils.writeStringToFile(xmlFile,
-                String.format(validExtensionXML, extensionId),
-                Charset.defaultCharset());
+        FileUtils.writeStringToFile(xmlFile, String.format(validExtensionXML, extensionId), Charset.defaultCharset());
 
         if (createJar) {
             final File jarFile = new File(validExtensionsFolder, "extension.jar");

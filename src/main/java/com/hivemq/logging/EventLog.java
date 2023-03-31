@@ -15,7 +15,7 @@
  */
 package com.hivemq.logging;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -64,9 +64,17 @@ public class EventLog {
      * @param qos      of the publish message
      * @param reason   why the message was dropped
      */
-    public void messageDropped(@Nullable final String clientId, @Nullable final String topic, @NotNull final int qos, @NotNull final String reason) {
-        logMessageDropped.debug("Outgoing publish message was dropped. Receiving client: {}, topic: {}, qos: {}, reason: {}.",
-                valueOrUnknown(clientId), valueOrUnknown(topic), qos, reason);
+    public void messageDropped(
+            @Nullable final String clientId,
+            @Nullable final String topic,
+            @NotNull final int qos,
+            @NotNull final String reason) {
+        logMessageDropped.debug(
+                "Outgoing publish message was dropped. Receiving client: {}, topic: {}, qos: {}, reason: {}.",
+                valueOrUnknown(clientId),
+                valueOrUnknown(topic),
+                qos,
+                reason);
     }
 
     /**
@@ -77,9 +85,17 @@ public class EventLog {
      * @param qos    of the publish message
      * @param reason why the message was dropped
      */
-    public void sharedSubscriptionMessageDropped(@Nullable final String group, @Nullable final String topic, @NotNull final int qos, @NotNull final String reason) {
-        logMessageDropped.debug("Outgoing publish message was dropped. Receiving shared subscription group: {}, topic: {}, qos: {}, reason: {}.",
-                valueOrUnknown(group), valueOrUnknown(topic), qos, reason);
+    public void sharedSubscriptionMessageDropped(
+            @Nullable final String group,
+            @Nullable final String topic,
+            @NotNull final int qos,
+            @NotNull final String reason) {
+        logMessageDropped.debug(
+                "Outgoing publish message was dropped. Receiving shared subscription group: {}, topic: {}, qos: {}, reason: {}.",
+                valueOrUnknown(group),
+                valueOrUnknown(topic),
+                qos,
+                reason);
     }
 
     /**
@@ -89,46 +105,58 @@ public class EventLog {
      * @param messageType MQTT message type
      * @param reason      why the message was dropped
      */
-    public void mqttMessageDropped(@Nullable final String client, @Nullable final String messageType, @NotNull final String reason) {
+    public void mqttMessageDropped(
+            @Nullable final String client, @Nullable final String messageType, @NotNull final String reason) {
         logMessageDropped.debug("Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
-                valueOrUnknown(client), valueOrUnknown(messageType), reason);
+                valueOrUnknown(client),
+                valueOrUnknown(messageType),
+                reason);
     }
 
     /**
      * Log that a client has successfully connected to the broker.
      *
-     * @param channel of the client connection
+     * @param channel    of the client connection
+     * @param cleanStart if the connection was started clean
      */
-    public void clientConnected(@NotNull final Channel channel) {
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final String clientId = clientConnection.getClientId();
-        final String ip = clientConnection.getChannelIP().orElse(null);
-        final Boolean cleanStart = clientConnection.isCleanStart();
-        final Long sessionExpiry = clientConnection.getClientSessionExpiryInterval();
+    public void clientConnected(final @NotNull Channel channel, final boolean cleanStart) {
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
+        final String clientId = clientConnectionContext.getClientId();
+        final String ip = clientConnectionContext.getChannelIP().orElse(null);
+        final Long sessionExpiry = clientConnectionContext.getClientSessionExpiryInterval();
 
-        logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.", valueOrUnknown(clientId), valueOrUnknown(ip), valueOrUnknown(cleanStart), valueOrUnknown(sessionExpiry));
+        logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.",
+                valueOrUnknown(clientId),
+                valueOrUnknown(ip),
+                valueOrUnknown(cleanStart),
+                valueOrUnknown(sessionExpiry));
     }
 
     /**
      * Log that the connection to a client was closed gracefully, regardless if the connection was closed by the client
      * or the server.
      *
-     * @param clientConnection the connection to the client.
-     * @param reason           reason specified by the client for the DISCONNECT.
+     * @param clientConnectionContext the connection to the client.
+     * @param reason                  reason specified by the client for the DISCONNECT.
      */
     public void clientDisconnectedGracefully(
-            final @NotNull ClientConnection clientConnection, final @Nullable String reason) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @Nullable String reason) {
 
-        final String clientId = clientConnection.getClientId();
-        final String ip = clientConnection.getChannelIP().orElse(null);
+        final String clientId = clientConnectionContext.getClientId();
+        final String ip = clientConnectionContext.getChannelIP().orElse(null);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected gracefully.", clientId);
         }
         if (reason != null) {
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}",
+                    valueOrUnknown(clientId),
+                    valueOrUnknown(ip),
+                    reason);
         } else {
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.",
+                    valueOrUnknown(clientId),
+                    valueOrUnknown(ip));
         }
     }
 
@@ -136,16 +164,18 @@ public class EventLog {
      * Log that the connection to a client was closed ungracefully, regardless if the connection was closed by the
      * client or the server.
      *
-     * @param clientConnection the connection to the client.
+     * @param clientConnectionContext the connection to the client.
      */
-    public void clientDisconnectedUngracefully(final @NotNull ClientConnection clientConnection) {
-        final String clientId = clientConnection.getClientId();
-        final String ip = clientConnection.getChannelIP().orElse(null);
+    public void clientDisconnectedUngracefully(final @NotNull ClientConnectionContext clientConnectionContext) {
+        final String clientId = clientConnectionContext.getClientId();
+        final String ip = clientConnectionContext.getChannelIP().orElse(null);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected ungracefully.", clientId);
         }
-        logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.", valueOrUnknown(clientId), valueOrUnknown(ip));
+        logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.",
+                valueOrUnknown(clientId),
+                valueOrUnknown(ip));
     }
 
     /**
@@ -155,13 +185,16 @@ public class EventLog {
      * @param reason  why the connection was closed
      */
     public void clientWasDisconnected(@NotNull final Channel channel, @NotNull final String reason) {
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final String clientId = clientConnection.getClientId();
-        final String ip = clientConnection.getChannelIP().orElse(null);
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
+        final String clientId = clientConnectionContext.getClientId();
+        final String ip = clientConnectionContext.getChannelIP().orElse(null);
         if (log.isTraceEnabled()) {
             log.trace("Client {} was disconnected.", clientId);
         }
-        logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reason);
+        logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.",
+                valueOrUnknown(clientId),
+                valueOrUnknown(ip),
+                reason);
     }
 
     /**
@@ -170,14 +203,21 @@ public class EventLog {
      * @param channel    of the client connection
      * @param reasonCode of the AUTH packet.
      */
-    public void clientAuthentication(@NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-        final String clientId = clientConnection.getClientId();
-        final String ip = clientConnection.getChannelIP().orElse(null);
+    public void clientAuthentication(
+            @NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
+        final String clientId = clientConnectionContext.getClientId();
+        final String ip = clientConnectionContext.getChannelIP().orElse(null);
         if (received) {
-            logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
+            logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.",
+                    valueOrUnknown(clientId),
+                    valueOrUnknown(ip),
+                    reasonCode.name());
         } else {
-            logAuthentication.debug("Sent AUTH to Client ID: {}, IP: {}, reason code: {}.", valueOrUnknown(clientId), valueOrUnknown(ip), reasonCode.name());
+            logAuthentication.debug("Sent AUTH to Client ID: {}, IP: {}, reason code: {}.",
+                    valueOrUnknown(clientId),
+                    valueOrUnknown(ip),
+                    reasonCode.name());
         }
     }
 
@@ -189,10 +229,12 @@ public class EventLog {
      */
     public void clientSessionExpired(final Long expiryTimestamp, @Nullable final String clientId) {
 
-        final LocalDateTime disconnectedSinceDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp),
-                ZONE);
-        logClientSessionExpired.debug("Client ID: {} session has expired at {}. All persistent data for this client has been removed.",
-                valueOrUnknown(clientId), disconnectedSinceDateTime.format(dateTimeFormatter));
+        final LocalDateTime disconnectedSinceDateTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZONE);
+        logClientSessionExpired.debug(
+                "Client ID: {} session has expired at {}. All persistent data for this client has been removed.",
+                valueOrUnknown(clientId),
+                disconnectedSinceDateTime.format(dateTimeFormatter));
     }
 
     @NotNull

@@ -60,7 +60,8 @@ public class DisconnectOutboundInputImpl implements DisconnectOutboundInput, Plu
     }
 
     public @NotNull DisconnectOutboundInputImpl update(final @NotNull DisconnectOutboundOutputImpl output) {
-        return new DisconnectOutboundInputImpl(
-                clientInformation, connectionInformation, output.getDisconnectPacket().copy());
+        return new DisconnectOutboundInputImpl(clientInformation,
+                connectionInformation,
+                output.getDisconnectPacket().copy());
     }
 }

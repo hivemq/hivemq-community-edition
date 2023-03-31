@@ -18,7 +18,11 @@ package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.services.builder.*;
+import com.hivemq.extension.sdk.api.services.builder.PublishBuilder;
+import com.hivemq.extension.sdk.api.services.builder.RetainedPublishBuilder;
+import com.hivemq.extension.sdk.api.services.builder.TopicPermissionBuilder;
+import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
+import com.hivemq.extension.sdk.api.services.builder.WillPublishBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,8 +47,7 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Before
     public void before() {
-        extensionBuilderDependencies = new ExtensionBuilderDependenciesImpl(
-                () -> retainedPublishBuilder,
+        extensionBuilderDependencies = new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder,
                 () -> topicSubscriptionBuilder,
                 () -> topicPermissionBuilderProvider,
                 () -> publishBuilder,

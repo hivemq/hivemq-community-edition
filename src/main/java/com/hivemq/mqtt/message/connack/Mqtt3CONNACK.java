@@ -19,7 +19,6 @@ import com.hivemq.mqtt.message.Message;
 
 /**
  * @author Florian Limpöck
- *
  * @since 4.0.0
  */
 public interface Mqtt3CONNACK extends Message {

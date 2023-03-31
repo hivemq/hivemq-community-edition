@@ -34,8 +34,8 @@ public class RetainedMessagesGaugeProvider implements Provider<RetainedMessagesG
     private final MetricRegistry metricRegistry;
 
     @Inject
-    public RetainedMessagesGaugeProvider(final RetainedMessagePersistence retainedMessagePersistence,
-                                         final MetricRegistry metricRegistry) {
+    public RetainedMessagesGaugeProvider(
+            final RetainedMessagePersistence retainedMessagePersistence, final MetricRegistry metricRegistry) {
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.metricRegistry = metricRegistry;
     }

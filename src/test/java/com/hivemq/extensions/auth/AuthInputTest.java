@@ -16,6 +16,7 @@
 package com.hivemq.extensions.auth;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.packets.auth.AuthPacket;
 import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -27,8 +28,12 @@ import com.hivemq.util.Bytes;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Florian Limpöck
@@ -50,8 +55,8 @@ public class AuthInputTest {
     public void setUp() {
 
         final EmbeddedChannel channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         auth = new AUTH(method, authData, reasonCode, userProperties, reasonString);

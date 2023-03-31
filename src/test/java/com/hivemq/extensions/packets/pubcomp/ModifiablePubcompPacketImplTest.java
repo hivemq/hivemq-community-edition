@@ -27,7 +27,9 @@ import util.TestConfigurationBootstrap;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Yannick Weber
@@ -44,8 +46,8 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void setReasonString() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(
-                1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiablePubcompPacketImpl modifiablePacket =
                 new ModifiablePubcompPacketImpl(packet, configurationService);
 
@@ -59,8 +61,10 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void setReasonString_null() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(
-                1, PubcompReasonCode.SUCCESS, "reason", UserPropertiesImpl.of(ImmutableList.of()));
+        final PubcompPacketImpl packet = new PubcompPacketImpl(1,
+                PubcompReasonCode.SUCCESS,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiablePubcompPacketImpl modifiablePacket =
                 new ModifiablePubcompPacketImpl(packet, configurationService);
 
@@ -74,8 +78,8 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void setReasonString_same() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(
-                1, PubcompReasonCode.SUCCESS, "same", UserPropertiesImpl.of(ImmutableList.of()));
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, "same", UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiablePubcompPacketImpl modifiablePacket =
                 new ModifiablePubcompPacketImpl(packet, configurationService);
 
@@ -89,8 +93,8 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(
-                1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiablePubcompPacketImpl modifiablePacket =
                 new ModifiablePubcompPacketImpl(packet, configurationService);
 
@@ -101,8 +105,8 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void copy_changes() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(
-                1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
         final ModifiablePubcompPacketImpl modifiablePacket =
                 new ModifiablePubcompPacketImpl(packet, configurationService);
 
@@ -110,8 +114,7 @@ public class ModifiablePubcompPacketImplTest {
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final PubcompPacketImpl copy = modifiablePacket.copy();
 
-        final PubcompPacketImpl expectedPacket = new PubcompPacketImpl(
-                1,
+        final PubcompPacketImpl expectedPacket = new PubcompPacketImpl(1,
                 PubcompReasonCode.SUCCESS,
                 "reason",
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))));

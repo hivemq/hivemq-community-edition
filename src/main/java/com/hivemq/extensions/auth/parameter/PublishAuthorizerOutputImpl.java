@@ -45,7 +45,11 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
 
 
     public enum AuthorizationState {
-        SUCCESS, CONTINUE, FAIL, DISCONNECT, UNDECIDED
+        SUCCESS,
+        CONTINUE,
+        FAIL,
+        DISCONNECT,
+        UNDECIDED
     }
 
     public PublishAuthorizerOutputImpl(@NotNull final PluginOutPutAsyncer asyncer) {
@@ -75,8 +79,7 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
     public void failAuthorization(final @NotNull AckReasonCode reasonCode) {
         checkCompleted("failAuthorization");
         Preconditions.checkNotNull(reasonCode, "reason code must never be null");
-        if (reasonCode == AckReasonCode.SUCCESS ||
-                reasonCode == AckReasonCode.NO_MATCHING_SUBSCRIBERS) {
+        if (reasonCode == AckReasonCode.SUCCESS || reasonCode == AckReasonCode.NO_MATCHING_SUBSCRIBERS) {
             throw new IllegalArgumentException("Fail must use an Ack Error code");
         }
 
@@ -89,8 +92,7 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
         checkCompleted("failAuthorization");
         Preconditions.checkNotNull(reasonCode, "reason code must never be null");
         Preconditions.checkNotNull(reasonString, "reason string must never be null");
-        if (reasonCode == AckReasonCode.SUCCESS ||
-                reasonCode == AckReasonCode.NO_MATCHING_SUBSCRIBERS) {
+        if (reasonCode == AckReasonCode.SUCCESS || reasonCode == AckReasonCode.NO_MATCHING_SUBSCRIBERS) {
             throw new IllegalArgumentException("Fail must use an Ack Error code");
         }
 
@@ -127,8 +129,9 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
     @Override
     public void nextExtensionOrDefault() {
         if (completed.get()) {
-            throw new UnsupportedOperationException("nextExtensionOrDefault must not be called if authorizeSuccessfully, " +
-                    "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
+            throw new UnsupportedOperationException(
+                    "nextExtensionOrDefault must not be called if authorizeSuccessfully, " +
+                            "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
         }
         authorizationState = AuthorizationState.CONTINUE;
     }
@@ -147,7 +150,8 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
 
     private void checkCompleted(final @NotNull String method) {
         if (!completed.compareAndSet(false, true)) {
-            throw new UnsupportedOperationException(method + " must not be called if authorizeSuccessfully, " +
+            throw new UnsupportedOperationException(method +
+                    " must not be called if authorizeSuccessfully, " +
                     "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
         }
     }

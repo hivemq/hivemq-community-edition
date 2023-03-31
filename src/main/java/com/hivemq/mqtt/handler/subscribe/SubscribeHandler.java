@@ -41,7 +41,8 @@ public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
     }
 
     @Override
-    protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final SUBSCRIBE msg) throws Exception {
+    protected void channelRead0(@NotNull final ChannelHandlerContext ctx, @NotNull final SUBSCRIBE msg)
+            throws Exception {
         SubscribeMessageBarrier.addToPipeline(ctx);
         incomingSubscribeHandler.interceptOrDelegate(ctx, msg);
     }

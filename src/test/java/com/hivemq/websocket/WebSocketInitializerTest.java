@@ -26,7 +26,12 @@ import util.DummyHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.HTTP_OBJECT_AGGREGATOR;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.HTTP_SERVER_CODEC;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_WEBSOCKET_ENCODER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.WEBSOCKET_BINARY_FRAME_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.WEBSOCKET_SERVER_PROTOCOL_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.WEBSOCKET_TEXT_FRAME_HANDLER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -43,10 +48,7 @@ public class WebSocketInitializerTest {
 
         channel.pipeline().addLast("dummy", new DummyHandler());
 
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
-                .bindAddress("0.0.0.0")
-                .build();
+        websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
     }
 
     @Test
@@ -92,8 +94,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_no_subprotocols() throws Exception {
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
+        websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(new ArrayList<String>())
                 .build();
@@ -104,8 +105,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_one_subprotocol() throws Exception {
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
+        websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1"))
                 .build();
@@ -117,8 +117,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_multiple_subprotocols() throws Exception {
-        websocketListener = new WebsocketListener.Builder()
-                .port(8000)
+        websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
                 .build();

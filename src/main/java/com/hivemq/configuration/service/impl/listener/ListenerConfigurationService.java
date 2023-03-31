@@ -16,7 +16,11 @@
 package com.hivemq.configuration.service.impl.listener;
 
 import com.hivemq.annotations.ReadOnly;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.configuration.service.exception.ConfigurationValidationException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 

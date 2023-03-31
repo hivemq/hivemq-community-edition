@@ -25,10 +25,8 @@ import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
-import org.rocksdb.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,15 +41,17 @@ import static com.hivemq.migration.persistence.legacy.serializer.PublishPayloadR
  * @since 4.5.0
  */
 @LazySingleton
-public class PublishPayloadRocksDBLocalPersistence_4_4 extends RocksDBLocalPersistence implements PublishPayloadLocalPersistence_4_4 {
+public class PublishPayloadRocksDBLocalPersistence_4_4 extends RocksDBLocalPersistence
+        implements PublishPayloadLocalPersistence_4_4 {
 
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
 
     public static final String PERSISTENCE_VERSION = "040000_R";
 
     @Inject
-    public PublishPayloadRocksDBLocalPersistence_4_4(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-                                                     final @NotNull PersistenceStartup persistenceStartup) {
+    public PublishPayloadRocksDBLocalPersistence_4_4(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PersistenceStartup persistenceStartup) {
         super(localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),

@@ -47,15 +47,14 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     private boolean modified = false;
 
     public ModifiableOutboundDisconnectPacketImpl(
-            final @NotNull DisconnectPacketImpl packet,
-            final @NotNull FullConfigurationService configurationService) {
+            final @NotNull DisconnectPacketImpl packet, final @NotNull FullConfigurationService configurationService) {
 
         reasonCode = packet.reasonCode;
         reasonString = packet.reasonString;
         sessionExpiryInterval = packet.sessionExpiryInterval;
         serverReference = packet.serverReference;
-        userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
     }
@@ -68,11 +67,10 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     @Override
     public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
-        Preconditions.checkArgument(
-                reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
-                "Reason code %s must not be used for disconnect packets.", reasonCode);
-        Preconditions.checkArgument(
-                Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByServer(),
+        Preconditions.checkArgument(reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                "Reason code %s must not be used for disconnect packets.",
+                reasonCode);
+        Preconditions.checkArgument(Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByServer(),
                 "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
                 reasonCode);
         if (this.reasonCode == reasonCode) {
@@ -99,7 +97,8 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
+        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ?
+                Optional.empty() :
                 Optional.of(sessionExpiryInterval);
     }
 
@@ -110,8 +109,8 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
 
     @Override
     public void setServerReference(final @Nullable String serverReference) {
-        PluginBuilderUtil.checkServerReference(
-                serverReference, configurationService.securityConfiguration().validateUTF8());
+        PluginBuilderUtil.checkServerReference(serverReference,
+                configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.serverReference, serverReference)) {
             return;
         }
@@ -129,8 +128,11 @@ public class ModifiableOutboundDisconnectPacketImpl implements ModifiableOutboun
     }
 
     public @NotNull DisconnectPacketImpl copy() {
-        return new DisconnectPacketImpl(
-                reasonCode, reasonString, sessionExpiryInterval, serverReference, userProperties.copy());
+        return new DisconnectPacketImpl(reasonCode,
+                reasonString,
+                sessionExpiryInterval,
+                serverReference,
+                userProperties.copy());
     }
 
     public @NotNull ModifiableOutboundDisconnectPacketImpl update(final @NotNull DisconnectPacketImpl packet) {

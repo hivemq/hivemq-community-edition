@@ -18,7 +18,9 @@ package com.hivemq.mqtt.message;
 import org.junit.Test;
 import util.EnumTestUtil;
 
-import static com.hivemq.mqtt.message.QoS.*;
+import static com.hivemq.mqtt.message.QoS.AT_LEAST_ONCE;
+import static com.hivemq.mqtt.message.QoS.AT_MOST_ONCE;
+import static com.hivemq.mqtt.message.QoS.EXACTLY_ONCE;
 import static org.junit.Assert.assertEquals;
 
 public class QoSTest {

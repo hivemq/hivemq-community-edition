@@ -17,16 +17,20 @@ package com.hivemq.extensions.events.client.parameters;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -42,9 +46,10 @@ public class ServerInitiatedDisconnectInputImplTest {
     @Test
     public void test_construction_values_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ServerInitiatedDisconnectInputImpl disconnectInput = new ServerInitiatedDisconnectInputImpl("client", channel, null, null, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
+        final ServerInitiatedDisconnectInputImpl disconnectInput =
+                new ServerInitiatedDisconnectInputImpl("client", channel, null, null, null);
         assertEquals(Optional.empty(), disconnectInput.getReasonCode());
         assertEquals(Optional.empty(), disconnectInput.getReasonString());
         assertEquals(Optional.empty(), disconnectInput.getUserProperties());
@@ -56,11 +61,13 @@ public class ServerInitiatedDisconnectInputImplTest {
     @Test
     public void test_construction_values_set() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ServerInitiatedDisconnectInputImpl disconnectInput =
-                new ServerInitiatedDisconnectInputImpl("client", channel, DisconnectedReasonCode.NORMAL_DISCONNECTION,
-                        "reason", UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
+        final ServerInitiatedDisconnectInputImpl disconnectInput = new ServerInitiatedDisconnectInputImpl("client",
+                channel,
+                DisconnectedReasonCode.NORMAL_DISCONNECTION,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))));
         assertEquals(Optional.of(DisconnectedReasonCode.NORMAL_DISCONNECTION), disconnectInput.getReasonCode());
         assertEquals(Optional.of("reason"), disconnectInput.getReasonString());
         assertTrue(disconnectInput.getUserProperties().isPresent());

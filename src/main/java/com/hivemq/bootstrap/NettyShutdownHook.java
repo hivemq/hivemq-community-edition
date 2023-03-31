@@ -81,7 +81,9 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
         }
 
         log.debug("Shutting down worker and boss threads");
-        final Future<?> workerFinished = workerGroup.shutdownGracefully(2, eventLoopsShutdownTimeout, TimeUnit.SECONDS); //TimeUnit effects both parameters!
+        final Future<?> workerFinished = workerGroup.shutdownGracefully(2,
+                eventLoopsShutdownTimeout,
+                TimeUnit.SECONDS); //TimeUnit effects both parameters!
         final Future<?> bossFinished = bossGroup.shutdownGracefully(2, eventLoopsShutdownTimeout, TimeUnit.SECONDS);
 
         log.trace("Waiting for Worker threads to finish");

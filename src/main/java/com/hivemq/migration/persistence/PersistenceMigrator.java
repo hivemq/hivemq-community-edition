@@ -92,13 +92,11 @@ public class PersistenceMigrator {
 
             migrator.migrateToType(persistenceType);
 
-            migrationlog.info(
-                    "Migrated {} to type {} successfully in {} ms",
+            migrationlog.info("Migrated {} to type {} successfully in {} ms",
                     migrationUnit,
                     persistenceType,
                     (System.currentTimeMillis() - startOne));
-            log.debug(
-                    "Migrated {} to type {} successfully in {} ms",
+            log.debug("Migrated {} to type {} successfully in {} ms",
                     migrationUnit,
                     persistenceType,
                     (System.currentTimeMillis() - startOne));
@@ -134,8 +132,7 @@ public class PersistenceMigrator {
 
             migrator.migrateToValue();
 
-            migrationlog.info(
-                    "Migrated {} successfully in {} ms",
+            migrationlog.info("Migrated {} successfully in {} ms",
                     migrationUnit,
                     (System.currentTimeMillis() - startOne));
             log.debug("Migrated {} successfully in {} ms", migrationUnit, (System.currentTimeMillis() - startOne));

@@ -112,7 +112,7 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the DISCONNECT Reason Code belonging to the given byte code or <code>null</code> if the byte code is not
-     * a valid DISCONNECT Reason Code.
+     *         a valid DISCONNECT Reason Code.
      */
     public static @Nullable Mqtt5DisconnectReasonCode fromCode(final int code) {
         if (code == NORMAL_DISCONNECTION.code) {
@@ -135,11 +135,19 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
         return DISCONNECTED_LOOKUP[reasonCode.ordinal()];
     }
 
-    private static final @NotNull EnumSet<Mqtt5DisconnectReasonCode> BY_CLIENT =
-            EnumSet.of(NORMAL_DISCONNECTION, DISCONNECT_WITH_WILL_MESSAGE, UNSPECIFIED_ERROR, PROTOCOL_ERROR,
-                    IMPLEMENTATION_SPECIFIC_ERROR, TOPIC_FILTER_INVALID, TOPIC_NAME_INVALID, RECEIVE_MAXIMUM_EXCEEDED,
-                    TOPIC_ALIAS_INVALID, PACKET_TOO_LARGE, MESSAGE_RATE_TOO_HIGH, QUOTA_EXCEEDED,
-                    ADMINISTRATIVE_ACTION);
+    private static final @NotNull EnumSet<Mqtt5DisconnectReasonCode> BY_CLIENT = EnumSet.of(NORMAL_DISCONNECTION,
+            DISCONNECT_WITH_WILL_MESSAGE,
+            UNSPECIFIED_ERROR,
+            PROTOCOL_ERROR,
+            IMPLEMENTATION_SPECIFIC_ERROR,
+            TOPIC_FILTER_INVALID,
+            TOPIC_NAME_INVALID,
+            RECEIVE_MAXIMUM_EXCEEDED,
+            TOPIC_ALIAS_INVALID,
+            PACKET_TOO_LARGE,
+            MESSAGE_RATE_TOO_HIGH,
+            QUOTA_EXCEEDED,
+            ADMINISTRATIVE_ACTION);
 
     @Override
     public boolean canBeSentByServer() {

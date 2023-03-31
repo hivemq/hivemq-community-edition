@@ -16,6 +16,7 @@
 package com.hivemq.codec.decoder.mqtt5;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.mqtt.message.ProtocolVersion;
@@ -23,6 +24,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.slf4j.LoggerFactory;
+import util.DummyClientConnection;
 import util.LogbackCapturingAppender;
 import util.TestMqttDecoder;
 
@@ -35,11 +37,12 @@ public class AbstractMqttDecoderTest {
 
     @Before
     public void setUp() {
-        logCapture = LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttServerDisconnectorImpl.class));
+        logCapture =
+                LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttServerDisconnectorImpl.class));
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 
     @After
@@ -50,8 +53,8 @@ public class AbstractMqttDecoderTest {
 
     protected void createChannel() {
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 }

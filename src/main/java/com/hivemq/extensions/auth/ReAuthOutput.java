@@ -68,8 +68,7 @@ public class ReAuthOutput extends AuthOutput<EnhancedAuthOutput> implements Enha
 
     @Override
     public void failAuthentication(
-            final @NotNull DisconnectedReasonCode reasonCode,
-            final @Nullable String reasonString) {
+            final @NotNull DisconnectedReasonCode reasonCode, final @Nullable String reasonString) {
 
         final Mqtt5DisconnectReasonCode disconnectReasonCode = checkReasonCode(reasonCode);
         failAuthentication(reasonString);
@@ -129,7 +128,8 @@ public class ReAuthOutput extends AuthOutput<EnhancedAuthOutput> implements Enha
         Preconditions.checkNotNull(disconnectedReasonCode, "Disconnected reason code must never be null");
         final Mqtt5DisconnectReasonCode disconnectReasonCode = Mqtt5DisconnectReasonCode.from(disconnectedReasonCode);
         Preconditions.checkArgument(disconnectReasonCode != null,
-                "The disconnected reason code " + disconnectedReasonCode.name() +
+                "The disconnected reason code " +
+                        disconnectedReasonCode.name() +
                         " is not a DISCONNECT reason code and therefore must not be used during re-authentication.");
         Preconditions.checkArgument(disconnectReasonCode != Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                 "DISCONNECT reason code must not be NORMAL_DISCONNECTION for failed authentication");

@@ -146,8 +146,7 @@ public class ChannelDependenciesTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        channelDependencies = new ChannelDependencies(
-                noConnectIdleHandler,
+        channelDependencies = new ChannelDependencies(noConnectIdleHandler,
                 () -> connectHandler,
                 connectionLimiterHandler,
                 disconnectHandler,

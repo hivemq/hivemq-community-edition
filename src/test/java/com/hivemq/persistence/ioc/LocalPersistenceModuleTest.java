@@ -23,7 +23,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonModule;
 import com.hivemq.configuration.info.SystemInformation;
-import com.hivemq.configuration.service.*;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.PersistenceConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -43,7 +47,12 @@ import com.hivemq.persistence.local.ClientSessionSubscriptionLocalPersistence;
 import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
-import com.hivemq.persistence.payload.*;
+import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
+import com.hivemq.persistence.payload.PublishPayloadNoopPersistenceImpl;
+import com.hivemq.persistence.payload.PublishPayloadPersistence;
+import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
+import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
+import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.throttling.ioc.ThrottlingModule;
 import org.junit.Before;
@@ -130,7 +139,8 @@ public class LocalPersistenceModuleTest {
         when(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class)).thenReturn(new PublishPayloadNoopPersistenceImpl());
 
         when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(Mockito.mock(PersistenceStartup.class));
-        when(persistenceInjector.getInstance(PersistenceConfigurationService.class)).thenReturn(persistenceConfigurationService);
+        when(persistenceInjector.getInstance(PersistenceConfigurationService.class)).thenReturn(
+                persistenceConfigurationService);
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceMode.FILE);
 
     }
@@ -141,23 +151,17 @@ public class LocalPersistenceModuleTest {
         final Injector injector =
                 createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
 
-        assertSame(
-                injector.getInstance(RetainedMessageLocalPersistence.class),
+        assertSame(injector.getInstance(RetainedMessageLocalPersistence.class),
                 injector.getInstance(RetainedMessageLocalPersistence.class));
-        assertSame(
-                injector.getInstance(ClientSessionLocalPersistence.class),
+        assertSame(injector.getInstance(ClientSessionLocalPersistence.class),
                 injector.getInstance(ClientSessionLocalPersistence.class));
-        assertSame(
-                injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
+        assertSame(injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
                 injector.getInstance(ClientSessionSubscriptionLocalPersistence.class));
-        assertSame(
-                injector.getInstance(ClientQueueLocalPersistence.class),
+        assertSame(injector.getInstance(ClientQueueLocalPersistence.class),
                 injector.getInstance(ClientQueueLocalPersistence.class));
-        assertSame(
-                injector.getInstance(PublishPayloadPersistence.class),
+        assertSame(injector.getInstance(PublishPayloadPersistence.class),
                 injector.getInstance(PublishPayloadPersistence.class));
-        assertSame(
-                injector.getInstance(PublishPayloadPersistenceImpl.class),
+        assertSame(injector.getInstance(PublishPayloadPersistenceImpl.class),
                 injector.getInstance(PublishPayloadPersistenceImpl.class));
     }
 
@@ -199,8 +203,7 @@ public class LocalPersistenceModuleTest {
     }
 
     private Injector createInjector(final LocalPersistenceModule localPersistenceModule) {
-        return Guice.createInjector(
-                localPersistenceModule,
+        return Guice.createInjector(localPersistenceModule,
                 new LazySingletonModule(),
                 new ThrottlingModule(),
                 new MQTTServiceModule(),

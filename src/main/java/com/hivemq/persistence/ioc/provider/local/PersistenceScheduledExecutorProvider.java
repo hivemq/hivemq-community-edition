@@ -17,9 +17,9 @@ package com.hivemq.persistence.ioc.provider.local;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.persistence.ioc.annotation.Persistence;
 import com.hivemq.util.ThreadFactoryUtil;
 
@@ -44,7 +44,8 @@ public class PersistenceScheduledExecutorProvider implements Provider<ListeningS
     public ListeningScheduledExecutorService get() {
         if (executorService == null) {
             final ThreadFactory threadFactory = ThreadFactoryUtil.create("scheduled-persistence-executor");
-            final ScheduledExecutorService singleThreadExecutor = Executors.newSingleThreadScheduledExecutor(threadFactory);
+            final ScheduledExecutorService singleThreadExecutor =
+                    Executors.newSingleThreadScheduledExecutor(threadFactory);
             this.executorService = MoreExecutors.listeningDecorator(singleThreadExecutor);
         }
         return executorService;

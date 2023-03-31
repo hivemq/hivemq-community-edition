@@ -42,7 +42,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class EmbeddedHiveMQImplTest {
 
@@ -62,10 +64,17 @@ public class EmbeddedHiveMQImplTest {
         conf = tmp.newFolder("conf");
         randomPort = RandomPortGenerator.get();
 
-        final String noListenerConfig =
-                "" + "<hivemq>\n" + "    <listeners>\n" + "        <tcp-listener>\n" + "            <port>" +
-                        randomPort + "</port>\n" + "            <bind-address>0.0.0.0</bind-address>\n" +
-                        "        </tcp-listener>\n" + "    </listeners>\n" + "</hivemq>";
+        final String noListenerConfig = "" +
+                "<hivemq>\n" +
+                "    <listeners>\n" +
+                "        <tcp-listener>\n" +
+                "            <port>" +
+                randomPort +
+                "</port>\n" +
+                "            <bind-address>0.0.0.0</bind-address>\n" +
+                "        </tcp-listener>\n" +
+                "    </listeners>\n" +
+                "</hivemq>";
         FileUtils.write(new File(conf, "config.xml"), noListenerConfig, StandardCharsets.UTF_8);
 
         TestExtensionUtil.shrinkwrapExtension(extensions, extensionName, Main.class, true);
@@ -252,8 +261,7 @@ public class EmbeddedHiveMQImplTest {
         final EmbeddedExtensionImpl extension =
                 new EmbeddedExtensionImpl("id", "name", "123", "luke_skywalker", 0, 1000, embeddedMain);
 
-        final EmbeddedHiveMQImpl embeddedHiveMQ =
-                new EmbeddedHiveMQImpl(conf, data, extensions, extension);
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions, extension);
         embeddedHiveMQ.start().get();
 
         assertTrue(embeddedMain.running.get());

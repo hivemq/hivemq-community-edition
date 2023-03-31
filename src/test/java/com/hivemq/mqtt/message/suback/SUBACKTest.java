@@ -35,18 +35,16 @@ public class SUBACKTest {
 
     @Test
     public void from_packet() {
-        final SubackPacketImpl packet = new SubackPacketImpl(
-                ImmutableList.of(SubackReasonCode.GRANTED_QOS_2, SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+        final SubackPacketImpl packet = new SubackPacketImpl(ImmutableList.of(SubackReasonCode.GRANTED_QOS_2,
+                SubackReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
                 "reasonString",
                 1,
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"))));
 
         final SUBACK suback = SUBACK.from(packet);
 
-        assertEquals(
-                ImmutableList.of(
-                        Mqtt5SubAckReasonCode.GRANTED_QOS_2, Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
-                suback.getReasonCodes());
+        assertEquals(ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_2,
+                Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), suback.getReasonCodes());
         assertEquals(packet.getReasonString(), Optional.ofNullable(suback.getReasonString()));
         assertEquals(packet.getPacketIdentifier(), suback.getPacketIdentifier());
         assertEquals(packet.getUserProperties().asInternalList(), suback.getUserProperties().asList());

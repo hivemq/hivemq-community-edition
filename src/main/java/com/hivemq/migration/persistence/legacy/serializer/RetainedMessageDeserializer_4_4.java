@@ -41,16 +41,28 @@ public class RetainedMessageDeserializer_4_4 {
     @NotNull
     public static byte[] serializeValue(final RetainedMessage retainedMessage) {
 
-        final byte[] responseTopic = retainedMessage.getResponseTopic() == null ? null : retainedMessage.getResponseTopic().getBytes(UTF_8);
-        final byte[] contentType = retainedMessage.getContentType() == null ? null : retainedMessage.getContentType().getBytes(UTF_8);
+        final byte[] responseTopic =
+                retainedMessage.getResponseTopic() == null ? null : retainedMessage.getResponseTopic().getBytes(UTF_8);
+        final byte[] contentType =
+                retainedMessage.getContentType() == null ? null : retainedMessage.getContentType().getBytes(UTF_8);
         final byte[] correlationData = retainedMessage.getCorrelationData();
         final int responseTopicLength = responseTopic != null ? responseTopic.length : 0;
         final int contentTypeLength = contentType != null ? contentType.length : 0;
         final int correlationDataLength = correlationData != null ? correlationData.length : 0;
-        final int payloadFormatIndicator = retainedMessage.getPayloadFormatIndicator() != null ? retainedMessage.getPayloadFormatIndicator().getCode() : -1;
+        final int payloadFormatIndicator = retainedMessage.getPayloadFormatIndicator() != null ?
+                retainedMessage.getPayloadFormatIndicator().getCode() :
+                -1;
 
         int cursor = 0;
-        final byte[] bytes = new byte[25 + PropertiesSerializationUtil.encodedSize(retainedMessage.getUserProperties()) + responseTopicLength + 4 + contentTypeLength + 4 + correlationDataLength + 4 + 1];
+        final byte[] bytes = new byte[25 +
+                PropertiesSerializationUtil.encodedSize(retainedMessage.getUserProperties()) +
+                responseTopicLength +
+                4 +
+                contentTypeLength +
+                4 +
+                correlationDataLength +
+                4 +
+                1];
 
         bytes[cursor] = ((byte) retainedMessage.getQos().getQosNumber());
         cursor += 1;
@@ -150,11 +162,21 @@ public class RetainedMessageDeserializer_4_4 {
             cursor += correlationDataLength;
         }
 
-        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = serialized[cursor] != -1 ? Mqtt5PayloadFormatIndicator.fromCode(serialized[cursor]) : null;
+        final Mqtt5PayloadFormatIndicator payloadFormatIndicator =
+                serialized[cursor] != -1 ? Mqtt5PayloadFormatIndicator.fromCode(serialized[cursor]) : null;
         cursor += 1;
 
         final Mqtt5UserProperties properties = PropertiesSerializationUtil.read(serialized, cursor);
 
-        return new RetainedMessage(null, qoS, publishId, ttl, properties, responseTopic, contentType, correlationData, payloadFormatIndicator, timestamp);
+        return new RetainedMessage(null,
+                qoS,
+                publishId,
+                ttl,
+                properties,
+                responseTopic,
+                contentType,
+                correlationData,
+                payloadFormatIndicator,
+                timestamp);
     }
 }

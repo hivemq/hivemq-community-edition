@@ -16,9 +16,9 @@
 package com.hivemq.migration.logging;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.migration.Migrations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +35,10 @@ public class PayloadExceptionLogging {
 
     private static final Logger migrationLog = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
     private static final int LOGGING_INTERVAL = 10_000;
-    private static final String bigLine = "================================================================================";
-    private static final String smallLine = "--------------------------------------------------------------------------------";
+    private static final String bigLine =
+            "================================================================================";
+    private static final String smallLine =
+            "--------------------------------------------------------------------------------";
     private int counter = 0;
 
     @NotNull
@@ -47,9 +49,8 @@ public class PayloadExceptionLogging {
         payloadIdMissingMessagesMap = new TreeMap<>();
     }
 
-    public synchronized void addLogging(final long payloadId,
-                                        @Nullable final Boolean retained,
-                                        @Nullable final String retainedTopic) {
+    public synchronized void addLogging(
+            final long payloadId, @Nullable final Boolean retained, @Nullable final String retainedTopic) {
 
         final MissingMessageInformation information;
         if (payloadIdMissingMessagesMap.containsKey(payloadId)) {
@@ -86,7 +87,10 @@ public class PayloadExceptionLogging {
         formatter.format("%1$s%n", bigLine);
         for (final Map.Entry<Long, MissingMessageInformation> entry : payloadIdMissingMessagesMap.entrySet()) {
             final MissingMessageInformation missingMessage = entry.getValue();
-            formatter.format("%1$19d | %2$8b | %3$47s %n", missingMessage.getPayloadId(), missingMessage.isRetained(), missingMessage.getTopic());
+            formatter.format("%1$19d | %2$8b | %3$47s %n",
+                    missingMessage.getPayloadId(),
+                    missingMessage.isRetained(),
+                    missingMessage.getTopic());
             formatter.format("%n%1$s%n", smallLine);
         }
 

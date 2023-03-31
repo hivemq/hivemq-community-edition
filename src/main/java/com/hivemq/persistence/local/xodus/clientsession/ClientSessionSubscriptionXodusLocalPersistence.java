@@ -45,7 +45,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
 
@@ -55,7 +57,8 @@ import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
  * @author Dominik Obermaier
  */
 @LazySingleton
-public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPersistence implements ClientSessionSubscriptionLocalPersistence {
+public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPersistence
+        implements ClientSessionSubscriptionLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSessionSubscriptionXodusLocalPersistence.class);
     private static final String PERSISTENCE_NAME = "client_session_subscriptions";
@@ -72,7 +75,11 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
 
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+                true);
         this.serializer = new ClientSessionSubscriptionXodusSerializer();
 
     }
@@ -133,7 +140,8 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     }
 
     @Override
-    public void addSubscription(@NotNull final String client, @NotNull final Topic topic, final long timestamp, final int bucketIndex) {
+    public void addSubscription(
+            @NotNull final String client, @NotNull final Topic topic, final long timestamp, final int bucketIndex) {
         checkNotNull(client, "Clientid must not be null");
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(topic.getTopic(), "Topic must not be null");
@@ -143,13 +151,18 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
         bucket.getEnvironment().executeInTransaction(txn -> {
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(client));
             bucket.getStore()
-                    .put(txn, key,
+                    .put(txn,
+                            key,
                             bytesToByteIterable(serializer.serializeValue(topic, timestamp, nextId.getAndIncrement())));
         });
     }
 
     @Override
-    public void addSubscriptions(@NotNull final String client, @NotNull final ImmutableSet<Topic> topics, final long timestamp, final int bucketIndex) {
+    public void addSubscriptions(
+            @NotNull final String client,
+            @NotNull final ImmutableSet<Topic> topics,
+            final long timestamp,
+            final int bucketIndex) {
         checkNotNull(client, "Client id must not be null");
         checkNotNull(topics, "Topics must not be null");
         checkState(timestamp > 0, "Timestamp must not be 0");
@@ -166,7 +179,11 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     }
 
     @Override
-    public void removeSubscriptions(final @NotNull String client, final @NotNull ImmutableSet<String> topics, final long timestamp, final int bucketIndex) {
+    public void removeSubscriptions(
+            final @NotNull String client,
+            final @NotNull ImmutableSet<String> topics,
+            final long timestamp,
+            final int bucketIndex) {
         checkNotNull(client, "Client id must not be null");
         checkNotNull(topics, "Topics must not be null");
         checkState(timestamp > 0, "Timestamp must not be 0");
@@ -218,8 +235,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
                     if (valueFromMap == null) {
                         results.put(value, id);
                     } else if (valueFromMap < id) {
-                        results.remove(
-                                value); // We have to remove the entry here, otherwise the key will not be replaced since it is considered equal.
+                        results.remove(value); // We have to remove the entry here, otherwise the key will not be replaced since it is considered equal.
                         results.put(value, id);
                     }
                 } while (cursor.getNextDup());
@@ -243,7 +259,8 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     }
 
     @Override
-    public void remove(@NotNull final String client, @NotNull final String topic, final long timestamp, final int bucketIndex) {
+    public void remove(
+            @NotNull final String client, @NotNull final String topic, final long timestamp, final int bucketIndex) {
         checkNotNull(client, "Clientid must not be null");
         checkNotNull(topic, "Topic must not be null");
         checkState(timestamp > 0, "Timestamp must not be 0");
@@ -252,9 +269,8 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
 
     @Override
     @NotNull
-    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(final int bucketIndex,
-                                                                                      @Nullable final String lastClientId,
-                                                                                      final int maxResults) {
+    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
+            final int bucketIndex, @Nullable final String lastClientId, final int maxResults) {
         checkArgument(maxResults > 0, "max results must be greater than 0");
 
         final ImmutableMap.Builder<String, ImmutableSet<Topic>> resultBuilder = ImmutableMap.builder();
@@ -267,7 +283,8 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
             int containedItemCount = 0;
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
 
-                final ByteIterable lastClientIdKey = lastClientId != null ? bytesToByteIterable(serializer.serializeKey(lastClientId)) : null;
+                final ByteIterable lastClientIdKey =
+                        lastClientId != null ? bytesToByteIterable(serializer.serializeKey(lastClientId)) : null;
 
                 if (lastClientIdKey != null) {
                     //jump to last known key or to next entry after key
@@ -320,7 +337,10 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
                         resultBuilder.put(clientId, topicSet);
 
                         if (containedItemCount >= maxResults) {
-                            return new BucketChunkResult<>(resultBuilder.build(), !cursor.getNext(), lastKey, bucketIndex);
+                            return new BucketChunkResult<>(resultBuilder.build(),
+                                    !cursor.getNext(),
+                                    lastKey,
+                                    bucketIndex);
                         }
                     }
                 } while (cursor.getNextNoDup());

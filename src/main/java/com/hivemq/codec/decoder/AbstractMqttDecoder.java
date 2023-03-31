@@ -16,7 +16,7 @@
 package com.hivemq.codec.decoder;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.codec.encoder.mqtt5.MqttBinaryData;
 import com.hivemq.codec.encoder.mqtt5.MqttVariableByteInteger;
@@ -82,22 +82,24 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * Valid user properties will be added to the UserProperty-Builder
      *
-     * @param clientConnection      the connection of the mqtt client
-     * @param buf                   the encoded ByteBuf of the message
-     * @param userPropertiesBuilder the builder of the user properties
-     * @param messageType           the type of the Message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param userPropertiesBuilder   the builder of the user properties
+     * @param messageType             the type of the Message
      * @return the UserProperty-Builder
      */
     protected @Nullable ImmutableList.Builder<MqttUserProperty> readUserProperty(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable ImmutableList.Builder<MqttUserProperty> userPropertiesBuilder,
             final @NotNull MessageType messageType) {
 
         final MqttUserProperty userProperty = MqttUserProperty.decode(buf, validateUTF8);
         if (userProperty == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed user property. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed user property. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a malformed user property",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_USER_PROPERTY, messageType.name()));
@@ -119,14 +121,14 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes less than indicated string length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param key              the name of the property, eg. 'will topic' or 'topic'
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param key                     the name of the property, eg. 'will topic' or 'topic'
+     * @param messageType             the type of the message
      * @return the length of the string or -1 for malformed packet
      */
     protected int decodeUTF8StringLength(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final @NotNull String key,
             final @NotNull MessageType messageType) {
@@ -134,8 +136,12 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
         final int utf8StringLength;
 
         if (buf.readableBytes() < 2 || (buf.readableBytes() < (utf8StringLength = buf.readUnsignedShort()))) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with an incorrect UTF-8 string length for '" + key + "'. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with an incorrect UTF-8 string length for '" +
+                            key +
+                            "'. Disconnecting client.",
                     "Incorrect " + messageType.name() + " UTF-8 string length for '" + key + "'",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_UTF8_LENGTH, messageType.name(), key));
@@ -148,25 +154,25 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Decodes a topic without knowing the length of it
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param key              the name of the property
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param key                     the name of the property
+     * @param messageType             the type of the message
      * @return the topic as String or {@code null} if failed
      */
     @Nullable
     protected String decodeUTF8Topic(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final @NotNull String key,
             final @NotNull MessageType messageType) {
 
-        final int utf8StringLength = decodeUTF8StringLength(clientConnection, buf, key, messageType);
+        final int utf8StringLength = decodeUTF8StringLength(clientConnectionContext, buf, key, messageType);
         if (utf8StringLength == DISCONNECTED) {
             return null;
         }
 
-        return decodeUTF8Topic(clientConnection, buf, utf8StringLength, key, messageType);
+        return decodeUTF8Topic(clientConnectionContext, buf, utf8StringLength, key, messageType);
     }
 
     /**
@@ -180,16 +186,16 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes less than indicated string length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param utf8StringLength length of the topic
-     * @param key              name of the property
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param utf8StringLength        length of the topic
+     * @param key                     name of the property
+     * @param messageType             the type of the message
      * @return the topic as String or {@code null} if failed
      */
     @Nullable
     protected String decodeUTF8Topic(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final int utf8StringLength,
             final @NotNull String key,
@@ -197,8 +203,12 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
 
         final String utf8String = Strings.getValidatedPrefixedString(buf, utf8StringLength, validateUTF8);
         if (utf8String == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed '" + key + "'. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed '" +
+                            key +
+                            "'. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with malformed UTF-8 String for '" + key + "'",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_UTF8_STRING, messageType.name(), key));
@@ -210,27 +220,29 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Decodes and validates the authentication method.
      *
-     * @param clientConnection     the {@link ClientConnection} of the MQTT Client
-     * @param buf                  the {@link ByteBuf} to decode
-     * @param authenticationMethod the {@link String} name of the authentication method
-     * @param messageType          the {@link MessageType} type of the message
+     * @param clientConnectionContext the {@link ClientConnectionContext} of the MQTT Client
+     * @param buf                     the {@link ByteBuf} to decode
+     * @param authenticationMethod    the {@link String} name of the authentication method
+     * @param messageType             the {@link MessageType} type of the message
      * @return decoded authentication method as {@link String}
      */
     @Nullable
     protected String decodeAuthenticationMethod(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String authenticationMethod,
             final @NotNull MessageType messageType) {
 
         if (authenticationMethod != null) {
-            disconnectByMoreThanOnce(clientConnection, "auth method", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "auth method", messageType);
             return null;
         }
         authenticationMethod = MqttBinaryData.decodeString(buf, validateUTF8);
         if (authenticationMethod == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed auth method. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed auth method. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with malformed UTF-8 String for auth method",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_AUTH_METHOD, messageType.name()));
@@ -248,19 +260,21 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - topic contains '#' character
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param topicName        the topic
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param topicName               the topic
+     * @param messageType             the type of the message
      * @return true if invalid, false if valid
      */
     protected boolean topicInvalid(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull String topicName,
             final @NotNull MessageType messageType) {
 
         if (Topics.containsWildcard(topicName)) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a wildcard character (# or +). This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a wildcard character (# or +). This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with wildcard character (#/+) in topic: " + topicName,
                     Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_WILDCARD, messageType.name()));
@@ -283,26 +297,28 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes less than indicated binary length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param correlationData  the initial correlation data (must be null)
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param correlationData         the initial correlation data (must be null)
+     * @param messageType             the type of the message
      * @return a byte[] containing decoded correlation data, or {@code null} when failed.
      */
     protected byte @Nullable [] readCorrelationData(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             byte @Nullable [] correlationData,
             final @NotNull MessageType messageType) {
 
         if (correlationData != null) {
-            disconnectByMoreThanOnce(clientConnection, "correlation data", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "correlation data", messageType);
             return null;
         }
         correlationData = MqttBinaryData.decode(buf);
         if (correlationData == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed correlation data. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed correlation data. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a malformed correlation data",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_CORRELATION_DATA, messageType.name()));
@@ -331,34 +347,36 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - topic contains '#' character
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param responseTopic    the initial response topic (must be null)
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param responseTopic           the initial response topic (must be null)
+     * @param messageType             the type of the message
      * @return a response topic, or {@code null} when failed.
      */
     @Nullable
     protected String readResponseTopic(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String responseTopic,
             final @NotNull MessageType messageType) {
 
         if (responseTopic != null) {
-            disconnectByMoreThanOnce(clientConnection, "response topic", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "response topic", messageType);
             return null;
         }
         responseTopic = MqttBinaryData.decodeString(buf, validateUTF8);
         if (responseTopic == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed UTF-8 string for response topic. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed UTF-8 string for response topic. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a malformed UTF-8 string for response topic",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_RESPONSE_TOPIC, messageType.name()));
 
             return null;
         }
-        if (topicInvalid(clientConnection, responseTopic, messageType)) {
+        if (topicInvalid(clientConnectionContext, responseTopic, messageType)) {
             return null;
         }
         return responseTopic;
@@ -379,27 +397,29 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes less than indicated binary length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param contentType      the initial content type (must be null)
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param contentType             the initial content type (must be null)
+     * @param messageType             the type of the message
      * @return a content type, or {@code null} when failed.
      */
     @Nullable
     protected String readContentType(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String contentType,
             final @NotNull MessageType messageType) {
 
         if (contentType != null) {
-            disconnectByMoreThanOnce(clientConnection, "content type", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "content type", messageType);
             return null;
         }
         contentType = MqttBinaryData.decodeString(buf, validateUTF8);
         if (contentType == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed UTF-8 string for content type. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed UTF-8 string for content type. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a malformed UTF-8 string for content type",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_CONTENT_TYPE, messageType.name()));
@@ -424,31 +444,33 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readUnsignedByte() > 1  (only 0 and 1 are allowed)
      *
-     * @param clientConnection       the connection of the mqtt client
-     * @param buf                    the encoded ByteBuf of the message
-     * @param payloadFormatIndicator the initial payload format indicator (must be null)
-     * @param messageType            the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param payloadFormatIndicator  the initial payload format indicator (must be null)
+     * @param messageType             the type of the message
      * @return a {@link Mqtt5PayloadFormatIndicator}, or {@code null} when failed.
      */
     protected @Nullable Mqtt5PayloadFormatIndicator readPayloadFormatIndicator(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator,
             final @NotNull MessageType messageType) {
 
         if (payloadFormatIndicator != null) {
-            disconnectByMoreThanOnce(clientConnection, "payload format indicator", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "payload format indicator", messageType);
             return null;
         }
         if (buf.readableBytes() < 1) {
-            disconnectByRemainingLengthToShort(clientConnection, messageType);
+            disconnectByRemainingLengthToShort(clientConnectionContext, messageType);
             return null;
         }
         final short payloadFormatIndicatorByte = buf.readUnsignedByte();
         payloadFormatIndicator = Mqtt5PayloadFormatIndicator.fromCode(payloadFormatIndicatorByte);
         if (payloadFormatIndicator == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a wrong payload format indicator. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a wrong payload format indicator. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a wrong payload format indicator",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_PFI, messageType.name()));
@@ -469,24 +491,25 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes less than 4
      *
-     * @param clientConnection      the connection of the mqtt client
-     * @param buf                   the encoded ByteBuf of the message
-     * @param messageExpiryInterval the initial message expiry interval (must be {@link PUBLISH#MESSAGE_EXPIRY_INTERVAL_NOT_SET})
-     * @param messageType           the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param messageExpiryInterval   the initial message expiry interval (must be
+     *                                {@link PUBLISH#MESSAGE_EXPIRY_INTERVAL_NOT_SET})
+     * @param messageType             the type of the message
      * @return true if invalid, false if valid
      */
     protected boolean messageExpiryIntervalInvalid(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final long messageExpiryInterval,
             final @NotNull MessageType messageType) {
 
         if (messageExpiryInterval != MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
-            disconnectByMoreThanOnce(clientConnection, "message expiry interval", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "message expiry interval", messageType);
             return true;
         }
         if (buf.readableBytes() < 4) {
-            disconnectByRemainingLengthToShort(clientConnection, messageType);
+            disconnectByRemainingLengthToShort(clientConnectionContext, messageType);
             return true;
         }
         return false;
@@ -507,27 +530,29 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes < decoded properties length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param messageType             the type of the message
      * @return the properties length, or -1 when failed.
      */
     protected int decodePropertiesLengthNoPayload(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final @NotNull MessageType messageType) {
 
         final int propertyLength = MqttVariableByteInteger.decode(buf);
         if (propertyLength < 0) {
-            disconnectByMalformedPropertyLength(clientConnection, messageType);
+            disconnectByMalformedPropertyLength(clientConnectionContext, messageType);
             return DISCONNECTED;
         }
         if (buf.readableBytes() != propertyLength) {
             if (buf.readableBytes() < propertyLength) {
-                disconnectByRemainingLengthToShort(clientConnection, messageType);
+                disconnectByRemainingLengthToShort(clientConnectionContext, messageType);
             } else {
-                disconnector.disconnect(clientConnection.getChannel(),
-                        "A client (IP: {}) sent a " + messageType.name() + " with payload. This is not allowed. Disconnecting client.",
+                disconnector.disconnect(clientConnectionContext.getChannel(),
+                        "A client (IP: {}) sent a " +
+                                messageType.name() +
+                                " with payload. This is not allowed. Disconnecting client.",
                         "Sent a " + messageType.name() + " with payload",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                         String.format(ReasonStrings.DISCONNECT_MALFORMED_PAYLOAD, messageType.name()));
@@ -548,25 +573,25 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - readable bytes less than 4
      *
-     * @param clientConnection      the clientConnection of the mqtt client
-     * @param buf                   the encoded ByteBuf of the message
-     * @param sessionExpiryInterval the initial session expiry interval (must be equal to sessionExpiryNotSet)
-     * @param sessionExpiryNotSet   a value that is considered as session expiry not set
-     * @param messageType           the type of the message
+     * @param clientConnectionContext the clientContext of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param sessionExpiryInterval   the initial session expiry interval (must be equal to sessionExpiryNotSet)
+     * @param sessionExpiryNotSet     a value that is considered as session expiry not set
+     * @param messageType             the type of the message
      * @return the session expiry interval, or -1 when decoding failed.
      */
     protected long decodeSessionExpiryInterval(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final long sessionExpiryInterval,
             final long sessionExpiryNotSet,
             final @NotNull MessageType messageType) {
         if (sessionExpiryInterval != sessionExpiryNotSet) {
-            disconnectByMoreThanOnce(clientConnection, "session expiry interval", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "session expiry interval", messageType);
             return DISCONNECTED;
         }
         if (buf.readableBytes() < 4) {
-            disconnectByRemainingLengthToShort(clientConnection, messageType);
+            disconnectByRemainingLengthToShort(clientConnectionContext, messageType);
             return DISCONNECTED;
         }
         return buf.readUnsignedInt();
@@ -584,26 +609,28 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * - server reference not UTF-8 well formed - readable bytes less than 2 - readable bytes less than indicated string
      * length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param serverReference  the initial server reference (must be null)
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param serverReference         the initial server reference (must be null)
+     * @param messageType             the type of the message
      * @return a server reference, or {@code null} when failed.
      */
     protected @Nullable String decodeServerReference(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String serverReference,
             final @NotNull MessageType messageType) {
 
         if (serverReference != null) {
-            disconnectByMoreThanOnce(clientConnection, "server reference", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "server reference", messageType);
             return null;
         }
         serverReference = MqttBinaryData.decodeString(buf, validateUTF8);
         if (serverReference == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed UTF-8 string for server reference. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed UTF-8 string for server reference. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a malformed UTF-8 string for server reference",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_SERVER_REFERENCE, messageType.name()));
@@ -624,26 +651,28 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * - reason string not UTF-8 well formed - readable bytes less than 2 - readable bytes less than indicated string
      * length
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param reasonString     the initial reason string (must be null)
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param reasonString            the initial reason string (must be null)
+     * @param messageType             the type of the message
      * @return a reason string, or {@code null} when failed.
      */
     protected @Nullable String decodeReasonString(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String reasonString,
             final @NotNull MessageType messageType) {
 
         if (reasonString != null) {
-            disconnectByMoreThanOnce(clientConnection, "reason string", messageType);
+            disconnectByMoreThanOnce(clientConnectionContext, "reason string", messageType);
             return null;
         }
         reasonString = MqttBinaryData.decodeString(buf, validateUTF8);
         if (reasonString == null) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with a malformed UTF-8 string for reason string. This is not allowed. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with a malformed UTF-8 string for reason string. This is not allowed. Disconnecting client.",
                     "Sent a " + messageType.name() + " with a malformed UTF-8 string for reason string",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                     String.format(ReasonStrings.DISCONNECT_MALFORMED_REASON_STRING, messageType.name()));
@@ -655,11 +684,12 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Sends a DISCONNECT to a client because of sending an invalid reason code.
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
      */
-    protected void disconnectByInvalidReasonCode(final @NotNull ClientConnection clientConnection, final @NotNull MessageType messageType) {
-        disconnector.disconnect(clientConnection.getChannel(),
+    protected void disconnectByInvalidReasonCode(
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
+        disconnector.disconnect(clientConnectionContext.getChannel(),
                 "A client (IP: {}) sent a " + messageType.name() + " with invalid reason code. Disconnecting client.",
                 "Sent a " + messageType.name() + " with invalid reason code",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -670,14 +700,16 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Sends a DISCONNECT to a client because of sending an invalid authentication method.
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
      */
     protected void disconnectByInvalidAuthMethod(
-            final @NotNull ClientConnection clientConnection, final @NotNull MessageType messageType) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
-                "A client (IP: {}) sent a " + messageType.name() + " with invalid authentication method. Disconnecting client.",
+        disconnector.disconnect(clientConnectionContext.getChannel(),
+                "A client (IP: {}) sent a " +
+                        messageType.name() +
+                        " with invalid authentication method. Disconnecting client.",
                 "Sent a " + messageType.name() + " with invalid authentication method",
                 Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_AUTH_METHOD, messageType.name()));
@@ -686,17 +718,21 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Sends a DISCONNECT to a client because of sending a property more than once.
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param messageType      the type of the message
-     * @param key              the name of the property
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
+     * @param key                     the name of the property
      */
     protected void disconnectByMoreThanOnce(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull String key,
             final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
-                "A client (IP: {}) sent a " + messageType.name() + " with '" + key + "' included more than once. This is not allowed. Disconnecting client.",
+        disconnector.disconnect(clientConnectionContext.getChannel(),
+                "A client (IP: {}) sent a " +
+                        messageType.name() +
+                        " with '" +
+                        key +
+                        "' included more than once. This is not allowed. Disconnecting client.",
                 "Sent a " + messageType.name() + " with '" + key + "' included more than once",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                 String.format(ReasonStrings.DISCONNECT_PROTOCOL_ERROR_MULTI_KEY, messageType.name(), key));
@@ -705,14 +741,16 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Sends a DISCONNECT to a client because of remaining length to short.
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
      */
     protected void disconnectByRemainingLengthToShort(
-            final @NotNull ClientConnection clientConnection, final @NotNull MessageType messageType) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
-                "A client (IP: {}) sent a " + messageType.name() + " with remaining length too short. This is not allowed. Disconnecting client.",
+        disconnector.disconnect(clientConnectionContext.getChannel(),
+                "A client (IP: {}) sent a " +
+                        messageType.name() +
+                        " with remaining length too short. This is not allowed. Disconnecting client.",
                 "Sent a " + messageType.name() + " with remaining length too short",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                 String.format(ReasonStrings.DISCONNECT_MALFORMED_REMAINING_LENGTH, messageType.name()));
@@ -721,14 +759,16 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Sends a DISCONNECT to a client because of sending a malformed properties length
      *
-     * @param clientConnection the conenction of the mqtt client
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the conenction of the mqtt client
+     * @param messageType             the type of the message
      */
     protected void disconnectByMalformedPropertyLength(
-            final @NotNull ClientConnection clientConnection, final @NotNull MessageType messageType) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
-                "A client (IP: {}) sent a " + messageType.name() + " with a malformed properties length. This is not allowed. Disconnecting client.",
+        disconnector.disconnect(clientConnectionContext.getChannel(),
+                "A client (IP: {}) sent a " +
+                        messageType.name() +
+                        " with a malformed properties length. This is not allowed. Disconnecting client.",
                 "Sent a " + messageType.name() + " with a malformed properties length",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                 String.format(ReasonStrings.DISCONNECT_MALFORMED_PROPERTIES_LENGTH, messageType.name()));
@@ -737,17 +777,21 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Sends a DISCONNECT to a client because of sending an invalid property identifier
      *
-     * @param clientConnection   the connection of the mqtt client
-     * @param messageType        the type of the message
-     * @param propertyIdentifier the invalid property identifier as int
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
+     * @param propertyIdentifier      the invalid property identifier as int
      */
     protected void disconnectByInvalidPropertyIdentifier(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final int propertyIdentifier,
             final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
-                "A client (IP: {}) sent a " + messageType.name() + " with an invalid property identifier '" + propertyIdentifier + "'. This is not allowed. Disconnecting client.",
+        disconnector.disconnect(clientConnectionContext.getChannel(),
+                "A client (IP: {}) sent a " +
+                        messageType.name() +
+                        " with an invalid property identifier '" +
+                        propertyIdentifier +
+                        "'. This is not allowed. Disconnecting client.",
                 "Sent a " + messageType.name() + " with invalid property identifier",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                 String.format(ReasonStrings.DISCONNECT_MALFORMED_PROPERTY_IDENTIFIER, messageType.name()));
@@ -757,14 +801,16 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * Sends a DISCONNECT to a client because of sending an invalid fixed header
      * The Server MUST treat this as malformed and close the Network Connection
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
      */
     protected void disconnectByInvalidFixedHeader(
-            final @NotNull ClientConnection clientConnection, final @NotNull MessageType messageType) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
-                "A client (IP: {}) sent a " + messageType.name() + " with an invalid fixed header. Disconnecting client.",
+        disconnector.disconnect(clientConnectionContext.getChannel(),
+                "A client (IP: {}) sent a " +
+                        messageType.name() +
+                        " with an invalid fixed header. Disconnecting client.",
                 "Sent a " + messageType.name() + " with invalid fixed header",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                 String.format(ReasonStrings.DISCONNECT_MALFORMED_FIXED_HEADER, messageType.name()));
@@ -773,16 +819,16 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
     /**
      * Closes the connection of a client because of sending a message without identifier
      * <p>
-     * MQTT 3 only. adapted from {@link this#decodePacketIdentifier(ClientConnection, ByteBuf, MessageType)}
+     * MQTT 3 only. adapted from {@link this#decodePacketIdentifier(ClientConnectionContext, ByteBuf, MessageType)}
      * <p>
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param messageType             the type of the message
      */
     protected void disconnectByNoMessageId(
-            final @NotNull ClientConnection clientConnection, final @NotNull MessageType messageType) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull MessageType messageType) {
 
-        disconnector.disconnect(clientConnection.getChannel(),
+        disconnector.disconnect(clientConnectionContext.getChannel(),
                 "A client (IP: {}) sent a " + messageType.name() + " without a message id. Disconnecting client.",
                 "Sent a " + messageType.name() + " without message id",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -796,19 +842,19 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * <p>
      * - packet identifier == 0
      *
-     * @param clientConnection the connection of the mqtt client
-     * @param buf              the encoded ByteBuf of the message
-     * @param messageType      the type of the message
+     * @param clientConnectionContext the connection of the mqtt client
+     * @param buf                     the encoded ByteBuf of the message
+     * @param messageType             the type of the message
      * @return the packet identifier
      */
     protected int decodePacketIdentifier(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final @NotNull MessageType messageType) {
 
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
-            disconnector.disconnect(clientConnection.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a " + messageType.name() + " with message ID 0. Disconnecting client.",
                     "Sent a " + messageType.name() + " with message id 0",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -824,13 +870,15 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param userProperties the properties to validate
      */
     protected boolean invalidUserPropertiesLength(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull MessageType messageType,
             final @NotNull Mqtt5UserProperties userProperties) {
 
         if (userProperties.encodedLength() > maxUserPropertiesLength) {
-            disconnector.disconnect(clientConnection.getChannel(),
-                    "A client (IP: {}) sent a " + messageType.name() + " with user properties that are too large. Disconnecting client.",
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a " +
+                            messageType.name() +
+                            " with user properties that are too large. Disconnecting client.",
                     "Sent a " + messageType.name() + " with too large user properties",
                     Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
                     String.format(ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_USER_PROPERTIES, messageType.name()));

@@ -60,7 +60,8 @@ public class UnsubackOutboundInputImpl implements UnsubackOutboundInput, PluginT
     }
 
     public @NotNull UnsubackOutboundInputImpl update(final @NotNull UnsubackOutboundOutputImpl output) {
-        return new UnsubackOutboundInputImpl(
-                clientInformation, connectionInformation, output.getUnsubackPacket().copy());
+        return new UnsubackOutboundInputImpl(clientInformation,
+                connectionInformation,
+                output.getUnsubackPacket().copy());
     }
 }

@@ -202,7 +202,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
             if (isTimedOut()) {
                 throw new UnsupportedOperationException(method + " has no effect as the async operation timed out.");
             }
-            throw new UnsupportedOperationException(method + " must not be called if authenticateSuccessfully, " +
+            throw new UnsupportedOperationException(method +
+                    " must not be called if authenticateSuccessfully, " +
                     "failAuthentication, continueAuthentication or nextExtensionOrDefault has already been called.");
         }
     }

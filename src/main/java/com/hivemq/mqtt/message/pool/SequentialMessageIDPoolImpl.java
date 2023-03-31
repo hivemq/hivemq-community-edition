@@ -36,7 +36,8 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
     private static final int MIN_MESSAGE_ID = 0;
     private static final int MAX_MESSAGE_ID = 65_535;
     //we can cache the exception, because we are not interested in any stack trace
-    private static final NoMessageIdAvailableException NO_MESSAGE_ID_AVAILABLE_EXCEPTION = new NoMessageIdAvailableException();
+    private static final NoMessageIdAvailableException NO_MESSAGE_ID_AVAILABLE_EXCEPTION =
+            new NoMessageIdAvailableException();
 
     static {
         //Clear the stack trace, otherwise we harden debugging unnecessary
@@ -109,7 +110,9 @@ public class SequentialMessageIDPoolImpl implements MessageIDPool {
         final boolean removed = usedMessageIds.remove(encodeAsShort(id));
 
         if (!removed) {
-            log.trace("Tried to return message id {} although it was already returned. This is could mean a DUP was acked", id);
+            log.trace(
+                    "Tried to return message id {} although it was already returned. This is could mean a DUP was acked",
+                    id);
         }
     }
 

@@ -15,7 +15,7 @@
  */
 package util.encoder;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.mqtt3.AbstractVariableHeaderLengthEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
@@ -34,7 +34,7 @@ public class Mqtt3UnsubscribeEncoder extends AbstractVariableHeaderLengthEncoder
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull UNSUBSCRIBE msg,
             final @NotNull ByteBuf out) {
 

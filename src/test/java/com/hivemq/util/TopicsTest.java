@@ -17,7 +17,10 @@ package com.hivemq.util;
 
 import org.junit.Test;
 
-import static com.hivemq.util.Topics.*;
+import static com.hivemq.util.Topics.isDollarTopic;
+import static com.hivemq.util.Topics.isSharedSubscriptionTopic;
+import static com.hivemq.util.Topics.isValidToSubscribe;
+import static com.hivemq.util.Topics.isValidTopicToPublish;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

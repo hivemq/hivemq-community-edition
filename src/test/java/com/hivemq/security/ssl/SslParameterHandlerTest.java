@@ -16,6 +16,7 @@
 package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.ssl.SslHandler;
@@ -24,11 +25,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLSession;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -53,7 +57,7 @@ public class SslParameterHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(new SslParameterHandler());
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }
@@ -71,8 +75,8 @@ public class SslParameterHandlerTest {
         when(sslSession.getCipherSuite()).thenReturn("CipherSuite");
         when(sslSession.getProtocol()).thenReturn("Protocol");
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-        assertEquals("Protocol", channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthProtocol());
-        assertEquals("CipherSuite", channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthCipherSuite());
+        assertEquals("Protocol", ClientConnection.of(channel).getAuthProtocol());
+        assertEquals("CipherSuite", ClientConnection.of(channel).getAuthCipherSuite());
         assertNull(channel.pipeline().get(SslParameterHandler.class));
     }
 }

@@ -15,9 +15,9 @@
  */
 package com.hivemq.persistence.payload;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.meta.PersistenceType;
 
 import javax.inject.Inject;
@@ -35,8 +35,9 @@ public class PublishPayloadLocalPersistenceProvider implements Provider<PublishP
 
 
     @Inject
-    public PublishPayloadLocalPersistenceProvider(final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> rocksDBProvider,
-                                                   final @NotNull Provider<PublishPayloadXodusLocalPersistence> xodusProvider) {
+    public PublishPayloadLocalPersistenceProvider(
+            final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> rocksDBProvider,
+            final @NotNull Provider<PublishPayloadXodusLocalPersistence> xodusProvider) {
         this.rocksDBProvider = rocksDBProvider;
         this.xodusProvider = xodusProvider;
         this.persistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
@@ -45,7 +46,7 @@ public class PublishPayloadLocalPersistenceProvider implements Provider<PublishP
     @NotNull
     @Override
     public PublishPayloadLocalPersistence get() {
-        if(persistenceType == PersistenceType.FILE_NATIVE) {
+        if (persistenceType == PersistenceType.FILE_NATIVE) {
             return rocksDBProvider.get();
         } else {
             return xodusProvider.get();

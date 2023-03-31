@@ -59,7 +59,8 @@ public class ExtensionStartStopInputImpl implements ExtensionStartInput, Extensi
     public @NotNull Map<String, @NotNull ExtensionInformation> getEnabledExtensions() {
         return enabledExtensions.entrySet()
                 .stream()
-                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, e -> new ExtensionInformationImpl(e.getValue())));
+                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey,
+                        e -> new ExtensionInformationImpl(e.getValue())));
     }
 
     @Override

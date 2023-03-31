@@ -16,10 +16,9 @@
 package com.hivemq.migration.persistence.retained;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.Migrations;
 import com.hivemq.migration.TypeMigration;
 import com.hivemq.migration.logging.PayloadExceptionLogging;
@@ -63,7 +62,8 @@ public class RetainedMessageTypeMigration implements TypeMigration {
     private final @NotNull PersistenceType configuredType;
 
     @Inject
-    public RetainedMessageTypeMigration(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+    public RetainedMessageTypeMigration(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull Provider<RetainedMessageXodusLocalPersistence> xodusLocalPersistenceProvider,
             final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBLocalPersistenceProvider,
             final @NotNull PublishPayloadLocalPersistenceProvider publishPayloadLocalPersistenceProvider,
@@ -83,7 +83,7 @@ public class RetainedMessageTypeMigration implements TypeMigration {
     public void migrateToType(final @NotNull PersistenceType type) {
         if (type.equals(PersistenceType.FILE_NATIVE)) {
             migrateToRocksDB();
-        } else if(type.equals(PersistenceType.FILE)) {
+        } else if (type.equals(PersistenceType.FILE)) {
             migrateToXodus();
         } else {
             throw new IllegalArgumentException("Unknown persistence type " + type + " for retained message migration");
@@ -92,16 +92,22 @@ public class RetainedMessageTypeMigration implements TypeMigration {
 
     private void migrateToXodus() {
 
-        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(RetainedMessageRocksDBLocalPersistence.PERSISTENCE_NAME, RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION);
-        if (oldFolderMissing(persistenceFolder)){
+        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_NAME,
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION);
+        if (oldFolderMissing(persistenceFolder)) {
             return;
         }
 
         final RetainedMessageXodusLocalPersistence xodus = xodusLocalPersistenceProvider.get();
         final RetainedMessageRocksDBLocalPersistence rocks = rocksDBLocalPersistenceProvider.get();
-        final PublishPayloadLocalPersistence publishPayloadLocalPersistence = publishPayloadLocalPersistenceProvider.get();
+        final PublishPayloadLocalPersistence publishPayloadLocalPersistence =
+                publishPayloadLocalPersistenceProvider.get();
 
-        rocks.iterate(new RetainedMessagePersistenceTypeSwitchCallback(bucketCount, publishPayloadLocalPersistence, xodus, payloadExceptionLogging));
+        rocks.iterate(new RetainedMessagePersistenceTypeSwitchCallback(bucketCount,
+                publishPayloadLocalPersistence,
+                xodus,
+                payloadExceptionLogging));
 
         savePersistenceType(PersistenceType.FILE);
 
@@ -111,16 +117,22 @@ public class RetainedMessageTypeMigration implements TypeMigration {
 
     private void migrateToRocksDB() {
 
-        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(RetainedMessageXodusLocalPersistence.PERSISTENCE_NAME, RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
-        if (oldFolderMissing(persistenceFolder)){
+        final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_NAME,
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
+        if (oldFolderMissing(persistenceFolder)) {
             return;
         }
 
         final RetainedMessageXodusLocalPersistence xodus = xodusLocalPersistenceProvider.get();
         final RetainedMessageRocksDBLocalPersistence rocks = rocksDBLocalPersistenceProvider.get();
-        final PublishPayloadLocalPersistence publishPayloadLocalPersistence = publishPayloadLocalPersistenceProvider.get();
+        final PublishPayloadLocalPersistence publishPayloadLocalPersistence =
+                publishPayloadLocalPersistenceProvider.get();
 
-        xodus.iterate(new RetainedMessagePersistenceTypeSwitchCallback(bucketCount, publishPayloadLocalPersistence, rocks, payloadExceptionLogging));
+        xodus.iterate(new RetainedMessagePersistenceTypeSwitchCallback(bucketCount,
+                publishPayloadLocalPersistence,
+                rocks,
+                payloadExceptionLogging));
 
         savePersistenceType(PersistenceType.FILE_NATIVE);
 
@@ -140,7 +152,9 @@ public class RetainedMessageTypeMigration implements TypeMigration {
     private void savePersistenceType(final @NotNull PersistenceType persistenceType) {
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
         metaFile.setRetainedMessagesPersistenceType(persistenceType);
-        metaFile.setRetainedMessagesPersistenceVersion(persistenceType == PersistenceType.FILE_NATIVE ? RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION : RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
+        metaFile.setRetainedMessagesPersistenceVersion(persistenceType == PersistenceType.FILE_NATIVE ?
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION :
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
         MetaFileService.writeMetaFile(systemInformation, metaFile);
     }
 
@@ -151,8 +165,10 @@ public class RetainedMessageTypeMigration implements TypeMigration {
 
         if (metaType != null && metaType.equals(persistenceType)) {
             //should never happen since getNeededMigrations() will skip those.
-            migrationLog.info("Retained message persistence is already migrated to current type {}, skipping migration", persistenceType);
-            log.debug("Retained message persistence is already migrated to current type {}, skipping migration", persistenceType);
+            migrationLog.info("Retained message persistence is already migrated to current type {}, skipping migration",
+                    persistenceType);
+            log.debug("Retained message persistence is already migrated to current type {}, skipping migration",
+                    persistenceType);
             return false;
         }
         return true;
@@ -167,7 +183,8 @@ public class RetainedMessageTypeMigration implements TypeMigration {
         private final @NotNull RetainedMessageLocalPersistence retainedMessageLocalPersistence;
         private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
 
-        RetainedMessagePersistenceTypeSwitchCallback(final int bucketCount,
+        RetainedMessagePersistenceTypeSwitchCallback(
+                final int bucketCount,
                 final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence,
                 final @NotNull RetainedMessageLocalPersistence retainedMessageLocalPersistence,
                 final @NotNull PayloadExceptionLogging payloadExceptionLogging) {

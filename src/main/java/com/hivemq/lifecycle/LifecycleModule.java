@@ -100,9 +100,9 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
     }
 
     private static <I> boolean isSingleton(final @NotNull Class<? super I> rawType) {
-        return rawType.isAnnotationPresent(javax.inject.Singleton.class)
-                || rawType.isAnnotationPresent(com.google.inject.Singleton.class)
-                || rawType.isAnnotationPresent(com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton.class);
+        return rawType.isAnnotationPresent(javax.inject.Singleton.class) ||
+                rawType.isAnnotationPresent(com.google.inject.Singleton.class) ||
+                rawType.isAnnotationPresent(com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton.class);
     }
 
     private static <I> Method findPostConstruct(final @NotNull Class<? super I> rawType) {
@@ -113,7 +113,8 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
                     throw new ProvisionException("A method annotated with @PostConstruct must not have any parameters");
                 }
                 if (method.getExceptionTypes().length > 0) {
-                    throw new ProvisionException("A method annotated with @PostConstruct must not throw any checked exceptions");
+                    throw new ProvisionException(
+                            "A method annotated with @PostConstruct must not throw any checked exceptions");
                 }
                 if (Modifier.isStatic(method.getModifiers())) {
                     throw new ProvisionException("A method annotated with @PostConstruct must not be static");
@@ -166,6 +167,7 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
             final @NotNull TypeEncounter<I> encounter,
             final @NotNull Method preDestroy,
             final @NotNull LifecycleRegistry lifecycleRegistry) {
-        encounter.register((InjectionListener<I>) injectionListener -> lifecycleRegistry.addPreDestroyMethod(preDestroy, injectionListener));
+        encounter.register((InjectionListener<I>) injectionListener -> lifecycleRegistry.addPreDestroyMethod(preDestroy,
+                injectionListener));
     }
 }

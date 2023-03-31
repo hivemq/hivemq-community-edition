@@ -27,15 +27,17 @@ import java.util.List;
 public interface ProducerQueues {
 
 
-    <R> @NotNull ListenableFuture<R> submit(@NotNull final String key, @NotNull final SingleWriterServiceImpl.Task<R> task);
+    <R> @NotNull ListenableFuture<R> submit(
+            @NotNull final String key, @NotNull final SingleWriterServiceImpl.Task<R> task);
 
     <R> @NotNull ListenableFuture<R> submit(final int bucketIndex, @NotNull final SingleWriterServiceImpl.Task<R> task);
 
 
-    <R> @Nullable ListenableFuture<R> submit(final int bucketIndex,
-                                             @NotNull final SingleWriterServiceImpl.Task<R> task,
-                                             @Nullable final SingleWriterServiceImpl.SuccessCallback<R> successCallback,
-                                             @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback);
+    <R> @Nullable ListenableFuture<R> submit(
+            final int bucketIndex,
+            @NotNull final SingleWriterServiceImpl.Task<R> task,
+            @Nullable final SingleWriterServiceImpl.SuccessCallback<R> successCallback,
+            @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback);
 
     @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(final @NotNull SingleWriterService.Task<R> task);
 

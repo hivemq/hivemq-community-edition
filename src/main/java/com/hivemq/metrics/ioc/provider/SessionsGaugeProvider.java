@@ -34,7 +34,8 @@ public class SessionsGaugeProvider implements Provider<SessionsGauge> {
     private final ClientSessionLocalPersistence clientSessionPersistence;
 
     @Inject
-    public SessionsGaugeProvider(final MetricRegistry metricRegistry, final ClientSessionLocalPersistence clientSessionPersistence) {
+    public SessionsGaugeProvider(
+            final MetricRegistry metricRegistry, final ClientSessionLocalPersistence clientSessionPersistence) {
         this.metricRegistry = metricRegistry;
         this.clientSessionPersistence = clientSessionPersistence;
     }

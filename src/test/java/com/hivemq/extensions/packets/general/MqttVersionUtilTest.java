@@ -17,8 +17,12 @@ package com.hivemq.extensions.packets.general;
 
 import org.junit.Test;
 
-import static com.hivemq.extension.sdk.api.packets.general.MqttVersion.*;
-import static com.hivemq.mqtt.message.ProtocolVersion.*;
+import static com.hivemq.extension.sdk.api.packets.general.MqttVersion.V_3_1;
+import static com.hivemq.extension.sdk.api.packets.general.MqttVersion.V_3_1_1;
+import static com.hivemq.extension.sdk.api.packets.general.MqttVersion.V_5;
+import static com.hivemq.mqtt.message.ProtocolVersion.MQTTv3_1;
+import static com.hivemq.mqtt.message.ProtocolVersion.MQTTv3_1_1;
+import static com.hivemq.mqtt.message.ProtocolVersion.MQTTv5;
 import static org.junit.Assert.assertSame;
 
 /**

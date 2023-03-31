@@ -40,7 +40,7 @@ public class MqttWillPublish implements Sizable {
     public static final long WILL_DELAY_INTERVAL_DEFAULT = 0;
 
     private int sizeInMemory = SIZE_NOT_CALCULATED;
-    
+
     //MQTT 5 and 3
     private final String topic;
     private byte[] payload;
@@ -123,14 +123,14 @@ public class MqttWillPublish implements Sizable {
         }
 
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator = packet.getPayloadFormatIndicator().isPresent() ?
-                Mqtt5PayloadFormatIndicator.valueOf(packet.getPayloadFormatIndicator().get().name()) : null;
+                Mqtt5PayloadFormatIndicator.valueOf(packet.getPayloadFormatIndicator().get().name()) :
+                null;
 
         final ImmutableList.Builder<MqttUserProperty> userProperties = new ImmutableList.Builder<>();
         for (final UserProperty userProperty : packet.getUserProperties().asList()) {
             userProperties.add(new MqttUserProperty(userProperty.getName(), userProperty.getValue()));
         }
-        return new MqttWillPublish(
-                hivemqId,
+        return new MqttWillPublish(hivemqId,
                 packet.getTopic(),
                 Bytes.getBytesFromReadOnlyBuffer(packet.getPayload()),
                 QoS.valueOf(packet.getQos().getQosNumber()),
@@ -207,9 +207,8 @@ public class MqttWillPublish implements Sizable {
     /**
      * Will publish payload is a shallow copy.
      */
-    public  @NotNull MqttWillPublish deepCopy() {
-        return new MqttWillPublish(
-                this.hivemqId,
+    public @NotNull MqttWillPublish deepCopy() {
+        return new MqttWillPublish(this.hivemqId,
                 this.topic,
                 this.payload,
                 this.qos,
@@ -308,8 +307,7 @@ public class MqttWillPublish implements Sizable {
 
         public MqttWillPublish build() {
 
-            return new MqttWillPublish(
-                    hivemqId,
+            return new MqttWillPublish(hivemqId,
                     topic,
                     payload,
                     qos,

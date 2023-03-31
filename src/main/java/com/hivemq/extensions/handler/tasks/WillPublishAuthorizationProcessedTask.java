@@ -17,6 +17,7 @@ package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
@@ -24,7 +25,6 @@ import com.hivemq.extensions.handler.PluginAuthorizerServiceImpl;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.util.Exceptions;
 import io.netty.channel.ChannelHandlerContext;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * @author Christoph Schäbel
@@ -34,8 +34,8 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
     private final @NotNull CONNECT connect;
     private final @NotNull ChannelHandlerContext ctx;
 
-    public WillPublishAuthorizationProcessedTask(@NotNull final CONNECT connect,
-                                                 @NotNull final ChannelHandlerContext ctx) {
+    public WillPublishAuthorizationProcessedTask(
+            @NotNull final CONNECT connect, @NotNull final ChannelHandlerContext ctx) {
         this.connect = connect;
         this.ctx = ctx;
     }
@@ -54,11 +54,13 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
         switch (output.getAuthorizationState()) {
             case DISCONNECT:
                 disconnectReasonCode = output.getDisconnectReasonCode();
-                reasonCode = output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
+                reasonCode =
+                        output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
                 reasonString = output.getReasonString() != null ? output.getReasonString() : getReasonString(connect);
                 break;
             case FAIL:
-                reasonCode = output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
+                reasonCode =
+                        output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
                 reasonString = output.getReasonString() != null ? output.getReasonString() : getReasonString(connect);
                 break;
             case UNDECIDED:
@@ -79,20 +81,32 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
                 throw new IllegalStateException("Unknown type");
         }
 
-        final PublishAuthorizerResult result = new PublishAuthorizerResult(reasonCode, reasonString, output.isAuthorizerPresent(), disconnectReasonCode);
-        ctx.pipeline().fireUserEventTriggered(new PluginAuthorizerServiceImpl.AuthorizeWillResultEvent(connect, result));
+        final PublishAuthorizerResult result = new PublishAuthorizerResult(reasonCode,
+                reasonString,
+                output.isAuthorizerPresent(),
+                disconnectReasonCode);
+        ctx.pipeline()
+                .fireUserEventTriggered(new PluginAuthorizerServiceImpl.AuthorizeWillResultEvent(connect, result));
     }
 
     @Override
     public void onFailure(@NotNull final Throwable t) {
         Exceptions.rethrowError("Exception at PublishAuthorization", t);
-        final PublishAuthorizerResult result = new PublishAuthorizerResult(AckReasonCode.NOT_AUTHORIZED, getReasonString(connect),
-                true, DisconnectReasonCode.NOT_AUTHORIZED);
-        ctx.pipeline().fireUserEventTriggered(new PluginAuthorizerServiceImpl.AuthorizeWillResultEvent(connect, result));
+        final PublishAuthorizerResult result = new PublishAuthorizerResult(AckReasonCode.NOT_AUTHORIZED,
+                getReasonString(connect),
+                true,
+                DisconnectReasonCode.NOT_AUTHORIZED);
+        ctx.pipeline()
+                .fireUserEventTriggered(new PluginAuthorizerServiceImpl.AuthorizeWillResultEvent(connect, result));
     }
 
     private String getReasonString(@NotNull final CONNECT connect) {
-        return "Not allowed to connect with Will Publish for unauthorized topic '" + connect.getWillPublish().getTopic() + "' with QoS '"
-                + connect.getWillPublish().getQos().getQosNumber() + "' and retain '" + connect.getWillPublish().isRetain() + "'";
+        return "Not allowed to connect with Will Publish for unauthorized topic '" +
+                connect.getWillPublish().getTopic() +
+                "' with QoS '" +
+                connect.getWillPublish().getQos().getQosNumber() +
+                "' and retain '" +
+                connect.getWillPublish().isRetain() +
+                "'";
     }
 }

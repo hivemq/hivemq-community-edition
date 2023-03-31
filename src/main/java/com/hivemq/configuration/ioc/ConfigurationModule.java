@@ -17,7 +17,11 @@ package com.hivemq.configuration.ioc;
 
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.configuration.HivemqId;
-import com.hivemq.configuration.service.*;
+import com.hivemq.configuration.service.ConfigurationService;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.statistics.UsageStatisticsConfig;

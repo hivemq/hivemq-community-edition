@@ -17,6 +17,7 @@ package com.hivemq.extensions.auth.parameter;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.subscribe.RetainHandling;
 import com.hivemq.extensions.packets.general.UserPropertiesImpl;
@@ -29,9 +30,12 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Christoph Schäbel
@@ -47,23 +51,27 @@ public class SubscriptionAuthorizerInputImplTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     @Test
     public void test_full_subscription() {
         final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
-        final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE, true, true,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 3);
+        final Topic topic = new Topic("topic",
+                QoS.EXACTLY_ONCE,
+                true,
+                true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                3);
         final SubscriptionAuthorizerInputImpl input =
                 new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
-        assertEquals(true, input.getSubscription().getNoLocal());
-        assertEquals(true, input.getSubscription().getRetainAsPublished());
+        assertTrue(input.getSubscription().getNoLocal());
+        assertTrue(input.getSubscription().getRetainAsPublished());
         assertEquals(RetainHandling.SEND_IF_NEW_SUBSCRIPTION, input.getSubscription().getRetainHandling());
         assertEquals(Qos.EXACTLY_ONCE, input.getSubscription().getQos());
         assertEquals("topic", input.getSubscription().getTopicFilter());
@@ -75,16 +83,17 @@ public class SubscriptionAuthorizerInputImplTest {
     public void test_subscription_minimal() {
         final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of());
         final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE);
-        final SubscriptionAuthorizerInputImpl input = new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
+        final SubscriptionAuthorizerInputImpl input =
+                new SubscriptionAuthorizerInputImpl(userProperties, topic, channel, "client");
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
-        assertEquals(false, input.getSubscription().getNoLocal());
-        assertEquals(false, input.getSubscription().getRetainAsPublished());
+        assertFalse(input.getSubscription().getNoLocal());
+        assertFalse(input.getSubscription().getRetainAsPublished());
         assertEquals(RetainHandling.SEND, input.getSubscription().getRetainHandling());
         assertEquals(Qos.EXACTLY_ONCE, input.getSubscription().getQos());
         assertEquals("topic", input.getSubscription().getTopicFilter());
-        assertEquals(false, input.getSubscriptionIdentifier().isPresent());
+        assertFalse(input.getSubscriptionIdentifier().isPresent());
         assertNotNull(input.getUserProperties());
     }
 

@@ -23,7 +23,9 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.util.ObjectMemoryEstimation;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 
 /**
  * @author Yannick Weber
@@ -45,8 +47,9 @@ public class PUBRELTest {
 
     @Test
     public void test_constructMqtt5() {
-        final PUBREL origin = new PUBREL(
-                1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reasonString",
+        final PUBREL origin = new PUBREL(1,
+                Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                "reasonString",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
         final PubrelPacketImpl packet = new PubrelPacketImpl(origin);
 
@@ -59,8 +62,7 @@ public class PUBRELTest {
 
     @Test
     public void test_constructMqtt5_withUserProperties() {
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("user1", "value1"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user1", "value1"),
                 new MqttUserProperty("user2", "value2"),
                 new MqttUserProperty("user3", "value3"));
 
@@ -85,17 +87,12 @@ public class PUBRELTest {
     @Test
     public void test_estimated_size() {
 
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("user1", "value1"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user1", "value1"),
                 new MqttUserProperty("user2", "value2"),
                 new MqttUserProperty("user3", "value3"));
 
-        final int userPropertiesSize =
-                3 * (
-                        24 + // overhead
-                                ObjectMemoryEstimation.stringSize("userx") +
-                                ObjectMemoryEstimation.stringSize("valuex")
-                );
+        final int userPropertiesSize = 3 * (24 + // overhead
+                ObjectMemoryEstimation.stringSize("userx") + ObjectMemoryEstimation.stringSize("valuex"));
 
         final String reasonString = "reasonString";
         final int reasonStringSize = ObjectMemoryEstimation.stringSize(reasonString);
@@ -103,10 +100,7 @@ public class PUBRELTest {
         final PUBREL pubrel1 = new PUBREL(1);
         final PUBREL pubrel2 = new PUBREL(1, 100L, 100L);
         final PUBREL pubrel3 =
-                new PUBREL(1,
-                        Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
-                        reasonString,
-                        userProperties);
+                new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, reasonString, userProperties);
 
         final PUBREL pubrel4 = new PUBREL(1,
                 Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
@@ -115,13 +109,13 @@ public class PUBRELTest {
                 100L,
                 100L);
 
-        final int fixedSize = ObjectMemoryEstimation.objectShellSize() +
-                ObjectMemoryEstimation.intSize() + // sizeInMemory
-                ObjectMemoryEstimation.intSize() + // packet id
-                ObjectMemoryEstimation.enumSize() + // reason code
-                ObjectMemoryEstimation.longWrapperSize() + //publish timestamp
-                ObjectMemoryEstimation.longWrapperSize() + //expiry interval
-                24; //user props overhead
+        final int fixedSize =
+                ObjectMemoryEstimation.objectShellSize() + ObjectMemoryEstimation.intSize() + // sizeInMemory
+                        ObjectMemoryEstimation.intSize() + // packet id
+                        ObjectMemoryEstimation.enumSize() + // reason code
+                        ObjectMemoryEstimation.longWrapperSize() + //publish timestamp
+                        ObjectMemoryEstimation.longWrapperSize() + //expiry interval
+                        24; //user props overhead
 
         final int pubrel3Size = fixedSize + reasonStringSize + userPropertiesSize;
         final int pubrel4Size = fixedSize + reasonStringSize + userPropertiesSize;

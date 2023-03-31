@@ -32,20 +32,17 @@ public interface Mqtt5PUBREC {
     /**
      * @return the reason code of this PUBREC packet.
      */
-    @NotNull
-    Mqtt5PubRecReasonCode getReasonCode();
+    @NotNull Mqtt5PubRecReasonCode getReasonCode();
 
     /**
      * @return the optional reason string of this PUBREC packet.
      */
-    @NotNull
-    String getReasonString();
+    @NotNull String getReasonString();
 
     /**
      * @return the optional user properties of this PUBREC packet.
      */
-    @NotNull
-    Mqtt5UserProperties getUserProperties();
+    @NotNull Mqtt5UserProperties getUserProperties();
 
     MessageType getType();
 }

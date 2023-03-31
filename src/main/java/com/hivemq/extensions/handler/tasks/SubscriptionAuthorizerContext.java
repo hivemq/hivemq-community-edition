@@ -49,7 +49,9 @@ public class SubscriptionAuthorizerContext extends PluginInOutTaskContext<Subscr
     @Override
     public void pluginPost(final @NotNull SubscriptionAuthorizerOutputImpl pluginOutput) {
 
-        if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+        if (pluginOutput.isAsync() &&
+                pluginOutput.isTimedOut() &&
+                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
             //Timeout fallback failure means publish delivery prevention
             pluginOutput.forceFailedAuthorization();
         }

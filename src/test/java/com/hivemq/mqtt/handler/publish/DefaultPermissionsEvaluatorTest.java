@@ -36,9 +36,13 @@ public class DefaultPermissionsEvaluatorTest {
 
     @Test
     public void test_null_deny() {
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         assertEquals(false, DefaultPermissionsEvaluator.checkPublish(null, publish));
     }
@@ -46,9 +50,13 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_empty_permissions() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.ALLOW);
@@ -60,7 +68,9 @@ public class DefaultPermissionsEvaluatorTest {
     public void test_will_publish_empty_permissions() {
 
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
+                .withQos(QoS.AT_LEAST_ONCE)
+                .withPayload(new byte[]{1, 2, 3})
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.ALLOW);
@@ -71,9 +81,13 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_empty_permissions_deny() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
@@ -84,12 +98,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_topic_not_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic/#").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "topic/#").build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -97,12 +116,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_qos_not_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -110,12 +134,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_qos_zero_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.AT_MOST_ONCE).withOnwardQos(QoS.AT_MOST_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -123,12 +152,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_qos_one_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/#").qos(TopicPermission.Qos.ONE).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").qos(TopicPermission.Qos.ONE).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -136,15 +170,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_activity_not_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("test/#")
-                .activity(TopicPermission.MqttActivity.SUBSCRIBE)
-                .build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").activity(TopicPermission.MqttActivity.SUBSCRIBE).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -152,15 +188,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_retained_not_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("test/#")
-                .retain(TopicPermission.Retain.NOT_RETAINED)
-                .build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").retain(TopicPermission.Retain.NOT_RETAINED).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -168,15 +206,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_not_retained_not_matching() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(false).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(false)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("test/#")
-                .retain(TopicPermission.Retain.RETAINED)
-                .build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").retain(TopicPermission.Retain.RETAINED).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -184,13 +224,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_matching_wildcard() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("test/#")
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                        "test/#")
                 .activity(TopicPermission.MqttActivity.PUBLISH)
                 .qos(TopicPermission.Qos.ONE_TWO)
                 .retain(TopicPermission.Retain.RETAINED)
@@ -202,12 +246,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_matching_root_wildcard() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -215,12 +264,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_matching_plus_wildcard() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/1/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/1/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/+/topic").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/+/topic").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -228,12 +282,17 @@ public class DefaultPermissionsEvaluatorTest {
     @Test
     public void test_publish_matching_root_plus_wildcard() {
 
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId1").withPayload(new byte[]{1, 2, 3})
-                .withTopic("test/1/topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE).withRetain(true).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId1")
+                .withPayload(new byte[]{1, 2, 3})
+                .withTopic("test/1/topic")
+                .withQoS(QoS.EXACTLY_ONCE)
+                .withOnwardQos(QoS.EXACTLY_ONCE)
+                .withRetain(true)
+                .build();
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("+/+/topic").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "+/+/topic").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkPublish(permissions, publish));
     }
@@ -274,7 +333,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("topic/#").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "topic/#").build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -285,7 +345,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -296,7 +357,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/topic", QoS.AT_MOST_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").qos(TopicPermission.Qos.ZERO_ONE).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -307,7 +369,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/topic", QoS.AT_LEAST_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/#").qos(TopicPermission.Qos.ONE).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").qos(TopicPermission.Qos.ONE).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -318,10 +381,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("test/#")
-                .activity(TopicPermission.MqttActivity.PUBLISH)
-                .build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").activity(TopicPermission.MqttActivity.PUBLISH).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -332,11 +393,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("test/#")
-                .activity(TopicPermission.MqttActivity.SUBSCRIBE)
-                .qos(TopicPermission.Qos.ONE_TWO)
-                .build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/#").activity(TopicPermission.MqttActivity.SUBSCRIBE).qos(TopicPermission.Qos.ONE_TWO).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -347,7 +405,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -358,7 +417,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/1/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("test/+/topic").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "test/+/topic").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -369,7 +429,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic = new Topic("test/1/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("+/+/topic").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "+/+/topic").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic));
     }
@@ -381,8 +442,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic2 = new Topic("$share/g1/test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#")
-                .sharedSubscription(TopicPermission.SharedSubscription.NOT_SHARED).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").sharedSubscription(TopicPermission.SharedSubscription.NOT_SHARED).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic1));
         assertEquals(false, DefaultPermissionsEvaluator.checkSubscription(permissions, topic2));
@@ -395,8 +456,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic2 = new Topic("$share/g1/test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#")
-                .sharedSubscription(TopicPermission.SharedSubscription.SHARED).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").sharedSubscription(TopicPermission.SharedSubscription.SHARED).build());
 
         assertEquals(false, DefaultPermissionsEvaluator.checkSubscription(permissions, topic1));
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic2));
@@ -409,8 +470,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic2 = new Topic("$share/g1/test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#")
-                .sharedSubscription(TopicPermission.SharedSubscription.ALL).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").sharedSubscription(TopicPermission.SharedSubscription.ALL).build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic1));
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic2));
@@ -425,8 +486,8 @@ public class DefaultPermissionsEvaluatorTest {
         final Topic topic3 = new Topic("$share/g2/test/topic", QoS.EXACTLY_ONCE);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("#")
-                .sharedSubscription(TopicPermission.SharedSubscription.ALL).sharedGroup("g1").build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
+                "#").sharedSubscription(TopicPermission.SharedSubscription.ALL).sharedGroup("g1").build());
 
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic1));
         assertEquals(true, DefaultPermissionsEvaluator.checkSubscription(permissions, topic2));

@@ -194,8 +194,7 @@ public class PublishBuilderImplTest {
 
     @Test
     public void test_all_values_set() {
-        final Publish publish = new PublishBuilderImpl(configurationService)
-                .topic("topic")
+        final Publish publish = new PublishBuilderImpl(configurationService).topic("topic")
                 .payload(ByteBuffer.wrap(new byte[]{1, 2, 3}))
                 .qos(Qos.EXACTLY_ONCE)
                 .retain(true)
@@ -204,7 +203,8 @@ public class PublishBuilderImplTest {
                 .responseTopic("responseTopic")
                 .messageExpiryInterval(10)
                 .payloadFormatIndicator(PayloadFormatIndicator.UTF_8)
-                .userProperty("key", "value").build();
+                .userProperty("key", "value")
+                .build();
 
         assertEquals("topic", publish.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, publish.getPayload().get().array());
@@ -220,8 +220,7 @@ public class PublishBuilderImplTest {
 
     @Test
     public void test_from_publish() {
-        final Publish original = new PublishBuilderImpl(configurationService)
-                .topic("topic")
+        final Publish original = new PublishBuilderImpl(configurationService).topic("topic")
                 .payload(ByteBuffer.wrap(new byte[]{1, 2, 3}))
                 .qos(Qos.EXACTLY_ONCE)
                 .retain(true)
@@ -230,7 +229,8 @@ public class PublishBuilderImplTest {
                 .responseTopic("responseTopic")
                 .messageExpiryInterval(10)
                 .payloadFormatIndicator(PayloadFormatIndicator.UTF_8)
-                .userProperty("key", "value").build();
+                .userProperty("key", "value")
+                .build();
 
         assertEquals("topic", original.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, original.getPayload().get().array());

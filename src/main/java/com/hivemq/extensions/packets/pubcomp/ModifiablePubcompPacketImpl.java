@@ -41,14 +41,13 @@ public class ModifiablePubcompPacketImpl implements ModifiablePubcompPacket {
     private boolean modified = false;
 
     public ModifiablePubcompPacketImpl(
-            final @NotNull PubcompPacketImpl packet,
-            final @NotNull FullConfigurationService configurationService) {
+            final @NotNull PubcompPacketImpl packet, final @NotNull FullConfigurationService configurationService) {
 
         packetIdentifier = packet.packetIdentifier;
         reasonCode = packet.reasonCode;
         reasonString = packet.reasonString;
-        userProperties = new ModifiableUserPropertiesImpl(
-                packet.userProperties.asInternalList(), configurationService.securityConfiguration().validateUTF8());
+        userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
+                configurationService.securityConfiguration().validateUTF8());
 
         this.configurationService = configurationService;
     }

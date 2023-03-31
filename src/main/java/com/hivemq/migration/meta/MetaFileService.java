@@ -15,8 +15,8 @@
  */
 package com.hivemq.migration.meta;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.info.SystemInformation;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.Migrations;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.io.FileUtils;
@@ -74,7 +74,8 @@ public class MetaFileService {
         }
     }
 
-    public static void writeMetaFile(final @NotNull SystemInformation systemInformation, final @NotNull MetaInformation metaInformation) {
+    public static void writeMetaFile(
+            final @NotNull SystemInformation systemInformation, final @NotNull MetaInformation metaInformation) {
 
         final File metaFile = getMetaFile(systemInformation);
         try {

@@ -22,8 +22,7 @@ public class Mqtt5PayloadFormatIndicatorTest {
 
     @Test
     public void test_all_fromCode() {
-        EnumTestUtil.assertAllValueOfWithFallback(
-                Mqtt5PayloadFormatIndicator.class,
+        EnumTestUtil.assertAllValueOfWithFallback(Mqtt5PayloadFormatIndicator.class,
                 Mqtt5PayloadFormatIndicator::getCode,
                 Mqtt5PayloadFormatIndicator::fromCode,
                 null);

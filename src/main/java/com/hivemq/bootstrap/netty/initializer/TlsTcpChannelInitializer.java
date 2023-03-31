@@ -26,9 +26,10 @@ import com.hivemq.security.ssl.SslFactory;
 public class TlsTcpChannelInitializer extends AbstractTlsChannelInitializer {
 
 
-    public TlsTcpChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
-                                    @NotNull final TlsTcpListener tlsTcpListener,
-                                    @NotNull final SslFactory sslFactory) {
+    public TlsTcpChannelInitializer(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final TlsTcpListener tlsTcpListener,
+            @NotNull final SslFactory sslFactory) {
         super(channelDependencies, tlsTcpListener, sslFactory);
     }
 

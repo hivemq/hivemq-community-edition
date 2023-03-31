@@ -66,8 +66,8 @@ public class PluginOutputAsyncerImpl implements PluginOutPutAsyncer {
     }
 
     @Override
-    public @NotNull <T extends PluginTaskOutput> Async<T> asyncify(@NotNull final T output,
-                                                                   @NotNull final Duration timeout) {
+    public @NotNull <T extends PluginTaskOutput> Async<T> asyncify(
+            @NotNull final T output, @NotNull final Duration timeout) {
 
         output.markAsAsync();
 

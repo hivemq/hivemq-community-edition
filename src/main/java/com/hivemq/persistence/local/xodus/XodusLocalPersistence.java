@@ -24,7 +24,11 @@ import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import jetbrains.exodus.ExodusException;
-import jetbrains.exodus.env.*;
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.EnvironmentConfig;
+import jetbrains.exodus.env.Environments;
+import jetbrains.exodus.env.Store;
+import jetbrains.exodus.env.StoreConfig;
 import jetbrains.exodus.io.FileDataWriter;
 import jetbrains.exodus.log.LogConfig;
 import org.slf4j.Logger;
@@ -119,13 +123,15 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
                 logConfig.setWriter(new XodusNoLockDataWriter(persistenceFile, logConfig));
 
                 final Environment environment = Environments.newContextualInstance(logConfig, environmentConfig);
-                final Store store = environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
+                final Store store =
+                        environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
 
                 buckets[i] = new Bucket(environment, store);
             }
 
         } catch (final ExodusException e) {
-            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
+            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+                    name);
             logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
@@ -162,7 +168,8 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
                     logConfig.setWriter(new XodusNoLockDataWriter(persistenceFile, logConfig));
 
                     final Environment environment = Environments.newContextualInstance(logConfig, environmentConfig);
-                    final Store store = environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
+                    final Store store =
+                            environment.computeInTransaction(txn -> environment.openStore(name, storeConfig, txn));
 
                     buckets[finalI] = new Bucket(environment, store);
                     counter.countDown();
@@ -172,7 +179,8 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
             counter.await();
 
         } catch (final ExodusException | InterruptedException e) {
-            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?", name);
+            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+                    name);
             logger.info("Original Exception:", e);
             throw new UnrecoverableException();
         }
@@ -206,7 +214,10 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
         }
         if (bucket.close()) {
             if (bucket.getEnvironment().isOpen()) {
-                new EnvironmentCloser(getName() + "-closer", bucket.getEnvironment(), closeRetries, closeRetryInterval).close();
+                new EnvironmentCloser(getName() + "-closer",
+                        bucket.getEnvironment(),
+                        closeRetries,
+                        closeRetryInterval).close();
             }
         }
     }

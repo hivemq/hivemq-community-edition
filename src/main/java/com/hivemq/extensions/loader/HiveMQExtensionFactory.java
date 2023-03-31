@@ -34,9 +34,9 @@ public interface HiveMQExtensionFactory {
      * @param enabled               if the extension is enabled
      * @return a {@link HiveMQExtension}
      */
-    @NotNull
-    HiveMQExtension createHiveMQExtension(@NotNull ExtensionMain extensionMainInstance,
-                                          @NotNull Path extensionFolder,
-                                          @NotNull HiveMQExtensionEntity extensionConfig,
-                                          boolean enabled);
+    @NotNull HiveMQExtension createHiveMQExtension(
+            @NotNull ExtensionMain extensionMainInstance,
+            @NotNull Path extensionFolder,
+            @NotNull HiveMQExtensionEntity extensionConfig,
+            boolean enabled);
 }

@@ -33,9 +33,18 @@ import util.TestSingleWriterFactory;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
@@ -65,9 +74,11 @@ public class RetainedMessagePersistenceImplTest {
         closeableMock = MockitoAnnotations.openMocks(this);
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        retainedMessagePersistence =
-                new RetainedMessagePersistenceImpl(localPersistence, topicMatcher, payloadPersistence,
-                        singleWriterService, new Chunker());
+        retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence,
+                topicMatcher,
+                payloadPersistence,
+                singleWriterService,
+                new Chunker());
     }
 
     @After
@@ -117,8 +128,7 @@ public class RetainedMessagePersistenceImplTest {
     public void test_get_with_wildcards_topic_without_wildcard() throws Throwable {
         try {
             retainedMessagePersistence.getWithWildcards("topic").get();
-        } catch (final InterruptedException |
-                ExecutionException e) {
+        } catch (final InterruptedException | ExecutionException e) {
             throw e.getCause();
         }
     }
@@ -137,8 +147,9 @@ public class RetainedMessagePersistenceImplTest {
 
     @Test
     public void test_get_with_wildcards_success() throws ExecutionException, InterruptedException {
-        when(localPersistence.getAllTopics(anyString(), anyInt())).thenReturn(
-                Sets.newHashSet("topic/1", "topic/2", "topic/3"));
+        when(localPersistence.getAllTopics(anyString(), anyInt())).thenReturn(Sets.newHashSet("topic/1",
+                "topic/2",
+                "topic/3"));
         final Set<String> topics = retainedMessagePersistence.getWithWildcards("topic/#").get();
 
         assertTrue(topics.contains("topic/1"));

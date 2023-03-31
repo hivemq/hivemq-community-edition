@@ -16,12 +16,11 @@
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl;
 import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
-
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,14 +54,16 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
     @Override
     public void pluginPost(final @NotNull PublishAuthorizerOutputImpl pluginOutput) {
 
-        if (pluginOutput.isAsync() && pluginOutput.isTimedOut() && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+        if (pluginOutput.isAsync() &&
+                pluginOutput.isTimedOut() &&
+                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
             //Timeout fallback failure means publish delivery prevention
             pluginOutput.forceFailedAuthorization();
         }
 
-        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL
-                || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
-            ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesSkipRest(true);
+        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL ||
+                pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
+            ClientConnectionContext.of(ctx.channel()).setIncomingPublishesSkipRest(true);
         }
 
 

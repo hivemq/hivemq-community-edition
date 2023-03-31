@@ -17,7 +17,10 @@ package util;
 
 import org.junit.contrib.java.lang.system.ClearSystemProperties;
 
-import static com.hivemq.configuration.SystemProperties.*;
+import static com.hivemq.configuration.SystemProperties.CONFIG_FOLDER;
+import static com.hivemq.configuration.SystemProperties.DATA_FOLDER;
+import static com.hivemq.configuration.SystemProperties.HIVEMQ_HOME;
+import static com.hivemq.configuration.SystemProperties.LOG_FOLDER;
 
 /**
  * * The {@code ClearHiveMQPropertiesRule} rule clears a set of system

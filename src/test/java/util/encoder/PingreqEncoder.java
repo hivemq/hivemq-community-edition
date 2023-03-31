@@ -15,7 +15,7 @@
  */
 package util.encoder;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.encoder.MqttEncoder;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.PINGREQ;
@@ -32,7 +32,7 @@ public class PingreqEncoder implements MqttEncoder<PINGREQ> {
 
     @Override
     public void encode(
-            final @NotNull ClientConnection clientConnection,
+            final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull PINGREQ msg,
             final @NotNull ByteBuf out) {
 
@@ -41,7 +41,7 @@ public class PingreqEncoder implements MqttEncoder<PINGREQ> {
     }
 
     @Override
-    public int bufferSize(final @NotNull ClientConnection clientConnection, final @NotNull PINGREQ msg) {
+    public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull PINGREQ msg) {
         return ENCODED_PINGREQ_SIZE;
     }
 }

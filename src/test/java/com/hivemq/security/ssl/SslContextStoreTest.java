@@ -291,10 +291,7 @@ public class SslContextStoreTest {
 
         //was called with the normal interval
         verify(executorService).scheduleAtFixedRate( //
-                captor.capture(),
-                eq(10L),
-                eq(10L),
-                eq(TimeUnit.SECONDS));
+                captor.capture(), eq(10L), eq(10L), eq(TimeUnit.SECONDS));
         assertTrue(captor.getValue() instanceof SslContextStore.SslContextScheduledRunnable);
 
     }

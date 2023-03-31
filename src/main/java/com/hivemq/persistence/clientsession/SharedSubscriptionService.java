@@ -35,7 +35,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.hivemq.configuration.service.InternalConfigurations.*;
+import static com.hivemq.configuration.service.InternalConfigurations.SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL;
+import static com.hivemq.configuration.service.InternalConfigurations.SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS;
+import static com.hivemq.configuration.service.InternalConfigurations.SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC;
+import static com.hivemq.configuration.service.InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL;
+import static com.hivemq.configuration.service.InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS;
+import static com.hivemq.configuration.service.InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC;
 
 @LazySingleton
 @ThreadSafe
@@ -120,10 +125,18 @@ public class SharedSubscriptionService {
 
         final SharedSubscription sharedSubscription = checkForSharedSubscription(topic.getTopic());
         if (sharedSubscription == null) {
-            return new Subscription(topic, SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
+            return new Subscription(topic,
+                    SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()),
+                    null);
         } else {
-            return new Subscription(new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(), topic.isNoLocal(), topic.isRetainAsPublished(), topic.getRetainHandling(), topic.getSubscriptionIdentifier()),
-                    SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()), sharedSubscription.getShareName());
+            return new Subscription(new Topic(sharedSubscription.getTopicFilter(),
+                    topic.getQoS(),
+                    topic.isNoLocal(),
+                    topic.isRetainAsPublished(),
+                    topic.getRetainHandling(),
+                    topic.getSubscriptionIdentifier()),
+                    SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()),
+                    sharedSubscription.getShareName());
         }
     }
 
@@ -154,7 +167,8 @@ public class SharedSubscriptionService {
      * @param client of which the subscriptions are requested.
      * @return a set of subscriptions
      */
-    public @NotNull ImmutableSet<Topic> getSharedSubscriptions(final @NotNull String client, final @NotNull Callable cacheUpdater) throws ExecutionException {
+    public @NotNull ImmutableSet<Topic> getSharedSubscriptions(
+            final @NotNull String client, final @NotNull Callable cacheUpdater) throws ExecutionException {
         //calling this method before post construct will return an empty set
         if (sharedSubscriptionCache == null) {
             return ImmutableSet.of();

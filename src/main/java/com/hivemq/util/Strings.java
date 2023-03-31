@@ -42,9 +42,10 @@ public class Strings {
      * index!</b>
      *
      * @param buf the {@link io.netty.buffer.ByteBuf} to read from
-     * @return The UTF-8 String or <code>null</code> if there aren't enough bytes to read. This can happen if this method
-     * can not read the prefixed size of the String or if there are less bytes to read available than
-     * indicated by the prefixed 16-bit length.
+     * @return The UTF-8 String or <code>null</code> if there aren't enough bytes to read. This can happen if this
+     *         method
+     *         can not read the prefixed size of the String or if there are less bytes to read available than
+     *         indicated by the prefixed 16-bit length.
      * @throws java.lang.NullPointerException if the passed {@link io.netty.buffer.ByteBuf} is <code>null</code>
      */
     public static String getPrefixedString(final ByteBuf buf) {
@@ -70,7 +71,8 @@ public class Strings {
         return string;
     }
 
-    public static String getValidatedPrefixedString(@NotNull final ByteBuf buf, final int utf8StringLength, final boolean validateShouldNotCharacters) {
+    public static String getValidatedPrefixedString(
+            @NotNull final ByteBuf buf, final int utf8StringLength, final boolean validateShouldNotCharacters) {
         checkNotNull(buf);
 
         if (buf.readableBytes() < utf8StringLength) {

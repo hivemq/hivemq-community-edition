@@ -30,9 +30,15 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.ExecutionException;
 
 import static com.hivemq.persistence.clientsession.SharedSubscriptionService.splitTopicAndGroup;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dominik Obermaier
@@ -69,7 +75,8 @@ public class SharedSubscriptionServiceTest {
 
         SharedSubscriptionService.SharedSubscription sharedSubscription;
 
-        sharedSubscription = service.checkForSharedSubscription(share + oldDelimiter + group + oldDelimiter + topic + subtopic);
+        sharedSubscription =
+                service.checkForSharedSubscription(share + oldDelimiter + group + oldDelimiter + topic + subtopic);
         assertNotNull(sharedSubscription);
         assertEquals(group, sharedSubscription.getShareName());
         assertEquals(topic + subtopic, sharedSubscription.getTopicFilter());
@@ -81,8 +88,12 @@ public class SharedSubscriptionServiceTest {
     @Test
     public void test_createSubscription_shared() throws Exception {
 
-        final Subscription subscription = service.createSubscription(new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE,
-                true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
+        final Subscription subscription = service.createSubscription(new Topic("$share/group1/topic/1",
+                QoS.AT_LEAST_ONCE,
+                true,
+                true,
+                Mqtt5RetainHandling.DO_NOT_SEND,
+                1));
 
         assertEquals("topic/1", subscription.getTopic().getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, subscription.getTopic().getQoS());
@@ -94,8 +105,12 @@ public class SharedSubscriptionServiceTest {
     @Test
     public void test_createSubscription_non_shared() throws Exception {
 
-        final Subscription subscription = service.createSubscription(new Topic("share/group1/topic/2", QoS.AT_LEAST_ONCE,
-                true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
+        final Subscription subscription = service.createSubscription(new Topic("share/group1/topic/2",
+                QoS.AT_LEAST_ONCE,
+                true,
+                true,
+                Mqtt5RetainHandling.DO_NOT_SEND,
+                1));
 
         assertEquals("share/group1/topic/2", subscription.getTopic().getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, subscription.getTopic().getQoS());
@@ -142,8 +157,10 @@ public class SharedSubscriptionServiceTest {
         final ImmutableSet<Topic> topics1 = ImmutableSet.of();
 
         when(subscriptionPersistence.getSharedSubscriptions("client")).thenReturn(topics1);
-        final ImmutableSet<Topic> topics2 = service.getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
-        final ImmutableSet<Topic> topics3 = service.getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
+        final ImmutableSet<Topic> topics2 = service.getSharedSubscriptions("client",
+                () -> subscriptionPersistence.getSharedSubscriptions("client"));
+        final ImmutableSet<Topic> topics3 = service.getSharedSubscriptions("client",
+                () -> subscriptionPersistence.getSharedSubscriptions("client"));
 
         verify(subscriptionPersistence, times(1)).getSharedSubscriptions("client");
         assertSame(topics1, topics2);

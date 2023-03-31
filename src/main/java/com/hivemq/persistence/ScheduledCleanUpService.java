@@ -16,7 +16,12 @@
 package com.hivemq.persistence;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableScheduledFuture;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Inject;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -36,7 +41,10 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.configuration.service.InternalConfigurations.*;
+import static com.hivemq.configuration.service.InternalConfigurations.CLEANUP_JOB_PARALLELISM;
+import static com.hivemq.configuration.service.InternalConfigurations.CLEANUP_JOB_TASK_TIMEOUT_SEC;
+import static com.hivemq.configuration.service.InternalConfigurations.INTERVAL_BETWEEN_CLEANUP_JOBS_SEC;
+import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENCE_BUCKET_COUNT;
 
 /**
  * This service is used to remove full remove tombstones that are older than a certain amount of time
@@ -86,11 +94,12 @@ public class ScheduledCleanUpService {
     private final int cleanUpTaskTimeoutSec;
 
     @Inject
-    public ScheduledCleanUpService(final @NotNull @Persistence ListeningScheduledExecutorService scheduledExecutorService,
-                                   final @NotNull ClientSessionPersistence clientSessionPersistence,
-                                   final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
-                                   final @NotNull RetainedMessagePersistence retainedMessagePersistence,
-                                   final @NotNull ClientQueuePersistence clientQueuePersistence) {
+    public ScheduledCleanUpService(
+            final @NotNull @Persistence ListeningScheduledExecutorService scheduledExecutorService,
+            final @NotNull ClientSessionPersistence clientSessionPersistence,
+            final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
+            final @NotNull RetainedMessagePersistence retainedMessagePersistence,
+            final @NotNull ClientQueuePersistence clientQueuePersistence) {
 
         this.scheduledExecutorService = scheduledExecutorService;
         this.clientSessionPersistence = clientSessionPersistence;
@@ -114,15 +123,11 @@ public class ScheduledCleanUpService {
         if (scheduledExecutorService.isShutdown()) {
             return;
         }
-        final ListenableScheduledFuture<Void> schedule = scheduledExecutorService.schedule(
-                new CleanUpTask(
-                        this,
-                        scheduledExecutorService,
-                        cleanUpTaskTimeoutSec,
-                        bucketIndex,
-                        persistenceIndex),
-                cleanUpJobSchedule,
-                TimeUnit.SECONDS);
+        final ListenableScheduledFuture<Void> schedule = scheduledExecutorService.schedule(new CleanUpTask(this,
+                scheduledExecutorService,
+                cleanUpTaskTimeoutSec,
+                bucketIndex,
+                persistenceIndex), cleanUpJobSchedule, TimeUnit.SECONDS);
         persistenceIndex = (persistenceIndex + 1) % NUMBER_OF_PERSISTENCES;
         if (persistenceIndex == 0) {
             bucketIndex = (bucketIndex + 1) % persistenceBucketCount;
@@ -157,11 +162,12 @@ public class ScheduledCleanUpService {
         private final int persistenceIndex;
 
         @VisibleForTesting
-        CleanUpTask(@NotNull final ScheduledCleanUpService scheduledCleanUpService,
-                    final @NotNull ListeningScheduledExecutorService scheduledExecutorService,
-                    final int cleanUpTaskTimeoutSec,
-                    final int bucketIndex,
-                    final int persistenceIndex) {
+        CleanUpTask(
+                @NotNull final ScheduledCleanUpService scheduledCleanUpService,
+                final @NotNull ListeningScheduledExecutorService scheduledExecutorService,
+                final int cleanUpTaskTimeoutSec,
+                final int bucketIndex,
+                final int persistenceIndex) {
             checkNotNull(scheduledCleanUpService, "Clean up service must not be null");
             checkNotNull(scheduledExecutorService, "Executor service must not be null");
             this.scheduledCleanUpService = scheduledCleanUpService;
@@ -179,7 +185,7 @@ public class ScheduledCleanUpService {
 
                     @Override
                     public void onSuccess(final @Nullable Void aVoid) {
-                            scheduledCleanUpService.scheduleCleanUpTask();
+                        scheduledCleanUpService.scheduleCleanUpTask();
                     }
 
                     @Override

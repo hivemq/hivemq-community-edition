@@ -16,9 +16,26 @@
 package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
-import com.hivemq.codec.encoder.mqtt3.*;
-import com.hivemq.codec.encoder.mqtt5.*;
+import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3ConnackEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3DisconnectEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubackEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubcompEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PublishEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubrecEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3PubrelEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3SubackEncoder;
+import com.hivemq.codec.encoder.mqtt3.Mqtt3UnsubackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5AuthEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5ConnackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5DisconnectEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubCompEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PublishEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubrecEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5PubrelEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5SubackEncoder;
+import com.hivemq.codec.encoder.mqtt5.Mqtt5UnsubackEncoder;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -69,16 +86,18 @@ public class EncoderFactory {
     /**
      * Finds the {@link MqttEncoder} encoder and encodes the {@link Message} message.
      *
-     * @param clientConnection the {@link ClientConnection} of the client
-     * @param msg              the {@link Message} to encode
-     * @param out              the {@link ByteBuf} into which the encoded message will be written
+     * @param clientConnectionContext the {@link ClientConnectionContext} of the client
+     * @param msg                     the {@link Message} to encode
+     * @param out                     the {@link ByteBuf} into which the encoded message will be written
      */
     public void encode(
-            final @NotNull ClientConnection clientConnection, final @NotNull Message msg, final @NotNull ByteBuf out) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull Message msg,
+            final @NotNull ByteBuf out) {
 
-        final MqttEncoder encoder = getEncoder(msg, clientConnection);
+        final MqttEncoder encoder = getEncoder(msg, clientConnectionContext);
         if (encoder != null) {
-            encoder.encode(clientConnection, msg, out);
+            encoder.encode(clientConnectionContext, msg, out);
         } else {
             log.error("No encoder found for msg: {} ", msg.getType());
         }
@@ -87,14 +106,14 @@ public class EncoderFactory {
     /**
      * This method finds the Mqtt encoder depending on the message and the protocol version.
      *
-     * @param msg              the {@link Message} is used to identify the encoder
-     * @param clientConnection the {@link ClientConnection} of the mqtt client
+     * @param msg                     the {@link Message} is used to identify the encoder
+     * @param clientConnectionContext the {@link ClientConnectionContext} of the mqtt client
      * @return {@link MqttEncoder} encoder depends on the message and protocol
      */
     protected @Nullable MqttEncoder getEncoder(
-            final @NotNull Message msg, final @NotNull ClientConnection clientConnection) {
+            final @NotNull Message msg, final @NotNull ClientConnectionContext clientConnectionContext) {
 
-        if (clientConnection.getProtocolVersion() == ProtocolVersion.MQTTv5) {
+        if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             return mqtt5Instance.getEncoder(msg);
         } else {
             return mqtt3Instance.getEncoder(msg);
@@ -102,22 +121,24 @@ public class EncoderFactory {
     }
 
     protected @NotNull ByteBuf allocateBuffer(
-            final @NotNull ClientConnection clientConnection, final @NotNull Message msg, final boolean preferDirect) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull Message msg,
+            final boolean preferDirect) {
 
-        final MqttEncoder encoder = getEncoder(msg, clientConnection);
+        final MqttEncoder encoder = getEncoder(msg, clientConnectionContext);
         if (encoder != null) {
-            final int bufferSize = encoder.bufferSize(clientConnection, msg);
+            final int bufferSize = encoder.bufferSize(clientConnectionContext, msg);
             if (preferDirect) {
-                return clientConnection.getChannel().alloc().ioBuffer(bufferSize);
+                return clientConnectionContext.getChannel().alloc().ioBuffer(bufferSize);
             } else {
-                return clientConnection.getChannel().alloc().heapBuffer(bufferSize);
+                return clientConnectionContext.getChannel().alloc().heapBuffer(bufferSize);
             }
         }
 
         if (preferDirect) {
-            return clientConnection.getChannel().alloc().ioBuffer();
+            return clientConnectionContext.getChannel().alloc().ioBuffer();
         } else {
-            return clientConnection.getChannel().alloc().heapBuffer();
+            return clientConnectionContext.getChannel().alloc().heapBuffer();
         }
     }
 

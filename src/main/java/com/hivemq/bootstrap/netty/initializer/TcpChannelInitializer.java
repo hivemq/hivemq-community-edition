@@ -34,9 +34,10 @@ public class TcpChannelInitializer extends AbstractChannelInitializer {
     @NotNull
     private final Provider<NonSslHandler> nonSslHandlerProvider;
 
-    public TcpChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
-                                 @NotNull final TcpListener tcpListener,
-                                 @NotNull final Provider<NonSslHandler> nonSslHandlerProvider) {
+    public TcpChannelInitializer(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final TcpListener tcpListener,
+            @NotNull final Provider<NonSslHandler> nonSslHandlerProvider) {
         super(channelDependencies, tcpListener);
         this.nonSslHandlerProvider = nonSslHandlerProvider;
     }

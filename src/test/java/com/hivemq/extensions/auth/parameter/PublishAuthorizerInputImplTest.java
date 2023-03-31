@@ -16,6 +16,7 @@
 package com.hivemq.extensions.auth.parameter;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -23,6 +24,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 import util.TestMessageUtil;
 
 import static org.junit.Assert.assertNotNull;
@@ -38,8 +40,8 @@ public class PublishAuthorizerInputImplTest {
     @Before
     public void before() {
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
@@ -75,7 +77,8 @@ public class PublishAuthorizerInputImplTest {
     @Test
     public void test_will_publish() {
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
-        final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(connect.getWillPublish(), channel, "client");
+        final PublishAuthorizerInputImpl input =
+                new PublishAuthorizerInputImpl(connect.getWillPublish(), channel, "client");
 
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());

@@ -39,7 +39,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_CLIENT_CERTIFICATE_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_EXCEPTION_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_PARAMETER_HANDLER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -94,7 +99,8 @@ public class TlsTcpChannelInitializerTest {
 
         when(tlsTcpListener.getTls()).thenReturn(tls);
         when(sslFactory.getSslContext(any(Tls.class))).thenReturn(sslContext);
-        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(sslHandler);
+        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(
+                sslHandler);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
