@@ -79,6 +79,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 onSendException(future.cause());
             }
         });
+        
         clientConnection.proposeClientState(ClientState.AUTHENTICATED);
     }
 
