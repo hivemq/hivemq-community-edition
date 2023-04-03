@@ -239,8 +239,10 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             if (oldEntry == null) {
                 // we create a tombstone here which will be removed at next cleanup
                 final ClientSession clientSession = new ClientSession(false, SESSION_EXPIRE_ON_DISCONNECT);
-                final PersistenceEntry<ClientSession> persistenceEntry = new PersistenceEntry<>(clientSession, timestamp);
-                currentMemorySize.addAndGet(persistenceEntry.getEstimatedSize() + ObjectMemoryEstimation.stringSize(clientId));
+                final PersistenceEntry<ClientSession> persistenceEntry =
+                        new PersistenceEntry<>(clientSession, timestamp);
+                currentMemorySize.addAndGet(persistenceEntry.getEstimatedSize() +
+                        ObjectMemoryEstimation.stringSize(clientId));
                 return persistenceEntry;
             }
 
@@ -327,7 +329,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 }
                 eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, entry.getKey());
                 expiredClientIds.add(entry.getKey());
-                currentMemorySize.addAndGet(-(storedEntry.getEstimatedSize() + ObjectMemoryEstimation.stringSize(entry.getKey())));
+                currentMemorySize.addAndGet(-(storedEntry.getEstimatedSize() +
+                        ObjectMemoryEstimation.stringSize(entry.getKey())));
                 iterator.remove();
             }
         }
@@ -344,7 +347,9 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 .stream()
                 .filter(entry -> !entry.getValue().getObject().isConnected())
                 .filter(entry -> entry.getValue().getObject().getSessionExpiryIntervalSec() > 0)
-                .filter(entry -> !entry.getValue().getObject().isExpired(currentTimeMillis - entry.getValue().getTimestamp()))
+                .filter(entry -> !entry.getValue()
+                        .getObject()
+                        .isExpired(currentTimeMillis - entry.getValue().getTimestamp()))
                 .map(Map.Entry::getKey)
                 .collect(ImmutableSet.toImmutableSet());
     }
@@ -405,8 +410,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                     final ClientSessionWill willPublish = storedSession.getObject().getWillPublish();
 
                     return new PendingWillMessages.PendingWill(Math.min(willPublish.getDelayInterval(),
-                            storedSession.getObject().getSessionExpiryIntervalSec()),
-                            willPublish.getDelayInterval());
+                            storedSession.getObject().getSessionExpiryIntervalSec()), willPublish.getDelayInterval());
                 }));
     }
 
@@ -429,7 +433,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
 
                     removeWillReference(oldSession);
 
-                    final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(oldSession.copyWithoutWill(), oldEntry.getTimestamp());
+                    final PersistenceEntry<ClientSession> newEntry =
+                            new PersistenceEntry<>(oldSession.copyWithoutWill(), oldEntry.getTimestamp());
                     currentMemorySize.addAndGet(newEntry.getEstimatedSize());
                     return newEntry;
                 });
@@ -453,15 +458,14 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         final long currentTimeMillis = System.currentTimeMillis();
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
 
-        final Map<String, ClientSession> sessions =
-                bucket.entrySet()
-                        .stream()
-                        .filter(entry -> {
-                            final PersistenceEntry<ClientSession> value = entry.getValue();
-                            return !value.getObject().isExpired(currentTimeMillis - value.getTimestamp());
-                        })
-                        .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
-                                entry -> entry.getValue().getObject().copyWithoutWill()));
+        final Map<String, ClientSession> sessions = bucket.entrySet()
+                .stream()
+                .filter(entry -> {
+                    final PersistenceEntry<ClientSession> value = entry.getValue();
+                    return !value.getObject().isExpired(currentTimeMillis - value.getTimestamp());
+                })
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
+                        entry -> entry.getValue().getObject().copyWithoutWill()));
 
         return new BucketChunkResult<>(sessions, true, null, bucketIndex);
     }

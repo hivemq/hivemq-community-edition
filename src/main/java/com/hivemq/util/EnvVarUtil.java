@@ -65,8 +65,7 @@ public class EnvVarUtil {
 
         final StringBuffer resultString = new StringBuffer();
 
-        final Matcher matcher = Pattern.compile(ENV_VAR_PATTERN)
-                .matcher(text);
+        final Matcher matcher = Pattern.compile(ENV_VAR_PATTERN).matcher(text);
 
         while (matcher.find()) {
 
@@ -98,8 +97,6 @@ public class EnvVarUtil {
     }
 
     private @NotNull String escapeReplacement(final @NotNull String replacement) {
-        return replacement
-                .replace("\\", "\\\\")
-                .replace("$", "\\$");
+        return replacement.replace("\\", "\\\\").replace("$", "\\$");
     }
 }

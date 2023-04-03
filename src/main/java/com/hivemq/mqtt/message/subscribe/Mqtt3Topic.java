@@ -27,13 +27,11 @@ public interface Mqtt3Topic {
     /**
      * @return the topic as String representation
      */
-    @NotNull
-    String getTopic();
+    @NotNull String getTopic();
 
     /**
      * @return the QoS of a Topic
      */
-    @NotNull
-    QoS getQoS();
+    @NotNull QoS getQoS();
 
 }

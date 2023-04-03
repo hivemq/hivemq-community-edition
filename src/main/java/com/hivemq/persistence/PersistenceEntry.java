@@ -53,7 +53,7 @@ public class PersistenceEntry<T extends Sizable> implements Sizable {
     @Override
     public int getEstimatedSize() {
 
-        if (sizeInMemory != SIZE_NOT_CALCULATED){
+        if (sizeInMemory != SIZE_NOT_CALCULATED) {
             return sizeInMemory;
         }
 

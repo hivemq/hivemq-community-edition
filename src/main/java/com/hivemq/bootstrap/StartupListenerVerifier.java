@@ -15,9 +15,9 @@
  */
 package com.hivemq.bootstrap;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,8 @@ public class StartupListenerVerifier {
      */
     public void verifyAndPrint() throws UnrecoverableException {
         if (startupInformation.isEmpty()) {
-            log.error("No listener was configured. In order to operate properly, HiveMQ needs at least one listener. Shutting down HiveMQ");
+            log.error(
+                    "No listener was configured. In order to operate properly, HiveMQ needs at least one listener. Shutting down HiveMQ");
             throw new UnrecoverableException(false);
         }
 

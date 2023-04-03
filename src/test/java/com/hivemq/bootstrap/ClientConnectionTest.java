@@ -22,11 +22,14 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.local.LocalAddress;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +44,7 @@ public class ClientConnectionTest {
         final ChannelPipeline pipeline = mock(ChannelPipeline.class);
         when(channel.pipeline()).thenReturn(pipeline);
         final PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
-        clientConnection = new ClientConnection(channel, publishFlushHandler);
+        clientConnection = new DummyClientConnection(channel, publishFlushHandler);
     }
 
     @Test

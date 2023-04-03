@@ -15,7 +15,11 @@
  */
 package com.hivemq.extensions.services.publish;
 
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator;
 import com.hivemq.configuration.HivemqId;
@@ -73,12 +77,13 @@ public class PublishServiceImpl implements PublishService {
     private final LocalTopicTree topicTree;
 
     @Inject
-    public PublishServiceImpl(@NotNull final PluginServiceRateLimitService rateLimitService,
-                              @NotNull final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService,
-                              @NotNull final InternalPublishService internalPublishService,
-                              @NotNull final PublishDistributor publishDistributor,
-                              @NotNull final HivemqId hiveMQId,
-                              @NotNull final LocalTopicTree topicTree) {
+    public PublishServiceImpl(
+            @NotNull final PluginServiceRateLimitService rateLimitService,
+            @NotNull final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService,
+            @NotNull final InternalPublishService internalPublishService,
+            @NotNull final PublishDistributor publishDistributor,
+            @NotNull final HivemqId hiveMQId,
+            @NotNull final LocalTopicTree topicTree) {
         this.rateLimitService = rateLimitService;
         this.globalManagedExtensionExecutorService = globalManagedExtensionExecutorService;
         this.internalPublishService = internalPublishService;
@@ -99,13 +104,15 @@ public class PublishServiceImpl implements PublishService {
         }
 
         final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
-        final ListenableFuture<PublishReturnCode> publishFuture = internalPublishService.publish(internalPublish, globalManagedExtensionExecutorService, null);
+        final ListenableFuture<PublishReturnCode> publishFuture =
+                internalPublishService.publish(internalPublish, globalManagedExtensionExecutorService, null);
         return ListenableFutureConverter.toVoidCompletable(publishFuture, globalManagedExtensionExecutorService);
     }
 
     @Override
     @NotNull
-    public CompletableFuture<PublishToClientResult> publishToClient(@NotNull final Publish publish, @NotNull final String clientId) {
+    public CompletableFuture<PublishToClientResult> publishToClient(
+            @NotNull final Publish publish, @NotNull final String clientId) {
         checkNotNull(publish, "Publish must never be null");
         checkNotNull(clientId, "Client ID must never be null");
         checkArgument(!clientId.isEmpty(), "Client ID must not be empty");
@@ -125,8 +132,13 @@ public class PublishServiceImpl implements PublishService {
             return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedExtensionExecutorService);
         }
 
-        final ListenableFuture<PublishStatus> publishSendFuture = publishDistributor.sendMessageToSubscriber(internalPublish, clientId, subscriber.getQos(), false,
-                subscriber.isRetainAsPublished(), subscriber.getSubscriptionIdentifier());
+        final ListenableFuture<PublishStatus> publishSendFuture = publishDistributor.sendMessageToSubscriber(
+                internalPublish,
+                clientId,
+                subscriber.getQos(),
+                false,
+                subscriber.isRetainAsPublished(),
+                subscriber.getSubscriptionIdentifier());
         Futures.addCallback(publishSendFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable final PublishStatus result) {
@@ -150,10 +162,10 @@ public class PublishServiceImpl implements PublishService {
         final byte[] correlationData = Bytes.getBytesFromReadOnlyBuffer(publish.getCorrelationData());
 
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent() ?
-                Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get()) : null;
+                Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get()) :
+                null;
 
-        return new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId(hiveMQId.get())
+        return new PUBLISHFactory.Mqtt5Builder().withHivemqId(hiveMQId.get())
                 .withQoS(QoS.valueOf(publish.getQos().getQosNumber()))
                 .withOnwardQos(QoS.valueOf(publish.getQos().getQosNumber()))
                 .withRetain(publish.getRetain())

@@ -33,7 +33,8 @@ public class AUTH extends MqttMessageWithUserProperties.MqttMessageWithReasonCod
 
     /**
      * Method by which the authentication is performed.
-     * Authentication Method is UTF-8 Encoded. It is a Protocol Error to omit the Authentication Method or to include it more than once.
+     * Authentication Method is UTF-8 Encoded. It is a Protocol Error to omit the Authentication Method or to include it
+     * more than once.
      */
     @NotNull
     private final String authMethod;
@@ -45,11 +46,12 @@ public class AUTH extends MqttMessageWithUserProperties.MqttMessageWithReasonCod
     @Nullable
     private final byte[] authData;
 
-    public AUTH(@NotNull final String authMethod,
-                @Nullable final byte[] authData,
-                @NotNull final Mqtt5AuthReasonCode reasonCode,
-                @NotNull final Mqtt5UserProperties userProperties,
-                @Nullable final String reasonString) {
+    public AUTH(
+            @NotNull final String authMethod,
+            @Nullable final byte[] authData,
+            @NotNull final Mqtt5AuthReasonCode reasonCode,
+            @NotNull final Mqtt5UserProperties userProperties,
+            @Nullable final String reasonString) {
 
         super(reasonCode, reasonString, userProperties);
 

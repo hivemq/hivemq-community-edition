@@ -17,7 +17,11 @@ package com.hivemq.persistence.clientsession;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -119,7 +123,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final long timestamp = System.currentTimeMillis();
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         singleWriter.submit(client, (SingleWriterService.Task<Void>) (bucketIndex) -> {
-            final ClientSession disconnectSession = localPersistence.disconnect(client, timestamp, sendWill, bucketIndex, sessionExpiry);
+            final ClientSession disconnectSession =
+                    localPersistence.disconnect(client, timestamp, sendWill, bucketIndex, sessionExpiry);
             if (sendWill) {
                 pendingWillMessages.sendOrEnqueueWillIfAvailable(client, disconnectSession);
             }
@@ -128,7 +133,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             if (disconnectSession.getSessionExpiryIntervalSec() == SESSION_EXPIRE_ON_DISCONNECT) {
                 final ListenableFuture<Void> removeSubFuture = subscriptionPersistence.removeAll(client);
                 resultFuture.setFuture(Futures.transform(Futures.allAsList(removeQos0Future, removeSubFuture),
-                        voids -> null, MoreExecutors.directExecutor()));
+                        voids -> null,
+                        MoreExecutors.directExecutor()));
                 return null;
             }
             resultFuture.setFuture(removeQos0Future);
@@ -154,15 +160,15 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             final long publishId = PublishPayloadPersistenceImpl.createId();
             sessionWill = new ClientSessionWill(willPublish, publishId);
         }
-        final ClientSession clientSession = new ClientSession(true, clientSessionExpiryInterval, sessionWill, queueLimit);
+        final ClientSession clientSession =
+                new ClientSession(true, clientSessionExpiryInterval, sessionWill, queueLimit);
 
-        final ListenableFuture<ConnectResult> submitFuture =
-                singleWriter.submit(client, (bucketIndex) -> {
-                    final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);
-                    final ClientSession previousClientSession = localPersistence.getSession(client, bucketIndex, false);
-                    localPersistence.put(client, clientSession, timestamp, bucketIndex);
-                    return new ConnectResult(previousTimestamp, previousClientSession);
-                });
+        final ListenableFuture<ConnectResult> submitFuture = singleWriter.submit(client, (bucketIndex) -> {
+            final Long previousTimestamp = localPersistence.getTimestamp(client, bucketIndex);
+            final ClientSession previousClientSession = localPersistence.getSession(client, bucketIndex, false);
+            localPersistence.put(client, clientSession, timestamp, bucketIndex);
+            return new ConnectResult(previousTimestamp, previousClientSession);
+        });
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
         Futures.addCallback(submitFuture, new FutureCallback<>() {
@@ -192,7 +198,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                             previousClientSession.isExpired(System.currentTimeMillis() - previousTimestamp);
                     if (expired) {
                         // timestamp in milliseconds + session expiry in seconds * 1000 = milliseconds
-                        eventLog.clientSessionExpired(previousTimestamp + previousClientSession.getSessionExpiryIntervalSec() * 1000, client);
+                        eventLog.clientSessionExpired(previousTimestamp +
+                                previousClientSession.getSessionExpiryIntervalSec() * 1000, client);
                         cleanupFuture = cleanClientData(client);
                     } else {
                         cleanupFuture = Futures.immediateFuture(null);
@@ -222,7 +229,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         final ClientSession session = getSession(clientId, false);
         if (session == null) {
-            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
+            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.",
+                    clientId);
             return Futures.immediateFuture(false);
         }
         if (preventLwtMessage) {
@@ -233,7 +241,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
         final ClientConnection clientConnection = connectionPersistence.get(clientId);
 
         if (clientConnection == null) {
-            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.", clientId);
+            log.trace("Ignoring forced client disconnect request for client '{}', because client is not connected.",
+                    clientId);
             return Futures.immediateFuture(false);
         }
         clientConnection.setPreventLwt(preventLwtMessage);
@@ -241,13 +250,19 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             clientConnection.setClientSessionExpiryInterval(session.getSessionExpiryIntervalSec());
         }
 
-        final String logMessage = String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);
+        final String logMessage =
+                String.format("Disconnecting client with clientId '%s' forcibly via extension system.", clientId);
         final String eventLogMessage = "Disconnected via extension system";
 
-        final Mqtt5DisconnectReasonCode usedReasonCode =
-                reasonCode == null ? Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION : Mqtt5DisconnectReasonCode.valueOf(reasonCode.name());
+        final Mqtt5DisconnectReasonCode usedReasonCode = reasonCode == null ?
+                Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION :
+                Mqtt5DisconnectReasonCode.valueOf(reasonCode.name());
 
-        mqttServerDisconnector.disconnect(clientConnection.getChannel(), logMessage, eventLogMessage, usedReasonCode, reasonString);
+        mqttServerDisconnector.disconnect(clientConnection.getChannel(),
+                logMessage,
+                eventLogMessage,
+                usedReasonCode,
+                reasonString);
 
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
         clientConnection.getChannel().closeFuture().addListener((ChannelFutureListener) future -> {
@@ -279,8 +294,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             clientSessions.addAll(localPersistence.getAllClients(bucketIndex));
             return clientSessions;
         });
-        return Futures.transform(
-                Futures.allAsList(futures),
+        return Futures.transform(Futures.allAsList(futures),
                 sets -> sets.stream().flatMap(Set::stream).collect(Collectors.toSet()),
                 MoreExecutors.directExecutor());
     }
@@ -298,18 +312,17 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         checkNotNull(clientId, "Client id must not be null");
 
-        final ListenableFuture<Boolean> setTTlFuture =
-                singleWriter.submit(clientId, (bucketIndex) -> {
+        final ListenableFuture<Boolean> setTTlFuture = singleWriter.submit(clientId, (bucketIndex) -> {
 
-                    final boolean clientSessionExists = localPersistence.getSession(clientId) != null;
+            final boolean clientSessionExists = localPersistence.getSession(clientId) != null;
 
-                    if (!clientSessionExists) {
-                        return false;
-                    }
+            if (!clientSessionExists) {
+                return false;
+            }
 
-                    localPersistence.setSessionExpiryInterval(clientId, sessionExpiryInterval, bucketIndex);
-                    return true;
-                });
+            localPersistence.setSessionExpiryInterval(clientId, sessionExpiryInterval, bucketIndex);
+            return true;
+        });
 
         final SettableFuture<Boolean> settableFuture = SettableFuture.create();
 
@@ -357,8 +370,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
     @Override
     public @NotNull ListenableFuture<Void> cleanUp(final int bucketIndex) {
-        return singleWriter.submit(
-                bucketIndex,
+        return singleWriter.submit(bucketIndex,
                 new ClientSessionCleanUpTask(localPersistence, this, pendingWillMessages));
     }
 
@@ -382,7 +394,8 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
             public void onSuccess(final Boolean sessionExists) {
 
                 if (sessionExists) {
-                    final ListenableFuture<Boolean> disconnectClientFuture = forceDisconnectClient(clientId, false, disconnectSource);
+                    final ListenableFuture<Boolean> disconnectClientFuture =
+                            forceDisconnectClient(clientId, false, disconnectSource);
                     resultFuture.setFuture(disconnectClientFuture);
                 } else {
                     resultFuture.set(null);
@@ -446,15 +459,12 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) -> singleWriter.submit(bucket,
                         // actual single writer call
-                        (bucketIndex) ->
-                                localPersistence.getAllClientsChunk(
-                                        bucketIndex,
-                                        lastKey,
-                                        maxResults)));
+                        (bucketIndex) -> localPersistence.getAllClientsChunk(bucketIndex, lastKey, maxResults)));
     }
 
     private static boolean isExistent(final @Nullable ClientSession clientSession) {
-        return (clientSession != null) && (clientSession.getSessionExpiryIntervalSec() > 0 || clientSession.isConnected());
+        return (clientSession != null) &&
+                (clientSession.getSessionExpiryIntervalSec() > 0 || clientSession.isConnected());
     }
 
     public enum DisconnectSource {

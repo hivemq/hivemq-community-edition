@@ -39,9 +39,10 @@ public class AsyncOutputImpl<T extends PluginTaskOutput> implements Async<T> {
     @NotNull
     private Status status;
 
-    public AsyncOutputImpl(@NotNull final T output,
-                           @NotNull final SettableFuture<Boolean> asyncFuture,
-                           @NotNull final ScheduledFuture<?> timeoutTaskFuture) {
+    public AsyncOutputImpl(
+            @NotNull final T output,
+            @NotNull final SettableFuture<Boolean> asyncFuture,
+            @NotNull final ScheduledFuture<?> timeoutTaskFuture) {
         this.output = output;
         this.asyncFuture = asyncFuture;
         this.timeoutTaskFuture = timeoutTaskFuture;

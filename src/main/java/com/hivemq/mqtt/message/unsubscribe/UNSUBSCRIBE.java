@@ -55,7 +55,8 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
 
     //MQTT 5
     public UNSUBSCRIBE(
-            @NotNull final ImmutableList<String> topicFilters, final int packetIdentifier,
+            @NotNull final ImmutableList<String> topicFilters,
+            final int packetIdentifier,
             final Mqtt5UserProperties userProperties) {
         super(userProperties);
 
@@ -67,8 +68,7 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
     }
 
     public static @NotNull UNSUBSCRIBE from(final @NotNull UnsubscribePacketImpl packet) {
-        return new UNSUBSCRIBE(
-                packet.getTopicFilters(),
+        return new UNSUBSCRIBE(packet.getTopicFilters(),
                 packet.getPacketIdentifier(),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }

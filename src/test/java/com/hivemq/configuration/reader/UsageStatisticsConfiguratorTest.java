@@ -26,12 +26,11 @@ public class UsageStatisticsConfiguratorTest extends AbstractConfigurationTest {
     @Test
     public void test_usage_statistics_xml() throws Exception {
 
-        final String contents =
-                "<hivemq>" +
-                        "    <anonymous-usage-statistics>\n" +
-                        "        <enabled>true</enabled>\n" +
-                        "    </anonymous-usage-statistics\n>" +
-                        "</hivemq>";
+        final String contents = "<hivemq>" +
+                "    <anonymous-usage-statistics>\n" +
+                "        <enabled>true</enabled>\n" +
+                "    </anonymous-usage-statistics\n>" +
+                "</hivemq>";
         Files.write(contents.getBytes(UTF_8), xmlFile);
 
         reader.applyConfig();
@@ -42,9 +41,7 @@ public class UsageStatisticsConfiguratorTest extends AbstractConfigurationTest {
     @Test
     public void test_usage_statistics_default() throws Exception {
 
-        final String contents =
-                "<hivemq>" +
-                        "</hivemq>";
+        final String contents = "<hivemq>" + "</hivemq>";
         Files.write(contents.getBytes(UTF_8), xmlFile);
 
         reader.applyConfig();

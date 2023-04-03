@@ -32,33 +32,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @since 4.0.0
  */
 public class PUBLISHTest {
 
-    private static final int FIXED_SIZE =
-            ObjectMemoryEstimation.objectShellSize() +  // shell size
-                    ObjectMemoryEstimation.intSize() +  // size size
-                    ObjectMemoryEstimation.longSize() +  // timestamp
-                    24 + // user props overhead
-                    ObjectMemoryEstimation.booleanSize() +  // duplicateDelivery
-                    ObjectMemoryEstimation.booleanSize() +  // retain
-                    ObjectMemoryEstimation.booleanSize() +  // isNewTopicAlias
-                    ObjectMemoryEstimation.longSize() +  // messageExpiryInterval
-                    ObjectMemoryEstimation.longSize() +  // publishId
-                    ObjectMemoryEstimation.longWrapperSize() + // payloadId
-                    ObjectMemoryEstimation.enumSize() +  // QoS
-                    ObjectMemoryEstimation.enumSize();   // payloadFormatIndicator
+    private static final int FIXED_SIZE = ObjectMemoryEstimation.objectShellSize() +  // shell size
+            ObjectMemoryEstimation.intSize() +  // size size
+            ObjectMemoryEstimation.longSize() +  // timestamp
+            24 + // user props overhead
+            ObjectMemoryEstimation.booleanSize() +  // duplicateDelivery
+            ObjectMemoryEstimation.booleanSize() +  // retain
+            ObjectMemoryEstimation.booleanSize() +  // isNewTopicAlias
+            ObjectMemoryEstimation.longSize() +  // messageExpiryInterval
+            ObjectMemoryEstimation.longSize() +  // publishId
+            ObjectMemoryEstimation.longWrapperSize() + // payloadId
+            ObjectMemoryEstimation.enumSize() +  // QoS
+            ObjectMemoryEstimation.enumSize();   // payloadFormatIndicator
 
     @Test(expected = NullPointerException.class)
     public void test_publish_qos_null() {
 
-        new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId")
+        new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId")
                 .withUserProperties(Mqtt5UserProperties.of())
                 .withTopic("topic")
                 .build();
@@ -68,8 +68,7 @@ public class PUBLISHTest {
     @Test(expected = NullPointerException.class)
     public void test_publish_topic_null() {
 
-        new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId")
+        new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId")
                 .withUserProperties(Mqtt5UserProperties.of())
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
@@ -80,8 +79,7 @@ public class PUBLISHTest {
     @Test(expected = NullPointerException.class)
     public void test_publish_hivemq_id_null() {
 
-        new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withTopic("topic")
                 .withUserProperties(Mqtt5UserProperties.of())
@@ -92,8 +90,7 @@ public class PUBLISHTest {
     @Test
     public void test_publish_ok_with_payload() {
 
-        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPayload(new byte[0])
@@ -101,8 +98,7 @@ public class PUBLISHTest {
                 .withUserProperties(Mqtt5UserProperties.of())
                 .build();
 
-        final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPayload(new byte[0])
@@ -117,8 +113,7 @@ public class PUBLISHTest {
     @Test
     public void test_publish_ok_with_payload_id_and_persistence() {
 
-        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPublishId(1L)
@@ -127,8 +122,7 @@ public class PUBLISHTest {
                 .withUserProperties(Mqtt5UserProperties.of())
                 .build();
 
-        final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt3 = new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPublishId(1L)
@@ -144,8 +138,7 @@ public class PUBLISHTest {
     @Test
     public void test_estimated_size_always_the_same() throws InterruptedException {
 
-        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
@@ -153,7 +146,8 @@ public class PUBLISHTest {
                 .withTopic("topic") // 10+38 = 48 bytes
                 .withResponseTopic("response") // 16+38 = 54 bytes
                 .withCorrelationData("correlation".getBytes()) // 11+12 = 23 bytes
-                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name", "value"))) //   ((4 + 5) * 2) + 24 + 38 + 38 = 118
+                .withUserProperties(Mqtt5UserProperties.of(MqttUserProperty.of("name",
+                        "value"))) //   ((4 + 5) * 2) + 24 + 38 + 38 = 118
                 .build();
 
         final List<Thread> threadList = new ArrayList<>();
@@ -182,23 +176,22 @@ public class PUBLISHTest {
     @Test
     public void test_estimated_size_min() {
 
-        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload("payload".getBytes()) // 7+12 = 19 bytes
                 .withTopic("topic") // 10+38 = 48 bytes
                 .build();
 
-        assertEquals(67 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), publishMqtt5.getEstimatedSizeInMemory());
+        assertEquals(67 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()),
+                publishMqtt5.getEstimatedSizeInMemory());
 
     }
 
     @Test
     public void test_estimated_size_without_payload() {
 
-        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPublishId(1L)
@@ -206,15 +199,15 @@ public class PUBLISHTest {
                 .withTopic("topic") // 10+38 = 48 bytes
                 .build();
 
-        assertEquals(48 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()), publishMqtt5.getEstimatedSizeInMemory());
+        assertEquals(48 + 54 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()),
+                publishMqtt5.getEstimatedSizeInMemory());
 
     }
 
     @Test
     public void test_estimated_size_very_large() {
 
-        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder()
-                .withQoS(QoS.AT_MOST_ONCE)
+        final PUBLISH publishMqtt5 = new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPayload(new byte[1024 * 1024 * 5]) // 5MB + 12 bytes
@@ -224,7 +217,13 @@ public class PUBLISHTest {
                 .withUserProperties(getManyProperties()) // 12.777.790 bytes
                 .build();
 
-        final long estimatedSize = ((1024 * 1024 * 5) * 2) + 54 + 24 + (130_038 * 2) + 12_777_790 + FIXED_SIZE + ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()); // 23_523_857 bytes + UniqueID Bytes
+        final long estimatedSize = ((1024 * 1024 * 5) * 2) +
+                54 +
+                24 +
+                (130_038 * 2) +
+                12_777_790 +
+                FIXED_SIZE +
+                ObjectMemoryEstimation.stringSize(publishMqtt5.getUniqueId()); // 23_523_857 bytes + UniqueID Bytes
         assertEquals(estimatedSize, publishMqtt5.getEstimatedSizeInMemory());
 
     }
@@ -249,13 +248,13 @@ public class PUBLISHTest {
         final PUBLISH publish2 = createPublishWithTimestampAndExpiry(System.currentTimeMillis(), 1);
         assertFalse(publish2.hasExpired());
 
-        final PUBLISH publish3 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 100000000, MqttConfigurationDefaults.TTL_DISABLED);
+        final PUBLISH publish3 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 100000000,
+                MqttConfigurationDefaults.TTL_DISABLED);
         assertFalse(publish3.hasExpired());
     }
 
     private PUBLISH createPublishWithTimestampAndExpiry(final long timestampMsec, final long messageExpiryIntervalSec) {
-        return new PUBLISHFactory.Mqtt5Builder()
-                .withHivemqId("hivemqId")
+        return new PUBLISHFactory.Mqtt5Builder().withHivemqId("hivemqId")
                 .withQoS(QoS.AT_MOST_ONCE)
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withPayload(new byte[0])

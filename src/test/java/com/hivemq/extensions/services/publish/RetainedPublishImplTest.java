@@ -29,7 +29,9 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 
 import static com.hivemq.codec.encoder.mqtt5.Mqtt5PayloadFormatIndicator.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Florian Limpöck
@@ -40,9 +42,15 @@ public class RetainedPublishImplTest {
     @Test
     public void test_convert_all_nullable_null() {
 
-        final RetainedPublishImpl retainedPublish =
-                new RetainedPublishImpl(Qos.AT_LEAST_ONCE, "topic", null, null, null, null, null, null,
-                        UserPropertiesImpl.of(ImmutableList.of()));
+        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_LEAST_ONCE,
+                "topic",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
 
         final RetainedMessage convert = RetainedPublishImpl.convert(retainedPublish);
 
@@ -60,14 +68,20 @@ public class RetainedPublishImplTest {
     @Test
     public void test_convert_all_set() {
 
-        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(ImmutableList.of(
-                new MqttUserProperty("name", "value"),
-                new MqttUserProperty("name", "value2"),
-                new MqttUserProperty("name2", "val")));
+        final UserPropertiesImpl userProperties =
+                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"),
+                        new MqttUserProperty("name", "value2"),
+                        new MqttUserProperty("name2", "val")));
 
-        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_MOST_ONCE, "topic",
-                PayloadFormatIndicator.UTF_8, 12345L, "response_topic", ByteBuffer.wrap("correlation_data".getBytes()),
-                "content_type", ByteBuffer.wrap("test3".getBytes()), userProperties);
+        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_MOST_ONCE,
+                "topic",
+                PayloadFormatIndicator.UTF_8,
+                12345L,
+                "response_topic",
+                ByteBuffer.wrap("correlation_data".getBytes()),
+                "content_type",
+                ByteBuffer.wrap("test3".getBytes()),
+                userProperties);
 
         final RetainedMessage convert = RetainedPublishImpl.convert(retainedPublish);
 

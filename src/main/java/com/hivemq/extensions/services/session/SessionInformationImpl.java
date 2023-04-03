@@ -29,7 +29,8 @@ public class SessionInformationImpl implements SessionInformation {
     private final long sessionExpiryInterval;
     private final boolean connected;
 
-    public SessionInformationImpl(@NotNull final String clientIdentifier, final long sessionExpiryInterval, final boolean connected) {
+    public SessionInformationImpl(
+            @NotNull final String clientIdentifier, final long sessionExpiryInterval, final boolean connected) {
         this.clientIdentifier = clientIdentifier;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.connected = connected;

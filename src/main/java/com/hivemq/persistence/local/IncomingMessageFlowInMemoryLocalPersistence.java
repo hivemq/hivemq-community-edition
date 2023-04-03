@@ -15,10 +15,10 @@
  */
 package com.hivemq.persistence.local;
 
+import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.mqtt.message.MessageWithID;
 
 import java.util.Set;
@@ -106,12 +106,18 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
 
         @Override
         public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             final MessageFlowKey that = (MessageFlowKey) o;
 
-            if (messageId != that.messageId) return false;
+            if (messageId != that.messageId) {
+                return false;
+            }
             return clientId.equals(that.clientId);
 
         }

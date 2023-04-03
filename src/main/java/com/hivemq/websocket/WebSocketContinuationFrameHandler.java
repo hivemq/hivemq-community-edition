@@ -22,7 +22,8 @@ import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 public class WebSocketContinuationFrameHandler extends SimpleChannelInboundHandler<ContinuationWebSocketFrame> {
 
     @Override
-    protected void channelRead0(final ChannelHandlerContext ctx, final ContinuationWebSocketFrame msg) throws Exception {
+    protected void channelRead0(final ChannelHandlerContext ctx, final ContinuationWebSocketFrame msg)
+            throws Exception {
         ctx.fireChannelRead(msg.content().retain());
     }
 }

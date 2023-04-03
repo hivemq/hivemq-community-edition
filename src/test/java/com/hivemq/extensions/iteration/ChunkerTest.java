@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ChunkerTest {
 
@@ -53,7 +55,8 @@ public class ChunkerTest {
 
         chunker.getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
             @Override
-            public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(final int bucket, final @NotNull String lastKey, final int maxResults) {
+            public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
+                    final int bucket, final @NotNull String lastKey, final int maxResults) {
                 assertEquals(1, maxResults);
                 return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), true, "last", bucket));
             }
@@ -65,14 +68,16 @@ public class ChunkerTest {
         final int[] counter = {0};
         final Chunker chunker = new Chunker();
 
-        final MultipleChunkResult<Map<String, @NotNull String>> multi = chunker.getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
-            @Override
-            public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(final int bucket, final @NotNull String lastKey, final int maxResults) {
+        final MultipleChunkResult<Map<String, @NotNull String>> multi =
+                chunker.getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
+                    @Override
+                    public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
+                            final int bucket, final @NotNull String lastKey, final int maxResults) {
 
-                counter[0]++;
-                return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), false, "last", bucket));
-            }
-        }).get();
+                        counter[0]++;
+                        return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), false, "last", bucket));
+                    }
+                }).get();
 
         final Map<Integer, BucketChunkResult<Map<String, @NotNull String>>> values = multi.getValues();
         assertEquals(4, values.size());
@@ -94,13 +99,15 @@ public class ChunkerTest {
         final Chunker chunker = new Chunker();
 
         final ChunkCursor cursor = new ChunkCursor(new HashMap<>(), ImmutableSet.of(1, 3));
-        final MultipleChunkResult<Map<String, @NotNull String>> multi = chunker.getAllLocalChunk(cursor, 4, new Chunker.SingleWriterCall<String>() {
-            @Override
-            public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(final int bucket, final @NotNull String lastKey, final int maxResults) {
-                counter[0]++;
-                return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), false, "last", bucket));
-            }
-        }).get();
+        final MultipleChunkResult<Map<String, @NotNull String>> multi =
+                chunker.getAllLocalChunk(cursor, 4, new Chunker.SingleWriterCall<String>() {
+                    @Override
+                    public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
+                            final int bucket, final @NotNull String lastKey, final int maxResults) {
+                        counter[0]++;
+                        return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), false, "last", bucket));
+                    }
+                }).get();
 
         final Map<Integer, BucketChunkResult<Map<String, @NotNull String>>> values = multi.getValues();
         assertEquals(4, values.size());

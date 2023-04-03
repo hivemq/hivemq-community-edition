@@ -79,7 +79,7 @@ public class PubrecInterceptorHandler {
 
     public void handleInboundPubrec(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBREC pubrec) {
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -113,7 +113,8 @@ public class PubrecInterceptorHandler {
 
         for (final PubrecInboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -130,7 +131,7 @@ public class PubrecInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -159,12 +160,17 @@ public class PubrecInterceptorHandler {
         final PubrecOutboundOutputImpl output = new PubrecOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubrecOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
 
-        final PubrecOutboundInterceptorContext context = new PubrecOutboundInterceptorContext(
-                clientId, interceptors.size(), ctx, promise, inputHolder, outputHolder);
+        final PubrecOutboundInterceptorContext context = new PubrecOutboundInterceptorContext(clientId,
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
 
         for (final PubrecOutboundInterceptor interceptor : interceptors) {
 
-            final HiveMQExtension extension = hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -248,9 +254,8 @@ public class PubrecInterceptorHandler {
             try {
                 interceptor.onInboundPubrec(input, output);
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBREC interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound PUBREC interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -338,9 +343,8 @@ public class PubrecInterceptorHandler {
             try {
                 interceptor.onOutboundPubrec(input, output);
             } catch (final Throwable e) {
-                log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBREC interception. " +
-                                "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound PUBREC interception. " +
+                        "Extensions are responsible for their own exception handling.", extensionId, e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

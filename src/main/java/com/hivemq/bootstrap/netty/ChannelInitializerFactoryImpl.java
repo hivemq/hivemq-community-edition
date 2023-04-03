@@ -15,8 +15,16 @@
  */
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.bootstrap.netty.initializer.*;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.bootstrap.netty.initializer.AbstractChannelInitializer;
+import com.hivemq.bootstrap.netty.initializer.TcpChannelInitializer;
+import com.hivemq.bootstrap.netty.initializer.TlsTcpChannelInitializer;
+import com.hivemq.bootstrap.netty.initializer.TlsWebsocketChannelInitializer;
+import com.hivemq.bootstrap.netty.initializer.WebsocketChannelInitializer;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.security.ssl.NonSslHandler;
@@ -45,10 +53,11 @@ public class ChannelInitializerFactoryImpl implements ChannelInitializerFactory 
     private final EventLog eventLog;
 
     @Inject
-    public ChannelInitializerFactoryImpl(@NotNull final ChannelDependencies channelDependencies,
-                                         @NotNull final SslFactory sslFactory,
-                                         @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
-                                         @NotNull final EventLog eventLog) {
+    public ChannelInitializerFactoryImpl(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final SslFactory sslFactory,
+            @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
+            @NotNull final EventLog eventLog) {
         this.channelDependencies = channelDependencies;
         this.sslFactory = sslFactory;
         this.nonSslHandlerProvider = nonSslHandlerProvider;

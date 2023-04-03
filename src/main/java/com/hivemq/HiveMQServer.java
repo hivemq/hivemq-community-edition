@@ -71,12 +71,7 @@ public class HiveMQServer {
     private @Nullable FullConfigurationService configService;
 
     public HiveMQServer() {
-        this(
-                new SystemInformationImpl(true),
-                new MetricRegistry(),
-                null,
-                true
-        );
+        this(new SystemInformationImpl(true), new MetricRegistry(), null, true);
     }
 
     public HiveMQServer(
@@ -149,9 +144,11 @@ public class HiveMQServer {
         final Set<MigrationUnit> valueMigrations = Migrations.checkForValueMigration(systemInformation);
 
         log.trace("Initializing persistences");
-        final Injector persistenceInjector =
-                GuiceBootstrap.persistenceInjector(systemInformation, metricRegistry, hivemqId, configService,
-                        lifecycleModule);
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+                metricRegistry,
+                hivemqId,
+                configService,
+                lifecycleModule);
         //blocks until all persistences started
         persistenceInjector.getInstance(PersistenceStartup.class).finish();
 
@@ -186,8 +183,12 @@ public class HiveMQServer {
         }
 
         log.trace("Initializing Guice");
-        injector = GuiceBootstrap.bootstrapInjector(systemInformation, metricRegistry, hivemqId,
-                configService, persistenceInjector, lifecycleModule);
+        injector = GuiceBootstrap.bootstrapInjector(systemInformation,
+                metricRegistry,
+                hivemqId,
+                configService,
+                persistenceInjector,
+                lifecycleModule);
     }
 
     public void startInstance(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
@@ -296,14 +297,16 @@ public class HiveMQServer {
                 channel = FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             } catch (final Throwable e) {
                 log.error("Could not open data lock file.", e);
-                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
+                throw new StartAbortedException(
+                        "An error occurred while opening the persistence. Is another HiveMQ instance running?");
             }
             try {
                 fileLock = channel.tryLock();
             } catch (final Throwable ignored) {
             }
             if (fileLock == null) {
-                throw new StartAbortedException("An error occurred while opening the persistence. Is another HiveMQ instance running?");
+                throw new StartAbortedException(
+                        "An error occurred while opening the persistence. Is another HiveMQ instance running?");
             }
         }
 

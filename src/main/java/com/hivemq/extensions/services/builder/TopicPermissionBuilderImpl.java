@@ -17,11 +17,11 @@ package com.hivemq.extensions.services.builder;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission.MqttActivity;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission.PermissionType;
@@ -60,7 +60,12 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     public TopicPermissionBuilder topicFilter(@NotNull final String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter cannot be null");
         Preconditions.checkArgument(!topicFilter.isEmpty(), "Topic filter cannot be empty");
-        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(), "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength() + "' characters, but has '" + topicFilter.length() + "' characters");
+        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(),
+                "Topic filter length must not exceed '" +
+                        restrictionsConfig.maxTopicLength() +
+                        "' characters, but has '" +
+                        topicFilter.length() +
+                        "' characters");
         Preconditions.checkArgument(Topics.isValidToSubscribe(topicFilter), "Topic filter is invalid");
 
         if (Topics.isSharedSubscriptionTopic(topicFilter)) {
@@ -126,10 +131,12 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     public TopicPermissionBuilder sharedGroup(@NotNull final String sharedGroup) {
         Preconditions.checkNotNull(sharedGroup, "Shared group cannot be null");
         Preconditions.checkArgument(!sharedGroup.isEmpty(), "Shared group cannot be empty");
-        Preconditions.checkArgument(!(sharedGroup.length() > 1 && sharedGroup.contains("#")), "Shared group cannot contain wildcard character '#' inside the name");
+        Preconditions.checkArgument(!(sharedGroup.length() > 1 && sharedGroup.contains("#")),
+                "Shared group cannot contain wildcard character '#' inside the name");
         Preconditions.checkArgument(!(sharedGroup.contains("+")), "Shared group cannot contain wildcard character '+'");
         Preconditions.checkArgument(!(sharedGroup.contains("/")), "Shared group cannot contain character '/'");
-        Preconditions.checkArgument(PluginBuilderUtil.isValidUtf8String(sharedGroup, securityConfigurationService.validateUTF8()), "Shared group contains invalid UTF-8 character");
+        Preconditions.checkArgument(PluginBuilderUtil.isValidUtf8String(sharedGroup,
+                securityConfigurationService.validateUTF8()), "Shared group contains invalid UTF-8 character");
 
         this.sharedGroup = sharedGroup;
         return this;

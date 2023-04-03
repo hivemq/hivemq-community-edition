@@ -27,8 +27,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
  */
 public interface PublishPayloadLocalPersistence_4_4 {
 
-    @Nullable
-    byte[] get(@NotNull long id);
+    @Nullable byte[] get(@NotNull long id);
 
     void put(final long id, @NotNull final byte[] payload);
 

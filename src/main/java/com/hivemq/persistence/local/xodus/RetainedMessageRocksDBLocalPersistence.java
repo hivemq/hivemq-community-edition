@@ -53,7 +53,8 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
  * @author Florian Limpöck
  */
 @LazySingleton
-public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersistence implements RetainedMessageLocalPersistence {
+public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersistence
+        implements RetainedMessageLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageRocksDBLocalPersistence.class);
 
@@ -287,8 +288,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 //persist needs increment.
                 retainMessageCounter.incrementAndGet();
             }
-        } catch (
-                final Exception e) {
+        } catch (final Exception e) {
             log.error("An error occurred while persisting a retained message.");
             log.debug("Original Exception:", e);
         }
@@ -338,9 +338,8 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
         }
     }
 
-    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(final int bucketIndex,
-                                                                                                         final @Nullable String lastTopic,
-                                                                                                         final int maxMemory) {
+    public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
+            final int bucketIndex, final @Nullable String lastTopic, final int maxMemory) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         final RocksDB bucket = buckets[bucketIndex];
 
@@ -379,8 +378,10 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
                 // ignore messages with no payload and log a warning for the fact
                 if (payload == null) {
-                    log.warn("Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".",
-                            deserializedTopic, deserializedMessage.getPublishId());
+                    log.warn(
+                            "Could not dereference payload for retained message on topic \"{}\" with payload id \"{}\".",
+                            deserializedTopic,
+                            deserializedMessage.getPublishId());
                     iterator.next();
                     continue;
                 }

@@ -29,7 +29,11 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
-import org.rocksdb.*;
+import org.rocksdb.FlushOptions;
+import org.rocksdb.Options;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +58,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     private final long memtableSize;
     private final boolean forceFlush;
 
-     private long @NotNull [] rocksdbToMemTableSize;
+    private long @NotNull [] rocksdbToMemTableSize;
 
     @Inject
     public PublishPayloadRocksDBLocalPersistence(

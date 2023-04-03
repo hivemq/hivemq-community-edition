@@ -15,10 +15,9 @@
  */
 package com.hivemq.mqtt.handler.ping;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
-
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -46,11 +45,11 @@ public class PingRequestHandler extends SimpleChannelInboundHandler<PINGREQ> {
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final PINGREQ msg) throws Exception {
         if (log.isTraceEnabled()) {
-            log.trace("PingReq received for client {}.", ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId());
+            log.trace("PingReq received for client {}.", ClientConnectionContext.of(ctx.channel()).getClientId());
         }
         ctx.writeAndFlush(PING_RESPONSE);
         if (log.isTraceEnabled()) {
-            log.trace("PingResp sent for client {}.", ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId());
+            log.trace("PingResp sent for client {}.", ClientConnectionContext.of(ctx.channel()).getClientId());
         }
     }
 

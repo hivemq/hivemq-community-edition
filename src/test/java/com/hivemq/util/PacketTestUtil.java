@@ -67,8 +67,7 @@ public class PacketTestUtil {
                 //     reason string
                 0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
     }
 
     public byte[] getInvalidPuback() {
@@ -84,8 +83,7 @@ public class PacketTestUtil {
                 //   reason code (success)
                 (byte) 1234,
                 //   properties
-                0
-        };
+                0};
     }
 
     public byte[] getInvalidPublish() {
@@ -102,8 +100,7 @@ public class PacketTestUtil {
                 //   packet identifier
                 0, (byte) 1,
                 //   properties length
-                50,
-        };
+                50,};
     }
 
     public byte[] getPublish(final int id) {
@@ -136,8 +133,7 @@ public class PacketTestUtil {
                 //     content type
                 0x03, 0, 4, 't', 'e', 'x', 't',
                 // payload
-                1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-        };
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     }
 
     public byte[] getConnectWithOut(final boolean requestProblemInformation) {
@@ -203,8 +199,7 @@ public class PacketTestUtil {
                 //   username
                 0, 8, 'u', 's', 'e', 'r', 'n', 'a', 'm', 'e',
                 //   password
-                0, 4, 'p', 'a', 's', 's'
-        };
+                0, 4, 'p', 'a', 's', 's'};
     }
 
     public byte[] getConnect(final boolean requestProblemInformation) {
@@ -262,7 +257,6 @@ public class PacketTestUtil {
                 //   will topic
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 //   will payload
-                0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-        };
+                0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,};
     }
 }

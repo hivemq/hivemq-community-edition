@@ -40,8 +40,7 @@ public abstract class SingletonModule<T> extends AbstractModule {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof SingletonModule
-                && ((SingletonModule) obj).key.equals(key);
+        return obj instanceof SingletonModule && ((SingletonModule) obj).key.equals(key);
     }
 
     @Override

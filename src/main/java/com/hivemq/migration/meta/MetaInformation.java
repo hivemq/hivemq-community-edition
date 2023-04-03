@@ -138,14 +138,30 @@ public class MetaInformation {
     @Override
     public String toString() {
         return "MetaInformation{" +
-                "hivemqVersion='" + hivemqVersion + '\'' +
-                ", clientSessionPersistenceVersion='" + clientSessionPersistenceVersion + '\'' +
-                ", queuedMessagesPersistenceVersion='" + queuedMessagesPersistenceVersion + '\'' +
-                ", subscriptionPersistenceVersion='" + subscriptionPersistenceVersion + '\'' +
-                ", retainedMessagesPersistenceVersion='" + retainedMessagesPersistenceVersion + '\'' +
-                ", publishPayloadPersistenceVersion='" + publishPayloadPersistenceVersion + '\'' +
-                ", retainedMessagesPersistenceType='" + retainedMessagesPersistenceType + '\'' +
-                ", publishPayloadPersistenceType='" + publishPayloadPersistenceType + '\'' +
+                "hivemqVersion='" +
+                hivemqVersion +
+                '\'' +
+                ", clientSessionPersistenceVersion='" +
+                clientSessionPersistenceVersion +
+                '\'' +
+                ", queuedMessagesPersistenceVersion='" +
+                queuedMessagesPersistenceVersion +
+                '\'' +
+                ", subscriptionPersistenceVersion='" +
+                subscriptionPersistenceVersion +
+                '\'' +
+                ", retainedMessagesPersistenceVersion='" +
+                retainedMessagesPersistenceVersion +
+                '\'' +
+                ", publishPayloadPersistenceVersion='" +
+                publishPayloadPersistenceVersion +
+                '\'' +
+                ", retainedMessagesPersistenceType='" +
+                retainedMessagesPersistenceType +
+                '\'' +
+                ", publishPayloadPersistenceType='" +
+                publishPayloadPersistenceType +
+                '\'' +
                 '}';
     }
 }

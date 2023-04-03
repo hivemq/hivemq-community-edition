@@ -27,7 +27,10 @@ import util.TestConfigurationBootstrap;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Christoph Schäbel
@@ -57,7 +60,8 @@ public class UsageStatisticsTest {
 
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
 
-        usageStatistics = new UsageStatistics(collector, systemInformation, sender, configurationService, shutdownHooks);
+        usageStatistics =
+                new UsageStatistics(collector, systemInformation, sender, configurationService, shutdownHooks);
     }
 
     @After

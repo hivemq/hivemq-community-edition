@@ -87,7 +87,7 @@ public class PublishOutboundInterceptorHandler {
             final @NotNull ChannelPromise promise) {
 
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
+        final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
@@ -237,9 +237,11 @@ public class PublishOutboundInterceptorHandler {
             try {
                 interceptor.onOutboundPublish(input, output);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. " +
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. " +
                                 "Extensions are responsible for their own exception handling.",
-                        extensionId, e);
+                        extensionId,
+                        e);
                 output.forciblyPreventPublishDelivery();
                 Exceptions.rethrowError(e);
             }

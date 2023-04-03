@@ -26,7 +26,9 @@ import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.configuration.service.InternalConfigurations.TOPIC_TREE_MAP_CREATION_THRESHOLD;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
@@ -97,7 +99,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
 
         assertEquals(1, firstNode.exactSubscriptions.getSubscriberCount());
 
-        assertThat(firstNode.exactSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
+        assertThat(firstNode.exactSubscriptions.getSubscribers(),
+                hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
     }
 
     @Test
@@ -112,7 +115,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
 
         assertEquals(1, firstNode.wildcardSubscriptions.getSubscriberCount());
 
-        assertThat(firstNode.wildcardSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
+        assertThat(firstNode.wildcardSubscriptions.getSubscribers(),
+                hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
     }
 
     @Test
@@ -122,7 +126,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         assertEquals(1, topicTree.segments.size());
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
+        assertEquals(1,
+                topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber", "my/topic/subscription", null);
 
@@ -137,7 +142,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         assertEquals(1, topicTree.segments.size());
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
+        assertEquals(1,
+                topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
 
         topicTree.removeSubscriber("subscriber", "my/topic/subscription/test", null);
 
@@ -145,7 +151,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         assertEquals(1, topicTree.segments.size());
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my").getChildren()[0]));
-        assertEquals(1, topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
+        assertEquals(1,
+                topicTree.segments.get("my").getChildren()[0].getChildren()[0].exactSubscriptions.getSubscriberCount());
     }
 
     @Test
@@ -164,7 +171,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         //The reference for the first subnode was deleted because there are no subscribers left on this path
         assertNull(topicTree.segments.get("my").getChildren()[0]);
         //The second node still has a subscriber
-        assertThat(topicTree.segments.get("my").getChildren()[1].exactSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
+        assertThat(topicTree.segments.get("my").getChildren()[1].exactSubscriptions.getSubscribers(),
+                hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
     }
 
     @Test
@@ -206,7 +214,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
 
         assertEquals(1, topicTree.rootWildcardSubscribers.size());
 
-        assertThat(topicTree.rootWildcardSubscribers, hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
+        assertThat(topicTree.rootWildcardSubscribers,
+                hasItem(new SubscriberWithQoS("subscriber", 0, (byte) 0, null, null, null)));
     }
 
     @Test
@@ -225,7 +234,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
         //The reference for the first subnode was deleted because there are no subscribers left on this path
         assertEquals(1, LocalTopicTree.getChildrenCount(topicTree.segments.get("my")));
         //The second node still has a subscriber
-        assertThat(topicTree.segments.get("my").getChildren()[1].wildcardSubscriptions.getSubscribers(), hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
+        assertThat(topicTree.segments.get("my").getChildren()[1].wildcardSubscriptions.getSubscribers(),
+                hasItem(new SubscriberWithQoS("subscriber2", 0, (byte) 0, null, null, null)));
     }
 
     @Test

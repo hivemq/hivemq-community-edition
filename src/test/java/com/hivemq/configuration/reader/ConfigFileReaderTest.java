@@ -70,8 +70,7 @@ public class ConfigFileReaderTest {
         listenerConfigurationService = new ListenerConfigurationServiceImpl();
 
         final ConfigurationFile configurationFile = new ConfigurationFile(null);
-        reader = new ConfigFileReader(
-                configurationFile,
+        reader = new ConfigFileReader(configurationFile,
                 new RestrictionConfigurator(restrictionsConfigurationService),
                 new SecurityConfigurator(securityConfigurationService),
                 envVarUtil,

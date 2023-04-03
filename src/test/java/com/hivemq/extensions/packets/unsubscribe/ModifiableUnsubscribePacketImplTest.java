@@ -26,7 +26,9 @@ import util.TestConfigurationBootstrap;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Robin Atherton
@@ -43,8 +45,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test
     public void setTopicFilters() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -60,8 +61,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilters_tooMany() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -72,8 +72,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilters_tooFew() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -84,8 +83,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setTopicFilters_null() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -96,8 +94,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test(expected = NullPointerException.class)
     public void setTopicFilters_nullElement() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -108,8 +105,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -122,8 +118,7 @@ public class ModifiableUnsubscribePacketImplTest {
 
     @Test
     public void copy_changes() {
-        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(
-                ImmutableList.of("topic1", "topic2"),
+        final UnsubscribePacketImpl packet = new UnsubscribePacketImpl(ImmutableList.of("topic1", "topic2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value"))),
                 1);
         final ModifiableUnsubscribePacketImpl modifiablePacket =
@@ -134,8 +129,7 @@ public class ModifiableUnsubscribePacketImplTest {
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final UnsubscribePacketImpl copy = modifiablePacket.copy();
 
-        final UnsubscribePacketImpl expectedPacket = new UnsubscribePacketImpl(
-                ImmutableList.of("test1", "test2"),
+        final UnsubscribePacketImpl expectedPacket = new UnsubscribePacketImpl(ImmutableList.of("test1", "test2"),
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))),
                 1);
         assertEquals(expectedPacket, copy);

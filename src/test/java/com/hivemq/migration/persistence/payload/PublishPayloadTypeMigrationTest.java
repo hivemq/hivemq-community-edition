@@ -100,25 +100,29 @@ public class PublishPayloadTypeMigrationTest {
     public void test_payload_migration_xodus_to_rocks() throws Exception {
 
 
-        final Map<MigrationUnit, PersistenceType>
-                migrations = Migrations.checkForTypeMigration(systemInformation);
+        final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
 
         assertEquals(2, migrations.size());
         assertEquals(PersistenceType.FILE_NATIVE, migrations.get(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
 
-        final Injector persistenceInjector =
-                GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService, new LifecycleModule());
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+                new MetricRegistry(),
+                new HivemqId(),
+                configurationService,
+                new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
-        final PublishPayloadXodusLocalPersistence xodus = persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
+        final PublishPayloadXodusLocalPersistence xodus =
+                persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             xodus.put(i, ("message" + i).getBytes());
         }
 
         Migrations.migrate(persistenceInjector, migrations, ImmutableSet.of());
 
-        final PublishPayloadRocksDBLocalPersistence rocks = persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class);
+        final PublishPayloadRocksDBLocalPersistence rocks =
+                persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             assertEquals("message" + i, new String(rocks.get(i)));
         }
@@ -129,7 +133,8 @@ public class PublishPayloadTypeMigrationTest {
 
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION, metaInformation.getPublishPayloadPersistenceVersion());
+        assertEquals(PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
+                metaInformation.getPublishPayloadPersistenceVersion());
         assertEquals(PersistenceType.FILE_NATIVE, metaInformation.getPublishPayloadPersistenceType());
     }
 
@@ -145,18 +150,24 @@ public class PublishPayloadTypeMigrationTest {
         assertEquals(1, migrations.size());
         assertEquals(PersistenceType.FILE, migrations.get(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService, new LifecycleModule());
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+                new MetricRegistry(),
+                new HivemqId(),
+                configurationService,
+                new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
-        final PublishPayloadRocksDBLocalPersistence rocks = persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class);
+        final PublishPayloadRocksDBLocalPersistence rocks =
+                persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             rocks.put(i, ("message" + i).getBytes());
         }
 
         Migrations.migrate(persistenceInjector, migrations, ImmutableSet.of());
 
-        final PublishPayloadXodusLocalPersistence xodus = persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
+        final PublishPayloadXodusLocalPersistence xodus =
+                persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             assertEquals("message" + i, new String(xodus.get(i)));
         }
@@ -167,7 +178,8 @@ public class PublishPayloadTypeMigrationTest {
 
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION, metaInformation.getPublishPayloadPersistenceVersion());
+        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
+                metaInformation.getPublishPayloadPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getPublishPayloadPersistenceType());
 
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
@@ -183,11 +195,16 @@ public class PublishPayloadTypeMigrationTest {
         assertEquals(1, migrations.size());
         assertFalse(migrations.containsKey(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
 
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation, new MetricRegistry(), new HivemqId(), configurationService, new LifecycleModule());
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+                new MetricRegistry(),
+                new HivemqId(),
+                configurationService,
+                new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
 
-        final PublishPayloadXodusLocalPersistence persistence_4_2_x = persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
+        final PublishPayloadXodusLocalPersistence persistence_4_2_x =
+                persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
         for (int i = 0; i < 10; i++) {
             persistence_4_2_x.put(i, ("message" + i).getBytes());
         }
@@ -200,7 +217,8 @@ public class PublishPayloadTypeMigrationTest {
 
         //check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION, metaInformation.getPublishPayloadPersistenceVersion());
+        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
+                metaInformation.getPublishPayloadPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getPublishPayloadPersistenceType());
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
 

@@ -15,7 +15,7 @@
  */
 package com.hivemq.bootstrap.netty;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
@@ -80,8 +80,7 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
                     "A client (IP: {}) sent illegal websocket data. Disconnecting client.",
                     "Illegal websocket data sent by client: " + cause.getMessage(),
                     Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
-                    null
-            );
+                    null);
             return;
 
 
@@ -90,22 +89,17 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
             //do not log IllegalArgumentException as error
 
         } else {
-            final ClientConnection clientConnection = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-            final Optional<String> channelIP = (clientConnection == null)
-                    ? Optional.empty()
-                    : clientConnection.getChannelIP();
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
+            final Optional<String> channelIP = clientConnectionContext.getChannelIP();
 
             log.error("An unexpected error occurred for client with IP {}: {}",
-                    channelIP.orElse("UNKNOWN"), ExceptionUtils.getStackTrace(cause));
+                    channelIP.orElse("UNKNOWN"),
+                    ExceptionUtils.getStackTrace(cause));
         }
 
         if (channel != null) {
-            mqttServerDisconnector.disconnect(channel,
-                    null, // already logged
-                    "Channel exception: " + cause.getMessage(),
-                    Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
-                    null
-            );
+            mqttServerDisconnector.disconnect(channel, null, // already logged
+                    "Channel exception: " + cause.getMessage(), Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR, null);
         }
     }
 }

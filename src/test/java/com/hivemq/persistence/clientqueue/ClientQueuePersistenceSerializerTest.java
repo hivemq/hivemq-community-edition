@@ -35,7 +35,10 @@ import org.mockito.MockitoAnnotations;
 import java.nio.charset.StandardCharsets;
 
 import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.Key;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Lukas Brandl
@@ -144,8 +147,9 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test
     public void test_serialize_mqtt_5_publish() {
-        final Mqtt5UserProperties properties = Mqtt5UserProperties.of(
-                ImmutableList.of(new MqttUserProperty("name1", "value1"), new MqttUserProperty("name2", "value2")));
+        final Mqtt5UserProperties properties =
+                Mqtt5UserProperties.of(ImmutableList.of(new MqttUserProperty("name1", "value1"),
+                        new MqttUserProperty("name2", "value2")));
 
         final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10)
                 .withQoS(QoS.AT_LEAST_ONCE)

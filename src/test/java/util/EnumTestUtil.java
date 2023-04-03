@@ -21,13 +21,16 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 public final class EnumTestUtil {
 
-    public static <T extends Enum<T>> void assertAllValueOf(@NotNull final Class<T> enumClass,
-                                                            @NotNull final ToIntFunction<T> toValueFunction,
-                                                            @NotNull final IntFunction<T> toEnumFunction) {
+    public static <T extends Enum<T>> void assertAllValueOf(
+            @NotNull final Class<T> enumClass,
+            @NotNull final ToIntFunction<T> toValueFunction,
+            @NotNull final IntFunction<T> toEnumFunction) {
         int minValue = Integer.MAX_VALUE;
         int maxValue = Integer.MIN_VALUE;
 
@@ -52,10 +55,11 @@ public final class EnumTestUtil {
         }
     }
 
-    public static <T extends Enum<T>> void assertAllValueOfWithFallback(@NotNull final Class<T> enumClass,
-                                                                        @NotNull final ToIntFunction<T> toValueFunction,
-                                                                        @NotNull final IntFunction<T> toEnumFunction,
-                                                                        @Nullable final T fallback) {
+    public static <T extends Enum<T>> void assertAllValueOfWithFallback(
+            @NotNull final Class<T> enumClass,
+            @NotNull final ToIntFunction<T> toValueFunction,
+            @NotNull final IntFunction<T> toEnumFunction,
+            @Nullable final T fallback) {
         int minValue = Integer.MAX_VALUE;
         int maxValue = Integer.MIN_VALUE;
 

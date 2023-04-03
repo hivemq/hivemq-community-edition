@@ -18,7 +18,7 @@ package com.hivemq.persistence.payload;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.Bytes;
 
-import static com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence.*;
+import static com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence.KeyPair;
 
 /**
  * @author Lukas Brandl

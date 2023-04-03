@@ -30,7 +30,12 @@ import com.hivemq.extension.sdk.api.services.ManagedExtensionExecutorService;
 import com.hivemq.extension.sdk.api.services.Services;
 import com.hivemq.extension.sdk.api.services.admin.AdminService;
 import com.hivemq.extension.sdk.api.services.auth.SecurityRegistry;
-import com.hivemq.extension.sdk.api.services.builder.*;
+import com.hivemq.extension.sdk.api.services.builder.Builders;
+import com.hivemq.extension.sdk.api.services.builder.PublishBuilder;
+import com.hivemq.extension.sdk.api.services.builder.RetainedPublishBuilder;
+import com.hivemq.extension.sdk.api.services.builder.TopicPermissionBuilder;
+import com.hivemq.extension.sdk.api.services.builder.TopicSubscriptionBuilder;
+import com.hivemq.extension.sdk.api.services.builder.WillPublishBuilder;
 import com.hivemq.extension.sdk.api.services.cluster.ClusterService;
 import com.hivemq.extension.sdk.api.services.interceptor.GlobalInterceptorRegistry;
 import com.hivemq.extension.sdk.api.services.intializer.InitializerRegistry;
@@ -44,7 +49,11 @@ import com.hivemq.extensions.exception.ExtensionLoadingException;
 import com.hivemq.extensions.services.auth.AuthenticatorsImpl;
 import com.hivemq.extensions.services.auth.AuthorizersImpl;
 import com.hivemq.extensions.services.auth.SecurityRegistryImpl;
-import com.hivemq.extensions.services.builder.*;
+import com.hivemq.extensions.services.builder.PublishBuilderImpl;
+import com.hivemq.extensions.services.builder.RetainedPublishBuilderImpl;
+import com.hivemq.extensions.services.builder.TopicPermissionBuilderImpl;
+import com.hivemq.extensions.services.builder.TopicSubscriptionBuilderImpl;
+import com.hivemq.extensions.services.builder.WillPublishBuilderImpl;
 import com.hivemq.extensions.services.executor.GlobalManagedExtensionExecutorService;
 import com.hivemq.extensions.services.executor.ManagedExecutorServicePerExtension;
 import com.hivemq.extensions.services.initializer.InitializerRegistryImpl;
@@ -64,7 +73,11 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -428,8 +441,7 @@ public class ExtensionStaticInitializerImplTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input,
-                final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
         }
 
         @Override

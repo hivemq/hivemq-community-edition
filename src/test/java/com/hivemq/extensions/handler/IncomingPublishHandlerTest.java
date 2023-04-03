@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler;
 
 import com.google.common.collect.Lists;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -54,7 +55,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubAckReasonCode;
 import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
@@ -65,6 +65,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
+import util.DummyClientConnection;
 import util.IsolatedExtensionClassloaderUtil;
 import util.TestConfigurationBootstrap;
 import util.TestMessageUtil;
@@ -78,9 +79,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @since 4.0.0
@@ -109,9 +117,9 @@ public class IncomingPublishHandlerTest {
         executor.postConstruct();
 
         channel = new EmbeddedChannel();
-        clientConnection = new ClientConnection(channel, publishFlushHandler);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId("test_client");
+        clientConnection = new DummyClientConnection(channel, publishFlushHandler);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnection.of(channel).setClientId("test_client");
 
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
 
@@ -157,7 +165,7 @@ public class IncomingPublishHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_publish_client_id_not_set() {
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientId(null);
+        ClientConnection.of(channel).setClientId(null);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 
@@ -166,7 +174,7 @@ public class IncomingPublishHandlerTest {
 
     @Test(timeout = 5000)
     public void test_read_publish_skip_incoming_publishes() {
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setIncomingPublishesSkipRest(true);
+        ClientConnection.of(channel).setIncomingPublishesSkipRest(true);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 
@@ -185,7 +193,7 @@ public class IncomingPublishHandlerTest {
         final ClientContextImpl clientContext =
                 new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
 
         channel.writeInbound(TestMessageUtil.createFullMqtt5Publish());
 
@@ -201,7 +209,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -215,7 +223,7 @@ public class IncomingPublishHandlerTest {
             o = channel.readOutbound();
         }
 
-        assertEquals(PUBREC.class, o.getClass());
+        assertSame(PUBREC.class, o.getClass());
         assertNull(channel.readInbound());
 
         assertTrue(dropLatch.await(5, TimeUnit.SECONDS));
@@ -230,7 +238,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -244,7 +252,7 @@ public class IncomingPublishHandlerTest {
             o = channel.readOutbound();
         }
 
-        assertEquals(PUBACK.class, o.getClass());
+        assertSame(PUBACK.class, o.getClass());
         assertNull(channel.readInbound());
 
         assertTrue(dropLatch.await(5, TimeUnit.SECONDS));
@@ -259,7 +267,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -290,7 +298,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -304,7 +312,7 @@ public class IncomingPublishHandlerTest {
             o = channel.readOutbound();
         }
 
-        assertEquals(PUBREC.class, o.getClass());
+        assertSame(PUBREC.class, o.getClass());
         assertNull(channel.readInbound());
 
         assertTrue(dropLatch.await(5, TimeUnit.SECONDS));
@@ -319,7 +327,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -333,7 +341,7 @@ public class IncomingPublishHandlerTest {
             o = channel.readOutbound();
         }
 
-        assertEquals(PUBACK.class, o.getClass());
+        assertSame(PUBACK.class, o.getClass());
         assertNull(channel.readInbound());
 
         assertTrue(dropLatch.await(5, TimeUnit.SECONDS));
@@ -348,7 +356,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -376,7 +384,7 @@ public class IncomingPublishHandlerTest {
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(1));
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -403,7 +411,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -429,7 +437,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -455,7 +463,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -485,7 +493,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(2));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -516,7 +524,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(3));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
@@ -547,7 +555,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(4));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
 
         final CountDownLatch pubackLatch = new CountDownLatch(1);
@@ -589,7 +597,7 @@ public class IncomingPublishHandlerTest {
 
         clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(4));
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setExtensionClientContext(clientContext);
+        ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
         final CountDownLatch pubackLatch = new CountDownLatch(1);
@@ -624,10 +632,11 @@ public class IncomingPublishHandlerTest {
 
     private List<PublishInboundInterceptor> getIsolatedInterceptor() throws Exception {
         final Class<?>[] classes = {
-                TestInterceptorPrevent.class, TestInterceptorChangeTopic.class,
-                TestInterceptorPreventWithReasonCode.class, TestInterceptorThrowsException.class,
-                TestInterceptorTimeout.class
-        };
+                TestInterceptorPrevent.class,
+                TestInterceptorChangeTopic.class,
+                TestInterceptorPreventWithReasonCode.class,
+                TestInterceptorThrowsException.class,
+                TestInterceptorTimeout.class};
 
         final IsolatedExtensionClassloader cl1 =
                 IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
@@ -658,8 +667,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             System.out.println("INTERCEPT " + System.currentTimeMillis());
             output.getPublishPacket().setTopic(input.getPublishPacket().getTopic() + "modified");
         }
@@ -669,8 +677,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             output.preventPublishDelivery();
         }
     }
@@ -679,8 +686,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             output.preventPublishDelivery(AckReasonCode.UNSPECIFIED_ERROR, "reason");
         }
     }
@@ -689,8 +695,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             final Async<PublishInboundOutput> async = output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
             try {
                 Thread.sleep(100);
@@ -705,8 +710,7 @@ public class IncomingPublishHandlerTest {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input,
-                final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
             throw new NullPointerException();
         }
     }

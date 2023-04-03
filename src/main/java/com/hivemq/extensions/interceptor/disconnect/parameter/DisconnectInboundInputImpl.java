@@ -60,7 +60,8 @@ public class DisconnectInboundInputImpl implements DisconnectInboundInput, Plugi
     }
 
     public @NotNull DisconnectInboundInputImpl update(final @NotNull DisconnectInboundOutputImpl output) {
-        return new DisconnectInboundInputImpl(
-                clientInformation, connectionInformation, output.getDisconnectPacket().copy());
+        return new DisconnectInboundInputImpl(clientInformation,
+                connectionInformation,
+                output.getDisconnectPacket().copy());
     }
 }

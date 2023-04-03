@@ -55,14 +55,13 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
 
         CompletableFuture<Void> returnFuture = CompletableFuture.completedFuture(null);
         for (final HiveMQExtensionEvent hiveMQExtensionEvent : sorted) {
-            returnFuture = returnFuture
-                    .thenComposeAsync((v) -> handlePluginEvent(hiveMQExtensionEvent), pluginStartStopExecutor)
-                    .handle((v, t) -> {
-                        if (t != null) {
-                            log.debug("Exception during Extension Lifecycle event handling", t);
-                        }
-                        return null;
-                    });
+            returnFuture = returnFuture.thenComposeAsync((v) -> handlePluginEvent(hiveMQExtensionEvent),
+                    pluginStartStopExecutor).handle((v, t) -> {
+                if (t != null) {
+                    log.debug("Exception during Extension Lifecycle event handling", t);
+                }
+                return null;
+            });
         }
         return returnFuture;
     }
@@ -81,19 +80,23 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
     private @NotNull CompletableFuture<Boolean> startPlugin(final @NotNull HiveMQExtensionEvent pluginEvent) {
         final String pluginId = pluginEvent.getExtensionId();
 
-        log.debug("Starting {}extension with id \"{}\" at {}", pluginEvent.isEmbedded() ? "embedded " : "", pluginId, pluginEvent.getExtensionFolder());
+        log.debug("Starting {}extension with id \"{}\" at {}",
+                pluginEvent.isEmbedded() ? "embedded " : "",
+                pluginId,
+                pluginEvent.getExtensionFolder());
         return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStart(pluginId), pluginStartStopExecutor);
     }
 
     private @NotNull CompletableFuture<Boolean> stopPlugin(final @NotNull String pluginId, final boolean embedded) {
 
         log.debug("Stopping {}extension with id {}", embedded ? "embedded " : "", pluginId);
-        return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStop(pluginId, false), pluginStartStopExecutor);
+        return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStop(pluginId, false),
+                pluginStartStopExecutor);
     }
 
     private @NotNull ImmutableList<HiveMQExtensionEvent> analyzePluginEvents(final ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents) {
         // here duplicate start priority logging can be added, once it is specified
-        return ImmutableList.sortedCopyOf(
-                Comparator.comparingInt(HiveMQExtensionEvent::getPriority).reversed(), hiveMQExtensionEvents);
+        return ImmutableList.sortedCopyOf(Comparator.comparingInt(HiveMQExtensionEvent::getPriority).reversed(),
+                hiveMQExtensionEvents);
     }
 }

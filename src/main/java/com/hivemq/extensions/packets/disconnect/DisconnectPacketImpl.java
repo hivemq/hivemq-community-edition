@@ -54,8 +54,7 @@ public class DisconnectPacketImpl implements DisconnectPacket {
     }
 
     public DisconnectPacketImpl(final @NotNull DISCONNECT disconnect) {
-        this(
-                disconnect.getReasonCode().toDisconnectReasonCode(),
+        this(disconnect.getReasonCode().toDisconnectReasonCode(),
                 disconnect.getReasonString(),
                 disconnect.getSessionExpiryInterval(),
                 disconnect.getServerReference(),
@@ -74,7 +73,8 @@ public class DisconnectPacketImpl implements DisconnectPacket {
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
+        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ?
+                Optional.empty() :
                 Optional.of(sessionExpiryInterval);
     }
 

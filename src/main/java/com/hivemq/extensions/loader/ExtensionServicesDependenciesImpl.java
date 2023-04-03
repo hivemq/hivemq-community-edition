@@ -110,7 +110,8 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
     @NotNull
     private ManagedExecutorServicePerExtension getManagedExecutorService(
             final @NotNull ClassLoader classLoader) {
-        return new ManagedExecutorServicePerExtension(
-                globalManagedExtensionExecutorService, classLoader, hiveMQExtensions);
+        return new ManagedExecutorServicePerExtension(globalManagedExtensionExecutorService,
+                classLoader,
+                hiveMQExtensions);
     }
 }

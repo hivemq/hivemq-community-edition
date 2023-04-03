@@ -73,7 +73,7 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the PUBACK Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
-     * valid PUBACK Reason Code.
+     *         valid PUBACK Reason Code.
      */
     public static @Nullable Mqtt5PubAckReasonCode fromCode(final int code) {
         for (final Mqtt5PubAckReasonCode reasonCode : VALUES) {

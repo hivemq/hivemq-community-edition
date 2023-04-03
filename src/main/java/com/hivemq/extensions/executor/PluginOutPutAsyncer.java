@@ -38,6 +38,6 @@ public interface PluginOutPutAsyncer {
      * @param <T>     an implementation of {@link com.hivemq.extensions.executor.task.PluginTaskOutput}
      * @return an {@link Async} of {@code <T>}
      */
-    @NotNull <T extends PluginTaskOutput> Async<T> asyncify(@NotNull final T output,
-                                                            @NotNull final Duration timeout);
+    @NotNull <T extends PluginTaskOutput> Async<T> asyncify(
+            @NotNull final T output, @NotNull final Duration timeout);
 }

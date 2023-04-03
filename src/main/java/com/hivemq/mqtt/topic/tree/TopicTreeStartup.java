@@ -89,16 +89,18 @@ public class TopicTreeStartup {
                             sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
 
                     if (sharedSubscription == null) {
-                        final byte flags = SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(),
-                                topic.isNoLocal());
+                        final byte flags =
+                                SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal());
 
                         topicTree.addTopic(client, topic, flags, null);
                     } else {
-                        final byte flags = SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(),
-                                topic.isNoLocal());
+                        final byte flags =
+                                SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal());
 
-                        final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(),
-                                topic.isNoLocal(), topic.isRetainAsPublished());
+                        final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(),
+                                topic.getQoS(),
+                                topic.isNoLocal(),
+                                topic.isRetainAsPublished());
 
                         topicTree.addTopic(client, sharedTopic, flags, sharedSubscription.getShareName());
                     }

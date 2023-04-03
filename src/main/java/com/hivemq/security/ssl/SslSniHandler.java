@@ -15,7 +15,7 @@
  */
 package com.hivemq.security.ssl;
 
-import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import io.netty.channel.ChannelHandlerContext;
@@ -47,13 +47,18 @@ public class SslSniHandler extends SniHandler {
     }
 
     @Override
-    protected void replaceHandler(final @NotNull ChannelHandlerContext ctx, final @Nullable String hostname, final @NotNull SslContext sslContext) throws Exception {
+    protected void replaceHandler(
+            final @NotNull ChannelHandlerContext ctx,
+            final @Nullable String hostname,
+            final @NotNull SslContext sslContext) throws Exception {
 
         if (hostname != null) {
-            final ClientConnection clientConnection = ctx.channel().attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get();
-            clientConnection.setAuthSniHostname(hostname);
+            final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
+            clientConnectionContext.setAuthSniHostname(hostname);
             if (log.isTraceEnabled()) {
-                log.trace("Client with IP '{}' sent SNI hostname '{}'", clientConnection.getChannelIP().orElse("UNKNOWN"), hostname);
+                log.trace("Client with IP '{}' sent SNI hostname '{}'",
+                        clientConnectionContext.getChannelIP().orElse("UNKNOWN"),
+                        hostname);
             }
         }
 

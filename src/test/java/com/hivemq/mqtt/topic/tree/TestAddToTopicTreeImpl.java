@@ -29,7 +29,9 @@ import org.junit.Test;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class TestAddToTopicTreeImpl {
 
@@ -82,7 +84,8 @@ public class TestAddToTopicTreeImpl {
         assertEquals(0, topicTree.segments.values().size());
 
         assertEquals(1, topicTree.rootWildcardSubscribers.size());
-        assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null), topicTree.rootWildcardSubscribers.get(0));
+        assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null),
+                topicTree.rootWildcardSubscribers.get(0));
     }
 
     @Test
@@ -94,7 +97,8 @@ public class TestAddToTopicTreeImpl {
 
         final TopicTreeNode wildcardNode = topicTree.segments.values().iterator().next();
         assertNull(wildcardNode.getChildren());
-        assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null), wildcardNode.wildcardSubscriptions.nonSharedSubscribersArray[0]);
+        assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null),
+                wildcardNode.wildcardSubscriptions.nonSharedSubscribersArray[0]);
         assertNull(wildcardNode.exactSubscriptions.nonSharedSubscribersArray);
 
         assertEquals(0, topicTree.rootWildcardSubscribers.size());
@@ -179,7 +183,12 @@ public class TestAddToTopicTreeImpl {
         assertNull(aNode.wildcardSubscriptions.nonSharedSubscribersArray);
 
         assertEquals(1, aNode.exactSubscriptions.nonSharedSubscribersMap.values().size());
-        assertTrue(aNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null)));
+        assertTrue(aNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub1",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
 
         /*
             Test the b Node
@@ -192,8 +201,18 @@ public class TestAddToTopicTreeImpl {
         assertNull(bNode.wildcardSubscriptions.nonSharedSubscribersArray);
 
         assertEquals(2, bNode.exactSubscriptions.nonSharedSubscribersMap.values().size());
-        assertTrue(bNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub2", 0, (byte) 0, null, null, null)));
-        assertTrue(bNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub3", 0, (byte) 0, null, null, null)));
+        assertTrue(bNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub2",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
+        assertTrue(bNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub3",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
 
         /*
             Test the c Node
@@ -206,7 +225,12 @@ public class TestAddToTopicTreeImpl {
         assertNull(cNode.wildcardSubscriptions.nonSharedSubscribersArray);
 
         assertEquals(1, cNode.exactSubscriptions.nonSharedSubscribersMap.size());
-        assertTrue(cNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub4", 0, (byte) 0, null, null, null)));
+        assertTrue(cNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub4",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
     }
 
     @Test
@@ -226,7 +250,8 @@ public class TestAddToTopicTreeImpl {
         assertEquals("+", firstWildcardNode.getTopicPart());
         assertEquals(1, firstWildcardNode.getChildren().length);
         assertEquals(1, firstWildcardNode.exactSubscriptions.nonSharedSubscribersArray.length);
-        assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null), firstWildcardNode.exactSubscriptions.nonSharedSubscribersArray[0]);
+        assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null),
+                firstWildcardNode.exactSubscriptions.nonSharedSubscribersArray[0]);
         assertNull(firstWildcardNode.wildcardSubscriptions.nonSharedSubscribersArray);
 
         /*
@@ -236,7 +261,8 @@ public class TestAddToTopicTreeImpl {
         assertEquals("+", secondWildcardNode.getTopicPart());
         assertNull(secondWildcardNode.getChildren());
         assertEquals(1, secondWildcardNode.exactSubscriptions.nonSharedSubscribersArray.length);
-        assertEquals(new SubscriberWithQoS("sub2", 0, (byte) 0, null, null, null), secondWildcardNode.exactSubscriptions.nonSharedSubscribersArray[0]);
+        assertEquals(new SubscriberWithQoS("sub2", 0, (byte) 0, null, null, null),
+                secondWildcardNode.exactSubscriptions.nonSharedSubscribersArray[0]);
         assertNull(secondWildcardNode.wildcardSubscriptions.nonSharedSubscribersArray);
 
         /*
@@ -256,7 +282,8 @@ public class TestAddToTopicTreeImpl {
         assertEquals(1, testWildcard.getChildren().length);
         assertNull(testWildcard.exactSubscriptions.nonSharedSubscribersArray);
         assertEquals(1, testWildcard.wildcardSubscriptions.nonSharedSubscribersArray.length);
-        assertEquals(new SubscriberWithQoS("sub4", 0, (byte) 0, null, null, null), testWildcard.wildcardSubscriptions.nonSharedSubscribersArray[0]);
+        assertEquals(new SubscriberWithQoS("sub4", 0, (byte) 0, null, null, null),
+                testWildcard.wildcardSubscriptions.nonSharedSubscribersArray[0]);
 
          /*
             test/+ node
@@ -265,7 +292,8 @@ public class TestAddToTopicTreeImpl {
         assertEquals("test", testWildcardTestNode.getTopicPart());
         assertNull(testWildcardTestNode.getChildren());
         assertEquals(1, testWildcardTestNode.exactSubscriptions.nonSharedSubscribersArray.length);
-        assertEquals(new SubscriberWithQoS("sub3", 0, (byte) 0, null, null, null), testWildcardTestNode.exactSubscriptions.nonSharedSubscribersArray[0]);
+        assertEquals(new SubscriberWithQoS("sub3", 0, (byte) 0, null, null, null),
+                testWildcardTestNode.exactSubscriptions.nonSharedSubscribersArray[0]);
         assertNull(testWildcardTestNode.wildcardSubscriptions.nonSharedSubscribersArray);
 
     }
@@ -288,7 +316,13 @@ public class TestAddToTopicTreeImpl {
         assertEquals("+", firstWildcardNode.getTopicPart());
         assertEquals(1, firstWildcardNode.getChildren().length);
         assertEquals(1, firstWildcardNode.exactSubscriptions.nonSharedSubscribersMap.size());
-        assertTrue(firstWildcardNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null)));
+        assertTrue(firstWildcardNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS(
+                "sub1",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
         assertNull(firstWildcardNode.wildcardSubscriptions.nonSharedSubscribersMap);
 
         /*
@@ -298,7 +332,13 @@ public class TestAddToTopicTreeImpl {
         assertEquals("+", secondWildcardNode.getTopicPart());
         assertNull(secondWildcardNode.getChildren());
         assertEquals(1, secondWildcardNode.exactSubscriptions.nonSharedSubscribersMap.size());
-        assertTrue(secondWildcardNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub2", 0, (byte) 0, null, null, null)));
+        assertTrue(secondWildcardNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS(
+                "sub2",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
         assertNull(secondWildcardNode.wildcardSubscriptions.nonSharedSubscribersMap);
 
         /*
@@ -318,7 +358,12 @@ public class TestAddToTopicTreeImpl {
         assertEquals(1, testWildcard.getChildren().length);
         assertNull(testWildcard.exactSubscriptions.nonSharedSubscribersMap);
         assertEquals(1, testWildcard.wildcardSubscriptions.nonSharedSubscribersMap.size());
-        assertTrue(testWildcard.wildcardSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub4", 0, (byte) 0, null, null, null)));
+        assertTrue(testWildcard.wildcardSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub4",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
 
          /*
             test/+ node
@@ -327,7 +372,13 @@ public class TestAddToTopicTreeImpl {
         assertEquals("test", testWildcardTestNode.getTopicPart());
         assertNull(testWildcardTestNode.getChildren());
         assertEquals(1, testWildcardTestNode.exactSubscriptions.nonSharedSubscribersMap.size());
-        assertTrue(testWildcardTestNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS("sub3", 0, (byte) 0, null, null, null)));
+        assertTrue(testWildcardTestNode.exactSubscriptions.nonSharedSubscribersMap.containsValue(new SubscriberWithQoS(
+                "sub3",
+                0,
+                (byte) 0,
+                null,
+                null,
+                null)));
         assertNull(testWildcardTestNode.wildcardSubscriptions.nonSharedSubscribersMap);
 
     }
@@ -335,11 +386,21 @@ public class TestAddToTopicTreeImpl {
     @Test
     public void addTopic_whenSegmentKeyLengthIsTwo_thenSubscriptionsArePresentInTree() {
         final LocalTopicTree topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
-        topicTree.addTopic("subscriber1", new Topic("topic1/1", QoS.AT_LEAST_ONCE), SubscriptionFlag.getDefaultFlags(false, false, false), null);
-        topicTree.addTopic("subscriber2", new Topic("topic1/+", QoS.AT_LEAST_ONCE), SubscriptionFlag.getDefaultFlags(false, true, true), null);
-        topicTree.addTopic("subscriber3", new Topic("+/1", QoS.AT_LEAST_ONCE), SubscriptionFlag.getDefaultFlags(false, false, false), null);
+        topicTree.addTopic("subscriber1",
+                new Topic("topic1/1", QoS.AT_LEAST_ONCE),
+                SubscriptionFlag.getDefaultFlags(false, false, false),
+                null);
+        topicTree.addTopic("subscriber2",
+                new Topic("topic1/+", QoS.AT_LEAST_ONCE),
+                SubscriptionFlag.getDefaultFlags(false, true, true),
+                null);
+        topicTree.addTopic("subscriber3",
+                new Topic("+/1", QoS.AT_LEAST_ONCE),
+                SubscriptionFlag.getDefaultFlags(false, false, false),
+                null);
 
-        final ImmutableSet<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("topic1/1").getSubscribers();
+        final ImmutableSet<SubscriberWithIdentifiers> subscribers =
+                topicTree.findTopicSubscribers("topic1/1").getSubscribers();
         assertEquals(3, subscribers.size());
     }
 }

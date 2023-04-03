@@ -100,8 +100,7 @@ public class SslFactoryTest {
         final File file = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath = file.getAbsolutePath();
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -128,8 +127,7 @@ public class SslFactoryTest {
     public void test_invalid_keystore() {
 
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(RandomStringUtils.randomAlphabetic(32))
+        final Tls tls = new Tls.Builder().withKeystorePath(RandomStringUtils.randomAlphabetic(32))
                 .withKeystoreType("JKS")
                 .withKeystorePassword(RandomStringUtils.randomAlphabetic(32))
                 .withPrivateKeyPassword(RandomStringUtils.randomAlphabetic(32))
@@ -153,8 +151,7 @@ public class SslFactoryTest {
         final File file = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath = file.getAbsolutePath();
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -187,8 +184,7 @@ public class SslFactoryTest {
 
         cipherSuites.add(chosenCipher);
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -222,8 +218,7 @@ public class SslFactoryTest {
 
         protocols.add(chosenProtocol);
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -248,8 +243,7 @@ public class SslFactoryTest {
         final File file = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath = file.getAbsolutePath();
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -277,8 +271,7 @@ public class SslFactoryTest {
         final File file = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath = file.getAbsolutePath();
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -303,8 +296,7 @@ public class SslFactoryTest {
         final File file = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath = file.getAbsolutePath();
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -330,8 +322,7 @@ public class SslFactoryTest {
         final String keystorePath = file.getAbsolutePath();
 
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -359,8 +350,7 @@ public class SslFactoryTest {
         final String keystorePath = file.getAbsolutePath();
 
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -387,8 +377,7 @@ public class SslFactoryTest {
         final String keystorePath1 = file1.getAbsolutePath();
 
 
-        final Tls tls1 = new Tls.Builder()
-                .withKeystorePath(keystorePath1)
+        final Tls tls1 = new Tls.Builder().withKeystorePath(keystorePath1)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -405,8 +394,7 @@ public class SslFactoryTest {
         final String keystorePath2 = file2.getAbsolutePath();
 
 
-        final Tls tls2 = new Tls.Builder()
-                .withKeystorePath(keystorePath2)
+        final Tls tls2 = new Tls.Builder().withKeystorePath(keystorePath2)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -437,8 +425,7 @@ public class SslFactoryTest {
         final String keystorePath = file.getAbsolutePath();
 
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -447,7 +434,8 @@ public class SslFactoryTest {
                 .withTruststoreType("JKS")
                 .withTruststorePassword("passwd1")
                 .withClientAuthMode(Tls.ClientAuthMode.OPTIONAL)
-                .withCipherSuites(Lists.newArrayList("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"))
+                .withCipherSuites(Lists.newArrayList("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                        "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"))
                 .withHandshakeTimeout(10000)
                 .build();
 
@@ -458,7 +446,9 @@ public class SslFactoryTest {
 
         final String message = logCapture.getLastCapturedLog().getFormattedMessage();
 
-        assertEquals("Enabled cipher suites for TCP Listener with TLS at address 0 and port 0: [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]", message);
+        assertEquals(
+                "Enabled cipher suites for TCP Listener with TLS at address 0 and port 0: [TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]",
+                message);
 
     }
 
@@ -469,8 +459,7 @@ public class SslFactoryTest {
         final String keystorePath = file.getAbsolutePath();
 
 
-        final Tls tls = new Tls.Builder()
-                .withKeystorePath(keystorePath)
+        final Tls tls = new Tls.Builder().withKeystorePath(keystorePath)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -490,7 +479,8 @@ public class SslFactoryTest {
 
         final String message = logCapture.getLastCapturedLog().getFormattedMessage();
 
-        assertEquals("Unknown cipher suites for TCP Listener with TLS at address 0 and port 0: [UNKNOWN_CIPHER]", message);
+        assertEquals("Unknown cipher suites for TCP Listener with TLS at address 0 and port 0: [UNKNOWN_CIPHER]",
+                message);
 
     }
 
@@ -506,8 +496,7 @@ public class SslFactoryTest {
         final File file1 = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath1 = file1.getAbsolutePath();
 
-        final Tls tls1 = new Tls.Builder()
-                .withKeystorePath(keystorePath1)
+        final Tls tls1 = new Tls.Builder().withKeystorePath(keystorePath1)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -529,8 +518,7 @@ public class SslFactoryTest {
         final File file2 = testKeyStoreGenerator.generateKeyStore("teststore", "JKS", "passwd1", "passwd2");
         final String keystorePath2 = file2.getAbsolutePath();
 
-        final Tls tls2 = new Tls.Builder()
-                .withKeystorePath(keystorePath2)
+        final Tls tls2 = new Tls.Builder().withKeystorePath(keystorePath2)
                 .withKeystoreType("JKS")
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
@@ -562,7 +550,8 @@ public class SslFactoryTest {
         assertEquals(sslParameters1.getWantClientAuth(), sslParameters2.getWantClientAuth());
         assertEquals(sslParameters1.getEnableRetransmissions(), sslParameters2.getEnableRetransmissions());
         assertEquals(sslParameters1.getMaximumPacketSize(), sslParameters2.getMaximumPacketSize());
-        assertEquals(sslParameters1.getEndpointIdentificationAlgorithm(), sslParameters2.getEndpointIdentificationAlgorithm());
+        assertEquals(sslParameters1.getEndpointIdentificationAlgorithm(),
+                sslParameters2.getEndpointIdentificationAlgorithm());
         assertEquals(sslParameters1.getSNIMatchers(), sslParameters2.getSNIMatchers());
 
         //NOTE: The constraints seem to be the same object despite parameters coming from different ssl context

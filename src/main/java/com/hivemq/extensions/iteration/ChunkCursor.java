@@ -54,9 +54,6 @@ public class ChunkCursor {
 
     @Override
     public String toString() {
-        return "ChunkCursor{" +
-                "lastKeys=" + lastKeys +
-                ", finishedBuckets=" + finishedBuckets +
-                '}';
+        return "ChunkCursor{" + "lastKeys=" + lastKeys + ", finishedBuckets=" + finishedBuckets + '}';
     }
 }

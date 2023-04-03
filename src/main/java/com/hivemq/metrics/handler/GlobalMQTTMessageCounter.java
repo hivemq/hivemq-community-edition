@@ -50,7 +50,8 @@ public class GlobalMQTTMessageCounter {
         this.bytesWrittenTotal = new LongAdder();
 
         metricsHolder.getMetricRegistry().register(BYTES_READ_TOTAL.name(), (Gauge<Long>) bytesReadTotal::longValue);
-        metricsHolder.getMetricRegistry().register(BYTES_WRITE_TOTAL.name(), (Gauge<Long>) bytesWrittenTotal::longValue);
+        metricsHolder.getMetricRegistry()
+                .register(BYTES_WRITE_TOTAL.name(), (Gauge<Long>) bytesWrittenTotal::longValue);
     }
 
     public void countInbound(final @NotNull Message message) {

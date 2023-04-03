@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -32,11 +33,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
 import util.encoder.TestMessageEncoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -54,7 +59,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(100L);
+        ClientConnection.of(channel).setClientSessionExpiryInterval(100L);
     }
 
     @Test
@@ -85,8 +90,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '7', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 //     server reference
-                0x1C, 0, 9, 'r', 'e', 'f', 'e', 'r', 'e', 'n', 'c', 'e'
-        };
+                0x1C, 0, 9, 'r', 'e', 'f', 'e', 'r', 'e', 'n', 'c', 'e'};
 
         final DISCONNECT disconnect = decode(encoded);
 
@@ -132,8 +136,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x26, 0, 5, 't', 'e', 's', 't', '5', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '6', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '7', 0, 5, 'v', 'a', 'l', 'u', 'e', //
-                0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',
-        };
+                0x26, 0, 5, 't', 'e', 's', 't', '8', 0, 5, 'v', 'a', 'l', 'u', 'e',};
 
         final DISCONNECT disconnect = decode(encoded);
 
@@ -156,8 +159,8 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
         channel = new EmbeddedChannel(new TestMessageEncoder(messageDroppedService, securityConfigurationService));
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
 
         channel.writeOutbound(disconnect);
         final ByteBuf buf = channel.readOutbound();
@@ -220,7 +223,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_header_not_valid() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -239,7 +242,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_reason_code() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -261,7 +264,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_properties_length_negative() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -286,7 +289,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_properties_length_remaining_length_to_short() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -313,7 +316,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_payload() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -342,9 +345,9 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_session_expiry_zero_overwrite() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(0L);
+        ClientConnection.of(channel).setClientSessionExpiryInterval(0L);
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -360,11 +363,13 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x11, 0, 0, 0, 100,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
-        assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("session expiry interval was set to zero"));
+        assertTrue(logCapture.getLastCapturedLog()
+                .getFormattedMessage()
+                .contains("session expiry interval was set to zero"));
 
     }
 
@@ -375,12 +380,12 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         fullConfig.mqttConfiguration().setMaxSessionExpiryInterval(80);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         //from connect
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setClientSessionExpiryInterval(50L);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        ClientConnection.of(channel).setClientSessionExpiryInterval(50L);
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -396,7 +401,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x11, 0, 0, 0, 100,
 
 
-        };
+                };
 
         final DISCONNECT disconnect = decode(encoded);
         assertEquals(80, disconnect.getSessionExpiryInterval());
@@ -406,7 +411,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_session_expiry_moreThanOnce() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -419,11 +424,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //  properties length
                 10,
                 //  session expiry interval
-                0x11, 0, 0, 0, 100,
-                0x11, 0, 0, 0, 100,
+                0x11, 0, 0, 0, 100, 0x11, 0, 0, 0, 100,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -434,7 +438,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_session_expiry_tooShort() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -461,7 +465,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_server_reference_moreThanOnce() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -474,11 +478,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //  properties length
                 12,
                 //  server reference
-                0x1C, 0, 3, 'r', 'e', 'f',
-                0x1C, 0, 3, 'r', 'e', 'f',
+                0x1C, 0, 3, 'r', 'e', 'f', 0x1C, 0, 3, 'r', 'e', 'f',
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -489,7 +492,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_server_reference_malformedMustNotChar() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -505,7 +508,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1C, 0, 3, 'r', 'e', 0,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -516,7 +519,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_server_reference_malformedShouldNotChar() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -532,7 +535,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1C, 0, 3, 'r', 'e', 0x7F,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -543,7 +546,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_server_reference_tooShort() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -570,7 +573,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_server_reference_notEnoughBytes() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -597,7 +600,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_reason_string_moreThanOnce() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -610,11 +613,10 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //  properties length
                 18,
                 //  reason string
-                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n',
-                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n',
+                0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n', 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n',
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -625,7 +627,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_reason_string_malformedMustNotChar() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -641,7 +643,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 0,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -652,7 +654,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_reason_string_malformedShouldNotChar() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -668,7 +670,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 0x7F,
 
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -679,7 +681,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_reason_string_tooShort() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -706,7 +708,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Test
     public void decode_failed_disconnect_with_reason_string_notEnoughBytes() {
 
-        final byte[] encoded = new byte[]{
+        final byte[] encoded = {
 
                 //fixed header
                 //  type, flags
@@ -747,7 +749,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
 
-        };
+                };
 
         decodeNullExpected(encoded);
 
@@ -795,7 +797,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 //   user property
                 0x26, 0,
 
-        };
+                };
 
         decodeNullExpected(encoded);
 

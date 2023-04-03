@@ -59,8 +59,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //     user properties
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -77,7 +76,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_reason_string_and_user_properties_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -91,8 +90,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   properties
                 0,
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -121,8 +119,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   properties
                 0,
                 // payload
-                0x00
-        };
+                0x00};
 
         final SUBACK subAck = new SUBACK(3,
                 ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
@@ -136,7 +133,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_user_property_request_problem_information_false() {
 
         testMessageEncoder.getSecurityConfigurationService().setAllowRequestProblemInformation(true);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setRequestProblemInformation(false);
+        ClientConnection.of(channel).setRequestProblemInformation(false);
 
         final byte[] expected = {
                 // fixed header
@@ -150,8 +147,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 //   properties
                 0,
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -183,8 +179,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 // payload
-                0x00
-        };
+                0x00};
 
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
 
@@ -237,7 +232,7 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
     public void encode_propertyLengthExceeded_omitReasonString() {
 
         final int maxPacketSize = 130;
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setMaxPacketSizeSend((long) maxPacketSize);
+        ClientConnection.of(channel).setMaxPacketSizeSend((long) maxPacketSize);
 
         final int maxUserPropertiesCount = maxPacketSize / userPropertyBytes;
         final Mqtt5UserProperties maxUserProperties = getUserProperties(maxUserPropertiesCount);

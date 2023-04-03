@@ -59,7 +59,8 @@ public class InMemorySingleWriterServiceTest {
 
 
     @Test
-    public void test_callbackExecutor_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws InterruptedException {
+    public void test_callbackExecutor_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently()
+            throws InterruptedException {
         final LinkedList<Integer> list = new LinkedList<>();
         list.add(0);
 

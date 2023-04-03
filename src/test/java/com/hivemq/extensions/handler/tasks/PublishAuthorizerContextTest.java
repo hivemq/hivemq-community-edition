@@ -18,6 +18,7 @@ package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
@@ -31,11 +32,17 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import java.time.Duration;
 
-import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.*;
-import static org.junit.Assert.*;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.FAIL;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.SUCCESS;
+import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.UNDECIDED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,8 +58,8 @@ public class PublishAuthorizerContextTest {
     @Before
     public void before() {
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME)
-                .set(new ClientConnection(channel, mock(PublishFlushHandler.class)));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
+                .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
         when(ctx.channel()).thenReturn(channel);
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         resultFuture = SettableFuture.create();
@@ -106,7 +113,7 @@ public class PublishAuthorizerContextTest {
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertTrue(result.isCompleted());
-        assertTrue(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isIncomingPublishesSkipRest());
+        assertTrue(ClientConnection.of(channel).isIncomingPublishesSkipRest());
     }
 
     @Test(timeout = 5000)
@@ -118,7 +125,7 @@ public class PublishAuthorizerContextTest {
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(DISCONNECT, result.getAuthorizationState());
         assertTrue(result.isCompleted());
-        assertTrue(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().isIncomingPublishesSkipRest());
+        assertTrue(ClientConnection.of(channel).isIncomingPublishesSkipRest());
     }
 
     @Test(timeout = 5000)

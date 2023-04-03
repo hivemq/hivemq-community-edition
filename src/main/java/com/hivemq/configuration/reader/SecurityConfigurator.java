@@ -15,9 +15,9 @@
  */
 package com.hivemq.configuration.reader;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.SecurityConfigEntity;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 public class SecurityConfigurator {
 
@@ -29,10 +29,13 @@ public class SecurityConfigurator {
     }
 
     void setSecurityConfig(@NotNull final SecurityConfigEntity securityConfigEntity) {
-        securityConfigurationService.setAllowServerAssignedClientId(securityConfigEntity.getAllowEmptyClientIdEntity().isEnabled());
+        securityConfigurationService.setAllowServerAssignedClientId(securityConfigEntity.getAllowEmptyClientIdEntity()
+                .isEnabled());
         securityConfigurationService.setValidateUTF8(securityConfigEntity.getUtf8ValidationEntity().isEnabled());
-        securityConfigurationService.setPayloadFormatValidation(securityConfigEntity.getPayloadFormatValidationEntity().isEnabled());
-        securityConfigurationService.setAllowRequestProblemInformation(securityConfigEntity.getAllowRequestProblemInformationEntity().isEnabled());
+        securityConfigurationService.setPayloadFormatValidation(securityConfigEntity.getPayloadFormatValidationEntity()
+                .isEnabled());
+        securityConfigurationService.setAllowRequestProblemInformation(securityConfigEntity.getAllowRequestProblemInformationEntity()
+                .isEnabled());
     }
 
 

@@ -122,8 +122,12 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final SubscriberWithQoS that = (SubscriberWithQoS) o;
         return qos == that.qos &&
                 flags == that.flags &&
@@ -159,9 +163,6 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
     @NotNull
     @Override
     public String toString() {
-        return "SubscriberWithQoS{" +
-                "subscriber='" + subscriber + '\'' +
-                ", qos=" + qos +
-                '}';
+        return "SubscriberWithQoS{" + "subscriber='" + subscriber + '\'' + ", qos=" + qos + '}';
     }
 }

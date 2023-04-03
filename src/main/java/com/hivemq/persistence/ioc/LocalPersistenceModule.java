@@ -23,7 +23,10 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl;
-import com.hivemq.persistence.clientsession.*;
+import com.hivemq.persistence.clientsession.ClientSessionPersistence;
+import com.hivemq.persistence.clientsession.ClientSessionPersistenceProvider;
+import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
+import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistenceProvider;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.connection.ConnectionPersistenceImpl;
 import com.hivemq.persistence.ioc.provider.local.IncomingMessageFlowPersistenceLocalProvider;
@@ -85,7 +88,8 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
 
         /* Payload Persistence */
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY) {
-            bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class));
+            bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(
+                    PublishPayloadNoopPersistenceImpl.class));
         } else {
             bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
             bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(

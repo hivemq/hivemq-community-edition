@@ -20,14 +20,16 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.hivemq.common.shutdown.HiveMQShutdownHook.Priority;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class ShutdownHooksTest {
 

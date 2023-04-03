@@ -38,10 +38,10 @@ public interface ClientSessionSubscriptionPersistence {
      *
      * @param client the client to add the subscription for.
      * @param topic  the topic of the subscription.
-     * @return A future containing the {@link SubscriptionResult} which completes as soon as the subscription is persisted.
+     * @return A future containing the {@link SubscriptionResult} which completes as soon as the subscription is
+     *         persisted.
      */
-    @NotNull
-    ListenableFuture<SubscriptionResult> addSubscription(@NotNull String client, @NotNull Topic topic);
+    @NotNull ListenableFuture<SubscriptionResult> addSubscription(@NotNull String client, @NotNull Topic topic);
 
     /**
      * Get all subscriptions for a specific client.
@@ -59,8 +59,7 @@ public interface ClientSessionSubscriptionPersistence {
      * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
      * @return a result containing the new cursor and a map of clientIds to their subscriptions
      */
-    @NotNull
-    ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> getAllLocalSubscribersChunk(@NotNull ChunkCursor cursor);
+    @NotNull ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> getAllLocalSubscribersChunk(@NotNull ChunkCursor cursor);
 
 
     /**
@@ -70,56 +69,52 @@ public interface ClientSessionSubscriptionPersistence {
      * @param topic  the topic of the subscription.
      * @return A future which completes as soon as the subscription is removed.
      */
-    @NotNull
-    ListenableFuture<Void> remove(@NotNull String client, @NotNull String topic);
+    @NotNull ListenableFuture<Void> remove(@NotNull String client, @NotNull String topic);
 
     /**
      * Close the persistence.
      *
      * @return a future which completes as soon as the persistence is closed.
      */
-    @NotNull
-    ListenableFuture<Void> closeDB();
+    @NotNull ListenableFuture<Void> closeDB();
 
     /**
      * Add a set of {@link Topic}s as subscriptions for a specific client.
      *
      * @param clientId the client to add the subscriptions for.
-     * @param topics the topics to add.
-     * @return A future containing an immutable list of {@link SubscriptionResult}s which completes as soon as the subscriptions are persisted.
+     * @param topics   the topics to add.
+     * @return A future containing an immutable list of {@link SubscriptionResult}s which completes as soon as the
+     *         subscriptions are persisted.
      */
     @NotNull
     @ReadOnly
-    ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<Topic> topics);
+    ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptions(
+            @NotNull String clientId, @NotNull ImmutableSet<Topic> topics);
 
     /**
      * Remove a set of topics subscription for a specific client and a specific topic.
      *
      * @param clientId the client to remove the subscriptions for.
-     * @param topics the topics of the subscriptions.
-     *
+     * @param topics   the topics of the subscriptions.
      * @return A future which completes as soon as the subscriptions are removed.
      */
-    @NotNull
-    ListenableFuture<Void> removeSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<String> topics);
+    @NotNull ListenableFuture<Void> removeSubscriptions(@NotNull String clientId, @NotNull ImmutableSet<String> topics);
 
     /**
      * Remove all subscriptions for a specific client.
      *
      * @param clientId the client to remove the subscriptions for.
-     *
      * @return A future which completes as soon as the subscriptions are removed.
      */
-    @NotNull
-    ListenableFuture<Void> removeAll(@NotNull String clientId);
+    @NotNull ListenableFuture<Void> removeAll(@NotNull String clientId);
 
     /**
-     * Removes all subscriptions for the local persistence. Topic tree entries associated with the subscription will NOT be updated!
+     * Removes all subscriptions for the local persistence. Topic tree entries associated with the subscription will NOT
+     * be updated!
      *
      * @param clientId for which the subscriptions should be removed
      */
-    @NotNull
-    ListenableFuture<Void> removeAllLocally(@NotNull String clientId);
+    @NotNull ListenableFuture<Void> removeAllLocally(@NotNull String clientId);
 
     /**
      * Trigger a cleanup for a specific bucket
@@ -127,8 +122,7 @@ public interface ClientSessionSubscriptionPersistence {
      * @param bucketIndex the index of the bucket
      * @return a future which completes as soon as the clean up is done.
      */
-    @NotNull
-    ListenableFuture<Void> cleanUp(int bucketIndex);
+    @NotNull ListenableFuture<Void> cleanUp(int bucketIndex);
 
     /**
      * Request all shared subscription for a given client.
@@ -147,7 +141,8 @@ public interface ClientSessionSubscriptionPersistence {
      * @param clientId   the client's id.
      * @param sharedSubs the shared subscriptions to invalidate cache for.
      */
-    void invalidateSharedSubscriptionCacheAndPoll(@NotNull String clientId, @NotNull ImmutableSet<Subscription> sharedSubs);
+    void invalidateSharedSubscriptionCacheAndPoll(
+            @NotNull String clientId, @NotNull ImmutableSet<Subscription> sharedSubs);
 
 
 }

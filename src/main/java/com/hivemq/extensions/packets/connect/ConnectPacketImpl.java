@@ -95,8 +95,7 @@ public class ConnectPacketImpl implements ConnectPacket {
     }
 
     public ConnectPacketImpl(final @NotNull CONNECT connect, final long timestamp) {
-        this(
-                MqttVersionUtil.toMqttVersion(connect.getProtocolVersion()),
+        this(MqttVersionUtil.toMqttVersion(connect.getProtocolVersion()),
                 connect.getClientIdentifier(),
                 connect.isCleanStart(),
                 connect.getSessionExpiryInterval(),
@@ -110,7 +109,9 @@ public class ConnectPacketImpl implements ConnectPacket {
                 (connect.getPassword() == null) ? null : ByteBuffer.wrap(connect.getPassword()),
                 connect.getAuthMethod(),
                 (connect.getAuthData() == null) ? null : ByteBuffer.wrap(connect.getAuthData()),
-                (connect.getWillPublish() == null) ? null : new WillPublishPacketImpl(connect.getWillPublish(), timestamp),
+                (connect.getWillPublish() == null) ?
+                        null :
+                        new WillPublishPacketImpl(connect.getWillPublish(), timestamp),
                 UserPropertiesImpl.of(connect.getUserProperties().asList()));
     }
 
@@ -223,8 +224,21 @@ public class ConnectPacketImpl implements ConnectPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mqttVersion, clientId, cleanStart, sessionExpiryInterval, keepAlive, receiveMaximum,
-                maximumPacketSize, topicAliasMaximum, requestProblemInformation, requestResponseInformation, userName,
-                password, authenticationMethod, authenticationData, willPublish, userProperties);
+        return Objects.hash(mqttVersion,
+                clientId,
+                cleanStart,
+                sessionExpiryInterval,
+                keepAlive,
+                receiveMaximum,
+                maximumPacketSize,
+                topicAliasMaximum,
+                requestProblemInformation,
+                requestResponseInformation,
+                userName,
+                password,
+                authenticationMethod,
+                authenticationData,
+                willPublish,
+                userProperties);
     }
 }

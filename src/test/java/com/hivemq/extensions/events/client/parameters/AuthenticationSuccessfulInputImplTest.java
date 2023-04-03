@@ -16,9 +16,11 @@
 package com.hivemq.extensions.events.client.parameters;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Test;
+import util.DummyClientConnection;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -36,10 +38,11 @@ public class AuthenticationSuccessfulInputImplTest {
     @Test
     public void test_construction_values() {
         final EmbeddedChannel channel = new EmbeddedChannel();
-        final ClientConnection clientConnection = new ClientConnection(channel, null);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final AuthenticationSuccessfulInputImpl successfulInput = new AuthenticationSuccessfulInputImpl("client", channel);
+        final AuthenticationSuccessfulInputImpl successfulInput =
+                new AuthenticationSuccessfulInputImpl("client", channel);
         assertNotNull(successfulInput);
         assertNotNull(successfulInput.get());
         assertNotNull(successfulInput.getClientInformation());

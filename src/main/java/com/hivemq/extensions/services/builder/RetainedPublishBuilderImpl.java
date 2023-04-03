@@ -104,9 +104,15 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
 
-        return fromComplete(publish.getQos(), publish.getTopic(), publish.getPayloadFormatIndicator(),
-                publish.getMessageExpiryInterval(), publish.getResponseTopic(), publish.getCorrelationData(),
-                publish.getContentType(), publish.getPayload(), publish.getUserProperties());
+        return fromComplete(publish.getQos(),
+                publish.getTopic(),
+                publish.getPayloadFormatIndicator(),
+                publish.getMessageExpiryInterval(),
+                publish.getResponseTopic(),
+                publish.getCorrelationData(),
+                publish.getContentType(),
+                publish.getPayload(),
+                publish.getUserProperties());
     }
 
     @NotNull
@@ -119,21 +125,28 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
 
-        return fromComplete(publish.getQos(), publish.getTopic(), publish.getPayloadFormatIndicator(),
-                publish.getMessageExpiryInterval(), publish.getResponseTopic(), publish.getCorrelationData(),
-                publish.getContentType(), publish.getPayload(), publish.getUserProperties());
+        return fromComplete(publish.getQos(),
+                publish.getTopic(),
+                publish.getPayloadFormatIndicator(),
+                publish.getMessageExpiryInterval(),
+                publish.getResponseTopic(),
+                publish.getCorrelationData(),
+                publish.getContentType(),
+                publish.getPayload(),
+                publish.getUserProperties());
     }
 
     @NotNull
-    private RetainedPublishBuilder fromComplete(@NotNull final Qos qos,
-                                                @NotNull final String topic,
-                                                @NotNull final Optional<PayloadFormatIndicator> payloadFormatIndicator,
-                                                @NotNull final Optional<Long> messageExpiryInterval,
-                                                @NotNull final Optional<String> responseTopic,
-                                                @NotNull final Optional<ByteBuffer> correlationData,
-                                                @NotNull final Optional<String> contentType,
-                                                @NotNull final Optional<ByteBuffer> payload,
-                                                @NotNull final UserProperties userProperties) {
+    private RetainedPublishBuilder fromComplete(
+            @NotNull final Qos qos,
+            @NotNull final String topic,
+            @NotNull final Optional<PayloadFormatIndicator> payloadFormatIndicator,
+            @NotNull final Optional<Long> messageExpiryInterval,
+            @NotNull final Optional<String> responseTopic,
+            @NotNull final Optional<ByteBuffer> correlationData,
+            @NotNull final Optional<String> contentType,
+            @NotNull final Optional<ByteBuffer> payload,
+            @NotNull final UserProperties userProperties) {
         this.qos(qos);
         this.topic(topic);
         this.payloadFormatIndicator(payloadFormatIndicator.orElse(null));
@@ -159,7 +172,9 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder topic(@NotNull final String topic) {
-        PluginBuilderUtil.checkTopic(topic, restrictionsConfig.maxTopicLength(), securityConfigurationService.validateUTF8());
+        PluginBuilderUtil.checkTopic(topic,
+                restrictionsConfig.maxTopicLength(),
+                securityConfigurationService.validateUTF8());
         this.topic = topic;
         return this;
     }
@@ -174,7 +189,8 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
+                mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -229,7 +245,14 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
 
-        return new RetainedPublishImpl(qos, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
-                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
+        return new RetainedPublishImpl(qos,
+                topic,
+                payloadFormatIndicator,
+                messageExpiryInterval,
+                responseTopic,
+                correlationData,
+                contentType,
+                payload,
+                UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

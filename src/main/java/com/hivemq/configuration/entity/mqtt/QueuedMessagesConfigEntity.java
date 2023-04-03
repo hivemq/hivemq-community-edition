@@ -17,7 +17,13 @@ package com.hivemq.configuration.entity.mqtt;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "queued-messages")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -27,10 +33,8 @@ public class QueuedMessagesConfigEntity {
     @XmlEnum
     @XmlType(name = "strategy")
     public enum QueuedMessagesStrategy {
-        @XmlEnumValue("discard-oldest")
-        DISCARD_OLDEST,
-        @XmlEnumValue("discard")
-        DISCARD
+        @XmlEnumValue("discard-oldest") DISCARD_OLDEST,
+        @XmlEnumValue("discard") DISCARD
     }
 
     @XmlElement(name = "max-queue-size", defaultValue = "1000")

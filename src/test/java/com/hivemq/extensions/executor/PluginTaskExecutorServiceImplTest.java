@@ -23,7 +23,16 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import com.hivemq.extensions.executor.task.*;
+import com.hivemq.extensions.executor.task.PluginInOutTask;
+import com.hivemq.extensions.executor.task.PluginInOutTaskContext;
+import com.hivemq.extensions.executor.task.PluginInTask;
+import com.hivemq.extensions.executor.task.PluginInTaskContext;
+import com.hivemq.extensions.executor.task.PluginOutTask;
+import com.hivemq.extensions.executor.task.PluginOutTaskContext;
+import com.hivemq.extensions.executor.task.PluginTaskExecution;
+import com.hivemq.extensions.executor.task.PluginTaskExecutor;
+import com.hivemq.extensions.executor.task.PluginTaskInput;
+import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -35,7 +44,10 @@ import javax.inject.Provider;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Christoph Schäbel
@@ -68,21 +80,17 @@ public class PluginTaskExecutorServiceImplTest {
     @Test
     public void test_inout_executed_in_the_right_executor() {
 
-        executorService.handlePluginInOutTaskExecution(
-                new TestPluginInOutContext(getIdForBucket(0)),
+        executorService.handlePluginInOutTaskExecution(new TestPluginInOutContext(getIdForBucket(0)),
                 TestPluginTaskInput::new,
                 TestPluginTaskOutput::new,
-                new TestPluginInOutTask(classloader)
-        );
+                new TestPluginInOutTask(classloader));
 
         verify(executor1, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
 
-        executorService.handlePluginInOutTaskExecution(
-                new TestPluginInOutContext(getIdForBucket(1)),
+        executorService.handlePluginInOutTaskExecution(new TestPluginInOutContext(getIdForBucket(1)),
                 TestPluginTaskInput::new,
                 TestPluginTaskOutput::new,
-                new TestPluginInOutTask(classloader)
-        );
+                new TestPluginInOutTask(classloader));
 
         verify(executor2, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
 
@@ -91,19 +99,15 @@ public class PluginTaskExecutorServiceImplTest {
     @Test
     public void test_in_executed_in_the_right_executor() {
 
-        executorService.handlePluginInTaskExecution(
-                new TestPluginInContext(getIdForBucket(0)),
+        executorService.handlePluginInTaskExecution(new TestPluginInContext(getIdForBucket(0)),
                 TestPluginTaskInput::new,
-                new TestPluginInTask(classloader)
-        );
+                new TestPluginInTask(classloader));
 
         verify(executor1, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
 
-        executorService.handlePluginInTaskExecution(
-                new TestPluginInContext(getIdForBucket(1)),
+        executorService.handlePluginInTaskExecution(new TestPluginInContext(getIdForBucket(1)),
                 TestPluginTaskInput::new,
-                new TestPluginInTask(classloader)
-        );
+                new TestPluginInTask(classloader));
 
         verify(executor2, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
 
@@ -112,19 +116,15 @@ public class PluginTaskExecutorServiceImplTest {
     @Test
     public void test_out_executed_in_the_right_executor() {
 
-        executorService.handlePluginOutTaskExecution(
-                new TestPluginOutContext(getIdForBucket(0)),
+        executorService.handlePluginOutTaskExecution(new TestPluginOutContext(getIdForBucket(0)),
                 TestPluginTaskOutput::new,
-                new TestPluginOutTask(classloader)
-        );
+                new TestPluginOutTask(classloader));
 
         verify(executor1, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
 
-        executorService.handlePluginOutTaskExecution(
-                new TestPluginOutContext(getIdForBucket(1)),
+        executorService.handlePluginOutTaskExecution(new TestPluginOutContext(getIdForBucket(1)),
                 TestPluginTaskOutput::new,
-                new TestPluginOutTask(classloader)
-        );
+                new TestPluginOutTask(classloader));
 
         verify(executor2, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
 

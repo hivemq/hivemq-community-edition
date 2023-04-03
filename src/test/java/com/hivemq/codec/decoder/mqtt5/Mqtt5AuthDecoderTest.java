@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.auth.AUTH;
@@ -26,9 +27,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import util.DummyClientConnection;
 import util.TestMqttDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Waldemar Ruck
@@ -40,8 +45,8 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
     @Before
     public void before() {
 
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().setProtocolVersion(ProtocolVersion.MQTTv5);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
     }
 
     // Tests for Fixed/Variable Header
@@ -59,15 +64,14 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         decodeNok(encoded0001);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded0010 = {
                 // fixed header
@@ -81,15 +85,14 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         decodeNok(encoded0010);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded0100 = {
                 // fixed header
@@ -103,15 +106,14 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         decodeNok(encoded0100);
 
         channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new ClientConnection(channel, null);
+        clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
 
         final byte[] encoded1000 = {
                 // fixed header
@@ -125,8 +127,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         decodeNok(encoded1000);
     }
@@ -148,8 +149,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -196,8 +196,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   remaining length
                 1,
                 // variable header
-                (byte) successCode.getCode()
-        };
+                (byte) successCode.getCode()};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -225,8 +224,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -250,8 +248,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         decodeNok(encoded);
     }
@@ -266,24 +263,149 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 (byte) 0b1111_0000,
                 //   remaining length (132)
                 // with reason code (byte) (128 + 4), 1,
-                (byte) (128 + 4), 1,
+                (byte) (128 + 4),
+                1,
                 // variable header
                 //   reason code (continue)
                 (byte) reasonCode.getCode(),
                 //   properties (129)
-                (byte) (128 + 1), 1,
+                (byte) (128 + 1),
+                1,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
+                0x15,
+                0,
+                8,
+                'G',
+                'S',
+                '2',
+                '-',
+                'K',
+                'R',
+                'B',
+                '5',
                 //     auth data
-                0x16, 0, 60, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                0x16,
+                0,
+                60,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
                 //     reason string
-                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e',
+                0x1F,
+                0,
+                8,
+                'c',
+                'o',
+                'n',
+                't',
+                'i',
+                'n',
+                'u',
+                'e',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 6, 'v', 'a', 'l', 'u', 'e', '2', //
-                0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e',
-        };
+                0x26,
+                0,
+                4,
+                't',
+                'e',
+                's',
+                't',
+                0,
+                5,
+                'v',
+                'a',
+                'l',
+                'u',
+                'e',
+                //
+                0x26,
+                0,
+                4,
+                't',
+                'e',
+                's',
+                't',
+                0,
+                6,
+                'v',
+                'a',
+                'l',
+                'u',
+                'e',
+                '2',
+                //
+                0x26,
+                0,
+                5,
+                't',
+                'e',
+                's',
+                't',
+                '2',
+                0,
+                5,
+                'v',
+                'a',
+                'l',
+                'u',
+                'e',};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -292,8 +414,67 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
         assertEquals("GS2-KRB5", auth.getAuthMethod());
         assertEquals("continue", auth.getReasonString());
 
-        assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, auth.getAuthData());
+        assertArrayEquals(new byte[]{
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10}, auth.getAuthData());
 
         final ImmutableList<MqttUserProperty> userProperties = auth.getUserProperties().asList();
         assertEquals(3, userProperties.size());
@@ -323,8 +504,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -347,8 +527,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 4,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -371,8 +550,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 5,
                 //     reason string
-                0x1F, 0, 2, 'r', 'e'
-        };
+                0x1F, 0, 2, 'r', 'e'};
 
         decodeNok(encoded);
     }
@@ -391,8 +569,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 5,
                 //     reason string
-                0x1F, 0, 2, 'r', 'e'
-        };
+                0x1F, 0, 2, 'r', 'e'};
 
         decodeNok(encoded);
 
@@ -413,8 +590,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 0x7F, 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 0x7F, 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -435,8 +611,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     reason string
-                0x1F, 0, 2, 0x7F, 'e'
-        };
+                0x1F, 0, 2, 0x7F, 'e'};
 
         decodeNok(encoded);
     }
@@ -455,8 +630,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 0x7F, 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 0x7F, 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -478,8 +652,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     user properties
-                0x26, 0, 4, 0x7F, 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 0x7F, 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         decodeNok(encoded);
     }
@@ -499,8 +672,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 0, 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 0, 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -521,8 +693,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     reason string
-                0x1F, 0, 2, 0, 'e'
-        };
+                0x1F, 0, 2, 0, 'e'};
 
         decodeNok(encoded);
     }
@@ -541,8 +712,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 0, 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 0, 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -564,8 +734,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     user properties
-                0x26, 0, 4, 0, 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 0, 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         decodeNok(encoded);
     }
@@ -587,8 +756,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     auth data
-                0x16, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1
-        };
+                0x16, 0, 8, 1, 1, 1, 1, 1, 1, 1, 1};
 
         decodeNok(encoded);
     }
@@ -609,8 +777,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     auth data
-                0x16, 0, 1, 1
-        };
+                0x16, 0, 1, 1};
 
         decodeNok(encoded);
     }
@@ -631,8 +798,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     auth data
-                0x16, 0, 1, 1
-        };
+                0x16, 0, 1, 1};
 
         decodeNok(encoded);
     }
@@ -649,8 +815,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   reason code (continue)
                 (byte) reasonCode.getCode(),
                 //   properties
-                8
-        };
+                8};
 
         decodeNok(encoded);
     }
@@ -660,8 +825,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
         final byte[] encoded = {
                 // fixed header
                 //   type, flags
-                (byte) 0b1111_0000,
-        };
+                (byte) 0b1111_0000,};
 
         decodeNok(encoded);
     }
@@ -682,8 +846,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 //     auth method
-                0x18
-        };
+                0x18};
 
         decodeNok(encoded);
     }
@@ -702,9 +865,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 12,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
-                0x04
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5', 0x04};
 
         decodeNok(encoded);
     }
@@ -726,9 +887,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     auth data
-                0x16, 0, 1, 1,
-                0x16, 0, 1, 1
-        };
+                0x16, 0, 1, 1, 0x16, 0, 1, 1};
 
         decodeNok(encoded);
     }
@@ -749,9 +908,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5', 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -772,9 +929,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     reason string
-                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e',
-                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e'
-        };
+                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e', 0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e'};
 
         decodeNok(encoded);
     }
@@ -794,11 +949,81 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
+                0x15,
+                0,
+                8,
+                'G',
+                'S',
+                '2',
+                '-',
+                'K',
+                'R',
+                'B',
+                '5',
                 //     auth data
-                0x16, 0, 60, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-        };
+                0x16,
+                0,
+                60,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -824,8 +1049,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     reason string
-                0x1F, 0, 7, 'a', 'e', 'a', 'b', 'c', 'd', 'r'
-        };
+                0x1F, 0, 7, 'a', 'e', 'a', 'b', 'c', 'd', 'r'};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -851,8 +1075,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         final AUTH auth = decodeAuth(encoded);
         assertNotNull(auth);
@@ -879,8 +1102,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         decodeNok(encoded);
     }
@@ -901,8 +1123,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 1, 'x',
                 //     user properties
-                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'
-        };
+                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'};
 
         decodeNok(encoded);
     }
@@ -921,8 +1142,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 -1,
                 //     auth method
-                0x15, 0, 1, 'x'
-        };
+                0x15, 0, 1, 'x'};
 
         decodeNok(encoded);
     }
@@ -941,8 +1161,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 11,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -961,8 +1180,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 -3,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -981,8 +1199,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 10,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }
@@ -1003,8 +1220,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 //     reason string
-                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e',
-        };
+                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e',};
 
         decodeNok(encoded);
     }
@@ -1025,8 +1241,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //     auth method
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
                 //     reason string
-                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e',
-        };
+                0x1F, 0, 8, 'c', 'o', 'n', 't', 'i', 'n', 'u', 'e',};
 
         decodeNok(encoded);
     }
@@ -1045,8 +1260,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
                 //   properties
                 15,
                 //     auth method
-                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'
-        };
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5'};
 
         decodeNok(encoded);
     }

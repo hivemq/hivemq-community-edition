@@ -48,7 +48,8 @@ import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
  * @since 4.5.0
  */
 @LazySingleton
-public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersistence implements PublishPayloadLocalPersistence_4_4 {
+public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersistence
+        implements PublishPayloadLocalPersistence_4_4 {
 
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadXodusLocalPersistence.class);
 
@@ -115,8 +116,7 @@ public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersisten
             try (final Cursor cursor = bucket.getStore().openCursor(transaction)) {
 
                 int chunkIndex = 0;
-                ByteIterable entry =
-                        cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, chunkIndex)));
+                ByteIterable entry = cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, chunkIndex)));
                 if (entry == null) {
                     return null;
                 }
@@ -144,8 +144,11 @@ public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersisten
 
             final byte[] result = new byte[resultSize];
             for (final Map.Entry<Long, byte[]> entry : chunks.entrySet()) {
-                System.arraycopy(
-                        entry.getValue(), 0, result, (int) (entry.getKey() * CHUNK_SIZE), entry.getValue().length);
+                System.arraycopy(entry.getValue(),
+                        0,
+                        result,
+                        (int) (entry.getKey() * CHUNK_SIZE),
+                        entry.getValue().length);
             }
             return result;
         });

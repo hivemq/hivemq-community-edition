@@ -15,11 +15,11 @@
  */
 package com.hivemq.configuration.entity;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.security.AllowEmptyClientIdEntity;
 import com.hivemq.configuration.entity.security.PayloadFormatValidationEntity;
 import com.hivemq.configuration.entity.security.RequestProblemInformationEntityConfig;
 import com.hivemq.configuration.entity.security.UTF8ValidationEntity;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -45,7 +45,8 @@ public class SecurityConfigEntity {
     private @NotNull AllowEmptyClientIdEntity allowEmptyClientIdEntity = new AllowEmptyClientIdEntity();
 
     @XmlElementRef(required = false)
-    private @NotNull RequestProblemInformationEntityConfig allowRequestProblemInformationEntity = new RequestProblemInformationEntityConfig();
+    private @NotNull RequestProblemInformationEntityConfig allowRequestProblemInformationEntity =
+            new RequestProblemInformationEntityConfig();
 
     public @NotNull PayloadFormatValidationEntity getPayloadFormatValidationEntity() {
         return payloadFormatValidationEntity;

@@ -18,10 +18,20 @@ package com.hivemq.configuration.reader;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.hivemq.configuration.entity.listener.*;
+import com.hivemq.configuration.entity.listener.ListenerEntity;
+import com.hivemq.configuration.entity.listener.TCPListenerEntity;
+import com.hivemq.configuration.entity.listener.TLSEntity;
+import com.hivemq.configuration.entity.listener.TlsTCPListenerEntity;
+import com.hivemq.configuration.entity.listener.TlsWebsocketListenerEntity;
+import com.hivemq.configuration.entity.listener.WebsocketListenerEntity;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
 import com.hivemq.configuration.info.SystemInformation;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.Tls;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -123,9 +133,9 @@ public class ListenerConfigurator {
     @NotNull
     private String getName(final @NotNull ListenerEntity entity, final @NotNull String defaultPrefix) {
 
-        final String chosenName =
-                (entity.getName() == null || entity.getName().trim().isEmpty()) ? defaultPrefix + entity.getPort() :
-                        entity.getName();
+        final String chosenName = (entity.getName() == null || entity.getName().trim().isEmpty()) ?
+                defaultPrefix + entity.getPort() :
+                entity.getName();
 
         if (chosenNames.contains(chosenName)) {
 
@@ -135,8 +145,7 @@ public class ListenerConfigurator {
                 newName = chosenName + "-" + count++;
             }
 
-            log.warn(
-                    "Name '{}' already in use. Renaming listener with address '{}' and port '{}' to: '{}'",
+            log.warn("Name '{}' already in use. Renaming listener with address '{}' and port '{}' to: '{}'",
                     chosenName,
                     entity.getBindAddress(),
                     entity.getPort(),

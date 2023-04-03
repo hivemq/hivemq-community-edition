@@ -65,18 +65,19 @@ public class Tls {
      * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher suites
      * @since 3.3
      */
-    protected Tls(final @NotNull String keystorePath,
-                  final @NotNull String keystorePassword,
-                  final @NotNull String keystoreType,
-                  final @NotNull String privateKeyPassword,
-                  final @Nullable String truststorePath,
-                  final @Nullable String truststorePassword,
-                  final @Nullable String truststoreType,
-                  final int handshakeTimeout,
-                  final @NotNull ClientAuthMode clientAuthMode,
-                  final @NotNull List<String> protocols,
-                  final @NotNull List<String> cipherSuites,
-                  final @Nullable Boolean preferServerCipherSuites) {
+    protected Tls(
+            final @NotNull String keystorePath,
+            final @NotNull String keystorePassword,
+            final @NotNull String keystoreType,
+            final @NotNull String privateKeyPassword,
+            final @Nullable String truststorePath,
+            final @Nullable String truststorePassword,
+            final @Nullable String truststoreType,
+            final int handshakeTimeout,
+            final @NotNull ClientAuthMode clientAuthMode,
+            final @NotNull List<String> protocols,
+            final @NotNull List<String> cipherSuites,
+            final @Nullable Boolean preferServerCipherSuites) {
 
         checkNotNull(clientAuthMode, "clientAuthMode must not be null");
         checkNotNull(protocols, "protocols must not be null");
@@ -181,27 +182,52 @@ public class Tls {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final Tls tls = (Tls) o;
 
-        if (!keystorePath.equals(tls.keystorePath)) return false;
-        if (!keystorePassword.equals(tls.keystorePassword)) return false;
-        if (!keystoreType.equals(tls.keystoreType)) return false;
-        if (!privateKeyPassword.equals(tls.privateKeyPassword)) return false;
-        if (truststorePath != null ? !truststorePath.equals(tls.truststorePath) : tls.truststorePath != null)
+        if (!keystorePath.equals(tls.keystorePath)) {
             return false;
-        if (truststorePassword != null ? !truststorePassword.equals(tls.truststorePassword) : tls.truststorePassword != null)
+        }
+        if (!keystorePassword.equals(tls.keystorePassword)) {
             return false;
-        if (truststoreType != null ? !truststoreType.equals(tls.truststoreType) : tls.truststoreType != null)
+        }
+        if (!keystoreType.equals(tls.keystoreType)) {
             return false;
-        if (handshakeTimeout != tls.handshakeTimeout)
+        }
+        if (!privateKeyPassword.equals(tls.privateKeyPassword)) {
             return false;
-        if (clientAuthMode != tls.clientAuthMode) return false;
-        if (!protocols.equals(tls.protocols)) return false;
-        if (preferServerCipherSuites != null ? !preferServerCipherSuites.equals(tls.preferServerCipherSuites) : tls.preferServerCipherSuites != null)
+        }
+        if (truststorePath != null ? !truststorePath.equals(tls.truststorePath) : tls.truststorePath != null) {
             return false;
+        }
+        if (truststorePassword != null ?
+                !truststorePassword.equals(tls.truststorePassword) :
+                tls.truststorePassword != null) {
+            return false;
+        }
+        if (truststoreType != null ? !truststoreType.equals(tls.truststoreType) : tls.truststoreType != null) {
+            return false;
+        }
+        if (handshakeTimeout != tls.handshakeTimeout) {
+            return false;
+        }
+        if (clientAuthMode != tls.clientAuthMode) {
+            return false;
+        }
+        if (!protocols.equals(tls.protocols)) {
+            return false;
+        }
+        if (preferServerCipherSuites != null ?
+                !preferServerCipherSuites.equals(tls.preferServerCipherSuites) :
+                tls.preferServerCipherSuites != null) {
+            return false;
+        }
         return cipherSuites.equals(tls.cipherSuites);
     }
 

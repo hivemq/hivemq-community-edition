@@ -29,7 +29,8 @@ import javax.inject.Singleton;
  * @since 4.0
  */
 @Singleton
-public class Mqtt5PubCompEncoder extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBCOMP, Mqtt5PubCompReasonCode> {
+public class Mqtt5PubCompEncoder extends
+        Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBCOMP, Mqtt5PubCompReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.PUBCOMP.ordinal() << 4;
 

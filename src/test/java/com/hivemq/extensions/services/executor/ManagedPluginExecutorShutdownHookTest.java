@@ -25,7 +25,10 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @since 4.0.0
@@ -53,8 +56,7 @@ public class ManagedPluginExecutorShutdownHookTest {
         final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook =
                 new ManagedPluginExecutorShutdownHook(executorService, 60);
 
-        when(executorService.awaitTermination(
-                anyLong(),
+        when(executorService.awaitTermination(anyLong(),
                 any(TimeUnit.class))).thenThrow(new InterruptedException("test"));
         pluginExecutorShutdownHook.run();
 

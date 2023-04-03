@@ -16,7 +16,11 @@
 package com.hivemq.configuration.service.impl.listener;
 
 import com.google.common.collect.ImmutableList;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +46,12 @@ public class ListenerConfigurationServiceImpl implements ListenerConfigurationSe
 
     @Override
     public <T extends Listener> void addListener(final @NotNull T listener) {
-        if (listener.getClass().equals(TcpListener.class) || listener.getClass().equals(TlsTcpListener.class) ||
+        if (listener.getClass().equals(TcpListener.class) ||
+                listener.getClass().equals(TlsTcpListener.class) ||
                 listener.getClass().equals(WebsocketListener.class) ||
                 listener.getClass().equals(TlsWebsocketListener.class)) {
 
-            log.debug(
-                    "Adding {} on bind address {} and port {}. Name: {}.",
+            log.debug("Adding {} on bind address {} and port {}. Name: {}.",
                     listener.readableName(),
                     listener.getBindAddress(),
                     listener.getPort(),

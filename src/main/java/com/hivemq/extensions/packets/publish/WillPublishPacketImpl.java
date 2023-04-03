@@ -52,8 +52,7 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
             final long willDelay,
             final long timestamp) {
 
-        super(
-                topic,
+        super(topic,
                 qos,
                 qos,
                 0,
@@ -72,13 +71,13 @@ public class WillPublishPacketImpl extends PublishPacketImpl implements WillPubl
     }
 
     public WillPublishPacketImpl(final @NotNull MqttWillPublish willPublish, final long timestamp) {
-        this(
-                willPublish.getTopic(),
+        this(willPublish.getTopic(),
                 willPublish.getQos().toQos(),
                 (willPublish.getPayload() == null) ? null : ByteBuffer.wrap(willPublish.getPayload()),
                 willPublish.isRetain(),
                 willPublish.getMessageExpiryInterval(),
-                (willPublish.getPayloadFormatIndicator() == null) ? null :
+                (willPublish.getPayloadFormatIndicator() == null) ?
+                        null :
                         PayloadFormatIndicator.valueOf(willPublish.getPayloadFormatIndicator().name()),
                 willPublish.getContentType(),
                 willPublish.getResponseTopic(),

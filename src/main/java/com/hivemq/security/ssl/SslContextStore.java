@@ -118,8 +118,7 @@ public class SslContextStore {
                     throw new UnrecoverableException();
                 }
                 //only start scheduled execution if first hash went through
-                executorService.scheduleAtFixedRate(
-                        new SslContextScheduledRunnable(tls),
+                executorService.scheduleAtFixedRate(new SslContextScheduledRunnable(tls),
                         SSL_RELOAD_INTERVAL_SEC,
                         SSL_RELOAD_INTERVAL_SEC,
                         TimeUnit.SECONDS);

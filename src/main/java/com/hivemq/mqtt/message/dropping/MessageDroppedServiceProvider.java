@@ -33,8 +33,8 @@ public class MessageDroppedServiceProvider implements Provider<MessageDroppedSer
 
 
     @Inject
-    MessageDroppedServiceProvider(final MetricsHolder metricsHolder,
-                                  final EventLog eventLog) {
+    MessageDroppedServiceProvider(
+            final MetricsHolder metricsHolder, final EventLog eventLog) {
         this.metricsHolder = metricsHolder;
         this.eventLog = eventLog;
     }

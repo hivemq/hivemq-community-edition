@@ -68,8 +68,8 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
     public void preventPublishDelivery(final @NotNull AckReasonCode reasonCode, final @Nullable String reasonString) {
         Preconditions.checkNotNull(reasonCode, "reason code must never be null");
         if (reasonCode == AckReasonCode.SUCCESS) {
-            Preconditions.checkArgument(
-                    reasonString == null, "reason string must not be set when ack reason code is success");
+            Preconditions.checkArgument(reasonString == null,
+                    "reason string must not be set when ack reason code is success");
         }
         checkPrevented();
         this.reasonCode = reasonCode;
@@ -104,10 +104,12 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
         Preconditions.checkNotNull(duration, "Duration must never be null");
         Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
         if (timeoutFallback == TimeoutFallback.SUCCESS) {
-            Preconditions.checkArgument(ackReasonCode == AckReasonCode.SUCCESS, "reason code must be success when fallback success");
+            Preconditions.checkArgument(ackReasonCode == AckReasonCode.SUCCESS,
+                    "reason code must be success when fallback success");
         }
         if (ackReasonCode == AckReasonCode.SUCCESS) {
-            Preconditions.checkArgument(reasonString == null, "reason string must not be set when ack reason code is success");
+            Preconditions.checkArgument(reasonString == null,
+                    "reason string must not be set when ack reason code is success");
         }
         Preconditions.checkNotNull(ackReasonCode, "Reason code must never be null");
 

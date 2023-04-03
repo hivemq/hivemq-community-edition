@@ -56,17 +56,19 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
     private int sizeInMemory = SIZE_NOT_CALCULATED;
 
     //MQTT 5 Topic
-    public Topic(final @NotNull String topic,
-                 final @NotNull QoS qoS,
-                 final boolean noLocal,
-                 final boolean retainAsPublished,
-                 final @NotNull Mqtt5RetainHandling retainHandling,
-                 final @Nullable Integer subscriptionIdentifier) {
+    public Topic(
+            final @NotNull String topic,
+            final @NotNull QoS qoS,
+            final boolean noLocal,
+            final boolean retainAsPublished,
+            final @NotNull Mqtt5RetainHandling retainHandling,
+            final @Nullable Integer subscriptionIdentifier) {
 
         checkNotNull(topic, "A Topic must not be null");
         checkNotNull(qoS, "A QoS must not be null");
         checkNotNull(retainHandling, "A RetainHandling must not be null");
-        checkArgument((subscriptionIdentifier == null) || ((subscriptionIdentifier >= 1) && (subscriptionIdentifier <= 268_435_455)),
+        checkArgument((subscriptionIdentifier == null) ||
+                        ((subscriptionIdentifier >= 1) && (subscriptionIdentifier <= 268_435_455)),
                 "Subscription identifier must be between 1 and 268_435_455");
 
         this.topic = topic;
@@ -77,8 +79,11 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
         this.subscriptionIdentifier = subscriptionIdentifier;
     }
 
-    public Topic(final @NotNull String topic, final @NotNull QoS qoS,
-                 final boolean noLocal, final boolean retainAsPublished) {
+    public Topic(
+            final @NotNull String topic,
+            final @NotNull QoS qoS,
+            final boolean noLocal,
+            final boolean retainAsPublished) {
 
         this(topic, qoS, noLocal, retainAsPublished, DEFAULT_RETAIN_HANDLING, null);
     }
@@ -93,7 +98,8 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
     }
 
     @NotNull
-    public static Topic topicFromSubscription(@NotNull final Subscription subscription, final @Nullable Integer subscriptionIdentifier) {
+    public static Topic topicFromSubscription(
+            @NotNull final Subscription subscription, final @Nullable Integer subscriptionIdentifier) {
         return new Topic(subscription.getTopicFilter(),
                 Objects.requireNonNull(QoS.valueOf(subscription.getQos().getQosNumber())),
                 subscription.getNoLocal(),
@@ -126,7 +132,7 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
 
     /**
      * @return whether the client must not receive messages published by itself. The default is {@link
-     * #DEFAULT_NO_LOCAL}.
+     *         #DEFAULT_NO_LOCAL}.
      */
     public boolean isNoLocal() {
         return noLocal;
@@ -154,8 +160,12 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final Topic topic1 = (Topic) o;
 
@@ -170,10 +180,7 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
 
     @Override
     public @NotNull String toString() {
-        return "Topic{" +
-                "topic='" + topic + '\'' +
-                ", qoS=" + qoS +
-                '}';
+        return "Topic{" + "topic='" + topic + '\'' + ", qoS=" + qoS + '}';
     }
 
     @Override

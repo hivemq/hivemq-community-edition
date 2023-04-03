@@ -19,7 +19,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -151,7 +155,8 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
             allClientsClosedFuture.set(null);
             return;
         }
-        final List<List<ClientConnection>> connectionPartitions = Lists.partition(allConnections, shutdownPartitionSize);
+        final List<List<ClientConnection>> connectionPartitions =
+                Lists.partition(allConnections, shutdownPartitionSize);
         shutDownPartition(connectionPartitions, 0, allClientsClosedFuture);
     }
 

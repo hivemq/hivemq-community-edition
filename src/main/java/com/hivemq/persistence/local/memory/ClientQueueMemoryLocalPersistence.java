@@ -42,7 +42,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -106,8 +110,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         qos0MessagesMemory = new AtomicLong();
         totalMemorySize = new AtomicLong();
 
-        metricRegistry.register(
-                HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+        metricRegistry.register(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) totalMemorySize::get);
 
     }
@@ -224,11 +227,17 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         final long currentQos0MessagesMemory = qos0MessagesMemory.get();
         if (currentQos0MessagesMemory >= qos0MemoryLimit) {
             if (shared) {
-                messageDroppedService.qos0MemoryExceededShared(
-                        queueId, publishWithRetained.getTopic(), 0, currentQos0MessagesMemory, qos0MemoryLimit);
+                messageDroppedService.qos0MemoryExceededShared(queueId,
+                        publishWithRetained.getTopic(),
+                        0,
+                        currentQos0MessagesMemory,
+                        qos0MemoryLimit);
             } else {
-                messageDroppedService.qos0MemoryExceeded(
-                        queueId, publishWithRetained.getTopic(), 0, currentQos0MessagesMemory, qos0MemoryLimit);
+                messageDroppedService.qos0MemoryExceeded(queueId,
+                        publishWithRetained.getTopic(),
+                        0,
+                        currentQos0MessagesMemory,
+                        qos0MemoryLimit);
             }
             payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
             return;
@@ -236,7 +245,11 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
 
         if (!shared) {
             if (messages.qos0Memory >= qos0ClientMemoryLimit) {
-                messageDroppedService.qos0MemoryExceeded(queueId, publishWithRetained.getTopic(), 0, messages.qos0Memory, qos0ClientMemoryLimit);
+                messageDroppedService.qos0MemoryExceeded(queueId,
+                        publishWithRetained.getTopic(),
+                        0,
+                        messages.qos0Memory,
+                        qos0ClientMemoryLimit);
                 payloadPersistence.decrementReferenceCounter(publishWithRetained.getPublishId());
                 return;
             }

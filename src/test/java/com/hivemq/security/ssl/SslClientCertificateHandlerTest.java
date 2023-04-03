@@ -16,6 +16,7 @@
 package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnection;
+import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -28,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import util.DummyClientConnection;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -35,7 +37,12 @@ import javax.net.ssl.SSLSession;
 import java.security.cert.Certificate;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
@@ -68,7 +75,7 @@ public class SslClientCertificateHandlerTest {
         when(sslEngine.getSession()).thenReturn(sslSession);
 
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).set(new ClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
     }
@@ -87,7 +94,7 @@ public class SslClientCertificateHandlerTest {
         when(sslSession.getPeerCertificates()).thenReturn(new Certificate[0]);
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        assertNotNull(channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getAuthCertificate());
+        assertNotNull(ClientConnection.of(channel).getAuthCertificate());
 
     }
 
@@ -163,7 +170,8 @@ public class SslClientCertificateHandlerTest {
     private class WrongHandler extends SimpleChannelInboundHandler<Object> {
 
         @Override
-        protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final Object o) throws Exception {
+        protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final Object o)
+                throws Exception {
             super.channelRead(channelHandlerContext, o);
         }
     }

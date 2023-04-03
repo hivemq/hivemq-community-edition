@@ -65,7 +65,7 @@ public enum Mqtt5AuthReasonCode implements Mqtt5ReasonCode {
      *
      * @param code the byte code.
      * @return the AUTH Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
-     * valid AUTH Reason Code.
+     *         valid AUTH Reason Code.
      */
     public static @Nullable Mqtt5AuthReasonCode fromCode(final int code) {
         if (code == SUCCESS.code) {

@@ -101,9 +101,16 @@ public class PublishBuilderImpl implements PublishBuilder {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
 
-        return fromComplete(publish.getQos(), publish.getRetain(), publish.getTopic(), publish.getPayloadFormatIndicator(),
-                publish.getMessageExpiryInterval(), publish.getResponseTopic(), publish.getCorrelationData(),
-                publish.getContentType(), publish.getPayload(), publish.getUserProperties());
+        return fromComplete(publish.getQos(),
+                publish.getRetain(),
+                publish.getTopic(),
+                publish.getPayloadFormatIndicator(),
+                publish.getMessageExpiryInterval(),
+                publish.getResponseTopic(),
+                publish.getCorrelationData(),
+                publish.getContentType(),
+                publish.getPayload(),
+                publish.getUserProperties());
     }
 
     @NotNull
@@ -116,22 +123,30 @@ public class PublishBuilderImpl implements PublishBuilder {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
 
-        return fromComplete(publish.getQos(), publish.getRetain(), publish.getTopic(), publish.getPayloadFormatIndicator(),
-                publish.getMessageExpiryInterval(), publish.getResponseTopic(), publish.getCorrelationData(),
-                publish.getContentType(), publish.getPayload(), publish.getUserProperties());
+        return fromComplete(publish.getQos(),
+                publish.getRetain(),
+                publish.getTopic(),
+                publish.getPayloadFormatIndicator(),
+                publish.getMessageExpiryInterval(),
+                publish.getResponseTopic(),
+                publish.getCorrelationData(),
+                publish.getContentType(),
+                publish.getPayload(),
+                publish.getUserProperties());
     }
 
     @NotNull
-    private PublishBuilder fromComplete(@NotNull final Qos qos,
-                                        final boolean retain,
-                                        @NotNull final String topic,
-                                        @NotNull final Optional<PayloadFormatIndicator> payloadFormatIndicator,
-                                        @NotNull final Optional<Long> messageExpiryInterval,
-                                        @NotNull final Optional<String> responseTopic,
-                                        @NotNull final Optional<ByteBuffer> correlationData,
-                                        @NotNull final Optional<String> contentType,
-                                        @NotNull final Optional<ByteBuffer> payload,
-                                        @NotNull final UserProperties userProperties) {
+    private PublishBuilder fromComplete(
+            @NotNull final Qos qos,
+            final boolean retain,
+            @NotNull final String topic,
+            @NotNull final Optional<PayloadFormatIndicator> payloadFormatIndicator,
+            @NotNull final Optional<Long> messageExpiryInterval,
+            @NotNull final Optional<String> responseTopic,
+            @NotNull final Optional<ByteBuffer> correlationData,
+            @NotNull final Optional<String> contentType,
+            @NotNull final Optional<ByteBuffer> payload,
+            @NotNull final UserProperties userProperties) {
         this.qos(qos);
         this.retain(retain);
         this.topic(topic);
@@ -192,7 +207,8 @@ public class PublishBuilderImpl implements PublishBuilder {
     @NotNull
     @Override
     public PublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
+                mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -247,7 +263,15 @@ public class PublishBuilderImpl implements PublishBuilder {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
 
-        return new PublishImpl(qos, retain, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
-                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
+        return new PublishImpl(qos,
+                retain,
+                topic,
+                payloadFormatIndicator,
+                messageExpiryInterval,
+                responseTopic,
+                correlationData,
+                contentType,
+                payload,
+                UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

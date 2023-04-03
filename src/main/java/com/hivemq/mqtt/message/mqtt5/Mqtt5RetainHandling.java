@@ -23,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
  *
  * @author Silvio Giebl
  * @author Florian Limpöck
- *
  * @since 4.0.0
  */
 public enum Mqtt5RetainHandling {

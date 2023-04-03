@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * @author Florian Limpöck
-*/
+ */
 public interface ClientAuthenticators {
 
     /**

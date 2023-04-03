@@ -88,8 +88,8 @@ public class Bytes {
      *
      * @param buf the {@link io.netty.buffer.ByteBuf} to read from
      * @return The byte array or <code>null</code> if there aren't enough bytes to read. This can happen if this method
-     * can not read the size of the byte array or if there are less bytes to read available than
-     * indicated by the prefixed 16-bit length.
+     *         can not read the size of the byte array or if there are less bytes to read available than
+     *         indicated by the prefixed 16-bit length.
      * @throws java.lang.NullPointerException if the passed {@link io.netty.buffer.ByteBuf} is <code>null</code>
      */
     public static byte[] getPrefixedBytes(final ByteBuf buf) {
@@ -155,10 +155,19 @@ public class Bytes {
      */
     public static long readLong(final byte[] buffer, final int startPosition) {
         if (startPosition + Long.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" + buffer.length + "] is to small to read 8 bytes from start position " + startPosition);
+            throw new IllegalArgumentException("The provided array[" +
+                    buffer.length +
+                    "] is to small to read 8 bytes from start position " +
+                    startPosition);
         }
-        return Longs.fromBytes(buffer[startPosition], buffer[startPosition + 1], buffer[startPosition + 2], buffer[startPosition + 3],
-                buffer[startPosition + 4], buffer[startPosition + 5], buffer[startPosition + 6], buffer[startPosition + 7]);
+        return Longs.fromBytes(buffer[startPosition],
+                buffer[startPosition + 1],
+                buffer[startPosition + 2],
+                buffer[startPosition + 3],
+                buffer[startPosition + 4],
+                buffer[startPosition + 5],
+                buffer[startPosition + 6],
+                buffer[startPosition + 7]);
     }
 
     /**
@@ -171,9 +180,15 @@ public class Bytes {
      */
     public static int readInt(final byte[] buffer, final int startPosition) {
         if (startPosition + Integer.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" + buffer.length + "] is to small to read 4 bytes from start position " + startPosition);
+            throw new IllegalArgumentException("The provided array[" +
+                    buffer.length +
+                    "] is to small to read 4 bytes from start position " +
+                    startPosition);
         }
-        return Ints.fromBytes(buffer[startPosition], buffer[startPosition + 1], buffer[startPosition + 2], buffer[startPosition + 3]);
+        return Ints.fromBytes(buffer[startPosition],
+                buffer[startPosition + 1],
+                buffer[startPosition + 2],
+                buffer[startPosition + 3]);
     }
 
     /**
@@ -186,7 +201,10 @@ public class Bytes {
      */
     public static int readUnsignedShort(final byte[] buffer, final int startPosition) {
         if (startPosition + Short.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" + buffer.length + "] is to small to read 2 bytes from start position " + startPosition);
+            throw new IllegalArgumentException("The provided array[" +
+                    buffer.length +
+                    "] is to small to read 2 bytes from start position " +
+                    startPosition);
         }
         return Ints.fromBytes((byte) 0, (byte) 0, buffer[startPosition], buffer[startPosition + 1]);
     }
@@ -251,7 +269,8 @@ public class Bytes {
 
     /**
      * @param optional of a {@link ByteBuffer}
-     * @return the bytes of an {@link Optional} of a {@link ByteBuffer} as byte array or null if the optional is not present
+     * @return the bytes of an {@link Optional} of a {@link ByteBuffer} as byte array or null if the optional is not
+     *         present
      */
     @Nullable
     public static byte[] getBytesFromReadOnlyBuffer(@NotNull final Optional<ByteBuffer> optional) {
@@ -260,8 +279,8 @@ public class Bytes {
     }
 
     @Nullable
-    public static byte[] fromReadOnlyBuffer(final @Nullable ByteBuffer byteBuffer){
-        if(byteBuffer == null){
+    public static byte[] fromReadOnlyBuffer(final @Nullable ByteBuffer byteBuffer) {
+        if (byteBuffer == null) {
             return null;
         }
         final ByteBuffer rewind = byteBuffer.asReadOnlyBuffer().rewind();

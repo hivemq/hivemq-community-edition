@@ -24,7 +24,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
  * @author Dominik Obermaier
  * @author Christian Goetz
  * @author Florian Limpöck
- *
  * @since 1.4
  */
 public enum Mqtt3ConnAckReturnCode {

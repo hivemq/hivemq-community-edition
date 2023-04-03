@@ -16,13 +16,20 @@
 package com.hivemq.configuration.reader;
 
 import com.google.common.io.Files;
-import com.hivemq.configuration.service.entity.*;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.configuration.service.entity.Tls;
+import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.entity.TlsWebsocketListener;
+import com.hivemq.configuration.service.entity.WebsocketListener;
 import org.junit.Test;
 
 import java.io.File;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 

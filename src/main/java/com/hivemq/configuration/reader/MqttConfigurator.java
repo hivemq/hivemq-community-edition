@@ -16,15 +16,23 @@
 package com.hivemq.configuration.reader;
 
 import com.google.inject.Inject;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.configuration.entity.MqttConfigEntity;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.*;
-import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.*;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.KEEP_ALIVE_MAX_DEFAULT;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAXIMUM_QOS_DEFAULT;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.SERVER_RECEIVE_MAXIMUM_DEFAULT;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.TOPIC_ALIAS_MAX_PER_CLIENT_MAXIMUM;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.TOPIC_ALIAS_MAX_PER_CLIENT_MINIMUM;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.DEFAULT_RECEIVE_MAXIMUM;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT;
+import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 
 public class MqttConfigurator {
 
@@ -41,19 +49,26 @@ public class MqttConfigurator {
     void setMqttConfig(@NotNull final MqttConfigEntity mqttConfigEntity) {
 
 
-        mqttConfigurationService.setRetainedMessagesEnabled(mqttConfigEntity.getRetainedMessagesConfigEntity().isEnabled());
+        mqttConfigurationService.setRetainedMessagesEnabled(mqttConfigEntity.getRetainedMessagesConfigEntity()
+                .isEnabled());
 
-        mqttConfigurationService.setWildcardSubscriptionsEnabled(mqttConfigEntity.getWildcardSubscriptionsConfigEntity().isEnabled());
-        mqttConfigurationService.setSubscriptionIdentifierEnabled(mqttConfigEntity.getSubscriptionIdentifierConfigEntity().isEnabled());
-        mqttConfigurationService.setSharedSubscriptionsEnabled(mqttConfigEntity.getSharedSubscriptionsConfigEntity().isEnabled());
+        mqttConfigurationService.setWildcardSubscriptionsEnabled(mqttConfigEntity.getWildcardSubscriptionsConfigEntity()
+                .isEnabled());
+        mqttConfigurationService.setSubscriptionIdentifierEnabled(mqttConfigEntity.getSubscriptionIdentifierConfigEntity()
+                .isEnabled());
+        mqttConfigurationService.setSharedSubscriptionsEnabled(mqttConfigEntity.getSharedSubscriptionsConfigEntity()
+                .isEnabled());
 
         mqttConfigurationService.setMaximumQos(validateQoS(mqttConfigEntity.getQoSConfigEntity().getMaxQos()));
 
         mqttConfigurationService.setTopicAliasEnabled(mqttConfigEntity.getTopicAliasConfigEntity().isEnabled());
-        mqttConfigurationService.setTopicAliasMaxPerClient(validateMaxPerClient(mqttConfigEntity.getTopicAliasConfigEntity().getMaxPerClient()));
+        mqttConfigurationService.setTopicAliasMaxPerClient(validateMaxPerClient(mqttConfigEntity.getTopicAliasConfigEntity()
+                .getMaxPerClient()));
 
-        mqttConfigurationService.setMaxQueuedMessages(mqttConfigEntity.getQueuedMessagesConfigEntity().getMaxQueueSize());
-        mqttConfigurationService.setQueuedMessagesStrategy(MqttConfigurationService.QueuedMessagesStrategy.valueOf(mqttConfigEntity.getQueuedMessagesConfigEntity().getQueuedMessagesStrategy().name()));
+        mqttConfigurationService.setMaxQueuedMessages(mqttConfigEntity.getQueuedMessagesConfigEntity()
+                .getMaxQueueSize());
+        mqttConfigurationService.setQueuedMessagesStrategy(MqttConfigurationService.QueuedMessagesStrategy.valueOf(
+                mqttConfigEntity.getQueuedMessagesConfigEntity().getQueuedMessagesStrategy().name()));
 
         final long clientSessionExpiryInterval = mqttConfigEntity.getSessionExpiryConfigEntity().getMaxInterval();
         mqttConfigurationService.setMaxSessionExpiryInterval(validateSessionExpiryInterval(clientSessionExpiryInterval));
@@ -74,11 +89,15 @@ public class MqttConfigurator {
 
     private int validateMaxPerClient(final int maxPerClient) {
         if (maxPerClient < TOPIC_ALIAS_MAX_PER_CLIENT_MINIMUM) {
-            log.warn("The configured topic alias maximum per client ({}) is too small. It was set to {} instead.", maxPerClient, TOPIC_ALIAS_MAX_PER_CLIENT_MINIMUM);
+            log.warn("The configured topic alias maximum per client ({}) is too small. It was set to {} instead.",
+                    maxPerClient,
+                    TOPIC_ALIAS_MAX_PER_CLIENT_MINIMUM);
             return TOPIC_ALIAS_MAX_PER_CLIENT_MINIMUM;
         }
         if (maxPerClient > TOPIC_ALIAS_MAX_PER_CLIENT_MAXIMUM) {
-            log.warn("The configured topic alias maximum per client ({}) is too large. It was set to {} instead.", maxPerClient, TOPIC_ALIAS_MAX_PER_CLIENT_MAXIMUM);
+            log.warn("The configured topic alias maximum per client ({}) is too large. It was set to {} instead.",
+                    maxPerClient,
+                    TOPIC_ALIAS_MAX_PER_CLIENT_MAXIMUM);
             return TOPIC_ALIAS_MAX_PER_CLIENT_MAXIMUM;
         }
         return maxPerClient;
@@ -90,18 +109,24 @@ public class MqttConfigurator {
         if (qoS != null) {
             return qoS;
         } else {
-            log.warn("The configured maximum qos ({}) does not exist. It was set to ({}) instead.", qos, MAXIMUM_QOS_DEFAULT.getQosNumber());
+            log.warn("The configured maximum qos ({}) does not exist. It was set to ({}) instead.",
+                    qos,
+                    MAXIMUM_QOS_DEFAULT.getQosNumber());
             return MAXIMUM_QOS_DEFAULT;
         }
     }
 
     private long validateMessageExpiryInterval(final long maxMessageExpiryInterval) {
         if (maxMessageExpiryInterval <= 0) {
-            log.warn("The configured max message expiry interval ({}) is too short. It was set to {} seconds instead.", maxMessageExpiryInterval, MAX_EXPIRY_INTERVAL_DEFAULT);
+            log.warn("The configured max message expiry interval ({}) is too short. It was set to {} seconds instead.",
+                    maxMessageExpiryInterval,
+                    MAX_EXPIRY_INTERVAL_DEFAULT);
             return MAX_EXPIRY_INTERVAL_DEFAULT;
         }
         if (maxMessageExpiryInterval > MAX_EXPIRY_INTERVAL_DEFAULT) {
-            log.warn("The configured max message expiry interval ({}) is too high. It was set to {} seconds instead.", maxMessageExpiryInterval, MAX_EXPIRY_INTERVAL_DEFAULT);
+            log.warn("The configured max message expiry interval ({}) is too high. It was set to {} seconds instead.",
+                    maxMessageExpiryInterval,
+                    MAX_EXPIRY_INTERVAL_DEFAULT);
             return MAX_EXPIRY_INTERVAL_DEFAULT;
         }
         return maxMessageExpiryInterval;
@@ -109,11 +134,15 @@ public class MqttConfigurator {
 
     private int validateMaxPacketSize(final int maxPacketSize) {
         if (maxPacketSize < 1) {
-            log.warn("The configured max packet size ({}) is too short. It was set to {} bytes instead.", maxPacketSize, DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
+            log.warn("The configured max packet size ({}) is too short. It was set to {} bytes instead.",
+                    maxPacketSize,
+                    DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
             return DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
         }
         if (maxPacketSize > DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT) {
-            log.warn("The configured max packet size ({}) is too high. It was set to {} bytes instead.", maxPacketSize, DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
+            log.warn("The configured max packet size ({}) is too high. It was set to {} bytes instead.",
+                    maxPacketSize,
+                    DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
             return DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
         }
         return maxPacketSize;
@@ -121,11 +150,15 @@ public class MqttConfigurator {
 
     private long validateSessionExpiryInterval(final long sessionExpiryInterval) {
         if (sessionExpiryInterval < SESSION_EXPIRE_ON_DISCONNECT) {
-            log.warn("The configured session expiry interval ({}) is too short. It was set to {} seconds instead.", sessionExpiryInterval, SESSION_EXPIRE_ON_DISCONNECT);
+            log.warn("The configured session expiry interval ({}) is too short. It was set to {} seconds instead.",
+                    sessionExpiryInterval,
+                    SESSION_EXPIRE_ON_DISCONNECT);
             return SESSION_EXPIRE_ON_DISCONNECT;
         }
         if (sessionExpiryInterval > SESSION_EXPIRY_MAX) {
-            log.warn("The configured session expiry interval ({}) is too high. It was set to {} seconds instead.", sessionExpiryInterval, SESSION_EXPIRY_MAX);
+            log.warn("The configured session expiry interval ({}) is too high. It was set to {} seconds instead.",
+                    sessionExpiryInterval,
+                    SESSION_EXPIRY_MAX);
             return SESSION_EXPIRY_MAX;
         }
         return sessionExpiryInterval;
@@ -133,11 +166,15 @@ public class MqttConfigurator {
 
     private int validateServerReceiveMaximum(final int receiveMaximum) {
         if (receiveMaximum < 1) {
-            log.warn("The configured server receive maximum ({}) is too short. It was set to {} seconds instead.", receiveMaximum, SERVER_RECEIVE_MAXIMUM_DEFAULT);
+            log.warn("The configured server receive maximum ({}) is too short. It was set to {} seconds instead.",
+                    receiveMaximum,
+                    SERVER_RECEIVE_MAXIMUM_DEFAULT);
             return SERVER_RECEIVE_MAXIMUM_DEFAULT;
         }
         if (receiveMaximum > DEFAULT_RECEIVE_MAXIMUM) {
-            log.warn("The configured server receive maximum ({}) is too high. It was set to {} seconds instead.", receiveMaximum, DEFAULT_RECEIVE_MAXIMUM);
+            log.warn("The configured server receive maximum ({}) is too high. It was set to {} seconds instead.",
+                    receiveMaximum,
+                    DEFAULT_RECEIVE_MAXIMUM);
             return DEFAULT_RECEIVE_MAXIMUM;
         }
         return receiveMaximum;
@@ -145,11 +182,15 @@ public class MqttConfigurator {
 
     private int validateKeepAliveMaximum(final int keepAliveMaximum) {
         if (keepAliveMaximum < 1) {
-            log.warn("The configured keep alive maximum ({}) is too short. It was set to {} seconds instead.", keepAliveMaximum, KEEP_ALIVE_MAX_DEFAULT);
+            log.warn("The configured keep alive maximum ({}) is too short. It was set to {} seconds instead.",
+                    keepAliveMaximum,
+                    KEEP_ALIVE_MAX_DEFAULT);
             return KEEP_ALIVE_MAX_DEFAULT;
         }
         if (keepAliveMaximum > KEEP_ALIVE_MAX_DEFAULT) {
-            log.warn("The configured keep alive maximum ({}) is too high. It was set to {} seconds instead.", keepAliveMaximum, KEEP_ALIVE_MAX_DEFAULT);
+            log.warn("The configured keep alive maximum ({}) is too high. It was set to {} seconds instead.",
+                    keepAliveMaximum,
+                    KEEP_ALIVE_MAX_DEFAULT);
             return KEEP_ALIVE_MAX_DEFAULT;
         }
         return keepAliveMaximum;

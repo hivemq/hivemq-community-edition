@@ -30,16 +30,16 @@ public class PublishWithFuture extends PUBLISH {
     private final SettableFuture<PublishStatus> future;
     private final boolean shared;
 
-    public PublishWithFuture(@NotNull final PUBLISH publish,
-                             @NotNull final SettableFuture<PublishStatus> future,
-                             final boolean shared) {
+    public PublishWithFuture(
+            @NotNull final PUBLISH publish, @NotNull final SettableFuture<PublishStatus> future, final boolean shared) {
         this(publish, future, shared, null);
     }
 
-    public PublishWithFuture(@NotNull final PUBLISH publish,
-                             @NotNull final SettableFuture<PublishStatus> future,
-                             final boolean shared,
-                             @Nullable final PublishPayloadPersistence persistence) {
+    public PublishWithFuture(
+            @NotNull final PUBLISH publish,
+            @NotNull final SettableFuture<PublishStatus> future,
+            final boolean shared,
+            @Nullable final PublishPayloadPersistence persistence) {
         super(publish, persistence);
         this.future = future;
         this.shared = shared;

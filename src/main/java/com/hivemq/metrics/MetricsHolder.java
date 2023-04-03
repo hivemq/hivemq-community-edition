@@ -21,7 +21,17 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import javax.inject.Singleton;
 
-import static com.hivemq.metrics.HiveMQMetrics.*;
+import static com.hivemq.metrics.HiveMQMetrics.CONNECTIONS_CLOSED_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.DROPPED_MESSAGE_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.INCOMING_CONNECT_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.INCOMING_MESSAGE_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.INCOMING_PUBLISH_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.MQTT_CONNECTION_NOT_WRITABLE_CURRENT;
+import static com.hivemq.metrics.HiveMQMetrics.OUTGOING_MESSAGE_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.OUTGOING_PUBLISH_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.SUBSCRIPTIONS_CURRENT;
+import static com.hivemq.metrics.HiveMQMetrics.WILL_MESSAGE_COUNT;
+import static com.hivemq.metrics.HiveMQMetrics.WILL_MESSAGE_PUBLISHED_COUNT_TOTAL;
 
 /**
  * @author Christoph Schäbel

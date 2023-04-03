@@ -17,7 +17,11 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.MqttConfigurationService;
@@ -98,7 +102,7 @@ public class RetainedMessagesSender {
             return Futures.immediateFuture(null);
         }
 
-        final String clientId = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getClientId();
+        final String clientId = ClientConnection.of(channel).getClientId();
         final ImmutableList.Builder<ListenableFuture<RetainedMessage>> retainedMessageFutures = ImmutableList.builder();
         for (final Topic topic : subscribedTopics) {
             retainedMessageFutures.add(retainedMessagePersistence.get(topic.getTopic()));
@@ -108,9 +112,16 @@ public class RetainedMessagesSender {
                 Futures.allAsList(retainedMessageFutures.build());
 
         final SettableFuture<Void> resultFuture = SettableFuture.create();
-        Futures.addCallback(retainedMessagesFuture, new SendRetainedMessageCallback(subscribedTopics, hiveMQId,
-                publishPayloadPersistence, clientId, resultFuture, channel, clientQueuePersistence,
-                mqttConfigurationService), channel.eventLoop());
+        Futures.addCallback(retainedMessagesFuture,
+                new SendRetainedMessageCallback(subscribedTopics,
+                        hiveMQId,
+                        publishPayloadPersistence,
+                        clientId,
+                        resultFuture,
+                        channel,
+                        clientQueuePersistence,
+                        mqttConfigurationService),
+                channel.eventLoop());
 
         return resultFuture;
 
@@ -172,24 +183,24 @@ public class RetainedMessagesSender {
                     subscriptionIdentifiers = ImmutableIntArray.of();
                 }
 
-                final PUBLISHFactory.Mqtt5Builder publishBuilder = new PUBLISHFactory.Mqtt5Builder()
-                        .withTimestamp(System.currentTimeMillis())
-                        .withHivemqId(hivemqId.get())
-                        .withPayload(retainedMessage.getMessage())
-                        .withPublishId(retainedMessage.getPublishId())
-                        .withPersistence(payloadPersistence)
-                        .withMessageExpiryInterval(retainedMessage.getMessageExpiryInterval())
-                        .withTopic(subscribedTopic.getTopic())
-                        .withRetain(true)
-                        .withDuplicateDelivery(false)
-                        .withQoS(qos)
-                        .withOnwardQos(qos)
-                        .withUserProperties(retainedMessage.getUserProperties())
-                        .withResponseTopic(retainedMessage.getResponseTopic())
-                        .withContentType(retainedMessage.getContentType())
-                        .withCorrelationData(retainedMessage.getCorrelationData())
-                        .withPayloadFormatIndicator(retainedMessage.getPayloadFormatIndicator())
-                        .withSubscriptionIdentifiers(subscriptionIdentifiers);
+                final PUBLISHFactory.Mqtt5Builder publishBuilder =
+                        new PUBLISHFactory.Mqtt5Builder().withTimestamp(System.currentTimeMillis())
+                                .withHivemqId(hivemqId.get())
+                                .withPayload(retainedMessage.getMessage())
+                                .withPublishId(retainedMessage.getPublishId())
+                                .withPersistence(payloadPersistence)
+                                .withMessageExpiryInterval(retainedMessage.getMessageExpiryInterval())
+                                .withTopic(subscribedTopic.getTopic())
+                                .withRetain(true)
+                                .withDuplicateDelivery(false)
+                                .withQoS(qos)
+                                .withOnwardQos(qos)
+                                .withUserProperties(retainedMessage.getUserProperties())
+                                .withResponseTopic(retainedMessage.getResponseTopic())
+                                .withContentType(retainedMessage.getContentType())
+                                .withCorrelationData(retainedMessage.getCorrelationData())
+                                .withPayloadFormatIndicator(retainedMessage.getPayloadFormatIndicator())
+                                .withSubscriptionIdentifiers(subscriptionIdentifiers);
                 builder.add(publishBuilder.build());
 
             }
@@ -223,8 +234,11 @@ public class RetainedMessagesSender {
                 resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
                 return;
             }
-            final Long queueLimit = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getQueueSizeMaximum();
-            futures.add(clientQueuePersistence.add(clientId, false, qos1and2Messages, true,
+            final Long queueLimit = ClientConnection.of(channel).getQueueSizeMaximum();
+            futures.add(clientQueuePersistence.add(clientId,
+                    false,
+                    qos1and2Messages,
+                    true,
                     Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages)));
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
         }
@@ -245,7 +259,7 @@ public class RetainedMessagesSender {
 
                     payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
                     if (qos0Publish.getPacketIdentifier() != 0) {
-                        final MessageIDPool messageIDPool = channel.attr(ClientConnection.CHANNEL_ATTRIBUTE_NAME).get().getMessageIDPool();
+                        final MessageIDPool messageIDPool = ClientConnection.of(channel).getMessageIDPool();
                         messageIDPool.returnId(qos0Publish.getPacketIdentifier());
                     }
                 }
@@ -261,7 +275,8 @@ public class RetainedMessagesSender {
                 }
             }, MoreExecutors.directExecutor());
 
-            final PublishWithFuture message = new PublishWithFuture(qos0Publish, publishFuture, false, payloadPersistence);
+            final PublishWithFuture message =
+                    new PublishWithFuture(qos0Publish, publishFuture, false, payloadPersistence);
             channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
 
             return resultFuture;

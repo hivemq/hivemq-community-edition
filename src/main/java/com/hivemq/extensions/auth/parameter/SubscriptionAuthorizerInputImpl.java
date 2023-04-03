@@ -34,7 +34,8 @@ import java.util.function.Supplier;
 /**
  * @author Lukas Brandl
  */
-public class SubscriptionAuthorizerInputImpl implements SubscriptionAuthorizerInput, PluginTaskInput, Supplier<SubscriptionAuthorizerInputImpl> {
+public class SubscriptionAuthorizerInputImpl
+        implements SubscriptionAuthorizerInput, PluginTaskInput, Supplier<SubscriptionAuthorizerInputImpl> {
 
     @NotNull
     private final UserProperties userProperties;
@@ -51,14 +52,20 @@ public class SubscriptionAuthorizerInputImpl implements SubscriptionAuthorizerIn
     @NotNull
     private final ClientInformation clientInformation;
 
-    public SubscriptionAuthorizerInputImpl(final @NotNull UserProperties userProperties, final @NotNull Topic topic, final @NotNull Channel channel, final @NotNull String clientId) {
+    public SubscriptionAuthorizerInputImpl(
+            final @NotNull UserProperties userProperties,
+            final @NotNull Topic topic,
+            final @NotNull Channel channel,
+            final @NotNull String clientId) {
         Preconditions.checkNotNull(userProperties, "userproperties must never be null");
         Preconditions.checkNotNull(topic, "topic must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "clientId must never be null");
         this.userProperties = userProperties;
-        this.subscriptionIdentifier = topic.getSubscriptionIdentifier() != null && topic.getSubscriptionIdentifier() > 0 ?
-                Optional.of(topic.getSubscriptionIdentifier()) : Optional.empty();
+        this.subscriptionIdentifier =
+                topic.getSubscriptionIdentifier() != null && topic.getSubscriptionIdentifier() > 0 ?
+                        Optional.of(topic.getSubscriptionIdentifier()) :
+                        Optional.empty();
 
         this.subscription = new SubscriptionImpl(topic);
 
