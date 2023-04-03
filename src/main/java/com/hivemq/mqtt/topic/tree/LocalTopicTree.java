@@ -399,8 +399,10 @@ public class LocalTopicTree {
             }
         }
         final ImmutableList<SubscriberWithQoS> foundSubscriberList = foundSubscribers.build();
-        rootWildcardSubscribers.removeAll(foundSubscriberList);
-        counters.getSubscriptionCounter().dec(foundSubscriberList.size());
+        if (!foundSubscriberList.isEmpty()) {
+            rootWildcardSubscribers.removeAll(foundSubscriberList);
+            counters.getSubscriptionCounter().dec(foundSubscriberList.size());
+        }
         return !foundSubscriberList.isEmpty();
     }
 
