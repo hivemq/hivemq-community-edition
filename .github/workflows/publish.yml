@@ -25,13 +25,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      #- name: Publish to Maven Central
-      #  env:
-      #    ORG_GRADLE_PROJECT_signKey: ${{ secrets.SIGN_KEY }}
-      #    ORG_GRADLE_PROJECT_signKeyPass: ${{ secrets.SIGN_KEY_PASS }}
-      #    ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
-      #    ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
-      #  run: ./gradlew publishEmbeddedPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+      - name: Publish to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_signKey: ${{ secrets.SIGN_KEY }}
+          ORG_GRADLE_PROJECT_signKeyPass: ${{ secrets.SIGN_KEY_PASS }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
+        run: ./gradlew publishEmbeddedPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
       - name: Push To Docker Hub
         run: PUSH_IMAGE=true docker/publish.sh
       - name: Attach HiveMQ Zip to GitHub Release
