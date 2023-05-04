@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-IMAGE="suhrmann/hivemq-ce:snapshot"
+IMAGE="hivemq/hivemq-ce:snapshot"
 
 cd "$(dirname $0)/../"
 HIVEMQ_VERSION=$(./gradlew properties | grep ^version: | sed -e "s/version: //")

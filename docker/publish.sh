@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-IMAGE_PREFIX="suhrmann/hivemq-ce"
+IMAGE_PREFIX="hivemq/hivemq-ce"
 LATEST_IMAGE="${IMAGE_PREFIX}:latest"
 
 cd "$(dirname $0)/../"
