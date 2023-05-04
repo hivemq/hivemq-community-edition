@@ -7,7 +7,7 @@ COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
 
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-jre
 
 ARG HIVEMQ_VERSION=2019.1
 
