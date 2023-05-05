@@ -7,7 +7,7 @@ COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
 
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
-FROM eclipse-temurin:11-jre
+FROM eclipse-temurin:11-jre-alpine
 
 ARG HIVEMQ_VERSION=2019.1
 
