@@ -31,7 +31,6 @@ public final class LoggingUtils {
      * @param channel the channel of the client connection
      * @param message the message to append listener and port to
      * @return the original message with appended listener and port.
-     * @since 4.15.0
      */
     public static @NotNull String appendListenerToMessage(
             final @NotNull Channel channel, final @NotNull String message) {
