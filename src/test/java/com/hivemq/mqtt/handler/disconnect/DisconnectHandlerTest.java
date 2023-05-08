@@ -21,6 +21,10 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
+import com.hivemq.bootstrap.UndefinedClientConnection;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -29,7 +33,9 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
+import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.connection.ConnectionPersistence;
+import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
@@ -37,6 +43,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
+import util.TestSingleWriterFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,6 +52,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -55,27 +63,16 @@ public class DisconnectHandlerTest {
 
     private EmbeddedChannel channel;
 
-    EventLog eventLog;
+    private final @NotNull TopicAliasLimiter topicAliasLimiter = mock(TopicAliasLimiter.class);
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock(ClientSessionPersistence.class);
+    private final @NotNull ConnectionPersistence connectionPersistence = mock(ConnectionPersistence.class);
+    private final @NotNull EventLog eventLog = spy(new EventLog());
+    private final @NotNull MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 
-    @Mock
-    private TopicAliasLimiter topicAliasLimiter;
-
-    @Mock
-    private ClientSessionPersistence clientSessionPersistence;
-
-    @Mock
-    private ConnectionPersistence connectionPersistence;
-
-    MetricsHolder metricsHolder;
-    private ClientConnection clientConnection;
+    private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        eventLog = spy(new EventLog());
-
-        metricsHolder = new MetricsHolder(new MetricRegistry());
 
         final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog,
                 metricsHolder,
@@ -83,10 +80,18 @@ public class DisconnectHandlerTest {
                 clientSessionPersistence,
                 connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
-        clientConnection = new DummyClientConnection(channel, null);
-        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnectionContext clientConnectionContext = new UndefinedClientConnection(channel,
+                null,
+                mock(TcpListener.class));
+        clientConnectionContext.setClientId("clientId");
+        clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
+        clientConnectionContext.proposeClientState(ClientState.CONNECTING);
+        clientConnectionContext.setClientSessionExpiryInterval(1245L);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnectionContext);
+        clientConnection = ClientConnection.from(clientConnectionContext);
 
         when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
+        when(clientSessionPersistence.clientDisconnected(anyString(), anyBoolean(), anyLong())).thenReturn(Futures.immediateFuture(null));
     }
 
     @Test

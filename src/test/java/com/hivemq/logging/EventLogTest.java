@@ -18,6 +18,9 @@ package com.hivemq.logging;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.bootstrap.UndefinedClientConnection;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import org.junit.After;
@@ -45,36 +48,35 @@ import static org.mockito.Mockito.when;
  */
 public class EventLogTest {
 
-    private final EventLog eventLog = new EventLog();
+    private final @NotNull EventLog eventLog = new EventLog();
 
-    private final LogbackCapturingAppender clientConnectedAppender =
+    private final @NotNull LogbackCapturingAppender clientConnectedAppender =
             LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_CONNECTED));
-    private final LogbackCapturingAppender clientDisconnectedAppender =
+    private final @NotNull LogbackCapturingAppender clientDisconnectedAppender =
             LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_DISCONNECTED));
-    private final LogbackCapturingAppender messageDroppedAppender =
+    private final @NotNull LogbackCapturingAppender messageDroppedAppender =
             LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_MESSAGE_DROPPED));
-    private final LogbackCapturingAppender sessionExpiredAppender =
+    private final @NotNull LogbackCapturingAppender sessionExpiredAppender =
             LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(EventLog.EVENT_CLIENT_SESSION_EXPIRED));
 
-    private StringBuffer logMessageBuffer;
+    private @NotNull StringBuffer logMessageBuffer;
 
     private final int qos = 1;
-    private final String topic = "topic/a";
-    private final String clientId = "clientId_";
-    private final String reason = "its a reason";
+    private final @NotNull String topic = "topic/a";
+    private final @NotNull String clientId = "clientId_";
+    private final @NotNull String reason = "its a reason";
     private final boolean cleanStart = false;
-    private final Long sessionExpiry = 123L;
+    private final @NotNull Long sessionExpiry = 123L;
+    private final @NotNull Channel channel = mock(Channel.class);
 
-    @Mock
-    private Channel channel;
-
-    private ClientConnection clientConnection;
+    private @NotNull UndefinedClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        clientConnection = new DummyClientConnection(channel, null);
+        clientConnection = new UndefinedClientConnection(channel,
+                null,
+                new TcpListener(0, "localhost", "")
+        );
         clientConnection.setClientSessionExpiryInterval(sessionExpiry);
         clientConnection.setCleanStart(cleanStart);
         clientConnection.setClientId(clientId);
@@ -202,7 +204,7 @@ public class EventLogTest {
                 .append(clientId)
                 .append(", IP: ")
                 .append("UNKNOWN")
-                .append(" disconnected ungracefully.");
+                .append(" disconnected ungracefully from TCP Listener on port: 0.");
 
         assertLogging(clientDisconnectedAppender);
     }

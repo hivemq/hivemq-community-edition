@@ -118,7 +118,7 @@ public class TlsTcpChannelInitializerTest {
     }
 
     @Test
-    public void test_add_special_handlers() throws Exception {
+    public void test_add_special_handlers() {
 
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
 
@@ -132,7 +132,7 @@ public class TlsTcpChannelInitializerTest {
     }
 
     @Test
-    public void test_add_special_handlers_with_timeout() throws Exception {
+    public void test_add_special_handlers_with_timeout() {
 
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
         when(tls.getHandshakeTimeout()).thenReturn(30);
@@ -149,7 +149,7 @@ public class TlsTcpChannelInitializerTest {
     }
 
     @Test
-    public void test_add_special_handlers_no_cert() throws Exception {
+    public void test_add_special_handlers_no_cert() {
 
 
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.NONE);
