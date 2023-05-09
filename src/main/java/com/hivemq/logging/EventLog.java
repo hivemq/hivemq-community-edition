@@ -20,6 +20,8 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
+import com.hivemq.configuration.service.entity.Listener;
+
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,13 +171,19 @@ public class EventLog {
     public void clientDisconnectedUngracefully(final @NotNull ClientConnectionContext clientConnectionContext) {
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
+        final Listener listener = clientConnectionContext.getConnectedListener();
+        final String listenerName = listener.readableName();
+        final int listenerPort = listener.getPort();
+        final String eventLogMessage = "Client ID: {}, IP: {} disconnected ungracefully from {} on port: {}.";
 
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected ungracefully.", clientId);
         }
-        logClientDisconnected.debug("Client ID: {}, IP: {} disconnected ungracefully.",
+        logClientDisconnected.debug(eventLogMessage,
                 valueOrUnknown(clientId),
-                valueOrUnknown(ip));
+                valueOrUnknown(ip),
+                listenerName,
+                listenerPort);
     }
 
     /**

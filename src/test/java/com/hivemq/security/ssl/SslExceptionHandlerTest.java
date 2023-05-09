@@ -17,6 +17,9 @@ package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.bootstrap.UndefinedClientConnection;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -34,6 +37,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +66,8 @@ public class SslExceptionHandlerTest {
         MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
 
-        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
+        final Listener listener = mock(TcpListener.class);
+        final ClientConnectionContext clientConnection = new UndefinedClientConnection(channel, null, listener);
         clientConnection.setClientId("client");
 
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(

@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
+import static com.hivemq.logging.LoggingUtils.appendListenerToMessage;
+
 /**
  * This Exception handler is responsible for handling SSLExceptions and all other
  * SSL related exceptions.
@@ -38,7 +40,7 @@ import javax.net.ssl.SSLHandshakeException;
  */
 public class SslExceptionHandler extends ChannelHandlerAdapter {
 
-    private static final Logger log = LoggerFactory.getLogger(SslExceptionHandler.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(SslExceptionHandler.class);
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
 
     @Inject
@@ -58,14 +60,16 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
             if (cause.getCause() instanceof SSLHandshakeException) {
                 logSSLHandshakeException(ctx, cause);
                 //Just in case the channel wasn't closed already
+                final String eventLogMessage = appendListenerToMessage(ctx.channel(), "SSL handshake failed");
                 mqttServerDisconnector.logAndClose(ctx.channel(), null, //already logged
-                        "SSL handshake failed");
+                        eventLogMessage);
                 return;
 
             } else if (cause.getCause() instanceof SSLException) {
                 logSSLException(ctx, cause);
+                final String eventLogMessage = appendListenerToMessage(ctx.channel(), "SSL message transmission failed");
                 mqttServerDisconnector.logAndClose(ctx.channel(), null, //already logged
-                        "SSL message transmission failed");
+                        eventLogMessage);
                 return;
             }
         }
@@ -111,7 +115,6 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
         }
     }
 
-
     private boolean ignorableException(final @NotNull Throwable cause, final @NotNull ChannelHandlerContext ctx) {
 
         if (cause instanceof NotSslRecordException) {
@@ -122,8 +125,9 @@ public class SslExceptionHandler extends ChannelHandlerAdapter {
                 log.trace("Original Exception:", cause);
             }
             //Just in case the client wasn't disconnected already
+            final String eventLogMessage = appendListenerToMessage(ctx.channel(), "SSL handshake failed");
             mqttServerDisconnector.logAndClose(ctx.channel(), null, //already logged
-                    "SSL handshake failed");
+                    eventLogMessage);
             return true;
         }
         return false;

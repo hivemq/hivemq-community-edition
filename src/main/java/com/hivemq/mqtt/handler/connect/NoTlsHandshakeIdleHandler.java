@@ -23,6 +23,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 
+import static com.hivemq.logging.LoggingUtils.appendListenerToMessage;
+
 /**
  * @author Christoph Schäbel
  */
@@ -41,9 +43,10 @@ public class NoTlsHandshakeIdleHandler extends ChannelInboundHandlerAdapter {
 
         if (evt instanceof IdleStateEvent) {
             if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
+                final String eventLogMessage = appendListenerToMessage(ctx.channel(), "TLS handshake not finished in time");
                 mqttServerDisconnector.logAndClose(ctx.channel(),
                         "Client with IP {} disconnected. The client was idle for too long without finishing the TLS handshake.",
-                        "TLS handshake not finished in time");
+                        eventLogMessage);
                 return;
             }
         }

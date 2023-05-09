@@ -36,30 +36,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.ALL_CHANNELS_GROUP_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.CLIENT_LIFECYCLE_EVENT_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.CONNECTION_LIMITER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.EXCEPTION_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.GLOBAL_THROTTLING_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.INTERCEPTOR_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MESSAGE_EXPIRY_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_AUTH_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_CONNECT_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_DISCONNECT_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_BARRIER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_DECODER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_ENCODER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_PINGREQ_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_SUBSCRIBE_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_UNSUBSCRIBE_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NO_CONNECT_IDLE_EVENT_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.PLUGIN_INITIALIZER_HANDLER;
-import static com.hivemq.bootstrap.netty.ChannelHandlerNames.PUBLISH_FLUSH_HANDLER;
+import static com.hivemq.bootstrap.netty.ChannelHandlerNames.*;
+import static com.hivemq.logging.LoggingUtils.appendListenerToMessage;
+
 
 public abstract class AbstractChannelInitializer extends ChannelInitializer<Channel> {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(AbstractChannelInitializer.class);
 
     private final @NotNull ChannelDependencies channelDependencies;
     private final @NotNull Listener listener;
@@ -163,11 +146,11 @@ public abstract class AbstractChannelInitializer extends ChannelInitializer<Chan
                     cause.getMessage(),
                     clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
             log.debug("Original exception:", cause);
+            final String eventLogMessage = appendListenerToMessage(ctx.channel(), cause.getMessage());
             //We need to close the channel because the initialization wasn't successful
             channelDependencies.getMqttServerDisconnector().logAndClose(ctx.channel(), null, //already logged
-                    cause.getMessage() != null ? cause.getMessage() : "TLS connection initialization failed.");
+                    eventLogMessage);
         } else {
-
             //Just use the default handler
             super.exceptionCaught(ctx, cause);
         }

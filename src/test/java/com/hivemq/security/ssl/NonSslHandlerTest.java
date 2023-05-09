@@ -16,6 +16,10 @@
 package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.bootstrap.UndefinedClientConnection;
+import com.hivemq.configuration.service.entity.Listener;
+import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -26,10 +30,8 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Florian Limpöck
@@ -37,11 +39,11 @@ import static org.junit.Assert.assertTrue;
  */
 public class NonSslHandlerTest {
 
-    private EmbeddedChannel channel;
+    private @NotNull EmbeddedChannel channel;
 
-    private MqttServerDisconnector disconnector;
+    private @NotNull MqttServerDisconnector disconnector;
 
-    private static final byte[] VALID_SSL_PACKET = {
+    private static final byte @NotNull [] VALID_SSL_PACKET = {
             22,
             3,
             3,
@@ -346,7 +348,7 @@ public class NonSslHandlerTest {
             3,
             1};
 
-    private static final byte[] VALID_SSL_CONNECT_PACKET = {
+    private static final byte @NotNull [] VALID_SSL_CONNECT_PACKET = {
             16,
             3,
             3,
@@ -654,8 +656,10 @@ public class NonSslHandlerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        final Listener listener = mock(TcpListener.class);
         channel = new EmbeddedChannel();
-        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
+                .set(new UndefinedClientConnection(channel, null, listener));
         disconnector = new MqttServerDisconnectorImpl(new EventLog());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
     }
