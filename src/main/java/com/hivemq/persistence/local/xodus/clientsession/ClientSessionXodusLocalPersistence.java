@@ -135,7 +135,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     protected void init() {
         for (int i = 0; i < bucketCount; i++) {
             final Bucket bucket = buckets[i];
-            bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
+            bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
                 final Store store = bucket.getStore();
 
                 final ImmutableList.Builder<Long> willsToRemoveBuilder = ImmutableList.builder();
@@ -281,7 +281,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
 
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(clientId));
 
@@ -329,7 +329,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
-        return bucket.getEnvironment().computeInTransaction(txn -> {
+        return bucket.getEnvironment().computeInExclusiveTransaction(txn -> {
 
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(clientId));
             final ByteIterable byteIterable = bucket.getStore().get(txn, key);
@@ -368,7 +368,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
-        return bucket.getEnvironment().computeInTransaction(txn -> {
+        return bucket.getEnvironment().computeInExclusiveTransaction(txn -> {
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(clientId));
             final ByteIterable byteIterable = bucket.getStore().get(txn, key);
 
@@ -400,7 +400,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         checkBucketIndex(bucketIndex);
 
         final Bucket bucket = buckets[bucketIndex];
-        return bucket.getEnvironment().computeInTransaction(txn -> {
+        return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             final Map<String, ClientSession> resultMap = Maps.newHashMap();
 
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
@@ -476,7 +476,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             final ByteIterable value = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(client)));
             if (value != null) {
                 final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(value));
@@ -503,7 +503,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         }
 
         final Bucket bucket = buckets[bucketIndex];
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
 
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(clientId));
 
@@ -536,7 +536,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             return expiredSessionsBuilder.build();
         }
         final Bucket bucket = buckets[bucketIndex];
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 while (cursor.getNext()) {
                     final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
