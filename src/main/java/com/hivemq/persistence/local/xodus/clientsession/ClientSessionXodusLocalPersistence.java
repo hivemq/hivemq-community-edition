@@ -335,20 +335,24 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 return clientSession;
             }
 
-            final TransactionCommitActions commitActions = TransactionCommitActions.asCommitHookFor(txn);
             final ClientSession clientSession = serializer.deserializeValue(byteIterableToBytes(byteIterable));
 
             if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
                 clientSession.setSessionExpiryIntervalSec(sessionExpiryInterval);
             }
 
-            if (clientSession.isConnected() && !persistent(clientSession)) {
-                commitActions.add(sessionsCount::decrementAndGet);
-            }
-            clientSession.setConnected(false);
+            final boolean isConnected = clientSession.isConnected();
             final ClientSessionWill will = clientSession.getWillPublish();
+            txn.setCommitHook(() -> {
+                if (isConnected && !persistent(clientSession)) {
+                    sessionsCount.decrementAndGet();
+                }
+                if (!sendWill && will != null) {
+                    removeWillReference(will);
+                }
+            });
+            clientSession.setConnected(false);
             if (!sendWill && will != null) {
-                commitActions.add(() -> removeWillReference(will));
                 clientSession.setWillPublish(null);
             }
             bucket.getStore().put(txn, key, bytesToByteIterable(serializer.serializeValue(clientSession, timestamp)));
