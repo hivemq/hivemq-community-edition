@@ -17,6 +17,7 @@ package com.hivemq.persistence.local.memory;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.annotations.ExecuteInSingleWriter;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
@@ -285,10 +286,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         return ImmutableSet.copyOf(bucket.keySet());
     }
 
-    @Override
-    @ExecuteInSingleWriter
-    public void removeWithTimestamp(final @NotNull String clientId, final int bucketIndex) {
-
+    @VisibleForTesting
+    void removeWithTimestamp(final @NotNull String clientId, final int bucketIndex) {
         final Map<String, PersistenceEntry<ClientSession>> bucket = getBucket(bucketIndex);
         final PersistenceEntry<ClientSession> remove = bucket.remove(clientId);
         if (remove != null) {

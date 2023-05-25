@@ -135,13 +135,6 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
     @NotNull Set<@NotNull String> getAllClients(int bucketIndex);
 
     /**
-     * Completely remove the session for the client. This will not create a tombstone.
-     */
-    @VisibleForTesting
-    @ExecuteInSingleWriter
-    void removeWithTimestamp(@NotNull String client, int bucketIndex);
-
-    /**
      * Trigger a cleanup for a specific persistence bucket.
      *
      * @param bucketIndex The index of the bucket in which the client sessions are stored.
