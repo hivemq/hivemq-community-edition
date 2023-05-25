@@ -34,7 +34,6 @@ import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.exception.InvalidSessionExpiryIntervalException;
-import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -90,7 +89,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
     private @NotNull EventLog eventLog;
 
     private @NotNull Gauge<Long> memoryGauge;
-    private @NotNull ClientSessionLocalPersistence persistence;
+    private @NotNull ClientSessionMemoryLocalPersistence persistence;
 
     @Before
     public void setUp() throws Exception {

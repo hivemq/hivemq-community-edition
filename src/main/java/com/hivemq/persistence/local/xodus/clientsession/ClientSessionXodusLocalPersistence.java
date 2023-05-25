@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.local.xodus.clientsession;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
@@ -466,10 +467,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         });
     }
 
-    @Override
-    public void removeWithTimestamp(final @NotNull String client, final int bucketIndex) {
-        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
+    @VisibleForTesting
+    void removeWithTimestamp(final @NotNull String client, final int bucketIndex) {
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             final ByteIterable value = bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(client)));
