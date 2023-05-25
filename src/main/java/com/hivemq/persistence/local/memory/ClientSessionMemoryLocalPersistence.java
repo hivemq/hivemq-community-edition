@@ -425,7 +425,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
                 bucket.computeIfPresent(clientId, (ignored, oldEntry) -> {
                     final ClientSession oldSession = oldEntry.getObject();
 
-                    // Just to be save, we do nothing
+                    // Just to be safe, we do nothing.
                     if (oldSession.isConnected()) {
                         return oldEntry;
                     }
@@ -474,8 +474,8 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
     @ExecuteInSingleWriter
     public void closeDB(final int bucketIndex) {
         getBucket(bucketIndex).clear();
-        //happens for every bucket, but its faster than calculating all sizes
-        //and decrementing the memory and count every time,
+        // Happens for every bucket, but it is faster than calculating all sizes
+        // and decrementing the memory and count every time.
         sessionsCount.set(0);
         currentMemorySize.set(0);
     }
