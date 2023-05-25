@@ -136,15 +136,17 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         for (int i = 0; i < bucketCount; i++) {
             final Bucket bucket = buckets[i];
             bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
-                final TransactionCommitActions commitActions = TransactionCommitActions.asCommitHookFor(txn);
                 final Store store = bucket.getStore();
 
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
+                    final TransactionCommitActions commitActions = TransactionCommitActions.asCommitHookFor(txn);
+                    final SessionCounterDelta sessionCounterDelta = new SessionCounterDelta();
+                    commitActions.add(sessionCounterDelta);
                     while (cursor.getNext()) {
                         final byte[] bytes = byteIterableToBytes(cursor.getValue());
                         final ClientSession clientSession = serializer.deserializeValue(bytes);
                         if (persistent(clientSession)) {
-                            commitActions.add(sessionsCount::incrementAndGet);
+                            sessionCounterDelta.increment();
                         }
                         final ClientSessionWill will = clientSession.getWillPublish();
                         if (will != null) {
@@ -538,6 +540,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final ImmutableSet.Builder<String> expiredSessionsBuilder = ImmutableSet.builder();
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 final TransactionCommitActions commitActions = TransactionCommitActions.asCommitHookFor(txn);
+                final SessionCounterDelta sessionCounterDelta = new SessionCounterDelta();
+                commitActions.add(sessionCounterDelta);
                 while (cursor.getNext()) {
                     final String clientId = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
 
@@ -550,13 +554,11 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
                     // Expired is true if the persistent data for the client has to be removed
                     if (clientSession.isExpired(timeSinceDisconnect)) {
-                        commitActions.add(() -> {
-                            if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
-                                sessionsCount.decrementAndGet();
-                            }
-
-                            eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId);
-                        });
+                        if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
+                            sessionCounterDelta.decrement();
+                        }
+                        commitActions.add(() ->
+                                eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId));
                         cursor.deleteCurrent();
                         expiredSessionsBuilder.add(clientId);
                     }
@@ -676,5 +678,23 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private void removeWillReference(final @NotNull ClientSessionWill will) {
         metricsHolder.getStoredWillMessagesCount().dec();
         payloadPersistence.decrementReferenceCounter(will.getPublishId());
+    }
+
+    private class SessionCounterDelta implements Runnable {
+
+        private int delta;
+
+        private void increment() {
+            delta++;
+        }
+
+        private void decrement() {
+            delta--;
+        }
+
+        @Override
+        public void run() {
+            sessionsCount.addAndGet(delta);
+        }
     }
 }
