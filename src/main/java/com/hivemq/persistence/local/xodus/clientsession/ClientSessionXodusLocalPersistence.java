@@ -135,13 +135,12 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     protected void init() {
         for (int i = 0; i < bucketCount; i++) {
             final Bucket bucket = buckets[i];
+            final SessionCounterDelta sessionCounterDelta = new SessionCounterDelta();
             bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
                 final Store store = bucket.getStore();
 
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                     final TransactionCommitActions commitActions = TransactionCommitActions.asCommitHookFor(txn);
-                    final SessionCounterDelta sessionCounterDelta = new SessionCounterDelta();
-                    commitActions.add(sessionCounterDelta);
                     while (cursor.getNext()) {
                         final byte[] bytes = byteIterableToBytes(cursor.getValue());
                         final ClientSession clientSession = serializer.deserializeValue(bytes);
@@ -166,6 +165,15 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     }
                 }
             });
+            // Ideally, this should be executed by Xodus as soon as the transaction is done.
+            // But transaction hooks are only executed if there actually was an update,
+            // which only happens if at least one session has a will.
+            // Therefore, we could either
+            // - increment continuously during the iteration in the transaction, or
+            // - increment once after the transaction is done.
+            // Let's go with the latter to better signal what's happening:
+            // All session updates are also committed at once, if there are any.
+            sessionCounterDelta.run();
         }
     }
 
