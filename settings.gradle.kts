@@ -7,7 +7,7 @@ pluginManagement {
         id("org.owasp.dependencycheck") version "${extra["plugin.dependencycheck.version"]}"
         id("com.github.spotbugs") version "${extra["plugin.spotbugs.version"]}"
         id("de.thetaphi.forbiddenapis") version "${extra["plugin.forbiddenapis.version"]}"
-        id("com.github.sgtsilvio.gradle.utf8") version "${extra["plugin.utf8.version"]}"
+        id("io.github.sgtsilvio.gradle.defaults") version "${extra["plugin.defaults.version"]}"
         id("com.github.sgtsilvio.gradle.metadata") version "${extra["plugin.metadata.version"]}"
         id("com.github.sgtsilvio.gradle.javadoc-links") version "${extra["plugin.javadoc-links.version"]}"
         id("io.github.gradle-nexus.publish-plugin") version "${extra["plugin.nexus-publish.version"]}"

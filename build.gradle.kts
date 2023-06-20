@@ -9,7 +9,7 @@ plugins {
     signing
     id("io.github.gradle-nexus.publish-plugin")
     id("com.github.johnrengelman.shadow")
-    id("com.github.sgtsilvio.gradle.utf8")
+    id("io.github.sgtsilvio.gradle.defaults")
     id("com.github.sgtsilvio.gradle.metadata")
     id("com.github.sgtsilvio.gradle.javadoc-links")
     id("com.github.breadmoirai.github-release")
