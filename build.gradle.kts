@@ -1,5 +1,4 @@
 import nl.javadude.gradle.plugins.license.DownloadLicensesExtension.license
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -201,7 +200,6 @@ tasks.test {
 
     testLogging {
         events = setOf(TestLogEvent.STARTED, TestLogEvent.FAILED)
-        exceptionFormat = TestExceptionFormat.FULL
     }
 }
 
