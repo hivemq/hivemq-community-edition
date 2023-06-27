@@ -202,7 +202,7 @@ public class InternalConfigurations {
             new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
     /**
-     * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size
+     * The memory that is used for rocksdb memTable as a portion of the RAM for the retained message persistence. (size
      * = RAM/configValue)
      */
     public static final int RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION = 32;
@@ -254,7 +254,7 @@ public class InternalConfigurations {
             new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
     /**
-     * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size
+     * The memory that is used for rocksdb memTable as a portion of the RAM for the retained message persistence. (size
      * = RAM/configValue)
      */
     public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);
