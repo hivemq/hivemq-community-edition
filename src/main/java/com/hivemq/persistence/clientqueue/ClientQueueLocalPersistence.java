@@ -169,16 +169,6 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
     int size(@NotNull String queueId, boolean shared, int bucketIndex);
 
     /**
-     * Returns the amount of queued qos 0 messages for the given client or shared subscription.
-     *
-     * @param queueId     for which to read the queue size
-     * @param shared      is true if the queueId is actually a shared subscription false if it is a client ID
-     * @param bucketIndex provided by the single writer
-     * @return the amount of queued qos 0 messages
-     */
-    int qos0Size(@NotNull String queueId, boolean shared, int bucketIndex);
-
-    /**
      * Removes the queue for the given client or shared subscription.
      *
      * @param queueId     for which to remove the queue

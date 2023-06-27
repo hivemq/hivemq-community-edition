@@ -549,20 +549,6 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
      */
     @Override
     @ExecuteInSingleWriter
-    public int qos0Size(final @NotNull String queueId, final boolean shared, final int bucketIndex) {
-        checkNotNull(queueId, "Queue ID must not be null");
-        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX); // QueueSizes are not thread save
-
-        final Map<String, Messages> bucket = shared ? sharedBuckets[bucketIndex] : buckets[bucketIndex];
-        final Messages messages = bucket.get(queueId);
-        return (messages == null) ? 0 : messages.qos0Messages.size();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @ExecuteInSingleWriter
     public void clear(final @NotNull String queueId, final boolean shared, final int bucketIndex) {
         checkNotNull(queueId, "Queue ID must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);

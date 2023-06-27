@@ -853,14 +853,6 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
     }
 
     @Override
-    public int qos0Size(final @NotNull String queueId, final boolean shared, final int bucketIndex) {
-        checkNotNull(queueId, "Queue ID must not be null");
-        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX); // QueueSizes are not thread save
-        final Key key = new Key(queueId, shared);
-        return qos0Size(key, bucketIndex);
-    }
-
-    @Override
     public void clear(final @NotNull String queueId, final boolean shared, final int bucketIndex) {
         checkNotNull(queueId, "Queue ID must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
