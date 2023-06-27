@@ -52,7 +52,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     }
 
     @Override
-    public int getAndIncrementBy(@NotNull long payloadId, int delta) {
+    public int getAndIncrementBy(long payloadId, int delta) {
         final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
         final int previousValue = map.getIfAbsent(payloadId, UNKNOWN_PAYLOAD);
         if (previousValue == UNKNOWN_PAYLOAD) {
@@ -80,7 +80,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     }
 
     @Override
-    public void remove(@NotNull long payloadId) {
+    public void remove(long payloadId) {
         final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
         if (map == null) {
             return;

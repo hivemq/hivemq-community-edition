@@ -36,9 +36,6 @@ import java.io.File;
 import static com.hivemq.migration.meta.PersistenceType.FILE;
 import static com.hivemq.migration.meta.PersistenceType.FILE_NATIVE;
 
-/**
- * @author Florian Limpöck
- */
 public class PublishPayloadTypeMigration implements TypeMigration {
 
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadTypeMigration.class);
@@ -62,13 +59,15 @@ public class PublishPayloadTypeMigration implements TypeMigration {
     }
 
     @Override
-    public void migrateToType(final @NotNull PersistenceType type) {
-        if (type.equals(FILE_NATIVE)) {
+    public void migrateToType(final @NotNull PersistenceType persistenceType) {
+        if (persistenceType.equals(FILE_NATIVE)) {
             migrateToRocksDB();
-        } else if (type.equals(PersistenceType.FILE)) {
+        } else if (persistenceType.equals(FILE)) {
             migrateToXodus();
         } else {
-            throw new IllegalArgumentException("Unknown persistence type " + type + " for publish payload migration");
+            throw new IllegalArgumentException("Unknown persistence type " +
+                    persistenceType +
+                    " for publish payload migration");
         }
     }
 
@@ -78,8 +77,8 @@ public class PublishPayloadTypeMigration implements TypeMigration {
                 PublishPayloadLocalPersistence.PERSISTENCE_NAME,
                 PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION);
 
-        final File publish_payload_store_0 = new File(persistenceFolder, "publish_payload_store_0");
-        if (!publish_payload_store_0.exists()) {
+        final File publishPayloadStore0 = new File(persistenceFolder, "publish_payload_store_0");
+        if (!publishPayloadStore0.exists()) {
             migrationLog.info("No (old) persistence folder (publish_payload) present, skipping migration.");
             log.debug("No (old) persistence folder (publish_payload) present, skipping migration.");
             return;
@@ -97,8 +96,8 @@ public class PublishPayloadTypeMigration implements TypeMigration {
                 PublishPayloadLocalPersistence.PERSISTENCE_NAME,
                 PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
 
-        final File publish_payload_store_0 = new File(persistenceFolder, "publish_payload_store_0");
-        if (!publish_payload_store_0.exists()) {
+        final File publishPayloadStore0 = new File(persistenceFolder, "publish_payload_store_0");
+        if (!publishPayloadStore0.exists()) {
             migrationLog.info("No (old) persistence folder (publish_payload) present, skipping migration.");
             log.debug("No (old) persistence folder (publish_payload) present, skipping migration.");
             return;
@@ -137,5 +136,4 @@ public class PublishPayloadTypeMigration implements TypeMigration {
                 PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
         MetaFileService.writeMetaFile(systemInformation, metaFile);
     }
-
 }

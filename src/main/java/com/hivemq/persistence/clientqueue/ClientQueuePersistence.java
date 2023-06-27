@@ -24,9 +24,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 
 import java.util.List;
 
-/**
- * @author Lukas Brandl
- */
 public interface ClientQueuePersistence {
 
     /**
@@ -154,7 +151,6 @@ public interface ClientQueuePersistence {
      */
     @NotNull ListenableFuture<Void> removeShared(@NotNull String sharedSubscription, @NotNull String uniqueId);
 
-
     /**
      * Remove the in-flight marker of a PUBLISH which has the same unique ID as the one that is provided.
      * This way the PUBLISH will be return by future calls of {@link ClientQueuePersistence#readNew(String, boolean,
@@ -174,7 +170,6 @@ public interface ClientQueuePersistence {
      * @param shared  is true if the queueId is actually a shared subscription false if it is a client ID
      */
     @NotNull ListenableFuture<Void> removeAllQos0Messages(@NotNull String queueId, boolean shared);
-
 
     /**
      * Notify that the client is connected and publishes are available

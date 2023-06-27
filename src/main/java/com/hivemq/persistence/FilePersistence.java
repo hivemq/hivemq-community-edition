@@ -16,7 +16,6 @@
 package com.hivemq.persistence;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 public interface FilePersistence {
@@ -35,5 +34,4 @@ public interface FilePersistence {
      * stop a file persistence by closing all persistence buckets.
      */
     void stop();
-
 }

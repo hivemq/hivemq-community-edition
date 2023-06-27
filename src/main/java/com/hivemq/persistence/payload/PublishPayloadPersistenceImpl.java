@@ -95,7 +95,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     public boolean add(final byte @NotNull [] payload, final long referenceCount, final long payloadId) {
         checkNotNull(payload, "Payload must not be null");
-        bucketLock.accessBucketByPaloadId(payloadId, () -> {
+        bucketLock.accessBucketByPayloadId(payloadId, () -> {
             if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == UNKNOWN_PAYLOAD) {
                 localPersistence.put(payloadId, payload);
             }
@@ -132,7 +132,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore, locking is not an issue here.
-        bucketLock.accessBucketByPaloadId(payloadId,
+        bucketLock.accessBucketByPayloadId(payloadId,
                 () -> payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1));
     }
 
@@ -141,7 +141,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
      */
     @Override
     public void decrementReferenceCounter(final long id) {
-        bucketLock.accessBucketByPaloadId(id, () -> {
+        bucketLock.accessBucketByPayloadId(id, () -> {
             final int result = payloadReferenceCounterRegistry.decrementAndGet(id);
             if (result == UNKNOWN_PAYLOAD || result == REF_COUNT_ALREADY_ZERO) {
                 log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
