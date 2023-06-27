@@ -46,7 +46,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
     private final @NotNull PersistenceStartup persistenceStartup;
     private final int bucketCount;
-    private final int memtableSizePortion;
+    private final int memTableSizePortion;
     private final int blockCacheSizePortion;
     private final int blockSize;
     private final boolean enabled;
@@ -55,7 +55,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup,
             final int bucketCount,
-            final int memtableSizePortion,
+            final int memTableSizePortion,
             final int blockCacheSizePortion,
             final int blockSize,
             final boolean enabled) {
@@ -63,7 +63,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         this.persistenceStartup = persistenceStartup;
         this.bucketCount = bucketCount;
         this.buckets = new RocksDB[bucketCount];
-        this.memtableSizePortion = memtableSizePortion;
+        this.memTableSizePortion = memTableSizePortion;
         this.blockCacheSizePortion = blockCacheSizePortion;
         this.blockSize = blockSize;
         this.enabled = enabled;
@@ -97,7 +97,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         final Logger logger = getLogger();
         try {
             final File persistenceFolder = localPersistenceFileUtil.getVersionedLocalPersistenceFolder(name, version);
-            final long memtableSize = physicalMemory() / memtableSizePortion / bucketCount;
+            final long memTableSize = physicalMemory() / memTableSizePortion / bucketCount;
             final LRUCache cache = new LRUCache(physicalMemory() / blockCacheSizePortion / bucketCount);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
             tableConfig.setBlockCache(cache);
@@ -105,7 +105,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setStatistics(new Statistics());
             options.setCreateIfMissing(true);
             options.setTableFormatConfig(tableConfig);
-            options.setWriteBufferSize(memtableSize);
+            options.setWriteBufferSize(memTableSize);
 
             options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
             options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
@@ -138,7 +138,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         final Logger logger = getLogger();
 
         try {
-            final long memtableSize = physicalMemory() / memtableSizePortion / bucketCount;
+            final long memTableSize = physicalMemory() / memTableSizePortion / bucketCount;
             final long blockCacheMaxSize = physicalMemory() / blockCacheSizePortion;
             final LRUCache cache = new LRUCache(blockCacheMaxSize);
             final BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
@@ -147,7 +147,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             options.setStatistics(new Statistics());
             options.setCreateIfMissing(true);
             options.setTableFormatConfig(tableConfig);
-            options.setWriteBufferSize(memtableSize);
+            options.setWriteBufferSize(memTableSize);
 
             options.setStatsPersistPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
             options.setStatsDumpPeriodSec(InternalConfigurations.ROCKSDB_STATS_PERSIST_PERIOD_SEC);
