@@ -22,9 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-/**
- * @author Lukas Brandl
- */
 class RemoveEntryTask implements Runnable {
 
     private final @NotNull PublishPayloadLocalPersistence localPersistence;
@@ -66,7 +63,7 @@ class RemoveEntryTask implements Runnable {
                         // and mark it as removable again before the cleanup is able to remove the payload.
                         if (referenceCount == 0) {
                             localPersistence.remove(payloadId);
-                            payloadReferenceCounterRegistry.remove(payloadId);
+                            payloadReferenceCounterRegistry.delete(payloadId);
                         }
                     });
                 } else {

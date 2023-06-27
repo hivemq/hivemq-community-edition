@@ -28,9 +28,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 
-/**
- * @author Lukas Brandl
- */
 public class RemoveEntryTaskTest {
 
     @Mock
@@ -52,7 +49,7 @@ public class RemoveEntryTaskTest {
     @Test
     public void run_whenARemoveDelayIsSet_doesNotRemoveAPayloadIfNotYetExpired() {
         removablePayloads.add(new RemovablePayload(1, System.currentTimeMillis()));
-        referenceCounterRegistry.getAndIncrementBy(1L, 1);
+        referenceCounterRegistry.getAndIncrement(1L);
         referenceCounterRegistry.decrementAndGet(1L);
         final RemoveEntryTask task = new RemoveEntryTask(localPersistence,
                 bucketLock,
@@ -68,7 +65,7 @@ public class RemoveEntryTaskTest {
     @Test
     public void run_whenTheRemoveDelayIsExpired_removesThePayloadWithoutDecrementingTheReferenceCounter() {
         removablePayloads.add(new RemovablePayload(1, System.currentTimeMillis() - 100L));
-        referenceCounterRegistry.getAndIncrementBy(1L, 1);
+        referenceCounterRegistry.getAndIncrement(1);
         final RemoveEntryTask task = new RemoveEntryTask(localPersistence,
                 bucketLock,
                 removablePayloads,
@@ -90,8 +87,8 @@ public class RemoveEntryTaskTest {
                 10000L,
                 referenceCounterRegistry,
                 10000);
-        referenceCounterRegistry.getAndIncrementBy(1L, 0);
-        referenceCounterRegistry.getAndIncrementBy(2L, 0);
+        referenceCounterRegistry.getAndIncrement(1L);
+        referenceCounterRegistry.getAndIncrement(2L);
         task.run();
         assertEquals(1, removablePayloads.size());
         assertEquals(1, referenceCounterRegistry.size());
@@ -107,7 +104,7 @@ public class RemoveEntryTaskTest {
                 10L,
                 referenceCounterRegistry,
                 10000);
-        referenceCounterRegistry.getAndIncrementBy(1L, 0);
+        referenceCounterRegistry.getAndIncrement(1L);
         task.run();
         assertEquals(0, removablePayloads.size());
         assertEquals(0, referenceCounterRegistry.size());
@@ -115,7 +112,7 @@ public class RemoveEntryTaskTest {
 
     @Test
     public void run_whenAThrowableIsThrownDuringRemoval_thenDontReThrow() {
-        final RemoveEntryTask task = createWithThrowableDuringRun(new Throwable());
+        final RemoveEntryTask task = createWithThrowableDuringRun(new Throwable("this is expected"));
         task.run();
         assertEquals(1, removablePayloads.size());
         assertEquals(1, referenceCounterRegistry.size());
@@ -123,7 +120,7 @@ public class RemoveEntryTaskTest {
 
     @Test(expected = Error.class)
     public void run_whenAnErrorIsThrownDuringRemoval_thenReThrow() {
-        final RemoveEntryTask task = createWithThrowableDuringRun(new Error());
+        final RemoveEntryTask task = createWithThrowableDuringRun(new Error("this is expected"));
         task.run();
         assertEquals(1, removablePayloads.size());
         assertEquals(1, referenceCounterRegistry.size());
@@ -133,7 +130,7 @@ public class RemoveEntryTaskTest {
         // Cover duplicate adds, too.
         removablePayloads.add(new RemovablePayload(1, System.currentTimeMillis() - 100L));
         removablePayloads.add(new RemovablePayload(1, System.currentTimeMillis() - 100L));
-        referenceCounterRegistry.getAndIncrementBy(1L, 0);
+        referenceCounterRegistry.getAndIncrement(1L);
         doAnswer(invocation -> {
             throw throwable;
         }).when(localPersistence).remove(anyLong());

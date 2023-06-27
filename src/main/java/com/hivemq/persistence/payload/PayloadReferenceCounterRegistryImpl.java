@@ -25,11 +25,9 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author Daniel Krüger
- *         <p>
- *         Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller
- *         The reason is that the caller (primarly PublishPayloadPersistence) calls often multiple methods and the lock
- *         must cover all sequential calls to methods
+ * Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller
+ * The reason is that the caller (primarily PublishPayloadPersistence) calls often multiple methods and the lock
+ * must cover all sequential calls to methods
  */
 @NotThreadSafe
 public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCounterRegistry {
@@ -52,13 +50,13 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     }
 
     @Override
-    public int getAndIncrementBy(long payloadId, int delta) {
+    public int getAndIncrement(final long payloadId) {
         final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
         final int previousValue = map.getIfAbsent(payloadId, UNKNOWN_PAYLOAD);
         if (previousValue == UNKNOWN_PAYLOAD) {
-            map.put(payloadId, delta);
+            map.put(payloadId, 1);
         } else {
-            map.put(payloadId, previousValue + delta);
+            map.put(payloadId, previousValue + 1);
         }
         return previousValue;
     }
@@ -80,7 +78,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     }
 
     @Override
-    public void remove(long payloadId) {
+    public void delete(final long payloadId) {
         final LongIntHashMap map = buckets[bucketIndexForPayloadId(payloadId)];
         if (map == null) {
             return;
@@ -94,7 +92,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
         for (int i = 0; i < buckets.length; i++) {
             final int bucketIndex = i;
             bucketLock.accessBucket(bucketIndex, () -> {
-                for (LongIntPair longIntPair : buckets[bucketIndex].keyValuesView()) {
+                for (final LongIntPair longIntPair : buckets[bucketIndex].keyValuesView()) {
                     builder.put(longIntPair.getOne(), longIntPair.getTwo());
                 }
             });

@@ -37,9 +37,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Lukas Brandl
- */
 @SuppressWarnings("ConstantConditions")
 public class PublishPayloadPersistenceImplTest {
 
@@ -72,18 +69,19 @@ public class PublishPayloadPersistenceImplTest {
     public void add_forNewPayloadIds_setsReferenceCounters() {
         final byte[] payload1 = "payload1".getBytes();
         final byte[] payload2 = "payload2".getBytes();
-        persistence.add(payload1, 1, 123);
-        persistence.add(payload2, 2, 234);
+        persistence.add(payload1, 123);
+        persistence.add(payload2, 234);
 
         assertEquals(1, persistence.getReferenceCountersAsMap().get(123L).intValue());
-        assertEquals(2, persistence.getReferenceCountersAsMap().get(234L).intValue());
+        assertEquals(1, persistence.getReferenceCountersAsMap().get(234L).intValue());
     }
 
     @Test
     public void add_forTheSamePayloadId_increasesReferenceCounter() {
         final byte[] payload = "payload".getBytes();
-        persistence.add(payload, 1, 123);
-        persistence.add(payload, 2, 123);
+        persistence.add(payload, 123);
+        persistence.add(payload, 123);
+        persistence.add(payload, 123);
 
         assertEquals(3, persistence.getReferenceCountersAsMap().get(123L).intValue());
     }
@@ -91,7 +89,7 @@ public class PublishPayloadPersistenceImplTest {
     @Test
     public void get_readsFromLocalPersistence() {
         final byte[] payload = "payload".getBytes();
-        persistence.add(payload, 1, 123);
+        persistence.add(payload, 123);
         when(localPersistence.get(123)).thenReturn(payload);
         assertEquals(1, persistence.getReferenceCountersAsMap().get(123L).intValue());
         final byte[] result = persistence.get(123);
