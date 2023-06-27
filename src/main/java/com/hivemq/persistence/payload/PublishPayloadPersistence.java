@@ -20,9 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-/**
- * @author Lukas Brandl
- */
 public interface PublishPayloadPersistence {
 
     /**
@@ -31,15 +28,14 @@ public interface PublishPayloadPersistence {
     void init();
 
     /**
-     * Add the payload to the persistence and set the initial reference count.
-     * If the payload is already existent in the persistence, the reference count is added to the current value.
+     * Add the payload to the persistence and counts the reference count up.
+     * If the payload is already existent in the persistence, the reference count is incremented.
      *
      * @param payload        The payload that will be persisted.
-     * @param referenceCount The initial amount of references for the payload.
      * @param payloadId      The publish ID is used a the payload ID
      * @return true: payload may be removed from the publish, false: dont remove the payload
      */
-    boolean add(@NotNull byte[] payload, long referenceCount, long payloadId);
+    boolean add(byte @NotNull [] payload, long payloadId);
 
     /**
      * Get the persisted payload for an id.
@@ -48,7 +44,7 @@ public interface PublishPayloadPersistence {
      * @return The payload that is persisted.
      * @throws PayloadPersistenceException if {@link PublishPayloadLocalPersistence} returns null reference for id.
      */
-    @NotNull byte[] get(long id);
+    byte @NotNull [] get(long id);
 
     /**
      * Get the persisted payload for an id or null.
@@ -56,8 +52,7 @@ public interface PublishPayloadPersistence {
      * @param id The id associated with the payload.
      * @return The payload that is persisted for the given id or null if the reference was deleted.
      */
-    @Nullable("There is a race condition case with retained messages where retained messages are overwritten. " +
-            "In this case this method may return null") byte[] getPayloadOrNull(long id);
+    byte @Nullable [] getPayloadOrNull(long id);
 
     /**
      * Increments the current reference count for an id.

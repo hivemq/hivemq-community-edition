@@ -61,6 +61,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     public PublishPayloadRocksDBLocalPersistence(
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
+
         super(localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
@@ -68,6 +69,7 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
+
         this.memTableSize = physicalMemory() /
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get() /
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
@@ -148,20 +150,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         }
     }
 
-    private void flushOnMemTableOverflow(final @NotNull RocksDB bucket, final int bucketIndex, final int payloadSize)
-            throws RocksDBException {
-        final long updatedSize = payloadSize + rocksdbToMemTableSize[bucketIndex];
-        if (updatedSize >= memTableSize) {
-            bucket.flush(FLUSH_OPTIONS);
-            if (log.isDebugEnabled()) {
-                log.debug("Hard flushing memTable due to exceeding memTable limit {}.", memTableSize);
-            }
-            rocksdbToMemTableSize[bucketIndex] = 0L;
-        } else {
-            rocksdbToMemTableSize[bucketIndex] = updatedSize;
-        }
-    }
-
     @Override
     public byte @Nullable [] get(final long id) {
         final RocksDB bucket = getRocksDb(Long.toString(id));
@@ -226,5 +214,19 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @VisibleForTesting
     public long getMemTableSize() {
         return memTableSize;
+    }
+
+    private void flushOnMemTableOverflow(final @NotNull RocksDB bucket, final int bucketIndex, final int payloadSize)
+            throws RocksDBException {
+        final long updatedSize = payloadSize + rocksdbToMemTableSize[bucketIndex];
+        if (updatedSize >= memTableSize) {
+            bucket.flush(FLUSH_OPTIONS);
+            if (log.isDebugEnabled()) {
+                log.debug("Hard flushing memTable due to exceeding memTable limit {}.", memTableSize);
+            }
+            rocksdbToMemTableSize[bucketIndex] = 0L;
+        } else {
+            rocksdbToMemTableSize[bucketIndex] = updatedSize;
+        }
     }
 }

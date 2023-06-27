@@ -37,9 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.REF_COUNT_ALREADY_ZERO;
 import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.UNKNOWN_PAYLOAD;
 
-/**
- * @author Lukas Brandl
- */
 @LazySingleton
 public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence {
 
@@ -48,14 +45,11 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     private final @NotNull PublishPayloadLocalPersistence localPersistence;
     private final @NotNull ListeningScheduledExecutorService scheduledExecutorService;
-
     private final long removeSchedule;
-
     private final @NotNull BucketLock bucketLock;
 
     private final @NotNull Queue<RemovablePayload> removablePayloads = new LinkedTransferQueue<>();
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
-
     private @Nullable ListenableScheduledFuture<?> removeTaskFuture;
 
     @Inject
@@ -66,7 +60,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         this.scheduledExecutorService = scheduledExecutorService;
 
         removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
-        int bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        final int bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         bucketLock = new BucketLock(bucketLockCount);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
     }
@@ -93,20 +87,17 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         }
     }
 
-    public boolean add(final byte @NotNull [] payload, final long referenceCount, final long payloadId) {
+    @Override
+    public boolean add(final byte @NotNull [] payload, final long payloadId) {
         checkNotNull(payload, "Payload must not be null");
         bucketLock.accessBucketByPayloadId(payloadId, () -> {
-            if (payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, (int) referenceCount) == UNKNOWN_PAYLOAD) {
+            if (payloadReferenceCounterRegistry.getAndIncrement(payloadId) == UNKNOWN_PAYLOAD) {
                 localPersistence.put(payloadId, payload);
             }
         });
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //this method is not allowed to return null
     @Override
     public byte @NotNull [] get(final long id) {
         final byte[] payload = getPayloadOrNull(id);
@@ -116,29 +107,19 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         return payload;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //this method is allowed to return null
     @Override
-    public @Nullable byte @NotNull [] getPayloadOrNull(final long id) {
+    public byte @Nullable [] getPayloadOrNull(final long id) {
         return localPersistence.get(id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore, locking is not an issue here.
         bucketLock.accessBucketByPayloadId(payloadId,
-                () -> payloadReferenceCounterRegistry.getAndIncrementBy(payloadId, 1));
+                () -> payloadReferenceCounterRegistry.getAndIncrement(payloadId));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void decrementReferenceCounter(final long id) {
         bucketLock.accessBucketByPayloadId(id, () -> {

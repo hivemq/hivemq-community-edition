@@ -210,7 +210,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
                 metricsHolder.getStoredWillMessagesCount().inc();
-                payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
+                payloadPersistence.add(newWill.getPayload(), newWill.getPublishId());
             }
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(usedSession, timestamp);

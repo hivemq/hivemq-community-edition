@@ -41,14 +41,14 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_get_whenReferenceCounterIsPresent_thenReturnCorrectCount() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
         final int referenceCounter = payloadReferenceCounterRegistry.get(1L);
         assertEquals(1, referenceCounter);
     }
 
     @Test
     public void test_increment_whenNodeIsUnknown_thenAddNewEntry() {
-        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrement(1L);
         assertEquals(UNKNOWN_PAYLOAD, referenceCounter);
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(1L);
         assertEquals(1, referenceCounter2);
@@ -56,8 +56,8 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_increment_whenNodeIsKnownButUniqueIsUnknown_thenAddNewEntry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
-        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrementBy(2L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
+        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrement(2L);
         assertEquals(UNKNOWN_PAYLOAD, referenceCounter);
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(2L);
         assertEquals(1, referenceCounter2);
@@ -65,8 +65,8 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_increment_whenEntryIsAlreadyPresent_thenIncrementEntry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
-        final int incremented = payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
+        final int incremented = payloadReferenceCounterRegistry.getAndIncrement(1L);
         assertEquals(1, incremented);
         final int referenceCounter = payloadReferenceCounterRegistry.get(1L);
         assertEquals(2, referenceCounter);
@@ -74,8 +74,8 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_add_whenNodeIsUnknown_thenAddNewEntry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
-        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
+        final int referenceCounter = payloadReferenceCounterRegistry.getAndIncrement(1L);
         assertEquals(1, referenceCounter);
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(1L);
         assertEquals(2, referenceCounter2);
@@ -83,8 +83,8 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_add_whenEntryIsAlreadyPresent_thenIncrementEntry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
-        final int incremented = payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
+        final int incremented = payloadReferenceCounterRegistry.getAndIncrement(1L);
         assertEquals(1, incremented);
         final int referenceCounter = payloadReferenceCounterRegistry.get(1L);
         assertEquals(2, referenceCounter);
@@ -102,7 +102,7 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_decrement_whenNodeIsKnownButUniqueIsUnknown_thenReturnNegativeValueButDontSetValueInRegistry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
         final int referenceCounter = payloadReferenceCounterRegistry.decrementAndGet(2L);
         assertEquals(-1, referenceCounter);
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(2L);
@@ -119,9 +119,9 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_decrement_whenEntryIsAlreadyPresent_thenDecrementEntry() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
 
         final int decrement = payloadReferenceCounterRegistry.decrementAndGet(1L);
         assertEquals(2, decrement);
@@ -132,14 +132,14 @@ public class PayloadReferenceCounterRegistryImplTest {
 
     @Test
     public void test_size_whenMultipleNodesArePresent_thenSizeCoversAll() {
-        payloadReferenceCounterRegistry.getAndIncrementBy(1L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(1L);
 
-        payloadReferenceCounterRegistry.getAndIncrementBy(2L, 1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(3L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(2L);
+        payloadReferenceCounterRegistry.getAndIncrement(3L);
 
-        payloadReferenceCounterRegistry.getAndIncrementBy(4L, 1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(5L, 1);
-        payloadReferenceCounterRegistry.getAndIncrementBy(6L, 1);
+        payloadReferenceCounterRegistry.getAndIncrement(4L);
+        payloadReferenceCounterRegistry.getAndIncrement(5L);
+        payloadReferenceCounterRegistry.getAndIncrement(6L);
 
         final int size = payloadReferenceCounterRegistry.size();
         assertEquals(6, size);

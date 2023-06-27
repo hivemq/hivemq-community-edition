@@ -60,32 +60,27 @@ public interface PayloadReferenceCounterRegistry {
     int decrementAndGet(long payloadId);
 
     /**
-     * Gets the current count of the reference and increases it afterwards by the given amount
+     * Gets the current count of the reference and increases it afterward by the given amount
      *
      * @param payloadId the payloadId for which the count is incremented
-     * @param delta     the value by which the reference count is incremented
      * @return {@link #UNKNOWN_PAYLOAD}: there was no entry for the given payloadId
      *         otherwise: the existing value that is associated before the increment
      */
-    int getAndIncrementBy(long payloadId, int delta);
+    int getAndIncrement(long payloadId);
 
     /**
-     * Removes the entry for the given payloadId from the registry
+     * Deletes the entry for the given payloadId from the registry
      *
      * @param payloadId the payloadId for which the entry is removed
      */
-    void remove(long payloadId);
+    void delete(long payloadId);
 
     /**
-     * Returns all reference counter entries for all buckets and nodes
-     *
      * @return all reference counter entries for all buckets and nodes
      */
     @NotNull ImmutableMap<Long, Integer> getAll();
 
     /**
-     * Returns the amount of entries for all buckets and nodes
-     *
      * @return the amount of entries for all buckets and nodes
      */
     int size();
