@@ -41,7 +41,7 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.task.ClientSessionCleanUpTask;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
+import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
@@ -157,7 +157,7 @@ public class ClientSessionPersistenceImpl extends AbstractPersistence implements
 
         ClientSessionWill sessionWill = null;
         if (willPublish != null) {
-            final long publishId = PublishPayloadPersistenceImpl.createId();
+            final long publishId = PublishPayloadPersistence.createId();
             sessionWill = new ClientSessionWill(willPublish, publishId);
         }
         final ClientSession clientSession =

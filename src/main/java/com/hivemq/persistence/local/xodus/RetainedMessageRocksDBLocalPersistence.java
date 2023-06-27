@@ -26,12 +26,12 @@ import com.hivemq.extensions.iteration.BucketChunkResult;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.persistence.PersistenceStartup;
 import com.hivemq.persistence.RetainedMessage;
+import com.hivemq.persistence.local.DeltaCounter;
 import com.hivemq.persistence.local.rocksdb.RocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ThreadPreConditions;
-import jetbrains.exodus.ExodusException;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
 import org.rocksdb.WriteBatch;
@@ -49,9 +49,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
-/**
- * @author Florian Limpöck
- */
 @LazySingleton
 public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersistence
         implements RetainedMessageLocalPersistence {
@@ -88,21 +85,18 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     }
 
-    @NotNull
     @Override
-    protected String getName() {
+    protected @NotNull String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
     @Override
-    protected String getVersion() {
+    protected @NotNull String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
     @Override
-    protected Logger getLogger() {
+    protected @NotNull Logger getLogger() {
         return log;
     }
 
@@ -113,27 +107,30 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     @Override
     public void init() {
-
         try {
+            final DeltaCounter deltaCounter = DeltaCounter.finishWith(retainMessageCounter::addAndGet);
+
             for (int i = 0; i < buckets.length; i++) {
+
                 final RocksDB bucket = buckets[i];
+                final PublishTopicTree publishTopicTree = topicTrees[i];
+
                 try (final RocksIterator iterator = bucket.newIterator()) {
                     iterator.seekToFirst();
                     while (iterator.isValid()) {
                         final RetainedMessage message = serializer.deserializeValue(iterator.value());
-                        final Long payloadId = message.getPublishId();
-                        if (payloadId != null) {
-                            payloadPersistence.incrementReferenceCounterOnBootstrap(payloadId);
-                        }
+                        payloadPersistence.incrementReferenceCounterOnBootstrap(message.getPublishId());
                         final String topic = serializer.deserializeKey(iterator.key());
-                        topicTrees[i].add(topic);
-                        retainMessageCounter.incrementAndGet();
+                        publishTopicTree.add(topic);
+                        deltaCounter.increment();
                         iterator.next();
                     }
                 }
             }
 
-        } catch (final ExodusException e) {
+            deltaCounter.run();
+
+        } catch (final Exception e) {
             log.error("An error occurred while preparing the Retained Message persistence.");
             log.debug("Original Exception:", e);
             throw new UnrecoverableException(false);
@@ -154,8 +151,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                     }
                 }
             }
-
-        } catch (final ExodusException e) {
+        } catch (final Exception e) {
             log.error("An error occurred while preparing the Retained Message persistence.");
             log.debug("Original Exception:", e);
             throw new UnrecoverableException(false);
@@ -164,23 +160,29 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     @Override
     public void clear(final int bucketIndex) {
-
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-        topicTrees[bucketIndex] = new PublishTopicTree();
 
+        topicTrees[bucketIndex] = new PublishTopicTree();
         final RocksDB bucket = buckets[bucketIndex];
+
         try (final WriteBatch writeBatch = new WriteBatch();
              final WriteOptions options = new WriteOptions();
              final RocksIterator iterator = bucket.newIterator()) {
+
+            final DeltaCounter retainMessageDelta = DeltaCounter.finishWith(retainMessageCounter::addAndGet);
             iterator.seekToFirst();
+            
             while (iterator.isValid()) {
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
                 payloadPersistence.decrementReferenceCounter(message.getPublishId());
-                retainMessageCounter.decrementAndGet();
+                retainMessageDelta.decrement();
                 writeBatch.delete(iterator.key());
                 iterator.next();
             }
             bucket.write(options, writeBatch);
+            
+            retainMessageDelta.run();
+
         } catch (final Exception e) {
             log.error("An error occurred while clearing the retained message persistence.");
             log.debug("Original Exception:", e);
@@ -193,7 +195,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
     }
 
     @Override
-    public void remove(@NotNull final String topic, final int bucketIndex) {
+    public void remove(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         final RocksDB bucket = buckets[bucketIndex];
@@ -218,12 +220,10 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
             log.error("An error occurred while removing a retained message.");
             log.debug("Original Exception:", e);
         }
-
     }
 
-    @Nullable
     @Override
-    public RetainedMessage get(@NotNull final String topic, final int bucketIndex) {
+    public @Nullable RetainedMessage get(final @NotNull String topic, final int bucketIndex) {
         try {
             return tryGetLocally(topic, 0, bucketIndex);
         } catch (final Exception e) {
@@ -233,39 +233,41 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
         }
     }
 
-    private RetainedMessage tryGetLocally(@NotNull final String topic, final int retry, final int bucketIndex)
+    private @Nullable RetainedMessage tryGetLocally(final @NotNull String topic, final int retry, final int bucketIndex)
             throws Exception {
+
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final RocksDB bucket = buckets[bucketIndex];
 
         final byte[] messageAsBytes = bucket.get(serializer.serializeKey(topic));
-        if (messageAsBytes != null) {
-            final RetainedMessage message = serializer.deserializeValue(messageAsBytes);
-            final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
-            if (payload == null) {
-                // In case the payload was just deleted, we return the new retained message for this topic (or null if it was removed).
-                if (retry < 100) {
-                    return tryGetLocally(topic, retry + 1, bucketIndex);
-                } else {
-                    log.warn("No payload was found for the retained message on topic {}.", topic);
-                    return null;
-                }
-            }
-
-            if (message.hasExpired()) {
+        if (messageAsBytes == null) {
+            return null;
+        }
+        final RetainedMessage message = serializer.deserializeValue(messageAsBytes);
+        if (message.hasExpired()) {
+            return null;
+        }
+        
+        final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
+        if (payload == null) {
+            // In case the payload was just deleted, we return the new retained message for this topic (or null if it was removed).
+            if (retry < 100) {
+                return tryGetLocally(topic, retry + 1, bucketIndex);
+            } else {
+                log.warn("No payload was found for the retained message on topic {}.", topic);
                 return null;
             }
-            message.setMessage(payload);
-            return message;
         }
-        return null;
+        message.setMessage(payload);
+        return message;
     }
 
     @Override
     public void put(
-            @NotNull final RetainedMessage retainedMessage, @NotNull final String topic, final int bucketIndex) {
+            final @NotNull RetainedMessage retainedMessage, final @NotNull String topic, final int bucketIndex) {
+
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
@@ -295,10 +297,10 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     }
 
-    @NotNull
     @Override
-    public Set<String> getAllTopics(
-            @NotNull final String subscription, final int bucketId) {
+    public @NotNull Set<String> getAllTopics(
+            final @NotNull String subscription, final int bucketId) {
+
         checkArgument(bucketId >= 0 && bucketId < getBucketCount(), "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         return topicTrees[bucketId].get(subscription);
@@ -320,6 +322,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
              final WriteBatch writeBatch = new WriteBatch();
              final WriteOptions options = new WriteOptions()) {
             iterator.seekToFirst();
+
             while (iterator.isValid()) {
                 final String topic = serializer.deserializeKey(iterator.key());
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
@@ -340,6 +343,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
             final int bucketIndex, final @Nullable String lastTopic, final int maxMemory) {
+
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         final RocksDB bucket = buckets[bucketIndex];
 
@@ -401,7 +405,6 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
     @Override
     public void iterate(final @NotNull ItemCallback callback) {
-
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         for (final RocksDB bucket : buckets) {
