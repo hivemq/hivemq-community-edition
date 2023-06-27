@@ -25,7 +25,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.ChunkCursor;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.extensions.iteration.MultipleChunkResult;
-import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.AbstractPersistence;
 import com.hivemq.persistence.ProducerQueues;
 import com.hivemq.persistence.RetainedMessage;
@@ -42,15 +41,10 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * @author Dominik Obermaier
- * @author Lukas Brandl
- */
 @LazySingleton
 public class RetainedMessagePersistenceImpl extends AbstractPersistence implements RetainedMessagePersistence {
 
     private final @NotNull RetainedMessageLocalPersistence localPersistence;
-    private final @NotNull TopicMatcher topicMatcher;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull ProducerQueues singleWriter;
     private final @NotNull Chunker chunker;
@@ -58,13 +52,11 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @Inject
     RetainedMessagePersistenceImpl(
             final @NotNull RetainedMessageLocalPersistence localPersistence,
-            final @NotNull TopicMatcher topicMatcher,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull SingleWriterService singleWriterService,
             final @NotNull Chunker chunker) {
 
         this.localPersistence = localPersistence;
-        this.topicMatcher = topicMatcher;
         this.payloadPersistence = payloadPersistence;
 
         singleWriter = singleWriterService.getRetainedMessageQueue();
@@ -72,28 +64,26 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         this.chunker = chunker;
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<RetainedMessage> get(@NotNull final String topic) {
+    public @NotNull ListenableFuture<RetainedMessage> get(final @NotNull String topic) {
         try {
             checkNotNull(topic, "Topic must not be null");
             if (topic.contains("+") || topic.contains("#")) {
                 throw new IllegalArgumentException(
                         "Topic contains wildcard characters. Call getWithWildcards method instead.");
             }
-
-            return singleWriter.submit(topic, (bucketIndex) -> {
-                final RetainedMessage retainedMessage = localPersistence.get(topic, bucketIndex);
-                if (retainedMessage == null) {
-                    return null;
-                }
-                payloadPersistence.add(retainedMessage.getMessage(), 1, retainedMessage.getPublishId());
-                return retainedMessage;
-            });
-
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
+
+        return singleWriter.submit(topic, (bucketIndex) -> {
+            final RetainedMessage retainedMessage = localPersistence.get(topic, bucketIndex);
+            if (retainedMessage == null) {
+                return null;
+            }
+            payloadPersistence.add(retainedMessage.getMessage(), 1, retainedMessage.getPublishId());
+            return retainedMessage;
+        });
     }
 
     @Override
@@ -101,9 +91,8 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         return localPersistence.size();
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> remove(@NotNull final String topic) {
+    public @NotNull ListenableFuture<Void> remove(final @NotNull String topic) {
         try {
             checkNotNull(topic, "Topic must not be null");
 
@@ -116,9 +105,9 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         }
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> persist(@NotNull final String topic, @NotNull final RetainedMessage retainedMessage) {
+    public @NotNull ListenableFuture<Void> persist(
+            final @NotNull String topic, final @NotNull RetainedMessage retainedMessage) {
         try {
             checkNotNull(topic, "Topic must not be null");
             checkNotNull(retainedMessage, "Retained message must not be null");
@@ -135,9 +124,8 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         }
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Set<String>> getWithWildcards(@NotNull final String subscription) {
+    public @NotNull ListenableFuture<Set<String>> getWithWildcards(final @NotNull String subscription) {
         try {
             checkNotNull(subscription, "Topic must not be null");
             if (!subscription.contains("+") && !subscription.contains("#")) {
@@ -157,24 +145,21 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         }
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> cleanUp(final int bucketIndex) {
+    public @NotNull ListenableFuture<Void> cleanUp(final int bucketIndex) {
         return singleWriter.submit(bucketIndex, (bucketIndex1) -> {
             localPersistence.cleanUp(bucketIndex1);
             return null;
         });
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> closeDB() {
+    public @NotNull ListenableFuture<Void> closeDB() {
         return closeDB(localPersistence, singleWriter);
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> clear() {
+    public @NotNull ListenableFuture<Void> clear() {
         final List<ListenableFuture<Void>> futureList = singleWriter.submitToAllBucketsParallel((bucketIndex) -> {
             localPersistence.clear(bucketIndex);
             return null;
