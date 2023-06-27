@@ -25,12 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Immutable
 public class Bucket {
 
-    @NotNull
-    private final Environment environment;
-    @NotNull
-    private final Store store;
-
-    private final AtomicBoolean closing = new AtomicBoolean(false);
+    private final @NotNull Environment environment;
+    private final @NotNull Store store;
+    private final @NotNull AtomicBoolean closing = new AtomicBoolean(false);
 
     public Bucket(@NotNull final Environment environment, @NotNull final Store store) {
         this.environment = environment;
@@ -41,15 +38,11 @@ public class Bucket {
         return closing.compareAndSet(false, true);
     }
 
-    @NotNull
-    public Environment getEnvironment() {
+    public @NotNull Environment getEnvironment() {
         return environment;
     }
 
-    @NotNull
-    public Store getStore() {
+    public @NotNull Store getStore() {
         return store;
     }
-
-
 }

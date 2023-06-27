@@ -19,8 +19,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.message.publish.PUBLISH;
 
 public interface PublishPayloadPersistence {
+
+    static long createId() {
+        return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
+    }
 
     /**
      * The payload persistence has to be initialized after the other persistence bootstraps are finished.

@@ -38,7 +38,7 @@ import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PayloadPersistenceException;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
+import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
@@ -227,7 +227,7 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
                     payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
                     return;
                 }
-                final long newPayloadId = PublishPayloadPersistenceImpl.createId();
+                final long newPayloadId = PublishPayloadPersistence.createId();
                 payloadLocalPersistence.put(newPayloadId, bytes);
                 message.setPublishId(newPayloadId);
                 retainedMessageLocalPersistence.put(message, topic, bucketIndex);
@@ -240,6 +240,4 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
             }
         }
     }
-
-
 }

@@ -159,8 +159,4 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
         return ImmutableMap.copyOf(payloadReferenceCounterRegistry.getAll());
     }
-
-    public static long createId() {
-        return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
-    }
 }
