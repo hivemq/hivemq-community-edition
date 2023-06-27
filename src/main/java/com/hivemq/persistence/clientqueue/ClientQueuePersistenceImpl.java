@@ -24,6 +24,7 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
@@ -49,30 +50,23 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
 
     public static final int SHARED_IN_FLIGHT_MARKER = 1;
 
-    @NotNull
-    private final ClientQueueLocalPersistence localPersistence;
-    @NotNull
-    private final ProducerQueues singleWriter;
-    @NotNull
-    private final MqttConfigurationService mqttConfigurationService;
-    @NotNull
-    private final ClientSessionLocalPersistence clientSessionLocalPersistence;
-    @NotNull
-    private final LocalTopicTree topicTree;
-    @NotNull
-    private final ConnectionPersistence connectionPersistence;
-    @NotNull
-    private final PublishPollService publishPollService;
+    private final @NotNull ClientQueueLocalPersistence localPersistence;
+    private final @NotNull ProducerQueues singleWriter;
+    private final @NotNull MqttConfigurationService mqttConfigurationService;
+    private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence;
+    private final @NotNull LocalTopicTree topicTree;
+    private final @NotNull ConnectionPersistence connectionPersistence;
+    private final @NotNull PublishPollService publishPollService;
 
     @Inject
     public ClientQueuePersistenceImpl(
-            @NotNull final ClientQueueLocalPersistence localPersistence,
-            @NotNull final SingleWriterService singleWriterService,
-            @NotNull final MqttConfigurationService mqttConfigurationService,
-            @NotNull final ClientSessionLocalPersistence clientSessionLocalPersistence,
-            @NotNull final LocalTopicTree topicTree,
-            @NotNull final ConnectionPersistence connectionPersistence,
-            @NotNull final PublishPollService publishPollService) {
+            final @NotNull ClientQueueLocalPersistence localPersistence,
+            final @NotNull SingleWriterService singleWriterService,
+            final @NotNull MqttConfigurationService mqttConfigurationService,
+            final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
+            final @NotNull LocalTopicTree topicTree,
+            final @NotNull ConnectionPersistence connectionPersistence,
+            final @NotNull PublishPollService publishPollService) {
         this.localPersistence = localPersistence;
         this.mqttConfigurationService = mqttConfigurationService;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
@@ -83,11 +77,10 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> add(
-            @NotNull final String queueId,
+    public @NotNull ListenableFuture<Void> add(
+            final @NotNull String queueId,
             final boolean shared,
-            @NotNull final PUBLISH publish,
+            final @NotNull PUBLISH publish,
             final boolean retained,
             final long queueLimit) {
         try {
@@ -118,11 +111,10 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> add(
-            @NotNull final String queueId,
+    public @NotNull ListenableFuture<Void> add(
+            final @NotNull String queueId,
             final boolean shared,
-            @NotNull final List<PUBLISH> publishes,
+            final @NotNull List<PUBLISH> publishes,
             final boolean retained,
             final long queueLimit) {
         try {
@@ -153,7 +145,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    public void publishAvailable(@NotNull final String client) {
+    public void publishAvailable(final @NotNull String client) {
         final ClientSession session = clientSessionLocalPersistence.getSession(client);
         if (session == null || !session.isConnected()) {
             return;
@@ -173,16 +165,15 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    public void sharedPublishAvailable(@NotNull final String sharedSubscription) {
+    public void sharedPublishAvailable(final @NotNull String sharedSubscription) {
         publishPollService.pollSharedPublishes(sharedSubscription);
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<ImmutableList<PUBLISH>> readNew(
-            @NotNull final String queueId,
+    public @NotNull ListenableFuture<ImmutableList<PUBLISH>> readNew(
+            final @NotNull String queueId,
             final boolean shared,
-            @NotNull final ImmutableIntArray packetIds,
+            final @NotNull ImmutableIntArray packetIds,
             final long byteLimit) {
         try {
             checkNotNull(queueId, "Queue ID must not be null");
@@ -190,15 +181,13 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         } catch (final Exception exception) {
             return Futures.immediateFailedFuture(exception);
         }
-        return singleWriter.submit(
-                queueId,
+        return singleWriter.submit(queueId,
                 bucketIndex -> localPersistence.readNew(queueId, shared, packetIds, byteLimit, bucketIndex));
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<ImmutableList<PUBLISH>> readShared(
-            @NotNull final String sharedSubscription, final int messageLimit, final long byteLimit) {
+    public @NotNull ListenableFuture<ImmutableList<PUBLISH>> readShared(
+            final @NotNull String sharedSubscription, final int messageLimit, final long byteLimit) {
         checkNotNull(sharedSubscription, "Shared subscription must not be null");
         // We reuse the non shared read new logic but without providing real message ID's.
         final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(messageLimit);
@@ -209,18 +198,15 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<ImmutableList<MessageWithID>> readInflight(
-            @NotNull final String client, final long byteLimit, final int messageLimit) {
+    public @NotNull ListenableFuture<ImmutableList<MessageWithID>> readInflight(
+            final @NotNull String client, final long byteLimit, final int messageLimit) {
         checkNotNull(client, "Client ID must not be null");
-        return singleWriter.submit(
-                client,
+        return singleWriter.submit(client,
                 bucketIndex -> localPersistence.readInflight(client, false, messageLimit, byteLimit, bucketIndex));
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> remove(@NotNull final String client, final int packetId) {
+    public @NotNull ListenableFuture<Void> remove(final @NotNull String client, final int packetId) {
         checkNotNull(client, "Client ID must not be null");
         return singleWriter.submit(client, (bucketIndex) -> {
             localPersistence.remove(client, packetId, bucketIndex);
@@ -229,8 +215,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> putPubrel(@NotNull final String client, final int packetId) {
+    public @NotNull ListenableFuture<Void> putPubrel(final @NotNull String client, final int packetId) {
         checkNotNull(client, "Client must not be null");
         return singleWriter.submit(client, (bucketIndex) -> {
             localPersistence.replace(client, new PUBREL(packetId), bucketIndex);
@@ -239,8 +224,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> clear(@NotNull final String queueId, final boolean shared) {
+    public @NotNull ListenableFuture<Void> clear(final @NotNull String queueId, final boolean shared) {
         checkNotNull(queueId, "Queue ID must not be");
         return singleWriter.submit(queueId, (bucketIndex) -> {
             localPersistence.clear(queueId, shared, bucketIndex);
@@ -249,14 +233,12 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> closeDB() {
+    public @NotNull ListenableFuture<Void> closeDB() {
         return closeDB(localPersistence, singleWriter);
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Void> cleanUp(final int bucketIndex) {
+    public @NotNull ListenableFuture<Void> cleanUp(final int bucketIndex) {
         return singleWriter.submit(bucketIndex, (bucketIndex1) -> {
             final ImmutableSet<String> sharedQueues = localPersistence.cleanUp(bucketIndex1);
             for (final String sharedQueue : sharedQueues) {
@@ -274,25 +256,22 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     }
 
     @Override
-    @NotNull
-    public ListenableFuture<Integer> size(@NotNull final String queueId, final boolean shared) {
+    public @NotNull ListenableFuture<Integer> size(final @NotNull String queueId, final boolean shared) {
         return singleWriter.submit(queueId, (bucketIndex) -> localPersistence.size(queueId, shared, bucketIndex));
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> removeShared(
-            @NotNull final String sharedSubscription, @NotNull final String uniqueId) {
+    public @NotNull ListenableFuture<Void> removeShared(
+            final @NotNull String sharedSubscription, final @NotNull String uniqueId) {
         return singleWriter.submit(sharedSubscription, (bucketIndex) -> {
             localPersistence.removeShared(sharedSubscription, uniqueId, bucketIndex);
             return null;
         });
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> removeInFlightMarker(
-            @NotNull final String sharedSubscription, @NotNull final String uniqueId) {
+    public @NotNull ListenableFuture<Void> removeInFlightMarker(
+            final @NotNull String sharedSubscription, final @NotNull String uniqueId) {
         return singleWriter.submit(sharedSubscription, (bucketIndex) -> {
             localPersistence.removeInFlightMarker(sharedSubscription, uniqueId, bucketIndex);
             // We notify the clients that there are new messages to poll.
@@ -302,9 +281,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         });
     }
 
-    @NotNull
     @Override
-    public ListenableFuture<Void> removeAllQos0Messages(@NotNull final String queueId, final boolean shared) {
+    public @NotNull ListenableFuture<Void> removeAllQos0Messages(final @NotNull String queueId, final boolean shared) {
         return singleWriter.submit(queueId, (bucketIndex) -> {
             localPersistence.removeAllQos0Messages(queueId, shared, bucketIndex);
             return null;
@@ -313,17 +291,15 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
 
     public static class Key implements Comparable<Key> {
 
-        @NotNull
-        private final String queueId;
+        private final @NotNull String queueId;
         private final boolean shared;
 
-        public Key(@NotNull final String queueId, final boolean shared) {
+        public Key(final @NotNull String queueId, final boolean shared) {
             this.queueId = queueId;
             this.shared = shared;
         }
 
-        @NotNull
-        public String getQueueId() {
+        public @NotNull String getQueueId() {
             return queueId;
         }
 
@@ -332,7 +308,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         }
 
         @Override
-        public boolean equals(final Object o) {
+        public boolean equals(final @Nullable Object o) {
             if (this == o) {
                 return true;
             }
@@ -349,7 +325,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         }
 
         @Override
-        public int compareTo(@NotNull final Key other) {
+        public int compareTo(final @NotNull Key other) {
             int compare = queueId.compareTo(other.queueId);
             if (compare == 0) {
                 compare = Boolean.compare(shared, other.shared);

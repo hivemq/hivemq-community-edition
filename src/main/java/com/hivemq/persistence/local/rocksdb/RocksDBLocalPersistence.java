@@ -39,9 +39,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-/**
- * @author Florian Limpöck
- */
 public abstract class RocksDBLocalPersistence implements LocalPersistence, FilePersistence {
 
     protected final AtomicBoolean stopped = new AtomicBoolean(false);
@@ -57,14 +54,14 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     protected RocksDBLocalPersistence(
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup,
-            final int internalBucketCount,
+            final int bucketCount,
             final int memtableSizePortion,
             final int blockCacheSizePortion,
             final int blockSize,
             final boolean enabled) {
         this.localPersistenceFileUtil = localPersistenceFileUtil;
         this.persistenceStartup = persistenceStartup;
-        this.bucketCount = internalBucketCount;
+        this.bucketCount = bucketCount;
         this.buckets = new RocksDB[bucketCount];
         this.memtableSizePortion = memtableSizePortion;
         this.blockCacheSizePortion = blockCacheSizePortion;
@@ -72,14 +69,11 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         this.enabled = enabled;
     }
 
-    @NotNull
-    protected abstract String getName();
+    protected abstract @NotNull String getName();
 
-    @NotNull
-    protected abstract String getVersion();
+    protected abstract @NotNull String getVersion();
 
-    @NotNull
-    protected abstract Logger getLogger();
+    protected abstract @NotNull Logger getLogger();
 
     public int getBucketCount() {
         return bucketCount;
@@ -191,7 +185,6 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         }
 
         init();
-
     }
 
     protected static long physicalMemory() {
@@ -242,13 +235,10 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
         bucket.close();
     }
 
-    @NotNull
-    protected RocksDB getRocksDb(final @NotNull String key) {
+    protected @NotNull RocksDB getRocksDb(final @NotNull String key) {
         return buckets[BucketUtils.getBucket(key, bucketCount)];
     }
 
-
-    @NotNull
     protected int getBucketIndex(final @NotNull String key) {
         return BucketUtils.getBucket(key, bucketCount);
     }
