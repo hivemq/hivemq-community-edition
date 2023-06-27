@@ -17,7 +17,6 @@ package com.hivemq.persistence.retained;
 
 import com.google.common.collect.Sets;
 import com.hivemq.extensions.iteration.Chunker;
-import com.hivemq.mqtt.topic.TopicMatcher;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
@@ -58,9 +57,6 @@ public class RetainedMessagePersistenceImplTest {
     private RetainedMessageLocalPersistence localPersistence;
 
     @Mock
-    private TopicMatcher topicMatcher;
-
-    @Mock
     private PublishPayloadPersistence payloadPersistence;
 
     private RetainedMessagePersistenceImpl retainedMessagePersistence;
@@ -75,7 +71,6 @@ public class RetainedMessagePersistenceImplTest {
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence,
-                topicMatcher,
                 payloadPersistence,
                 singleWriterService,
                 new Chunker());
