@@ -15,8 +15,6 @@
  */
 package com.hivemq.persistence.payload;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -36,8 +34,8 @@ public interface PublishPayloadPersistence {
      * Add the payload to the persistence and counts the reference count up.
      * If the payload is already existent in the persistence, the reference count is incremented.
      *
-     * @param payload   The payload that will be persisted.
-     * @param id The publish ID is used a the payload ID
+     * @param payload The payload that will be persisted.
+     * @param id      The publish ID is used as the payload ID
      */
     void add(byte @NotNull [] payload, long id);
 
@@ -79,10 +77,4 @@ public interface PublishPayloadPersistence {
      * close the persistence with all buckets.
      */
     void closeDB();
-
-    /**
-     * @return all reference counts for all publish payloads in a readonly map.
-     */
-    @VisibleForTesting
-    @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap();
 }

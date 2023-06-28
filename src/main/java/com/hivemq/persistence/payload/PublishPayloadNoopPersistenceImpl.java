@@ -15,8 +15,6 @@
  */
 package com.hivemq.persistence.payload;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -62,11 +60,5 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
     @Override
     public void closeDB() {
         //NOOP
-    }
-
-    @Override
-    @VisibleForTesting
-    public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
-        throw new UnsupportedOperationException("getAllIds is not supported for in-memory persistence");
     }
 }
