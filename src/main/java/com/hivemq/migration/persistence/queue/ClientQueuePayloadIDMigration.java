@@ -40,7 +40,6 @@ import com.hivemq.persistence.clientqueue.ClientQueueXodusLocalPersistence;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.slf4j.Logger;
@@ -71,7 +70,6 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
-    private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
 
     private final int bucketCount;
 
@@ -86,8 +84,7 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
             final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull SystemInformation systemInformation,
-            final @NotNull PayloadExceptionLogging payloadExceptionLogging,
-            final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
+            final @NotNull PayloadExceptionLogging payloadExceptionLogging) {
         this.sessionLocalPersistenceProvider = sessionLocalPersistenceProvider;
         this.localXodusPersistenceProvider = localXodusPersistenceProvider;
         this.clientQueueXodusLocalPersistence_4_4Provider = clientQueueXodusLocalPersistence_4_4Provider;
@@ -97,7 +94,6 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
         this.systemInformation = systemInformation;
         this.bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         this.payloadExceptionLogging = payloadExceptionLogging;
-        this.publishPayloadPersistence = publishPayloadPersistence;
     }
 
     private static boolean oldFolderMissing(final @NotNull File persistenceFolder) {
@@ -135,8 +131,7 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
                 localXodusPersistenceProvider.get(),
                 payloadExceptionLogging,
                 legacyPayloadPersistence,
-                sessionLocalPersistenceProvider.get(),
-                publishPayloadPersistence);
+                sessionLocalPersistenceProvider.get());
 
         clientQueueXodusLocalPersistence_4_4Provider.get().iterate(iterationCallback);
     }
@@ -159,22 +154,19 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
         private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
         private final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence;
         private final @NotNull ClientSessionLocalPersistence sessionLocalPersistence;
-        private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
 
         QueuedMessagePersistenceValueSwitchCallback(
                 final int bucketCount,
                 final @NotNull ClientQueueXodusLocalPersistence clientQueueXodusLocalPersistence,
                 final @NotNull PayloadExceptionLogging payloadExceptionLogging,
                 final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence,
-                final @NotNull ClientSessionLocalPersistence sessionLocalPersistence,
-                final @NotNull PublishPayloadPersistence publishPayloadPersistence) {
+                final @NotNull ClientSessionLocalPersistence sessionLocalPersistence) {
 
             this.bucketCount = bucketCount;
             this.clientQueueXodusLocalPersistence = clientQueueXodusLocalPersistence;
             this.payloadExceptionLogging = payloadExceptionLogging;
             this.legacyPayloadPersistence = legacyPayloadPersistence;
             this.sessionLocalPersistence = sessionLocalPersistence;
-            this.publishPayloadPersistence = publishPayloadPersistence;
         }
 
         @Override
@@ -202,7 +194,7 @@ public class ClientQueuePayloadIDMigration implements ValueMigration {
                             payloadExceptionLogging.addLogging(legacyPublish.getPayloadID(), null, null);
                             continue;
                         }
-                        publishPayloadPersistence.add(bytes, legacyPublish.getPublish().getPublishId());
+                        legacyPublish.getPublish().setPayload(bytes);
                         clientQueueXodusLocalPersistence.add(key.getQueueId(),
                                 key.isShared(),
                                 legacyPublish.getPublish(),

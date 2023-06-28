@@ -26,10 +26,6 @@ import com.hivemq.persistence.RetainedMessage;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Dominik Obermaier
- * @author Lukas Brandl
- */
 public interface RetainedMessageLocalPersistence extends LocalPersistence {
 
     String PERSISTENCE_NAME = "retained_messages";
@@ -77,9 +73,8 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @param bucket       The index of the bucket in which the retained messages are stored.
      * @return a readonly set of topic strings.
      */
-    @NotNull
     @ReadOnly
-    Set<String> getAllTopics(@NotNull String subscription, int bucket);
+    @NotNull Set<String> getAllTopics(@NotNull String subscription, int bucket);
 
     /**
      * Trigger a cleanup for a specific bucket.
@@ -96,7 +91,7 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * Tombstones are ignored.
      *
      * @param bucketIndex the bucket index
-     * @param lastTopic   the last topic for this chunk. Pass <code>null</code> to start at the beginning.
+     * @param lastTopic   the last topic for this chunk. Pass {@code null} to start at the beginning.
      * @param maxMemory   the max amount of memory for results contained in the chunk.
      * @return a {@link BucketChunkResult} with the mapping of topic -> retained message and the information if more
      *         chunks are available
@@ -106,10 +101,7 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
             int bucketIndex, @Nullable String lastTopic, int maxMemory);
 
-
     void iterate(@NotNull ItemCallback callback);
-
-    void bootstrapPayloads();
 
     interface ItemCallback {
         void onItem(@NotNull String topic, @NotNull RetainedMessage message);

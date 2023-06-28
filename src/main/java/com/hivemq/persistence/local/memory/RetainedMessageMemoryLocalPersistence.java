@@ -29,8 +29,6 @@ import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.PublishTopicTree;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.ThreadPreConditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,27 +43,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
-/**
- * @author Lukas Brandl
- */
 @Singleton
 public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLocalPersistence {
-
-    private static final Logger log = LoggerFactory.getLogger(RetainedMessageMemoryLocalPersistence.class);
 
     @VisibleForTesting
     final @NotNull AtomicLong currentMemorySize = new AtomicLong();
 
     @VisibleForTesting
-    @NotNull
-    final PublishTopicTree[] topicTrees;
+    final @NotNull PublishTopicTree @NotNull [] topicTrees;
 
-    final private @NotNull Map<String, RetainedMessage>[] buckets;
-
+    private final @NotNull Map<String, RetainedMessage>[] buckets;
     private final int bucketCount;
 
     @Inject
-    public RetainedMessageMemoryLocalPersistence(@NotNull final MetricRegistry metricRegistry) {
+    public RetainedMessageMemoryLocalPersistence(final @NotNull MetricRegistry metricRegistry) {
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
 
         //noinspection unchecked
@@ -106,7 +97,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
     @ExecuteInSingleWriter
     @Override
-    public void remove(@NotNull final String topic, final int bucketIndex) {
+    public void remove(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
@@ -120,27 +111,22 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
     @ExecuteInSingleWriter
     @Override
-    public @Nullable RetainedMessage get(@NotNull final String topic, final int bucketIndex) {
+    public @Nullable RetainedMessage get(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage retainedMessage = bucket.get(topic);
-        if (retainedMessage == null) {
+        if (retainedMessage == null || retainedMessage.hasExpired()) {
             return null;
         }
-
-        if (retainedMessage.hasExpired()) {
-            return null;
-        }
-        final RetainedMessage copy = retainedMessage.copyWithoutPayload();
         return retainedMessage;
     }
 
     @ExecuteInSingleWriter
     @Override
     public void put(
-            @NotNull final RetainedMessage retainedMessage, @NotNull final String topic, final int bucketIndex) {
+            final @NotNull RetainedMessage retainedMessage, final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
@@ -154,10 +140,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         topicTrees[bucketIndex].add(topic);
     }
 
-    @NotNull
     @ExecuteInSingleWriter
     @Override
-    public Set<String> getAllTopics(@NotNull final String subscription, final int bucketIndex) {
+    public @NotNull Set<String> getAllTopics(final @NotNull String subscription, final int bucketIndex) {
         checkArgument(bucketIndex >= 0 && bucketIndex < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
@@ -203,14 +188,6 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
                                 return null;
                             }
 
-                            final Long payloadId = retainedMessage.getPublishId();
-                            if (payloadId == null) {
-                                log.warn(
-                                        "Could not dereference payload for retained message on topic \"{}\" as payload was null.",
-                                        topic);
-                                return null;
-                            }
-
                             return new AbstractMap.SimpleEntry<>(topic, retainedMessage);
 
                         })
@@ -221,14 +198,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     }
 
     @Override
-    public void iterate(@NotNull final ItemCallback callback) {
+    public void iterate(final @NotNull ItemCallback callback) {
         throw new UnsupportedOperationException(
                 "Iterate is only used for migrations which are not needed for memory persistences");
-    }
-
-    @Override
-    public void bootstrapPayloads() {
-        // noop
     }
 
     @Override

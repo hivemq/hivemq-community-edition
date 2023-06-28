@@ -41,9 +41,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.io.File;
 
-/**
- * @author Florian Limpöck
- */
 public class RetainedMessageTypeMigration implements TypeMigration {
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageTypeMigration.class);
@@ -58,7 +55,6 @@ public class RetainedMessageTypeMigration implements TypeMigration {
     private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
 
     private final int bucketCount;
-    private final @NotNull PersistenceType configuredType;
 
     @Inject
     public RetainedMessageTypeMigration(
@@ -75,7 +71,6 @@ public class RetainedMessageTypeMigration implements TypeMigration {
         this.systemInformation = systemInformation;
         this.bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         this.payloadExceptionLogging = payloadExceptionLogging;
-        this.configuredType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
     }
 
     @Override
@@ -110,8 +105,11 @@ public class RetainedMessageTypeMigration implements TypeMigration {
 
         savePersistenceType(PersistenceType.FILE);
 
+        for (int i = 0; i < InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(); i++) {
+            // Cleanup the old retained messages with their own payload references
+            rocks.clear(i);
+        }
         rocks.stop();
-
     }
 
     private void migrateToRocksDB() {
@@ -135,6 +133,10 @@ public class RetainedMessageTypeMigration implements TypeMigration {
 
         savePersistenceType(PersistenceType.FILE_NATIVE);
 
+        for (int i = 0; i < InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(); i++) {
+            // Cleanup the old retained messages with their own payload references
+            xodus.clear(i);
+        }
         xodus.stop();
     }
 
@@ -156,23 +158,6 @@ public class RetainedMessageTypeMigration implements TypeMigration {
                 RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
         MetaFileService.writeMetaFile(systemInformation, metaFile);
     }
-
-    private boolean checkPreviousType(final @NotNull PersistenceType persistenceType) {
-
-        final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        final PersistenceType metaType = metaInformation.getRetainedMessagesPersistenceType();
-
-        if (metaType != null && metaType.equals(persistenceType)) {
-            //should never happen since getNeededMigrations() will skip those.
-            migrationLog.info("Retained message persistence is already migrated to current type {}, skipping migration",
-                    persistenceType);
-            log.debug("Retained message persistence is already migrated to current type {}, skipping migration",
-                    persistenceType);
-            return false;
-        }
-        return true;
-    }
-
 
     @VisibleForTesting
     static class RetainedMessagePersistenceTypeSwitchCallback implements RetainedMessageLocalPersistence.ItemCallback {
@@ -202,6 +187,7 @@ public class RetainedMessageTypeMigration implements TypeMigration {
                     payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
                     return;
                 }
+                message.setMessage(bytes);
                 retainedMessageLocalPersistence.put(message, topic, bucketIndex);
 
             } catch (final Throwable throwable) {

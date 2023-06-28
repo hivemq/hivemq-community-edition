@@ -40,38 +40,28 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Florian Limpöck
  * @since 4.1.0
  */
 public class RetainedMessagePersistenceImplTest {
 
-    private AutoCloseable closeableMock;
-
-    @Mock
-    private RetainedMessageLocalPersistence localPersistence;
-
-    @Mock
-    private PublishPayloadPersistence payloadPersistence;
+    private final RetainedMessageLocalPersistence localPersistence = mock(RetainedMessageLocalPersistence.class);
 
     private RetainedMessagePersistenceImpl retainedMessagePersistence;
-
     private RetainedMessage message;
-
     private SingleWriterService singleWriterService;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence,
-                payloadPersistence,
                 singleWriterService,
                 new Chunker());
     }
@@ -80,7 +70,6 @@ public class RetainedMessagePersistenceImplTest {
     public void tearDown() throws Exception {
         retainedMessagePersistence.closeDB();
         singleWriterService.stop();
-        closeableMock.close();
     }
 
     @Test(expected = NullPointerException.class)
@@ -129,19 +118,19 @@ public class RetainedMessagePersistenceImplTest {
     }
 
     @Test
-    public void test_get_success_null() throws ExecutionException, InterruptedException {
+    public void test_get_success_null() throws Exception {
         when(localPersistence.get("topic", BucketUtils.getBucket("topic", 64))).thenReturn(null);
         assertNull(retainedMessagePersistence.get("topic").get());
     }
 
     @Test
-    public void test_get_success_message() throws ExecutionException, InterruptedException {
+    public void test_get_success_message() throws Exception {
         when(localPersistence.get("topic", BucketUtils.getBucket("topic", 64))).thenReturn(message);
         assertEquals(message, retainedMessagePersistence.get("topic").get());
     }
 
     @Test
-    public void test_get_with_wildcards_success() throws ExecutionException, InterruptedException {
+    public void test_get_with_wildcards_success() throws Exception {
         when(localPersistence.getAllTopics(anyString(), anyInt())).thenReturn(Sets.newHashSet("topic/1",
                 "topic/2",
                 "topic/3"));
@@ -206,23 +195,22 @@ public class RetainedMessagePersistenceImplTest {
             throw e.getCause();
         }
         verify(localPersistence).put(eq(message), eq("topic"), anyInt());
-        verify(payloadPersistence).add(any(byte[].class), anyLong());
     }
 
     @Test
-    public void test_cleanup() throws ExecutionException, InterruptedException {
+    public void test_cleanup() throws Exception {
         retainedMessagePersistence.cleanUp(1).get();
         verify(localPersistence).cleanUp(1);
     }
 
     @Test
-    public void test_close() throws ExecutionException, InterruptedException {
+    public void test_close() throws Exception {
         retainedMessagePersistence.closeDB().get();
         verify(localPersistence, times(64)).closeDB(anyInt());
     }
 
     @Test
-    public void test_clear() throws ExecutionException, InterruptedException {
+    public void test_clear() throws Exception {
         retainedMessagePersistence.clear().get();
         verify(localPersistence, times(64)).clear(anyInt());
     }

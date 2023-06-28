@@ -48,28 +48,24 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * 0       <- QoS
  * <p>
  * 0       <- QoS
- * <p>
- *
- * @author Christoph Schäbel
  */
-public class RetainedMessageXodusSerializer {
+public final class RetainedMessageSerializer {
 
-    @NotNull
-    public byte[] serializeKey(final @NotNull String topic) {
+    private RetainedMessageSerializer() {
+    }
+
+    public static byte @NotNull [] serializeKey(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
 
         return topic.getBytes(UTF_8);
     }
 
-    @NotNull
-    public String deserializeKey(final @NotNull byte[] serialized) {
+    public static @NotNull String deserializeKey(final byte @NotNull [] serialized) {
         checkNotNull(serialized, "Byte array must not be null");
         return new String(serialized, 0, serialized.length, UTF_8);
     }
 
-    @NotNull
-    public byte[] serializeValue(@NotNull final RetainedMessage retainedMessage) {
-
+    public static byte @NotNull [] serializeValue(@NotNull final RetainedMessage retainedMessage) {
 
         final byte[] responseTopic =
                 retainedMessage.getResponseTopic() == null ? null : retainedMessage.getResponseTopic().getBytes(UTF_8);
@@ -138,8 +134,7 @@ public class RetainedMessageXodusSerializer {
         return bytes;
     }
 
-    @NotNull
-    public RetainedMessage deserializeValue(@NotNull final byte[] serialized) {
+    public static @NotNull RetainedMessage deserializeValue(final byte @NotNull [] serialized) {
         checkNotNull(serialized, "Byte array must not be null");
 
         final QoS qoS = QoS.valueOf(serialized[0] & 0b0000_0011);
