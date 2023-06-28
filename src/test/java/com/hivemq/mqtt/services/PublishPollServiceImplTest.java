@@ -42,7 +42,6 @@ import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import com.hivemq.persistence.connection.ConnectionPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelPipeline;
@@ -91,7 +90,6 @@ public class PublishPollServiceImplTest {
         messageIDPool = mock(MessageIDPool.class);
         clientQueuePersistence = mock(ClientQueuePersistence.class);
         connectionPersistence = mock(ConnectionPersistence.class);
-        final PublishPayloadPersistence publishPayloadPersistence = mock(PublishPayloadPersistence.class);
         channel = mock(Channel.class);
         pipeline = mock(ChannelPipeline.class);
         final MessageDroppedService messageDroppedService = mock(MessageDroppedService.class);
@@ -121,7 +119,6 @@ public class PublishPollServiceImplTest {
 
         publishPollService = new PublishPollServiceImpl(clientQueuePersistence,
                 connectionPersistence,
-                publishPayloadPersistence,
                 messageDroppedService,
                 sharedSubscriptionService,
                 singleWriterService,

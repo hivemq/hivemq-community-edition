@@ -28,7 +28,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.local.xodus.XodusUtils;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.Bytes;
 import jetbrains.exodus.ByteIterable;
 import org.slf4j.Logger;
@@ -39,10 +38,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.Key;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-/**
- * @author Lukas Brandl
- * @author Silvio Giebl
- */
 public class ClientQueuePersistenceSerializer_4_4 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientQueuePersistenceSerializer_4_4.class);
@@ -69,13 +64,6 @@ public class ClientQueuePersistenceSerializer_4_4 {
     // The messages must preserve the order in which they are added to the persistence
     // ID's < Long.MAX_VALUE / 2 are reserved for messages that should be polled with priority
     public static final AtomicLong NEXT_PUBLISH_NUMBER = new AtomicLong(Long.MAX_VALUE / 2);
-
-    @NotNull
-    private final PublishPayloadPersistence payloadPersistence;
-
-    public ClientQueuePersistenceSerializer_4_4(@NotNull final PublishPayloadPersistence payloadPersistence) {
-        this.payloadPersistence = payloadPersistence;
-    }
 
     // ********** Key **********
 
@@ -440,6 +428,6 @@ public class ClientQueuePersistenceSerializer_4_4 {
             builder.withUserProperties(PropertiesSerializationUtil.read(serialized, cursor));
         }
 
-        return new PUBLISH_4_4(builder.withPersistence(payloadPersistence).build(), payloadId);
+        return new PUBLISH_4_4(builder.build(), payloadId);
     }
 }

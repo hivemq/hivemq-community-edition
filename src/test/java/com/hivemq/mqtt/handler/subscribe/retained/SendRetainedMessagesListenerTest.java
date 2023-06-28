@@ -29,7 +29,6 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -56,7 +55,6 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -504,7 +502,6 @@ public class SendRetainedMessagesListenerTest {
             final List<SubscriptionResult> subscriptions, final Set<Topic> ignoredTopics) {
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
-                mock(PublishPayloadPersistence.class),
                 retainedMessagePersistence,
                 queuePersistence,
                 mqttConfigurationService);
@@ -519,17 +516,14 @@ public class SendRetainedMessagesListenerTest {
         final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE);
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
-                mock(PublishPayloadPersistence.class),
                 retainedMessagePersistence,
                 queuePersistence,
                 mqttConfigurationService);
 
         return new SendRetainedMessageResultListener(channel, topic, retainedMessagesSender);
-
     }
 
     private SubscriptionResult subResult(final Topic topic, final boolean subscriptionAlreadyExisted) {
         return new SubscriptionResult(topic, subscriptionAlreadyExisted, null);
     }
-
 }

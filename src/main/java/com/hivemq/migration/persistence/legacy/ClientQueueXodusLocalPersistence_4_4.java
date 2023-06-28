@@ -27,7 +27,6 @@ import com.hivemq.persistence.clientqueue.ClientQueueEntry;
 import com.hivemq.persistence.local.xodus.EnvironmentUtil;
 import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ThreadPreConditions;
 import jetbrains.exodus.ByteIterable;
@@ -46,10 +45,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.Key;
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
-/**
- * @author Lukas Brandl
- * @author Silvio Giebl
- */
 @LazySingleton
 public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence {
 
@@ -84,7 +79,6 @@ public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence 
 
     @Inject
     ClientQueueXodusLocalPersistence_4_4(
-            final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
@@ -95,7 +89,7 @@ public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence 
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
                 false);
 
-        this.serializer = new ClientQueuePersistenceSerializer_4_4(payloadPersistence);
+        this.serializer = new ClientQueuePersistenceSerializer_4_4();
         this.queueSizeBuckets = new ConcurrentHashMap<>();
         this.retainedQueueSizeBuckets = new ConcurrentHashMap<>();
         this.queueQos0MemoryMap = new ConcurrentHashMap<>();

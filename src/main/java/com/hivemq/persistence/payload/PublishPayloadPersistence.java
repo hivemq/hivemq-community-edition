@@ -36,11 +36,10 @@ public interface PublishPayloadPersistence {
      * Add the payload to the persistence and counts the reference count up.
      * If the payload is already existent in the persistence, the reference count is incremented.
      *
-     * @param payload        The payload that will be persisted.
-     * @param payloadId      The publish ID is used a the payload ID
-     * @return true: payload may be removed from the publish, false: dont remove the payload
+     * @param payload   The payload that will be persisted.
+     * @param id The publish ID is used a the payload ID
      */
-    boolean add(byte @NotNull [] payload, long payloadId);
+    void add(byte @NotNull [] payload, long id);
 
     /**
      * Get the persisted payload for an id.

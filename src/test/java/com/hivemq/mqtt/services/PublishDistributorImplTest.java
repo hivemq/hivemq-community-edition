@@ -29,7 +29,6 @@ import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,8 +57,6 @@ public class PublishDistributorImplTest {
     private AutoCloseable closeableMock;
 
     @Mock
-    private @NotNull PublishPayloadPersistence payloadPersistence;
-    @Mock
     private @NotNull ClientQueuePersistence clientQueuePersistence;
     @Mock
     private @NotNull ClientSessionPersistence clientSessionPersistence;
@@ -73,8 +70,7 @@ public class PublishDistributorImplTest {
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        publishDistributor = new PublishDistributorImpl(payloadPersistence,
-                clientQueuePersistence,
+        publishDistributor = new PublishDistributorImpl(clientQueuePersistence,
                 clientSessionPersistence,
                 singleWriterService,
                 mqttConfigurationService);

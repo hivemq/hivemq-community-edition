@@ -27,7 +27,6 @@ import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -46,10 +45,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Lukas Brandl
- */
-@SuppressWarnings("unchecked")
 public class DropOutgoingPublishesHandlerTest {
 
     @Mock
@@ -67,9 +62,6 @@ public class DropOutgoingPublishesHandlerTest {
     @Mock
     Counter counter;
 
-    @Mock
-    PublishPayloadPersistence publishPayloadPersistence;
-
     private DropOutgoingPublishesHandler handler;
 
     @Before
@@ -81,7 +73,7 @@ public class DropOutgoingPublishesHandlerTest {
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
                 clientConnection));
         InternalConfigurations.NOT_WRITABLE_QUEUE_SIZE.set(0);
-        handler = new DropOutgoingPublishesHandler(publishPayloadPersistence, messageDroppedService);
+        handler = new DropOutgoingPublishesHandler(messageDroppedService);
     }
 
     @Test
@@ -94,11 +86,9 @@ public class DropOutgoingPublishesHandlerTest {
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_NOT_SET)
                 .withPublishId(1L)
-                .withPersistence(publishPayloadPersistence)
                 .build();
 
-        final PublishWithFuture publishWithFuture =
-                new PublishWithFuture(publish, future, false, publishPayloadPersistence);
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false);
         final boolean messageDropped = handler.checkChannelNotWritable(ctx, publishWithFuture, promise);
         assertTrue(messageDropped);
         assertEquals(PublishStatus.CHANNEL_NOT_WRITABLE, future.get());
@@ -116,16 +106,13 @@ public class DropOutgoingPublishesHandlerTest {
                 .withOnwardQos(QoS.AT_LEAST_ONCE)
                 .withMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_NOT_SET)
                 .withPublishId(1L)
-                .withPersistence(publishPayloadPersistence)
                 .build();
-        final PublishWithFuture publishWithFuture =
-                new PublishWithFuture(publish, future, false, publishPayloadPersistence);
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false);
         final boolean messageDropped = handler.checkChannelNotWritable(ctx, publishWithFuture, promise);
         assertFalse(messageDropped);
         assertEquals(false, future.isDone()); // will be set in the Ordered topic handler
         verify(promise, never()).setSuccess();
         verify(counter, never()).inc();
-        verify(publishPayloadPersistence, never()).decrementReferenceCounter(1);
     }
 
     @Test
@@ -139,15 +126,12 @@ public class DropOutgoingPublishesHandlerTest {
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withMessageExpiryInterval(MESSAGE_EXPIRY_INTERVAL_NOT_SET)
                 .withPublishId(1L)
-                .withPersistence(publishPayloadPersistence)
                 .build();
-        final PublishWithFuture publishWithFuture =
-                new PublishWithFuture(publish, future, false, publishPayloadPersistence);
+        final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false);
         final boolean messageDropped = handler.checkChannelNotWritable(ctx, publishWithFuture, promise);
         assertFalse(messageDropped);
         assertEquals(false, future.isDone()); // will be set in the Ordered topic handler
         verify(promise, never()).setSuccess();
         verify(counter, never()).inc();
-        verify(publishPayloadPersistence, never()).decrementReferenceCounter(1);
     }
 }

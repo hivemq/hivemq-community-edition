@@ -30,7 +30,6 @@ import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.local.memory.ClientQueueMemoryLocalPersistence.PublishWithRetained;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ObjectMemoryEstimation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
@@ -54,7 +53,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -66,9 +64,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    @Mock
-    private PublishPayloadPersistence payloadPersistence;
 
     @Mock
     private MessageDroppedService messageDroppedService;
@@ -90,7 +85,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         InternalConfigurations.RETAINED_MESSAGE_QUEUE_SIZE.set(5);
 
         metricRegistry = new MetricRegistry();
-        persistence = new ClientQueueMemoryLocalPersistence(payloadPersistence, messageDroppedService, metricRegistry);
+        persistence = new ClientQueueMemoryLocalPersistence(messageDroppedService, metricRegistry);
     }
 
     @After
@@ -423,8 +418,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertEquals(3, messages.get(1).getPacketIdentifier());
 
         assertEquals(2, persistence.size("client", false, 0));
-
-        verify(payloadPersistence, times(1)).decrementReferenceCounter(anyLong());
     }
 
     @Test
@@ -467,7 +460,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 false,
                 0);
 
-        verify(payloadPersistence).decrementReferenceCounter(2);
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic5"), eq(0), anyLong(), anyLong());
     }
 
@@ -491,7 +483,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 false,
                 0);
 
-        verify(payloadPersistence).decrementReferenceCounter(2);
         verify(messageDroppedService).qos0MemoryExceededShared(eq("group"), eq("topic5"), eq(0), anyLong(), anyLong());
     }
 
@@ -793,8 +784,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
 
         assertTrue(sharedQueues.isEmpty());
-        verify(payloadPersistence,
-                times(5)).decrementReferenceCounter(anyLong()); // 3 expired + 1 clear + 1 poll(readNew)
         assertEquals(1, persistence.size("client1", false, 0));
     }
 
@@ -819,7 +808,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
 
         assertTrue(sharedQueues.isEmpty());
-        verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong()); // 2 expired
         assertEquals(0, persistence.size("client1", false, 0));
     }
 
@@ -844,7 +832,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
 
         assertTrue(sharedQueues.isEmpty());
-        verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong()); // 2 expired
         assertEquals(0, persistence.size("client1", false, 0));
     }
 
@@ -877,7 +864,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
 
         assertTrue(sharedQueues.isEmpty());
-        verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong()); // 2 replaces
         assertEquals(2, persistence.size("client1", false, 0));
     }
 
@@ -887,7 +873,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED = true;
 
         metricRegistry = new MetricRegistry();
-        persistence = new ClientQueueMemoryLocalPersistence(payloadPersistence, messageDroppedService, metricRegistry);
+        persistence = new ClientQueueMemoryLocalPersistence(messageDroppedService, metricRegistry);
 
         persistence.add("client1",
                 false,
@@ -915,7 +901,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
 
         assertTrue(sharedQueues.isEmpty());
-        verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong()); // 2 replaces
         assertEquals(0, persistence.size("client1", false, 0));
     }
 
@@ -985,8 +970,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertEquals(2, messages.size());
 
         assertEquals(2, persistence.size("group/topic", true, 0));
-
-        verify(payloadPersistence, times(1)).decrementReferenceCounter(anyLong());
     }
 
     @Test
@@ -1014,8 +997,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertEquals(SHARED_IN_FLIGHT_MARKER, messages.get(1).getPacketIdentifier());
 
         assertEquals(3, persistence.size("group/topic", true, 0));
-
-        verify(payloadPersistence, never()).decrementReferenceCounter(anyLong());
     }
 
     @Test
@@ -1046,8 +1027,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableList<PUBLISH> messages =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1, 2, 3), 10000L, 0);
         assertEquals(1, messages.size());
-
-        verify(payloadPersistence, times(2)).decrementReferenceCounter(anyLong());
 
         assertTrue(gauge.getValue() > 0);
         assertEquals(new PublishWithRetained(messages.get(0), false).getEstimatedSize() +
@@ -1140,7 +1119,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
         publishes.add(createBigPublish(1, QoS.AT_MOST_ONCE, "topic2", 2, queueLimit));
         persistence.add("client", false, publishes.build(), 100L, DISCARD, false, 0);
 
-        verify(payloadPersistence).decrementReferenceCounter(2);
         verify(messageDroppedService).qos0MemoryExceeded(eq("client"), eq("topic2"), eq(0), anyLong(), anyLong());
 
         assertEquals(1, persistence.size("client", false, 0));
@@ -1311,7 +1289,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         metricRegistry = new MetricRegistry();
-        persistence = new ClientQueueMemoryLocalPersistence(payloadPersistence, messageDroppedService, metricRegistry);
+        persistence = new ClientQueueMemoryLocalPersistence(messageDroppedService, metricRegistry);
 
         final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
         int totalPublishBytes = 0;
@@ -1345,7 +1323,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         metricRegistry = new MetricRegistry();
-        persistence = new ClientQueueMemoryLocalPersistence(payloadPersistence, messageDroppedService, metricRegistry);
+        persistence = new ClientQueueMemoryLocalPersistence(messageDroppedService, metricRegistry);
 
         final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
         int totalPublishBytes = 0;
@@ -1389,7 +1367,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024 * 100);
 
         metricRegistry = new MetricRegistry();
-        persistence = new ClientQueueMemoryLocalPersistence(payloadPersistence, messageDroppedService, metricRegistry);
+        persistence = new ClientQueueMemoryLocalPersistence(messageDroppedService, metricRegistry);
 
         final ImmutableList.Builder<PUBLISH> publishes = ImmutableList.builder();
         int totalPublishBytes = 0;
@@ -1450,7 +1428,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 .withPayload("message".getBytes())
                 .withTopic("topic")
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .withMessageExpiryInterval(expiryInterval)
                 .withTimestamp(timestamp)
                 .build();
@@ -1464,7 +1441,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 .withPayload("message".getBytes())
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .build();
     }
 
@@ -1476,7 +1452,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 .withPayload("message".getBytes())
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .withPublishId(publishId)
                 .build();
     }
@@ -1491,7 +1466,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 .withPayload(message)
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .withPublishId(publishId)
                 .build();
     }
@@ -1508,7 +1482,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
                 .withPublishId(publishId)
-                .withPersistence(payloadPersistence)
                 .build();
     }
 }

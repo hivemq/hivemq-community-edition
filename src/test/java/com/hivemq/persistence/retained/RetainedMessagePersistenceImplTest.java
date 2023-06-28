@@ -206,7 +206,7 @@ public class RetainedMessagePersistenceImplTest {
             throw e.getCause();
         }
         verify(localPersistence).put(eq(message), eq("topic"), anyInt());
-        verify(payloadPersistence).add(any(byte[].class), eq(1L), anyLong());
+        verify(payloadPersistence).add(any(byte[].class), anyLong());
     }
 
     @Test

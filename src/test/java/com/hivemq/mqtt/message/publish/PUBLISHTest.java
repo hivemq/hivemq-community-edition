@@ -19,11 +19,9 @@ import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.ObjectMemoryEstimation;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +115,6 @@ public class PUBLISHTest {
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPublishId(1L)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
                 .withTopic("topic")
                 .withUserProperties(Mqtt5UserProperties.of())
                 .build();
@@ -126,7 +123,6 @@ public class PUBLISHTest {
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId")
                 .withPublishId(1L)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
                 .withTopic("topic")
                 .build();
 
@@ -195,7 +191,6 @@ public class PUBLISHTest {
                 .withOnwardQos(QoS.AT_MOST_ONCE)
                 .withHivemqId("hivemqId") // 16+38 = 54 bytes
                 .withPublishId(1L)
-                .withPersistence(Mockito.mock(PublishPayloadPersistence.class))
                 .withTopic("topic") // 10+38 = 48 bytes
                 .build();
 
@@ -231,26 +226,26 @@ public class PUBLISHTest {
     @Test
     public void hasExpired_whenExpiryIntervalSinceCreationElapsed_thenMessageExpired() {
         final PUBLISH publish1 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 2000, 1);
-        assertTrue(publish1.hasExpired());
+        assertTrue(publish1.isExpired());
 
         final PUBLISH publish2 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 10000, 10);
-        assertTrue(publish2.hasExpired());
+        assertTrue(publish2.isExpired());
 
         final PUBLISH publish3 = createPublishWithTimestampAndExpiry(System.currentTimeMillis(), 0);
-        assertTrue(publish3.hasExpired());
+        assertTrue(publish3.isExpired());
     }
 
     @Test
     public void hasExpired_whenExpiryIntervalSinceCreationDidNotElapse_thenMessageIsNotExpired() {
         final PUBLISH publish1 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 2, 1);
-        assertFalse(publish1.hasExpired());
+        assertFalse(publish1.isExpired());
 
         final PUBLISH publish2 = createPublishWithTimestampAndExpiry(System.currentTimeMillis(), 1);
-        assertFalse(publish2.hasExpired());
+        assertFalse(publish2.isExpired());
 
         final PUBLISH publish3 = createPublishWithTimestampAndExpiry(System.currentTimeMillis() - 100000000,
                 MqttConfigurationDefaults.TTL_DISABLED);
-        assertFalse(publish3.hasExpired());
+        assertFalse(publish3.isExpired());
     }
 
     private PUBLISH createPublishWithTimestampAndExpiry(final long timestampMsec, final long messageExpiryIntervalSec) {

@@ -24,7 +24,6 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.concurrent.Future;
@@ -41,24 +40,20 @@ public class DropOutgoingPublishesHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DropOutgoingPublishesHandler.class);
 
-    private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
     private final @NotNull AtomicInteger notWritableMessages = new AtomicInteger();
     private final @NotNull DecrementCounterListener decrementCounterListener = new DecrementCounterListener();
     private final @NotNull MessageDroppedService messageDroppedService;
     private final int notWritableQueueSize;
 
     @Inject
-    public DropOutgoingPublishesHandler(
-            final @NotNull PublishPayloadPersistence publishPayloadPersistence,
-            final @NotNull MessageDroppedService messageDroppedService) {
-        this.publishPayloadPersistence = publishPayloadPersistence;
+    public DropOutgoingPublishesHandler(final @NotNull MessageDroppedService messageDroppedService) {
         this.messageDroppedService = messageDroppedService;
         this.notWritableQueueSize = NOT_WRITABLE_QUEUE_SIZE.get();
     }
 
     public boolean checkChannelNotWritable(
-            final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
-            throws Exception {
+            final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
+
         if (!ctx.channel().isWritable()) {
 
             if (msg instanceof PUBLISH) {
@@ -93,7 +88,7 @@ public class DropOutgoingPublishesHandler {
     private class DecrementCounterListener implements GenericFutureListener<Future<? super Void>> {
 
         @Override
-        public void operationComplete(final @NotNull Future<? super Void> future) throws Exception {
+        public void operationComplete(final @NotNull Future<? super Void> future) {
             notWritableMessages.decrementAndGet();
         }
     }
