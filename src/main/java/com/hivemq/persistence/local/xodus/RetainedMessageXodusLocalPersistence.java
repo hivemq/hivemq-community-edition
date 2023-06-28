@@ -233,17 +233,12 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public @Nullable RetainedMessage get(@NotNull final String topic, final int bucketIndex) {
-        return tryGetLocally(topic, 0, bucketIndex);
-    }
-
-    private @Nullable RetainedMessage tryGetLocally(@NotNull final String topic, final int retry, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
         final Bucket bucket = buckets[bucketIndex];
-        final AtomicBoolean payloadIdExpired = new AtomicBoolean(false);
 
-        final RetainedMessage retainedMessage = bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
+        return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             final ByteIterable byteIterable =
                     bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(topic)));
             if (byteIterable != null) {
@@ -255,8 +250,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
 
                 final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
                 if (payload == null) {
-                    // In case the payload was just deleted, we return the new retained message for this topic (or null if it was removed).
-                    payloadIdExpired.set(true);
+                    log.warn("No payload was found for the retained message on topic {}.", topic);
                     return null;
                 }
                 message.setMessage(payload);
@@ -266,16 +260,6 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
             //Not found :(
             return null;
         });
-
-        if (payloadIdExpired.get()) {
-            if (retry < 100) {
-                return tryGetLocally(topic, retry + 1, bucketIndex);
-            } else {
-                log.warn("No payload was found for the retained message on topic {}.", topic);
-                return null;
-            }
-        }
-        return retainedMessage;
     }
 
     @Override

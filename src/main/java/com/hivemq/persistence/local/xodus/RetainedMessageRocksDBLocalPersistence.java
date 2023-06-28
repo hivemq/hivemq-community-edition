@@ -171,7 +171,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
 
             final DeltaCounter retainMessageDelta = DeltaCounter.finishWith(retainMessageCounter::addAndGet);
             iterator.seekToFirst();
-            
+
             while (iterator.isValid()) {
                 final RetainedMessage message = serializer.deserializeValue(iterator.value());
                 payloadPersistence.decrementReferenceCounter(message.getPublishId());
@@ -180,7 +180,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 iterator.next();
             }
             bucket.write(options, writeBatch);
-            
+
             retainMessageDelta.run();
 
         } catch (final Exception e) {
@@ -225,43 +225,32 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
     @Override
     public @Nullable RetainedMessage get(final @NotNull String topic, final int bucketIndex) {
         try {
-            return tryGetLocally(topic, 0, bucketIndex);
+            checkNotNull(topic, "Topic must not be null");
+            ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
+
+            final RocksDB bucket = buckets[bucketIndex];
+
+            final byte[] messageAsBytes = bucket.get(serializer.serializeKey(topic));
+            if (messageAsBytes == null) {
+                return null;
+            }
+            final RetainedMessage message = serializer.deserializeValue(messageAsBytes);
+            if (message.hasExpired()) {
+                return null;
+            }
+
+            final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
+            if (payload == null) {
+                log.warn("No payload was found for the retained message on topic {}.", topic);
+                return null;
+            }
+            message.setMessage(payload);
+            return message;
         } catch (final Exception e) {
             log.error("An error occurred while getting a retained message.");
             log.debug("Original Exception:", e);
             return null;
         }
-    }
-
-    private @Nullable RetainedMessage tryGetLocally(final @NotNull String topic, final int retry, final int bucketIndex)
-            throws Exception {
-
-        checkNotNull(topic, "Topic must not be null");
-        ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
-        final RocksDB bucket = buckets[bucketIndex];
-
-        final byte[] messageAsBytes = bucket.get(serializer.serializeKey(topic));
-        if (messageAsBytes == null) {
-            return null;
-        }
-        final RetainedMessage message = serializer.deserializeValue(messageAsBytes);
-        if (message.hasExpired()) {
-            return null;
-        }
-        
-        final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
-        if (payload == null) {
-            // In case the payload was just deleted, we return the new retained message for this topic (or null if it was removed).
-            if (retry < 100) {
-                return tryGetLocally(topic, retry + 1, bucketIndex);
-            } else {
-                log.warn("No payload was found for the retained message on topic {}.", topic);
-                return null;
-            }
-        }
-        message.setMessage(payload);
-        return message;
     }
 
     @Override
