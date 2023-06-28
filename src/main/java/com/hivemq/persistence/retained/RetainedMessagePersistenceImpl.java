@@ -45,22 +45,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class RetainedMessagePersistenceImpl extends AbstractPersistence implements RetainedMessagePersistence {
 
     private final @NotNull RetainedMessageLocalPersistence localPersistence;
-    private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull ProducerQueues singleWriter;
     private final @NotNull Chunker chunker;
 
     @Inject
     RetainedMessagePersistenceImpl(
             final @NotNull RetainedMessageLocalPersistence localPersistence,
-            final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull SingleWriterService singleWriterService,
             final @NotNull Chunker chunker) {
 
         this.localPersistence = localPersistence;
-        this.payloadPersistence = payloadPersistence;
-
         singleWriter = singleWriterService.getRetainedMessageQueue();
-
         this.chunker = chunker;
     }
 
@@ -76,14 +71,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
             return Futures.immediateFailedFuture(throwable);
         }
 
-        return singleWriter.submit(topic, (bucketIndex) -> {
-            final RetainedMessage retainedMessage = localPersistence.get(topic, bucketIndex);
-            if (retainedMessage == null) {
-                return null;
-            }
-            payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
-            return retainedMessage;
-        });
+        return singleWriter.submit(topic, (bucketIndex) -> localPersistence.get(topic, bucketIndex));
     }
 
     @Override
@@ -111,8 +99,6 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         try {
             checkNotNull(topic, "Topic must not be null");
             checkNotNull(retainedMessage, "Retained message must not be null");
-
-            payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
 
             return singleWriter.submit(topic, (bucketIndex) -> {
                 localPersistence.put(retainedMessage, topic, bucketIndex);

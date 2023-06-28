@@ -1150,6 +1150,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
         boolean nextEntry();
     }
 
+    @VisibleForTesting
     public @NotNull ImmutableList<ClientQueueEntry> getAll(
             final @NotNull String queueId, final boolean shared, final int bucketIndex) {
         checkNotNull(queueId, "Queue id must not be null");
@@ -1167,6 +1168,10 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                         iterateQueue(cursor, key, false, () -> {
                             final ByteIterable value = cursor.getValue();
                             final MessageWithID messageWithID = serializer.deserializeValue(value);
+                            if (messageWithID instanceof PUBLISH) {
+                                final PUBLISH publish = (PUBLISH) messageWithID;
+                                publish.setPayload(payloadPersistence.get(publish.getPublishId()));
+                            }
                             final boolean retained = serializer.deserializeRetained(value);
                             entries.add(new ClientQueueEntry(messageWithID, retained));
                             return true;
