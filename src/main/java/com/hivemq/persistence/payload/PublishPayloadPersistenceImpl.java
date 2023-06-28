@@ -151,7 +151,6 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         localPersistence.closeDB();
     }
 
-    @Override
     @VisibleForTesting
     public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
         return ImmutableMap.copyOf(payloadReferenceCounterRegistry.getAll());
