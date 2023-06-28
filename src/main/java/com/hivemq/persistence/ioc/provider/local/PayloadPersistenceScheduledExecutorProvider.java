@@ -29,19 +29,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-/**
- * @author Lukas Brandl
- */
 @LazySingleton
 public class PayloadPersistenceScheduledExecutorProvider implements Provider<ListeningScheduledExecutorService> {
 
     private @Nullable ListeningScheduledExecutorService executorService;
 
-    @NotNull
     @Override
     @LazySingleton
     @PayloadPersistence
-    public ListeningScheduledExecutorService get() {
+    public @NotNull ListeningScheduledExecutorService get() {
         if (executorService == null) {
             final ThreadFactory threadFactory = ThreadFactoryUtil.create("payload-persistence-cleanup-%d");
             final int coreSize = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
