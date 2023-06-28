@@ -25,11 +25,9 @@ import com.hivemq.mqtt.message.mqtt5.MqttUserProperty;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import jetbrains.exodus.ByteIterable;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.nio.charset.StandardCharsets;
@@ -45,15 +43,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class ClientQueuePersistenceSerializerTest {
 
-    @Mock
-    private PublishPayloadPersistence payloadPersistence;
-
     private ClientQueuePersistenceSerializer serializer;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        serializer = new ClientQueuePersistenceSerializer(payloadPersistence);
+        serializer = new ClientQueuePersistenceSerializer();
         ClientQueuePersistenceSerializer.NEXT_PUBLISH_NUMBER.set(Long.MAX_VALUE / 2);
     }
 
@@ -121,7 +116,6 @@ public class ClientQueuePersistenceSerializerTest {
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .withTopic("topic")
                 .withDuplicateDelivery(false)
                 .build();
@@ -157,7 +151,6 @@ public class ClientQueuePersistenceSerializerTest {
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
                 .withTopic("topic")
                 .withRetain(true)
@@ -208,7 +201,6 @@ public class ClientQueuePersistenceSerializerTest {
                 .withPublishId(123)
                 .withTimestamp(456)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
                 .withTopic("topic")
                 .withRetain(true)

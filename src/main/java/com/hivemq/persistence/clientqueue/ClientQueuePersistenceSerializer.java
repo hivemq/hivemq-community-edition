@@ -27,7 +27,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.local.xodus.XodusUtils;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.Bytes;
 import jetbrains.exodus.ByteIterable;
 import org.slf4j.Logger;
@@ -64,13 +63,6 @@ public class ClientQueuePersistenceSerializer {
     // The messages must preserve the order in which they are added to the persistence
     // ID's < Long.MAX_VALUE / 2 are reserved for messages that should be polled with priority
     public static final AtomicLong NEXT_PUBLISH_NUMBER = new AtomicLong(Long.MAX_VALUE / 2);
-
-    @NotNull
-    private final PublishPayloadPersistence payloadPersistence;
-
-    ClientQueuePersistenceSerializer(final @NotNull PublishPayloadPersistence payloadPersistence) {
-        this.payloadPersistence = payloadPersistence;
-    }
 
     // ********** Key **********
 
@@ -430,6 +422,6 @@ public class ClientQueuePersistenceSerializer {
             builder.withUserProperties(PropertiesSerializationUtil.read(serialized, cursor));
         }
 
-        return builder.withPersistence(payloadPersistence).build();
+        return builder.build();
     }
 }

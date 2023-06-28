@@ -24,7 +24,6 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
-import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,14 +87,13 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     }
 
     @Override
-    public boolean add(final byte @NotNull [] payload, final long payloadId) {
+    public void add(final byte @NotNull [] payload, final long id) {
         checkNotNull(payload, "Payload must not be null");
-        bucketLock.accessBucketByPayloadId(payloadId, () -> {
-            if (payloadReferenceCounterRegistry.getAndIncrement(payloadId) == UNKNOWN_PAYLOAD) {
-                localPersistence.put(payloadId, payload);
+        bucketLock.accessBucketByPayloadId(id, () -> {
+            if (payloadReferenceCounterRegistry.getAndIncrement(id) == UNKNOWN_PAYLOAD) {
+                localPersistence.put(id, payload);
             }
         });
-        return true;
     }
 
     @Override
@@ -113,11 +111,10 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     }
 
     @Override
-    public void incrementReferenceCounterOnBootstrap(final long payloadId) {
+    public void incrementReferenceCounterOnBootstrap(final long id) {
         // Since this method is only called during bootstrap, it is not performance critical.
         // Therefore, locking is not an issue here.
-        bucketLock.accessBucketByPayloadId(payloadId,
-                () -> payloadReferenceCounterRegistry.getAndIncrement(payloadId));
+        bucketLock.accessBucketByPayloadId(id, () -> payloadReferenceCounterRegistry.getAndIncrement(id));
     }
 
     @Override

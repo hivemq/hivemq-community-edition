@@ -18,19 +18,11 @@ package com.hivemq.mqtt.message;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * @author Dominik Obermaier
  * @since 1.4
  */
 public abstract class MessageWithID implements Message {
 
     protected int packetIdentifier;
-
-    public MessageWithID() {
-    }
-
-    public MessageWithID(final int packetIdentifier) {
-        this.packetIdentifier = packetIdentifier;
-    }
 
     public int getPacketIdentifier() {
         return packetIdentifier;

@@ -37,7 +37,6 @@ import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import com.hivemq.persistence.util.FutureUtils;
 import io.netty.channel.Channel;
@@ -53,9 +52,6 @@ import java.util.concurrent.CancellationException;
 
 /**
  * Utility methods for using retained messages
- *
- * @author Dominik Obermaier
- * @author Christoph Schäbel
  */
 @Singleton
 public class RetainedMessagesSender {
@@ -68,7 +64,6 @@ public class RetainedMessagesSender {
     }
 
     private final @NotNull HivemqId hiveMQId;
-    private final @NotNull PublishPayloadPersistence publishPayloadPersistence;
     private final @NotNull RetainedMessagePersistence retainedMessagePersistence;
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
@@ -76,13 +71,11 @@ public class RetainedMessagesSender {
     @Inject
     public RetainedMessagesSender(
             final @NotNull HivemqId hiveMQId,
-            final @NotNull PublishPayloadPersistence publishPayloadPersistence,
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
             final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull MqttConfigurationService mqttConfigurationService) {
 
         this.hiveMQId = hiveMQId;
-        this.publishPayloadPersistence = publishPayloadPersistence;
         this.retainedMessagePersistence = retainedMessagePersistence;
         this.clientQueuePersistence = clientQueuePersistence;
         this.mqttConfigurationService = mqttConfigurationService;
@@ -115,7 +108,6 @@ public class RetainedMessagesSender {
         Futures.addCallback(retainedMessagesFuture,
                 new SendRetainedMessageCallback(subscribedTopics,
                         hiveMQId,
-                        publishPayloadPersistence,
                         clientId,
                         resultFuture,
                         channel,
@@ -131,7 +123,6 @@ public class RetainedMessagesSender {
 
         private final @NotNull Topic[] subscribedTopics;
         private final @NotNull HivemqId hivemqId;
-        private final @NotNull PublishPayloadPersistence payloadPersistence;
         private final @NotNull String clientId;
         private final @NotNull SettableFuture<Void> resultFuture;
         private final @NotNull Channel channel;
@@ -141,7 +132,6 @@ public class RetainedMessagesSender {
         SendRetainedMessageCallback(
                 final @NotNull Topic[] subscribedTopics,
                 final @NotNull HivemqId hivemqId,
-                final @NotNull PublishPayloadPersistence payloadPersistence,
                 final @NotNull String clientId,
                 final @NotNull SettableFuture<Void> resultFuture,
                 final @NotNull Channel channel,
@@ -150,7 +140,6 @@ public class RetainedMessagesSender {
 
             this.subscribedTopics = subscribedTopics;
             this.hivemqId = hivemqId;
-            this.payloadPersistence = payloadPersistence;
             this.clientId = clientId;
             this.resultFuture = resultFuture;
             this.channel = channel;
@@ -188,7 +177,6 @@ public class RetainedMessagesSender {
                                 .withHivemqId(hivemqId.get())
                                 .withPayload(retainedMessage.getMessage())
                                 .withPublishId(retainedMessage.getPublishId())
-                                .withPersistence(payloadPersistence)
                                 .withMessageExpiryInterval(retainedMessage.getMessageExpiryInterval())
                                 .withTopic(subscribedTopic.getTopic())
                                 .withRetain(true)
@@ -209,9 +197,6 @@ public class RetainedMessagesSender {
 
         private void sendOutMessages(final @NotNull List<PUBLISH> retainedPublishes) {
             if (!channel.isActive()) {
-                for (final PUBLISH publish : retainedPublishes) {
-                    payloadPersistence.decrementReferenceCounter(publish.getPublishId());
-                }
                 resultFuture.setException(CLOSED_CHANNEL_EXCEPTION);
                 return;
             }
@@ -257,7 +242,6 @@ public class RetainedMessagesSender {
                         resultFuture.setException(new ClosedChannelException());
                     }
 
-                    payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
                     if (qos0Publish.getPacketIdentifier() != 0) {
                         final MessageIDPool messageIDPool = ClientConnection.of(channel).getMessageIDPool();
                         messageIDPool.returnId(qos0Publish.getPacketIdentifier());
@@ -271,12 +255,10 @@ public class RetainedMessagesSender {
                         //response has already been sent by callback from ChannelInactiveHandler
                         return;
                     }
-                    payloadPersistence.decrementReferenceCounter(qos0Publish.getPublishId());
                 }
             }, MoreExecutors.directExecutor());
 
-            final PublishWithFuture message =
-                    new PublishWithFuture(qos0Publish, publishFuture, false, payloadPersistence);
+            final PublishWithFuture message = new PublishWithFuture(qos0Publish, publishFuture, false);
             channel.writeAndFlush(message).addListener(new PublishWriteFailedListener(publishFuture));
 
             return resultFuture;

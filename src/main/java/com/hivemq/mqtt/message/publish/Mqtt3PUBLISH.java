@@ -19,7 +19,6 @@ import com.hivemq.mqtt.message.Message;
 import com.hivemq.mqtt.message.QoS;
 
 /**
- * @author Florian Limpöck
  * @since 4.0.0
  */
 public interface Mqtt3PUBLISH extends Message {
@@ -82,7 +81,5 @@ public interface Mqtt3PUBLISH extends Message {
     /**
      * dereferences the payload of the publish message
      */
-    void dereferencePayload();
-
-
+    void setPayload(final byte[] payload);
 }

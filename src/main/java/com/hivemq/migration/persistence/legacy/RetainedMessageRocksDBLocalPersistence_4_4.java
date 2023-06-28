@@ -43,7 +43,6 @@ import static com.hivemq.migration.persistence.legacy.serializer.RetainedMessage
 import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
 /**
- * @author Florian Limpöck
  * @since 4.5.0
  */
 @LazySingleton
@@ -72,7 +71,6 @@ public class RetainedMessageRocksDBLocalPersistence_4_4 extends RocksDBLocalPers
                 false);
 
         this.payloadPersistence = payloadPersistence;
-        final int bucketCount = getBucketCount();
     }
 
     @NotNull
