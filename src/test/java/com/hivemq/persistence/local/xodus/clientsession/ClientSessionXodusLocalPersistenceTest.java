@@ -436,7 +436,7 @@ public class ClientSessionXodusLocalPersistenceTest {
 
     @Test
     public void test_disconnected_send_will() {
-        when(payloadPersistence.getPayloadOrNull(anyLong())).thenReturn(new byte[]{});
+        when(payloadPersistence.get(anyLong())).thenReturn(new byte[]{});
 
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
@@ -462,7 +462,7 @@ public class ClientSessionXodusLocalPersistenceTest {
 
     @Test
     public void test_remove_will() {
-        when(payloadPersistence.getPayloadOrNull(anyLong())).thenReturn(new byte[]{});
+        when(payloadPersistence.get(anyLong())).thenReturn(new byte[]{});
         final String client1 = TestBucketUtil.getId(1, BUCKET_COUNT);
 
         persistence.put(client1,

@@ -87,14 +87,9 @@ public class PublishPayloadPersistenceImplTest {
         assertArrayEquals(payload, result);
     }
 
-    @Test(expected = PayloadPersistenceException.class)
-    public void get_forExistingPayloadId_throwsPayloadPersistenceException() {
-        persistence.get(1);
-    }
-
     @Test
-    public void getPayloadOrNull_forNonExistingPayloadId_returnsNull() {
-        final byte[] bytes = persistence.getPayloadOrNull(1);
+    public void get_forNonExistingPayloadId_returnsNull() {
+        final byte[] bytes = persistence.get(1);
         assertNull(bytes);
     }
 

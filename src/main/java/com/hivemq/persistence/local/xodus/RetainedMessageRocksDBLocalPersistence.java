@@ -239,7 +239,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                 return null;
             }
 
-            final byte[] payload = payloadPersistence.getPayloadOrNull(message.getPublishId());
+            final byte[] payload = payloadPersistence.get(message.getPublishId());
             if (payload == null) {
                 log.warn("No payload was found for the retained message on topic {}.", topic);
                 return null;
@@ -367,7 +367,7 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
                     continue;
                 }
 
-                final byte[] payload = payloadPersistence.getPayloadOrNull(deserializedMessage.getPublishId());
+                final byte[] payload = payloadPersistence.get(deserializedMessage.getPublishId());
 
                 // ignore messages with no payload and log a warning for the fact
                 if (payload == null) {

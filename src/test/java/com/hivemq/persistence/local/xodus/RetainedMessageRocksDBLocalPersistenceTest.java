@@ -82,15 +82,15 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
                 temporaryFolder.newFolder());
 
-        when(payloadPersistence.getPayloadOrNull(0)).thenReturn("message0".getBytes());
         when(payloadPersistence.get(0)).thenReturn("message0".getBytes());
-        when(payloadPersistence.getPayloadOrNull(1)).thenReturn("message1".getBytes());
+        when(payloadPersistence.get(0)).thenReturn("message0".getBytes());
         when(payloadPersistence.get(1)).thenReturn("message1".getBytes());
-        when(payloadPersistence.getPayloadOrNull(2)).thenReturn("message2".getBytes());
+        when(payloadPersistence.get(1)).thenReturn("message1".getBytes());
         when(payloadPersistence.get(2)).thenReturn("message2".getBytes());
-        when(payloadPersistence.getPayloadOrNull(3)).thenReturn("message3".getBytes());
+        when(payloadPersistence.get(2)).thenReturn("message2".getBytes());
         when(payloadPersistence.get(3)).thenReturn("message3".getBytes());
-        when(payloadPersistence.getPayloadOrNull(4)).thenReturn("message4".getBytes());
+        when(payloadPersistence.get(3)).thenReturn("message3".getBytes());
+        when(payloadPersistence.get(4)).thenReturn("message4".getBytes());
         when(payloadPersistence.get(4)).thenReturn("message4".getBytes());
 
         persistenceStartup = new PersistenceStartup();
@@ -382,7 +382,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
     public void getAllRetainedMessagesChunk_onlyMessagesWithPayload() {
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 1L, 1000), "topic/1", 1);
         persistence.put(new RetainedMessage(new byte[0], QoS.AT_MOST_ONCE, 2L, 1000), "topic/2", 1);
-        when(payloadPersistence.getPayloadOrNull(2)).thenReturn(null);
+        when(payloadPersistence.get(2)).thenReturn(null);
 
         final BucketChunkResult<Map<String, @NotNull RetainedMessage>> chunk =
                 persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
