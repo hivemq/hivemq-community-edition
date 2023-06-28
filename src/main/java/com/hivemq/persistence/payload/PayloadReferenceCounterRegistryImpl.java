@@ -17,6 +17,7 @@ package com.hivemq.persistence.payload;
 
 import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import org.eclipse.collections.api.tuple.primitive.LongIntPair;
 import org.eclipse.collections.impl.map.mutable.primitive.LongIntHashMap;
@@ -86,6 +87,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
         map.remove(payloadId);
     }
 
+    @ThreadSafe
     @Override
     public @NotNull ImmutableMap<Long, Integer> getAll() {
         final ImmutableMap.Builder<Long, Integer> builder = ImmutableMap.builder();
@@ -100,6 +102,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
         return builder.build();
     }
 
+    @ThreadSafe
     @Override
     public int size() {
         final AtomicInteger sum = new AtomicInteger();
