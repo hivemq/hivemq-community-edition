@@ -126,7 +126,7 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
     public void put(final long id, final byte @NotNull [] payload) {
 
         final Bucket bucket = getBucket(Long.toString(id));
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             int chunkIndex = 0;
             // We have to split the payload in chunks with less than 8MB, because Xodus can't handle entries that are bigger than the page size.
             // The chunks are associated with an index.
@@ -150,6 +150,7 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public byte @Nullable [] get(final long id) {
+
         final Bucket bucket = getBucket(Long.toString(id));
         return bucket.getEnvironment().computeInReadonlyTransaction(transaction -> {
 
@@ -159,16 +160,13 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
 
                 int chunkIndex = 0;
                 ByteIterable entry = cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, chunkIndex)));
-                if (entry == null) {
-                    return null;
-                }
+                while (entry != null) {
 
-                do {
                     final KeyPair key = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
                     chunks.put(key.getChunkIndex(), byteIterableToBytes(cursor.getValue()));
 
                     entry = cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, ++chunkIndex)));
-                } while (entry != null);
+                }
             }
 
             if (chunks.isEmpty()) {
@@ -223,13 +221,13 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
             return;
         }
         final Bucket bucket = getBucket(Long.toString(id));
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
 
             int chunkIndex = 0;
-            boolean deleted = true;
-            while (deleted) {
+            boolean deleted;
+            do {
                 deleted = bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(id, chunkIndex++)));
-            }
+            } while (deleted);
         });
     }
 
