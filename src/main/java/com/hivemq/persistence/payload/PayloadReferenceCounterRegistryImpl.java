@@ -92,8 +92,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     public @NotNull ImmutableMap<Long, Integer> getAll() {
         final ImmutableMap.Builder<Long, Integer> builder = ImmutableMap.builder();
         for (int i = 0; i < buckets.length; i++) {
-            final int bucketIndex = i;
-            bucketLock.accessBucket(bucketIndex, () -> {
+            bucketLock.accessBucket(i, (bucketIndex) -> {
                 for (final LongIntPair longIntPair : buckets[bucketIndex].keyValuesView()) {
                     builder.put(longIntPair.getOne(), longIntPair.getTwo());
                 }
@@ -107,8 +106,7 @@ public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCoun
     public int size() {
         final AtomicInteger sum = new AtomicInteger();
         for (int i = 0; i < buckets.length; i++) {
-            final int bucketIndex = i;
-            bucketLock.accessBucket(bucketIndex, () -> sum.addAndGet(buckets[bucketIndex].size()));
+            bucketLock.accessBucket(i, (bucketIndex) -> sum.addAndGet(buckets[bucketIndex].size()));
         }
         return sum.get();
     }

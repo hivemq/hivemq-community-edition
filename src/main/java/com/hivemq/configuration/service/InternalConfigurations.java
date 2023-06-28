@@ -21,7 +21,6 @@ import org.rocksdb.MutableColumnFamilyOptionsInterface;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.hivemq.persistence.local.xodus.EnvironmentUtil.GCType;
@@ -227,12 +226,6 @@ public class InternalConfigurations {
      * anymore.
      */
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC = new AtomicInteger(250);
-
-    /**
-     * The amount of time that a payload is preserved after the last reference was removed in case the same payload is
-     * published again.
-     */
-    public static final AtomicLong PAYLOAD_PERSISTENCE_CLEANUP_DELAY_MSEC = new AtomicLong(2000);
 
     /**
      * The amount of threads in the cleanup job thread pool.

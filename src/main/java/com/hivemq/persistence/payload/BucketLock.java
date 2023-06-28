@@ -45,7 +45,7 @@ public class BucketLock {
         final Lock lock = locks[index];
         lock.lock();
         try {
-            callback.call();
+            callback.call(index);
         } finally {
             lock.unlock();
         }
@@ -53,6 +53,6 @@ public class BucketLock {
 
     @FunctionalInterface
     interface BucketAccessCallback {
-        void call();
+        void call(int bucketIndex);
     }
 }

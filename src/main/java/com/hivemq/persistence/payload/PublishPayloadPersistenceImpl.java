@@ -17,7 +17,6 @@ package com.hivemq.persistence.payload;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
@@ -28,60 +27,60 @@ import com.hivemq.persistence.ioc.annotation.PayloadPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Queue;
-import java.util.concurrent.LinkedTransferQueue;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.REF_COUNT_ALREADY_ZERO;
-import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistry.UNKNOWN_PAYLOAD;
+import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistryImpl.REF_COUNT_ALREADY_ZERO;
+import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistryImpl.UNKNOWN_PAYLOAD;
 
 @LazySingleton
 public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence {
 
-    @VisibleForTesting
-    static final @NotNull Logger log = LoggerFactory.getLogger(PublishPayloadPersistenceImpl.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(PublishPayloadPersistenceImpl.class);
 
     private final @NotNull PublishPayloadLocalPersistence localPersistence;
     private final @NotNull ListeningScheduledExecutorService scheduledExecutorService;
-    private final long removeSchedule;
     private final @NotNull BucketLock bucketLock;
-
-    private final @NotNull Queue<RemovablePayload> removablePayloads = new LinkedTransferQueue<>();
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
-    private @Nullable ListenableScheduledFuture<?> removeTaskFuture;
+    private final @NotNull RemovablePayloads[] removablePayloads;
 
     @Inject
     PublishPayloadPersistenceImpl(
             final @NotNull PublishPayloadLocalPersistence localPersistence,
             final @NotNull @PayloadPersistence ListeningScheduledExecutorService scheduledExecutorService) {
+
         this.localPersistence = localPersistence;
         this.scheduledExecutorService = scheduledExecutorService;
 
-        removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
-        final int bucketLockCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
-        bucketLock = new BucketLock(bucketLockCount);
+        final int bucketCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        bucketLock = new BucketLock(bucketCount);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
+
+        removablePayloads = new RemovablePayloads[bucketCount];
+        for (int i = 0; i < bucketCount; i++) {
+            removablePayloads[i] = new RemovablePayloads(i, new LinkedList<>());
+        }
     }
 
     // The payload persistence has to be initialized after the other persistence bootstraps are finished.
     @Override
     public void init() {
-        final long removeDelay = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_DELAY_MSEC.get();
         final int cleanupThreadCount = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
-        final long taskSchedule = removeSchedule * cleanupThreadCount;
+        final long removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
+
+        final RemovablePayloads[][] bucketResponsibilities =
+                partitionBucketResponsibilities(removablePayloads, cleanupThreadCount);
+
         for (int i = 0; i < cleanupThreadCount; i++) {
-            final long initialSchedule = removeSchedule * i;
-            // We schedule an amount of tasks to be equal to the amount of cleanup threads.
-            // The rate is a configured value multiplied by the thread count.
-            // Therefore, all threads in the pool should be running simultaneously on high load.
-            if (!scheduledExecutorService.isShutdown()) {
-                removeTaskFuture = scheduledExecutorService.scheduleAtFixedRate(new RemoveEntryTask(localPersistence,
-                        bucketLock,
-                        removablePayloads,
-                        removeDelay,
+
+            final RemovablePayloads[] responsibleBuckets = bucketResponsibilities[i];
+
+            if (responsibleBuckets.length > 0 && !scheduledExecutorService.isShutdown()) {
+                scheduledExecutorService.scheduleWithFixedDelay(new RemoveEntryTask(bucketLock,
                         payloadReferenceCounterRegistry,
-                        taskSchedule), initialSchedule, taskSchedule, TimeUnit.MILLISECONDS);
+                        localPersistence,
+                        responsibleBuckets), removeSchedule, removeSchedule, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -89,7 +88,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     @Override
     public void add(final byte @NotNull [] payload, final long id) {
         checkNotNull(payload, "Payload must not be null");
-        bucketLock.accessBucketByPayloadId(id, () -> {
+        bucketLock.accessBucketByPayloadId(id, (bucketIndex) -> {
             if (payloadReferenceCounterRegistry.getAndIncrement(id) == UNKNOWN_PAYLOAD) {
                 localPersistence.put(id, payload);
             }
@@ -112,14 +111,12 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     @Override
     public void incrementReferenceCounterOnBootstrap(final long id) {
-        // Since this method is only called during bootstrap, it is not performance critical.
-        // Therefore, locking is not an issue here.
-        bucketLock.accessBucketByPayloadId(id, () -> payloadReferenceCounterRegistry.getAndIncrement(id));
+        bucketLock.accessBucketByPayloadId(id, (bucketIndex) -> payloadReferenceCounterRegistry.getAndIncrement(id));
     }
 
     @Override
     public void decrementReferenceCounter(final long id) {
-        bucketLock.accessBucketByPayloadId(id, () -> {
+        bucketLock.accessBucketByPayloadId(id, (bucketIndex) -> {
             final int result = payloadReferenceCounterRegistry.decrementAndGet(id);
             if (result == UNKNOWN_PAYLOAD || result == REF_COUNT_ALREADY_ZERO) {
                 log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
@@ -137,22 +134,47 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
                     }
                 }
             } else if (result == 0) {
-                //Note: We'll remove the reference counter entry  in the cleanup
-                removablePayloads.add(new RemovablePayload(id, System.currentTimeMillis()));
+                //Note: We'll remove the entry async in the cleanup job.
+                removablePayloads[bucketIndex].getQueue().add(id);
             }
         });
     }
 
     @Override
     public void closeDB() {
-        if (removeTaskFuture != null) {
-            removeTaskFuture.cancel(true);
-        }
         localPersistence.closeDB();
     }
 
     @VisibleForTesting
     public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
         return ImmutableMap.copyOf(payloadReferenceCounterRegistry.getAll());
+    }
+
+    @VisibleForTesting
+    static @NotNull RemovablePayloads @NotNull [] @NotNull [] partitionBucketResponsibilities(
+            final @NotNull RemovablePayloads[] removablePayloads, final int threads) {
+
+        final RemovablePayloads[][] responsibilities = new RemovablePayloads[threads][];
+
+        final int buckets = removablePayloads.length;
+        final int bucketsPerThread = buckets / threads;
+        // There can be remaining buckets depending on the number of CPU cores available.
+        final int remainingBuckets = buckets % threads;
+
+        for (int i = 0; i < threads; i++) {
+
+            if (i < remainingBuckets) {
+                responsibilities[i] = new RemovablePayloads[bucketsPerThread + 1];
+                // add one of the remaining buckets to the last index
+                responsibilities[i][bucketsPerThread] = removablePayloads[(buckets - 1 /* last index */) - i];
+            } else {
+                responsibilities[i] = new RemovablePayloads[bucketsPerThread];
+            }
+
+            final int startIndex = i * bucketsPerThread;
+
+            System.arraycopy(removablePayloads, startIndex, responsibilities[i], 0, bucketsPerThread);
+        }
+        return responsibilities;
     }
 }
