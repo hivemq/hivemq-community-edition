@@ -96,16 +96,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     }
 
     @Override
-    public byte @NotNull [] get(final long id) {
-        final byte[] payload = getPayloadOrNull(id);
-        if (payload == null) {
-            throw new PayloadPersistenceException(id);
-        }
-        return payload;
-    }
-
-    @Override
-    public byte @Nullable [] getPayloadOrNull(final long id) {
+    public byte @Nullable [] get(final long id) {
         return localPersistence.get(id);
     }
 
@@ -119,18 +110,17 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
         bucketLock.accessBucketByPayloadId(id, (bucketIndex) -> {
             final int result = payloadReferenceCounterRegistry.decrementAndGet(id);
             if (result == UNKNOWN_PAYLOAD || result == REF_COUNT_ALREADY_ZERO) {
-                log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
                 if (InternalConfigurations.LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING) {
                     if (log.isWarnEnabled()) {
-                        for (int i = 0; i < Thread.currentThread().getStackTrace().length; i++) {
-                            log.warn(Thread.currentThread().getStackTrace()[i].toString());
-                        }
+                        log.warn("Tried to decrement a payload reference counter ({}) that was already zero.",
+                                id,
+                                new Exception()); // We create here an exception to log the stacktrace.
                     }
                 } else {
+                    log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
                     if (log.isDebugEnabled()) {
-                        for (int i = 0; i < Thread.currentThread().getStackTrace().length; i++) {
-                            log.debug(Thread.currentThread().getStackTrace()[i].toString());
-                        }
+                        log.debug("Original Exception:",
+                                new Exception()); // We create here an exception to log the stacktrace.
                     }
                 }
             } else if (result == 0) {

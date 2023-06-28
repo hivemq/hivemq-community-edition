@@ -36,7 +36,6 @@ import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.payload.PayloadPersistenceException;
 import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
@@ -232,8 +231,6 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
                 message.setPublishId(newPayloadId);
                 retainedMessageLocalPersistence.put(message, topic, bucketIndex);
 
-            } catch (final PayloadPersistenceException payloadException) {
-                payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
             } catch (final Throwable throwable) {
                 log.warn("Could not migrate retained message for topic {}, original exception: ", topic, throwable);
                 Exceptions.rethrowError(throwable);

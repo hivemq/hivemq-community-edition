@@ -40,21 +40,12 @@ public interface PublishPayloadPersistence {
     void add(byte @NotNull [] payload, long id);
 
     /**
-     * Get the persisted payload for an id.
-     *
-     * @param id The id associated with the payload.
-     * @return The payload that is persisted.
-     * @throws PayloadPersistenceException if {@link PublishPayloadLocalPersistence} returns null reference for id.
-     */
-    byte @NotNull [] get(long id);
-
-    /**
      * Get the persisted payload for an id or null.
      *
      * @param id The id associated with the payload.
      * @return The payload that is persisted for the given id or null if the reference was deleted.
      */
-    byte @Nullable [] getPayloadOrNull(long id);
+    byte @Nullable [] get(long id);
 
     /**
      * Increments the current reference count for an id.

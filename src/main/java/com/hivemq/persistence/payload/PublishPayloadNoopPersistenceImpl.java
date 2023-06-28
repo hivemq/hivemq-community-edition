@@ -37,13 +37,7 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
     }
 
     @Override
-    public byte @NotNull [] get(final long id) {
-        throw new UnsupportedOperationException("With in-memory payloads must not be gotten.");
-    }
-
-    //this method is allowed to return null
-    @Override
-    public byte @Nullable [] getPayloadOrNull(final long id) {
+    public byte @Nullable [] get(final long id) {
         throw new UnsupportedOperationException("With in-memory payloads must not be gotten.");
     }
 

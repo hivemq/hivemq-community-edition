@@ -500,7 +500,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (willPublish.getPayload() != null) {
             return;
         }
-        final byte[] payload = payloadPersistence.getPayloadOrNull(willPublish.getPublishId());
+        final byte[] payload = payloadPersistence.get(willPublish.getPublishId());
         if (payload == null) {
             clientSession.setWillPublish(null);
             log.warn("Will Payload for payloadid {} not found", willPublish.getPublishId());

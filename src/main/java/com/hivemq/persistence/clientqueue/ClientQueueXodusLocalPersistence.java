@@ -38,7 +38,6 @@ import com.hivemq.persistence.local.xodus.TransactionCommitActions;
 import com.hivemq.persistence.local.xodus.XodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.Bucket;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.payload.PayloadPersistenceException;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.Strings;
@@ -565,10 +564,9 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             final @NotNull String queueId,
             final boolean shared,
             final int bucketIndex) {
-        try {
-            final byte[] payload = payloadPersistence.get(publish.getPublishId());
-            publish.setPayload(payload);
-        } catch (final PayloadPersistenceException e) {
+
+        final byte[] payload = payloadPersistence.get(publish.getPublishId());
+        if (payload == null) {
             messageDroppedService.failed(queueId, publish.getTopic(), publish.getQoS().getQosNumber());
             // No payload exists: remove the PUBLISH from its persistent queue. (Not necessary for QoS 0.)
             if (publish.getQoS() != QoS.AT_MOST_ONCE) {
@@ -585,6 +583,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
             }
             return false;
         }
+        publish.setPayload(payload);
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {
             // We can decrement the persistence counter immediately because the QoS 0 PUBLISH has already been
             // removed from its (in-memory) queue, hence we won't attempt to access its payload again anyway.
