@@ -104,8 +104,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
 
     // security
-    implementation("org.bouncycastle:bcprov-jdk15on:${property("bouncycastle.version")}")
-    implementation("org.bouncycastle:bcpkix-jdk15on:${property("bouncycastle.version")}")
+    implementation("org.bouncycastle:bcprov-jdk18on:${property("bouncycastle.version")}")
+    implementation("org.bouncycastle:bcpkix-jdk18on:${property("bouncycastle.version")}")
 
     // persistence
     implementation("org.rocksdb:rocksdbjni:${property("rocksdb.version")}")
@@ -288,7 +288,7 @@ dependencyCheck {
     analyzers.apply {
         centralEnabled = false
     }
-    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL
+    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL.toString()
     scanConfigurations = listOf("runtimeClasspath")
     suppressionFile = "$projectDir/gradle/dependency-check/suppress.xml"
 }

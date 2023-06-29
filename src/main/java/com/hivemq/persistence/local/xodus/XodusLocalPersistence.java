@@ -29,6 +29,7 @@ import jetbrains.exodus.env.EnvironmentConfig;
 import jetbrains.exodus.env.Environments;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.StoreConfig;
+import jetbrains.exodus.io.FileDataReader;
 import jetbrains.exodus.io.FileDataWriter;
 import jetbrains.exodus.log.LogConfig;
 import org.slf4j.Logger;
@@ -119,7 +120,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
                 }
 
                 final LogConfig logConfig = new LogConfig();
-                logConfig.setDir(persistenceFile);
+                logConfig.setLocation(persistenceFile.getPath());
                 logConfig.setWriter(new XodusNoLockDataWriter(persistenceFile, logConfig));
 
                 final Environment environment = Environments.newContextualInstance(logConfig, environmentConfig);
@@ -164,7 +165,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
                     }
 
                     final LogConfig logConfig = new LogConfig();
-                    logConfig.setDir(persistenceFile);
+                    logConfig.setLocation(persistenceFile.getPath());
                     logConfig.setWriter(new XodusNoLockDataWriter(persistenceFile, logConfig));
 
                     final Environment environment = Environments.newContextualInstance(logConfig, environmentConfig);
@@ -234,7 +235,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
     private static final class XodusNoLockDataWriter extends FileDataWriter {
 
         private XodusNoLockDataWriter(final @NotNull File persistenceFile, final @NotNull LogConfig logConfig) {
-            super(persistenceFile, logConfig.getLockId());
+            super(new FileDataReader(persistenceFile));
         }
 
         @Override
