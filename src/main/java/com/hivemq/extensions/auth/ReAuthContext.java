@@ -16,6 +16,7 @@
 package com.hivemq.extensions.auth;
 
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.bootstrap.ClientState;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
 import com.hivemq.extensions.events.OnAuthSuccessEvent;
@@ -66,6 +67,9 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
                 Mqtt5AuthReasonCode.SUCCESS,
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
                 output.getReasonString());
+
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
+        clientConnectionContext.proposeClientState(ClientState.AUTHENTICATED);
 
         authFuture.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
