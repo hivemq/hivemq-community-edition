@@ -255,11 +255,11 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
             } else {
                 log.trace("Creating new retained message for topic {}", topic);
                 bucket.put(serializedTopic, serializeValue(retainedMessage));
-                payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
                 topicTrees[bucketIndex].add(topic);
                 //persist needs increment.
                 retainMessageCounter.incrementAndGet();
             }
+            payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
         } catch (final Exception e) {
             log.error("An error occurred while persisting a retained message.");
             log.debug("Original Exception:", e);
