@@ -13,21 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.persistence.payload;
+package com.hivemq.persistence.local;
 
-import com.google.common.primitives.Longs;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-final class PublishPayloadRocksDBSerializer {
+import java.util.function.Consumer;
 
-    private PublishPayloadRocksDBSerializer() {
+public class DeltaCounter implements Runnable {
+
+    private final @NotNull Consumer<Long> consumer;
+    private long delta;
+
+    private DeltaCounter(final @NotNull Consumer<Long> consumer) {
+        this.consumer = consumer;
     }
 
-    public static byte @NotNull [] serializeKey(final long id) {
-        return Longs.toByteArray(id);
+    public static @NotNull DeltaCounter finishWith(final @NotNull Consumer<Long> consumer) {
+        return new DeltaCounter(consumer);
     }
 
-    public static long deserializeKey(final byte @NotNull [] bytes) {
-        return Longs.fromByteArray(bytes);
+    public void increment() {
+        delta += 1;
+    }
+
+    public void decrement() {
+        delta -= 1;
+    }
+
+    @Override
+    public void run() {
+        consumer.accept(delta);
     }
 }

@@ -34,7 +34,6 @@ import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.ExodusException;
 import jetbrains.exodus.env.Cursor;
 import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.TransactionalComputable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,13 +42,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.hivemq.persistence.local.xodus.XodusUtils.byteIterableToBytes;
 import static com.hivemq.persistence.local.xodus.XodusUtils.bytesToByteIterable;
+import static com.hivemq.persistence.payload.PublishPayloadXodusSerializer.deserializeKey;
+import static com.hivemq.persistence.payload.PublishPayloadXodusSerializer.serializeKey;
 
-/**
- * @author Lukas Brandl
- */
 // The LazySingleton annotation is necessary here, because the PublishPayloadLocalPersistenceProvider is not used during migrations.
 @LazySingleton
 public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
@@ -60,42 +57,36 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
     public static final String PERSISTENCE_VERSION = "040500";
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
 
-    private final @NotNull PublishPayloadXodusSerializer serializer;
-
     @Inject
     public PublishPayloadXodusLocalPersistence(
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
+
         super(environmentUtil,
                 localPersistenceFileUtil,
                 persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE);
-        serializer = new PublishPayloadXodusSerializer();
     }
 
-    @NotNull
     @Override
-    protected String getName() {
+    protected @NotNull String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
     @Override
-    protected String getVersion() {
+    protected @NotNull String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
     @Override
-    protected StoreConfig getStoreConfig() {
+    protected @NotNull StoreConfig getStoreConfig() {
         return StoreConfig.WITHOUT_DUPLICATES_WITH_PREFIXING;
     }
 
-    @NotNull
     @Override
-    protected Logger getLogger() {
+    protected @NotNull Logger getLogger() {
         return log;
     }
 
@@ -106,14 +97,13 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public void init() {
-
         try {
             final AtomicLong maxId = new AtomicLong(0);
             for (final Bucket bucket : buckets) {
                 bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                     try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                         while (cursor.getNext()) {
-                            final KeyPair keypair = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                            final KeyPair keypair = deserializeKey(byteIterableToBytes(cursor.getKey()));
                             if (keypair.getId() > maxId.get()) {
                                 maxId.set(keypair.getId());
                             }
@@ -131,16 +121,15 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
     }
 
     @Override
-    public void put(final long id, @NotNull final byte[] payload) {
-        checkNotNull(payload, "payload must not be null");
+    public void put(final long id, final byte @NotNull [] payload) {
 
         final Bucket bucket = getBucket(Long.toString(id));
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             int chunkIndex = 0;
             // We have to split the payload in chunks with less than 8MB, because Xodus can't handle entries that are bigger than the page size.
             // The chunks are associated with an index.
             do {
-                final ByteIterable key = bytesToByteIterable(serializer.serializeKey(id, chunkIndex));
+                final ByteIterable key = bytesToByteIterable(serializeKey(id, chunkIndex));
                 if (payload.length < CHUNK_SIZE) {
                     bucket.getStore().put(txn, key, bytesToByteIterable(payload));
                 } else {
@@ -157,9 +146,9 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
         });
     }
 
-    @Nullable
     @Override
-    public byte[] get(final long id) {
+    public byte @Nullable [] get(final long id) {
+
         final Bucket bucket = getBucket(Long.toString(id));
         return bucket.getEnvironment().computeInReadonlyTransaction(transaction -> {
 
@@ -168,20 +157,17 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
             try (final Cursor cursor = bucket.getStore().openCursor(transaction)) {
 
                 int chunkIndex = 0;
-                ByteIterable entry = cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, chunkIndex)));
-                if (entry == null) {
-                    return null;
-                }
+                ByteIterable entry = cursor.getSearchKey(bytesToByteIterable(serializeKey(id, chunkIndex)));
+                while (entry != null) {
 
-                do {
-                    final KeyPair key = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
+                    final KeyPair key = deserializeKey(byteIterableToBytes(cursor.getKey()));
                     chunks.put(key.getChunkIndex(), byteIterableToBytes(cursor.getValue()));
 
-                    entry = cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(id, ++chunkIndex)));
-                } while (entry != null);
+                    entry = cursor.getSearchKey(bytesToByteIterable(serializeKey(id, ++chunkIndex)));
+                }
             }
 
-            if (chunks.size() < 1) {
+            if (chunks.isEmpty()) {
                 return null;
             }
             if (chunks.size() == 1) {
@@ -206,26 +192,25 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
         });
     }
 
-    @NotNull
     @Override
-    public ImmutableList<Long> getAllIds() {
+    public @NotNull ImmutableList<Long> getAllIds() {
 
-        final ImmutableList.Builder<Long> builder = ImmutableList.builder();
+        final ImmutableList.Builder<Long> payloadIdsBuilder = ImmutableList.builder();
         for (final Bucket bucket : buckets) {
 
-            bucket.getEnvironment().computeInReadonlyTransaction((TransactionalComputable<Void>) transaction -> {
+            bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
 
-                try (final Cursor cursor = bucket.getStore().openCursor(transaction)) {
+                try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                     while (cursor.getNext()) {
-                        final KeyPair key = serializer.deserializeKey(byteIterableToBytes(cursor.getKey()));
-                        builder.add(key.getId());
+                        final KeyPair key = deserializeKey(byteIterableToBytes(cursor.getKey()));
+                        payloadIdsBuilder.add(key.getId());
                     }
                 }
                 return null;
             });
         }
 
-        return builder.build();
+        return payloadIdsBuilder.build();
     }
 
     @Override
@@ -234,13 +219,13 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
             return;
         }
         final Bucket bucket = getBucket(Long.toString(id));
-        bucket.getEnvironment().executeInTransaction(txn -> {
+        bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
 
             int chunkIndex = 0;
-            boolean deleted = true;
-            while (deleted) {
-                deleted = bucket.getStore().delete(txn, bytesToByteIterable(serializer.serializeKey(id, chunkIndex++)));
-            }
+            boolean deleted;
+            do {
+                deleted = bucket.getStore().delete(txn, bytesToByteIterable(serializeKey(id, chunkIndex++)));
+            } while (deleted);
         });
     }
 

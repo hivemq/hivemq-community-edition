@@ -210,7 +210,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
             final ClientSessionWill newWill = newClientSession.getWillPublish();
             if (newWill != null) {
                 metricsHolder.getStoredWillMessagesCount().inc();
-                payloadPersistence.add(newWill.getPayload(), 1, newWill.getPublishId());
+                payloadPersistence.add(newWill.getPayload(), newWill.getPublishId());
             }
 
             final PersistenceEntry<ClientSession> newEntry = new PersistenceEntry<>(usedSession, timestamp);
@@ -500,7 +500,7 @@ public class ClientSessionMemoryLocalPersistence implements ClientSessionLocalPe
         if (willPublish.getPayload() != null) {
             return;
         }
-        final byte[] payload = payloadPersistence.getPayloadOrNull(willPublish.getPublishId());
+        final byte[] payload = payloadPersistence.get(willPublish.getPublishId());
         if (payload == null) {
             clientSession.setWillPublish(null);
             log.warn("Will Payload for payloadid {} not found", willPublish.getPublishId());

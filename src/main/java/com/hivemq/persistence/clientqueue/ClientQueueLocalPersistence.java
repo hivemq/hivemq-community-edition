@@ -30,7 +30,6 @@ import java.util.List;
 import static com.hivemq.configuration.service.MqttConfigurationService.QueuedMessagesStrategy;
 
 /**
- * @author Lukas Brandl
  * @since 4.0.0
  */
 public interface ClientQueueLocalPersistence extends LocalPersistence {
@@ -109,10 +108,10 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
     /**
      * Returns a batch of PUBLISHes that already have a packet identifier. The size of the batch is limited by 2
      * factors:
-     * <li>
-     * <ul>The count of PUBLISHes will be less then or equal to the size of the given packet id list</ul>
-     * <ul>The estimated memory usage will be approximately less than or equal to the given bytes limit</ul>
-     * </li>
+     * <ul>
+     * <li>The count of PUBLISHes will be less then or equal to the size of the given packet id list</li>
+     * <li>The estimated memory usage will be approximately less than or equal to the given bytes limit</li>
+     * </ul>
      *
      * @param client      for which to read the PUBLISHes
      * @param shared      is true if the queueId is actually a shared subscription false if it is a client ID
@@ -132,7 +131,7 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
      * @param client      for which the PUBREL will replace a PUBLISH
      * @param pubrel      to be put
      * @param bucketIndex provided by the single writer
-     * @return the id of the replace publish or null if no message was replaced
+     * @return the id of the replaced publish or null if no message was replaced
      */
     @Nullable String replace(@NotNull String client, @NotNull PUBREL pubrel, int bucketIndex);
 
@@ -168,16 +167,6 @@ public interface ClientQueueLocalPersistence extends LocalPersistence {
      * @return the amount of queued messages
      */
     int size(@NotNull String queueId, boolean shared, int bucketIndex);
-
-    /**
-     * Returns the amount of queued qos 0 messages for the given client or shared subscription.
-     *
-     * @param queueId     for which to read the queue size
-     * @param shared      is true if the queueId is actually a shared subscription false if it is a client ID
-     * @param bucketIndex provided by the single writer
-     * @return the amount of queued qos 0 messages
-     */
-    int qos0Size(@NotNull String queueId, boolean shared, int bucketIndex);
 
     /**
      * Removes the queue for the given client or shared subscription.

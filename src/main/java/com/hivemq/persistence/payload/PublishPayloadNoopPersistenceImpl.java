@@ -15,16 +15,11 @@
  */
 package com.hivemq.persistence.payload;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-/**
- * @author Daniel Krüger
- */
 @LazySingleton
 public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersistence {
 
@@ -36,57 +31,28 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
     public void init() {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean add(@NotNull final byte[] payload, final long referenceCount, final long payloadId) {
-        return false;
+    public void add(final byte @NotNull [] payload, final long id) {
+        //NOOP
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public byte @NotNull [] get(final long id) {
+    public byte @Nullable [] get(final long id) {
         throw new UnsupportedOperationException("With in-memory payloads must not be gotten.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //this method is allowed to return null
-    @Override
-    public byte @Nullable [] getPayloadOrNull(final long id) {
-        throw new UnsupportedOperationException("With in-memory payloads must not be gotten.");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
         //NOOP
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void decrementReferenceCounter(final long id) {
         //NOOP
     }
 
-
     @Override
     public void closeDB() {
         //NOOP
     }
-
-    @Override
-    @VisibleForTesting
-    public @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap() {
-        throw new UnsupportedOperationException("getAllIds iys not supported for in-memory persistence");
-    }
-
 }

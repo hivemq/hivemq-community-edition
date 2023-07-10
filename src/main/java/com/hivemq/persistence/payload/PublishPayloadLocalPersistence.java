@@ -21,9 +21,6 @@ import com.hivemq.annotations.ReadOnly;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
-/**
- * @author Lukas Brandl
- */
 public interface PublishPayloadLocalPersistence {
 
     String PERSISTENCE_NAME = "publish_payload_store";

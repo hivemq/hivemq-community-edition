@@ -44,11 +44,10 @@ import static com.hivemq.configuration.service.InternalConfigurations.PERSISTENC
 
 public abstract class XodusLocalPersistence implements LocalPersistence, FilePersistence {
 
-
     private final @NotNull EnvironmentUtil environmentUtil;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
     private final @NotNull PersistenceStartup persistenceStartup;
-    protected final AtomicBoolean stopped = new AtomicBoolean(false);
+    protected final @NotNull AtomicBoolean stopped = new AtomicBoolean(false);
 
     protected @NotNull Bucket[] buckets;
     protected int bucketCount;
@@ -61,13 +60,13 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
             final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup,
-            final int internalBucketCount,
+            final int bucketCount,
             final boolean enabled) {
 
         this.environmentUtil = environmentUtil;
         this.localPersistenceFileUtil = localPersistenceFileUtil;
         this.persistenceStartup = persistenceStartup;
-        this.bucketCount = internalBucketCount;
+        this.bucketCount = bucketCount;
         this.buckets = new Bucket[bucketCount];
         this.enabled = enabled;
 
@@ -75,21 +74,17 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
         this.closeRetryInterval = PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.get();
     }
 
-    @NotNull
-    protected abstract String getName();
+    protected abstract @NotNull String getName();
 
-    @NotNull
-    protected abstract String getVersion();
+    protected abstract @NotNull String getVersion();
 
     public int getBucketCount() {
         return bucketCount;
     }
 
-    @NotNull
-    protected abstract StoreConfig getStoreConfig();
+    protected abstract @NotNull StoreConfig getStoreConfig();
 
-    @NotNull
-    protected abstract Logger getLogger();
+    protected abstract @NotNull Logger getLogger();
 
     protected void postConstruct() {
         if (enabled) {
@@ -104,7 +99,6 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
         final String name = getName();
         final String version = getVersion();
-        final int bucketCount = getBucketCount();
         final StoreConfig storeConfig = getStoreConfig();
         final Logger logger = getLogger();
 
@@ -145,7 +139,6 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
 
         final String name = getName();
         final String version = getVersion();
-        final int bucketCount = getBucketCount();
         final StoreConfig storeConfig = getStoreConfig();
         final Logger logger = getLogger();
 
@@ -223,8 +216,7 @@ public abstract class XodusLocalPersistence implements LocalPersistence, FilePer
         }
     }
 
-    @NotNull
-    public Bucket getBucket(final @NotNull String key) {
+    public @NotNull Bucket getBucket(final @NotNull String key) {
         return buckets[BucketUtils.getBucket(key, bucketCount)];
     }
 

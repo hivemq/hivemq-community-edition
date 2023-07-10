@@ -20,8 +20,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import java.io.Serializable;
 
 /**
- * @author Dominik Obermaier
- * @author Florian Limpöck
  * @since 1.4
  */
 public interface Message extends Serializable {

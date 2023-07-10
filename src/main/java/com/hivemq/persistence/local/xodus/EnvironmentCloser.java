@@ -26,37 +26,34 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A instance of this class tries to close a Xodus environment even if transactions are running at the moment.
+ * An instance of this class tries to close a Xodus environment even if transactions are running at the moment.
  * <p>
  * It retries until the store was closed successfully or the maximum tries were reached.
  * <p>
  * This class is <b>not</b> thread safe.
- *
- * @author Dominik Obermaier
  */
 public class EnvironmentCloser {
 
     private static final Logger log = LoggerFactory.getLogger(EnvironmentCloser.class);
 
-
-    private final String name;
-    private final Environment environment;
+    private final @NotNull String name;
+    private final @NotNull Environment environment;
     private final int maxTries;
     private final int retryInterval;
 
-    private int tryNo = 0;
+    private int tryNo;
 
     /**
      * @param name          the name of the environment. Used for logging.
      * @param environment   the environment to close
      * @param maxTries      the maximum tries to close the environment
      * @param retryInterval the retryInterval in milliseconds
-     * @throws NullPointerException     if the name or the environment is <code>null</code>
-     * @throws IllegalArgumentException if the maxTries or retryinterval is smaller than 1
+     * @throws NullPointerException     if the name or the environment is {@code null}
+     * @throws IllegalArgumentException if the maxTries or retry interval is smaller than 1
      */
     public EnvironmentCloser(
-            @NotNull final String name,
-            @NotNull final Environment environment,
+            final @NotNull String name,
+            final @NotNull Environment environment,
             final int maxTries,
             final int retryInterval) {
 
@@ -101,7 +98,7 @@ public class EnvironmentCloser {
      *
      * @param e the exception
      */
-    private boolean retry(final ExodusException e) {
+    private boolean retry(final @NotNull ExodusException e) {
         if ("Finish all transactions before closing database environment".equals(e.getMessage())) {
             //This exception means we still have pending transactions
             tryNo += 1;

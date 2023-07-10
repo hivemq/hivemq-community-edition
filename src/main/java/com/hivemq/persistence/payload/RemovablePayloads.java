@@ -15,15 +15,26 @@
  */
 package com.hivemq.persistence.payload;
 
-/**
- * @author Georg Held
- */
-public class PayloadPersistenceException extends RuntimeException {
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 
-    private final long payloadId;
+import java.util.Queue;
 
-    public PayloadPersistenceException(final long payloadId) {
-        super("Payload with id " + payloadId + " not found");
-        this.payloadId = payloadId;
+public class RemovablePayloads {
+
+    private final int bucketIndex;
+    private final @NotNull Queue<Long> queue;
+
+    public RemovablePayloads(
+            final int bucketIndex, final @NotNull Queue<Long> queue) {
+        this.bucketIndex = bucketIndex;
+        this.queue = queue;
+    }
+
+    public int getBucketIndex() {
+        return bucketIndex;
+    }
+
+    public @NotNull Queue<Long> getQueue() {
+        return queue;
     }
 }

@@ -21,7 +21,6 @@ import org.rocksdb.MutableColumnFamilyOptionsInterface;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.hivemq.persistence.local.xodus.EnvironmentUtil.GCType;
@@ -202,7 +201,7 @@ public class InternalConfigurations {
             new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
     /**
-     * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size
+     * The memory that is used for rocksdb memTable as a portion of the RAM for the retained message persistence. (size
      * = RAM/configValue)
      */
     public static final int RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION = 32;
@@ -229,12 +228,6 @@ public class InternalConfigurations {
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC = new AtomicInteger(250);
 
     /**
-     * The amount of time that a payload is preserved after the last reference was removed in case the same payload is
-     * published again.
-     */
-    public static final AtomicLong PAYLOAD_PERSISTENCE_CLEANUP_DELAY_MSEC = new AtomicLong(2000);
-
-    /**
      * The amount of threads in the cleanup job thread pool.
      */
     public static final AtomicInteger PAYLOAD_PERSISTENCE_CLEANUP_THREADS =
@@ -254,7 +247,7 @@ public class InternalConfigurations {
             new AtomicReference<>(PersistenceType.FILE_NATIVE);
 
     /**
-     * The memory that is used for rocksdb memtable as a portion of the RAM for the retained message persistence. (size
+     * The memory that is used for rocksdb memTable as a portion of the RAM for the retained message persistence. (size
      * = RAM/configValue)
      */
     public static final AtomicInteger PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION = new AtomicInteger(32);

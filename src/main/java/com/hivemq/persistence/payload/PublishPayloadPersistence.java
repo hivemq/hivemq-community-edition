@@ -15,15 +15,15 @@
  */
 package com.hivemq.persistence.payload;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.mqtt.message.publish.PUBLISH;
 
-/**
- * @author Lukas Brandl
- */
 public interface PublishPayloadPersistence {
+
+    static long createId() {
+        return PUBLISH.PUBLISH_COUNTER.getAndIncrement();
+    }
 
     /**
      * The payload persistence has to be initialized after the other persistence bootstraps are finished.
@@ -31,24 +31,13 @@ public interface PublishPayloadPersistence {
     void init();
 
     /**
-     * Add the payload to the persistence and set the initial reference count.
-     * If the payload is already existent in the persistence, the reference count is added to the current value.
+     * Add the payload to the persistence and counts the reference count up.
+     * If the payload is already existent in the persistence, the reference count is incremented.
      *
-     * @param payload        The payload that will be persisted.
-     * @param referenceCount The initial amount of references for the payload.
-     * @param payloadId      The publish ID is used a the payload ID
-     * @return true: payload may be removed from the publish, false: dont remove the payload
+     * @param payload The payload that will be persisted.
+     * @param id      The publish ID is used as the payload ID
      */
-    boolean add(@NotNull byte[] payload, long referenceCount, long payloadId);
-
-    /**
-     * Get the persisted payload for an id.
-     *
-     * @param id The id associated with the payload.
-     * @return The payload that is persisted.
-     * @throws PayloadPersistenceException if {@link PublishPayloadLocalPersistence} returns null reference for id.
-     */
-    @NotNull byte[] get(long id);
+    void add(byte @NotNull [] payload, long id);
 
     /**
      * Get the persisted payload for an id or null.
@@ -56,8 +45,7 @@ public interface PublishPayloadPersistence {
      * @param id The id associated with the payload.
      * @return The payload that is persisted for the given id or null if the reference was deleted.
      */
-    @Nullable("There is a race condition case with retained messages where retained messages are overwritten. " +
-            "In this case this method may return null") byte[] getPayloadOrNull(long id);
+    byte @Nullable [] get(long id);
 
     /**
      * Increments the current reference count for an id.
@@ -80,10 +68,4 @@ public interface PublishPayloadPersistence {
      * close the persistence with all buckets.
      */
     void closeDB();
-
-    /**
-     * @return all reference counts for all publish payloads in a readonly map.
-     */
-    @VisibleForTesting
-    @NotNull ImmutableMap<Long, Integer> getReferenceCountersAsMap();
 }

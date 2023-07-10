@@ -319,7 +319,6 @@ public class ClientQueuePersistenceImplTest {
                 .withPayload("message".getBytes())
                 .withTopic(topic)
                 .withHivemqId("hivemqId")
-                .withPersistence(payloadPersistence)
                 .build();
     }
 }

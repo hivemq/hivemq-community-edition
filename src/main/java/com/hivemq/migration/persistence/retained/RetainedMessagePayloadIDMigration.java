@@ -36,11 +36,7 @@ import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence;
 import com.hivemq.persistence.local.xodus.RetainedMessageXodusLocalPersistence;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.payload.PayloadPersistenceException;
-import com.hivemq.persistence.payload.PublishPayloadLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
-import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
-import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
+import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.LocalPersistenceFileUtil;
@@ -74,9 +70,6 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
     private final @NotNull Provider<RetainedMessageXodusLocalPersistence> localXodusPersistenceProvider;
     private final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> localRocksPersistenceProvider;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
-    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence>
-            publishPayloadRocksDBLocalPersistenceProvider;
-    private final @NotNull Provider<PublishPayloadXodusLocalPersistence> publishPayloadXodusLocalPersistenceProvider;
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
 
@@ -94,8 +87,6 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull Provider<RetainedMessageXodusLocalPersistence> localXodusPersistenceProvider,
             final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> localRocksPersistenceProvider,
-            final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> publishPayloadRocksDBLocalPersistenceProvider,
-            final @NotNull Provider<PublishPayloadXodusLocalPersistence> publishPayloadXodusLocalPersistenceProvider,
             final @NotNull SystemInformation systemInformation,
             final @NotNull PayloadExceptionLogging payloadExceptionLogging) {
         this.retainedMessageXodusLocalPersistence_4_4Provider = retainedMessageXodusLocalPersistence_4_4Provider;
@@ -105,8 +96,6 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
         this.localPersistenceFileUtil = localPersistenceFileUtil;
         this.localRocksPersistenceProvider = localRocksPersistenceProvider;
         this.localXodusPersistenceProvider = localXodusPersistenceProvider;
-        this.publishPayloadRocksDBLocalPersistenceProvider = publishPayloadRocksDBLocalPersistenceProvider;
-        this.publishPayloadXodusLocalPersistenceProvider = publishPayloadXodusLocalPersistenceProvider;
         this.systemInformation = systemInformation;
         this.bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         this.payloadExceptionLogging = payloadExceptionLogging;
@@ -156,20 +145,16 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
             previousRetainedType.set(PersistenceType.FILE);
         }
 
-        final PublishPayloadLocalPersistence publishPayloadLocalPersistence;
         final PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence;
         if (metaFile.getPublishPayloadPersistenceType() == PersistenceType.FILE_NATIVE) {
             legacyPayloadPersistence = publishPayloadRocksDBLocalPersistence_4_4Provider.get();
-            publishPayloadLocalPersistence = publishPayloadRocksDBLocalPersistenceProvider.get();
             previousPayloadType.set(PersistenceType.FILE_NATIVE);
         } else {
             legacyPayloadPersistence = publishPayloadXodusLocalPersistence_4_4Provider.get();
-            publishPayloadLocalPersistence = publishPayloadXodusLocalPersistenceProvider.get();
             previousPayloadType.set(PersistenceType.FILE);
         }
         final RetainedMessagePersistenceValueSwitchCallback iterationCallback =
                 new RetainedMessagePersistenceValueSwitchCallback(bucketCount,
-                        publishPayloadLocalPersistence,
                         retainedMessageLocalPersistence,
                         payloadExceptionLogging,
                         legacyPayloadPersistence);
@@ -180,7 +165,6 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
             retainedMessageXodusLocalPersistence_4_4Provider.get().iterate(iterationCallback);
             savePersistenceVersion(PersistenceType.FILE);
         }
-        retainedMessageLocalPersistence.bootstrapPayloads();
     }
 
     public void closeLegacy() {
@@ -200,19 +184,16 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
     static class RetainedMessagePersistenceValueSwitchCallback implements RetainedMessageItemCallback_4_4 {
 
         private final int bucketCount;
-        private final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence;
         private final @NotNull RetainedMessageLocalPersistence retainedMessageLocalPersistence;
         private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
         private final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence;
 
         RetainedMessagePersistenceValueSwitchCallback(
                 final int bucketCount,
-                final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence,
                 final @NotNull RetainedMessageLocalPersistence retainedMessageLocalPersistence,
                 final @NotNull PayloadExceptionLogging payloadExceptionLogging,
                 final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence) {
             this.bucketCount = bucketCount;
-            this.payloadLocalPersistence = payloadLocalPersistence;
             this.retainedMessageLocalPersistence = retainedMessageLocalPersistence;
             this.payloadExceptionLogging = payloadExceptionLogging;
             this.legacyPayloadPersistence = legacyPayloadPersistence;
@@ -227,19 +208,15 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
                     payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
                     return;
                 }
-                final long newPayloadId = PublishPayloadPersistenceImpl.createId();
-                payloadLocalPersistence.put(newPayloadId, bytes);
+                final long newPayloadId = PublishPayloadPersistence.createId();
                 message.setPublishId(newPayloadId);
+                message.setMessage(bytes);
                 retainedMessageLocalPersistence.put(message, topic, bucketIndex);
 
-            } catch (final PayloadPersistenceException payloadException) {
-                payloadExceptionLogging.addLogging(message.getPublishId(), true, topic);
             } catch (final Throwable throwable) {
                 log.warn("Could not migrate retained message for topic {}, original exception: ", topic, throwable);
                 Exceptions.rethrowError(throwable);
             }
         }
     }
-
-
 }

@@ -69,8 +69,6 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
  * An implementation of the ClientSessionLocalPersistence based on Xodus.
  * <p>
  * This implementation is thread safe and all methods block.
- *
- * @author Dominik Obermaier
  */
 @ThreadSafe
 @LazySingleton
@@ -95,6 +93,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final @NotNull EventLog eventLog,
             final @NotNull PersistenceStartup persistenceStartup,
             final @NotNull MetricsHolder metricsHolder) {
+
         super(environmentUtil,
                 localPersistenceFileUtil,
                 persistenceStartup,
@@ -137,6 +136,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final Bucket bucket = buckets[i];
             final SessionCounterDelta sessionCounterDelta = new SessionCounterDelta();
             bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
+
                 final Store store = bucket.getStore();
 
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
@@ -201,9 +201,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     @Override
     public @Nullable ClientSession getSession(
-            final @NotNull String clientId,
-            final int bucketIndex,
-            final boolean checkExpired) {
+            final @NotNull String clientId, final int bucketIndex, final boolean checkExpired) {
+
         checkNotNull(clientId, "Client id must not be null");
         checkBucketIndex(bucketIndex);
 
@@ -212,9 +211,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     @Override
     public @Nullable ClientSession getSession(
-            final @NotNull String clientId,
-            final boolean checkExpired,
-            final boolean includeWill) {
+            final @NotNull String clientId, final boolean checkExpired, final boolean includeWill) {
+
         checkNotNull(clientId, "Client id must not be null");
 
         return getSession(clientId, getBucket(clientId), checkExpired, includeWill);
@@ -225,6 +223,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final Bucket bucket,
             final boolean checkExpired,
             final boolean includeWill) {
+
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
 
             final ByteIterable byteIterable =
@@ -262,6 +261,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     public @Nullable Long getTimestamp(final @NotNull String clientId, final int bucketIndex) {
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
+
             final ByteIterable byteIterable =
                     bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
             if (byteIterable == null) {
@@ -329,6 +329,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final boolean sendWill,
             final int bucketIndex,
             final long sessionExpiryInterval) {
+
         checkNotNull(clientId, "Client id must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
 
@@ -404,9 +405,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     @Override
     public @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
-            final int bucketIndex,
-            final @Nullable String lastClientId,
-            final int maxResults) {
+            final int bucketIndex, final @Nullable String lastClientId, final int maxResults) {
         checkBucketIndex(bucketIndex);
 
         final Bucket bucket = buckets[bucketIndex];
@@ -503,9 +502,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     @Override
     public void setSessionExpiryInterval(
-            final @NotNull String clientId,
-            final long sessionExpiryInterval,
-            final int bucketIndex) {
+            final @NotNull String clientId, final long sessionExpiryInterval, final int bucketIndex) {
         checkNotNull(clientId, "Client Id must not be null");
 
         if (sessionExpiryInterval < 0) {
@@ -565,8 +562,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                         if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
                             sessionCounterDelta.decrement();
                         }
-                        commitActions.add(() ->
-                                eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId));
+                        commitActions.add(() -> eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000,
+                                clientId));
                         cursor.deleteCurrent();
                         expiredSessionsBuilder.add(clientId);
                     }
@@ -646,7 +643,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
         if (willPublish.getPayload() != null) {
             return;
         }
-        final byte[] payload = payloadPersistence.getPayloadOrNull(willPublish.getPublishId());
+        final byte[] payload = payloadPersistence.get(willPublish.getPublishId());
         if (payload == null) {
             clientSession.setWillPublish(null);
             log.warn("Will Payload for payloadId {} not found", willPublish.getPublishId());
@@ -656,13 +653,12 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     }
 
     private void handleWillPayloads(
-            final @Nullable ClientSessionWill previousWill,
-            final @Nullable ClientSessionWill currentWill) {
+            final @Nullable ClientSessionWill previousWill, final @Nullable ClientSessionWill currentWill) {
         if (previousWill != null && currentWill != null) {
             // When equal we have the payload already.
             if (previousWill.getPublishId() != currentWill.getPublishId()) {
                 payloadPersistence.decrementReferenceCounter(previousWill.getPublishId());
-                payloadPersistence.add(currentWill.getPayload(), 1, currentWill.getPublishId());
+                payloadPersistence.add(currentWill.getPayload(), currentWill.getPublishId());
             }
         } else {
             if (previousWill != null) {
@@ -680,7 +676,7 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
 
     private void addWillReference(final @NotNull ClientSessionWill will) {
         metricsHolder.getStoredWillMessagesCount().inc();
-        payloadPersistence.add(will.getPayload(), 1, will.getPublishId());
+        payloadPersistence.add(will.getPayload(), will.getPublishId());
     }
 
     private void removeWillReference(final @NotNull ClientSessionWill will) {

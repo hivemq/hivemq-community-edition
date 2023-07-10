@@ -27,7 +27,6 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.persistence.local.xodus.XodusUtils;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.Bytes;
 import jetbrains.exodus.ByteIterable;
 import org.slf4j.Logger;
@@ -38,10 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import static com.hivemq.persistence.clientqueue.ClientQueuePersistenceImpl.Key;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-/**
- * @author Lukas Brandl
- * @author Silvio Giebl
- */
 public class ClientQueuePersistenceSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientQueuePersistenceSerializer.class);
@@ -69,13 +64,6 @@ public class ClientQueuePersistenceSerializer {
     // ID's < Long.MAX_VALUE / 2 are reserved for messages that should be polled with priority
     public static final AtomicLong NEXT_PUBLISH_NUMBER = new AtomicLong(Long.MAX_VALUE / 2);
 
-    @NotNull
-    private final PublishPayloadPersistence payloadPersistence;
-
-    ClientQueuePersistenceSerializer(@NotNull final PublishPayloadPersistence payloadPersistence) {
-        this.payloadPersistence = payloadPersistence;
-    }
-
     // ********** Key **********
 
     /**
@@ -84,23 +72,23 @@ public class ClientQueuePersistenceSerializer {
      * @param key to be serialized
      * @return the serialized key for storing a new PUBLISH
      */
-    @NotNull ByteIterable serializeNewPublishKey(@NotNull final Key key) {
+    @NotNull ByteIterable serializeNewPublishKey(final @NotNull Key key) {
         return serializeKey(key, NEXT_PUBLISH_NUMBER.getAndIncrement());
     }
 
     /**
-     * Serializes the client id and adds a entry number to represent the message order.
+     * Serializes the client id and adds an entry number to represent the message order.
      *
      * @param key to be serialized
      * @return the serialized key for storing an unknown PUBREL
      */
-    @NotNull ByteIterable serializeUnknownPubRelKey(@NotNull final Key key) {
+    @NotNull ByteIterable serializeUnknownPubRelKey(final @NotNull Key key) {
         // Ensure unknown PUBRELs are always first
         final long messageNumber = NEXT_PUBLISH_NUMBER.getAndIncrement() - Long.MAX_VALUE / 2;
         return serializeKey(key, messageNumber);
     }
 
-    @NotNull ByteIterable serializeKey(@NotNull final Key key, final long number) {
+    @NotNull ByteIterable serializeKey(final @NotNull Key key, final long number) {
         final byte[] clientBytes = key.getQueueId().getBytes(UTF_8);
         final byte[] result = new byte[clientBytes.length + 1 + Long.BYTES];
 
@@ -117,7 +105,7 @@ public class ClientQueuePersistenceSerializer {
      * @param key to be serialized
      * @return the serialized client id for searching
      */
-    @NotNull ByteIterable serializeKey(@NotNull final Key key) {
+    @NotNull ByteIterable serializeKey(final @NotNull Key key) {
         final byte[] clientBytes = key.getQueueId().getBytes(UTF_8);
         final byte[] result = new byte[clientBytes.length + 1];
 
@@ -127,7 +115,7 @@ public class ClientQueuePersistenceSerializer {
         return XodusUtils.bytesToByteIterable(result);
     }
 
-    int compareClientId(@NotNull final ByteIterable serializedClientId, @NotNull final ByteIterable serializedKey) {
+    int compareClientId(final @NotNull ByteIterable serializedClientId, final @NotNull ByteIterable serializedKey) {
         final int clientLength = serializedClientId.getLength();
         if (serializedClientId.compareTo(serializedKey.subIterable(0, clientLength)) != 0) {
             return CLIENT_ID_NO_MATCH;
@@ -138,7 +126,7 @@ public class ClientQueuePersistenceSerializer {
         return CLIENT_ID_SAME_PREFIX;
     }
 
-    @NotNull Key deserializeKeyId(@NotNull final ByteIterable serializedKey) {
+    @NotNull Key deserializeKeyId(final @NotNull ByteIterable serializedKey) {
         final byte[] bytes = serializedKey.getBytesUnsafe();
         final int clientIdLength = serializedKey.getLength() - 1 - Long.BYTES;
         final String client = new String(bytes, 0, clientIdLength, UTF_8);
@@ -146,7 +134,7 @@ public class ClientQueuePersistenceSerializer {
         return new Key(client, shared);
     }
 
-    long deserializeIndex(@NotNull final ByteIterable serializedKey) {
+    long deserializeIndex(final @NotNull ByteIterable serializedKey) {
         final byte[] keyBytes = XodusUtils.byteIterableToBytes(serializedKey);
         final int indexIndex = serializedKey.getLength() - Long.BYTES;
         return Bytes.readLong(keyBytes, indexIndex);
@@ -154,28 +142,28 @@ public class ClientQueuePersistenceSerializer {
 
     // ********** Value **********
 
-    @NotNull ByteIterable serializePublishWithoutPacketId(@NotNull final PUBLISH publish, final boolean retained) {
+    @NotNull ByteIterable serializePublishWithoutPacketId(final @NotNull PUBLISH publish, final boolean retained) {
         return XodusUtils.bytesToByteIterable(createPublishBytes(publish, retained));
     }
 
-    @NotNull ByteIterable serializeAndSetPacketId(@NotNull final ByteIterable serializedValue, final int packetId) {
+    @NotNull ByteIterable serializeAndSetPacketId(final @NotNull ByteIterable serializedValue, final int packetId) {
         final byte[] bytes = XodusUtils.byteIterableToBytes(serializedValue);
         Bytes.copyUnsignedShortToByteArray(packetId, bytes, 0);
         return XodusUtils.bytesToByteIterable(bytes);
     }
 
-    @NotNull ByteIterable serializePubRel(@NotNull final PUBREL pubrel, final boolean retained) {
+    @NotNull ByteIterable serializePubRel(final @NotNull PUBREL pubrel, final boolean retained) {
         return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier(),
                 retained,
                 pubrel.getMessageExpiryInterval(),
                 pubrel.getPublishTimestamp()));
     }
 
-    int deserializePacketId(@NotNull final ByteIterable serializedValue) {
+    int deserializePacketId(final @NotNull ByteIterable serializedValue) {
         return Bytes.readUnsignedShort(serializedValue.getBytesUnsafe(), 0);
     }
 
-    @NotNull MessageWithID deserializeValue(@NotNull final ByteIterable serializedValue) {
+    @NotNull MessageWithID deserializeValue(final @NotNull ByteIterable serializedValue) {
         final byte[] bytes = serializedValue.getBytesUnsafe();
 
         if ((bytes[Short.BYTES] & PUBREL_BIT) == PUBREL_BIT) {
@@ -196,13 +184,12 @@ public class ClientQueuePersistenceSerializer {
         throw new IllegalArgumentException("Invalid client queue persistence value to deserialize");
     }
 
-    boolean deserializeRetained(@NotNull final ByteIterable serializedValue) {
+    boolean deserializeRetained(final @NotNull ByteIterable serializedValue) {
         final byte[] bytes = serializedValue.getBytesUnsafe();
         return (bytes[Short.BYTES] & RETAINED_MESSAGE_BIT) == RETAINED_MESSAGE_BIT;
     }
 
-    @NotNull
-    private byte[] createPubrelBytes(
+    private byte @NotNull [] createPubrelBytes(
             final int packetId,
             final boolean retained,
             @Nullable final Long expiry,
@@ -227,8 +214,7 @@ public class ClientQueuePersistenceSerializer {
         return result;
     }
 
-    @NotNull
-    private byte[] createPublishBytes(@NotNull final PUBLISH message, final boolean retained) {
+    private byte @NotNull [] createPublishBytes(final @NotNull PUBLISH message, final boolean retained) {
 
         final byte[] topic = message.getTopic().getBytes(UTF_8);
         final byte[] hivemqId = message.getHivemqId().getBytes(UTF_8);
@@ -344,8 +330,7 @@ public class ClientQueuePersistenceSerializer {
         return result;
     }
 
-    @NotNull
-    private PUBLISH deserializePublish(@NotNull final byte[] serialized) {
+    private @NotNull PUBLISH deserializePublish(final @NotNull byte[] serialized) {
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
 
         int cursor = 0;
@@ -437,6 +422,6 @@ public class ClientQueuePersistenceSerializer {
             builder.withUserProperties(PropertiesSerializationUtil.read(serialized, cursor));
         }
 
-        return builder.withPersistence(payloadPersistence).build();
+        return builder.build();
     }
 }
