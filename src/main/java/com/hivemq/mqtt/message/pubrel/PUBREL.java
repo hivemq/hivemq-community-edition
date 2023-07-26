@@ -98,25 +98,23 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
         this.publishTimestamp = publishTimestamp;
     }
 
-    public long getRemainingExpiry() {
-        if (isExpiryDisabled()) {
-            return PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
-        }
-        final long waitingSeconds = (System.currentTimeMillis() - publishTimestamp) / 1000;
-        return Math.max(0, messageExpiryInterval - waitingSeconds);
-    }
-
     public boolean isExpiryDisabled() {
         return (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED) ||
                 (messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET);
     }
 
-    public boolean hasExpired() {
+    public boolean hasExpired(final long maximalPubRelExpiry) {
         if ((publishTimestamp == null) || (messageExpiryInterval == null)) {
             return false;
         }
-
-        return getRemainingExpiry() == 0;
+        if (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED ||
+                messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
+            return false;
+        }
+        final long waitingSeconds = (System.currentTimeMillis() - publishTimestamp) / 1000;
+        final long actualMessageExpiry = Math.min(messageExpiryInterval, maximalPubRelExpiry);
+        final long remainingTime = actualMessageExpiry - waitingSeconds;
+        return remainingTime < 1;
     }
 
     public static @NotNull PUBREL from(final @NotNull PubrelPacketImpl packet) {

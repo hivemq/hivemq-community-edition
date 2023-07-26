@@ -795,6 +795,10 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     return packetId != ClientQueuePersistenceSerializer.NO_PACKET_ID;
                 });
                 if (!packetIdFound[0]) {
+                    if (InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
+                        pubrel.setMessageExpiryInterval(InternalConfigurations.MAXIMUM_INFLIGHT_PUBREL_EXPIRY);
+                        pubrel.setPublishTimestamp(System.currentTimeMillis());
+                    }
                     getOrPutQueueSize(key, bucketIndex).incrementAndGet();
                     final ByteIterable serializedPubRel = serializer.serializePubRel(pubrel, false);
                     bucket.getStore().put(txn, serializer.serializeUnknownPubRelKey(key), serializedPubRel);
@@ -1038,13 +1042,7 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     final MessageWithID message = serializer.deserializeValue(serializedValue);
                     if (message instanceof PUBREL) {
                         final PUBREL pubrel = (PUBREL) message;
-                        if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
-                            return true;
-                        }
-                        if (pubrel.getMessageExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
-                            return true;
-                        }
-                        if (!pubrel.hasExpired()) {
+                        if (!pubrel.hasExpired(InternalConfigurations.MAXIMUM_INFLIGHT_PUBREL_EXPIRY)) {
                             return true;
                         }
                         getOrPutQueueSize(key, bucketIndex).decrementAndGet();
