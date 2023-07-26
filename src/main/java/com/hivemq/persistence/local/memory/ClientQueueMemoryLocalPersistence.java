@@ -756,6 +756,9 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
             final MessageWithID messageWithID = qos12iterator.next();
             if (messageWithID instanceof PubrelWithRetained) {
                 final PubrelWithRetained pubrel = (PubrelWithRetained) messageWithID;
+                if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
+                    continue;
+                }
                 if (!pubrel.hasExpired(InternalConfigurations.MAXIMUM_INFLIGHT_PUBREL_EXPIRY)) {
                     continue;
                 }

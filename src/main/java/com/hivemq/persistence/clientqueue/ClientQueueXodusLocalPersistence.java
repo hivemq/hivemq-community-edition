@@ -1042,6 +1042,9 @@ public class ClientQueueXodusLocalPersistence extends XodusLocalPersistence impl
                     final MessageWithID message = serializer.deserializeValue(serializedValue);
                     if (message instanceof PUBREL) {
                         final PUBREL pubrel = (PUBREL) message;
+                        if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
+                            return true;
+                        }
                         if (!pubrel.hasExpired(InternalConfigurations.MAXIMUM_INFLIGHT_PUBREL_EXPIRY)) {
                             return true;
                         }
