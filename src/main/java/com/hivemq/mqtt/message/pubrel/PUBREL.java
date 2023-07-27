@@ -27,6 +27,8 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.util.ObjectMemoryEstimation;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @since 1.4
  */
@@ -111,7 +113,7 @@ public class PUBREL extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
                 messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             return false;
         }
-        final long waitingSeconds = (System.currentTimeMillis() - publishTimestamp) / 1000;
+        final long waitingSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - publishTimestamp);
         final long actualMessageExpiry = Math.min(messageExpiryInterval, maximalPubRelExpiry);
         final long remainingTime = actualMessageExpiry - waitingSeconds;
         return remainingTime < 1;
