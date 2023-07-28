@@ -445,6 +445,10 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
         if (packetIdFound) {
             messages.qos1Or2Messages.set(messageIndexInQueue, pubrelWithRetained);
         } else {
+            if (InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
+                pubrelWithRetained.setMessageExpiryInterval(InternalConfigurations.MAXIMUM_INFLIGHT_PUBREL_EXPIRY);
+                pubrelWithRetained.setPublishTimestamp(System.currentTimeMillis());
+            }
             // Ensure unknown PUBRELs are always first in queue
             messages.qos1Or2Messages.addFirst(pubrelWithRetained);
         }
@@ -755,10 +759,7 @@ public class ClientQueueMemoryLocalPersistence implements ClientQueueLocalPersis
                 if (!InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED) {
                     continue;
                 }
-                if (pubrel.getMessageExpiryInterval() == null || pubrel.getPublishTimestamp() == null) {
-                    continue;
-                }
-                if (!pubrel.hasExpired()) {
+                if (!pubrel.hasExpired(InternalConfigurations.MAXIMUM_INFLIGHT_PUBREL_EXPIRY)) {
                     continue;
                 }
                 if (pubrel.retained) {

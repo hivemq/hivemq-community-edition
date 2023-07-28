@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT;
 import static com.hivemq.persistence.local.xodus.EnvironmentUtil.GCType;
 
 /**
@@ -469,4 +470,5 @@ public class InternalConfigurations {
     public static boolean EXPIRE_INFLIGHT_MESSAGES_ENABLED = false;
     public static boolean EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
 
+    public static long MAXIMUM_INFLIGHT_PUBREL_EXPIRY = MAX_EXPIRY_INTERVAL_DEFAULT;
 }
