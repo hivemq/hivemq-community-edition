@@ -42,9 +42,9 @@ HiveMQ uses the following third party libraries:
  net.openhft:zero-allocation-hashing                                        | 0.16                                      | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.apache.commons:commons-compress                                        | 1.23.0                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.apache.commons:commons-lang3                                           | 3.12.0                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
- org.bouncycastle:bcpkix-jdk15on                                            | 1.70                                      | MIT           | https://www.bouncycastle.org/licence.html
- org.bouncycastle:bcprov-jdk15on                                            | 1.70                                      | MIT           | https://www.bouncycastle.org/licence.html
- org.bouncycastle:bcutil-jdk15on                                            | 1.70                                      | MIT           | https://www.bouncycastle.org/licence.html
+ org.bouncycastle:bcpkix-jdk18on                                            | 1.75                                      | MIT           | https://www.bouncycastle.org/licence.html
+ org.bouncycastle:bcprov-jdk18on                                            | 1.75                                      | MIT           | https://www.bouncycastle.org/licence.html
+ org.bouncycastle:bcutil-jdk18on                                            | 1.75                                      | MIT           | https://www.bouncycastle.org/licence.html
  org.eclipse.collections:eclipse-collections                                | 11.1.0                                    | BSD-3-Clause  | https://www.eclipse.org/org/documents/edl-v10.php
  org.eclipse.collections:eclipse-collections-api                            | 11.1.0                                    | BSD-3-Clause  | https://www.eclipse.org/org/documents/edl-v10.php
  org.jctools:jctools-core                                                   | 4.0.1                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
