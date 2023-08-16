@@ -7,7 +7,7 @@ COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
 
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-jre-jammy
 
 ARG HIVEMQ_VERSION=2019.1
 
@@ -28,7 +28,7 @@ ENV LANG=en_US.UTF-8
 
 # gosu setup
 RUN set -x \
-        && apt-get update && apt-get install -y --no-install-recommends curl gnupg-agent gnupg dirmngr \
+        && apt-get update && apt-get install -y --no-install-recommends gnupg-agent gnupg dirmngr \
         && curl -fSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu \
         && curl -fSL "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" -o /usr/local/bin/gosu.asc \
         && export GNUPGHOME="$(mktemp -d)" \
