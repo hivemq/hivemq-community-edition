@@ -17,6 +17,7 @@ package com.hivemq.codec.decoder;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
@@ -24,9 +25,14 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
+import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
+
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -174,4 +180,150 @@ public class MQTTMessageDecoderTest {
         assertFalse(channel.isOpen());
 
     }
+
+    @Test
+    public void test_connect_mqtt5_packet_size_too_large() {
+        final byte[] mqtt5_connect = {
+                // fixed header
+                //   type, reserved
+                0b0001_0000,
+                // remaining length
+                17,
+                // variable header
+                //   protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                //   protocol version
+                5,
+                //   connect flags
+                (byte) 0b0000_0000,
+                //   keep alive
+                0, 0,
+                //   properties
+                0,
+                // payload
+                //   client identifier
+                0, 4, 't', 'e', 's', 't'};
+
+        test_connect_packet_size_too_large(mqtt5_connect);
+    }
+
+    @Test
+    public void test_connect_mqtt3_1_1_packet_size_too_large() {
+        final byte[] mqtt3_1_1_connect = {
+                // fixed header
+                //   type, reserved
+                0b0001_0000,
+                // remaining length
+                17,
+                // variable header
+                //   protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                //   protocol version
+                5,
+                //   connect flags
+                (byte) 0b0000_0000,
+                //   keep alive
+                0, 0,
+                //   properties
+                0,
+                // payload
+                //   client identifier
+                0, 4, 't', 'e', 's', 't'};
+
+        test_connect_packet_size_too_large(mqtt3_1_1_connect);
+    }
+
+    @Test
+    public void test_connect_mqtt3_1_packet_size_too_large() {
+        final byte[] mqtt3_1_connect = {
+                // fixed header
+                //   type, reserved
+                0b0001_0000,
+                // remaining length
+                17,
+                // variable header
+                //   protocol name
+                0, 6, 'M', 'Q', 'T', 'T',
+                //   protocol version
+                3, 1,
+                //   connect flags
+                (byte) 0b0000_0000,
+                //   keep alive
+                0, 0,
+                //   properties
+                0,
+                // payload
+                //   client identifier
+                0, 4, 't', 'e', 's', 't'};
+
+
+        test_connect_packet_size_too_large(mqtt3_1_connect);
+    }
+
+
+    @Test
+    public void test_publish_mqtt5_packet_size_too_large() {
+        test_publish_packet_size_too_large(ProtocolVersion.MQTTv5);
+    }
+
+    @Test
+    public void test_publish_mqtt3_1_1_packet_size_too_large() {
+        test_publish_packet_size_too_large(ProtocolVersion.MQTTv3_1_1);
+    }
+
+    @Test
+    public void test_publish_mqtt3_1_packet_size_too_large() {
+        test_publish_packet_size_too_large(ProtocolVersion.MQTTv3_1);
+    }
+
+    private void test_publish_packet_size_too_large(final @NotNull ProtocolVersion protocolVersion) {
+        final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
+        fullConfig.mqttConfiguration().setMaxPacketSize(10);
+        channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
+        clientConnection = new DummyClientConnection(channel, null);
+        //setting version to fake "connected" state
+        clientConnection.setProtocolVersion(protocolVersion);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+
+        final byte[] publish = {
+                // fixed header
+                //   type, flags
+                0b0011_0000,
+                //   remaining length
+                22,
+                // variable header
+                //   topic name
+                0, 5, 't', 'o', 'p', 'i', 'c',
+                //   properties
+                14,
+                //     user properties
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'
+
+        };
+
+        final ByteBuf buf = Unpooled.buffer();
+        buf.writeBytes(publish);
+        channel.writeInbound(buf);
+
+        //verify that the client was disconnected
+        assertFalse(channel.isOpen());
+    }
+
+
+    private void test_connect_packet_size_too_large(byte[] connect) {
+        final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
+        fullConfig.mqttConfiguration().setMaxPacketSize(10);
+        channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
+        clientConnection = new DummyClientConnection(channel, null);
+        clientConnection.setProtocolVersion(null);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+
+        final ByteBuf buf = Unpooled.buffer();
+        buf.writeBytes(connect);
+        channel.writeInbound(buf);
+
+        //verify that the client was not disconnected
+        assertFalse(channel.isOpen());
+    }
+
 }

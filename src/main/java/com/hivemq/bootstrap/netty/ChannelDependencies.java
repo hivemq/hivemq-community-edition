@@ -33,6 +33,7 @@ import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
+import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.handler.connect.ConnectionLimiterHandler;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
@@ -66,6 +67,7 @@ public class ChannelDependencies {
     private final @NotNull PingRequestHandler pingRequestHandler;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull MqttConnectDecoder mqttConnectDecoder;
+    private final @NotNull MqttConnacker mqttConnacker;
     private final @NotNull MQTTMessageEncoder mqttMessageEncoder;
     private final @NotNull EventLog eventLog;
     private final @NotNull SslParameterHandler sslParameterHandler;
@@ -98,8 +100,7 @@ public class ChannelDependencies {
             final @NotNull ExceptionHandler exceptionHandler,
             final @NotNull PingRequestHandler pingRequestHandler,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
-            final @NotNull MqttConnectDecoder mqttConnectDecoder,
-            final @NotNull EventLog eventLog,
+            final @NotNull MqttConnectDecoder mqttConnectDecoder, final MqttConnacker mqttConnacker, final @NotNull EventLog eventLog,
             final @NotNull SslParameterHandler sslParameterHandler,
             final @NotNull MqttDecoders mqttDecoders,
             final @NotNull EncoderFactory encoderFactory,
@@ -129,6 +130,7 @@ public class ChannelDependencies {
         this.pingRequestHandler = pingRequestHandler;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
         this.mqttConnectDecoder = mqttConnectDecoder;
+        this.mqttConnacker = mqttConnacker;
         this.shutdownHooks = shutdownHooks;
         this.mqttMessageEncoder = new MQTTMessageEncoder(encoderFactory, globalMQTTMessageCounter);
         this.eventLog = eventLog;
@@ -214,6 +216,10 @@ public class ChannelDependencies {
     @NotNull
     public MqttConnectDecoder getMqttConnectDecoder() {
         return mqttConnectDecoder;
+    }
+
+    public MqttConnacker getMqttConnacker() {
+        return mqttConnacker;
     }
 
     @NotNull
