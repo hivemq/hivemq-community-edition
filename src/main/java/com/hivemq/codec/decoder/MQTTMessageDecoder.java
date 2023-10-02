@@ -144,6 +144,20 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             final int packetSize,
             final int remainingLength) {
 
+        if (isAlreadyConnected(clientConnectionContext)) {
+            mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (ID: {}, IP: {}) sent second CONNECT message. This is not allowed. Disconnecting client.",
+                    "Sent second CONNECT message",
+                    null,
+                    null,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES,
+                    false,
+                    true
+                    // as we don't know if a CONNACK was already sent we can only close the channel here
+            );
+            return null;
+        }
+
         final ByteBuf messageBuffer = readRestOfMessage(buf, remainingLength);
 
         final ProtocolVersion protocolVersion =
@@ -160,20 +174,6 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             } else {
                 disconnectPacketTooLarge(clientConnectionContext, true);
             }
-            return null;
-        }
-
-        if (isAlreadyConnected(clientConnectionContext)) {
-            mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
-                    "A client (ID: {}, IP: {}) sent second CONNECT message. This is not allowed. Disconnecting client.",
-                    "Sent second CONNECT message",
-                    null,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES,
-                    false,
-                    true
-                    // as we don't know if a CONNACK was already sent we can only close the channel here
-            );
             return null;
         }
 

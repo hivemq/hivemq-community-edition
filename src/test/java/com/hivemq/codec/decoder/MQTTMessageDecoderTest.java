@@ -25,14 +25,10 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
-
-import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
