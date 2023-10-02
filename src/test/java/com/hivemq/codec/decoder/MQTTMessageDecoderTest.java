@@ -256,7 +256,6 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-
         test_connect_packet_size_too_large(mqtt3_1_connect);
     }
 
