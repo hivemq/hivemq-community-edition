@@ -19,6 +19,7 @@ import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.netty.ChannelDependencies;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -122,7 +123,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         final int packetSize = fixedHeaderSize + remainingLength;
 
         final MessageType messageType = getMessageType(fixedHeader);
-        final Message message;
+        final @Nullable Message message;
         if (messageType == CONNECT) {
             message = handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength);
         } else {
@@ -160,7 +161,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final ByteBuf messageBuffer = readRestOfMessage(buf, remainingLength);
 
-        final ProtocolVersion protocolVersion =
+        final @Nullable ProtocolVersion protocolVersion =
                 connectDecoder.decodeProtocolVersion(clientConnectionContext, messageBuffer);
         if (protocolVersion == null) {
             return null;
