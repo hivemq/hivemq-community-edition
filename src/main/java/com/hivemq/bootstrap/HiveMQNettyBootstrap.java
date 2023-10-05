@@ -289,7 +289,7 @@ public class HiveMQNettyBootstrap {
         }
 
         @Override
-        public void operationComplete(final @NotNull ChannelFuture future) throws Exception {
+        public void operationComplete(final @NotNull ChannelFuture future) {
             final Listener listener = bindInformation.getListener();
             if (future.isSuccess()) {
                 final int bindPort = ((InetSocketAddress) future.channel().localAddress()).getPort();
