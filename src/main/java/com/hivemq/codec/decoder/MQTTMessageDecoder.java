@@ -124,6 +124,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final MessageType messageType = getMessageType(fixedHeader);
         final @Nullable Message message;
+
         if (messageType == CONNECT) {
             message = handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength);
         } else {

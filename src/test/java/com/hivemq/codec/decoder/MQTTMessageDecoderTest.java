@@ -179,7 +179,7 @@ public class MQTTMessageDecoderTest {
 
     @Test
     public void test_connect_mqtt5_packet_size_too_large() {
-        final byte[] mqtt5_connect = {
+        final byte[] mqtt5Connect = {
                 // fixed header
                 //   type, reserved
                 0b0001_0000,
@@ -200,12 +200,12 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-        test_connect_packet_size_too_large(mqtt5_connect);
+        test_connect_packet_size_too_large(mqtt5Connect);
     }
 
     @Test
     public void test_connect_mqtt3_1_1_packet_size_too_large() {
-        final byte[] mqtt3_1_1_connect = {
+        final byte[] mqtt311Connect = {
                 // fixed header
                 //   type, reserved
                 0b0001_0000,
@@ -226,12 +226,12 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-        test_connect_packet_size_too_large(mqtt3_1_1_connect);
+        test_connect_packet_size_too_large(mqtt311Connect);
     }
 
     @Test
     public void test_connect_mqtt3_1_packet_size_too_large() {
-        final byte[] mqtt3_1_connect = {
+        final byte[] mqtt31Connect = {
                 // fixed header
                 //   type, reserved
                 0b0001_0000,
@@ -252,7 +252,7 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-        test_connect_packet_size_too_large(mqtt3_1_connect);
+        test_connect_packet_size_too_large(mqtt31Connect);
     }
 
 
