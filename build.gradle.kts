@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
+// TODO: remove suppression after upgrading Gradle to 8.x
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
