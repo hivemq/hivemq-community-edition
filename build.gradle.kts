@@ -1,25 +1,26 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
     `java-library`
     `maven-publish`
     signing
-    id("io.github.gradle-nexus.publish-plugin")
-    id("com.github.johnrengelman.shadow")
-    id("io.github.sgtsilvio.gradle.defaults")
-    id("io.github.sgtsilvio.gradle.metadata")
-    id("io.github.sgtsilvio.gradle.javadoc-links")
-    id("com.github.breadmoirai.github-release")
-    id("com.github.hierynomus.license")
-    id("org.owasp.dependencycheck")
-    id("com.github.ben-manes.versions")
+    alias(libs.plugins.nexusPublish)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.defaults)
+    alias(libs.plugins.metadata)
+    alias(libs.plugins.javadocLinks)
+    alias(libs.plugins.githubRelease)
+    alias(libs.plugins.license)
+    alias(libs.plugins.dependencyCheck)
+    alias(libs.plugins.versions)
 
     /* Code Quality Plugins */
     id("jacoco")
     id("pmd")
-    id("com.github.spotbugs")
-    id("de.thetaphi.forbiddenapis")
+    alias(libs.plugins.spotbugs)
+    alias(libs.plugins.forbiddenApis)
 
     id("com.hivemq.third-party-license-generator")
 }
@@ -88,88 +89,88 @@ repositories {
 }
 
 dependencies {
-    api("com.hivemq:hivemq-extension-sdk:${property("hivemq-extension-sdk.version")}")
+    api(libs.hivemq.extensionSdk)
 
     // netty
-    implementation("io.netty:netty-buffer:${property("netty.version")}")
-    implementation("io.netty:netty-codec:${property("netty.version")}")
-    implementation("io.netty:netty-codec-http:${property("netty.version")}")
-    implementation("io.netty:netty-common:${property("netty.version")}")
-    implementation("io.netty:netty-handler:${property("netty.version")}")
-    implementation("io.netty:netty-transport:${property("netty.version")}")
+    implementation(libs.netty.buffer)
+    implementation(libs.netty.codec)
+    implementation(libs.netty.codec.http)
+    implementation(libs.netty.common)
+    implementation(libs.netty.handler)
+    implementation(libs.netty.transport)
 
     // logging
-    implementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
-    implementation("org.slf4j:jul-to-slf4j:${property("slf4j.version")}")
-    implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
+    implementation(libs.slf4j.api)
+    implementation(libs.julToSlf4j)
+    implementation(libs.logback.classic)
 
     // security
-    implementation("org.bouncycastle:bcprov-jdk18on:${property("bouncycastle.version")}")
-    implementation("org.bouncycastle:bcpkix-jdk18on:${property("bouncycastle.version")}")
+    implementation(libs.bouncycastle.prov)
+    implementation(libs.bouncycastle.pkix)
 
     // persistence
-    implementation("org.rocksdb:rocksdbjni:${property("rocksdb.version")}")
-    implementation("org.jetbrains.xodus:xodus-openAPI:${property("xodus.version")}") {
+    implementation(libs.rocksdb)
+    implementation(libs.xodus.openApi) {
         exclude("org.jetbrains", "annotations")
     }
-    implementation("org.jetbrains.xodus:xodus-environment:${property("xodus.version")}") {
+    implementation(libs.xodus.environment) {
         exclude("org.jetbrains", "annotations")
     }
     // override transitive dependencies of xodus that have security vulnerabilities
     constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:${property("kotlin.version")}")
-        implementation("org.apache.commons:commons-compress:${property("commons-compress.version")}")
+        implementation(libs.kotlin.stdlib)
+        implementation(libs.apache.commonsCompress)
     }
 
     // config
-    implementation("jakarta.xml.bind:jakarta.xml.bind-api:${property("jakarta-xml-bind.version")}")
-    runtimeOnly("com.sun.xml.bind:jaxb-impl:${property("jaxb.version")}")
+    implementation(libs.jaxb.api)
+    runtimeOnly(libs.jaxb.impl)
 
     // metrics
-    api("io.dropwizard.metrics:metrics-core:${property("metrics.version")}")
-    implementation("io.dropwizard.metrics:metrics-jmx:${property("metrics.version")}")
-    runtimeOnly("io.dropwizard.metrics:metrics-logback:${property("metrics.version")}")
-    implementation("com.github.oshi:oshi-core:${property("oshi.version")}")
+    api(libs.dropwizard.metrics)
+    implementation(libs.dropwizard.metrics.jmx)
+    runtimeOnly(libs.dropwizard.metrics.logback)
+    implementation(libs.oshi)
     // net.java.dev.jna:jna (transitive dependency of com.github.oshi:oshi-core) is used in imports
 
     // dependency injection
-    implementation("com.google.inject:guice:${property("guice.version")}") {
+    implementation(libs.guice) {
         exclude("com.google.guava", "guava")
     }
-    implementation("javax.annotation:javax.annotation-api:${property("javax.annotation.version")}")
+    implementation(libs.javax.annotation.api)
     // javax.inject:javax.inject (transitive dependency of com.google.inject:guice) is used in imports
 
     // common
-    implementation("commons-io:commons-io:${property("commons-io.version")}")
-    implementation("org.apache.commons:commons-lang3:${property("commons-lang.version")}")
-    implementation("com.google.guava:guava:${property("guava.version")}") {
+    implementation(libs.apache.commonsIO)
+    implementation(libs.apache.commonsLang)
+    implementation(libs.guava) {
         exclude("org.checkerframework", "checker-qual")
         exclude("com.google.errorprone", "error_prone_annotations")
     }
     // com.google.code.findbugs:jsr305 (transitive dependency of com.google.guava:guava) is used in imports
-    implementation("net.openhft:zero-allocation-hashing:${property("zero-allocation-hashing.version")}")
-    implementation("com.fasterxml.jackson.core:jackson-databind:${property("jackson.version")}")
-    implementation("org.jctools:jctools-core:${property("jctools.version")}")
+    implementation(libs.zeroAllocationHashing)
+    implementation(libs.jackson.databind)
+    implementation(libs.jctools)
 
     /* primitive data structures */
-    implementation("org.eclipse.collections:eclipse-collections:${property("eclipse.collections.version")}")
+    implementation(libs.eclipse.collections)
 }
 
 
 /* ******************** test ******************** */
 
 dependencies {
-    testImplementation("junit:junit:${property("junit.version")}")
-    testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
-    testImplementation("nl.jqno.equalsverifier:equalsverifier:${property("equalsverifier.version")}")
-    testImplementation("net.jodah:concurrentunit:${property("concurrentunit.version")}")
-    testImplementation("org.jboss.shrinkwrap:shrinkwrap-api:${property("shrinkwrap.version")}")
-    testRuntimeOnly("org.jboss.shrinkwrap:shrinkwrap-impl-base:${property("shrinkwrap.version")}")
-    testImplementation("net.bytebuddy:byte-buddy:${property("bytebuddy.version")}")
-    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:${property("wiremock.version")}")
-    testImplementation("org.javassist:javassist:${property("javassist.version")}")
-    testImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
-    testImplementation("com.github.stefanbirkner:system-rules:${property("system-rules.version")}") {
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito)
+    testImplementation(libs.equalsVerifier)
+    testImplementation(libs.concurrentUnit)
+    testImplementation(libs.shrinkwrap.api)
+    testRuntimeOnly(libs.shrinkwrap.impl)
+    testImplementation(libs.byteBuddy)
+    testImplementation(libs.wiremock.jre8.standalone)
+    testImplementation(libs.javassist)
+    testImplementation(libs.awaitility)
+    testImplementation(libs.stefanBirkner.systemRules) {
         exclude("junit", "junit-dep")
     }
 }
@@ -281,7 +282,7 @@ spotbugs {
 }
 
 dependencies {
-    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.8.0")
+    spotbugsPlugins(libs.findsecbugs.plugin)
 }
 
 dependencyCheck {
