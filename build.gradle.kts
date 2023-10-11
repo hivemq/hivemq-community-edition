@@ -18,8 +18,8 @@ plugins {
     alias(libs.plugins.versions)
 
     /* Code Quality Plugins */
-    id("jacoco")
-    id("pmd")
+    jacoco
+    pmd
     alias(libs.plugins.spotbugs)
     alias(libs.plugins.forbiddenApis)
 
