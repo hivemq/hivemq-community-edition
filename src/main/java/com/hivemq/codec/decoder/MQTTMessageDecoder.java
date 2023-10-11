@@ -37,6 +37,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
 
 import static com.hivemq.mqtt.message.MessageType.CONNECT;
+import static com.hivemq.mqtt.message.MessageType.PUBLISH;
 
 /**
  * @author Dominik Obermaier
@@ -123,30 +124,48 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         final int packetSize = fixedHeaderSize + remainingLength;
 
         final MessageType messageType = getMessageType(fixedHeader);
-        final @Nullable Message message;
-
-        if (messageType == CONNECT) {
-            message = handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength);
-        } else {
-            message =
-                    handledMessage(buf, clientConnectionContext, fixedHeader, messageType, packetSize, remainingLength);
-        }
+        final Message message = messageType == CONNECT ?
+                handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength) :
+                handleMessage(buf, clientConnectionContext, fixedHeader, messageType, packetSize, remainingLength);
         if (message == null) {
             buf.clear();
             return;
         }
-        globalMQTTMessageCounter.countInbound(message);
         out.add(message);
     }
 
-    private Message handleConnect(
+    private @Nullable Message handleConnect(
             final @NotNull ByteBuf buf,
             final @NotNull ClientConnectionContext clientConnectionContext,
             final byte fixedHeader,
             final int packetSize,
             final int remainingLength) {
 
-        if (isAlreadyConnected(clientConnectionContext)) {
+        //this is the message size HiveMQ allows for incoming messages
+        if (packetSize > mqttConfig.maxPacketSize()) {
+            //connack with PACKET_TOO_LARGE for Mqtt5
+            final ProtocolVersion protocolVersion = connectDecoder.decodeProtocolVersion(clientConnectionContext, buf);
+            if (protocolVersion == ProtocolVersion.MQTTv5) {
+                mqttConnacker.connackError(clientConnectionContext.getChannel(),
+                        "A client (IP: {}) connect packet exceeded the maximum permissible size.",
+                        "Sent CONNECT exceeded the maximum permissible size",
+                        Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
+                        ReasonStrings.CONNACK_PACKET_TOO_LARGE);
+            } else { //force channel close for Mqtt3.1 and Mqtt3.1.1
+                mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
+                        "A client (IP: {}) sent a message, that was bigger than the maximum message size. Disconnecting client.",
+                        "Sent a message that was bigger than the maximum size",
+                        Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
+                        ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_MESSAGE,
+                        Mqtt5UserProperties.NO_USER_PROPERTIES,
+                        false,
+                        true);
+            }
+            return null;
+        }
+        
+        // Check if the client is already connected
+        if (clientConnectionContext.getProtocolVersion() != null) {
             mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent second CONNECT message. This is not allowed. Disconnecting client.",
                     "Sent second CONNECT message",
@@ -160,54 +179,15 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return null;
         }
 
-        final ByteBuf messageBuffer = readRestOfMessage(buf, remainingLength);
+        //We're slicing the buffer to the exact MQTT message size so we don't have to pass the actual length around
+        final ByteBuf messageBuffer = buf.readSlice(remainingLength);
+        //We mark the end of the message
+        buf.markReaderIndex();
 
-        final @Nullable ProtocolVersion protocolVersion =
-                connectDecoder.decodeProtocolVersion(clientConnectionContext, messageBuffer);
-        if (protocolVersion == null) {
-            return null;
-        }
-
-        //this is the message size HiveMQ allows for incoming messages
-        if (packetSize > mqttConfig.maxPacketSize()) {
-            //force channel close for Mqtt3.1, Mqtt3.1.1 and null (before connect)
-            if (protocolVersion == ProtocolVersion.MQTTv5) {
-                connackPacketTooLarge(clientConnectionContext);
-            } else {
-                disconnectPacketTooLarge(clientConnectionContext, true);
-            }
-            return null;
-        }
-
-        globalMQTTMessageCounter.countInboundTraffic(packetSize);
         return connectDecoder.decode(clientConnectionContext, messageBuffer, fixedHeader);
     }
 
-    private void disconnectPacketTooLarge(ClientConnectionContext clientConnectionContext, boolean forceClose) {
-        mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
-                "A client (IP: {}) sent a message, that was bigger than the maximum message size. Disconnecting client.",
-                "Sent a message that was bigger than the maximum size",
-                Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
-                ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_MESSAGE,
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                false,
-                forceClose);
-    }
-
-
-    private void connackPacketTooLarge(final @NotNull ClientConnectionContext clientConnectionContext) {
-        mqttConnacker.connackError(clientConnectionContext.getChannel(),
-                "A client (IP: {}) connect packet exceeded the maximum permissible size.",
-                "Sent CONNECT exceeded the maximum permissible size",
-                Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
-                ReasonStrings.CONNACK_PACKET_TOO_LARGE);
-    }
-
-    private static boolean isAlreadyConnected(ClientConnectionContext clientConnectionContext) {
-        return clientConnectionContext.getProtocolVersion() != null;
-    }
-
-    private Message handledMessage(
+    private @Nullable Message handleMessage(
             final @NotNull ByteBuf buf,
             final @NotNull ClientConnectionContext clientConnectionContext,
             final byte fixedHeader,
@@ -222,20 +202,29 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
             //force channel close for Mqtt3.1, Mqtt3.1.1 and null (before connect)
             final boolean forceClose = protocolVersion != ProtocolVersion.MQTTv5;
-            disconnectPacketTooLarge(clientConnectionContext, forceClose);
+            mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a message, that was bigger than the maximum message size. Disconnecting client.",
+                    "Sent a message that was bigger than the maximum size",
+                    Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
+                    ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_MESSAGE,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES,
+                    false,
+                    forceClose);
             return null;
         }
 
-        if (isNotConnected(protocolVersion)) {
+        // Check if client is connected
+        if (protocolVersion == null) {
             mqttServerDisconnector.logAndClose(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent other message before CONNECT. Disconnecting client.",
                     "Sent other message before CONNECT");
             return null;
         }
 
-        globalMQTTMessageCounter.countInboundTraffic(packetSize);
-
-        final ByteBuf messageBuffer = readRestOfMessage(buf, remainingLength);
+        //We're slicing the buffer to the exact MQTT message size so we don't have to pass the actual length around
+        final ByteBuf messageBuffer = buf.readSlice(remainingLength);
+        //We mark the end of the message
+        buf.markReaderIndex();
 
         final MqttDecoder<?> decoder = mqttDecoders.decoder(messageType, protocolVersion);
         if (decoder != null) {
@@ -269,7 +258,6 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                             "Sent a UNSUBACK message",
                             Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
                             ReasonStrings.DISCONNECT_UNSUBACK_RECEIVED);
-                    ;
                     return null;
                 case PINGRESP:
                     mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
@@ -294,18 +282,6 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                     return null;
             }
         }
-    }
-
-    private static boolean isNotConnected(ProtocolVersion protocolVersion) {
-        return protocolVersion == null;
-    }
-
-    private static ByteBuf readRestOfMessage(ByteBuf buf, int remainingLength) {
-        //We're slicing the buffer to the exact MQTT message size so we don't have to pass the actual length around
-        final ByteBuf messageBuffer = buf.readSlice(remainingLength);
-        //We mark the end of the message
-        buf.markReaderIndex();
-        return messageBuffer;
     }
 
     private static int getFixedHeaderSize(final int remainingLength) {

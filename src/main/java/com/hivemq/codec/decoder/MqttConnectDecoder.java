@@ -60,8 +60,7 @@ public class MqttConnectDecoder {
 
 
     public @Nullable ProtocolVersion decodeProtocolVersion(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull ByteBuf buf) {
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
         /*
          * It is sufficient to look at the second byte of the variable header (Length LSB) This byte
          * indicates how long the following protocol name is going to be. In case of the
@@ -77,7 +76,7 @@ public class MqttConnectDecoder {
         // interested in the Length LSB byte
         if (buf.readableBytes() < 2) {
             mqttConnacker.connackError(clientConnectionContext.getChannel(),
-                    "A client (IP: {}) connected with a packet without protocol version.",
+                    "A client (ID: {}, IP: {}) connected with a packet without protocol version.",
                     "Sent CONNECT without protocol version",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
                     ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
@@ -114,6 +113,7 @@ public class MqttConnectDecoder {
 
         clientConnectionContext.setProtocolVersion(protocolVersion);
         clientConnectionContext.setConnectReceivedTimestamp(System.currentTimeMillis());
+
         return protocolVersion;
     }
 
@@ -122,7 +122,11 @@ public class MqttConnectDecoder {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte fixedHeader) {
-        final ProtocolVersion protocolVersion = clientConnectionContext.getProtocolVersion();
+
+        final ProtocolVersion protocolVersion = decodeProtocolVersion(clientConnectionContext, buf);
+        if (protocolVersion == null) {
+            return null;
+        }
         if (protocolVersion == ProtocolVersion.MQTTv5) {
             return mqtt5ConnectDecoder.decode(clientConnectionContext, buf, fixedHeader);
         } else if (protocolVersion == ProtocolVersion.MQTTv3_1_1) {
