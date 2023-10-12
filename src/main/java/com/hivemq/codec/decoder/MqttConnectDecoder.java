@@ -76,7 +76,7 @@ public class MqttConnectDecoder {
         // interested in the Length LSB byte
         if (buf.readableBytes() < 2) {
             mqttConnacker.connackError(clientConnectionContext.getChannel(),
-                    "A client (P: {}) connected with a packet without protocol version.",
+                    "A client (IP: {}) connected with a packet without protocol version.",
                     "Sent CONNECT without protocol version",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
                     ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
