@@ -132,7 +132,6 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             message =
                     handleMessage(buf, clientConnectionContext, fixedHeader, messageType, packetSize, remainingLength);
         }
-
         if (message == null) {
             buf.clear();
             return;
