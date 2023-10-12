@@ -126,7 +126,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
 
         final MessageType messageType = getMessageType(fixedHeader);
         final Message message;
-        if (Objects.requireNonNull(messageType) == CONNECT) {
+        if (messageType == CONNECT) {
             message = handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength);
         } else {
             message =
