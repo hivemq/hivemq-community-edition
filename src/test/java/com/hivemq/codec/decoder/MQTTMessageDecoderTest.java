@@ -304,7 +304,7 @@ public class MQTTMessageDecoderTest {
     }
 
 
-    private void test_connect_packet_size_too_large(byte[] connect) {
+    private void testConnectPacketSizeTooLarge(byte[] connect) {
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.mqttConfiguration().setMaxPacketSize(10);
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
