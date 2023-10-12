@@ -163,7 +163,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             }
             return null;
         }
-        
+
         // Check if the client is already connected
         if (clientConnectionContext.getProtocolVersion() != null) {
             mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),

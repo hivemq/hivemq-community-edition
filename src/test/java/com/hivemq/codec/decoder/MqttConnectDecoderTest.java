@@ -40,6 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class MqttConnectDecoderTest {
+
     private static final byte FIXED_HEADER = 0b0001_0000;
     private @NotNull MqttConnacker mqttConnacker;
     private @NotNull Channel channel;
