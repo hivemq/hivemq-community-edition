@@ -117,7 +117,6 @@ public class MqttConnectDecoder {
         return protocolVersion;
     }
 
-
     public @Nullable CONNECT decode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
