@@ -35,6 +35,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.hivemq.mqtt.message.MessageType.CONNECT;
 import static com.hivemq.mqtt.message.MessageType.PUBLISH;
@@ -124,9 +125,14 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         final int packetSize = fixedHeaderSize + remainingLength;
 
         final MessageType messageType = getMessageType(fixedHeader);
-        final Message message = messageType == CONNECT ?
-                handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength) :
-                handleMessage(buf, clientConnectionContext, fixedHeader, messageType, packetSize, remainingLength);
+        final Message message;
+        if (Objects.requireNonNull(messageType) == CONNECT) {
+            message = handleConnect(buf, clientConnectionContext, fixedHeader, packetSize, remainingLength);
+        } else {
+            message =
+                    handleMessage(buf, clientConnectionContext, fixedHeader, messageType, packetSize, remainingLength);
+        }
+
         if (message == null) {
             buf.clear();
             return;
