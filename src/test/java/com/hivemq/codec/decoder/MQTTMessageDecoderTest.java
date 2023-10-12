@@ -255,7 +255,6 @@ public class MQTTMessageDecoderTest {
         test_connect_packet_size_too_large(mqtt31Connect);
     }
 
-
     @Test
     public void test_publish_mqtt5_packet_size_too_large() {
         test_publish_packet_size_too_large(ProtocolVersion.MQTTv5);
