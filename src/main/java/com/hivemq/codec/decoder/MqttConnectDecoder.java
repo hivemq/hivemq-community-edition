@@ -136,7 +136,6 @@ public class MqttConnectDecoder {
         }
     }
 
-
     private void connackInvalidProtocolVersion(final @NotNull ClientConnectionContext clientConnectionContext) {
         mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (IP: {}) connected with an invalid protocol version.",
