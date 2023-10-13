@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class FreePacketIdRangesTest {
@@ -84,23 +85,27 @@ public class FreePacketIdRangesTest {
     }
 
     @Test
-    public void takeIfAvailable_whenIdIsFree_thenIdIsReturned() throws NoMessageIdAvailableException {
+    public void takeIfAvailable_whenIdIsFree_thenIdWasTaken() throws NoMessageIdAvailableException {
 
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
-
-        final int id = messageIDPool.takeIfAvailable(42);
-        assertEquals(42, id);
+        messageIDPool.takeIfAvailable(42);
+        for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID - 1; i++) {
+            final int id = messageIDPool.takeNextId();
+            assertNotEquals(42, id);//since was taken directly
+        }
     }
 
     @Test
-    public void takeIfAvailable_whenIdIsNotFreeAndMoreIdsAreAvailable_thenNextFreeIdIsReturned() throws NoMessageIdAvailableException {
+    public void takeIfAvailable_whenIdIsTakenTwice_thenItRemainsTaken() throws NoMessageIdAvailableException {
 
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
 
-        final int id = messageIDPool.takeIfAvailable(42);
-        final int idNewAttempt = messageIDPool.takeIfAvailable(42);
-        assertEquals(42, id);
-        assertEquals(1, idNewAttempt);
+        messageIDPool.takeIfAvailable(42);
+        messageIDPool.takeIfAvailable(42);
+        for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID - 1; i++) {
+            final int id = messageIDPool.takeNextId();
+            assertNotEquals(42, id);//since was taken directly
+        }
     }
 
     @Test(expected = IllegalArgumentException.class)

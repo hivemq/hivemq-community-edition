@@ -222,22 +222,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                     final MessageWithID message = messages.get(i);
                     final FreePacketIdRanges messageIDPool = clientConnection.getMessageIDPool();
-                    try {
-                        final int packetId = messageIDPool.takeIfAvailable(message.getPacketIdentifier());
-                        if (message.getPacketIdentifier() != packetId) {
-                            // This should never happen, but we need to make sure the packet ID is returned in case this is the result of a retry.
-                            messageIDPool.returnId(packetId);
-                        }
-                    } catch (final NoMessageIdAvailableException e) {
-                        // This should never happen if the limit for the poll message limit is set correctly
-                        log.error("No message id available for client {}.", client);
-                        if (message instanceof PUBLISH) {
-                            messageDroppedService.queueFull(client,
-                                    ((PUBLISH) message).getTopic(),
-                                    ((PUBLISH) message).getQoS().getQosNumber());
-                        }
-                        return;
-                    }
+                    messageIDPool.takeIfAvailable(message.getPacketIdentifier());
 
                     if (message instanceof PUBLISH) {
                         final PUBLISH publish = (PUBLISH) message;
@@ -341,8 +326,6 @@ public class PublishPollServiceImpl implements PublishPollService {
                 // concurrently while we're still sending others here.
                 inFlightMessageCount.addAndGet(publishes.size());
                 for (final PUBLISH publish : publishes) {
-                    final PUBLISH publishToSend;
-
                     if (publish.getOnwardQoS().getQosNumber() > 0 && qos == 0) {
                         // In case the messages gets downgraded to qos 0, it can be removed.
                         removeMessageFromSharedQueue(sharedSubscription, publish.getUniqueId());
@@ -370,7 +353,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         return;
                     }
 
-                    publishToSend = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
+                    final PUBLISH publishToSend = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
                             .withPacketIdentifier(packetId)
                             .withQoS(minQos)
                             .withOnwardQos(minQos)

@@ -81,7 +81,7 @@ public class FreePacketIdRanges {
      * @return the requested {@param id} if it is available in one of the {@link Range} intervals or otherwise some
      *         other free ID.
      */
-    public int takeIfAvailable(final int id) throws NoMessageIdAvailableException {
+    public void takeIfAvailable(final int id) {
         Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
                 "Attempting to take an ID %s that is outside the valid packet IDs range.",
                 id);
@@ -90,7 +90,11 @@ public class FreePacketIdRanges {
         Range prev = null;
 
         while (current != null) {
-            if (id >= current.start && id < current.end) {
+            if (id < current.start) {
+                return; // since the ranges are traversed in increasing order of IDs, the given id will not be found
+            }
+
+            if (id < current.end) { // the id is int the current range of free ids
 
                 final int prevCurStart = current.start;
                 current.start = id + 1;
@@ -104,14 +108,13 @@ public class FreePacketIdRanges {
                     }
                 }
 
-                return id;
+                return; // id found and taken
             }
 
+            // consider next range
             prev = current;
             current = current.next;
         }
-
-        return takeNextId();
     }
 
     /**
@@ -152,8 +155,8 @@ public class FreePacketIdRanges {
         }
 
         final Range next = range.next;
+        Preconditions.checkState(next != null, "The id is greater than maxId. This must not happen and is a bug.");
         if (id == range.end) {
-            Preconditions.checkState(next != null, "The id is greater than maxId. This must not happen and is a bug.");
             range.end++;
             if (range.end == next.start) {
                 range.end = next.end;
@@ -161,7 +164,6 @@ public class FreePacketIdRanges {
             }
             return null;
         }
-        Preconditions.checkState(next != null, "The id is greater than maxId. This must not happen and is a bug.");
         return next;
     }
 

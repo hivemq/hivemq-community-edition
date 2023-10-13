@@ -193,9 +193,7 @@ public class PublishPollServiceImplTest {
     }
 
     @Test
-    public void test_inflight_messages() throws NoMessageIdAvailableException {
-        when(messageIDPool.takeIfAvailable(1)).thenReturn(1);
-        when(messageIDPool.takeIfAvailable(2)).thenReturn(2);
+    public void test_inflight_messages() {
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(
                 ImmutableList.of(createPublish(), new PUBREL(2))));
 
@@ -211,8 +209,7 @@ public class PublishPollServiceImplTest {
     }
 
     @Test
-    public void test_inflight_messages_packet_id_not_available() throws NoMessageIdAvailableException {
-        when(messageIDPool.takeIfAvailable(1)).thenReturn(2);
+    public void test_inflight_messages_packet_id_not_available() {
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(
                 ImmutableList.of(createPublish())));
 
@@ -227,7 +224,7 @@ public class PublishPollServiceImplTest {
     }
 
     @Test
-    public void test_inflight_messages_empty() throws NoMessageIdAvailableException {
+    public void test_inflight_messages_empty() {
         clientConnection.setInFlightMessagesSent(true);
 
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(
