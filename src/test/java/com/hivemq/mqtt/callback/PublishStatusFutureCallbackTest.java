@@ -20,7 +20,7 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.pool.FreeIdRanges;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.PublishPollService;
 import io.netty.channel.Channel;
@@ -51,7 +51,7 @@ public class PublishStatusFutureCallbackTest {
     private PublishPollService publishPollService;
 
     @Mock
-    private FreeIdRanges messageIDPool;
+    private FreePacketIdRanges messageIDPool;
 
     private boolean sharedSubscription;
 

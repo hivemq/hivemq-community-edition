@@ -33,7 +33,7 @@ import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
-import com.hivemq.mqtt.message.pool.FreeIdRanges;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
@@ -140,7 +140,7 @@ public class PublishPollServiceImpl implements PublishPollService {
 
     @Override
     public void pollNewMessages(final @NotNull String client, final @NotNull Channel channel) {
-        final FreeIdRanges messageIDPool = ClientConnection.of(channel).getMessageIDPool();
+        final FreePacketIdRanges messageIDPool = ClientConnection.of(channel).getMessageIDPool();
         final ImmutableIntArray messageIds;
         try {
             messageIds = createMessageIds(messageIDPool, pollMessageLimit(channel));
@@ -221,7 +221,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 inFlightMessageCount.addAndGet(messages.size());
                 for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                     final MessageWithID message = messages.get(i);
-                    final FreeIdRanges messageIDPool = clientConnection.getMessageIDPool();
+                    final FreePacketIdRanges messageIDPool = clientConnection.getMessageIDPool();
                     try {
                         final int packetId = messageIDPool.takeIfAvailable(message.getPacketIdentifier());
                         if (message.getPacketIdentifier() != packetId) {
@@ -333,7 +333,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 if (publishes.isEmpty()) {
                     return;
                 }
-                final FreeIdRanges messageIDPool = clientConnection.getMessageIDPool();
+                final FreePacketIdRanges messageIDPool = clientConnection.getMessageIDPool();
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
                 final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
                 // Add all messages to the in-flight count before sending them out.
@@ -428,7 +428,7 @@ public class PublishPollServiceImpl implements PublishPollService {
     }
 
     private @NotNull ImmutableIntArray createMessageIds(
-            final @NotNull FreeIdRanges messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
+            final @NotNull FreePacketIdRanges messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
         final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(pollMessageLimit);
         for (int i = 0; i < pollMessageLimit; i++) {
             final int nextId = messageIDPool.takeNextId();
@@ -448,13 +448,13 @@ public class PublishPollServiceImpl implements PublishPollService {
 
         private final @NotNull String client;
         private final @NotNull MessageWithID message;
-        private final @NotNull FreeIdRanges messageIDPool;
+        private final @NotNull FreePacketIdRanges messageIDPool;
         private final @NotNull Channel channel;
 
         PubrelResendCallback(
                 final @NotNull String client,
                 final @NotNull MessageWithID message,
-                final @NotNull FreeIdRanges messageIDPool,
+                final @NotNull FreePacketIdRanges messageIDPool,
                 final @NotNull Channel channel) {
             this.client = client;
             this.message = message;

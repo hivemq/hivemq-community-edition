@@ -29,7 +29,7 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
-import com.hivemq.mqtt.message.pool.FreeIdRanges;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
@@ -74,7 +74,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 public class PublishPollServiceImplTest {
 
-    private @NotNull FreeIdRanges messageIDPool;
+    private @NotNull FreePacketIdRanges messageIDPool;
     private @NotNull ClientQueuePersistence clientQueuePersistence;
     private @NotNull ConnectionPersistence connectionPersistence;
     private @NotNull Channel channel;
@@ -87,7 +87,7 @@ public class PublishPollServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        messageIDPool = mock(FreeIdRanges.class);
+        messageIDPool = mock(FreePacketIdRanges.class);
         clientQueuePersistence = mock(ClientQueuePersistence.class);
         connectionPersistence = mock(ConnectionPersistence.class);
         channel = mock(Channel.class);

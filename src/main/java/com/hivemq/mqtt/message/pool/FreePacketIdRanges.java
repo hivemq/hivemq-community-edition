@@ -16,18 +16,18 @@
 
 package com.hivemq.mqtt.message.pool;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The purpose of this class is to reduce packet IDs allocation time for each independent client
  * and to reduce the memory footprint of keeping track of allocated IDs.
  * <p>
  * This is achieved by keeping a list of {@link Range} objects each of which represents a contiguous interval of
- * integer ids that are NOT currently assigned to any object using this instance of {@link FreeIdRanges}.
+ * integer ids that are NOT currently assigned to any object using this instance of {@link FreePacketIdRanges}.
  * The lower end of the {@link Range} instance is included whereas the upper end is excluded from the interval.
  * That is, the {@link Range} instance with start 42 and end 42 contains only one ID - 42.
  * The {@link Range} instance with start 10 and end 12 contains only two IDs: 10 and 11.
@@ -43,19 +43,17 @@ import org.slf4j.LoggerFactory;
  * href="https://github.com/hivemq/hivemq-mqtt-client/blob/master/src/main/java/com/hivemq/client/internal/util/Ranges.java">The
  * original implementation in the HiveMQ Java Client.</a>
  */
-public class FreeIdRanges {
+public class FreePacketIdRanges {
 
-    private static final @NotNull Logger log = LoggerFactory.getLogger(FreeIdRanges.class);
+    private static final int MIN_ALLOWED_MQTT_PACKET_ID = 1;
 
-    final int minAllowedId;
-    final int maxAllowedId;
+    @VisibleForTesting
+    public static final int MAX_ALLOWED_MQTT_PACKET_ID = 65_535;
 
     private @NotNull Range rootRange;
 
-    public FreeIdRanges(final int minId, final int maxId) {
-        minAllowedId = minId;
-        maxAllowedId = maxId;
-        rootRange = new Range(minId, maxId + 1);
+    public FreePacketIdRanges() {
+        rootRange = new Range(MIN_ALLOWED_MQTT_PACKET_ID, MAX_ALLOWED_MQTT_PACKET_ID + 1);
     }
 
     /**
@@ -84,12 +82,9 @@ public class FreeIdRanges {
      *         other free ID.
      */
     public int takeIfAvailable(final int id) throws NoMessageIdAvailableException {
-        if (id < minAllowedId || id > maxAllowedId) {
-            log.warn("Attempting to take an ID {} that is outside the valid range [{}, {}], will try taking another ID.",
-                    id,
-                    minAllowedId,
-                    maxAllowedId);
-        }
+        Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
+                "Attempting to take an ID %s that is outside the valid packet IDs range.",
+                id);
 
         Range current = rootRange;
         Range prev = null;
@@ -125,13 +120,9 @@ public class FreeIdRanges {
      * @param id an ID that the caller attempts to return (to free).
      */
     public void returnId(final int id) {
-        if (id < minAllowedId || id > maxAllowedId) {
-            log.warn("The returned ID {} is outside the valid range [{}, {}], ignoring.",
-                    id,
-                    minAllowedId,
-                    maxAllowedId);
-            return;
-        }
+        Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
+                "Attempting to return an ID %s that is outside the valid packet IDs range.",
+                id);
 
         Range current = rootRange;
         if (id < current.start - 1) { // at least one element is between the returned and the next range
@@ -162,9 +153,7 @@ public class FreeIdRanges {
 
         final Range next = range.next;
         if (id == range.end) {
-            if (next == null) {
-                throw new IllegalStateException("The id is greater than maxId. This must not happen and is a bug.");
-            }
+            Preconditions.checkState(next != null, "The id is greater than maxId. This must not happen and is a bug.");
             range.end++;
             if (range.end == next.start) {
                 range.end = next.end;
@@ -172,9 +161,7 @@ public class FreeIdRanges {
             }
             return null;
         }
-        if (next == null) {
-            throw new IllegalStateException("The id is greater than maxId. This must not happen and is a bug.");
-        }
+        Preconditions.checkState(next != null, "The id is greater than maxId. This must not happen and is a bug.");
         return next;
     }
 

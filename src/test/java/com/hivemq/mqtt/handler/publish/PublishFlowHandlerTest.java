@@ -26,7 +26,7 @@ import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.pool.FreeIdRanges;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -74,7 +74,7 @@ public class PublishFlowHandlerTest {
     private PublishPollService publishPollService;
 
     @Mock
-    private FreeIdRanges pool;
+    private FreePacketIdRanges pool;
 
     @Mock
     private IncomingPublishHandler incomingPublishHandler;

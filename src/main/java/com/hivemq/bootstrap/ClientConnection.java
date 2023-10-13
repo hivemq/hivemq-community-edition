@@ -32,7 +32,7 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.pool.FreeIdRanges;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
 
@@ -49,11 +49,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ClientConnection implements ClientConnectionContext {
 
-    public static final int MAX_MESSAGE_ID = 65_535;
-
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
-    private final @NotNull FreeIdRanges messageIDPool = new FreeIdRanges(1, MAX_MESSAGE_ID);
+    private final @NotNull FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
     private final @NotNull Listener connectedListener;
     private volatile @NotNull ClientState clientState;
 
@@ -376,7 +374,7 @@ public class ClientConnection implements ClientConnectionContext {
         this.queueSizeMaximum = queueSizeMaximum;
     }
 
-    public @NotNull FreeIdRanges getMessageIDPool() {
+    public @NotNull FreePacketIdRanges getMessageIDPool() {
         return messageIDPool;
     }
 
