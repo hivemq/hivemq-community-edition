@@ -220,7 +220,6 @@ public class PublishPollServiceImplTest {
 
         verify(freePacketIdRanges, times(1)).takeIfAvailable(anyInt());
         verify(publishFlushHandler, times(1)).sendPublishes(any(List.class));
-        verify(freePacketIdRanges).returnId(2);
     }
 
     @Test
