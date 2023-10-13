@@ -316,8 +316,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         //Such a message ID must never be zero, but better be safe than sorry
         if (messageId > 0) {
-            final FreePacketIdRanges messageIDPool = ClientConnection.of(channel).getMessageIDPool();
-            messageIDPool.returnId(messageId);
+            final FreePacketIdRanges freePacketIdRanges = ClientConnection.of(channel).getFreePacketIdRanges();
+            freePacketIdRanges.returnId(messageId);
             if (log.isTraceEnabled()) {
                 log.trace("Returning Message ID {} for client {} because of a {} message was received",
                         messageId,

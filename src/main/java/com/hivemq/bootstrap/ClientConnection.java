@@ -51,7 +51,7 @@ public class ClientConnection implements ClientConnectionContext {
 
     private final @NotNull Channel channel;
     private final @NotNull PublishFlushHandler publishFlushHandler;
-    private final @NotNull FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
+    private final @NotNull FreePacketIdRanges freePacketIdRanges = new FreePacketIdRanges();
     private final @NotNull Listener connectedListener;
     private volatile @NotNull ClientState clientState;
 
@@ -374,8 +374,8 @@ public class ClientConnection implements ClientConnectionContext {
         this.queueSizeMaximum = queueSizeMaximum;
     }
 
-    public @NotNull FreePacketIdRanges getMessageIDPool() {
-        return messageIDPool;
+    public @NotNull FreePacketIdRanges getFreePacketIdRanges() {
+        return freePacketIdRanges;
     }
 
     /**

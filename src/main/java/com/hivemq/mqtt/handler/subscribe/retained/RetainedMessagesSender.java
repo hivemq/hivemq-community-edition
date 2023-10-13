@@ -243,8 +243,8 @@ public class RetainedMessagesSender {
                     }
 
                     if (qos0Publish.getPacketIdentifier() != 0) {
-                        final FreePacketIdRanges messageIDPool = ClientConnection.of(channel).getMessageIDPool();
-                        messageIDPool.returnId(qos0Publish.getPacketIdentifier());
+                        final FreePacketIdRanges freePacketIdRanges = ClientConnection.of(channel).getFreePacketIdRanges();
+                        freePacketIdRanges.returnId(qos0Publish.getPacketIdentifier());
                     }
                 }
 
