@@ -20,7 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
-import com.hivemq.mqtt.message.pool.MessageIDPool;
+import com.hivemq.mqtt.message.pool.FreeIdRanges;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.PublishPollService;
 import com.hivemq.persistence.util.FutureUtils;
@@ -38,7 +38,7 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
     private final boolean sharedSubscription;
     private final @NotNull String queueId;
     private final @NotNull PUBLISH publish;
-    private final @NotNull MessageIDPool messageIDPool;
+    private final @NotNull FreeIdRanges messageIDPool;
     private final int packetIdentifier;
     private final @NotNull Channel channel;
     private final @NotNull String client;
@@ -48,7 +48,7 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
             final boolean sharedSubscription,
             final @NotNull String queueId,
             final @NotNull PUBLISH publish,
-            final @NotNull MessageIDPool messageIDPool,
+            final @NotNull FreeIdRanges messageIDPool,
             final @NotNull Channel channel,
             final @NotNull String client) {
         this.publishPollService = publishPollService;
