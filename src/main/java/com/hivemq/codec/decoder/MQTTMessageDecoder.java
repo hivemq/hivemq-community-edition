@@ -136,6 +136,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             buf.clear();
             return;
         }
+        globalMQTTMessageCounter.countInbound(message);
         out.add(message);
     }
 
@@ -184,6 +185,8 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             return null;
         }
 
+        globalMQTTMessageCounter.countInboundTraffic(packetSize);
+
         //We're slicing the buffer to the exact MQTT message size so we don't have to pass the actual length around
         final ByteBuf messageBuffer = buf.readSlice(remainingLength);
         //We mark the end of the message
@@ -225,6 +228,8 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
                     "Sent other message before CONNECT");
             return null;
         }
+
+        globalMQTTMessageCounter.countInboundTraffic(packetSize);
 
         //We're slicing the buffer to the exact MQTT message size so we don't have to pass the actual length around
         final ByteBuf messageBuffer = buf.readSlice(remainingLength);
