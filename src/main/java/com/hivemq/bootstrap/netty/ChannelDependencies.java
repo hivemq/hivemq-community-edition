@@ -220,7 +220,7 @@ public class ChannelDependencies {
         return mqttConnectDecoder;
     }
 
-    public MqttConnacker getMqttConnacker() {
+    public @NotNull MqttConnacker getMqttConnacker() {
         return mqttConnacker;
     }
 
