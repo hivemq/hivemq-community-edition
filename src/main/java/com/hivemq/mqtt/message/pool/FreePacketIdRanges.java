@@ -75,11 +75,9 @@ public class FreePacketIdRanges {
     }
 
     /**
-     * Provides the requested ID if it is available or some other ID otherwise.
+     * Takes the requested ID from the range if it is available.
      *
      * @param id an ID that the caller attempts to take.
-     * @return the requested {@param id} if it is available in one of the {@link Range} intervals or otherwise some
-     *         other free ID.
      */
     public void takeIfAvailable(final int id) {
         Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
