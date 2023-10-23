@@ -324,7 +324,7 @@ public class MQTTMessageDecoderTest {
         buf.writeBytes(connect);
         channel.writeInbound(buf);
 
-        //verify that the client was not disconnected
+        //verify that the client was disconnected
         assertFalse(channel.isOpen());
     }
 
