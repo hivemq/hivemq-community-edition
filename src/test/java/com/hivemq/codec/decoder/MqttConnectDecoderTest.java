@@ -61,7 +61,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_no_protocol_version() {
+    public void decode_whenNoProtocolVersion_thenConnectionIsClosedAndCONNACKIsReceived() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{1});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
         verify(mqttConnacker).connackError(eq(channel),
@@ -72,7 +72,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_invalid_protocol_version_not_enough_readable_bytes() {
+    public void decode_whenInvalidProtocolVersionBecauseNotEnoughReadableBytes_thenConnectionIsClosedAndCONNACKIsReceived() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 1, 2, 3, 4});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
         verify(mqttConnacker).connackError(eq(channel),
@@ -83,7 +83,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_valid_mqtt5_version() {
+    public void decode_whenValidMqtt5CONNECT_thenProtocolAndTimestampIsSet() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 5});
         try {
             decoder.decode(clientConnection, buf, FIXED_HEADER);
@@ -96,7 +96,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_valid_mqtt3_1_1_version() {
+    public void decode_whenValidMqtt311CONNECT_thenProtocolAndTimestampIsSet() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 4});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
         assertSame(ProtocolVersion.MQTTv3_1_1, clientConnection.getProtocolVersion());
@@ -112,7 +112,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_invalid_protocol_version_mqtt_5() {
+    public void decode_whenValidMqtt31CONNECT_thenProtocolAndTimestampIsSet() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 5});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
         verify(mqttConnacker).connackError(eq(channel),
@@ -123,7 +123,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_invalid_protocol_version_7() {
+    public void decode_whenInvalidMqtt7ProtocolVersion_thenConnectionIsClosedAndCONNACKIsReceived() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', 7});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
         verify(mqttConnacker).connackError(eq(channel),
@@ -134,7 +134,7 @@ public class MqttConnectDecoderTest {
     }
 
     @Test
-    public void test_invalid_protocol_version_length() {
+    public void decode_whenInvalidLength_thenConnectionIsClosedAndCONNACKIsReceived() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 5, 'M', 'Q', 'T', 'T', 7});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
         verify(mqttConnacker).connackError(eq(channel),

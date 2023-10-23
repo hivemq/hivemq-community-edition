@@ -20,6 +20,9 @@ import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.connack.CONNACK;
+import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
+import com.hivemq.util.ReasonStrings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -30,6 +33,7 @@ import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -54,7 +58,7 @@ public class MQTTMessageDecoderTest {
      * ***********************/
 
     @Test
-    public void test_reserved_zero_received() {
+    public void decode_whenReceivesReservedZero_thenConnectionIsClosed() {
 
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0000_0000);
@@ -67,7 +71,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_reserved_fifteen_received() {
+    public void decode_whenReceivesReservedFifteen_thenConnectionIsClosed() {
 
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
@@ -81,7 +85,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_connack_received() {
+    public void decode_whenReceivesCONNACK_thenConnectionIsClosed() {
 
         //We must not receive CONNACK from clients because only servers must send CONNACKs
         final ByteBuf buf = Unpooled.buffer();
@@ -95,7 +99,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_suback_received() {
+    public void decode_whenReceivesSUBACK_thenConnectionIsClosed() {
 
         //We must not receive a SUBACK from clients because only servers must send SUBACKs
         final ByteBuf buf = Unpooled.buffer();
@@ -109,7 +113,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_unsuback_received() {
+    public void decode_whenReceivesUNSUBACK_thenConnectionIsClosed() {
 
         //We must not receive a UNSUBACK from clients because only servers must send UNSUBACKs
         final ByteBuf buf = Unpooled.buffer();
@@ -123,7 +127,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_pingresp_received_received() {
+    public void decode_whenReceivesPINGRESP_thenConnectionIsClosed() {
 
         //We must not receive a PINGRESP from clients because only servers must send PINGRESPs
         final ByteBuf buf = Unpooled.buffer();
@@ -137,7 +141,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_second_connect_received() {
+    public void decode_whenReceivesSecondCONNECT_thenConnectionIsClosed() {
 
         clientConnection.setProtocolVersion(null);
 
@@ -178,7 +182,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void test_connect_mqtt5_packet_size_too_large() {
+    public void decode_whenReceivesMqtt5CONNECTTooLarge_thenConnectionIsClosedAndCONNACKIsReceived() {
         final byte[] mqtt5Connect = {
                 // fixed header
                 //   type, reserved
@@ -200,11 +204,16 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-        test_connect_packet_size_too_large(mqtt5Connect);
+        testConnectPacketSizeTooLarge(mqtt5Connect);
+
+        //verify that the client received the proper CONNACK
+        CONNACK connack = channel.readOutbound();
+        assertEquals(Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE, connack.getReasonCode());
+        assertEquals(ReasonStrings.CONNACK_PACKET_TOO_LARGE, connack.getReasonString());
     }
 
     @Test
-    public void test_connect_mqtt3_1_1_packet_size_too_large() {
+    public void decode_whenReceives311CONNECTTooLarge_thenConnectionIsClosed() {
         final byte[] mqtt311Connect = {
                 // fixed header
                 //   type, reserved
@@ -226,11 +235,11 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-        test_connect_packet_size_too_large(mqtt311Connect);
+        testConnectPacketSizeTooLarge(mqtt311Connect);
     }
 
     @Test
-    public void test_connect_mqtt3_1_packet_size_too_large() {
+    public void decode_whenReceives31CONNECTTooLarge_thenConnectionIsClosed() {
         final byte[] mqtt31Connect = {
                 // fixed header
                 //   type, reserved
@@ -252,25 +261,25 @@ public class MQTTMessageDecoderTest {
                 //   client identifier
                 0, 4, 't', 'e', 's', 't'};
 
-        test_connect_packet_size_too_large(mqtt31Connect);
+        testConnectPacketSizeTooLarge(mqtt31Connect);
     }
 
     @Test
-    public void test_publish_mqtt5_packet_size_too_large() {
-        test_publish_packet_size_too_large(ProtocolVersion.MQTTv5);
+    public void decode_whenReceivesMqtt5PUBLISHTooLarge_thenConnectionIsClosed() {
+        testPublishPacketSizeTooLarge(ProtocolVersion.MQTTv5);
     }
 
     @Test
-    public void test_publish_mqtt3_1_1_packet_size_too_large() {
-        test_publish_packet_size_too_large(ProtocolVersion.MQTTv3_1_1);
+    public void decode_whenReceivesMqtt311PUBLISHTooLarge_thenConnectionIsClosed() {
+        testPublishPacketSizeTooLarge(ProtocolVersion.MQTTv3_1_1);
     }
 
     @Test
-    public void test_publish_mqtt3_1_packet_size_too_large() {
-        test_publish_packet_size_too_large(ProtocolVersion.MQTTv3_1);
+    public void decode_whenReceivesMqtt31PUBLISHTooLarge_thenConnectionIsClosed() {
+        testPublishPacketSizeTooLarge(ProtocolVersion.MQTTv3_1);
     }
 
-    private void test_publish_packet_size_too_large(final @NotNull ProtocolVersion protocolVersion) {
+    private void testPublishPacketSizeTooLarge(final @NotNull ProtocolVersion protocolVersion) {
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.mqttConfiguration().setMaxPacketSize(10);
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
@@ -303,7 +312,7 @@ public class MQTTMessageDecoderTest {
         assertFalse(channel.isOpen());
     }
 
-    private void test_connect_packet_size_too_large(byte[] connect) {
+    private void testConnectPacketSizeTooLarge(byte[] connect) {
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.mqttConfiguration().setMaxPacketSize(10);
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
