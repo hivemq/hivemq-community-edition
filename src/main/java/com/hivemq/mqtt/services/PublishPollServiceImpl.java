@@ -33,7 +33,7 @@ import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
-import com.hivemq.mqtt.message.pool.MessageIDPool;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
@@ -140,10 +140,10 @@ public class PublishPollServiceImpl implements PublishPollService {
 
     @Override
     public void pollNewMessages(final @NotNull String client, final @NotNull Channel channel) {
-        final MessageIDPool messageIDPool = ClientConnection.of(channel).getMessageIDPool();
+        final FreePacketIdRanges freePacketIdRanges = ClientConnection.of(channel).getFreePacketIdRanges();
         final ImmutableIntArray messageIds;
         try {
-            messageIds = createMessageIds(messageIDPool, pollMessageLimit(channel));
+            messageIds = createMessageIds(freePacketIdRanges, pollMessageLimit(channel));
         } catch (final NoMessageIdAvailableException e) {
             // This should never happen if the limit for the poll message limit is set correctly
             log.error("No message id available for client {}", client, e);
@@ -164,7 +164,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                     }
                 }
                 for (int i = usedIds; i < messageIds.length(); i++) {
-                    messageIDPool.returnId(messageIds.get(i));
+                    freePacketIdRanges.returnId(messageIds.get(i));
                 }
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
                 final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
@@ -179,7 +179,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                                     false,
                                     client,
                                     publish,
-                                    messageIDPool,
+                                    freePacketIdRanges,
                                     channel,
                                     client),
                             MoreExecutors.directExecutor());
@@ -221,23 +221,9 @@ public class PublishPollServiceImpl implements PublishPollService {
                 inFlightMessageCount.addAndGet(messages.size());
                 for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                     final MessageWithID message = messages.get(i);
-                    final MessageIDPool messageIDPool = clientConnection.getMessageIDPool();
-                    try {
-                        final int packetId = messageIDPool.takeIfAvailable(message.getPacketIdentifier());
-                        if (message.getPacketIdentifier() != packetId) {
-                            // This should never happen, but we need to make sure the packet ID is returned in case this is the result of a retry.
-                            messageIDPool.returnId(packetId);
-                        }
-                    } catch (final NoMessageIdAvailableException e) {
-                        // This should never happen if the limit for the poll message limit is set correctly
-                        log.error("No message id available for client {}.", client, e);
-                        if (message instanceof PUBLISH) {
-                            messageDroppedService.queueFull(client,
-                                    ((PUBLISH) message).getTopic(),
-                                    ((PUBLISH) message).getQoS().getQosNumber());
-                        }
-                        return;
-                    }
+                    final FreePacketIdRanges freePacketIdRanges = clientConnection.getFreePacketIdRanges();
+                    freePacketIdRanges.takeIfAvailable(message.getPacketIdentifier());
+
                     if (message instanceof PUBLISH) {
                         final PUBLISH publish = (PUBLISH) message;
                         final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
@@ -246,7 +232,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                                         false,
                                         client,
                                         publish,
-                                        messageIDPool,
+                                        freePacketIdRanges,
                                         channel,
                                         client),
                                 MoreExecutors.directExecutor());
@@ -259,7 +245,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                         final SettableFuture<PublishStatus> settableFuture = SettableFuture.create();
                         channel.writeAndFlush(new PubrelWithFuture((PUBREL) message, settableFuture));
                         Futures.addCallback(settableFuture,
-                                new PubrelResendCallback(client, message, messageIDPool, channel),
+                                new PubrelResendCallback(client, message, freePacketIdRanges, channel),
                                 MoreExecutors.directExecutor());
                     }
                 }
@@ -332,7 +318,7 @@ public class PublishPollServiceImpl implements PublishPollService {
                 if (publishes.isEmpty()) {
                     return;
                 }
-                final MessageIDPool messageIDPool = clientConnection.getMessageIDPool();
+                final FreePacketIdRanges freePacketIdRanges = clientConnection.getFreePacketIdRanges();
                 final List<PublishWithFuture> publishesToSend = new ArrayList<>(publishes.size());
                 final AtomicInteger inFlightMessageCount = inFlightMessageCount(channel);
                 // Add all messages to the in-flight count before sending them out.
@@ -340,48 +326,48 @@ public class PublishPollServiceImpl implements PublishPollService {
                 // concurrently while we're still sending others here.
                 inFlightMessageCount.addAndGet(publishes.size());
                 for (final PUBLISH publish : publishes) {
-                    final PUBLISH publishToSend;
+                    if (publish.getOnwardQoS().getQosNumber() > 0 && qos == 0) {
+                        // In case the messages gets downgraded to qos 0, it can be removed.
+                        removeMessageFromSharedQueue(sharedSubscription, publish.getUniqueId());
+                    }
+                    // We can't send the qos when the message is queue, because we don't know the which client is will be sent
+                    final QoS minQos = QoS.valueOf(Math.min(qos, publish.getOnwardQoS().getQosNumber()));
+                    // There can only be one subscription ID for this message, because there are no overlapping shared subscriptions
+                    final ImmutableIntArray subscriptionIdentifiers = subscriptionIdentifier != null ?
+                            ImmutableIntArray.of(subscriptionIdentifier) :
+                            ImmutableIntArray.of();
+                    int packetId = 0;
                     try {
-                        if (publish.getOnwardQoS().getQosNumber() > 0 && qos == 0) {
-                            // In case the messages gets downgraded to qos 0, it can be removed.
-                            removeMessageFromSharedQueue(sharedSubscription, publish.getUniqueId());
-                        }
-                        // We can't send the qos when the message is queue, because we don't know the which client is will be sent
-                        final QoS minQos = QoS.valueOf(Math.min(qos, publish.getOnwardQoS().getQosNumber()));
-                        // There can only be one subscription ID for this message, because there are no overlapping shared subscriptions
-                        final ImmutableIntArray subscriptionIdentifiers = subscriptionIdentifier != null ?
-                                ImmutableIntArray.of(subscriptionIdentifier) :
-                                ImmutableIntArray.of();
-                        int packetId = 0;
                         if (checkNotNull(minQos).getQosNumber() > 0) {
-                            packetId = messageIDPool.takeNextId();
+                            packetId = freePacketIdRanges.takeNextId();
                         }
-                        publishToSend = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
-                                .withPacketIdentifier(packetId)
-                                .withQoS(minQos)
-                                .withOnwardQos(minQos)
-                                .withRetain(publish.isRetain() && retainAsPublished)
-                                .withSubscriptionIdentifiers(subscriptionIdentifiers)
-                                .build();
                     } catch (final NoMessageIdAvailableException e) {
                         // This should never happen if the limit for the poll message limit is set correctly
                         log.error("No message id available for client: {}, shared subscription {}",
                                 client,
-                                sharedSubscription,
-                                e);
+                                sharedSubscription);
                         messageDroppedService.queueFullShared(sharedSubscription,
                                 publish.getTopic(),
                                 publish.getQoS().getQosNumber());
                         inFlightMessageCount.decrementAndGet();
                         return;
                     }
+
+                    final PUBLISH publishToSend = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
+                            .withPacketIdentifier(packetId)
+                            .withQoS(minQos)
+                            .withOnwardQos(minQos)
+                            .withRetain(publish.isRetain() && retainAsPublished)
+                            .withSubscriptionIdentifiers(subscriptionIdentifiers)
+                            .build();
+
                     final SettableFuture<PublishStatus> publishFuture = SettableFuture.create();
                     Futures.addCallback(publishFuture,
                             new PublishStatusFutureCallback(PublishPollServiceImpl.this,
                                     true,
                                     sharedSubscription,
                                     publishToSend,
-                                    messageIDPool,
+                                    freePacketIdRanges,
                                     channel,
                                     client),
                             MoreExecutors.directExecutor());
@@ -425,8 +411,7 @@ public class PublishPollServiceImpl implements PublishPollService {
     }
 
     private @NotNull ImmutableIntArray createMessageIds(
-            final @NotNull MessageIDPool messageIDPool, final int pollMessageLimit)
-            throws NoMessageIdAvailableException {
+            final @NotNull FreePacketIdRanges messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
         final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(pollMessageLimit);
         for (int i = 0; i < pollMessageLimit; i++) {
             final int nextId = messageIDPool.takeNextId();
@@ -446,13 +431,13 @@ public class PublishPollServiceImpl implements PublishPollService {
 
         private final @NotNull String client;
         private final @NotNull MessageWithID message;
-        private final @NotNull MessageIDPool messageIDPool;
+        private final @NotNull FreePacketIdRanges messageIDPool;
         private final @NotNull Channel channel;
 
         PubrelResendCallback(
                 final @NotNull String client,
                 final @NotNull MessageWithID message,
-                final @NotNull MessageIDPool messageIDPool,
+                final @NotNull FreePacketIdRanges messageIDPool,
                 final @NotNull Channel channel) {
             this.client = client;
             this.message = message;

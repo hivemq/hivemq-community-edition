@@ -29,7 +29,7 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
-import com.hivemq.mqtt.message.pool.MessageIDPool;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PublishWithFuture;
@@ -74,7 +74,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 public class PublishPollServiceImplTest {
 
-    private @NotNull MessageIDPool messageIDPool;
+    private @NotNull FreePacketIdRanges freePacketIdRanges;
     private @NotNull ClientQueuePersistence clientQueuePersistence;
     private @NotNull ConnectionPersistence connectionPersistence;
     private @NotNull Channel channel;
@@ -87,7 +87,7 @@ public class PublishPollServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        messageIDPool = mock(MessageIDPool.class);
+        freePacketIdRanges = mock(FreePacketIdRanges.class);
         clientQueuePersistence = mock(ClientQueuePersistence.class);
         connectionPersistence = mock(ConnectionPersistence.class);
         channel = mock(Channel.class);
@@ -102,7 +102,7 @@ public class PublishPollServiceImplTest {
 
         clientConnection = spy(new DummyClientConnection(channel, publishFlushHandler));
         clientConnection.proposeClientState(ClientState.AUTHENTICATED);
-        when(clientConnection.getMessageIDPool()).thenReturn(messageIDPool);
+        when(clientConnection.getFreePacketIdRanges()).thenReturn(freePacketIdRanges);
 
         when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
 
@@ -133,7 +133,7 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_new_messages() throws NoMessageIdAvailableException {
 
-        when(messageIDPool.takeNextId()).thenReturn(1);
+        when(freePacketIdRanges.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"),
                 eq(false),
                 any(ImmutableIntArray.class),
@@ -143,7 +143,7 @@ public class PublishPollServiceImplTest {
 
         publishPollService.pollNewMessages("client");
 
-        verify(messageIDPool, times(48)).returnId(anyInt());
+        verify(freePacketIdRanges, times(48)).returnId(anyInt());
         verify(publishFlushHandler, times(1)).sendPublishes(any(List.class));
     }
 
@@ -155,7 +155,7 @@ public class PublishPollServiceImplTest {
 
         clientConnection.setClientReceiveMaximum(10);
 
-        when(messageIDPool.takeNextId()).thenReturn(1);
+        when(freePacketIdRanges.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"),
                 eq(false),
                 any(ImmutableIntArray.class),
@@ -167,7 +167,7 @@ public class PublishPollServiceImplTest {
 
         publishPollService.pollNewMessages("client");
 
-        verify(messageIDPool,
+        verify(freePacketIdRanges,
                 times(9)).returnId(anyInt()); // 10 messages are polled because the client receive max is 10
         verify(publishFlushHandler, times(1)).sendPublishes(any(List.class));
     }
@@ -175,7 +175,7 @@ public class PublishPollServiceImplTest {
     @Test
     public void test_new_messages_channel_inactive() throws NoMessageIdAvailableException {
 
-        when(messageIDPool.takeNextId()).thenReturn(1);
+        when(freePacketIdRanges.takeNextId()).thenReturn(1);
         when(clientQueuePersistence.readNew(eq("client"),
                 eq(false),
                 any(ImmutableIntArray.class),
@@ -189,13 +189,11 @@ public class PublishPollServiceImplTest {
 
         verify(publishFlushHandler, times(1)).sendPublishes(argumentCaptor.capture());
         argumentCaptor.getValue().get(0).getFuture().set(PublishStatus.NOT_CONNECTED);
-        verify(messageIDPool, times(50)).returnId(anyInt()); // The id must be returned
+        verify(freePacketIdRanges, times(50)).returnId(anyInt()); // The id must be returned
     }
 
     @Test
-    public void test_inflight_messages() throws NoMessageIdAvailableException {
-        when(messageIDPool.takeIfAvailable(1)).thenReturn(1);
-        when(messageIDPool.takeIfAvailable(2)).thenReturn(2);
+    public void test_inflight_messages() {
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(
                 ImmutableList.of(createPublish(), new PUBREL(2))));
 
@@ -205,14 +203,13 @@ public class PublishPollServiceImplTest {
 
         publishPollService.pollInflightMessages("client", channel);
 
-        verify(messageIDPool, times(2)).takeIfAvailable(anyInt());
+        verify(freePacketIdRanges, times(2)).takeIfAvailable(anyInt());
         verify(publishFlushHandler, times(1)).sendPublishes(any(List.class));
         verify(channel).writeAndFlush(any(PubrelWithFuture.class));
     }
 
     @Test
-    public void test_inflight_messages_packet_id_not_available() throws NoMessageIdAvailableException {
-        when(messageIDPool.takeIfAvailable(1)).thenReturn(2);
+    public void test_inflight_messages_packet_id_not_available() {
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(
                 ImmutableList.of(createPublish())));
 
@@ -221,20 +218,19 @@ public class PublishPollServiceImplTest {
 
         publishPollService.pollInflightMessages("client", channel);
 
-        verify(messageIDPool, times(1)).takeIfAvailable(anyInt());
+        verify(freePacketIdRanges, times(1)).takeIfAvailable(anyInt());
         verify(publishFlushHandler, times(1)).sendPublishes(any(List.class));
-        verify(messageIDPool).returnId(2);
     }
 
     @Test
-    public void test_inflight_messages_empty() throws NoMessageIdAvailableException {
+    public void test_inflight_messages_empty() {
         clientConnection.setInFlightMessagesSent(true);
 
         when(clientQueuePersistence.readInflight(eq("client"), anyLong(), anyInt())).thenReturn(Futures.immediateFuture(
                 ImmutableList.of()));
         publishPollService.pollInflightMessages("client", channel);
 
-        verify(messageIDPool, never()).takeIfAvailable(anyInt());
+        verify(freePacketIdRanges, never()).takeIfAvailable(anyInt());
     }
 
     @Test
@@ -255,7 +251,7 @@ public class PublishPollServiceImplTest {
                 createPublish(),
                 TestMessageUtil.createMqtt3Publish(QoS.AT_MOST_ONCE))));
 
-        when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
+        when(freePacketIdRanges.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
         final AtomicInteger inFlightCount = new AtomicInteger(0);
         clientConnection.setInFlightMessageCount(inFlightCount);
@@ -267,7 +263,7 @@ public class PublishPollServiceImplTest {
 
         final ArgumentCaptor<List<PublishWithFuture>> captor = ArgumentCaptor.forClass(List.class);
         verify(publishFlushHandler, times(1)).sendPublishes(captor.capture());
-        verify(messageIDPool, times(2)).takeNextId();
+        verify(freePacketIdRanges, times(2)).takeNextId();
 
         final List<PublishWithFuture> values = captor.getValue();
         assertEquals(2, values.get(0).getPacketIdentifier());
@@ -290,7 +286,7 @@ public class PublishPollServiceImplTest {
                 1)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);
 
-        when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
+        when(freePacketIdRanges.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
         clientConnection.setInFlightMessageCount(new AtomicInteger(1));
         clientConnection.setInFlightMessagesSent(true);
@@ -311,7 +307,7 @@ public class PublishPollServiceImplTest {
                 1)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);
 
-        when(messageIDPool.takeNextId()).thenReturn(2).thenReturn(3);
+        when(freePacketIdRanges.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
 
         when(pipeline.get(PublishFlowHandler.class)).thenReturn(pubflishFlowHandler);
@@ -337,7 +333,7 @@ public class PublishPollServiceImplTest {
                 anyInt(),
                 anyLong())).thenReturn(Futures.immediateFuture(ImmutableList.of(publish)));
 
-        when(messageIDPool.takeNextId()).thenReturn(1);
+        when(freePacketIdRanges.takeNextId()).thenReturn(1);
 
         publishPollService.pollSharedPublishesForClient("client", "group/topic", 0, false, null, channel);
 

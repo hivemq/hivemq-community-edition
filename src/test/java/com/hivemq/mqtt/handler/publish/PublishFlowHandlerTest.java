@@ -26,7 +26,7 @@ import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connect.Mqtt5CONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
-import com.hivemq.mqtt.message.pool.MessageIDPool;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -74,7 +74,7 @@ public class PublishFlowHandlerTest {
     private PublishPollService publishPollService;
 
     @Mock
-    private MessageIDPool pool;
+    private FreePacketIdRanges freePacketIdRanges;
 
     @Mock
     private IncomingPublishHandler incomingPublishHandler;
@@ -87,7 +87,7 @@ public class PublishFlowHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 5;
-        when(pool.takeNextId()).thenReturn(100);
+        when(freePacketIdRanges.takeNextId()).thenReturn(100);
         orderedTopicService = new OrderedTopicService();
         channel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
                 incomingMessageFlowPersistence,
@@ -95,7 +95,7 @@ public class PublishFlowHandlerTest {
                 incomingPublishHandler,
                 mock(DropOutgoingPublishesHandler.class)));
         final ClientConnection clientConnection = spy(new DummyClientConnection(channel, null));
-        when(clientConnection.getMessageIDPool()).thenReturn(pool);
+        when(clientConnection.getFreePacketIdRanges()).thenReturn(freePacketIdRanges);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setClientId(CLIENT_ID);
     }
@@ -108,29 +108,29 @@ public class PublishFlowHandlerTest {
     @Test
     public void test_return_qos_1_message_id() throws Exception {
 
-        final PUBACK puback = new PUBACK(pool.takeNextId());
+        final PUBACK puback = new PUBACK(freePacketIdRanges.takeNextId());
         channel.writeInbound(puback);
 
-        verify(pool).returnId(eq(100));
+        verify(freePacketIdRanges).returnId(eq(100));
 
     }
 
     @Test
     public void test_return_qos_2_message_id() throws Exception {
 
-        final PUBCOMP pubcomp = new PUBCOMP(pool.takeNextId());
+        final PUBCOMP pubcomp = new PUBCOMP(freePacketIdRanges.takeNextId());
         channel.writeInbound(pubcomp);
 
-        verify(pool).returnId(eq(100));
+        verify(freePacketIdRanges).returnId(eq(100));
     }
 
     @Test
     public void test_dont_return_message_id() throws Exception {
 
-        final PUBREL pubrel = new PUBREL(pool.takeNextId());
+        final PUBREL pubrel = new PUBREL(freePacketIdRanges.takeNextId());
         channel.writeInbound(pubrel);
 
-        verify(pool, never()).returnId(anyInt());
+        verify(freePacketIdRanges, never()).returnId(anyInt());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class PublishFlowHandlerTest {
         final PUBACK puback = new PUBACK(-1);
         channel.writeInbound(puback);
 
-        verify(pool, never()).returnId(anyInt());
+        verify(freePacketIdRanges, never()).returnId(anyInt());
     }
 
     @Test
