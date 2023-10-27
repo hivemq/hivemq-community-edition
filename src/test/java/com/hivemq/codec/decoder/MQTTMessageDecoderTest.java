@@ -206,8 +206,11 @@ public class MQTTMessageDecoderTest {
 
         testConnectPacketSizeTooLarge(mqtt5Connect);
 
+        //verify that the client was disconnected
+        assertFalse(channel.isOpen());
+
         //verify that the client received the proper CONNACK
-        CONNACK connack = channel.readOutbound();
+        final CONNACK connack = channel.readOutbound();
         assertEquals(Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE, connack.getReasonCode());
         assertEquals(ReasonStrings.CONNACK_PACKET_TOO_LARGE, connack.getReasonString());
     }
@@ -224,7 +227,7 @@ public class MQTTMessageDecoderTest {
                 //   protocol name
                 0, 4, 'M', 'Q', 'T', 'T',
                 //   protocol version
-                5,
+                4,
                 //   connect flags
                 (byte) 0b0000_0000,
                 //   keep alive
@@ -236,6 +239,14 @@ public class MQTTMessageDecoderTest {
                 0, 4, 't', 'e', 's', 't'};
 
         testConnectPacketSizeTooLarge(mqtt311Connect);
+
+        //verify that the client was disconnected
+        assertFalse(channel.isOpen());
+
+        //verify that the client received the proper CONNACK
+        final CONNACK connack = channel.readOutbound();
+        assertEquals(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, connack.getReasonCode());
+        assertNull(connack.getReasonString());
     }
 
     @Test
@@ -262,6 +273,14 @@ public class MQTTMessageDecoderTest {
                 0, 4, 't', 'e', 's', 't'};
 
         testConnectPacketSizeTooLarge(mqtt31Connect);
+
+        //verify that the client was disconnected
+        assertFalse(channel.isOpen());
+
+        //verify that the client received the proper CONNACK
+        final CONNACK connack = channel.readOutbound();
+        assertEquals(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED, connack.getReasonCode());
+        assertNull(connack.getReasonString());
     }
 
     @Test
@@ -323,9 +342,6 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeBytes(connect);
         channel.writeInbound(buf);
-
-        //verify that the client was disconnected
-        assertFalse(channel.isOpen());
     }
 
 }

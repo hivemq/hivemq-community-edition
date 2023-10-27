@@ -152,7 +152,7 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
             //connack with PACKET_TOO_LARGE for Mqtt5
             connectDecoder.decodeProtocolVersion(clientConnectionContext, buf);
             mqttConnacker.connackError(clientConnectionContext.getChannel(),
-                    "A client (ID: {}, IP: {}) connect packet exceeded the maximum permissible size.",
+                    "A client (IP: {}) connect packet exceeded the maximum permissible size.",
                     "Sent CONNECT exceeded the maximum permissible size",
                     Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
                     ReasonStrings.CONNACK_PACKET_TOO_LARGE);
