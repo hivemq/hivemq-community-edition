@@ -150,23 +150,13 @@ public class MQTTMessageDecoder extends ByteToMessageDecoder {
         //this is the message size HiveMQ allows for incoming messages
         if (packetSize > mqttConfig.maxPacketSize()) {
             //connack with PACKET_TOO_LARGE for Mqtt5
-            final ProtocolVersion protocolVersion = connectDecoder.decodeProtocolVersion(clientConnectionContext, buf);
-            if (protocolVersion == ProtocolVersion.MQTTv5) {
-                mqttConnacker.connackError(clientConnectionContext.getChannel(),
-                        "A client (IP: {}) connect packet exceeded the maximum permissible size.",
-                        "Sent CONNECT exceeded the maximum permissible size",
-                        Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
-                        ReasonStrings.CONNACK_PACKET_TOO_LARGE);
-            } else { //force channel close for Mqtt3.1 and Mqtt3.1.1
-                mqttServerDisconnector.disconnect(clientConnectionContext.getChannel(),
-                        "A client (IP: {}) sent a message, that was bigger than the maximum message size. Disconnecting client.",
-                        "Sent a message that was bigger than the maximum size",
-                        Mqtt5DisconnectReasonCode.PACKET_TOO_LARGE,
-                        ReasonStrings.DISCONNECT_PACKET_TOO_LARGE_MESSAGE,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES,
-                        false,
-                        true);
-            }
+            connectDecoder.decodeProtocolVersion(clientConnectionContext, buf);
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
+                    "A client (ID: {}, IP: {}) connect packet exceeded the maximum permissible size.",
+                    "Sent CONNECT exceeded the maximum permissible size",
+                    Mqtt5ConnAckReasonCode.PACKET_TOO_LARGE,
+                    ReasonStrings.CONNACK_PACKET_TOO_LARGE);
+
             return null;
         }
 
