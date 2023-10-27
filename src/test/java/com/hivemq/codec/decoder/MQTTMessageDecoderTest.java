@@ -216,7 +216,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void decode_whenReceives311CONNECTTooLarge_thenConnectionIsClosed() {
+    public void decode_whenReceives311CONNECTTooLarge_thenConnectionIsClosedAndCONNACKIsReceived() {
         final byte[] mqtt311Connect = {
                 // fixed header
                 //   type, reserved
@@ -250,7 +250,7 @@ public class MQTTMessageDecoderTest {
     }
 
     @Test
-    public void decode_whenReceives31CONNECTTooLarge_thenConnectionIsClosed() {
+    public void decode_whenReceives31CONNECTTooLarge_thenConnectionIsClosedAndCONNACKIsReceived() {
         final byte[] mqtt31Connect = {
                 // fixed header
                 //   type, reserved
