@@ -26,7 +26,7 @@ import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.event.PubrelDroppedEvent;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
-import com.hivemq.mqtt.message.pool.MessageIDPool;
+import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.mqtt.message.puback.PUBACK;
 import com.hivemq.mqtt.message.pubcomp.PUBCOMP;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -316,8 +316,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         //Such a message ID must never be zero, but better be safe than sorry
         if (messageId > 0) {
-            final MessageIDPool messageIDPool = ClientConnection.of(channel).getMessageIDPool();
-            messageIDPool.returnId(messageId);
+            final FreePacketIdRanges freePacketIdRanges = ClientConnection.of(channel).getFreePacketIdRanges();
+            freePacketIdRanges.returnId(messageId);
             if (log.isTraceEnabled()) {
                 log.trace("Returning Message ID {} for client {} because of a {} message was received",
                         messageId,

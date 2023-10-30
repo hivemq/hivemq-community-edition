@@ -74,36 +74,19 @@ public class StartupListenerVerifier {
         }
     }
 
-    private String getSuccessfulStartedString(final ListenerStartupInformation startupInfo) {
-        final StringBuilder builder = new StringBuilder();
-
-        final Listener listener = startupInfo.getOriginalListener();
-
-        builder.append("Started ");
-        builder.append(listener.readableName());
-        builder.append(" ");
-        builder.append("on address ");
-        builder.append(listener.getBindAddress());
-        builder.append(" and on port ");
-        builder.append(startupInfo.getPort());
-
-        return builder.toString();
+    private @NotNull String getSuccessfulStartedString(final @NotNull ListenerStartupInformation startupInfo) {
+        final Listener listener = startupInfo.getListener();
+        return String.format("Started %s on address %s and on port %s.",
+                listener.readableName(),
+                listener.getBindAddress(),
+                listener.getPort());
     }
 
-    private String getNotSuccessfulStartedString(final ListenerStartupInformation startupInfo) {
-        final StringBuilder builder = new StringBuilder();
-
-        final Listener listener = startupInfo.getOriginalListener();
-
-        builder.append("Could not start ");
-        builder.append(listener.readableName());
-        builder.append(" ");
-        builder.append("on port ");
-        builder.append(startupInfo.getPort());
-        builder.append(" and address ");
-        builder.append(listener.getBindAddress());
-        builder.append(". Is it already in use?");
-
-        return builder.toString();
+    private @NotNull String getNotSuccessfulStartedString(final @NotNull ListenerStartupInformation startupInfo) {
+        final Listener listener = startupInfo.getListener();
+        return String.format("Could not start %s on port %s and address %s. Is it already in use?",
+                listener.readableName(),
+                listener.getPort(),
+                listener.getBindAddress());
     }
 }

@@ -27,50 +27,38 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Immutable
 public class ListenerStartupInformation {
 
-    private final int port;
-
     private final boolean successful;
-    private final Listener originalListener;
-
-    private final Optional<Throwable> exception;
+    private final @NotNull Listener listener;
+    private final @Nullable Throwable exception;
 
     private ListenerStartupInformation(
-            final int port,
-            final boolean successful,
-            @NotNull final Listener originalListener,
-            @Nullable final Throwable exception) {
+            final boolean successful, final @NotNull Listener listener, final @Nullable Throwable exception) {
 
-        checkNotNull(originalListener, "Original Listener must not be null");
+        checkNotNull(listener, "Original Listener must not be null");
 
-        this.port = port;
         this.successful = successful;
-        this.originalListener = originalListener;
-        this.exception = Optional.ofNullable(exception);
-    }
-
-    public int getPort() {
-        return port;
+        this.listener = listener;
+        this.exception = exception;
     }
 
     public boolean isSuccessful() {
         return successful;
     }
 
-    public Optional<Throwable> getException() {
-        return exception;
+    public @NotNull Listener getListener() {
+        return listener;
     }
 
-    public Listener getOriginalListener() {
-        return originalListener;
+    public @NotNull Optional<Throwable> getException() {
+        return Optional.ofNullable(exception);
     }
 
-    public static ListenerStartupInformation successfulListenerStartup(
-            final int port, @NotNull final Listener originalListener) {
-        return new ListenerStartupInformation(port, true, originalListener, null);
+    public static ListenerStartupInformation successfulListenerStartup(final @NotNull Listener listener) {
+        return new ListenerStartupInformation(true, listener, null);
     }
 
     public static ListenerStartupInformation failedListenerStartup(
-            final int port, @NotNull final Listener originalListener, @Nullable final Throwable exception) {
-        return new ListenerStartupInformation(port, false, originalListener, exception);
+            final @NotNull Listener listener, final @Nullable Throwable exception) {
+        return new ListenerStartupInformation(false, listener, exception);
     }
 }
