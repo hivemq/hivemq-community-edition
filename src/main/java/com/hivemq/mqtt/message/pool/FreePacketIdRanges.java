@@ -106,6 +106,12 @@ public class FreePacketIdRanges {
                     }
                 }
 
+                // Updating the root range to preserve the invariant of root range being non-empty if there are ranges
+                // with free IDs available. We do so by ignoring intervals that consist of a single id.
+                while ((rootRange.start == rootRange.end) && (rootRange.next != null)) {
+                    rootRange = rootRange.next;
+                }
+
                 return; // id found and taken
             }
 

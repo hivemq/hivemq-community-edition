@@ -54,6 +54,19 @@ public class FreePacketIdRangesTest {
         assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(1)));
     }
 
+    @Test
+    public void takeNextId_whenPreviousTakesLeaveEmptyRangesButFreeIdsRemainInOtherRanges_thenNewIdIsReturned()
+            throws NoMessageIdAvailableException {
+        final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
+        final int firstId = messageIDPool.takeNextId();
+        assertEquals(1, firstId);
+        final int secondId = messageIDPool.takeNextId();
+        assertEquals(2, secondId);
+        messageIDPool.returnId(firstId);
+        messageIDPool.takeIfAvailable(firstId);
+        assertEquals(3, messageIDPool.takeNextId());
+    }
+
     @Test(expected = NoMessageIdAvailableException.class)
     public void takeNextId_whenNoMoreIdsAvailable_thenExceptionIsThrown() throws
             NoMessageIdAvailableException {
