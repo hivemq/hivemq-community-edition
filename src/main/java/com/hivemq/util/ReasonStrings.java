@@ -67,6 +67,7 @@ public class ReasonStrings {
             "Not authorized to connect. Will topic contained wildcard characters (#/+). The broker does not allow this.";
     public static final String CONNACK_NOT_AUTHORIZED_NO_AUTHENTICATOR =
             "Not authorized to connect. No authenticator registered.";
+    public static final String CONNACK_PACKET_TOO_LARGE = "Sent CONNECT exceeded the maximum permissible size.";
     public static final String CONNACK_NOT_AUTHORIZED_FAILED = "Not authorized to connect. Authentication failed.";
 
     public static final String CONNACK_TOPIC_NAME_INVALID_WILL_LENGTH =
