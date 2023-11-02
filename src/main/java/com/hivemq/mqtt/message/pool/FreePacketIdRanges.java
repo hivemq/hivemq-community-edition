@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 
 /**
@@ -37,12 +38,11 @@ import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
  * Upon assignment, the interval's lower end is incremented (interval size reduces from below).
  * When the ID is returned, it either joins one of the existing {@link Range} intervals in the list (if it is adjacent)
  * or it forms a new {@link Range} that is added to the list.
- * <p>
- * This class is NOT thread-safe.
  * <a
  * href="https://github.com/hivemq/hivemq-mqtt-client/blob/master/src/main/java/com/hivemq/client/internal/util/Ranges.java">The
  * original implementation in the HiveMQ Java Client.</a>
  */
+@ThreadSafe
 public class FreePacketIdRanges {
 
     private static final int MIN_ALLOWED_MQTT_PACKET_ID = 1;
@@ -61,7 +61,7 @@ public class FreePacketIdRanges {
      *
      * @return a new ID if available in any of the ranges or {@link NoMessageIdAvailableException} if ran out of IDs.
      */
-    public int takeNextId() throws NoMessageIdAvailableException {
+    public synchronized int takeNextId() throws NoMessageIdAvailableException {
         if (rootRange.start == rootRange.end) {
             throw new NoMessageIdAvailableException();
         }
@@ -79,7 +79,7 @@ public class FreePacketIdRanges {
      *
      * @param id an ID that the caller attempts to take.
      */
-    public void takeIfAvailable(final int id) {
+    public synchronized void takeIfAvailable(final int id) {
         Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
                 "Attempting to take an ID %s that is outside the valid packet IDs range.",
                 id);
@@ -126,7 +126,7 @@ public class FreePacketIdRanges {
      *
      * @param id an ID that the caller attempts to return (to free).
      */
-    public void returnId(final int id) {
+    public synchronized void returnId(final int id) {
         Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
                 "Attempting to return an ID %s that is outside the valid packet IDs range.",
                 id);
