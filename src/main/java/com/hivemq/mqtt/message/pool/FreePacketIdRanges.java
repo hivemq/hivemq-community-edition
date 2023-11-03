@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
+import com.hivemq.mqtt.message.pool.exception.MessageIdUnavailableException;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 
 /**
@@ -79,7 +80,7 @@ public class FreePacketIdRanges {
      *
      * @param id an ID that the caller attempts to take.
      */
-    public synchronized void takeIfAvailable(final int id) {
+    public synchronized void takeSpecificId(final int id) throws MessageIdUnavailableException {
         Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
                 "Attempting to take an ID %s that is outside the valid packet IDs range.",
                 id);
@@ -89,7 +90,7 @@ public class FreePacketIdRanges {
 
         while (current != null) {
             if (id < current.start) {
-                return; // since the ranges are traversed in increasing order of IDs, the given id will not be found
+                throw new MessageIdUnavailableException(id); // since the ranges are traversed in increasing order of IDs, the given id will not be found
             }
 
             if (id < current.end) { // the id is int the current range of free ids
@@ -107,7 +108,7 @@ public class FreePacketIdRanges {
                 }
 
                 // Updating the root range to preserve the invariant of root range being non-empty if there are ranges
-                // with free IDs available. We do so by ignoring intervals that consist of a single id.
+                // with free IDs available. We do so by ignoring empty intervals.
                 while ((rootRange.start == rootRange.end) && (rootRange.next != null)) {
                     rootRange = rootRange.next;
                 }
