@@ -32,6 +32,7 @@ import com.hivemq.metrics.handler.GlobalMQTTMessageCounter;
 import com.hivemq.mqtt.handler.InterceptorHandler;
 import com.hivemq.mqtt.handler.auth.AuthHandler;
 import com.hivemq.mqtt.handler.auth.AuthInProgressMessageHandler;
+import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connect.ConnectHandler;
 import com.hivemq.mqtt.handler.connect.ConnectionLimiterHandler;
 import com.hivemq.mqtt.handler.connect.NoConnectIdleHandler;
@@ -91,6 +92,9 @@ public class ChannelDependenciesTest {
 
     @Mock
     private @NotNull MqttConnectDecoder mqttConnectDecoder;
+
+    @Mock
+    private @NotNull MqttConnacker mqttConnacker;
 
     @Mock
     private @NotNull EncoderFactory encoderFactory;
@@ -160,6 +164,7 @@ public class ChannelDependenciesTest {
                 pingRequestHandler,
                 restrictionsConfigurationService,
                 mqttConnectDecoder,
+                mqttConnacker,
                 eventLog,
                 sslParameterHandler,
                 mqttDecoders,

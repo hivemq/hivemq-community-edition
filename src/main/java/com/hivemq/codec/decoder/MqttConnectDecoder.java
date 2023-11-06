@@ -58,11 +58,9 @@ public class MqttConnectDecoder {
         mqtt31ConnectDecoder = new Mqtt31ConnectDecoder(mqttConnacker, clientIds, fullConfigurationService, hiveMQId);
     }
 
-    public @Nullable CONNECT decode(
-            final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull ByteBuf buf,
-            final byte fixedHeader) {
 
+    public @Nullable ProtocolVersion decodeProtocolVersion(
+            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
         /*
          * It is sufficient to look at the second byte of the variable header (Length LSB) This byte
          * indicates how long the following protocol name is going to be. In case of the
@@ -87,7 +85,6 @@ public class MqttConnectDecoder {
 
         final ByteBuf lengthLSBBuf = buf.slice(buf.readerIndex() + 1, 1);
         final int lengthLSB = lengthLSBBuf.readByte();
-
         final ProtocolVersion protocolVersion;
         switch (lengthLSB) {
             case 4:
@@ -117,6 +114,18 @@ public class MqttConnectDecoder {
         clientConnectionContext.setProtocolVersion(protocolVersion);
         clientConnectionContext.setConnectReceivedTimestamp(System.currentTimeMillis());
 
+        return protocolVersion;
+    }
+
+    public @Nullable CONNECT decode(
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf,
+            final byte fixedHeader) {
+
+        final ProtocolVersion protocolVersion = decodeProtocolVersion(clientConnectionContext, buf);
+        if (protocolVersion == null) {
+            return null;
+        }
         if (protocolVersion == ProtocolVersion.MQTTv5) {
             return mqtt5ConnectDecoder.decode(clientConnectionContext, buf, fixedHeader);
         } else if (protocolVersion == ProtocolVersion.MQTTv3_1_1) {
