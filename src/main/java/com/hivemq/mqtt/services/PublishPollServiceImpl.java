@@ -34,6 +34,7 @@ import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
+import com.hivemq.mqtt.message.pool.exception.MessageIdUnavailableException;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
@@ -222,7 +223,12 @@ public class PublishPollServiceImpl implements PublishPollService {
                 for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
                     final MessageWithID message = messages.get(i);
                     final FreePacketIdRanges freePacketIdRanges = clientConnection.getFreePacketIdRanges();
-                    freePacketIdRanges.takeIfAvailable(message.getPacketIdentifier());
+                    try {
+                        freePacketIdRanges.takeSpecificId(message.getPacketIdentifier());
+                    } catch (final MessageIdUnavailableException e) {
+                        log.warn("The desired packet ID was not available when polling inflight messages: {}",
+                                e.getMessage());
+                    }
 
                     if (message instanceof PUBLISH) {
                         final PUBLISH publish = (PUBLISH) message;
@@ -411,7 +417,8 @@ public class PublishPollServiceImpl implements PublishPollService {
     }
 
     private @NotNull ImmutableIntArray createMessageIds(
-            final @NotNull FreePacketIdRanges messageIDPool, final int pollMessageLimit) throws NoMessageIdAvailableException {
+            final @NotNull FreePacketIdRanges messageIDPool, final int pollMessageLimit)
+            throws NoMessageIdAvailableException {
         final ImmutableIntArray.Builder builder = ImmutableIntArray.builder(pollMessageLimit);
         for (int i = 0; i < pollMessageLimit; i++) {
             final int nextId = messageIDPool.takeNextId();
