@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.logging;
+package com.hivemq.logging.modifier;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -21,8 +21,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
+import com.hivemq.bootstrap.LoggingBootstrap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.logging.LogLevelModifierTurboFilter;
+import jetbrains.exodus.env.EnvironmentImpl;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,32 +36,40 @@ import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-/**
- * @author Dominik Obermaier
- */
-public class XodusEnvironmentImplLogLevelModificatorTest {
+public class XodusEnvironmentImplLogLevelModifierTest {
 
     private ch.qos.logback.classic.Logger rootLogger;
+    private LoggerContext context;
     private Level level;
 
     @Before
     public void setUp() throws Exception {
 
-        final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
 
+        final LogLevelModifierTurboFilter logLevelModifierTurboFilter = new LogLevelModifierTurboFilter();
+        logLevelModifierTurboFilter.registerLogLevelModifier(new XodusEnvironmentImplLogLevelModifier());
         level = rootLogger.getLevel();
         rootLogger.setLevel(Level.TRACE);
-        context.addTurboFilter(new XodusEnvironmentImplLogLevelModificator());
+        context.addTurboFilter(logLevelModifierTurboFilter);
         context.getLogger("jetbrains.exodus").setLevel(Level.TRACE);
     }
 
     @After
     public void tearDown() throws Exception {
         rootLogger.setLevel(level);
+        context.resetTurboFilterList();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.reset();
+        LoggingBootstrap.prepareLogging();
     }
 
     @Test
@@ -72,9 +84,9 @@ public class XodusEnvironmentImplLogLevelModificatorTest {
 
             appenderIterator.next().addFilter(createFilter(countDownLatch, msg));
         }
-        XodusEnvironmentImplLogLevelModificator.environmentalLogger.error(msg);
+        context.getLogger(EnvironmentImpl.class).error(msg);
 
-        assertEquals(true, countDownLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(countDownLatch.await(3, TimeUnit.SECONDS));
     }
 
     @Test
@@ -87,14 +99,15 @@ public class XodusEnvironmentImplLogLevelModificatorTest {
 
             appenderIterator.next().addFilter(createFilter(countDownLatch, msg));
         }
-        XodusEnvironmentImplLogLevelModificator.environmentalLogger.error(msg);
+        context.getLogger(EnvironmentImpl.class).error(msg);
 
-        assertEquals(true, countDownLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(countDownLatch.await(3, TimeUnit.SECONDS));
     }
 
-    @NotNull
-    private Filter<ILoggingEvent> createFilter(final CountDownLatch countDownLatch, final String text) {
-        return new Filter<ILoggingEvent>() {
+    private @NotNull Filter<ILoggingEvent> createFilter(
+            final @NotNull CountDownLatch countDownLatch, final @NotNull String text) {
+
+        return new Filter<>() {
             @Override
             public FilterReply decide(final ILoggingEvent event) {
                 if (event.getLevel().equals(Level.TRACE)) {
