@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hivemq.logging;
+package com.hivemq.logging.modifier;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -21,23 +21,24 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
+import com.hivemq.bootstrap.LoggingBootstrap;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import com.hivemq.logging.LogLevelModifierTurboFilter;
+import jetbrains.exodus.io.FileDataWriter;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Georg Held
- */
-public class XodusFileDataWriterLogLevelModificatorTest {
+
+public class XodusFileDataWriterLogLevelModifierTest {
 
     private ch.qos.logback.classic.Logger rootLogger;
     private Level level;
@@ -50,9 +51,11 @@ public class XodusFileDataWriterLogLevelModificatorTest {
 
         rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
 
+        final LogLevelModifierTurboFilter logLevelModifierTurboFilter = new LogLevelModifierTurboFilter();
+        logLevelModifierTurboFilter.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
         level = rootLogger.getLevel();
         rootLogger.setLevel(Level.DEBUG);
-        context.addTurboFilter(new XodusFileDataWriterLogLevelModificator());
+        context.addTurboFilter(logLevelModifierTurboFilter);
         context.getLogger("jetbrains.exodus").setLevel(Level.DEBUG);
     }
 
@@ -62,30 +65,37 @@ public class XodusFileDataWriterLogLevelModificatorTest {
         context.resetTurboFilterList();
     }
 
-    @Test(timeout = 5000)
-    public void test_first_time_gets_modified_to_debug() throws Exception {
+    @AfterClass
+    public static void afterClass() {
+        final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.reset();
+        LoggingBootstrap.prepareLogging();
+    }
+
+    @Test
+    public void test_first_time_gets_modified_to_debug() {
         final String msg = "Can't open directory channel. Log directory fsync won't be performed.";
 
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final AtomicInteger loggedCounter = new AtomicInteger();
         final Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
 
         while (appenderIterator.hasNext()) {
-
-            appenderIterator.next().addFilter(createFilter(countDownLatch, msg));
+            appenderIterator.next().addFilter(createFilter(loggedCounter, msg));
         }
-        XodusFileDataWriterLogLevelModificator.fileDataWriterLogger.warn(msg);
+        context.getLogger(FileDataWriter.class).warn(msg);
 
-        assertEquals(true, countDownLatch.await(5, TimeUnit.SECONDS));
+        assertEquals(1, loggedCounter.get());
     }
 
-    @NotNull
-    private Filter<ILoggingEvent> createFilter(final CountDownLatch countDownLatch, final String text) {
-        return new Filter<ILoggingEvent>() {
+    private @NotNull Filter<ILoggingEvent> createFilter(
+            final @NotNull AtomicInteger loggedCounter, final @NotNull String text) {
+
+        return new Filter<>() {
             @Override
             public FilterReply decide(final ILoggingEvent event) {
                 if (event.getLevel().equals(Level.DEBUG)) {
                     if (event.getFormattedMessage().equals(text)) {
-                        countDownLatch.countDown();
+                        loggedCounter.getAndIncrement();
                         return FilterReply.NEUTRAL;
                     }
                 }

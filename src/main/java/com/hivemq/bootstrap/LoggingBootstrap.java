@@ -25,9 +25,10 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.read.ListAppender;
 import ch.qos.logback.core.util.StatusPrinter;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.logging.NettyLogLevelModifier;
-import com.hivemq.logging.XodusEnvironmentImplLogLevelModificator;
-import com.hivemq.logging.XodusFileDataWriterLogLevelModificator;
+import com.hivemq.logging.LogLevelModifierTurboFilter;
+import com.hivemq.logging.modifier.NettyLogLevelModifier;
+import com.hivemq.logging.modifier.XodusEnvironmentImplLogLevelModifier;
+import com.hivemq.logging.modifier.XodusFileDataWriterLogLevelModifier;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,22 +43,15 @@ import java.util.List;
  * This class is responsible for all logging bootstrapping. This is only
  * needed at the very beginning of HiveMQs lifecycle and before bootstrapping other
  * resources
- *
- * @author Dominik Obermaier
  */
 public class LoggingBootstrap {
 
-    private static @NotNull ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-
     private static final Logger log = LoggerFactory.getLogger(LoggingBootstrap.class);
 
-    private static final XodusFileDataWriterLogLevelModificator xodusFileDataWriterLogLevelModificator =
-            new XodusFileDataWriterLogLevelModificator();
-    private static final NettyLogLevelModifier nettyLogLevelModifier = new NettyLogLevelModifier();
-    private static final XodusEnvironmentImplLogLevelModificator xodusEnvironmentImplLogLevelModificator =
-            new XodusEnvironmentImplLogLevelModificator();
-
+    private static @NotNull ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
     private static final List<Appender<ILoggingEvent>> defaultAppenders = new LinkedList<>();
+    private static final @NotNull LogLevelModifierTurboFilter logLevelModifierTurboFilter =
+            new LogLevelModifierTurboFilter();
 
     /**
      * Prepares the logging. This method must be called before any logging occurs
@@ -90,9 +84,8 @@ public class LoggingBootstrap {
     public static void initLogging(final @NotNull File configFolder) {
 
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        final ch.qos.logback.classic.Logger logger = getRootLogger();
 
-        context.addListener(new LogbackChangeListener(logger));
+        context.addListener(new LogbackChangeListener());
 
         final boolean overridden = overrideLogbackXml(configFolder);
 
@@ -104,13 +97,15 @@ public class LoggingBootstrap {
 
         reset();
 
+        context.addTurboFilter(logLevelModifierTurboFilter);
+
         // must be added here, as addLoglevelModifiers() is much to late
         if (SystemUtils.IS_OS_WINDOWS) {
-            context.addTurboFilter(xodusFileDataWriterLogLevelModificator);
+            logLevelModifierTurboFilter.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
             log.trace("Added Xodus log level modifier for FileDataWriter.class");
         }
 
-        context.addTurboFilter(nettyLogLevelModifier);
+        logLevelModifierTurboFilter.registerLogLevelModifier(new NettyLogLevelModifier());
         log.trace("Added Netty log level modifier");
     }
 
@@ -194,9 +189,7 @@ public class LoggingBootstrap {
     }
 
     public static void addLoglevelModifiers() {
-        final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
-        context.addTurboFilter(xodusEnvironmentImplLogLevelModificator);
+        logLevelModifierTurboFilter.registerLogLevelModifier(new XodusEnvironmentImplLogLevelModifier());
         log.trace("Added Xodus log level modifier for EnvironmentImpl.class");
     }
 
@@ -208,14 +201,7 @@ public class LoggingBootstrap {
         listAppender.list.clear();
     }
 
-    private static class LogbackChangeListener implements LoggerContextListener {
-
-        private final @NotNull ch.qos.logback.classic.Logger logger;
-
-        private LogbackChangeListener(
-                final @NotNull ch.qos.logback.classic.Logger logger) {
-            this.logger = logger;
-        }
+    private static final class LogbackChangeListener implements LoggerContextListener {
 
         @Override
         public boolean isResetResistant() {
@@ -237,7 +223,7 @@ public class LoggingBootstrap {
         @Override
         public void onReset(final @NotNull LoggerContext context) {
             log.trace("logback.xml was changed");
-            addTurboFilters(context);
+            context.addTurboFilter(logLevelModifierTurboFilter);
         }
 
         @Override
@@ -248,13 +234,6 @@ public class LoggingBootstrap {
         @Override
         public void onLevelChange(final @NotNull ch.qos.logback.classic.Logger logger, final @NotNull Level level) {
             //noop
-        }
-
-        private void addTurboFilters(final @NotNull LoggerContext context) {
-
-            context.addTurboFilter(xodusFileDataWriterLogLevelModificator);
-            context.addTurboFilter(nettyLogLevelModifier);
-            context.addTurboFilter(xodusEnvironmentImplLogLevelModificator);
         }
     }
 }
