@@ -21,7 +21,7 @@ HiveMQ uses the following third party libraries:
  com.sun.activation:jakarta.activation                                      | 1.2.2                                     | BSD-3-Clause  | https://www.eclipse.org/org/documents/edl-v10.php
  com.sun.xml.bind:jaxb-impl                                                 | 2.3.8                                     | BSD-3-Clause  | https://www.eclipse.org/org/documents/edl-v10.php
  commons-io:commons-io                                                      | 2.13.0                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
- io.dropwizard.metrics:metrics-core                                         | 4.2.19                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
+ io.dropwizard.metrics:metrics-core                                         | 4.2.22                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  io.dropwizard.metrics:metrics-jmx                                          | 4.2.19                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  io.dropwizard.metrics:metrics-logback                                      | 4.2.19                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  io.github.microutils:kotlin-logging                                        | 1.4.1                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
@@ -56,7 +56,7 @@ HiveMQ uses the following third party libraries:
  org.jetbrains.xodus:xodus-utils                                            | 1.2.3                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.rocksdb:rocksdbjni                                                     | 7.4.5                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.slf4j:jul-to-slf4j                                                     | 2.0.7                                     | MIT           | https://spdx.org/licenses/MIT.html
- org.slf4j:slf4j-api                                                        | 2.0.7                                     | MIT           | https://spdx.org/licenses/MIT.html
+ org.slf4j:slf4j-api                                                        | 2.0.9                                     | MIT           | https://spdx.org/licenses/MIT.html
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 The open source code of the libraries can be obtained by sending an email to legal@hivemq.com.
