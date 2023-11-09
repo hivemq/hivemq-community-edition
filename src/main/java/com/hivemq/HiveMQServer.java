@@ -262,6 +262,7 @@ public class HiveMQServer {
         if (configService.persistenceConfigurationService().getMode() == PersistenceMode.FILE) {
             dataLock.unlock();
         }
+        LoggingBootstrap.resetLogging();
     }
 
     public @Nullable Injector getInjector() {
