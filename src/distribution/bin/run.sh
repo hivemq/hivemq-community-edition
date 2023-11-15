@@ -52,7 +52,7 @@ if hash java 2>/dev/null; then
     fi
 
     # JMX Monitoring
-    JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+    JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${JMX_PORT:-9010} -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 
     # Uncomment for enabling Diagnostic Mode
     #JAVA_OPTS="$JAVA_OPTS -DdiagnosticMode=true"
