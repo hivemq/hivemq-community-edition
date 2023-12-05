@@ -59,6 +59,7 @@
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>100MB</maxFileSize>
+            <checkIncrement>10000</checkIncrement>
         </triggeringPolicy>
     </appender>
 
