@@ -46,6 +46,6 @@ public interface SingleWriterService {
     }
 
     interface FailedCallback {
-        void afterTask(@NotNull Exception exception);
+        void afterTask(@NotNull Throwable exception);
     }
 }

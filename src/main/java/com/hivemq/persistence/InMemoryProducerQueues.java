@@ -150,7 +150,7 @@ public class InMemoryProducerQueues implements ProducerQueues {
                 } else {
                     successCallback.afterTask(result);
                 }
-            } catch (final Exception e) {
+            } catch (final Throwable e) {
                 if (resultFuture != null) {
                     resultFuture.setException(e);
                 } else {

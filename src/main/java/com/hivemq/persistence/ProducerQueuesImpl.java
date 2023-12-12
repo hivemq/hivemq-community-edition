@@ -230,7 +230,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
                                         .afterTask(result));
                             }
                         }
-                    } catch (final Exception e) {
+                    } catch (final Throwable e) {
                         if (taskWithFuture.getFuture() != null) {
                             taskWithFuture.getFuture().setException(e);
                         } else {
