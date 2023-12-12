@@ -88,7 +88,7 @@ public class LoggingBootstrap {
 
         context.addListener(logbackChangeListener);
 
-        final boolean overridden = overrideLogbackXml(configFolder);
+        final boolean overridden = tryToOverrideLogbackXml(configFolder);
 
         if (!overridden) {
             reEnableDefaultAppenders();
@@ -158,15 +158,14 @@ public class LoggingBootstrap {
     }
 
     /**
-     * Overrides the standard Logging configuration delivered with HiveMQ with
+     * Attempts to override the standard Logging configuration delivered with HiveMQ with
      * a logback.xml from the config folder.
      *
      * @return If the default configuration was overridden
      */
-    private static boolean overrideLogbackXml(final @NotNull File configFolder) {
+    private static boolean tryToOverrideLogbackXml(final @NotNull File configFolder) {
         final File file = new File(configFolder, "logback.xml");
         if (file.canRead()) {
-            log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
             final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             try {
                 context.reset();
@@ -176,22 +175,28 @@ public class LoggingBootstrap {
                 configurator.doConfigure(file);
 
                 context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(listAppender);
+                log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
                 return true;
             } catch (final JoranException je) {
-                // StatusPrinter will handle this
+                // StatusPrinter will handle the rest
+                log.warn(
+                        "A configurator exception was thrown while attempting to configure Logback. Using HiveMQ default logging configuration.");
             } catch (final Exception ex) {
+                log.warn(
+                        "An exception was thrown while attempting to configure Logback. Using HiveMQ default logging configuration.");
                 // Just in case, so we see a stacktrace if the logger could not be initialized
                 ex.printStackTrace();
             } finally {
                 StatusPrinter.printInCaseOfErrorsOrWarnings(context);
             }
             // Print internal status data in case of warnings or errors.
-            return false;
-        } else {
-            log.warn("The logging configuration file {} does not exist. Using HiveMQ default logging configuration.",
+        } else { // we do not override if the custom config file does not exist
+            log.warn(
+                    "The logging configuration file {} cannot be read or does not exist. Using HiveMQ default logging configuration.",
                     file.getAbsolutePath());
-            return false;
         }
+
+        return false;
     }
 
     public static void addLoglevelModifiers() {
