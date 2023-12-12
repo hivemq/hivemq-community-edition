@@ -89,7 +89,6 @@ public class LoggingBootstrap {
         context.addListener(logbackChangeListener);
 
         final boolean overridden = tryToOverrideLogbackXml(configFolder);
-
         if (!overridden) {
             reEnableDefaultAppenders();
             context.addTurboFilter(logLevelModifierTurboFilter);
@@ -98,7 +97,6 @@ public class LoggingBootstrap {
         logQueuedEntries();
 
         reset();
-
         // must be added here, as addLoglevelModifiers() is much to late
         if (SystemUtils.IS_OS_WINDOWS) {
             logLevelModifierTurboFilter.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
