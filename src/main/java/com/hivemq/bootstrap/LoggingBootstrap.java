@@ -61,7 +61,6 @@ public class LoggingBootstrap {
 
         final ch.qos.logback.classic.Logger logger = getRootLogger();
 
-
         final Iterator<Appender<ILoggingEvent>> iterator = logger.iteratorForAppenders();
         while (iterator.hasNext()) {
             final Appender<ILoggingEvent> next = iterator.next();
@@ -70,12 +69,10 @@ public class LoggingBootstrap {
             defaultAppenders.add(next);
         }
 
-
         //This appender just adds entries to an Array List so we can queue the log statements for later
         listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
-
     }
 
     /**
@@ -83,7 +80,6 @@ public class LoggingBootstrap {
      * at the very beginning of the HiveMQ lifecycle
      */
     public static void initLogging(final @NotNull File configFolder) {
-
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         context.addListener(logbackChangeListener);
@@ -117,7 +113,6 @@ public class LoggingBootstrap {
      * Re-enables all default appenders that were removed from the root logger for startup
      */
     private static void reEnableDefaultAppenders() {
-
         final ch.qos.logback.classic.Logger logger = getRootLogger();
 
         for (final Appender<ILoggingEvent> defaultAppender : defaultAppenders) {
@@ -129,7 +124,6 @@ public class LoggingBootstrap {
      * Logs all queued Entries to the logger. It is assumed that the logger is fully initialized at this point
      */
     private static void logQueuedEntries() {
-
         final ch.qos.logback.classic.Logger logger = getRootLogger();
 
         listAppender.stop();
