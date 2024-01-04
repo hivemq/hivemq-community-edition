@@ -259,26 +259,36 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * - topic contains '+' character
      * <p>
      * - topic contains '#' character
+     * <p>
+     * - topic is empty
      *
      * @param clientConnectionContext the connection of the mqtt client
      * @param topicName               the topic
-     * @param messageType             the type of the message
      * @return true if invalid, false if valid
      */
     protected boolean topicInvalid(
             final @NotNull ClientConnectionContext clientConnectionContext,
-            final @NotNull String topicName,
-            final @NotNull MessageType messageType) {
+            final @NotNull String topicName) {
+
+        if (topicName.isEmpty()) {
+            disconnector.disconnect(clientConnectionContext.getChannel(),
+                    "A client (ID: {}, IP: {}) sent a " +
+                            MessageType.PUBLISH.name() +
+                            " with an empty topic. This is not allowed. Disconnecting client.",
+                    "Sent a " + MessageType.PUBLISH.name() + " with an empty topic.",
+                    Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
+                    ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_EMPTY);
+            return true;
+        }
 
         if (Topics.containsWildcard(topicName)) {
             disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a " +
-                            messageType.name() +
+                            MessageType.PUBLISH.name() +
                             " with a wildcard character (# or +). This is not allowed. Disconnecting client.",
-                    "Sent a " + messageType.name() + " with wildcard character (#/+) in topic: " + topicName,
+                    "Sent a " + MessageType.PUBLISH.name() + " with wildcard character (#/+) in topic: " + topicName,
                     Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
-                    String.format(ReasonStrings.DISCONNECT_MALFORMED_WILDCARD, messageType.name()));
-
+                    String.format(ReasonStrings.DISCONNECT_MALFORMED_WILDCARD, MessageType.PUBLISH.name()));
             return true;
         }
         return false;
@@ -350,7 +360,6 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param clientConnectionContext the connection of the mqtt client
      * @param buf                     the encoded ByteBuf of the message
      * @param responseTopic           the initial response topic (must be null)
-     * @param messageType             the type of the message
      * @return a response topic, or {@code null} when failed.
      */
     @Nullable
@@ -376,7 +385,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
 
             return null;
         }
-        if (topicInvalid(clientConnectionContext, responseTopic, messageType)) {
+        if (topicInvalid(clientConnectionContext, responseTopic)) {
             return null;
         }
         return responseTopic;

@@ -403,6 +403,30 @@ public class Mqtt3PublishDecoderTest {
     }
 
     @Test
+    public void test_invalid_topic_empty() {
+
+        final int invalidLength = 0;
+
+        final String topic = "";
+        final String payload = "payload";
+
+        final ByteBuf buf = Unpooled.buffer();
+        buf.writeByte(0b0011_0000);
+        buf.writeByte(topic.getBytes(UTF_8).length + 2 + payload.getBytes(UTF_8).length);
+        buf.writeShort(invalidLength);
+        buf.writeBytes(topic.getBytes(UTF_8));
+        buf.writeBytes(payload.getBytes(UTF_8));
+        channel.writeInbound(buf);
+
+        final PUBLISH publish = channel.readInbound();
+
+        assertNull(publish);
+
+        //Make sure we did get disconnected
+        assertFalse(channel.isActive());
+    }
+
+    @Test
     public void test_topic_contains_control_character() {
 
         final String topic = "topic" + '\u0013';
