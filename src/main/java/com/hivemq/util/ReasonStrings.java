@@ -169,6 +169,7 @@ public class ReasonStrings {
 
     public static final String DISCONNECT_RECEIVE_MAXIMUM_EXCEEDED = "Too many concurrent PUBLISH messages sent.";
 
+    public static final String DISCONNECT_TOPIC_NAME_INVALID_EMPTY = "PUBLISH with empty topic.";
     public static final String DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY = "Shared subscription with empty topic.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_ZERO = "PUBLISH containing topic alias of '0' was sent.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_TOO_LARGE = "Topic alias in PUBLISH sent was too large.";
