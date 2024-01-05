@@ -81,8 +81,8 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
             final String topic = Strings.getPrefixedString(buf);
             if (isInvalidTopic(clientConnectionContext, topic)) {
                 disconnector.disconnect(clientConnectionContext.getChannel(),
-                        "A client (IP: {}) sent an UNSUBSCRIBE with an empty topic. This is not allowed. Disconnecting client.",
-                        "Sent UNSUBSCRIBE with an empty topic",
+                        "A client (IP: {}) sent an UNSUBSCRIBE with an invalid topic filter. This is not allowed. Disconnecting client.",
+                        "Sent UNSUBSCRIBE with an invalid topic filter",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
                         ReasonStrings.DISCONNECT_MALFORMED_EMPTY_UNSUB_TOPIC);
                 buf.clear();

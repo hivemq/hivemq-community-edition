@@ -100,7 +100,7 @@ public class Mqtt5PublishDecoder extends AbstractMqttPublishDecoder<Mqtt5PUBLISH
         if (topicName.isEmpty()) {
             topicName = null;
         } else {
-            if (topicInvalid(clientConnectionContext, topicName)) {
+            if (topicInvalid(clientConnectionContext, "topic", topicName)) {
                 return null;
             }
         }

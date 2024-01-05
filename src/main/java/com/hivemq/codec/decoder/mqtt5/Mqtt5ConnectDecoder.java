@@ -913,7 +913,7 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
 
             return null;
         }
-        if (topicInvalid(clientConnectionContext, responseTopic, "response topic")) {
+        if (topicInvalid(clientConnectionContext, responseTopic, "will response topic")) {
             return null;
         }
         return responseTopic;
@@ -1128,6 +1128,15 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
             final @NotNull String topicName,
             final @NotNull String location) {
 
+        if (topicName.isEmpty()) {
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
+                    "A client (ID: {}, IP: {}) sent a CONNECT with an empty " + location + ". This is not allowed.",
+                    "Sent a CONNECT with an empty " + location,
+                    Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
+                    String.format(ReasonStrings.CONNACK_TOPIC_NAME_INVALID_EMPTY, location));
+            return true;
+        }
+
         if (Topics.containsWildcard(topicName)) {
             mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a CONNECT with a wildcard character (# or +) in the " +
@@ -1136,7 +1145,6 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
                     "Sent CONNECT with wildcard character (#/+) in the " + location,
                     Mqtt5ConnAckReasonCode.TOPIC_NAME_INVALID,
                     String.format(ReasonStrings.CONNACK_TOPIC_NAME_INVALID_WILL_WILDCARD, location));
-
             return true;
         }
         return false;
