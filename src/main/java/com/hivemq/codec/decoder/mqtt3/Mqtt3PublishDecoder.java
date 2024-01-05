@@ -86,7 +86,7 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
             topicName = Strings.getPrefixedString(buf, utf8StringLength);
         }
 
-        if (topicInvalid(clientConnectionContext, topicName)) {
+        if (topicInvalid(clientConnectionContext, "topic", topicName)) {
             return null;
         }
 

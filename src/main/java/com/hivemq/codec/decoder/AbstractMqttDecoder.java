@@ -263,32 +263,32 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * - topic is empty
      *
      * @param clientConnectionContext the connection of the mqtt client
+     * @param parameterName           the name of the mqtt parameter (topic, response topic)
      * @param topicName               the topic
      * @return true if invalid, false if valid
      */
     protected boolean topicInvalid(
             final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull String parameterName,
             final @NotNull String topicName) {
 
         if (topicName.isEmpty()) {
             disconnector.disconnect(clientConnectionContext.getChannel(),
-                    "A client (ID: {}, IP: {}) sent a " +
-                            MessageType.PUBLISH.name() +
-                            " with an empty topic. This is not allowed. Disconnecting client.",
-                    "Sent a " + MessageType.PUBLISH.name() + " with an empty topic.",
+                    "A client (ID: {}, IP: {}) sent a PUBLISH with an empty " +
+                            parameterName +
+                            ". This is not allowed. Disconnecting client.",
+                    "Sent a PUBLISH with an empty " + parameterName,
                     Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
-                    ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_EMPTY);
+                    String.format(ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_EMPTY, parameterName));
             return true;
         }
 
         if (Topics.containsWildcard(topicName)) {
             disconnector.disconnect(clientConnectionContext.getChannel(),
-                    "A client (IP: {}) sent a " +
-                            MessageType.PUBLISH.name() +
-                            " with a wildcard character (# or +). This is not allowed. Disconnecting client.",
-                    "Sent a " + MessageType.PUBLISH.name() + " with wildcard character (#/+) in topic: " + topicName,
+                    "A client (ID: {}, IP: {}) sent a PUBLISH with a wildcard character (# or +). This is not allowed. Disconnecting client.",
+                    "Sent a PUBLISH with wildcard character (#/+) in topic: " + topicName,
                     Mqtt5DisconnectReasonCode.TOPIC_NAME_INVALID,
-                    String.format(ReasonStrings.DISCONNECT_MALFORMED_WILDCARD, MessageType.PUBLISH.name()));
+                    String.format(ReasonStrings.DISCONNECT_MALFORMED_WILDCARD, "PUBLISH"));
             return true;
         }
         return false;
@@ -385,7 +385,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
 
             return null;
         }
-        if (topicInvalid(clientConnectionContext, responseTopic)) {
+        if (topicInvalid(clientConnectionContext, "response topic", responseTopic)) {
             return null;
         }
         return responseTopic;
