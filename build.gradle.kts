@@ -12,13 +12,10 @@ plugins {
     alias(libs.plugins.javadocLinks)
     alias(libs.plugins.githubRelease)
     alias(libs.plugins.license)
-    alias(libs.plugins.dependencyCheck)
     alias(libs.plugins.versions)
 
     /* Code Quality Plugins */
     jacoco
-    pmd
-    alias(libs.plugins.spotbugs)
     alias(libs.plugins.forbiddenApis)
 
     id("com.hivemq.third-party-license-generator")
@@ -253,34 +250,6 @@ tasks.javadoc {
 jacoco {
     toolVersion = libs.versions.jacoco.get()
 }
-
-pmd {
-    toolVersion = libs.versions.pmd.get()
-    sourceSets = listOf(project.sourceSets.main.get())
-    isIgnoreFailures = true
-    rulesMinimumPriority.set(3)
-}
-
-spotbugs {
-    toolVersion.set(libs.versions.spotbugs)
-    ignoreFailures.set(true)
-    reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
-}
-
-dependencies {
-    spotbugsPlugins(libs.findsecbugs.plugin)
-}
-
-dependencyCheck {
-    analyzers.apply {
-        centralEnabled = false
-    }
-    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL
-    scanConfigurations = listOf("runtimeClasspath")
-    suppressionFile = "$projectDir/gradle/dependency-check/suppress.xml"
-}
-
-tasks.check { dependsOn(tasks.dependencyCheckAnalyze) }
 
 forbiddenApis {
     bundledSignatures = setOf("jdk-system-out")
