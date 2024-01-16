@@ -264,18 +264,18 @@ tasks.javadoc {
 /* ******************** checks ******************** */
 
 jacoco {
-    toolVersion = "${property("jacoco.version")}"
+    toolVersion = libs.versions.jacoco.get()
 }
 
 pmd {
-    toolVersion = "${property("pmd.version")}"
+    toolVersion = libs.versions.pmd.get()
     sourceSets = listOf(project.sourceSets.main.get())
     isIgnoreFailures = true
     rulesMinimumPriority.set(3)
 }
 
 spotbugs {
-    toolVersion.set("${property("spotbugs.version")}")
+    toolVersion.set(libs.versions.spotbugs)
     ignoreFailures.set(true)
     reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
 }
