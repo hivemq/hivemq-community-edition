@@ -24,9 +24,6 @@ plugins {
     id("com.hivemq.third-party-license-generator")
 }
 
-
-/* ******************** metadata ******************** */
-
 group = "com.hivemq"
 description = "HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5"
 
@@ -68,20 +65,13 @@ metadata {
     }
 }
 
-
-/* ******************** java ******************** */
-
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
-
     withJavadocJar()
     withSourcesJar()
 }
-
-
-/* ******************** dependencies ******************** */
 
 repositories {
     mavenCentral()
@@ -155,7 +145,6 @@ dependencies {
     implementation(libs.eclipse.collections)
 }
 
-
 /* ******************** test ******************** */
 
 dependencies {
@@ -203,7 +192,6 @@ tasks.test {
         events = setOf(TestLogEvent.STARTED, TestLogEvent.FAILED)
     }
 }
-
 
 /* ******************** distribution ******************** */
 
@@ -260,7 +248,6 @@ tasks.javadoc {
     }
 }
 
-
 /* ******************** checks ******************** */
 
 jacoco {
@@ -306,7 +293,6 @@ tasks.forbiddenApisMain {
 
 tasks.forbiddenApisTest { enabled = false }
 
-
 /* ******************** compliance ******************** */
 
 license {
@@ -325,20 +311,16 @@ tasks.updateThirdPartyLicenses {
     outputDirectory.set(layout.projectDirectory.dir("src/distribution/third-party-licenses"))
 }
 
-
 /* ******************** publishing ******************** */
 
 publishing {
     publications {
         register<MavenPublication>("distribution") {
             artifact(hivemqZip)
-
             artifactId = "hivemq-community-edition"
         }
-
         register<MavenPublication>("embedded") {
             from(components["java"])
-
             artifactId = "hivemq-community-edition-embedded"
         }
     }
