@@ -188,7 +188,7 @@ tasks.test {
         "--add-opens",
         "jdk.management/com.sun.management.internal=ALL-UNNAMED",
         "--add-exports",
-        "java.base/jdk.internal.misc=ALL-UNNAMED"
+        "java.base/jdk.internal.misc=ALL-UNNAMED",
     )
 
     val inclusions = rootDir.resolve("inclusions.txt")
@@ -213,7 +213,7 @@ tasks.jar {
         "Implementation-Vendor" to metadata.organization.get().name.get(),
         "Implementation-Version" to project.version,
         "HiveMQ-Version" to project.version,
-        "Main-Class" to "com.hivemq.HiveMQServer"
+        "Main-Class" to "com.hivemq.HiveMQServer",
     )
 }
 
