@@ -79,8 +79,6 @@ xodus-environment = { module = "org.jetbrains.xodus:xodus-environment", version.
 xodus-openApi = { module = "org.jetbrains.xodus:xodus-openAPI", version.ref = "xodus" }
 zeroAllocationHashing = { module = "net.openhft:zero-allocation-hashing", version.ref = "zeroAllocationHashing" }
 
-[bundles]
-
 [plugins]
 defaults = { id = "io.github.sgtsilvio.gradle.defaults", version = "0.2.0" }
 dependencyCheck = { id = "org.owasp.dependencycheck", version = "7.1.1" }
