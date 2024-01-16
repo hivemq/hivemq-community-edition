@@ -38,8 +38,8 @@ apache-commonsCompress = { module = "org.apache.commons:commons-compress", versi
 apache-commonsIO = { module = "commons-io:commons-io", version.ref = "apache-commonsIO" }
 apache-commonsLang = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commonsLang" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
-bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 byteBuddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
 concurrentUnit = { module = "net.jodah:concurrentunit", version.ref = "concurrentUnit" }
 dropwizard-metrics = { module = "io.dropwizard.metrics:metrics-core", version.ref = "dropwizard-metrics" }
