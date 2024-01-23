@@ -1,14 +1,14 @@
 # We use multi-stage here to unzip in an initial layer so we don't have to COPY and then RUN unzip (two layers). ADD can lead to larger layers as well.
 FROM busybox:1.35.0 AS unpack
 
-ARG HIVEMQ_VERSION=2019.1
+ARG HIVEMQ_VERSION
 
 COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
 FROM eclipse-temurin:11-jre-jammy
 
-ARG HIVEMQ_VERSION=2019.1
+ARG HIVEMQ_VERSION
 
 ENV HIVEMQ_GID=10000
 ENV HIVEMQ_UID=10000
