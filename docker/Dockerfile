@@ -1,5 +1,5 @@
 # We use multi-stage here to unzip in an initial layer so we don't have to COPY and then RUN unzip (two layers). ADD can lead to larger layers as well.
-FROM busybox AS unzip
+FROM busybox:1.35.0 AS unpack
 
 ARG HIVEMQ_VERSION=2019.1
 
@@ -27,7 +27,7 @@ COPY config.xml /opt/config.xml
 COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
 
 # HiveMQ setup
-COPY --from=unzip /hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
+COPY --from=unpack /hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
 RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
     && mv /opt/config.xml /opt/hivemq/conf/config.xml \
     && groupadd --gid ${HIVEMQ_GID} hivemq \
@@ -41,11 +41,9 @@ VOLUME /opt/hivemq/data
 # Persist log data
 VOLUME /opt/hivemq/log
 
-#mqtt-clients
-EXPOSE 1883
-
-#websockets
-EXPOSE 8000
+# MQTT TCP listener: 1883
+# MQTT Websocket listener: 8000
+EXPOSE 1883 8000
 
 WORKDIR /opt/hivemq
 
