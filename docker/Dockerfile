@@ -4,7 +4,9 @@ FROM busybox:1.35.0 AS unpack
 ARG HIVEMQ_VERSION
 
 COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
-RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
+RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip -d /opt \
+    && chgrp -R 0 /opt \
+    && chmod -R 770 /opt
 
 FROM eclipse-temurin:11-jre-jammy
 
@@ -23,13 +25,16 @@ ENV HIVEMQ_ALLOW_ALL_CLIENTS "true"
 ENV LANG=en_US.UTF-8
 
 # HiveMQ setup
-COPY --from=unpack /hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
+COPY --from=unpack /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
 COPY config.xml /opt/hivemq-ce-${HIVEMQ_VERSION}/conf/config.xml
 COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
 RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
     && groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq \
-    && chmod -R 775 /opt \
+    && chgrp 0 /opt/hivemq-ce-${HIVEMQ_VERSION}/conf/config.xml \
+    && chmod 770 /opt/hivemq-ce-${HIVEMQ_VERSION}/conf/config.xml \
+    && chgrp 0 /opt/hivemq \
+    && chmod 770 /opt/hivemq \
     && chmod +x /opt/hivemq/bin/run.sh /opt/docker-entrypoint.sh
 
 # Make broker data persistent throughout stop/start cycles
