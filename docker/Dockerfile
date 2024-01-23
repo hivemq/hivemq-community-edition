@@ -4,7 +4,6 @@ FROM busybox:1.35.0 AS unpack
 ARG HIVEMQ_VERSION=2019.1
 
 COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
-
 RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip
 
 FROM eclipse-temurin:11-jre-jammy
@@ -23,13 +22,11 @@ ENV HIVEMQ_ALLOW_ALL_CLIENTS "true"
 # Set locale
 ENV LANG=en_US.UTF-8
 
-COPY config.xml /opt/config.xml
-COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
-
 # HiveMQ setup
 COPY --from=unpack /hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
+COPY config.xml /opt/hivemq-ce-${HIVEMQ_VERSION}/conf/config.xml
+COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
 RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
-    && mv /opt/config.xml /opt/hivemq/conf/config.xml \
     && groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq \
     && chmod -R 775 /opt \
