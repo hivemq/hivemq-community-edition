@@ -35,20 +35,7 @@ readonly gid
 readonly exec_cmd
 
 if [[ "$(id -u)" = "0" ]]; then
-    chown "${uid}":"${gid}" /opt/hivemq/data
-    chmod 700 /opt/hivemq/data
-    # Any of the following may fail but still allow HiveMQ to start normally, so lets ignore errors
-    set +e
-    chown "${uid}":"${gid}" /opt/hivemq
-    chown "${uid}":"${gid}" /opt/hivemq-*
-    chown "${uid}":"${gid}" /opt/hivemq/log
-    chown "${uid}":"${gid}" /opt/hivemq/conf
-    chown "${uid}":"${gid}" /opt/hivemq/conf/config.xml
-    # Recursive for bin, no volume here
-    chown -R "${uid}":"${gid}" /opt/hivemq/bin
-    chmod 700 /opt/hivemq
-    chmod 700 /opt/hivemq-*
-    chmod -R 700 /opt/hivemq/bin
+    find /opt \! -user "${uid}" -exec chown "${uid}" '{}' + || true
 fi
 
 ${exec_cmd} "$@"
