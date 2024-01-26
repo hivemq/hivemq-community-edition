@@ -1,0 +1,11 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "local>hivemq/renovate-config:default.json5"
+    ],
+    baseBranches: [
+        "master",
+        "renovate-playground"
+    ],
+    "useBaseBranchConfig": "merge"
+}
