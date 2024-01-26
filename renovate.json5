@@ -7,5 +7,6 @@
         "master",
         "renovate-playground"
     ],
-    "useBaseBranchConfig": "merge"
+    "useBaseBranchConfig": "merge",
+    "branchPrefix": "renovate/hivemq-community-edition/"
 }
