@@ -26,8 +26,8 @@ ENV HIVEMQ_ALLOW_ALL_CLIENTS "true"
 ENV LANG=en_US.UTF-8
 
 # HiveMQ setup
-COPY --from=unpack /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
 COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
+COPY --from=unpack /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq-ce-${HIVEMQ_VERSION}
 RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
     && groupadd --gid ${HIVEMQ_GID} hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq \
