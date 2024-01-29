@@ -12,8 +12,8 @@ FROM eclipse-temurin:11.0.22_7-jre-jammy@sha256:985ec5f9ff61ef9e24b2298ef902d773
 
 ARG HIVEMQ_VERSION
 
-ENV HIVEMQ_GID=10000
-ENV HIVEMQ_UID=10000
+ARG HIVEMQ_GID=10000
+ARG HIVEMQ_UID=10000
 
 # Additional JVM options, may be overwritten by user
 ENV JAVA_OPTS "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA"
