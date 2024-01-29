@@ -3,8 +3,8 @@ FROM busybox:1.35.0@sha256:02289a9972c5024cd2f083221f6903786e7f4cb4a9a9696f665d2
 
 ARG HIVEMQ_VERSION
 
-COPY hivemq-ce-${HIVEMQ_VERSION}.zip /
-RUN unzip /hivemq-ce-${HIVEMQ_VERSION}.zip -d /opt \
+COPY hivemq-ce-${HIVEMQ_VERSION}.zip /tmp/hivemq-ce.zip
+RUN unzip /tmp/hivemq-ce.zip -d /opt \
     && chgrp -R 0 /opt \
     && chmod -R 770 /opt
 
