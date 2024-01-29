@@ -7,7 +7,8 @@ COPY hivemq-ce-${HIVEMQ_VERSION}.zip /tmp/hivemq-ce.zip
 RUN unzip /tmp/hivemq-ce.zip -d /opt
 COPY config.xml /opt/hivemq-ce-${HIVEMQ_VERSION}/conf/config.xml
 RUN chgrp -R 0 /opt \
-    && chmod -R 770 /opt
+    && chmod -R 770 /opt \
+    && chmod +x /opt/hivemq-ce-${HIVEMQ_VERSION}/bin/run.sh
 
 FROM eclipse-temurin:11.0.22_7-jre-jammy@sha256:985ec5f9ff61ef9e24b2298ef902d773a1e1cb36693d62d0ac4d37e289ff595b
 
@@ -33,7 +34,7 @@ RUN ln -s /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq \
     && useradd -g hivemq -d /opt/hivemq -s /bin/bash --uid ${HIVEMQ_UID} hivemq \
     && chgrp 0 /opt/hivemq \
     && chmod 770 /opt/hivemq \
-    && chmod +x /opt/hivemq/bin/run.sh /opt/docker-entrypoint.sh
+    && chmod +x /opt/docker-entrypoint.sh
 
 # Make broker data persistent throughout stop/start cycles
 VOLUME /opt/hivemq/data
