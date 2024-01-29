@@ -1,5 +1,5 @@
 # We use multi-stage here to unzip in an initial layer so we don't have to COPY and then RUN unzip (two layers). ADD can lead to larger layers as well.
-FROM busybox:1.35.0 AS unpack
+FROM busybox:1.35.0@sha256:02289a9972c5024cd2f083221f6903786e7f4cb4a9a9696f665d20dd6892e5d6 AS unpack
 
 ARG HIVEMQ_VERSION
 
