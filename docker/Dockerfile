@@ -1,5 +1,5 @@
-# We use multi-stage here to unzip in an initial layer so we don't have to COPY and then RUN unzip (two layers). ADD can lead to larger layers as well.
-FROM busybox:1.35.0@sha256:02289a9972c5024cd2f083221f6903786e7f4cb4a9a9696f665d20dd6892e5d6 AS unpack
+# Additional build image to unpack the zip file and change the permissions without retaining large layers just for those operations
+FROM busybox:1.36.1@sha256:6d9ac9237a84afe1516540f40a0fafdc86859b2141954b4d643af7066d598b74 AS unpack
 
 ARG HIVEMQ_VERSION
 
