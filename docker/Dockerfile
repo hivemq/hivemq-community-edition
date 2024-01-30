@@ -18,10 +18,10 @@ ARG HIVEMQ_GID=10000
 ARG HIVEMQ_UID=10000
 
 # Additional JVM options, may be overwritten by user
-ENV JAVA_OPTS "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA"
+ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA"
 
 # Default allow all extension, set this to false to disable it
-ENV HIVEMQ_ALLOW_ALL_CLIENTS "true"
+ENV HIVEMQ_ALLOW_ALL_CLIENTS=true
 
 # Set locale
 ENV LANG=en_US.UTF-8
