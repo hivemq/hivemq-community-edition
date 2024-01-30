@@ -1,0 +1,2 @@
+* * * * * sleep 0; /opt/check_extension.sh
+* * * * * sleep 30; /opt/check_extension.sh
