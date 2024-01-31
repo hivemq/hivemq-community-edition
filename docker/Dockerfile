@@ -7,7 +7,7 @@ COPY hivemq-ce-${HIVEMQ_VERSION}.zip /tmp/hivemq-ce.zip
 RUN unzip /tmp/hivemq-ce.zip -d /opt \
     && mv /opt/hivemq-ce-${HIVEMQ_VERSION} /opt/hivemq
 COPY config.xml /opt/hivemq/conf/config.xml
-RUN chmod -R 770 /opt \
+RUN chmod -R 770 /opt/hivemq \
     && chmod +x /opt/hivemq/bin/run.sh
 
 
