@@ -17,6 +17,7 @@ package util;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientState;
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import io.netty.channel.Channel;
@@ -34,6 +35,52 @@ public class DummyClientConnection extends ClientConnection {
                 false,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                false,
+                false,
+                false,
+                null,
+                null,
+                false,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+    }
+
+    public DummyClientConnection(
+            final @NotNull Channel channel, final @NotNull PublishFlushHandler publishFlushHandler, @NotNull Listener connectedListener) {
+
+        super(channel,
+                publishFlushHandler,
+                ClientState.CONNECTING,
+                null,
+                null,
+                false,
+                null,
+                connectedListener,
                 null,
                 null,
                 null,

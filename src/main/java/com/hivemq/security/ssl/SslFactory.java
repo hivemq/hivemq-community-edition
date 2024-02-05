@@ -53,9 +53,20 @@ public class SslFactory {
     public @NotNull SslHandler getSslHandler(
             final @NotNull Channel ch, final @NotNull Tls tls, final @NotNull SslContext sslContext)
             throws SslException {
-
         final SSLEngine sslEngine = sslContext.newEngine(ch.alloc());
+        return getSslHandler(sslEngine, tls);
+    }
 
+    public @NotNull SslHandler getSslHandler(
+            final @NotNull Channel ch, final @NotNull Tls tls, final @NotNull SslContext sslContext, final String hostname, final int port)
+            throws SslException {
+        final SSLEngine sslEngine = sslContext.newEngine(ch.alloc(), hostname, port);
+        return getSslHandler(sslEngine, tls);
+    }
+
+    public @NotNull SslHandler getSslHandler(
+            final @NotNull SSLEngine sslEngine, final @NotNull Tls tls)
+            throws SslException {
         // if prefer server suites is null -> use default of the engine
         final Boolean preferServerCipherSuites = tls.isPreferServerCipherSuites();
         if (preferServerCipherSuites != null) {
