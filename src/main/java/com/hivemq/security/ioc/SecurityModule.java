@@ -17,6 +17,7 @@ package com.hivemq.security.ioc;
 
 import com.hivemq.bootstrap.ioc.SingletonModule;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.security.ssl.SslContextStore;
 import com.hivemq.security.ssl.SslFactory;
 
@@ -27,14 +28,18 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class SecurityModule extends SingletonModule<Class<SecurityModule>> {
 
-    public SecurityModule() {
+    private final SecurityConfigurationService securityConfigurationService;
+
+    public SecurityModule(final SecurityConfigurationService securityConfigurationService) {
         super(SecurityModule.class);
+        this.securityConfigurationService = securityConfigurationService;
     }
 
     @Override
     protected void configure() {
         bind(SslFactory.class).in(LazySingleton.class);
         bind(SslContextStore.class).in(LazySingleton.class);
+        bind(SecurityConfigurationService.class).toInstance(securityConfigurationService);
 
         bind(ScheduledExecutorService.class).annotatedWith(Security.class)
                 .toProvider(SecurityExecutorProvider.class)

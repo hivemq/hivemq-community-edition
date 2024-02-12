@@ -16,7 +16,10 @@
 
 package com.hivemq.security.ssl;
 
+import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
@@ -60,6 +63,13 @@ public class SslContextFactory {
     private static final Logger log = LoggerFactory.getLogger(SslContextFactory.class);
 
     public static final int DNS_NAME_TYPE = 2;
+
+    private final @NotNull SecurityConfigurationService securityConfigurationService;
+
+    @Inject
+    SslContextFactory(final @NotNull SecurityConfigurationService securityConfigurationService) {
+        this.securityConfigurationService = securityConfigurationService;
+    }
 
     /**
      * Creates a new {@link SslContext} according to the information stored in the {@link Tls} object
@@ -111,9 +121,15 @@ public class SslContextFactory {
                 @Override
                 public String chooseEngineServerAlias(
                         final String keyType, final Principal[] issuers, final SSLEngine engine) {
-                    final String certificateAlias = dnsResolver.resolve(engine.getPeerHost());
-                    log.trace("Choose engine server alias for host: {} found alias: {}",
-                            engine.getPeerHost(),
+                    final String hostname = engine.getPeerHost();
+                    final String certificateAlias;
+                    if (hostname == null) {
+                        // Without SNI activated the hostname is null, so we use the default alias
+                        certificateAlias = securityConfigurationService.getDefaultKeystoreAlias();
+                    } else {
+                        certificateAlias = dnsResolver.resolve(hostname);
+                    }
+                    log.trace("Choose engine server alias for host: {} found alias: {}", hostname,
                             certificateAlias);
                     return certificateAlias;
                 }

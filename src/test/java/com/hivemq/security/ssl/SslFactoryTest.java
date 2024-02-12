@@ -79,7 +79,7 @@ public class SslFactoryTest {
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(logger);
 
-        final SslContextStore sslContextStore = new SslContextStore(executorService, new SslContextFactory());
+        final SslContextStore sslContextStore = new SslContextStore(executorService, new SslContextFactory(null));
         sslFactory = new SslFactory(sslContextStore);
 
         when(socketChannel.alloc()).thenReturn(byteBufAllocator);

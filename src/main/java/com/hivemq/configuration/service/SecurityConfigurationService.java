@@ -29,6 +29,7 @@ public interface SecurityConfigurationService {
     boolean VALIDATE_UTF_8_DEFAULT = true;
     boolean PAYLOAD_FORMAT_VALIDATION_DEFAULT = false;
     boolean ALLOW_REQUEST_PROBLEM_INFORMATION_DEFAULT = true;
+    String DEFAULT_KEYSTORE_ALIAS = "hivemq";
 
     /**
      * @return true if server may assign a client id when clients connect with zero length client id else false.
@@ -50,6 +51,11 @@ public interface SecurityConfigurationService {
      */
     boolean allowRequestProblemInformation();
 
+    /**
+     * @return the default keystore alias.
+     */
+    String getDefaultKeystoreAlias();
+
     void setValidateUTF8(final boolean validateUTF8);
 
     void setPayloadFormatValidation(final boolean payloadFormatValidation);
@@ -57,4 +63,6 @@ public interface SecurityConfigurationService {
     void setAllowServerAssignedClientId(final boolean allowServerAssignedClientId);
 
     void setAllowRequestProblemInformation(final boolean allowRequestProblemInformation);
+
+    void setDefaultKeystoreAlias(final String defaultKeystoreAlias);
 }

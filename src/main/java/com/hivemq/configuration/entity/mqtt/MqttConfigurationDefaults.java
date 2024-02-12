@@ -48,4 +48,6 @@ public class MqttConfigurationDefaults {
     public static final boolean KEEP_ALIVE_ALLOW_UNLIMITED_DEFAULT = true;
     public static final int KEEP_ALIVE_MAX_DEFAULT = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
 
+    public static final String DEFAULT_KEYSTORE_ALIAS = "hivemq";
+
 }

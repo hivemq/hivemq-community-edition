@@ -36,6 +36,7 @@ public class SecurityConfigurator {
                 .isEnabled());
         securityConfigurationService.setAllowRequestProblemInformation(securityConfigEntity.getAllowRequestProblemInformationEntity()
                 .isEnabled());
+        securityConfigurationService.setDefaultKeystoreAlias(securityConfigEntity.getDefaultKeystoreAlias());
     }
 
 
