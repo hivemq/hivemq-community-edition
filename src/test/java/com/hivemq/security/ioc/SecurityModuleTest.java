@@ -22,7 +22,6 @@ import com.google.inject.Stage;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.common.shutdown.ShutdownHooks;
-import com.hivemq.configuration.service.impl.SecurityConfigurationServiceImpl;
 import com.hivemq.security.ssl.SslFactory;
 import io.netty.util.concurrent.EventExecutorGroup;
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class SecurityModuleTest {
     @Test
     public void test_ssl_factory_same() {
 
-        final Injector injector = Guice.createInjector(Stage.PRODUCTION, new SecurityModule(new SecurityConfigurationServiceImpl()), new AbstractModule() {
+        final Injector injector = Guice.createInjector(Stage.PRODUCTION, new SecurityModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(EventExecutorGroup.class).toInstance(mock(EventExecutorGroup.class));

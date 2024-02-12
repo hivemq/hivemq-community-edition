@@ -15,7 +15,6 @@
  */
 package com.hivemq.configuration.entity;
 
-import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.entity.security.AllowEmptyClientIdEntity;
 import com.hivemq.configuration.entity.security.PayloadFormatValidationEntity;
 import com.hivemq.configuration.entity.security.RequestProblemInformationEntityConfig;
@@ -24,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -50,9 +48,6 @@ public class SecurityConfigEntity {
     private @NotNull RequestProblemInformationEntityConfig allowRequestProblemInformationEntity =
             new RequestProblemInformationEntityConfig();
 
-    @XmlElement(name = "default-keystore-alias", defaultValue = "hivemq")
-    private String defaultKeystoreAlias = MqttConfigurationDefaults.DEFAULT_KEYSTORE_ALIAS;
-
     public @NotNull PayloadFormatValidationEntity getPayloadFormatValidationEntity() {
         return payloadFormatValidationEntity;
     }
@@ -63,10 +58,6 @@ public class SecurityConfigEntity {
 
     public @NotNull AllowEmptyClientIdEntity getAllowEmptyClientIdEntity() {
         return allowEmptyClientIdEntity;
-    }
-
-    public String getDefaultKeystoreAlias() {
-        return defaultKeystoreAlias;
     }
 
     public @NotNull RequestProblemInformationEntityConfig getAllowRequestProblemInformationEntity() {

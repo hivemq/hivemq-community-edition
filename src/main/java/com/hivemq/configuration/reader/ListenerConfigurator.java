@@ -182,6 +182,7 @@ public class ListenerConfigurator {
                 .withPreferServerCipherSuites(entity.isPreferServerCipherSuites())
 
                 .withHandshakeTimeout(entity.getHandshakeTimeout())
+                .withDefaultKeystoreAlias(entity.getDefaultKeystoreAlias())
 
                 .build();
     }
