@@ -91,7 +91,7 @@ public class GuiceBootstrap {
                 /* Binds Diagnostics */
                 new DiagnosticModule(),
                 /* Binds SSL functionality*/
-                new SecurityModule(fullConfigurationService.securityConfiguration()),
+                new SecurityModule(),
                 /* Bind Statistics specific classes */
                 new UsageStatisticsModule(),
                 /* Binds the Extension System */

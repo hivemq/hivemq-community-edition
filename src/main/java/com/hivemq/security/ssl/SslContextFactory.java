@@ -63,13 +63,6 @@ public class SslContextFactory {
 
     public static final int DNS_NAME_TYPE = 2;
 
-    private final @NotNull SecurityConfigurationService securityConfigurationService;
-
-    @Inject
-    SslContextFactory(final @NotNull SecurityConfigurationService securityConfigurationService) {
-        this.securityConfigurationService = securityConfigurationService;
-    }
-
     /**
      * Creates a new {@link SslContext} according to the information stored in the {@link Tls} object
      *
@@ -124,7 +117,7 @@ public class SslContextFactory {
                     final String certificateAlias;
                     if (hostname == null) {
                         // Without SNI activated the hostname is null, so we use the default alias
-                        certificateAlias = securityConfigurationService.getDefaultKeystoreAlias();
+                        certificateAlias = tls.getDefaultKeystoreAlias();
                         log.debug("No SNI hostname given, using default alias: {}", certificateAlias);
                     } else {
                         certificateAlias = dnsResolver.resolve(hostname);
