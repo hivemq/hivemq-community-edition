@@ -36,6 +36,8 @@ public class SecurityConfigurationServiceImpl implements SecurityConfigurationSe
     private final AtomicBoolean allowRequestProblemInformation =
             new AtomicBoolean(ALLOW_REQUEST_PROBLEM_INFORMATION_DEFAULT);
 
+    private String defaultKeystoreAlias = DEFAULT_KEYSTORE_ALIAS;
+
     @Override
     public boolean allowServerAssignedClientId() {
         return allowServerAssignedClientId.get();
@@ -54,6 +56,11 @@ public class SecurityConfigurationServiceImpl implements SecurityConfigurationSe
     @Override
     public boolean allowRequestProblemInformation() {
         return allowRequestProblemInformation.get();
+    }
+
+    @Override
+    public String getDefaultKeystoreAlias() {
+        return defaultKeystoreAlias;
     }
 
     @Override
@@ -78,5 +85,11 @@ public class SecurityConfigurationServiceImpl implements SecurityConfigurationSe
     public void setAllowRequestProblemInformation(final boolean allowRequestProblemInformation) {
         log.debug("Setting allow-problem-information to {}", allowRequestProblemInformation);
         this.allowRequestProblemInformation.set(allowRequestProblemInformation);
+    }
+
+    @Override
+    public void setDefaultKeystoreAlias(final String defaultKeystoreAlias) {
+        log.debug("Setting default-keystore-alias to {}", defaultKeystoreAlias);
+        this.defaultKeystoreAlias = defaultKeystoreAlias;
     }
 }
