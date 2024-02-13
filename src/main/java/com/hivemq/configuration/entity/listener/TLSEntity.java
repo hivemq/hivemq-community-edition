@@ -19,6 +19,7 @@ package com.hivemq.configuration.entity.listener;
 import com.hivemq.configuration.entity.listener.tls.ClientAuthenticationModeEntity;
 import com.hivemq.configuration.entity.listener.tls.KeystoreEntity;
 import com.hivemq.configuration.entity.listener.tls.TruststoreEntity;
+import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
@@ -60,6 +61,9 @@ public class TLSEntity {
     @XmlElement(name = "cipher-suite")
     private @NotNull List<String> cipherSuites = new ArrayList<>();
 
+    @XmlElement(name = "default-keystore-alias", defaultValue = "hivemq")
+    private String defaultKeystoreAlias = MqttConfigurationDefaults.DEFAULT_KEYSTORE_ALIAS;
+
     @XmlElement(name = "prefer-server-cipher-suites")
     private @Nullable Boolean preferServerCipherSuites = null;
 
@@ -91,4 +95,7 @@ public class TLSEntity {
         return preferServerCipherSuites;
     }
 
+    public String getDefaultKeystoreAlias() {
+        return defaultKeystoreAlias;
+    }
 }

@@ -45,6 +45,7 @@ public class Tls {
     private final @NotNull List<String> protocols;
     private final @NotNull List<String> cipherSuites;
     private final @Nullable Boolean preferServerCipherSuites;
+    private final @Nullable String defaultKeystoreAlias;
 
     /**
      * Creates a new TLS configuration
@@ -63,6 +64,7 @@ public class Tls {
      * @param cipherSuites             the supported cipher suites. <code>null</code> means that all enabled cipher
      *                                 suites by the JVM are enabled
      * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher suites
+     * @param defaultKeystoreAlias     the default keystore alias to use if no sni name is given
      * @since 3.3
      */
     protected Tls(
@@ -77,7 +79,7 @@ public class Tls {
             final @NotNull ClientAuthMode clientAuthMode,
             final @NotNull List<String> protocols,
             final @NotNull List<String> cipherSuites,
-            final @Nullable Boolean preferServerCipherSuites) {
+            final @Nullable Boolean preferServerCipherSuites, final String defaultKeystoreAlias) {
 
         checkNotNull(clientAuthMode, "clientAuthMode must not be null");
         checkNotNull(protocols, "protocols must not be null");
@@ -94,6 +96,7 @@ public class Tls {
         this.protocols = protocols;
         this.cipherSuites = cipherSuites;
         this.preferServerCipherSuites = preferServerCipherSuites;
+        this.defaultKeystoreAlias = defaultKeystoreAlias;
     }
 
     /**
@@ -173,6 +176,9 @@ public class Tls {
         return cipherSuites;
     }
 
+    public @NotNull String getDefaultKeystoreAlias() {
+        return defaultKeystoreAlias;
+    }
     /**
      * @return if the server cipher suites should be preferred
      */
@@ -294,6 +300,7 @@ public class Tls {
         private @Nullable List<String> protocols;
         private @Nullable List<String> cipherSuites;
         private @Nullable Boolean preferServerCipherSuites;
+        private @Nullable String defaultKeystoreAlias;
 
         public @NotNull Builder withKeystorePath(final @NotNull String keystorePath) {
             this.keystorePath = keystorePath;
@@ -355,6 +362,11 @@ public class Tls {
             return this;
         }
 
+        public @NotNull Builder withDefaultKeystoreAlias(final @NotNull String defaultKeystoreAlias) {
+            this.defaultKeystoreAlias = defaultKeystoreAlias;
+            return this;
+        }
+
         public @NotNull Tls build() {
             checkNotNull(keystorePath, "keystorePath must not be null");
             checkNotNull(keystorePassword, "keystorePassword must not be null");
@@ -375,7 +387,8 @@ public class Tls {
                     clientAuthMode,
                     protocols,
                     cipherSuites,
-                    preferServerCipherSuites) {
+                    preferServerCipherSuites,
+                    defaultKeystoreAlias) {
             };
         }
     }

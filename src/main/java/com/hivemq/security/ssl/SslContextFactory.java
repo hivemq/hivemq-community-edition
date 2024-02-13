@@ -16,7 +16,9 @@
 
 package com.hivemq.security.ssl;
 
+import com.google.inject.Inject;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.exception.SslException;
@@ -111,9 +113,16 @@ public class SslContextFactory {
                 @Override
                 public String chooseEngineServerAlias(
                         final String keyType, final Principal[] issuers, final SSLEngine engine) {
-                    final String certificateAlias = dnsResolver.resolve(engine.getPeerHost());
-                    log.trace("Choose engine server alias for host: {} found alias: {}",
-                            engine.getPeerHost(),
+                    final String hostname = engine.getPeerHost();
+                    final String certificateAlias;
+                    if (hostname == null) {
+                        // Without SNI activated the hostname is null, so we use the default alias
+                        certificateAlias = tls.getDefaultKeystoreAlias();
+                        log.debug("No SNI hostname given, using default alias: {}", certificateAlias);
+                    } else {
+                        certificateAlias = dnsResolver.resolve(hostname);
+                    }
+                    log.trace("Choose engine server alias for host: {} found alias: {}", hostname,
                             certificateAlias);
                     return certificateAlias;
                 }
