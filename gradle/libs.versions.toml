@@ -29,7 +29,7 @@ rocksdb = "7.4.5"
 shrinkwrap = "1.2.6"
 slf4j = "2.0.12"
 stefanBirkner-systemRules = "1.19.0"
-wiremock = "2.35.1"
+wiremock = "2.35.2"
 xodus = "1.2.3"
 zeroAllocationHashing = "0.16"
 
