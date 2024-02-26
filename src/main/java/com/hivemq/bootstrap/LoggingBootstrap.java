@@ -48,8 +48,8 @@ public class LoggingBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingBootstrap.class);
 
-    private static @NotNull ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-    private static final List<Appender<ILoggingEvent>> defaultAppenders = new LinkedList<>();
+    private static final @NotNull ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+    private static final @NotNull List<Appender<ILoggingEvent>> defaultAppenders = new LinkedList<>();
     private static final @NotNull LogLevelModifierTurboFilter logLevelModifierTurboFilter =
             new LogLevelModifierTurboFilter();
     private static final @NotNull LogbackChangeListener logbackChangeListener = new LogbackChangeListener();
@@ -70,7 +70,6 @@ public class LoggingBootstrap {
         }
 
         //This appender just adds entries to an Array List so we can queue the log statements for later
-        listAppender = new ListAppender<>();
         listAppender.start();
         logger.addAppender(listAppender);
     }
@@ -166,6 +165,7 @@ public class LoggingBootstrap {
                 configurator.setContext(context);
                 configurator.doConfigure(file);
 
+                listAppender.start();
                 context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(listAppender);
                 log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
                 return true;
