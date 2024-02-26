@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.time.Instant
 
 plugins {
     java
@@ -9,6 +10,7 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.defaults)
     alias(libs.plugins.metadata)
+    alias(libs.plugins.oci)
     alias(libs.plugins.javadocLinks)
     alias(libs.plugins.githubRelease)
     alias(libs.plugins.license)
@@ -218,6 +220,77 @@ val hivemqZip by tasks.registering(Zip::class) {
     from("src/main/resources/config.xsd") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
+}
+
+oci {
+    registries {
+        dockerHub {
+            credentials()
+        }
+    }
+    imageDefinitions.register("main") {
+        imageName.set("hivemq/hivemq-ce")
+        allPlatforms {
+            parentImages {
+//                add("library:eclipse-temurin:11.0.22_7-jre-jammy") { isChanging = true }
+                add("library:eclipse-temurin:sha256!ec48c245e50016d20c36fd3cdd5b4e881eee68cab535955df74a8a9ec709faaa")
+            }
+            config {
+                creationTime.set(Instant.EPOCH)
+                user = "10000"
+                ports = setOf("1883", "8000")
+                environment = mapOf(
+                    "JAVA_OPTS" to "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA",
+                    "HIVEMQ_ALLOW_ALL_CLIENTS" to "true",
+                    "LANG" to "en_US.UTF-8",
+                )
+                entryPoint = listOf("/opt/docker-entrypoint.sh")
+                arguments = listOf("/opt/hivemq/bin/run.sh")
+                volumes = setOf("/opt/hivemq/data", "/opt/hivemq/log")
+                workingDirectory = "/opt/hivemq"
+            }
+            layers {
+                layer("hivemq") {
+                    metadata { creationTime.set(Instant.EPOCH) }
+                    contents {
+                        into("opt") {
+                            filePermissions = 0b110_110_000
+                            directoryPermissions = 0b111_111_000
+                            permissions("**/*.sh", 0b111_111_000)
+                            from("docker/docker-entrypoint.sh")
+                            into("hivemq") {
+                                from("src/distribution") { filter { exclude("**/.gitkeep") } }
+                                from("docker/config.xml") { into("conf") }
+                                from("src/main/resources/config.xsd") { into("conf") }
+                                from(tasks.shadowJar) { into("bin").rename(".*", "hivemq.jar") }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        specificPlatform(platform("linux", "amd64"))
+        specificPlatform(platform("linux", "arm64", "v8"))
+    }
+    imageDependencies {
+        register("release") {
+            add(project)
+            add(project).tag("latest")
+        }
+        register("snapshot") {
+            add(project).tag("snapshot")
+        }
+    }
+}
+
+val pushReleaseToDockerHub by tasks.registering(oci.pushTaskClass) {
+    from(oci.imageDependencies["release"])
+    registry.from(oci.registries.list["dockerHub"])
+}
+
+val pushSnapshotToDockerHub by tasks.registering(oci.pushTaskClass) {
+    from(oci.imageDependencies["snapshot"])
+    registry.from(oci.registries.list["dockerHub"])
 }
 
 tasks.javadoc {
