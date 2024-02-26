@@ -14,15 +14,15 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '11'
       - name: Publish to Maven Central
+        run: ./gradlew publishEmbeddedPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
         env:
           ORG_GRADLE_PROJECT_signKey: ${{ secrets.SIGN_KEY }}
           ORG_GRADLE_PROJECT_signKeyPass: ${{ secrets.SIGN_KEY_PASS }}
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
-        run: ./gradlew publishEmbeddedPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
       - name: Push To Docker Hub
         run: ./gradlew pushReleaseToDockerHub
         env:
