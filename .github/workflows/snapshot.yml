@@ -20,7 +20,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: '11'
       - name: Push Snapshot To Docker Hub
         run: ./gradlew pushSnapshotToDockerHub
