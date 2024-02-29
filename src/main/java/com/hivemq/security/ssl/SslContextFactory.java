@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -115,15 +116,24 @@ public class SslContextFactory {
                         final String keyType, final Principal[] issuers, final SSLEngine engine) {
                     final String hostname = engine.getPeerHost();
                     final String certificateAlias;
+
                     if (hostname == null) {
                         // Without SNI activated the hostname is null, so we use the default alias
                         certificateAlias = tls.getDefaultKeystoreAlias();
                         log.debug("No SNI hostname given, using default alias: {}", certificateAlias);
                     } else {
-                        certificateAlias = dnsResolver.resolve(hostname);
+                        final Optional<String> optionalHostname = dnsResolver.resolve(hostname);
+
+                        if (optionalHostname.isEmpty()) {
+                            certificateAlias = tls.getDefaultKeystoreAlias();
+                            log.debug("No certificate found for hostname: {}, defaulting to alias: {}", hostname, certificateAlias);
+                        } else {
+                            certificateAlias = optionalHostname.get();
+                        }
                     }
-                    log.trace("Choose engine server alias for host: {} found alias: {}", hostname,
-                            certificateAlias);
+
+                    log.trace("Choose engine server alias for host: {} found alias: {}", hostname, certificateAlias);
+
                     return certificateAlias;
                 }
             };
@@ -206,8 +216,8 @@ public class SslContextFactory {
             }
         }
 
-        log.info("Parsed hostNames: {}",
-                dnsHostnameMap.isEmpty() ? "no hostnames available" : String.join(", ", dnsHostnameMap.values()));
+        log.info("Parsed hostnames: {}",
+                dnsHostnameMap.isEmpty() ? "no hostnames available" : String.join(", ", dnsHostnameMap.keySet()));
 
         return dnsHostnameMap;
     }

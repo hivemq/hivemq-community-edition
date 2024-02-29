@@ -16,6 +16,7 @@
 package com.hivemq.security.ssl;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class DnsResolver {
 
@@ -25,10 +26,10 @@ public class DnsResolver {
         this.dnsMap = dnsMap;
     }
 
-    String resolve(final String domain) {
+    Optional<String> resolve(final String domain) {
         String alias = dnsMap.get(domain);
         if (alias != null) {
-            return alias;
+            return Optional.of(alias);
         }
 
         int index = domain.indexOf('.');
@@ -36,12 +37,12 @@ public class DnsResolver {
             final String wildcardDomain = "*" + domain.substring(index);
             alias = dnsMap.get(wildcardDomain);
             if (alias != null) {
-                return alias;
+                return Optional.of(alias);
             }
             index = domain.indexOf('.', index + 1);
         }
 
-        return null;
+        return Optional.empty();
     }
 
 }
