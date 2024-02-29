@@ -18,6 +18,7 @@ package com.hivemq.security.ssl;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -35,10 +36,10 @@ public class DnsResolverTest {
         final DnsResolver dnsResolver =
                 new DnsResolver(Map.of(TEST_EXAMPLE_COM, ALIAS_1, TEST_OTHER_COM, ALIAS_2, TEST_FOO_BAR, ALIAS_3));
 
-        final String resolve = dnsResolver.resolve(TEST_EXAMPLE_COM);
+        final Optional<String> resolvedHostname = dnsResolver.resolve(TEST_EXAMPLE_COM);
 
-        assertNotNull(resolve);
-        assertEquals(ALIAS_1, resolve);
+        assertTrue(resolvedHostname.isPresent());
+        assertEquals(ALIAS_1, resolvedHostname.get());
     }
 
     @Test
@@ -46,9 +47,9 @@ public class DnsResolverTest {
         final DnsResolver dnsResolver =
                 new DnsResolver(Map.of(TEST_EXAMPLE_COM, ALIAS_1, TEST_OTHER_COM, ALIAS_2, TEST_FOO_BAR, ALIAS_3));
 
-        final String resolve = dnsResolver.resolve("other.example.com");
+        final Optional<String> resolvedHostname = dnsResolver.resolve("other.example.com");
 
-        assertNull(resolve);
+        assertTrue(resolvedHostname.isEmpty());
     }
 
     @Test
@@ -56,51 +57,63 @@ public class DnsResolverTest {
         final DnsResolver dnsResolver =
                 new DnsResolver(Map.of(WILDCARD_EXAMPLE_COM, ALIAS_1, TEST_OTHER_COM, ALIAS_2, TEST_FOO_BAR, ALIAS_3));
 
-        final String resolve = dnsResolver.resolve(TEST_EXAMPLE_COM);
+        final Optional<String> resolvedHostname = dnsResolver.resolve(TEST_EXAMPLE_COM);
 
-        assertNotNull(resolve);
-        assertEquals(ALIAS_1, resolve);
+        assertTrue(resolvedHostname.isPresent());
+        assertEquals(ALIAS_1, resolvedHostname.get());
     }
 
     @Test
     public void test_resolve_nested_wildcard_dns_name() {
-        final DnsResolver dnsResolver =
-                new DnsResolver(Map.of(WILDCARD_EXAMPLE_COM, ALIAS_1, "test.example.com", ALIAS_2, TEST_FOO_BAR, ALIAS_3));
+        final DnsResolver dnsResolver = new DnsResolver(Map.of(WILDCARD_EXAMPLE_COM,
+                ALIAS_1,
+                "test.example.com",
+                ALIAS_2,
+                TEST_FOO_BAR,
+                ALIAS_3));
 
-        final String resolve = dnsResolver.resolve("sub.test.example.com");
+        final Optional<String> resolvedHostname = dnsResolver.resolve("sub.test.example.com");
 
-        assertNotNull(resolve);
-        assertEquals(ALIAS_1, resolve);
+        assertTrue(resolvedHostname.isPresent());
+        assertEquals(ALIAS_1, resolvedHostname.get());
     }
 
     @Test
     public void test_resolve_non_matching_wildcard_dns_name() {
         final DnsResolver dnsResolver = new DnsResolver(Map.of("*.other.com", ALIAS_2, TEST_FOO_BAR, ALIAS_3));
 
-        final String resolve = dnsResolver.resolve("test.example.com");
+        final Optional<String> resolvedHostname = dnsResolver.resolve("test.example.com");
 
-        assertNull(resolve);
+        assertTrue(resolvedHostname.isEmpty());
     }
 
     @Test
     public void test_prefer_full_cert_before_wildcard_cert() {
-        final DnsResolver dnsResolver =
-                new DnsResolver(Map.of("test.example.com", ALIAS_1, WILDCARD_EXAMPLE_COM, ALIAS_2, TEST_FOO_BAR, ALIAS_3));
+        final DnsResolver dnsResolver = new DnsResolver(Map.of("test.example.com",
+                ALIAS_1,
+                WILDCARD_EXAMPLE_COM,
+                ALIAS_2,
+                TEST_FOO_BAR,
+                ALIAS_3));
 
-        final String resolve = dnsResolver.resolve("test.example.com");
+        final Optional<String> resolvedHostname = dnsResolver.resolve("test.example.com");
 
-        assertNotNull(resolve);
-        assertEquals(ALIAS_1, resolve);
+        assertTrue(resolvedHostname.isPresent());
+        assertEquals(ALIAS_1, resolvedHostname.get());
     }
 
     @Test
     public void test_prefer_best_matching_wildcard_cert() {
-        final DnsResolver dnsResolver =
-                new DnsResolver(Map.of(WILDCARD_EXAMPLE_COM, ALIAS_1, "*.test.example.com", ALIAS_2, TEST_FOO_BAR, ALIAS_3));
+        final DnsResolver dnsResolver = new DnsResolver(Map.of(WILDCARD_EXAMPLE_COM,
+                ALIAS_1,
+                "*.test.example.com",
+                ALIAS_2,
+                TEST_FOO_BAR,
+                ALIAS_3));
 
-        final String resolve = dnsResolver.resolve("sub.test.example.com");
+        final Optional<String> resolvedHostname = dnsResolver.resolve("sub.test.example.com");
 
-        assertNotNull(resolve);
-        assertEquals(ALIAS_2, resolve);
+        assertTrue(resolvedHostname.isPresent());
+        assertEquals(ALIAS_2, resolvedHostname.get());
     }
 }
