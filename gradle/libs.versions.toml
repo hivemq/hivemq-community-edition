@@ -1,5 +1,5 @@
 [versions]
-apache-commonsCompress = "1.26.0"
+apache-commonsCompress = "1.26.1"
 apache-commonsIO = "2.13.0"
 apache-commonsLang = "3.12.0"
 awaitility = "4.2.0"
