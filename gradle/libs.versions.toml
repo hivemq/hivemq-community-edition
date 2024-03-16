@@ -2,7 +2,7 @@
 apache-commonsCompress = "1.26.1"
 apache-commonsIO = "2.13.0"
 apache-commonsLang = "3.12.0"
-awaitility = "4.2.0"
+awaitility = "4.2.1"
 bouncycastle = "1.75"
 byteBuddy = "1.14.12"
 concurrentUnit = "0.4.6"
