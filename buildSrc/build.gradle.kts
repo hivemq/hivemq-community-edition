@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.14.2")
+    implementation(libs.jackson.dataformat.xml)
 }
 
 gradlePlugin {

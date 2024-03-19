@@ -2216,6 +2216,36 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
     }
 
     @Test
+    public void decode_will_failed_by_property_response_topic_empty() {
+        final byte[] encoded = {
+                // fixed header
+                //   type, reserved
+                0b0001_0000,
+                // remaining length
+                32,
+                // protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                //   protocol version
+                5,
+                //   connect flags
+                (byte) 0b0010_1100,
+                //   keep alive
+                0, 0,
+                //   properties
+                11,
+                //     auth method
+                0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
+                // payload
+                //   client identifier
+                0, 4, 'h', 'u', 'h', 'u',
+                //   will properties
+                3,
+                //   response topic
+                0x08, 0, 0};
+        decodeNullExpected(encoded);
+    }
+
+    @Test
     public void decode_will_failed_by_property_response_topic_wild_card_hash() {
         final byte[] encoded = {
                 // fixed header

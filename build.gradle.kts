@@ -1,7 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.time.Instant
 
-// TODO: remove suppression after upgrading Gradle to 8.x
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     java
     `java-library`
@@ -11,23 +10,18 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.defaults)
     alias(libs.plugins.metadata)
+    alias(libs.plugins.oci)
     alias(libs.plugins.javadocLinks)
     alias(libs.plugins.githubRelease)
     alias(libs.plugins.license)
-    alias(libs.plugins.dependencyCheck)
     alias(libs.plugins.versions)
 
     /* Code Quality Plugins */
     jacoco
-    pmd
-    alias(libs.plugins.spotbugs)
     alias(libs.plugins.forbiddenApis)
 
     id("com.hivemq.third-party-license-generator")
 }
-
-
-/* ******************** metadata ******************** */
 
 group = "com.hivemq"
 description = "HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5"
@@ -70,20 +64,13 @@ metadata {
     }
 }
 
-
-/* ******************** java ******************** */
-
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
-
     withJavadocJar()
     withSourcesJar()
 }
-
-
-/* ******************** dependencies ******************** */
 
 repositories {
     mavenCentral()
@@ -157,7 +144,6 @@ dependencies {
     implementation(libs.eclipse.collections)
 }
 
-
 /* ******************** test ******************** */
 
 dependencies {
@@ -190,7 +176,7 @@ tasks.test {
         "--add-opens",
         "jdk.management/com.sun.management.internal=ALL-UNNAMED",
         "--add-exports",
-        "java.base/jdk.internal.misc=ALL-UNNAMED"
+        "java.base/jdk.internal.misc=ALL-UNNAMED",
     )
 
     val inclusions = rootDir.resolve("inclusions.txt")
@@ -206,7 +192,6 @@ tasks.test {
     }
 }
 
-
 /* ******************** distribution ******************** */
 
 tasks.jar {
@@ -215,7 +200,7 @@ tasks.jar {
         "Implementation-Vendor" to metadata.organization.get().name.get(),
         "Implementation-Version" to project.version,
         "HiveMQ-Version" to project.version,
-        "Main-Class" to "com.hivemq.HiveMQServer"
+        "Main-Class" to "com.hivemq.HiveMQServer",
     )
 }
 
@@ -235,6 +220,76 @@ val hivemqZip by tasks.registering(Zip::class) {
     from("src/main/resources/config.xsd") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
     into(name)
+}
+
+oci {
+    registries {
+        dockerHub {
+            credentials()
+        }
+    }
+    imageDefinitions.register("main") {
+        imageName.set("hivemq/hivemq-ce")
+        allPlatforms {
+            parentImages {
+                add("library:eclipse-temurin:sha256!ec48c245e50016d20c36fd3cdd5b4e881eee68cab535955df74a8a9ec709faaa") // 11.0.22_7-jre-jammy
+            }
+            config {
+                creationTime.set(Instant.EPOCH)
+                user = "10000"
+                ports = setOf("1883", "8000")
+                environment = mapOf(
+                    "JAVA_OPTS" to "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA",
+                    "HIVEMQ_ALLOW_ALL_CLIENTS" to "true",
+                    "LANG" to "en_US.UTF-8",
+                )
+                entryPoint = listOf("/opt/docker-entrypoint.sh")
+                arguments = listOf("/opt/hivemq/bin/run.sh")
+                volumes = setOf("/opt/hivemq/data", "/opt/hivemq/log")
+                workingDirectory = "/opt/hivemq"
+            }
+            layers {
+                layer("hivemq") {
+                    metadata { creationTime.set(Instant.EPOCH) }
+                    contents {
+                        into("opt") {
+                            filePermissions = 0b110_110_000
+                            directoryPermissions = 0b111_111_000
+                            permissions("**/*.sh", 0b111_111_000)
+                            from("docker/docker-entrypoint.sh")
+                            into("hivemq") {
+                                from("src/distribution") { filter { exclude("**/.gitkeep") } }
+                                from("docker/config.xml") { into("conf") }
+                                from("src/main/resources/config.xsd") { into("conf") }
+                                from(tasks.shadowJar) { into("bin").rename(".*", "hivemq.jar") }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        specificPlatform(platform("linux", "amd64"))
+        specificPlatform(platform("linux", "arm64", "v8"))
+    }
+    imageDependencies {
+        register("release") {
+            add(project)
+            add(project).tag("latest")
+        }
+        register("snapshot") {
+            add(project).tag("snapshot")
+        }
+    }
+}
+
+val pushReleaseToDockerHub by tasks.registering(oci.pushTaskClass) {
+    from(oci.imageDependencies["release"])
+    registry.from(oci.registries.list["dockerHub"])
+}
+
+val pushSnapshotToDockerHub by tasks.registering(oci.pushTaskClass) {
+    from(oci.imageDependencies["snapshot"])
+    registry.from(oci.registries.list["dockerHub"])
 }
 
 tasks.javadoc {
@@ -262,40 +317,11 @@ tasks.javadoc {
     }
 }
 
-
 /* ******************** checks ******************** */
 
 jacoco {
-    toolVersion = "${property("jacoco.version")}"
+    toolVersion = libs.versions.jacoco.get()
 }
-
-pmd {
-    toolVersion = "${property("pmd.version")}"
-    sourceSets = listOf(project.sourceSets.main.get())
-    isIgnoreFailures = true
-    rulesMinimumPriority.set(3)
-}
-
-spotbugs {
-    toolVersion.set("${property("spotbugs.version")}")
-    ignoreFailures.set(true)
-    reportLevel.set(com.github.spotbugs.snom.Confidence.MEDIUM)
-}
-
-dependencies {
-    spotbugsPlugins(libs.findsecbugs.plugin)
-}
-
-dependencyCheck {
-    analyzers.apply {
-        centralEnabled = false
-    }
-    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL
-    scanConfigurations = listOf("runtimeClasspath")
-    suppressionFile = "$projectDir/gradle/dependency-check/suppress.xml"
-}
-
-tasks.check { dependsOn(tasks.dependencyCheckAnalyze) }
 
 forbiddenApis {
     bundledSignatures = setOf("jdk-system-out")
@@ -307,7 +333,6 @@ tasks.forbiddenApisMain {
 }
 
 tasks.forbiddenApisTest { enabled = false }
-
 
 /* ******************** compliance ******************** */
 
@@ -327,20 +352,16 @@ tasks.updateThirdPartyLicenses {
     outputDirectory.set(layout.projectDirectory.dir("src/distribution/third-party-licenses"))
 }
 
-
 /* ******************** publishing ******************** */
 
 publishing {
     publications {
         register<MavenPublication>("distribution") {
             artifact(hivemqZip)
-
             artifactId = "hivemq-community-edition"
         }
-
         register<MavenPublication>("embedded") {
             from(components["java"])
-
             artifactId = "hivemq-community-edition-embedded"
         }
     }

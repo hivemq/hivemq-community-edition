@@ -996,6 +996,26 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
     }
 
     @Test
+    public void test_decode_responseTopicEmpty_returnsNull() {
+        final byte[] encoded = {
+                // fixed header
+                //   type, flags
+                0b0011_0000,
+                //   remaining length
+                13,
+                // variable header
+                //   topic name
+                0, 5, 't', 'o', 'p', 'i', 'c',
+                //   properties
+                5,
+                //     response topic
+                0x08, 0, 0,
+                //     payload format indicator
+                0x01, 0};
+        decodeNullExpected(encoded);
+    }
+
+    @Test
     public void test_decode_responseTopicMoreThanOnce_returnsNull() {
         final byte[] encoded = {
                 // fixed header

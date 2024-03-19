@@ -70,6 +70,7 @@ public class ReasonStrings {
     public static final String CONNACK_PACKET_TOO_LARGE = "Sent CONNECT exceeded the maximum permissible size.";
     public static final String CONNACK_NOT_AUTHORIZED_FAILED = "Not authorized to connect. Authentication failed.";
 
+    public static final String CONNACK_TOPIC_NAME_INVALID_EMPTY = "CONNECT with empty %s.";
     public static final String CONNACK_TOPIC_NAME_INVALID_WILL_LENGTH =
             "Sent CONNECT with incorrect will topic length.";
     public static final String CONNACK_TOPIC_NAME_INVALID_WILL_MALFORMED = "Sent CONNECT with malformed will topic.";
@@ -119,7 +120,7 @@ public class ReasonStrings {
     public static final String DISCONNECT_MALFORMED_SUBSCRIPTION_OPTIONS =
             "SUBSCRIBE with malformed subscription options was sent.";
     public static final String DISCONNECT_MALFORMED_UTF8_STRING = "%s with malformed UTF-8 String for %s was sent.";
-    public static final String DISCONNECT_MALFORMED_EMPTY_UNSUB_TOPIC = "Sent UNSUBSCRIBE with an empty topic.";
+    public static final String DISCONNECT_MALFORMED_EMPTY_UNSUB_TOPIC = "Sent UNSUBSCRIBE with an invalid topic filter.";
     public static final String DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID =
             "Sent SUBSCRIBE with an invalid topic filter.";
 
@@ -169,6 +170,7 @@ public class ReasonStrings {
 
     public static final String DISCONNECT_RECEIVE_MAXIMUM_EXCEEDED = "Too many concurrent PUBLISH messages sent.";
 
+    public static final String DISCONNECT_TOPIC_NAME_INVALID_EMPTY = "PUBLISH with empty %s.";
     public static final String DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY = "Shared subscription with empty topic.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_ZERO = "PUBLISH containing topic alias of '0' was sent.";
     public static final String DISCONNECT_TOPIC_ALIAS_INVALID_TOO_LARGE = "Topic alias in PUBLISH sent was too large.";
