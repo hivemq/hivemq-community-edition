@@ -21,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Injector;
 import com.hivemq.HiveMQServer;
 import com.hivemq.configuration.ConfigurationBootstrap;
+import com.hivemq.configuration.SystemProperties;
 import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.InternalConfigurations;
@@ -50,6 +51,9 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
 
     private final @NotNull SystemInformationImpl systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
+    private final @NotNull boolean loggingBootstrapEnabled =
+            !Boolean.parseBoolean(System.getProperty(SystemProperties.EMBEDDED_LOG_BOOTSTRAP_DISABLED, "false"));
+
     @VisibleForTesting
     final @NotNull ExecutorService stateChangeExecutor;
     private final @Nullable EmbeddedExtension embeddedExtension;
@@ -146,7 +150,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     systemInformation.init();
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
-                    hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, false);
+                    hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, loggingBootstrapEnabled, false);
                     hiveMQServer.bootstrap();
                     hiveMQServer.startInstance(embeddedExtension);
 

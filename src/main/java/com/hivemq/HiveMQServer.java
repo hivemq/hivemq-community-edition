@@ -66,18 +66,20 @@ public class HiveMQServer {
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
     private final boolean migrate;
+    private final boolean loggingBootstrapEnabled;
 
     private @Nullable Injector injector;
     private @Nullable FullConfigurationService configService;
 
     public HiveMQServer() {
-        this(new SystemInformationImpl(true), new MetricRegistry(), null, true);
+        this(new SystemInformationImpl(true), new MetricRegistry(), null, true, true);
     }
 
     public HiveMQServer(
             final @NotNull SystemInformation systemInformation,
             final @Nullable MetricRegistry metricRegistry,
             final @Nullable FullConfigurationService configService,
+            final boolean loggingBootstrapEnabled,
             final boolean migrate) {
         hivemqId = new HivemqId();
         lifecycleModule = new LifecycleModule();
@@ -85,6 +87,7 @@ public class HiveMQServer {
         this.systemInformation = systemInformation;
         this.metricRegistry = metricRegistry;
         this.configService = configService;
+        this.loggingBootstrapEnabled = loggingBootstrapEnabled;
         this.migrate = migrate;
     }
 
@@ -105,7 +108,9 @@ public class HiveMQServer {
 
         metricRegistry.addListener(new MetricRegistryLogger());
 
-        LoggingBootstrap.prepareLogging();
+        if (loggingBootstrapEnabled) {
+            LoggingBootstrap.prepareLogging();
+        }
 
         log.info("Starting HiveMQ Community Edition Server");
 
@@ -117,7 +122,10 @@ public class HiveMQServer {
         }
 
         log.trace("Initializing Logging");
-        LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
+
+        if (loggingBootstrapEnabled) {
+            LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
+        }
 
         log.trace("Initializing Exception handlers");
         HiveMQExceptionHandlerBootstrap.addUnrecoverableExceptionHandler();
@@ -216,7 +224,10 @@ public class HiveMQServer {
 
         /* It's important that we are modifying the log levels after Guice is initialized,
         otherwise this somehow interferes with Singleton creation */
-        LoggingBootstrap.addLoglevelModifiers();
+        if (loggingBootstrapEnabled) {
+            LoggingBootstrap.addLoglevelModifiers();
+        }
+
         instance.start(embeddedExtension);
     }
 
@@ -262,7 +273,9 @@ public class HiveMQServer {
         if (configService.persistenceConfigurationService().getMode() == PersistenceMode.FILE) {
             dataLock.unlock();
         }
-        LoggingBootstrap.resetLogging();
+        if (loggingBootstrapEnabled) {
+            LoggingBootstrap.resetLogging();
+        }
     }
 
     public @Nullable Injector getInjector() {
