@@ -31,4 +31,6 @@ public class SystemProperties {
     public static final String EXTENSIONS_FOLDER = "hivemq.extensions.folder";
 
     public static final String DIAGNOSTIC_MODE = "diagnosticMode";
+
+    public static final String EMBEDDED_LOG_BOOTSTRAP_DISABLED = "hivemq.embedded.log.bootstrap.disabled";
 }
