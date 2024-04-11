@@ -225,7 +225,7 @@ val hivemqZip by tasks.registering(Zip::class) {
 oci {
     registries {
         dockerHub {
-            credentials()
+            optionalCredentials()
         }
     }
     imageDefinitions.register("main") {
@@ -271,25 +271,6 @@ oci {
         specificPlatform(platform("linux", "amd64"))
         specificPlatform(platform("linux", "arm64", "v8"))
     }
-    imageDependencies {
-        register("release") {
-            add(project)
-            add(project).tag("latest")
-        }
-        register("snapshot") {
-            add(project).tag("snapshot")
-        }
-    }
-}
-
-val pushReleaseToDockerHub by tasks.registering(oci.pushTaskClass) {
-    from(oci.imageDependencies["release"])
-    registry.from(oci.registries.list["dockerHub"])
-}
-
-val pushSnapshotToDockerHub by tasks.registering(oci.pushTaskClass) {
-    from(oci.imageDependencies["snapshot"])
-    registry.from(oci.registries.list["dockerHub"])
 }
 
 tasks.javadoc {
