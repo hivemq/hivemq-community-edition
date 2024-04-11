@@ -24,7 +24,7 @@ jobs:
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
       - name: Push To Docker Hub
-        run: ./gradlew pushOciImage --registry dockerHub --tag . --tag latest
+        run: ./gradlew pushOciImage --registry dockerHub --tag . --tag latest # . is a placeholder for the default tag
         env:
           ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
           ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
