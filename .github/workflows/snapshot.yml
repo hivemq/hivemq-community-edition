@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       - name: Push Snapshot To Docker Hub
-        run: ./gradlew pushSnapshotToDockerHub
+        run: ./gradlew pushOciImage --registry dockerHub --tag snapshot
         env:
           ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
           ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
