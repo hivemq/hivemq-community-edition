@@ -204,7 +204,7 @@ public class SendRetainedMessagesListenerTest {
         channel.runPendingTasks();
 
         final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getValue().get(0);
@@ -288,7 +288,7 @@ public class SendRetainedMessagesListenerTest {
         channel.runPendingTasks();
 
         final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getValue().get(0);
@@ -322,7 +322,7 @@ public class SendRetainedMessagesListenerTest {
         channel.runPendingTasks();
 
         final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getAllValues().get(0).get(0);
@@ -478,7 +478,7 @@ public class SendRetainedMessagesListenerTest {
         channel.runPendingTasks();
 
         final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) ArrayList.class);
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence, timeout(5000).times(2)).add(eq("client"),
                 eq(false),
                 captor.capture(),
