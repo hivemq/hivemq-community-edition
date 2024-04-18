@@ -27,46 +27,46 @@ group = "com.hivemq"
 description = "HiveMQ CE is a Java-based open source MQTT broker that fully supports MQTT 3.x and MQTT 5"
 
 metadata {
-    readableName.set("HiveMQ Community Edition")
+    readableName = "HiveMQ Community Edition"
     organization {
-        name.set("HiveMQ GmbH")
-        url.set("https://www.hivemq.com/")
+        name = "HiveMQ GmbH"
+        url = "https://www.hivemq.com/"
     }
     license {
         apache2()
     }
     developers {
         register("cschaebe") {
-            fullName.set("Christoph Schaebel")
-            email.set("christoph.schaebel@hivemq.com")
+            fullName = "Christoph Schaebel"
+            email = "christoph.schaebel@hivemq.com"
         }
         register("lbrandl") {
-            fullName.set("Lukas Brandl")
-            email.set("lukas.brandl@hivemq.com")
+            fullName = "Lukas Brandl"
+            email = "lukas.brandl@hivemq.com"
         }
         register("flimpoeck") {
-            fullName.set("Florian Limpoeck")
-            email.set("florian.limpoeck@hivemq.com")
+            fullName = "Florian Limpoeck"
+            email = "florian.limpoeck@hivemq.com"
         }
         register("sauroter") {
-            fullName.set("Georg Held")
-            email.set("georg.held@hivemq.com")
+            fullName = "Georg Held"
+            email = "georg.held@hivemq.com"
         }
         register("SgtSilvio") {
-            fullName.set("Silvio Giebl")
-            email.set("silvio.giebl@hivemq.com")
+            fullName = "Silvio Giebl"
+            email = "silvio.giebl@hivemq.com"
         }
     }
     github {
-        org.set("hivemq")
-        repo.set("hivemq-community-edition")
+        org = "hivemq"
+        repo = "hivemq-community-edition"
         issues()
     }
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion = JavaLanguageVersion.of(11)
     }
     withJavadocJar()
     withSourcesJar()
@@ -213,7 +213,7 @@ val hivemqZip by tasks.registering(Zip::class) {
 
     val name = "hivemq-ce-${project.version}"
 
-    archiveFileName.set("$name.zip")
+    archiveFileName = "$name.zip"
 
     from("src/distribution") { exclude("**/.gitkeep") }
     from("src/main/resources/config.xml") { into("conf") }
@@ -229,13 +229,13 @@ oci {
         }
     }
     imageDefinitions.register("main") {
-        imageName.set("hivemq/hivemq-ce")
+        imageName = "hivemq/hivemq-ce"
         allPlatforms {
             parentImages {
                 add("library:eclipse-temurin:sha256!a56ee1f79cf57b2b31152cd471a4c85b6deb3057e4a1fbe8e50b57e7d2a1d7c9") // 21.0.2_13-jre-jammy
             }
             config {
-                creationTime.set(Instant.EPOCH)
+                creationTime = Instant.EPOCH
                 user = "10000"
                 ports = setOf("1883", "8000")
                 environment = mapOf(
@@ -251,7 +251,7 @@ oci {
             }
             layers {
                 layer("hivemq") {
-                    metadata { creationTime.set(Instant.EPOCH) }
+                    metadata { creationTime = Instant.EPOCH }
                     contents {
                         into("opt") {
                             filePermissions = 0b110_100_000
@@ -338,9 +338,9 @@ downloadLicenses {
 
 tasks.updateThirdPartyLicenses {
     dependsOn(tasks.downloadLicenses)
-    projectName.set("HiveMQ")
-    dependencyLicense.set(tasks.downloadLicenses.get().xmlDestination.resolve("dependency-license.xml"))
-    outputDirectory.set(layout.projectDirectory.dir("src/distribution/third-party-licenses"))
+    projectName = "HiveMQ"
+    dependencyLicense = tasks.downloadLicenses.get().xmlDestination.resolve("dependency-license.xml")
+    outputDirectory = layout.projectDirectory.dir("src/distribution/third-party-licenses")
 }
 
 /* ******************** publishing ******************** */
