@@ -57,7 +57,9 @@ if [ -c "/dev/urandom" ]; then
 fi
 
 # JMX Monitoring
-JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${HIVEMQ_JMX_PORT:-9010} -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+if [ "${HIVEMQ_JMX_ENABLED:-true}" == "true" ]; then
+    JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${HIVEMQ_JMX_PORT:-9010} -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+fi
 
 # Disable Localization
 JAVA_OPTS="$JAVA_OPTS -Duser.language=en -Duser.region=US"
