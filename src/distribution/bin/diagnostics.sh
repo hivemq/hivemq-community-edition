@@ -73,12 +73,6 @@ else
 fi
 HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
 
-if [ -z "$HIVEMQ_HEAPDUMP_FOLDER" ]; then
-    HEAPDUMP_PATH="$HIVEMQ_FOLDER"
-else
-    HEAPDUMP_PATH="$HIVEMQ_HEAPDUMP_FOLDER"
-fi
-
 if [ ! -d "$HIVEMQ_FOLDER" ]; then
     echoerr 'ERROR! HiveMQ Home Folder not found.'
     exit 1
@@ -94,6 +88,12 @@ if [ ! -f "$JAR_PATH" ]; then
     echoerr 'ERROR! HiveMQ JAR not found.'
     echoerr "$HIVEMQ_FOLDER"
     exit 1
+fi
+
+if [ -z "$HIVEMQ_HEAPDUMP_FOLDER" ]; then
+    HEAPDUMP_PATH="$HIVEMQ_FOLDER"
+else
+    HEAPDUMP_PATH="$HIVEMQ_HEAPDUMP_FOLDER"
 fi
 
 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
