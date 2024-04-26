@@ -37,7 +37,7 @@ fi
 
 java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed 's/\..*//')
 
-if [[ "$((java_version))" -lt 11 ]]; then
+if [ "$java_version" -lt 11 ]; then
     echoerr 'HiveMQ requires at least Java version 11'
     exit 1
 fi
@@ -57,7 +57,7 @@ if [ -c '/dev/urandom' ]; then
 fi
 
 # JMX Monitoring
-if [ "${HIVEMQ_JMX_ENABLED:-true}" == 'true' ]; then
+if [ "${HIVEMQ_JMX_ENABLED:-true}" = 'true' ]; then
     JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${HIVEMQ_JMX_PORT:-9010} -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 fi
 
