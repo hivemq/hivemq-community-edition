@@ -57,6 +57,9 @@ fi
 # JMX Monitoring
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=${HIVEMQ_JMX_PORT:-9010} -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 
+# Disable Localization
+JAVA_OPTS="$JAVA_OPTS -Duser.language=en -Duser.region=US"
+
 # Uncomment for enabling Diagnostic Mode
 #JAVA_OPTS="$JAVA_OPTS -DdiagnosticMode=true"
 
