@@ -35,9 +35,9 @@ if ! hash java 2>/dev/null; then
     exit 1
 fi
 
-java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed 's/\..*//')
+JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed 's/\..*//')
 
-if [ "$java_version" -lt 11 ]; then
+if [ "$JAVA_VERSION" -lt 11 ]; then
     echoerr 'HiveMQ requires at least Java version 11'
     exit 1
 fi
@@ -107,7 +107,7 @@ echo "  HIVEMQ_HOME: $HIVEMQ_FOLDER"
 echo ''
 echo "  JAVA_OPTS: $JAVA_OPTS"
 echo ''
-echo "  JAVA_VERSION: $java_version"
+echo "  JAVA_VERSION: $JAVA_VERSION"
 echo ''
 echo '-------------------------------------------------------------------------'
 echo ''
