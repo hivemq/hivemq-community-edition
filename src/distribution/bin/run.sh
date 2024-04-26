@@ -65,11 +65,10 @@ JAVA_OPTS="$JAVA_OPTS -Duser.language=en -Duser.region=US"
 
 if [ -z "$HIVEMQ_HOME" ]; then
     HIVEMQ_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
-    HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
 else
     HIVEMQ_FOLDER="$HIVEMQ_HOME"
-    HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
 fi
+HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
 
 if [ -z "$HIVEMQ_HEAPDUMP_FOLDER" ]; then
     HEAPDUMP_PATH="$HIVEMQ_FOLDER"
@@ -87,7 +86,8 @@ if [ ! -w "$HIVEMQ_FOLDER" ]; then
     exit 1
 fi
 
-if [ ! -f "$HIVEMQ_FOLDER/bin/hivemq.jar" ]; then
+JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
+if [ ! -f "$JAR_PATH" ]; then
     echoerr "ERROR! HiveMQ JAR not found."
     echoerr "$HIVEMQ_FOLDER"
     exit 1
@@ -108,6 +108,5 @@ echo "  JAVA_VERSION: $java_version"
 echo ""
 echo "-------------------------------------------------------------------------"
 echo ""
-# Run HiveMQ
-JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
+
 exec "java" "${HOME_OPT}" "${HEAPDUMP_PATH_OPT}" "${ERROR_FILE_PATH_OPT}" ${JAVA_OPTS} -jar "${JAR_PATH}"
