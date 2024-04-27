@@ -26,17 +26,15 @@ echo ''
 echo '  HiveMQ Start Script for Linux/Unix v1.14'
 echo ''
 
-echoerr() { printf "%s\n" "$*" >&2; }
-
 if ! hash java 2>/dev/null; then
-    echoerr 'ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/?variant=openjdk11 and try again.'
+    echo 'ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/?variant=openjdk11 and try again.' >&2
     exit 1
 fi
 
 JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed 's/\..*//')
 
 if [ "$JAVA_VERSION" -lt 11 ]; then
-    echoerr 'HiveMQ requires at least Java version 11'
+    echo 'HiveMQ requires at least Java version 11' >&2
     exit 1
 fi
 
@@ -71,18 +69,18 @@ fi
 HOME_OPT="-Dhivemq.home=$HIVEMQ_HOME"
 
 if [ ! -d "$HIVEMQ_HOME" ]; then
-    echoerr 'ERROR! HiveMQ Home Folder not found.'
+    echo 'ERROR! HiveMQ Home Folder not found.' >&2
     exit 1
 fi
 
 if [ ! -w "$HIVEMQ_HOME" ]; then
-    echoerr 'ERROR! HiveMQ Home Folder Permissions not correct.'
+    echo 'ERROR! HiveMQ Home Folder Permissions not correct.' >&2
     exit 1
 fi
 
 JAR_PATH="$HIVEMQ_HOME/bin/hivemq.jar"
 if [ ! -f "$JAR_PATH" ]; then
-    echoerr 'ERROR! HiveMQ JAR not found.'
+    echo 'ERROR! HiveMQ JAR not found.' >&2
     exit 1
 fi
 
