@@ -66,43 +66,38 @@ JAVA_OPTS="$JAVA_OPTS -Duser.language=en -Duser.region=US"
 #JAVA_OPTS="$JAVA_OPTS -DdiagnosticMode=true"
 
 if [ -z "$HIVEMQ_HOME" ]; then
-    HIVEMQ_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
-else
-    HIVEMQ_FOLDER="$HIVEMQ_HOME"
+    HIVEMQ_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
 fi
-HOME_OPT="-Dhivemq.home=$HIVEMQ_FOLDER"
+HOME_OPT="-Dhivemq.home=$HIVEMQ_HOME"
 
-if [ ! -d "$HIVEMQ_FOLDER" ]; then
+if [ ! -d "$HIVEMQ_HOME" ]; then
     echoerr 'ERROR! HiveMQ Home Folder not found.'
     exit 1
 fi
 
-if [ ! -w "$HIVEMQ_FOLDER" ]; then
+if [ ! -w "$HIVEMQ_HOME" ]; then
     echoerr 'ERROR! HiveMQ Home Folder Permissions not correct.'
     exit 1
 fi
 
-JAR_PATH="$HIVEMQ_FOLDER/bin/hivemq.jar"
+JAR_PATH="$HIVEMQ_HOME/bin/hivemq.jar"
 if [ ! -f "$JAR_PATH" ]; then
     echoerr 'ERROR! HiveMQ JAR not found.'
-    echoerr "$HIVEMQ_FOLDER"
     exit 1
 fi
 
 if [ -z "$HIVEMQ_HEAPDUMP_FOLDER" ]; then
-    HEAPDUMP_PATH="$HIVEMQ_FOLDER"
-else
-    HEAPDUMP_PATH="$HIVEMQ_HEAPDUMP_FOLDER"
+    HIVEMQ_HEAPDUMP_FOLDER="$HIVEMQ_HOME"
 fi
 
 JAVA_OPTS="$JAVA_OPTS -XX:+CrashOnOutOfMemoryError"
 JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
-HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=$HEAPDUMP_PATH/heap-dump.hprof"
-ERROR_FILE_PATH_OPT="-XX:ErrorFile=$HEAPDUMP_PATH/hs_err_pid%p.log"
+HEAPDUMP_PATH_OPT="-XX:HeapDumpPath=$HIVEMQ_HEAPDUMP_FOLDER/heap-dump.hprof"
+ERROR_FILE_PATH_OPT="-XX:ErrorFile=$HIVEMQ_HEAPDUMP_FOLDER/hs_err_pid%p.log"
 
 echo '-------------------------------------------------------------------------'
 echo ''
-echo "  HIVEMQ_HOME: $HIVEMQ_FOLDER"
+echo "  HIVEMQ_HOME: $HIVEMQ_HOME"
 echo ''
 echo "  JAVA_OPTS: $JAVA_OPTS"
 echo ''
