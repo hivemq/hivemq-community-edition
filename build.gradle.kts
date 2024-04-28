@@ -232,7 +232,7 @@ oci {
         imageName.set("hivemq/hivemq-ce")
         allPlatforms {
             parentImages {
-                add("library:eclipse-temurin:sha256!603d23272e30bbefa9e7c436a7165c6303b9c67e27aae07472d8ddc748fe96a2") // 21.0.2_13-jre-jammy
+                add("library:eclipse-temurin:sha256!a56ee1f79cf57b2b31152cd471a4c85b6deb3057e4a1fbe8e50b57e7d2a1d7c9") // 21.0.2_13-jre-jammy
             }
             config {
                 creationTime.set(Instant.EPOCH)
