@@ -253,11 +253,19 @@ oci {
                     metadata { creationTime.set(Instant.EPOCH) }
                     contents {
                         into("opt") {
-                            filePermissions = 0b110_110_000
-                            directoryPermissions = 0b111_111_000
-                            permissions("**/*.sh", 0b111_111_000)
+                            filePermissions = 0b110_100_000
+                            directoryPermissions = 0b111_101_000
+                            permissions("**/*.sh", 0b111_101_000)
                             from("docker/docker-entrypoint.sh")
                             into("hivemq") {
+                                permissions("conf/", 0b111_111_000)
+                                permissions("conf/config.xml", 0b110_110_000)
+                                permissions("conf/logback.xml", 0b110_110_000)
+                                permissions("data/", 0b111_111_000)
+                                permissions("extensions/", 0b111_111_000)
+                                permissions("extensions/*/", 0b111_111_000)
+                                permissions("extensions/*/hivemq-extension.xml", 0b110_110_000)
+                                permissions("log/", 0b111_111_000)
                                 from("src/distribution") { filter { exclude("**/.gitkeep") } }
                                 from("docker/config.xml") { into("conf") }
                                 from("src/main/resources/config.xsd") { into("conf") }
