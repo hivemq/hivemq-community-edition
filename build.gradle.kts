@@ -242,6 +242,7 @@ oci {
                     "JAVA_OPTS" to "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA",
                     "HIVEMQ_ALLOW_ALL_CLIENTS" to "true",
                     "LANG" to "en_US.UTF-8",
+                    "HOME" to "/opt/hivemq",
                 )
                 entryPoint = listOf("/opt/docker-entrypoint.sh")
                 arguments = listOf("/opt/hivemq/bin/run.sh")
