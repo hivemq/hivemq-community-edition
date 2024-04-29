@@ -34,7 +34,7 @@ fi
 JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | sed 's/\..*//')
 
 if [ "$JAVA_VERSION" -lt 11 ]; then
-    echo 'HiveMQ requires at least Java version 11' >&2
+    echo 'ERROR! HiveMQ requires at least Java version 11.' >&2
     exit 1
 fi
 
@@ -69,12 +69,12 @@ fi
 HOME_OPT="-Dhivemq.home=$HIVEMQ_HOME"
 
 if [ ! -d "$HIVEMQ_HOME" ]; then
-    echo 'ERROR! HiveMQ Home Folder not found.' >&2
+    echo 'ERROR! HiveMQ home folder not found.' >&2
     exit 1
 fi
 
 if [ ! -w "$HIVEMQ_HOME" ]; then
-    echo 'ERROR! HiveMQ Home Folder Permissions not correct.' >&2
+    echo 'ERROR! HiveMQ home folder permissions not correct.' >&2
     exit 1
 fi
 
