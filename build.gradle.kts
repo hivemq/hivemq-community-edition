@@ -256,6 +256,7 @@ oci {
                         into("opt") {
                             filePermissions = 0b110_100_000
                             directoryPermissions = 0b111_101_000
+                            permissions("hivemq/", 0b111_111_000)
                             permissions("**/*.sh", 0b111_101_000)
                             from("docker/docker-entrypoint.sh")
                             into("hivemq") {
