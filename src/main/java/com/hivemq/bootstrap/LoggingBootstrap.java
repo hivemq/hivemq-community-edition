@@ -87,9 +87,10 @@ public class LoggingBootstrap {
         if (!overridden) {
             reEnableDefaultAppenders();
             context.addTurboFilter(LOG_LEVEL_MODIFIER_TURBO_FILTER);
+            logQueuedEntries();
         }
+
         redirectJULToSLF4J();
-        logQueuedEntries();
 
         reset();
         // must be added here, as addLoglevelModifiers() is much to late
@@ -164,9 +165,7 @@ public class LoggingBootstrap {
                 final JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(context);
                 configurator.doConfigure(file);
-
-                LIST_APPENDER.start();
-                context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(LIST_APPENDER);
+                logQueuedEntries();
                 log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
                 return true;
             } catch (final JoranException je) {
