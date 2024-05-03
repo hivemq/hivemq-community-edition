@@ -132,6 +132,7 @@ public class LoggingBootstrap {
         for (final ILoggingEvent loggingEvent : LIST_APPENDER.list) {
             logger.callAppenders(loggingEvent);
         }
+        LIST_APPENDER.list.clear();
     }
 
     private static @NotNull ch.qos.logback.classic.Logger getRootLogger() {
