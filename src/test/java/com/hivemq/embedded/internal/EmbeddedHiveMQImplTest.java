@@ -268,7 +268,8 @@ public class EmbeddedHiveMQImplTest {
         final EmbeddedExtensionImpl extension =
                 new EmbeddedExtensionImpl("id", "name", "123", "luke_skywalker", 0, 1000, embeddedMain);
 
-        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions, extension);
+        final EmbeddedHiveMQImpl embeddedHiveMQ =
+                new EmbeddedHiveMQImpl(conf, data, extensions, extension, true);
         embeddedHiveMQ.start().get();
 
         assertTrue(embeddedMain.running.get());
