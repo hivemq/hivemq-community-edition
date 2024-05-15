@@ -75,6 +75,14 @@ public interface EmbeddedHiveMQBuilder {
     @NotNull EmbeddedHiveMQBuilder withEmbeddedExtension(@Nullable EmbeddedExtension embeddedExtension);
 
     /**
+     * Disables the internal logging bootstrap, for the case any logging is already provided by other frameworks,
+     * such as OSGi or Springboot.
+     *
+     * @return this builder.
+     */
+    @NotNull EmbeddedHiveMQBuilder withoutLoggingBootstrap();
+
+    /**
      * Concludes the EmbeddedHiveMQ build process.
      * <p>
      * Beware that this method sets the

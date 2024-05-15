@@ -64,17 +64,21 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     private @NotNull LinkedList<CompletableFuture<Void>> stopFutures = new LinkedList<>();
     private @Nullable Future<?> shutDownFuture;
 
+    private final boolean enableLoggingBootstrap;
+
     EmbeddedHiveMQImpl(
             final @Nullable File conf, final @Nullable File data, final @Nullable File extensions) {
-        this(conf, data, extensions, null);
+        this(conf, data, extensions, null, true);
     }
 
     EmbeddedHiveMQImpl(
             final @Nullable File conf,
             final @Nullable File data,
             final @Nullable File extensions,
-            final @Nullable EmbeddedExtension embeddedExtension) {
+            final @Nullable EmbeddedExtension embeddedExtension,
+            final boolean enableLoggingBootstrap) {
         this.embeddedExtension = embeddedExtension;
+        this.enableLoggingBootstrap = enableLoggingBootstrap;
 
         log.info("Setting default authentication behavior to ALLOW ALL");
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(false);
@@ -146,7 +150,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                     systemInformation.init();
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
 
-                    hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, false);
+                    hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService, enableLoggingBootstrap, false);
                     hiveMQServer.bootstrap();
                     hiveMQServer.startInstance(embeddedExtension);
 
