@@ -67,7 +67,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
     public void success() {
         when(channel.isActive()).thenReturn(true);
         when(retainedMessagesSender.writeRetainedMessages(any(Channel.class),
-                any(Topic.class))).thenReturn(Futures.immediateFuture(null));
+                any(Topic[].class))).thenReturn(Futures.immediateFuture(null));
         final Topic topic = new Topic("#", QoS.AT_LEAST_ONCE);
         final Queue<String> topics = new ArrayDeque<>();
         for (int i = 0; i < 90; i++) {
@@ -77,7 +77,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
                 new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onSuccess(null);
 
-        verify(retainedMessagesSender, timeout(5000).times(4)).writeRetainedMessages(eq(channel), any(Topic.class));
+        verify(retainedMessagesSender, timeout(5000).times(4)).writeRetainedMessages(eq(channel), any(Topic[].class));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
                 new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onSuccess(null);
 
-        verify(retainedMessagesSender, never()).writeRetainedMessages(any(Channel.class), any(Topic.class));
+        verify(retainedMessagesSender, never()).writeRetainedMessages(any(Channel.class), any(Topic[].class));
     }
 
     @Test
@@ -108,7 +108,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
                 new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onFailure(new RuntimeException("test"));
 
-        verify(retainedMessagesSender, never()).writeRetainedMessages(any(Channel.class), any(Topic.class));
+        verify(retainedMessagesSender, never()).writeRetainedMessages(any(Channel.class), any(Topic[].class));
         verify(channel).disconnect();
     }
 
@@ -117,7 +117,7 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
         when(channel.isActive()).thenReturn(true);
         clientConnection.setClientId("client");
         when(retainedMessagesSender.writeRetainedMessages(any(Channel.class),
-                any(Topic.class))).thenReturn(Futures.immediateFuture(null));
+                any(Topic[].class))).thenReturn(Futures.immediateFuture(null));
         final Topic topic = new Topic("#", QoS.AT_LEAST_ONCE);
         final Queue<String> topics = new ArrayDeque<>();
         for (int i = 0; i < 90; i++) {
@@ -128,6 +128,6 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
         listener.onFailure(new NoMessageIdAvailableException());
 
         verify(retainedMessagesSender, timeout(5000).times(4)).writeRetainedMessages(any(Channel.class),
-                any(Topic.class));
+                any(Topic[].class));
     }
 }

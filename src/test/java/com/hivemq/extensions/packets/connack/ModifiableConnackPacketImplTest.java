@@ -763,4 +763,36 @@ public class ModifiableConnackPacketImplTest {
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }
+
+    @Test
+    public void setSessionPresent() {
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
+                true,
+                10,
+                60,
+                null,
+                null,
+                null,
+                3,
+                1000,
+                10,
+                Qos.AT_LEAST_ONCE,
+                true,
+                true,
+                true,
+                true,
+                null,
+                null,
+                null,
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnackPacketImpl modifiablePacket =
+                new ModifiableConnackPacketImpl(packet, configurationService, true);
+
+        assertFalse(modifiablePacket.isModified());
+
+        modifiablePacket.setSessionPresent(false);
+
+        assertTrue(modifiablePacket.isModified());
+        assertFalse(modifiablePacket.getSessionPresent());
+    }
 }

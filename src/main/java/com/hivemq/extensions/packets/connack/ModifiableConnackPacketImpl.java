@@ -41,7 +41,7 @@ import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
 
     private @NotNull ConnackReasonCode reasonCode;
-    private final boolean sessionPresent;
+    private boolean sessionPresent;
     private final long sessionExpiryInterval;
     private final int serverKeepAlive;
     private @Nullable String assignedClientId;
@@ -155,6 +155,16 @@ public class ModifiableConnackPacketImpl implements ModifiableConnackPacket {
         }
 
         this.assignedClientId = assignedClientIdentifier;
+        modified = true;
+    }
+
+    @Override
+    public void setSessionPresent(final boolean sessionPresent) {
+        if (Objects.equals(this.sessionPresent, sessionPresent)) {
+            return;
+        }
+
+        this.sessionPresent = sessionPresent;
         modified = true;
     }
 

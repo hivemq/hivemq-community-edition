@@ -48,11 +48,11 @@ public class LoggingBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingBootstrap.class);
 
-    private static @NotNull ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-    private static final List<Appender<ILoggingEvent>> defaultAppenders = new LinkedList<>();
-    private static final @NotNull LogLevelModifierTurboFilter logLevelModifierTurboFilter =
+    private static final @NotNull ListAppender<ILoggingEvent> LIST_APPENDER = new ListAppender<>();
+    private static final @NotNull List<Appender<ILoggingEvent>> DEFAULT_APPENDERS = new LinkedList<>();
+    private static final @NotNull LogLevelModifierTurboFilter LOG_LEVEL_MODIFIER_TURBO_FILTER =
             new LogLevelModifierTurboFilter();
-    private static final @NotNull LogbackChangeListener logbackChangeListener = new LogbackChangeListener();
+    private static final @NotNull LogbackChangeListener LOGBACK_CHANGE_LISTENER = new LogbackChangeListener();
 
     /**
      * Prepares the logging. This method must be called before any logging occurs
@@ -66,13 +66,12 @@ public class LoggingBootstrap {
             final Appender<ILoggingEvent> next = iterator.next();
             //We remove the appender for the moment
             logger.detachAppender(next);
-            defaultAppenders.add(next);
+            DEFAULT_APPENDERS.add(next);
         }
 
         //This appender just adds entries to an Array List so we can queue the log statements for later
-        listAppender = new ListAppender<>();
-        listAppender.start();
-        logger.addAppender(listAppender);
+        LIST_APPENDER.start();
+        logger.addAppender(LIST_APPENDER);
     }
 
     /**
@@ -82,31 +81,32 @@ public class LoggingBootstrap {
     public static void initLogging(final @NotNull File configFolder) {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-        context.addListener(logbackChangeListener);
+        context.addListener(LOGBACK_CHANGE_LISTENER);
 
         final boolean overridden = tryToOverrideLogbackXml(configFolder);
         if (!overridden) {
             reEnableDefaultAppenders();
-            context.addTurboFilter(logLevelModifierTurboFilter);
+            context.addTurboFilter(LOG_LEVEL_MODIFIER_TURBO_FILTER);
+            logQueuedEntries();
         }
+
         redirectJULToSLF4J();
-        logQueuedEntries();
 
         reset();
         // must be added here, as addLoglevelModifiers() is much to late
         if (SystemUtils.IS_OS_WINDOWS) {
-            logLevelModifierTurboFilter.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
+            LOG_LEVEL_MODIFIER_TURBO_FILTER.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
             log.trace("Added Xodus log level modifier for FileDataWriter.class");
         }
 
-        logLevelModifierTurboFilter.registerLogLevelModifier(new NettyLogLevelModifier());
+        LOG_LEVEL_MODIFIER_TURBO_FILTER.registerLogLevelModifier(new NettyLogLevelModifier());
         log.trace("Added Netty log level modifier");
     }
 
     public static void resetLogging() {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        context.getTurboFilterList().remove(logLevelModifierTurboFilter);
-        context.removeListener(logbackChangeListener);
+        context.getTurboFilterList().remove(LOG_LEVEL_MODIFIER_TURBO_FILTER);
+        context.removeListener(LOGBACK_CHANGE_LISTENER);
     }
 
     /**
@@ -115,7 +115,7 @@ public class LoggingBootstrap {
     private static void reEnableDefaultAppenders() {
         final ch.qos.logback.classic.Logger logger = getRootLogger();
 
-        for (final Appender<ILoggingEvent> defaultAppender : defaultAppenders) {
+        for (final Appender<ILoggingEvent> defaultAppender : DEFAULT_APPENDERS) {
             logger.addAppender(defaultAppender);
         }
     }
@@ -126,12 +126,13 @@ public class LoggingBootstrap {
     private static void logQueuedEntries() {
         final ch.qos.logback.classic.Logger logger = getRootLogger();
 
-        listAppender.stop();
+        LIST_APPENDER.stop();
         //Now we need to detach the appender (if needed) so it isn't used anymore
-        logger.detachAppender(listAppender);
-        for (final ILoggingEvent loggingEvent : listAppender.list) {
+        logger.detachAppender(LIST_APPENDER);
+        for (final ILoggingEvent loggingEvent : LIST_APPENDER.list) {
             logger.callAppenders(loggingEvent);
         }
+        LIST_APPENDER.list.clear();
     }
 
     private static @NotNull ch.qos.logback.classic.Logger getRootLogger() {
@@ -165,8 +166,7 @@ public class LoggingBootstrap {
                 final JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(context);
                 configurator.doConfigure(file);
-
-                context.getLogger(Logger.ROOT_LOGGER_NAME).addAppender(listAppender);
+                logQueuedEntries();
                 log.info("Log Configuration was overridden by {}", file.getAbsolutePath());
                 return true;
             } catch (final JoranException je) {
@@ -192,7 +192,7 @@ public class LoggingBootstrap {
     }
 
     public static void addLoglevelModifiers() {
-        logLevelModifierTurboFilter.registerLogLevelModifier(new XodusEnvironmentImplLogLevelModifier());
+        LOG_LEVEL_MODIFIER_TURBO_FILTER.registerLogLevelModifier(new XodusEnvironmentImplLogLevelModifier());
         log.trace("Added Xodus log level modifier for EnvironmentImpl.class");
     }
 
@@ -200,8 +200,8 @@ public class LoggingBootstrap {
      * Resets everything to the initial state
      */
     private static void reset() {
-        defaultAppenders.clear();
-        listAppender.list.clear();
+        DEFAULT_APPENDERS.clear();
+        LIST_APPENDER.list.clear();
     }
 
     private static final class LogbackChangeListener implements LoggerContextListener {
@@ -226,7 +226,7 @@ public class LoggingBootstrap {
         @Override
         public void onReset(final @NotNull LoggerContext context) {
             log.trace("logback.xml was changed");
-            context.addTurboFilter(logLevelModifierTurboFilter);
+            context.addTurboFilter(LOG_LEVEL_MODIFIER_TURBO_FILTER);
         }
 
         @Override
