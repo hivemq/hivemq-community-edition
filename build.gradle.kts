@@ -1,5 +1,4 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import java.time.Instant
 
 plugins {
     java
@@ -235,7 +234,6 @@ oci {
                 add("library:eclipse-temurin:sha256!a56ee1f79cf57b2b31152cd471a4c85b6deb3057e4a1fbe8e50b57e7d2a1d7c9") // 21.0.2_13-jre-jammy
             }
             config {
-                creationTime = Instant.EPOCH
                 user = "10000"
                 ports = setOf("1883", "8000")
                 environment = mapOf(
@@ -251,7 +249,6 @@ oci {
             }
             layers {
                 layer("hivemq") {
-                    metadata { creationTime = Instant.EPOCH }
                     contents {
                         into("opt") {
                             filePermissions = 0b110_100_000
