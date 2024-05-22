@@ -229,7 +229,7 @@ oci {
         imageName = "hivemq/hivemq-ce"
         allPlatforms {
             parentImages {
-                add("library:eclipse-temurin:sha256!a56ee1f79cf57b2b31152cd471a4c85b6deb3057e4a1fbe8e50b57e7d2a1d7c9") // 21.0.2_13-jre-jammy
+                add("library:eclipse-temurin:sha256!0f8bc645fb0c9ab40c913602c9f5f12c32d9ae6bef3e34fa0469c98e7341333c") // 21.0.3_9-jre-jammy
             }
             config {
                 user = "10000"
