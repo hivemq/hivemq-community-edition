@@ -57,8 +57,6 @@ metadata {
         }
     }
     github {
-        org = "hivemq"
-        repo = "hivemq-community-edition"
         issues()
     }
 }
