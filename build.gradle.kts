@@ -249,12 +249,12 @@ oci {
                 layer("hivemq") {
                     contents {
                         into("opt") {
-                            filePermissions = 0b110_100_000
-                            directoryPermissions = 0b111_101_000
+                            from("docker/docker-entrypoint.sh") { filePermissions = 0b111_101_101 }
                             permissions("hivemq/", 0b111_111_000)
-                            permissions("**/*.sh", 0b111_101_000)
-                            from("docker/docker-entrypoint.sh")
                             into("hivemq") {
+                                filePermissions = 0b110_100_000
+                                directoryPermissions = 0b111_101_000
+                                permissions("**/*.sh", 0b111_101_000)
                                 permissions("conf/", 0b111_111_000)
                                 permissions("conf/config.xml", 0b110_110_000)
                                 permissions("conf/logback.xml", 0b110_110_000)
