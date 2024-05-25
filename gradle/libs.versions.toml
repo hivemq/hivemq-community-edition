@@ -1,10 +1,10 @@
 [versions]
-apache-commonsCompress = "1.26.1"
+apache-commonsCompress = "1.26.2"
 apache-commonsIO = "2.16.1"
 apache-commonsLang = "3.14.0"
 awaitility = "4.2.1"
 bouncycastle = "1.78.1"
-byteBuddy = "1.14.15"
+byteBuddy = "1.14.16"
 concurrentUnit = "0.4.6"
 dropwizard-metrics = "4.2.25"
 eclipse-collections = "11.1.0"
