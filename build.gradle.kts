@@ -225,14 +225,14 @@ val hivemqZip by tasks.registering(Zip::class) {
 oci {
     registries {
         dockerHub {
-            credentials()
+            optionalCredentials()
         }
     }
     imageDefinitions.register("main") {
         imageName.set("hivemq/hivemq-ce")
         allPlatforms {
             parentImages {
-                add("library:eclipse-temurin:sha256!ec48c245e50016d20c36fd3cdd5b4e881eee68cab535955df74a8a9ec709faaa") // 11.0.22_7-jre-jammy
+                add("library:eclipse-temurin:sha256!a56ee1f79cf57b2b31152cd471a4c85b6deb3057e4a1fbe8e50b57e7d2a1d7c9") // 21.0.2_13-jre-jammy
             }
             config {
                 creationTime.set(Instant.EPOCH)
@@ -242,6 +242,7 @@ oci {
                     "JAVA_OPTS" to "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA",
                     "HIVEMQ_ALLOW_ALL_CLIENTS" to "true",
                     "LANG" to "en_US.UTF-8",
+                    "HOME" to "/opt/hivemq",
                 )
                 entryPoint = listOf("/opt/docker-entrypoint.sh")
                 arguments = listOf("/opt/hivemq/bin/run.sh")
@@ -253,11 +254,20 @@ oci {
                     metadata { creationTime.set(Instant.EPOCH) }
                     contents {
                         into("opt") {
-                            filePermissions = 0b110_110_000
-                            directoryPermissions = 0b111_111_000
-                            permissions("**/*.sh", 0b111_111_000)
+                            filePermissions = 0b110_100_000
+                            directoryPermissions = 0b111_101_000
+                            permissions("hivemq/", 0b111_111_000)
+                            permissions("**/*.sh", 0b111_101_000)
                             from("docker/docker-entrypoint.sh")
                             into("hivemq") {
+                                permissions("conf/", 0b111_111_000)
+                                permissions("conf/config.xml", 0b110_110_000)
+                                permissions("conf/logback.xml", 0b110_110_000)
+                                permissions("data/", 0b111_111_000)
+                                permissions("extensions/", 0b111_111_000)
+                                permissions("extensions/*/", 0b111_111_000)
+                                permissions("extensions/*/hivemq-extension.xml", 0b110_110_000)
+                                permissions("log/", 0b111_111_000)
                                 from("src/distribution") { filter { exclude("**/.gitkeep") } }
                                 from("docker/config.xml") { into("conf") }
                                 from("src/main/resources/config.xsd") { into("conf") }
@@ -271,25 +281,6 @@ oci {
         specificPlatform(platform("linux", "amd64"))
         specificPlatform(platform("linux", "arm64", "v8"))
     }
-    imageDependencies {
-        register("release") {
-            add(project)
-            add(project).tag("latest")
-        }
-        register("snapshot") {
-            add(project).tag("snapshot")
-        }
-    }
-}
-
-val pushReleaseToDockerHub by tasks.registering(oci.pushTaskClass) {
-    from(oci.imageDependencies["release"])
-    registry.from(oci.registries.list["dockerHub"])
-}
-
-val pushSnapshotToDockerHub by tasks.registering(oci.pushTaskClass) {
-    from(oci.imageDependencies["snapshot"])
-    registry.from(oci.registries.list["dockerHub"])
 }
 
 tasks.javadoc {
