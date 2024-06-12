@@ -37,7 +37,10 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 import com.hivemq.mqtt.services.PublishPollService;
+import com.hivemq.persistence.local.IncomingMessageFlowInMemoryLocalPersistence;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
+import com.hivemq.persistence.qos.IncomingMessageFlowPersistenceImpl;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
@@ -51,6 +54,7 @@ import util.TestMessageUtil;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.anyInt;
@@ -213,7 +217,7 @@ public class PublishFlowHandlerTest {
     }
 
     @Test
-    public void test_qos_1_messages_is_not_dup() {
+    public void test_qos_1_messages_is_dup() {
 
         final int messageid = 1;
 
@@ -231,9 +235,6 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
 
         assertEquals(true, channel.outboundMessages().isEmpty());
-        verify(incomingMessageFlowPersistence, times(2)).addOrReplace(CLIENT_ID,
-                publish.getPacketIdentifier(),
-                publish);
     }
 
     @Test
@@ -270,7 +271,7 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
 
         //pubcomp is here
-        assertEquals(1, channel.outboundMessages().size());
+        assertEquals(2, channel.outboundMessages().size());
     }
 
     @Test
@@ -292,11 +293,11 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
         channel.writeInbound(publish);
 
-        assertEquals(true, channel.outboundMessages().isEmpty());
+        assertEquals(false, channel.outboundMessages().isEmpty());
     }
 
     @Test
-    public void test_qos_2_messages_is_not_dup() {
+    public void test_qos_2_messages_is_dup() {
 
         final int messageid = 1;
 
@@ -313,8 +314,8 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
         channel.writeInbound(publish);
 
-        assertEquals(true, channel.outboundMessages().isEmpty());
-        verify(incomingMessageFlowPersistence, times(2)).addOrReplace(CLIENT_ID,
+        assertEquals(false, channel.outboundMessages().isEmpty());
+        verify(incomingMessageFlowPersistence, times(1)).addOrReplace(CLIENT_ID,
                 publish.getPacketIdentifier(),
                 publish);
     }
@@ -352,13 +353,6 @@ public class PublishFlowHandlerTest {
 
         assertNotNull(pubackOut);
         assertEquals(puback.getPacketIdentifier(), pubackOut.getPacketIdentifier());
-
-        verify(incomingMessageFlowPersistence).addOrReplace(eq("client"),
-                eq(puback.getPacketIdentifier()),
-                same(puback));
-
-        //We have to make sure that the client was actually deleted in the end
-        verify(incomingMessageFlowPersistence).remove(eq("client"), eq(puback.getPacketIdentifier()));
     }
 
     @Test
@@ -816,6 +810,43 @@ public class PublishFlowHandlerTest {
         assertEquals(1, orderedTopicService.queue.size());
         assertEquals(3, orderedTopicService.unacknowledgedMessages().size());
     }
+
+    @Test()
+    public void test_Qos2AndQos1PublishDoNotInterfereWithEachOther() throws Exception {
+        InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 50;
+        channel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
+                new IncomingMessageFlowPersistenceImpl(new IncomingMessageFlowInMemoryLocalPersistence()),
+                orderedTopicService,
+                incomingPublishHandler,
+                mock(DropOutgoingPublishesHandler.class)));
+        final ClientConnection clientConnection = spy(new DummyClientConnection(channel, null));
+        when(clientConnection.getFreePacketIdRanges()).thenReturn(freePacketIdRanges);
+        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
+        ClientConnection.of(channel).setClientId(CLIENT_ID);
+
+
+        final PUBLISH publishQoS1 = createPublish("topic", 100, QoS.AT_LEAST_ONCE);
+        final PUBLISH publishQoS2 = createPublish("topic", 100, QoS.EXACTLY_ONCE);
+
+        final PUBLISH publishQoS2_1000 = createPublish("topic", 100, QoS.EXACTLY_ONCE);
+
+        channel.pipeline().fireChannelRead(publishQoS2);
+        channel.pipeline().fireChannelRead(publishQoS1);
+        channel.pipeline().fireChannelRead(publishQoS2_1000);
+
+        assertEquals(0, orderedTopicService.queue.size());
+        assertEquals(0, orderedTopicService.unacknowledgedMessages().size());
+        verify(incomingPublishHandler, times(1)).interceptOrDelegate(any(ChannelHandlerContext.class),
+                eq(publishQoS1),
+                eq(CLIENT_ID));
+        verify(incomingPublishHandler, times(1)).interceptOrDelegate(any(ChannelHandlerContext.class),
+                eq(publishQoS2),
+                eq(CLIENT_ID));
+        verify(incomingPublishHandler, times(0)).interceptOrDelegate(any(ChannelHandlerContext.class),
+                eq(publishQoS2_1000),
+                eq(CLIENT_ID));
+    }
+
 
     private PUBLISH createPublish(final String topic, final int messageId, final QoS qoS) {
         return createPublish(topic, messageId, qoS, false);

@@ -32,7 +32,7 @@ public class IncomingMessageFlowPersistenceImpl implements IncomingMessageFlowPe
     private final @NotNull IncomingMessageFlowLocalPersistence localPersistence;
 
     @Inject
-    IncomingMessageFlowPersistenceImpl(final @NotNull IncomingMessageFlowLocalPersistence localPersistence) {
+    public IncomingMessageFlowPersistenceImpl(final @NotNull IncomingMessageFlowLocalPersistence localPersistence) {
         this.localPersistence = localPersistence;
     }
 
