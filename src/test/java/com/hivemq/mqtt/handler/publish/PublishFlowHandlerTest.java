@@ -847,7 +847,7 @@ public class PublishFlowHandlerTest {
         verify(incomingPublishHandler, times(1)).interceptOrDelegate(any(ChannelHandlerContext.class),
                 eq(publishQoS2),
                 eq(CLIENT_ID));
-        verify(incomingPublishHandler, times(0)).interceptOrDelegate(any(ChannelHandlerContext.class),
+        verify(incomingPublishHandler, never()).interceptOrDelegate(any(ChannelHandlerContext.class),
                 eq(publishQoS2Duplicate),
                 eq(CLIENT_ID));
     }
