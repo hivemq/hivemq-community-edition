@@ -64,6 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("NullabilityAnnotations")
@@ -235,6 +236,7 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
 
         assertEquals(true, channel.outboundMessages().isEmpty());
+        verifyNoMoreInteractions(incomingMessageFlowPersistence);
     }
 
     @Test
@@ -293,7 +295,10 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
         channel.writeInbound(publish);
 
-        assertEquals(false, channel.outboundMessages().isEmpty());
+        assertEquals(1, channel.outboundMessages().size());
+        verify(incomingMessageFlowPersistence, times(1)).addOrReplace(CLIENT_ID,
+                publish.getPacketIdentifier(),
+                publish);
     }
 
     @Test
@@ -314,7 +319,7 @@ public class PublishFlowHandlerTest {
         channel.writeInbound(publish);
         channel.writeInbound(publish);
 
-        assertEquals(false, channel.outboundMessages().isEmpty());
+        assertEquals(1, channel.outboundMessages().size());
         verify(incomingMessageFlowPersistence, times(1)).addOrReplace(CLIENT_ID,
                 publish.getPacketIdentifier(),
                 publish);
@@ -353,6 +358,7 @@ public class PublishFlowHandlerTest {
 
         assertNotNull(pubackOut);
         assertEquals(puback.getPacketIdentifier(), pubackOut.getPacketIdentifier());
+        verifyNoMoreInteractions(incomingMessageFlowPersistence);
     }
 
     @Test
@@ -786,7 +792,7 @@ public class PublishFlowHandlerTest {
     }
 
     @Test(timeout = 5000)
-    public void test_max_inflight_window() throws Exception {
+    public void test_max_inflight_window() {
 
         ClientConnection.of(channel).setClientReceiveMaximum(50);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 3;
@@ -812,7 +818,7 @@ public class PublishFlowHandlerTest {
     }
 
     @Test()
-    public void test_Qos2AndQos1PublishDoNotInterfereWithEachOther() throws Exception {
+    public void test_Qos2AndQos1PublishDoNotInterfereWithEachOther() {
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 50;
         channel = new EmbeddedChannel(new PublishFlowHandler(publishPollService,
                 new IncomingMessageFlowPersistenceImpl(new IncomingMessageFlowInMemoryLocalPersistence()),
@@ -824,15 +830,14 @@ public class PublishFlowHandlerTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setClientId(CLIENT_ID);
 
-
         final PUBLISH publishQoS1 = createPublish("topic", 100, QoS.AT_LEAST_ONCE);
         final PUBLISH publishQoS2 = createPublish("topic", 100, QoS.EXACTLY_ONCE);
 
-        final PUBLISH publishQoS2_1000 = createPublish("topic", 100, QoS.EXACTLY_ONCE);
+        final PUBLISH publishQoS2Duplicate = createPublish("topic", 100, QoS.EXACTLY_ONCE);
 
         channel.pipeline().fireChannelRead(publishQoS2);
         channel.pipeline().fireChannelRead(publishQoS1);
-        channel.pipeline().fireChannelRead(publishQoS2_1000);
+        channel.pipeline().fireChannelRead(publishQoS2Duplicate);
 
         assertEquals(0, orderedTopicService.queue.size());
         assertEquals(0, orderedTopicService.unacknowledgedMessages().size());
@@ -843,7 +848,7 @@ public class PublishFlowHandlerTest {
                 eq(publishQoS2),
                 eq(CLIENT_ID));
         verify(incomingPublishHandler, times(0)).interceptOrDelegate(any(ChannelHandlerContext.class),
-                eq(publishQoS2_1000),
+                eq(publishQoS2Duplicate),
                 eq(CLIENT_ID));
     }
 
