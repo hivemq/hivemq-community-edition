@@ -70,7 +70,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private final @NotNull IncomingPublishHandler incomingPublishHandler;
     private final @NotNull DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
 
-    private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
+    private final @NotNull Map<Integer, Boolean> qos1AlreadySentMap;
 
     @VisibleForTesting
     @Inject
@@ -83,7 +83,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         this.publishPollService = publishPollService;
         this.persistence = persistence;
         this.orderedTopicService = orderedTopicService;
-        this.qos1And2AlreadySentMap = new HashMap<>();
+        this.qos1AlreadySentMap = new HashMap<>();
         this.incomingPublishHandler = incomingPublishHandler;
         this.dropOutgoingPublishesHandler = dropOutgoingPublishesHandler;
     }
@@ -117,13 +117,17 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         if (msg instanceof PUBACK) {
             final PUBACK puback = (PUBACK) msg;
-            final String client = ClientConnection.of(ctx.channel()).getClientId();
             final int messageId = puback.getPacketIdentifier();
-            persistence.addOrReplace(client, messageId, puback);
-            promise.addListener(new PUBLISHFlowCompleteListener(messageId,
-                    client,
-                    qos1And2AlreadySentMap,
-                    persistence));
+            promise.addListener((ChannelFutureListener) future -> {
+                if (future.isSuccess()) {
+                    qos1AlreadySentMap.remove(messageId);
+                    if (log.isTraceEnabled()) {
+                        log.trace("Client '{}' completed a PUBLISH flow with QoS 1 for packet identifier '{}'",
+                                ctx,
+                                messageId);
+                    }
+                }
+            });
         }
 
         final boolean flowComplete = orderedTopicService.handlePublish(ctx.channel(), msg, promise);
@@ -183,22 +187,27 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
             incomingPublishHandler.interceptOrDelegate(ctx, publish, clientId);
-            // QoS 1 or 2 duplicate delivery handling
-        } else {
+            // QoS 1 delivery handling
+        } else if (publish.getQoS() == QoS.AT_LEAST_ONCE) {
             UNACKNOWLEDGED_PUBLISHES_COUNTER.incrementAndGet();
+            if (publish.isDuplicateDelivery() && qos1AlreadySentMap.get(publish.getPacketIdentifier()) != null) {
+                log.debug("Client {} sent a duplicate publish message with id {}. This message is ignored",
+                        clientId,
+                        publish.getPacketIdentifier());
+            } else {
+                final int packetId = publish.getPacketIdentifier();
+                qos1AlreadySentMap.put(publish.getPacketIdentifier(), true);
+                firstPublishForMessageIdReceived(ctx, publish, clientId, packetId);
+            }
+            // QoS 2 duplicate delivery handling
+        } else {
             final int messageId = publish.getPacketIdentifier();
             final MessageWithID savedMessage = persistence.get(clientId, messageId);
-
-            //No PUBLISH message was found in persistence. This is the standard case since we don't know this message yet
             if (!(savedMessage instanceof PUBLISH)) {
+                persistence.addOrReplace(clientId, messageId, publish);
                 firstPublishForMessageIdReceived(ctx, publish, clientId, messageId);
-                //The publish was resent with the DUP flag
-            } else if (publish.isDuplicateDelivery()) {
-                resentWithDUPFlag(ctx, publish, clientId);
-                //The publish was resent without DUP flag!
-            } else {
-                resentWithoutDUPFlag(ctx, publish, clientId);
-            }
+            } else
+                ctx.writeAndFlush(new PUBREC(messageId));
         }
     }
 
@@ -207,45 +216,11 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             final @NotNull PUBLISH publish,
             final @NotNull String client,
             final int messageId) throws Exception {
-        persistence.addOrReplace(client, messageId, publish);
         incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
-        qos1And2AlreadySentMap.put(messageId, true);
         log.trace(
                 "Client {} sent a publish message with id {} which was not forwarded before. This message is processed normally",
                 client,
                 messageId);
-    }
-
-    private void resentWithDUPFlag(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client)
-            throws Exception {
-        final Boolean alreadySent = qos1And2AlreadySentMap.get(publish.getPacketIdentifier());
-        if (alreadySent != null && alreadySent) {
-
-            log.debug("Client {} sent a duplicate publish message with id {}. This message is ignored",
-                    client,
-                    publish.getPacketIdentifier());
-        } else {
-            super.channelRead(ctx, publish);
-            log.debug(
-                    "Client {} sent a duplicate publish message with id {} which was not forwarded before. This message is processed normally",
-                    client,
-                    publish.getPacketIdentifier());
-        }
-        qos1And2AlreadySentMap.put(publish.getPacketIdentifier(), true);
-    }
-
-    private void resentWithoutDUPFlag(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String client)
-            throws Exception {
-        log.debug(
-                "Client {} sent a new PUBLISH with QoS {} and a message identifier which is already in process ({}) by another flow! Starting new flow",
-                client,
-                publish.getQoS().getQosNumber(),
-                publish.getPacketIdentifier());
-        persistence.addOrReplace(client, publish.getPacketIdentifier(), publish);
-        incomingPublishHandler.interceptOrDelegate(ctx, publish, client);
-        qos1And2AlreadySentMap.put(publish.getPacketIdentifier(), true);
     }
 
 
@@ -291,7 +266,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
         persistence.addOrReplace(client, messageId, pubrel);
         ctx.writeAndFlush(new PUBCOMP(messageId))
-                .addListener(new PUBLISHFlowCompleteListener(messageId, client, qos1And2AlreadySentMap, persistence));
+                .addListener(new PubcompSentListener(messageId, client, persistence));
     }
 
     private void handlePubcomp(final @NotNull ChannelHandlerContext ctx, @NotNull final PUBCOMP msg) {
@@ -329,31 +304,27 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     }
 
     @Immutable
-    private static class PUBLISHFlowCompleteListener implements ChannelFutureListener {
+    private static class PubcompSentListener implements ChannelFutureListener {
 
         private final int messageId;
         private final @NotNull String client;
-        private final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap;
         private final @NotNull IncomingMessageFlowPersistence persistence;
 
-        PUBLISHFlowCompleteListener(
+        PubcompSentListener(
                 final int messageId,
                 final @NotNull String client,
-                final @NotNull Map<Integer, Boolean> qos1And2AlreadySentMap,
                 final @NotNull IncomingMessageFlowPersistence persistence) {
             this.messageId = messageId;
             this.client = client;
-            this.qos1And2AlreadySentMap = qos1And2AlreadySentMap;
             this.persistence = persistence;
         }
 
         @Override
-        public void operationComplete(final ChannelFuture future) throws Exception {
+        public void operationComplete(final ChannelFuture future)  {
             if (future.isSuccess()) {
                 UNACKNOWLEDGED_PUBLISHES_COUNTER.decrementAndGet();
-                qos1And2AlreadySentMap.remove(messageId);
                 persistence.remove(client, messageId);
-                log.trace("Client '{}' completed a PUBLISH flow with QoS 1 or 2 for packet identifier '{}'",
+                log.trace("Client '{}' completed a PUBLISH flow with QoS 2 for packet identifier '{}'",
                         client,
                         messageId);
             }
