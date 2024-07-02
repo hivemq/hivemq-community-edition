@@ -62,7 +62,7 @@ public class EmbeddedHiveMQBuilderImpl implements EmbeddedHiveMQBuilder {
     }
 
     @Override
-    public EmbeddedHiveMQBuilder withoutLoggingBootstrap() {
+    public @NotNull EmbeddedHiveMQBuilder withoutLoggingBootstrap() {
         this.enableLoggingBootstrap = false;
         return this;
     }
