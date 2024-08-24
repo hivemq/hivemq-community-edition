@@ -30,7 +30,7 @@ shrinkwrap = "1.2.6"
 slf4j = "2.0.16"
 stefanBirkner-systemRules = "1.19.0"
 wiremock = "3.0.1"
-xodus = "1.2.3"
+xodus = "1.3.232"
 zeroAllocationHashing = "0.16"
 
 [libraries]
