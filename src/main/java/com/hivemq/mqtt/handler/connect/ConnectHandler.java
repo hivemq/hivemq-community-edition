@@ -225,8 +225,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
         }
 
         clientConnectionContext.proposeClientState(ClientState.AUTHENTICATED);
-        connectAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnectionContext);
+        connectAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
     }
 
     public void connectSuccessfulAuthenticated(
@@ -236,8 +236,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
             final @Nullable ModifiableClientSettingsImpl clientSettings) {
 
         clientConnectionContext.proposeClientState(ClientState.AUTHENTICATED);
-        connectAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
         cleanChannelAttributesAfterAuth(clientConnectionContext);
+        connectAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
     }
 
     private static void cleanChannelAttributesAfterAuth(final @NotNull ClientConnectionContext clientConnectionContext) {
