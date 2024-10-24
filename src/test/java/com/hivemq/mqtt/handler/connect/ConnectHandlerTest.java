@@ -1467,6 +1467,36 @@ public class ConnectHandlerTest {
         assertEquals(123, connect.getReceiveMaximum());
     }
 
+    @Test(timeout = 5000)
+    public void test_connectAuthenticated_connectMessageCleared() {
+        createHandler();
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
+        clientConnectionContext.setAuthConnect(connect);
+
+        handler.connectSuccessfulAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
+
+        final ClientConnection clientConnection = ClientConnection.of(channel);
+        assertEquals(ClientState.AUTHENTICATED, clientConnection.getClientState());
+        assertNull(clientConnection.getAuthConnect());
+    }
+
+    @Test(timeout = 5000)
+    public void test_connectUnauthenticated_connectMessageCleared() {
+        createHandler();
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").withAuthMethod("someMethod").build();
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
+        clientConnectionContext.setAuthConnect(connect);
+
+        handler.connectSuccessfulUndecided(ctx, clientConnectionContext, connect, clientSettings);
+
+        final ClientConnection clientConnection = ClientConnection.of(channel);
+        assertEquals(ClientState.AUTHENTICATED, clientConnection.getClientState());
+        assertNull(clientConnection.getAuthConnect());
+    }
+
     @Test
     public void test_start_connection_persistent() throws Exception {
         final CONNECT connect = new CONNECT.Mqtt3Builder().withClientIdentifier("client")
