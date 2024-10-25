@@ -25,6 +25,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -42,6 +43,8 @@ public class NonSslHandlerTest {
     private @NotNull EmbeddedChannel channel;
 
     private @NotNull MqttServerDisconnector disconnector;
+
+    private AutoCloseable closeable;
 
     private static final byte @NotNull [] VALID_SSL_PACKET = {
             22,
@@ -655,13 +658,18 @@ public class NonSslHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         final Listener listener = mock(TcpListener.class);
         channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new UndefinedClientConnection(channel, null, listener));
         disconnector = new MqttServerDisconnectorImpl(new EventLog());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

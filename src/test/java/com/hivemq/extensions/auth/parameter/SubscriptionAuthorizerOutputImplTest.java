@@ -18,6 +18,7 @@ package com.hivemq.extensions.auth.parameter;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -40,11 +41,17 @@ public class SubscriptionAuthorizerOutputImplTest {
     private PluginOutPutAsyncer asyncer;
 
     private SubscriptionAuthorizerOutputImpl output;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         output = new SubscriptionAuthorizerOutputImpl(asyncer);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

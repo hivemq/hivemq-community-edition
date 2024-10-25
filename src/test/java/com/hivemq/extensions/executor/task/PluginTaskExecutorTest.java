@@ -45,15 +45,15 @@ import static org.junit.Assert.assertTrue;
 public class PluginTaskExecutorTest {
 
     private PluginTaskExecutor pluginTaskExecutor;
-
     private List<Integer> executionOrder;
+    private AutoCloseable closeable;
 
     @Mock
     IsolatedExtensionClassloader classloader;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         executionOrder = Collections.synchronizedList(new ArrayList<>());
 
         pluginTaskExecutor = new PluginTaskExecutor(new AtomicLong(0));
@@ -63,6 +63,11 @@ public class PluginTaskExecutorTest {
     @After
     public void after() {
         pluginTaskExecutor.stop();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 5000)

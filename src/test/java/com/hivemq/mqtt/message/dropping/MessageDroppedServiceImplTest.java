@@ -18,6 +18,7 @@ package com.hivemq.mqtt.message.dropping;
 import com.codahale.metrics.MetricRegistry;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,14 +40,20 @@ public class MessageDroppedServiceImplTest {
     private EventLog eventLog;
 
     private MessageDroppedService messageDroppedService;
+    private AutoCloseable closeable;
 
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         messageDroppedService = new MessageDroppedServiceImpl(new MetricsHolder(new MetricRegistry()), eventLog);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -30,6 +30,7 @@ import com.hivemq.logging.EventLog;
 import com.hivemq.security.ssl.NonSslHandler;
 import com.hivemq.security.ssl.SslFactory;
 import io.netty.channel.Channel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -69,15 +70,21 @@ public class ChannelInitializerFactoryImplTest {
     private RestrictionsConfigurationService restrictionsConfigurationService;
 
     private ChannelInitializerFactoryImpl channelInitializerFactory;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
         channelInitializerFactory =
                 new TestChannelInitializerFactory(channelDependencies, sslFactory, nonSslHandlerProvider);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

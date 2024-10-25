@@ -85,12 +85,13 @@ public class RetainedMessageTypeMigrationTest {
 
     private File dataFolder;
     private FullConfigurationService configurationService;
+    private AutoCloseable closeable;
 
     private RetainedMessageTypeMigration.RetainedMessagePersistenceTypeSwitchCallback callback;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());
@@ -119,6 +120,11 @@ public class RetainedMessageTypeMigrationTest {
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
         FileUtils.forceDelete(dataFolder);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 5000)

@@ -29,6 +29,7 @@ import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -59,10 +60,11 @@ public class UnsubscribeHandlerTest {
     private @NotNull UnsubscribeHandler unsubscribeHandler;
     private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
         clientConnection = new DummyClientConnection(channel, null);
         channel = new EmbeddedChannel(unsubscribeHandler);
@@ -73,6 +75,11 @@ public class UnsubscribeHandlerTest {
                 any(String.class))).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(
                 Futures.<Void>immediateFuture(null));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

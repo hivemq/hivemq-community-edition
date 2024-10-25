@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableSet;
 import com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -42,11 +43,17 @@ public class ClientSessionCleanUpTaskTest {
     private PendingWillMessages pendingWillMessages;
 
     private ClientSessionCleanUpTask task;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         task = new ClientSessionCleanUpTask(localPersistence, clientSessionPersistence, pendingWillMessages);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

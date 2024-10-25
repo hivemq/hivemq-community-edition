@@ -17,6 +17,7 @@ package com.hivemq.statistics;
 
 import com.hivemq.configuration.info.SystemInformation;
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,16 +43,21 @@ public class HivemqIdTest {
     private SystemInformation systemInformation;
 
     private HivemqId hivemqId;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         when(systemInformation.getDataFolder()).thenReturn(temporaryFolder.getRoot());
 
         hivemqId = new HivemqId(systemInformation);
     }
 
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
+    }
 
     @Test
     public void test_no_id_present() {

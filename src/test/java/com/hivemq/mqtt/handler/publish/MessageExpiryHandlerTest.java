@@ -55,12 +55,14 @@ public class MessageExpiryHandlerTest {
     private ChannelHandlerContext ctx;
 
     private EmbeddedChannel channel;
+    private AutoCloseable closeable;
 
     LogbackCapturingAppender logCapture;
 
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         final MessageExpiryHandler messageExpiryHandler = new MessageExpiryHandler();
         channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
@@ -75,6 +77,11 @@ public class MessageExpiryHandlerTest {
     @After
     public void tearDown() throws Exception {
         LogbackCapturingAppender.Factory.cleanUp();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

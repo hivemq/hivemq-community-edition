@@ -29,6 +29,7 @@ import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrec.PUBREC;
 import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -54,13 +55,15 @@ public class FlowControlHandlerTest {
 
     private MqttConfigurationServiceImpl mqttConfigurationService;
 
+    private AutoCloseable closeable;
+
     @Mock
     EventLog eventLog;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         mqttConfigurationService = new MqttConfigurationServiceImpl();
         mqttConfigurationService.setServerReceiveMaximum(10);
@@ -69,6 +72,11 @@ public class FlowControlHandlerTest {
 
         flowControlHandler = new FlowControlHandler(mqttConfigurationService, serverDisconnector);
 
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

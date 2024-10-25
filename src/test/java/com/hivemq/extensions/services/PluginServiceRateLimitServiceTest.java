@@ -17,6 +17,7 @@ package com.hivemq.extensions.services;
 
 
 import com.hivemq.configuration.service.InternalConfigurations;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -30,11 +31,17 @@ import static org.junit.Assert.assertTrue;
 public class PluginServiceRateLimitServiceTest {
 
     private PluginServiceRateLimitService pluginServiceRateLimitService;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         pluginServiceRateLimitService = new PluginServiceRateLimitService();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

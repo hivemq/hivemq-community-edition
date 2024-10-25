@@ -38,6 +38,7 @@ import com.hivemq.mqtt.services.PublishDistributor;
 import com.hivemq.mqtt.topic.SubscriberWithIdentifiers;
 import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -84,10 +85,11 @@ public class PublishServiceImplTest {
     private final FullConfigurationService fullConfigurationService =
             new TestConfigurationBootstrap().getFullConfigurationService();
     private PublishServiceImpl publishService;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
         managedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
         managedPluginExecutorService.postConstruct();
@@ -97,6 +99,11 @@ public class PublishServiceImplTest {
                 publishDistributor,
                 hiveMQId,
                 topicTree);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(expected = DoNotImplementException.class)

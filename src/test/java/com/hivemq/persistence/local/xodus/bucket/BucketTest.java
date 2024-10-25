@@ -17,6 +17,7 @@ package com.hivemq.persistence.local.xodus.bucket;
 
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -36,9 +37,16 @@ public class BucketTest {
     @Mock
     Store store;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

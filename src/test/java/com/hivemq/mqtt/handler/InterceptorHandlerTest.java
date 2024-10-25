@@ -44,6 +44,7 @@ import com.hivemq.mqtt.message.unsuback.UNSUBACK;
 import com.hivemq.mqtt.message.unsubscribe.UNSUBSCRIBE;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -89,10 +90,11 @@ public class InterceptorHandlerTest {
     private @NotNull ChannelPromise channelPromise;
 
     private @NotNull InterceptorHandler interceptorHandler;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         interceptorHandler = new InterceptorHandler(connectInboundInterceptorHandler,
                 connackOutboundInterceptorHandler,
                 publishOutboundInterceptorHandler,
@@ -105,6 +107,11 @@ public class InterceptorHandlerTest {
                 unsubackOutboundInterceptorHandler,
                 pingInterceptorHandler,
                 disconnectInterceptorHandler);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

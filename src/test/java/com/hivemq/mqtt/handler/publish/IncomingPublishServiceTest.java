@@ -43,6 +43,7 @@ import com.hivemq.mqtt.services.InternalPublishService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -83,11 +84,12 @@ public class IncomingPublishServiceTest {
     private EmbeddedChannel channel;
     private ChannelHandlerContext ctx;
     private IncomingPublishService incomingPublishService;
+    private AutoCloseable closeable;
     private final ClientConnection clientConnection = new DummyClientConnection(channel, null);
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         mqttConfigurationService = Mockito.spy(new MqttConfigurationServiceImpl());
         restrictionsConfigurationService = Mockito.spy(new RestrictionsConfigurationServiceImpl());
@@ -115,6 +117,11 @@ public class IncomingPublishServiceTest {
 
         ClientConnection.of(channel).setClientId("clientid");
         ClientConnection.of(channel).setMaxPacketSizeSend(1000L);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -61,11 +61,12 @@ public class ConfigurationFileProviderTest {
 
 
     private File confFolder;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logger.addAppender(mockAppender);
@@ -84,6 +85,11 @@ public class ConfigurationFileProviderTest {
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
         logger.detachAppender(mockAppender);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

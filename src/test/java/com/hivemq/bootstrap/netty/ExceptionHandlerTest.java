@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.CorruptedFrameException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -57,10 +58,11 @@ public class ExceptionHandlerTest {
     ClientConnection clientConnection;
 
     private ExceptionHandler handler;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         when(ctx.pipeline()).thenReturn(pipeline);
         when(channel.pipeline()).thenReturn(pipeline);
@@ -70,6 +72,11 @@ public class ExceptionHandlerTest {
         when(ctx.channel()).thenReturn(channel);
 
         handler = new ExceptionHandler(mqttServerDisconnector);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -30,6 +30,7 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
 import com.hivemq.mqtt.message.auth.AUTH;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,27 +54,29 @@ import static org.mockito.Mockito.when;
 public class ReAuthTaskTest {
 
     public static AtomicBoolean connect;
-
-    @Mock
-    private WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
     public static AtomicBoolean auth;
-
-    private EnhancedAuthenticator enhancedAuthenticator;
     public static AtomicBoolean reAuth;
+    private EnhancedAuthenticator enhancedAuthenticator;
+    private IsolatedExtensionClassloader classloader;
+    private AutoCloseable closeable;
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private ReAuthTask authTask;
     @Mock
+    private WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
+
+    @Mock
     private AuthenticatorProviderInput authenticatorProviderInput;
-    private IsolatedExtensionClassloader classloader;
+
     @Mock
     private HiveMQExtensions extensions;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         connect = new AtomicBoolean();
         auth = new AtomicBoolean();
@@ -89,6 +92,11 @@ public class ReAuthTaskTest {
                 authenticatorProviderInput,
                 "extension1",
                 new ClientAuthenticatorsImpl(new ExtensionPriorityComparator(extensions)));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 5000)

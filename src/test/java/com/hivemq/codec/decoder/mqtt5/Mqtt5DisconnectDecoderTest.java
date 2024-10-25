@@ -29,6 +29,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -55,11 +56,18 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
     @Mock
     private @NotNull SecurityConfigurationService securityConfigurationService;
 
+    private AutoCloseable closeable;
+
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
         ClientConnection.of(channel).setClientSessionExpiryInterval(100L);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

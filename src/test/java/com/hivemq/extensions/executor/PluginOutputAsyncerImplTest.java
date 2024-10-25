@@ -22,6 +22,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.async.Async;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -44,6 +45,7 @@ public class PluginOutputAsyncerImplTest {
 
 
     private PluginOutPutAsyncer asyncer;
+    private AutoCloseable closeable;
 
     @Mock
     private ShutdownHooks shutdownHooks;
@@ -51,9 +53,14 @@ public class PluginOutputAsyncerImplTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         asyncer = new PluginOutputAsyncerImpl(shutdownHooks);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -17,6 +17,7 @@ package com.hivemq.persistence;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -36,10 +37,17 @@ public class InMemoryProducerQueuesTest {
     @NotNull
     private InMemoryProducerQueues producerQueues;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         producerQueues = new InMemoryProducerQueues(64, 4);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

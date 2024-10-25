@@ -34,6 +34,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -95,10 +96,11 @@ public class TlsWebsocketChannelInitializerTest {
     private Tls tls;
 
     private ChannelPipeline pipeline;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         pipeline = new FakeChannelPipeline();
 
@@ -118,6 +120,11 @@ public class TlsWebsocketChannelInitializerTest {
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

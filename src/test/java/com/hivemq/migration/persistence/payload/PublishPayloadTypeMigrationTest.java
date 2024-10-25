@@ -68,10 +68,11 @@ public class PublishPayloadTypeMigrationTest {
 
     private File dataFolder;
     private FullConfigurationService configurationService;
+    private AutoCloseable closeable;
 
     @Before
     public void before() throws IOException {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());
@@ -94,6 +95,11 @@ public class PublishPayloadTypeMigrationTest {
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
         FileUtils.forceDelete(dataFolder);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

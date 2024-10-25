@@ -20,6 +20,7 @@ import jetbrains.exodus.ExodusException;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Environments;
 import jetbrains.exodus.env.Transaction;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,11 +47,18 @@ public class EnvironmentCloserTest {
     @Mock
     LocalPersistenceFileUtil localPersistenceFileUtil;
 
+    private  AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         when(localPersistenceFileUtil.getLocalPersistenceFolder()).thenReturn(temporaryFolder.newFolder());
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 10000)

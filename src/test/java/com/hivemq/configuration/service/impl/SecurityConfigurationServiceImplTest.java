@@ -26,7 +26,7 @@ import util.LogbackCapturingAppender;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * @author Waldemar Ruck
@@ -38,10 +38,11 @@ public class SecurityConfigurationServiceImplTest {
             new SecurityConfigurationServiceImpl();
 
     private LogbackCapturingAppender logCapture;
+    private AutoCloseable closeable;
 
     @Before
     public void setup() {
-        initMocks(this);
+        closeable = openMocks(this);
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(logger);
     }
@@ -49,6 +50,11 @@ public class SecurityConfigurationServiceImplTest {
     @After
     public void tearDown() throws Exception {
         LogbackCapturingAppender.Factory.cleanUp();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

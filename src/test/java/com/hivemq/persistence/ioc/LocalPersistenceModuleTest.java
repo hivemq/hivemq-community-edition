@@ -55,6 +55,7 @@ import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
 import com.hivemq.persistence.payload.PublishPayloadXodusLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.throttling.ioc.ThrottlingModule;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -110,9 +111,11 @@ public class LocalPersistenceModuleTest {
     @Mock
     private Injector persistenceInjector;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(metricsHolder.getMetricRegistry()).thenReturn(new MetricRegistry());
 
         when(persistenceInjector.getInstance(PublishPayloadPersistence.class)).thenReturn(Mockito.mock(
@@ -143,6 +146,11 @@ public class LocalPersistenceModuleTest {
                 persistenceConfigurationService);
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceMode.FILE);
 
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

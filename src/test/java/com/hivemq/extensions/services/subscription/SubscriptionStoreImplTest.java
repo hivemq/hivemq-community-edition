@@ -47,6 +47,7 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -86,6 +87,7 @@ import static org.mockito.Mockito.when;
 public class SubscriptionStoreImplTest {
 
     private SubscriptionStore subscriptionStore;
+    private AutoCloseable closeable;
 
     @Mock
     private ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
@@ -102,13 +104,18 @@ public class SubscriptionStoreImplTest {
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         subscriptionStore = new SubscriptionStoreImpl(clientSessionSubscriptionPersistence,
                 rateLimitService,
                 topicTree,
                 getManagedExtensionExecutorService(),
                 asyncIteratorFactory);
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 10000)

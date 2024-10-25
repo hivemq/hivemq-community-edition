@@ -20,6 +20,7 @@ import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.subscribe.Topic;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -33,13 +34,19 @@ import static org.junit.Assert.assertTrue;
 public class TopicTreeImplExistingSubscriptionTest {
 
     private LocalTopicTree topicTree;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         InternalConfigurations.TOPIC_TREE_MAP_CREATION_THRESHOLD.set(1);
         topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

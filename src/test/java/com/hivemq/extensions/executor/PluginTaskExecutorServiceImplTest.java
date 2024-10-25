@@ -35,6 +35,7 @@ import com.hivemq.extensions.executor.task.PluginTaskInput;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.verify;
 public class PluginTaskExecutorServiceImplTest {
 
     private PluginTaskExecutorServiceImpl executorService;
+    private AutoCloseable closeable;
 
     @Mock
     private PluginTaskExecutor executor1;
@@ -68,13 +70,18 @@ public class PluginTaskExecutorServiceImplTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.set(2);
 
         executorService =
                 new PluginTaskExecutorServiceImpl(new ExecutorProvider(Lists.newArrayList(executor1, executor2)),
                         mock(ShutdownHooks.class));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -18,6 +18,7 @@ package com.hivemq.websocket;
 import com.google.common.collect.Lists;
 import com.hivemq.configuration.service.entity.WebsocketListener;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -38,17 +39,22 @@ import static org.junit.Assert.assertTrue;
 public class WebSocketInitializerTest {
 
     private EmbeddedChannel channel;
-
     private WebsocketListener websocketListener;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         channel = new EmbeddedChannel();
 
         channel.pipeline().addLast("dummy", new DummyHandler());
 
         websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

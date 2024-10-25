@@ -20,6 +20,7 @@ import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -37,9 +38,16 @@ public class PingRequestHandlerTest {
     @Mock
     ChannelHandlerContext ctx;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

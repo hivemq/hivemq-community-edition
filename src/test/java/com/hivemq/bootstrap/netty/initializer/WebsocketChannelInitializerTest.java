@@ -24,6 +24,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.security.ssl.NonSslHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -58,10 +59,11 @@ public class WebsocketChannelInitializerTest {
     private RestrictionsConfigurationService restrictionsConfigurationService;
 
     private ChannelPipeline pipeline;
+    private AutoCloseable closeable;
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         pipeline = new FakeChannelPipeline();
 
@@ -70,6 +72,11 @@ public class WebsocketChannelInitializerTest {
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

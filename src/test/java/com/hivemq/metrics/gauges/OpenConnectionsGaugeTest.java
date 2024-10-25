@@ -16,6 +16,7 @@
 package com.hivemq.metrics.gauges;
 
 import io.netty.channel.group.ChannelGroup;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -33,11 +34,17 @@ public class OpenConnectionsGaugeTest {
     ChannelGroup channelGroup;
 
     private OpenConnectionsGauge gauge;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         gauge = new OpenConnectionsGauge(channelGroup);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

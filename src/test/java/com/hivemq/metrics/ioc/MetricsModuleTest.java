@@ -29,6 +29,7 @@ import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -40,10 +41,11 @@ import static org.mockito.Mockito.when;
 public class MetricsModuleTest {
 
     private Injector injector;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         injector = Guice.createInjector(new AbstractModule() {
             @Override
@@ -64,6 +66,11 @@ public class MetricsModuleTest {
                 install(new MetricsModule(new MetricRegistry(), persistenceInjector));
             }
         });
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

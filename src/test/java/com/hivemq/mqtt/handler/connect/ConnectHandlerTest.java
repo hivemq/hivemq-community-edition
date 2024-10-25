@@ -154,11 +154,12 @@ public class ConnectHandlerTest {
     private MqttServerDisconnectorImpl serverDisconnector;
     private @NotNull ClientConnectionContext clientConnectionContext;
     private ConnectionPersistence connectionPersistence;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
         when(clientSessionPersistence.clientConnected(anyString(),
                 anyBoolean(),
@@ -205,6 +206,11 @@ public class ConnectHandlerTest {
     @After
     public void tearDown() {
         InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.set(true);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

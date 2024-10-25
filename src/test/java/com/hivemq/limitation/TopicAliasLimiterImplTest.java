@@ -18,6 +18,7 @@ package com.hivemq.limitation;
 
 import com.hivemq.configuration.service.InternalConfigurations;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -31,15 +32,21 @@ import static org.junit.Assert.assertEquals;
 public class TopicAliasLimiterImplTest {
 
     private TopicAliasLimiter topicAliasLimiter;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_SOFT_LIMIT_BYTES.set(50);
         InternalConfigurations.TOPIC_ALIAS_GLOBAL_MEMORY_HARD_LIMIT_BYTES.set(200);
 
         topicAliasLimiter = new TopicAliasLimiterImpl();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

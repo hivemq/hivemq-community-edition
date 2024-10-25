@@ -18,6 +18,7 @@ package com.hivemq.migration.meta;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,13 +46,19 @@ public class MetaFileServiceTest {
     private SystemInformation systemInformation;
 
     private File dataFolder;
+    private AutoCloseable closeable;
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -32,6 +32,7 @@ import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,10 +64,11 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class SendRetainedMessagesListenerTest {
 
+    private Set<Topic> ignoredTopics;
+    private AutoCloseable closeable;
+
     @Mock
     private RetainedMessagePersistence retainedMessagePersistence;
-
-    private Set<Topic> ignoredTopics;
 
     @Mock
     private ChannelFuture channelFuture;
@@ -79,8 +81,13 @@ public class SendRetainedMessagesListenerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         ignoredTopics = new LinkedHashSet<>();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

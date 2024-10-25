@@ -30,6 +30,7 @@ import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServi
 import com.hivemq.statistics.UsageStatisticsConfig;
 import com.hivemq.statistics.UsageStatisticsConfigImpl;
 import com.hivemq.util.EnvVarUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -59,9 +60,11 @@ public class AbstractConfigurationTest {
     SystemInformation systemInformation;
     PersistenceConfigurationService persistenceConfigurationService;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         listenerConfigurationService = new ListenerConfigurationServiceImpl();
 
         xmlFile = temporaryFolder.newFile();
@@ -82,6 +85,11 @@ public class AbstractConfigurationTest {
                 new MqttConfigurator(mqttConfigurationService),
                 new ListenerConfigurator(listenerConfigurationService, systemInformation),
                 new PersistenceConfigurator(persistenceConfigurationService));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
 }

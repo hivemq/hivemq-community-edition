@@ -33,6 +33,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -75,11 +76,12 @@ public class Mqtt311ConnectDecoderTest {
     private static final byte fixedHeader = 0b0001_0000;
     private HivemqId hiveMQId;
     private ClientConnection clientConnection;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         clientConnection = new DummyClientConnection(channel, null);
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
@@ -93,6 +95,11 @@ public class Mqtt311ConnectDecoderTest {
                 new ClientIds(hiveMQId),
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 hiveMQId);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

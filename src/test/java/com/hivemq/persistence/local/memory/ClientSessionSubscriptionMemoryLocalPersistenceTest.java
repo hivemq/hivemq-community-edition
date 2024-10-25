@@ -31,6 +31,7 @@ import com.hivemq.util.LocalPersistenceFileUtil;
 import com.hivemq.util.ObjectMemoryEstimation;
 import net.jodah.concurrentunit.Waiter;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -74,10 +75,11 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     private final int bucketCount = 4;
     private MetricRegistry metricRegistry;
+    private AutoCloseable closeable;
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
@@ -85,6 +87,11 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         metricRegistry = new MetricRegistry();
 
         persistence = new ClientSessionSubscriptionMemoryLocalPersistence(metricRegistry);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

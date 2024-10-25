@@ -28,6 +28,7 @@ import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -41,16 +42,21 @@ import static org.junit.Assert.assertTrue;
 public class TopicSubscriptionBuilderImplTest {
 
     private FullConfigurationService fullConfigurationService;
-
     private TopicSubscriptionBuilder topicSubscriptionBuilder;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         topicSubscriptionBuilder = new TopicSubscriptionBuilderImpl(fullConfigurationService);
 
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

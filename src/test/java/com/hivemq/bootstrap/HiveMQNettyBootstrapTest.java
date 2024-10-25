@@ -32,6 +32,7 @@ import com.hivemq.persistence.connection.ConnectionPersistence;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -52,6 +53,7 @@ import static util.TlsTestUtil.createDefaultTLS;
 public class HiveMQNettyBootstrapTest {
 
     private HiveMQNettyBootstrap hiveMQNettyBootstrap;
+    private AutoCloseable closeable;
 
     @Mock
     private ShutdownHooks shutdownHooks;
@@ -73,7 +75,7 @@ public class HiveMQNettyBootstrapTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         hiveMQNettyBootstrap = new HiveMQNettyBootstrap(shutdownHooks,
                 listenerConfigurationService,
                 channelInitializerFactoryImpl,
@@ -85,6 +87,11 @@ public class HiveMQNettyBootstrapTest {
 
         when(channelInitializerFactoryImpl.getChannelInitializer(any(Listener.class))).thenReturn(
                 abstractChannelInitializer);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

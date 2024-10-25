@@ -22,6 +22,7 @@ import com.hivemq.migration.persistence.payload.PublishPayloadTypeMigration;
 import com.hivemq.migration.persistence.queue.ClientQueuePayloadIDMigration;
 import com.hivemq.migration.persistence.retained.RetainedMessagePayloadIDMigration;
 import com.hivemq.migration.persistence.retained.RetainedMessageTypeMigration;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -44,13 +45,20 @@ public class PersistenceMigratorTest {
     @Mock
     private RetainedMessagePayloadIDMigration retainedMessagePayloadIDMigration;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         persistenceMigrator = new PersistenceMigrator(() -> publishPayloadTypeMigration,
                 () -> retainedMessageTypeMigration,
                 () -> retainedMessagePayloadIDMigration,
                 () -> clientQueuePayloadIDMigration);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
