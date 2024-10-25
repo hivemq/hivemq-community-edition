@@ -44,6 +44,11 @@ class ConnectSimpleAuthOutput implements SimpleAuthOutput {
     }
 
     @Override
+    public void authenticateSuccessfully(final boolean clearPasswordAfterAuth) {
+        delegate.authenticateSuccessfully(clearPasswordAfterAuth);
+    }
+
+    @Override
     public void failAuthentication() {
         delegate.failAuthentication();
     }

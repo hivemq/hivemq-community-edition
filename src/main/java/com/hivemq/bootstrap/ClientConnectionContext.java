@@ -219,4 +219,10 @@ public interface ClientConnectionContext {
     @NotNull Optional<String> getChannelIP();
 
     @NotNull Optional<InetAddress> getChannelAddress();
+
+    void setClearPasswordAfterAuth(@Nullable Boolean clearPasswordAfterAuth);
+
+    @NotNull Optional<Boolean> isClearPasswordAfterAuth();
+
+    void clearPassword();
 }

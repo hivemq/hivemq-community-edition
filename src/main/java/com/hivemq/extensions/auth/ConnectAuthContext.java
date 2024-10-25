@@ -63,6 +63,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     void succeedAuthentication(final @NotNull ConnectAuthOutput output) {
         super.succeedAuthentication(output);
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
+        clientConnectionContext.setClearPasswordAfterAuth(output.isClearPasswordAfterAuth());
         clientConnectionContext.setAuthData(output.getAuthenticationData());
         clientConnectionContext.setAuthUserProperties(Mqtt5UserProperties.of(output.getOutboundUserProperties()
                 .asInternalList()));

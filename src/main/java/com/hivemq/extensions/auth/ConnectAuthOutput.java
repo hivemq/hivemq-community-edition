@@ -42,6 +42,7 @@ public class ConnectAuthOutput extends AuthOutput<EnhancedAuthOutput> implements
 
     private @NotNull Mqtt5ConnAckReasonCode reasonCode = Mqtt5ConnAckReasonCode.NOT_AUTHORIZED;
     private @NotNull Mqtt5ConnAckReasonCode timeoutReasonCode = Mqtt5ConnAckReasonCode.NOT_AUTHORIZED;
+    private @Nullable Boolean clearPasswordAfterAuth;
     private final boolean supportsEnhancedAuth;
 
     public ConnectAuthOutput(
@@ -66,6 +67,11 @@ public class ConnectAuthOutput extends AuthOutput<EnhancedAuthOutput> implements
     private void setDefaultReasonStrings() {
         reasonString = ReasonStrings.AUTH_FAILED;
         timeoutReasonString = ReasonStrings.AUTH_FAILED_EXTENSION_TIMEOUT;
+    }
+
+    public void authenticateSuccessfully(final boolean clearPasswordAfterAuth) {
+        this.clearPasswordAfterAuth = clearPasswordAfterAuth;
+        super.authenticateSuccessfully();
     }
 
     @Override
@@ -191,6 +197,10 @@ public class ConnectAuthOutput extends AuthOutput<EnhancedAuthOutput> implements
 
     @NotNull Mqtt5ConnAckReasonCode getReasonCode() {
         return reasonCode;
+    }
+
+    public @Nullable Boolean isClearPasswordAfterAuth() {
+        return clearPasswordAfterAuth;
     }
 
     private static @NotNull Mqtt5ConnAckReasonCode checkReasonCode(final @NotNull ConnackReasonCode reasonCode) {
