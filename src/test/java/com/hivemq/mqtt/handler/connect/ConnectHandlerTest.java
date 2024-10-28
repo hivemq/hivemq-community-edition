@@ -102,12 +102,14 @@ import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
 
 import javax.inject.Provider;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.hivemq.configuration.service.InternalConfigurations.MQTT_CONNECTION_AUTH_CLEAR_PASSWORD;
 import static com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel.NONE;
 import static com.hivemq.mqtt.message.connack.CONNACK.KEEP_ALIVE_NOT_SET;
 import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
@@ -1495,6 +1497,58 @@ public class ConnectHandlerTest {
         final ClientConnection clientConnection = ClientConnection.of(channel);
         assertEquals(ClientState.AUTHENTICATED, clientConnection.getClientState());
         assertNull(clientConnection.getAuthConnect());
+    }
+
+    @Test(timeout = 5000)
+    public void test_contextWantsPasswordErasure_passwordCleared() {
+        createHandler();
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
+
+        clientConnectionContext.setClearPasswordAfterAuth(true);
+        clientConnectionContext.setAuthPassword("password".getBytes(StandardCharsets.UTF_8));
+
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
+        handler.connectSuccessfulAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
+
+        final ClientConnection clientConnection = ClientConnection.of(channel);
+        assertNull(clientConnection.getAuthPassword());
+    }
+
+    @Test(timeout = 5000)
+    public void test_contextDoesNotWantPasswordErasure_passwordKept() {
+        createHandler();
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
+
+        clientConnectionContext.setClearPasswordAfterAuth(false);
+        clientConnectionContext.setAuthPassword("password".getBytes(StandardCharsets.UTF_8));
+
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
+        handler.connectSuccessfulAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
+
+        final ClientConnection clientConnection = ClientConnection.of(channel);
+        assertNotNull(clientConnection.getAuthPassword());
+    }
+
+    @Test(timeout = 5000)
+    public void test_contextDoesNotDecidePasswordErasure_passwordKeptOrCleared() {
+        createHandler();
+        final CONNECT connect =
+                new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
+
+        clientConnectionContext.setClearPasswordAfterAuth(null);
+        clientConnectionContext.setAuthPassword("password".getBytes(StandardCharsets.UTF_8));
+
+        final ModifiableClientSettingsImpl clientSettings = new ModifiableClientSettingsImpl(65535, null);
+        handler.connectSuccessfulAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
+
+        final ClientConnection clientConnection = ClientConnection.of(channel);
+        if(MQTT_CONNECTION_AUTH_CLEAR_PASSWORD) {
+            assertNull(clientConnection.getAuthPassword());
+        } else {
+            assertNotNull(clientConnection.getAuthPassword());
+        }
     }
 
     @Test

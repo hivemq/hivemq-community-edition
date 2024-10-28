@@ -450,6 +450,7 @@ public class InternalConfigurations {
     public static final int NETTY_COUNT_OF_CONNECTIONS_IN_SHUTDOWN_PARTITION = 100;
 
     public static final double MQTT_CONNECTION_KEEP_ALIVE_FACTOR = 1.5;
+    public static final boolean MQTT_CONNECTION_AUTH_CLEAR_PASSWORD = true;
 
     public static final long DISCONNECT_KEEP_ALIVE_BATCH = 100;
 

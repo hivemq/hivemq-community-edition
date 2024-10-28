@@ -40,6 +40,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,6 +94,7 @@ public class ClientConnection implements ClientConnectionContext {
     private @Nullable ByteBuffer authData;
     private @Nullable Mqtt5UserProperties authUserProperties;
     private @Nullable ScheduledFuture<?> authFuture;
+    private @Nullable Boolean clearPasswordAfterAuth;
 
     private @Nullable ClientContextImpl extensionClientContext;
     private @Nullable ClientEventListeners extensionClientEventListeners;
@@ -769,5 +771,24 @@ public class ClientConnection implements ClientConnectionContext {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public void setClearPasswordAfterAuth(final @Nullable Boolean clearPasswordAfterAuth) {
+        this.clearPasswordAfterAuth = clearPasswordAfterAuth;
+    }
+
+    @Override
+    public @NotNull Optional<Boolean> isClearPasswordAfterAuth() {
+        return Optional.ofNullable(clearPasswordAfterAuth);
+    }
+
+    @Override
+    public void clearPassword(){
+        if(authPassword == null) {
+            return;
+        }
+        Arrays.fill(authPassword, (byte) 0);
+        authPassword = null;
     }
 }
