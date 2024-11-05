@@ -606,8 +606,8 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
 
         final ChannelFuture connackSent;
 
-        // We retain the CONNECT message in memory during the initialization progress, e.g. for plugin initialization.
-        clientConnection.setConnectMessage(msg);
+        // We retain the WILL message in memory during the initialization progress, e.g. for plugin initialization.
+        clientConnection.setWillPublish(msg.getWillPublish());
 
         if (msg.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             final CONNACK connack = buildMqtt5Connack(clientConnection, msg, sessionPresent);

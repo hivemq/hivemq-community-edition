@@ -29,6 +29,7 @@ import com.hivemq.extensions.client.parameter.ConnectionAttributes;
 import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
@@ -136,7 +137,7 @@ public interface ClientConnectionContext {
 
     void setRequestProblemInformation(boolean problemInformationRequested);
 
-    void setConnectMessage(@Nullable CONNECT msg);
+    void setWillPublish(@Nullable MqttWillPublish willPublish);
 
     @NotNull String @Nullable [] getTopicAliasMapping();
 

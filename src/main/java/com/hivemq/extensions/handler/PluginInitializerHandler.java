@@ -37,7 +37,6 @@ import com.hivemq.extensions.services.initializer.Initializers;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.publish.DefaultPermissionsEvaluator;
 import com.hivemq.mqtt.message.connack.CONNACK;
-import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -124,9 +123,9 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         if (pluginInitializerMap.isEmpty() && msg != null) {
             clientConnection.setPreventLwt(false);
             ctx.writeAndFlush(msg, promise);
-            // Prevent leaking the retained CONNECT message for any existing ClientConnection.
-            // The CONNECT message would otherwise be owned by the plugin initialization below outside this scope.
-            clientConnection.setConnectMessage(null);
+            // Prevent leaking the retained WILL message for any existing ClientConnection.
+            // The WILL message would otherwise be owned by the plugin initialization below outside this scope.
+            clientConnection.setWillPublish(null);
             return;
         }
 
@@ -175,14 +174,14 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             @Override
             public void onSuccess(@Nullable final Void result) {
                 authenticateWill(ctx, msg, promise);
-                clientConnection.setConnectMessage(null);
+                clientConnection.setWillPublish(null);
             }
 
             @Override
             public void onFailure(final @NotNull Throwable t) {
                 Exceptions.rethrowError(t);
                 log.error("Calling initializer failed", t);
-                clientConnection.setConnectMessage(null);
+                clientConnection.setWillPublish(null);
                 ctx.writeAndFlush(msg, promise);
             }
         }, ctx.executor());
@@ -195,13 +194,12 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
         final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
 
-        final CONNECT connect = clientConnection.getConnectMessage();
-        if (connect == null || connect.getWillPublish() == null) {
+        final MqttWillPublish willPublish = clientConnection.getWillPublish();
+        if (willPublish == null) {
             ctx.writeAndFlush(msg, promise);
             return;
         }
 
-        final MqttWillPublish willPublish = connect.getWillPublish();
         final ModifiableDefaultPermissions permissions = clientConnection.getAuthPermissions();
         if (DefaultPermissionsEvaluator.checkWillPublish(permissions, willPublish)) {
             clientConnection.setPreventLwt(false); //clear prevent flag, Will is authorized
@@ -213,7 +211,7 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         clientConnection.setPreventLwt(true);
         //We have already added the will to the session, so we need to remove it again
         final ListenableFuture<Void> removeWillFuture =
-                clientSessionPersistence.deleteWill(connect.getClientIdentifier());
+                clientSessionPersistence.deleteWill(clientConnection.getClientId());
         Futures.addCallback(removeWillFuture, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable final Void result) {
