@@ -30,6 +30,7 @@ import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.security.auth.SslClientCertificate;
 import io.netty.channel.Channel;
@@ -53,7 +54,7 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     @Nullable String clientId;
     boolean cleanStart;
     @Nullable ModifiableDefaultPermissions authPermissions;
-    @Nullable CONNECT connectMessage;
+    @Nullable MqttWillPublish willPublish;
     @Nullable Integer clientReceiveMaximum;
     @Nullable Integer connectKeepAlive;
     @Nullable Long queueSizeMaximum;
@@ -165,8 +166,8 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void setConnectMessage(final @Nullable CONNECT connectMessage) {
-        this.connectMessage = connectMessage;
+    public void setWillPublish(final @Nullable MqttWillPublish willPublish) {
+        this.willPublish = willPublish;
     }
 
     @Override

@@ -31,6 +31,7 @@ import com.hivemq.extensions.events.client.parameters.ClientEventListeners;
 import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.connect.CONNECT;
+import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
 import com.hivemq.security.auth.SslClientCertificate;
@@ -60,7 +61,7 @@ public class ClientConnection implements ClientConnectionContext {
     private @NotNull String clientId;
     private boolean cleanStart;
     private @Nullable ModifiableDefaultPermissions authPermissions;
-    private @Nullable CONNECT connectMessage;
+    private @Nullable MqttWillPublish willPublish;
     private @Nullable AtomicInteger inFlightMessageCount;
     private @Nullable Integer clientReceiveMaximum;
     private @Nullable Integer connectKeepAlive;
@@ -131,7 +132,7 @@ public class ClientConnection implements ClientConnectionContext {
                 context.cleanStart,
                 context.authPermissions,
                 context.connectedListener,
-                context.connectMessage,
+                context.willPublish,
                 context.clientReceiveMaximum,
                 context.connectKeepAlive,
                 context.queueSizeMaximum,
@@ -178,7 +179,7 @@ public class ClientConnection implements ClientConnectionContext {
             final boolean cleanStart,
             final @Nullable ModifiableDefaultPermissions authPermissions,
             final @NotNull Listener connectedListener,
-            final @Nullable CONNECT connectMessage,
+            final @Nullable MqttWillPublish mqttWillPublish,
             final @Nullable Integer clientReceiveMaximum,
             final @Nullable Integer connectKeepAlive,
             final @Nullable Long queueSizeMaximum,
@@ -219,7 +220,7 @@ public class ClientConnection implements ClientConnectionContext {
         this.cleanStart = cleanStart;
         this.authPermissions = authPermissions;
         this.connectedListener = connectedListener;
-        this.connectMessage = connectMessage;
+        this.willPublish = mqttWillPublish;
         this.clientReceiveMaximum = clientReceiveMaximum;
         this.connectKeepAlive = connectKeepAlive;
         this.queueSizeMaximum = queueSizeMaximum;
@@ -327,13 +328,13 @@ public class ClientConnection implements ClientConnectionContext {
         return connectedListener;
     }
 
-    public @Nullable CONNECT getConnectMessage() {
-        return connectMessage;
+    public @Nullable MqttWillPublish getWillPublish() {
+        return willPublish;
     }
 
     @Override
-    public void setConnectMessage(final @Nullable CONNECT connectMessage) {
-        this.connectMessage = connectMessage;
+    public void setWillPublish(final @Nullable MqttWillPublish willPublish) {
+        this.willPublish = willPublish;
     }
 
     /**

@@ -41,7 +41,6 @@ import com.hivemq.mqtt.handler.publish.PublishFlushHandler;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.connack.CONNACK;
-import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.connect.MqttWillPublish;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
@@ -112,7 +111,7 @@ public class PluginInitializerHandlerTest {
 
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, publishFlushHandler);
-        clientConnection.setConnectMessage(mock(CONNECT.class));
+        clientConnection.setWillPublish(mock(MqttWillPublish.class));
         clientConnection.setClientId("test_client");
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
@@ -163,7 +162,7 @@ public class PluginInitializerHandlerTest {
         verify(channelHandlerContext).writeAndFlush(any(Object.class), eq(channelPromise));
 
         assertFalse(ClientConnection.of(channel).isPreventLwt());
-        assertNull(clientConnection.getConnectMessage());
+        assertNull(clientConnection.getWillPublish());
     }
 
     @Test(timeout = 10000)
@@ -193,7 +192,7 @@ public class PluginInitializerHandlerTest {
         verify(initializers, timeout(5000).times(1)).getClientInitializerMap();
         verify(channelHandlerContext, timeout(5000)).writeAndFlush(any(Object.class), eq(channelPromise));
         verify(channelPipeline).remove(any(ChannelHandler.class));
-        assertNull(clientConnection.getConnectMessage());
+        assertNull(clientConnection.getWillPublish());
     }
 
     @Test(timeout = 10000)
@@ -215,10 +214,7 @@ public class PluginInitializerHandlerTest {
                 .withPayload(new byte[]{1, 2, 3})
                 .build();
 
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("test-client").withWillPublish(willPublish).build();
-
-        ClientConnection.of(channel).setConnectMessage(connect);
+        ClientConnection.of(channel).setWillPublish(willPublish);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
@@ -238,7 +234,7 @@ public class PluginInitializerHandlerTest {
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
         assertTrue(ClientConnection.of(channel).isPreventLwt());
-        assertNull(clientConnection.getConnectMessage());
+        assertNull(clientConnection.getWillPublish());
     }
 
     @Test(timeout = 10000)
@@ -251,10 +247,7 @@ public class PluginInitializerHandlerTest {
                 .withPayload(new byte[]{1, 2, 3})
                 .build();
 
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("test-client").withWillPublish(willPublish).build();
-
-        ClientConnection.of(channel).setConnectMessage(connect);
+        ClientConnection.of(channel).setWillPublish(willPublish);
 
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
         permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
@@ -271,7 +264,7 @@ public class PluginInitializerHandlerTest {
 
         verify(channelPipeline).remove(any(ChannelHandler.class));
         assertFalse(ClientConnection.of(channel).isPreventLwt());
-        assertNull(clientConnection.getConnectMessage());
+        assertNull(clientConnection.getWillPublish());
     }
 
     private Map<String, ClientInitializer> createClientInitializerMap() throws Exception {
