@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.publish;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.EncoderException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -36,9 +37,16 @@ public class PublishWriteFailedListenerTest {
     @Mock
     ChannelFuture channelFuture;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -26,6 +26,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.NotSslRecordException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -61,9 +62,11 @@ public class SslExceptionHandlerTest {
 
     SslExceptionHandler sslExceptionHandler;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(ctx.channel()).thenReturn(channel);
 
         final Listener listener = mock(TcpListener.class);
@@ -77,6 +80,11 @@ public class SslExceptionHandlerTest {
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         sslExceptionHandler = new SslExceptionHandler(mqttServerDisconnector);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -23,6 +23,7 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -36,11 +37,17 @@ import static org.junit.Assert.assertTrue;
 public class Mqtt3PubrelDecoderTest {
 
     private @NotNull EmbeddedChannel channel;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         channel = new EmbeddedChannel(TestMqttDecoder.create());
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
