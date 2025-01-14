@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -50,14 +51,20 @@ public class AsyncLocalChunkIteratorTest {
     private TestFetchCallback fetchCallback;
     private TestItemCallback itemCallback;
     private ExecutorService executorService;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         executorService = Executors.newFixedThreadPool(2);
         fetchCallback = new TestFetchCallback(executorService);
         itemCallback = new TestItemCallback();
         asyncIterator = new AsyncLocalChunkIterator<>(fetchCallback, itemCallback, executorService);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
 

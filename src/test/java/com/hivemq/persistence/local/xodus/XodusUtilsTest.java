@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import jetbrains.exodus.ByteIterable;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -37,9 +38,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class XodusUtilsTest {
 
+    private AutoCloseable closeable;
+
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

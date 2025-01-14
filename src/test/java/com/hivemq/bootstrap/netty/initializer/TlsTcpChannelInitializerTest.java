@@ -34,6 +34,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -90,10 +91,11 @@ public class TlsTcpChannelInitializerTest {
     private ChannelPipeline pipeline;
 
     private TlsTcpChannelInitializer tlstcpChannelInitializer;
+    private AutoCloseable closeable;
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         pipeline = new FakeChannelPipeline();
 
@@ -115,6 +117,11 @@ public class TlsTcpChannelInitializerTest {
 
         tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, sslFactory);
 
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

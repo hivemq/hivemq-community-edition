@@ -24,6 +24,7 @@ import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.security.ssl.NonSslHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -58,14 +59,13 @@ public class TcpChannelInitializerTest {
     @Mock
     private RestrictionsConfigurationService restrictionsConfigurationService;
 
-
     private ChannelPipeline pipeline;
-
     private TcpChannelInitializer tcpChannelInitializer;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
@@ -78,6 +78,11 @@ public class TcpChannelInitializerTest {
         when(nonSslHandlerProvider.get()).thenReturn(new NonSslHandler(mqttServerDisconnector));
         when(socketChannel.pipeline()).thenReturn(pipeline);
 
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
