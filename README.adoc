@@ -121,7 +121,7 @@ git clone https://github.com/hivemq/hivemq-community-edition.git
 
 cd hivemq-community-edition
 
-docker/build.sh
+./gradlew loadOciImage
 ----
 
 The Docker image `hivemq/hivemq-ce:snapshot` is created locally.
