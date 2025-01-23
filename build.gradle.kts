@@ -252,7 +252,7 @@ oci {
                 layer("main") {
                     contents {
                         into("opt") {
-                            from("docker/docker-entrypoint.sh") { filePermissions = 0b111_101_101 }
+                            from("src/oci/docker-entrypoint.sh") { filePermissions = 0b111_101_101 }
                             permissions("hivemq/", 0b111_111_101)
                             into("hivemq") {
                                 permissions("**/*.sh", 0b111_101_101)
@@ -265,7 +265,7 @@ oci {
                                 permissions("extensions/*/hivemq-extension.xml", 0b110_110_100)
                                 permissions("log/", 0b111_111_101)
                                 from("src/distribution") { filter { exclude("**/.gitkeep") } }
-                                from("docker/config.xml") { into("conf") }
+                                from("src/oci/config.xml") { into("conf") }
                                 from("src/main/resources/config.xsd") { into("conf") }
                                 from(tasks.shadowJar) { into("bin").rename(".*", "hivemq.jar") }
                             }
