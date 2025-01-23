@@ -228,16 +228,19 @@ oci {
     imageDefinitions.register("main") {
         imageName = "hivemq/hivemq-ce"
         allPlatforms {
-            parentImages {
-                add("library:eclipse-temurin:sha256!78a82edcacc6cef9fd8c8a276fbd5e08f72fcdfbaf9d28df8b2d9207a7450cb6") // 21.0.3_9-jre-jammy
+            dependencies {
+                runtime("library:eclipse-temurin:sha256!5f8358c9d5615c18e95728e8b8528bda7ff40a7a5da2ac9a35b7a01f5d9b231a") // 21.0.5_11-jre-jammy
             }
             config {
                 user = "10000"
-                ports = setOf("1883", "8000")
+                ports = setOf(/* MQTT */ "1883", /* MQTT over WebSocket */ "8000")
                 environment = mapOf(
                     "JAVA_OPTS" to "-XX:+UnlockExperimentalVMOptions -XX:+UseNUMA",
                     "HIVEMQ_ALLOW_ALL_CLIENTS" to "true",
                     "LANG" to "en_US.UTF-8",
+                    // As the user id that runs the container (10000 by default) does not have an entry in /etc/passwd, set the home directory explicitly.
+                    // If not set, HOME would default to "/".
+                    // Java uses this value for the system property "user.home".
                     "HOME" to "/opt/hivemq",
                 )
                 entryPoint = listOf("/opt/docker-entrypoint.sh")
@@ -246,23 +249,21 @@ oci {
                 workingDirectory = "/opt/hivemq"
             }
             layers {
-                layer("hivemq") {
+                layer("main") {
                     contents {
                         into("opt") {
                             from("docker/docker-entrypoint.sh") { filePermissions = 0b111_101_101 }
-                            permissions("hivemq/", 0b111_111_000)
+                            permissions("hivemq/", 0b111_111_101)
                             into("hivemq") {
-                                filePermissions = 0b110_100_000
-                                directoryPermissions = 0b111_101_000
-                                permissions("**/*.sh", 0b111_101_000)
-                                permissions("conf/", 0b111_111_000)
-                                permissions("conf/config.xml", 0b110_110_000)
-                                permissions("conf/logback.xml", 0b110_110_000)
-                                permissions("data/", 0b111_111_000)
-                                permissions("extensions/", 0b111_111_000)
-                                permissions("extensions/*/", 0b111_111_000)
-                                permissions("extensions/*/hivemq-extension.xml", 0b110_110_000)
-                                permissions("log/", 0b111_111_000)
+                                permissions("**/*.sh", 0b111_101_101)
+                                permissions("conf/", 0b111_111_101)
+                                permissions("conf/config.xml", 0b110_110_100)
+                                permissions("conf/logback.xml", 0b110_110_100)
+                                permissions("data/", 0b111_111_101)
+                                permissions("extensions/", 0b111_111_101)
+                                permissions("extensions/*/", 0b111_111_101)
+                                permissions("extensions/*/hivemq-extension.xml", 0b110_110_100)
+                                permissions("log/", 0b111_111_101)
                                 from("src/distribution") { filter { exclude("**/.gitkeep") } }
                                 from("docker/config.xml") { into("conf") }
                                 from("src/main/resources/config.xsd") { into("conf") }
