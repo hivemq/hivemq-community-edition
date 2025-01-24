@@ -29,6 +29,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoop;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -45,7 +46,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 /**
  * @author Daniel Krüger
@@ -66,9 +67,11 @@ public class PublishFlushHandlerTest {
 
     private @NotNull PublishFlushHandler publishFlushHandler = new PublishFlushHandler(metricsHolder);
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() {
-        initMocks(this);
+        closeable = openMocks(this);
 
         when(channelHandlerContext.channel()).thenReturn(channel);
         when(channel.eventLoop()).thenReturn(eventLoop);
@@ -77,6 +80,11 @@ public class PublishFlushHandlerTest {
             return null;
         }).when(eventLoop).execute(any(Runnable.class));
         when(channelHandlerContext.write(any())).thenReturn(mock(ChannelFuture.class));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

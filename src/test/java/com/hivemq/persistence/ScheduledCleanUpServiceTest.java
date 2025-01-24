@@ -25,6 +25,7 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.awaitility.Awaitility;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -71,10 +72,11 @@ public class ScheduledCleanUpServiceTest {
     private ClientQueuePersistence clientQueuePersistence;
 
     private ScheduledCleanUpService scheduledCleanUpService;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService,
                 clientSessionPersistence,
                 subscriptionPersistence,
@@ -82,6 +84,11 @@ public class ScheduledCleanUpServiceTest {
                 clientQueuePersistence);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
