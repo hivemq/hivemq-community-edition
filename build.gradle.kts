@@ -248,27 +248,25 @@ oci {
                 volumes = setOf("/opt/hivemq/data", "/opt/hivemq/log")
                 workingDirectory = "/opt/hivemq"
             }
-            layers {
-                layer("main") {
-                    contents {
-                        into("opt") {
-                            from("src/oci/docker-entrypoint.sh") { filePermissions = 0b111_101_101 }
-                            permissions("hivemq/", 0b111_111_101)
-                            into("hivemq") {
-                                permissions("**/*.sh", 0b111_101_101)
-                                permissions("conf/", 0b111_111_101)
-                                permissions("conf/config.xml", 0b110_110_100)
-                                permissions("conf/logback.xml", 0b110_110_100)
-                                permissions("data/", 0b111_111_101)
-                                permissions("extensions/", 0b111_111_101)
-                                permissions("extensions/*/", 0b111_111_101)
-                                permissions("extensions/*/hivemq-extension.xml", 0b110_110_100)
-                                permissions("log/", 0b111_111_101)
-                                from("src/distribution") { filter { exclude("**/.gitkeep") } }
-                                from("src/oci/config.xml") { into("conf") }
-                                from("src/main/resources/config.xsd") { into("conf") }
-                                from(tasks.shadowJar) { into("bin").rename(".*", "hivemq.jar") }
-                            }
+            layer("main") {
+                contents {
+                    into("opt") {
+                        from("src/oci/docker-entrypoint.sh") { filePermissions = 0b111_101_101 }
+                        permissions("hivemq/", 0b111_111_101)
+                        into("hivemq") {
+                            permissions("**/*.sh", 0b111_101_101)
+                            permissions("conf/", 0b111_111_101)
+                            permissions("conf/config.xml", 0b110_110_100)
+                            permissions("conf/logback.xml", 0b110_110_100)
+                            permissions("data/", 0b111_111_101)
+                            permissions("extensions/", 0b111_111_101)
+                            permissions("extensions/*/", 0b111_111_101)
+                            permissions("extensions/*/hivemq-extension.xml", 0b110_110_100)
+                            permissions("log/", 0b111_111_101)
+                            from("src/distribution") { filter { exclude("**/.gitkeep") } }
+                            from("src/oci/config.xml") { into("conf") }
+                            from("src/main/resources/config.xsd") { into("conf") }
+                            from(tasks.shadowJar) { into("bin").rename(".*", "hivemq.jar") }
                         }
                     }
                 }
