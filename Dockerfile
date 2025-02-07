@@ -1,4 +1,4 @@
-ARG BASE_IMAGE_TAG=zulu-openjdk-17.0.3-alpine-2
+ARG BASE_IMAGE_TAG=zulu-openjdk-21.0.5-alpine-0
 
 FROM com2mcore.azurecr.io/iot-base-image:$BASE_IMAGE_TAG
 
