@@ -15,12 +15,21 @@
  */
 package com.hivemq.extensions.handler;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.configuration.ConfigurationBootstrap;
+import com.hivemq.configuration.info.SystemInformation;
+import com.hivemq.configuration.info.SystemInformationImpl;
+import com.hivemq.configuration.ioc.ConfigurationModule;
+import com.hivemq.configuration.reader.MqttConfigurator;
+import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.impl.ConfigurationServiceImpl;
+import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.AuthorizerProviderInput;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
@@ -63,8 +72,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.hivemq.configuration.service.InternalConfigurations.MQTT_ALLOW_DOLLAR_TOPICS;
-
 /**
  * @author Florian Limpöck
  * @since 4.1.0
@@ -102,7 +109,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.extensionPriorityComparator = new ExtensionPriorityComparator(hiveMQExtensions);
         this.incomingSubscribeService = incomingSubscribeService;
-        this.allowDollarTopics = MQTT_ALLOW_DOLLAR_TOPICS.get();
+        this.allowDollarTopics = false;
     }
 
     public void authorizePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH msg) {
