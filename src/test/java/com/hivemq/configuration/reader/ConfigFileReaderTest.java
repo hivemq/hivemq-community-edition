@@ -99,6 +99,8 @@ public class ConfigFileReaderTest {
                 .getMaxInterval());
         verify(mqttConfigurationService).setRetainedMessagesEnabled(defaultMqttValues.getRetainedMessagesConfigEntity()
                 .isEnabled());
+        verify(mqttConfigurationService).setAllowDollarTopicsEnabled(defaultMqttValues.getAllowDollarTopicConfigEntity()
+                .isEnabled());
         verify(mqttConfigurationService).setWildcardSubscriptionsEnabled(defaultMqttValues.getWildcardSubscriptionsConfigEntity()
                 .isEnabled());
         verify(mqttConfigurationService).setMaximumQos(QoS.valueOf(defaultMqttValues.getQoSConfigEntity().getMaxQos()));
