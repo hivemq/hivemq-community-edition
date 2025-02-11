@@ -33,6 +33,7 @@ public class MqttConfigurationDefaults {
     public static final long MAX_EXPIRY_INTERVAL_DEFAULT = UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE + 1;
 
     public static final boolean RETAINED_MESSAGES_ENABLED_DEFAULT = true;
+    public static final boolean MQTT_ALLOW_DOLLAR_TOPICS_DEFAULT = false;
 
     public static final QoS MAXIMUM_QOS_DEFAULT = QoS.EXACTLY_ONCE;
 
