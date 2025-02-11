@@ -28,6 +28,7 @@ import com.hivemq.configuration.info.SystemInformationImpl;
 import com.hivemq.configuration.ioc.ConfigurationModule;
 import com.hivemq.configuration.reader.MqttConfigurator;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.impl.ConfigurationServiceImpl;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -99,7 +100,8 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull IncomingPublishService incomingPublishService,
-            final @NotNull IncomingSubscribeService incomingSubscribeService) {
+            final @NotNull IncomingSubscribeService incomingSubscribeService,
+            final @NotNull MqttConfigurationService mqttConfigService) {
 
         this.authorizers = authorizers;
         this.asyncer = asyncer;
@@ -109,7 +111,7 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         this.mqttServerDisconnector = mqttServerDisconnector;
         this.extensionPriorityComparator = new ExtensionPriorityComparator(hiveMQExtensions);
         this.incomingSubscribeService = incomingSubscribeService;
-        this.allowDollarTopics = false;
+        this.allowDollarTopics = mqttConfigService.allowDollarTopicsEnabled();
     }
 
     public void authorizePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH msg) {
