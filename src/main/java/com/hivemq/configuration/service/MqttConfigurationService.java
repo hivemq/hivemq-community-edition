@@ -97,6 +97,11 @@ public interface MqttConfigurationService {
     boolean retainedMessagesEnabled();
 
     /**
+     * @return true if publishing to dollar topics is enabled, else false. Default false
+     */
+    boolean allowDollarTopicsEnabled();
+
+    /**
      * @return true if wildcard subscriptions are enabled, else false. Default true
      */
     boolean wildcardSubscriptionsEnabled();
@@ -150,6 +155,8 @@ public interface MqttConfigurationService {
     void setMaxMessageExpiryInterval(final long maxMessageExpiryInterval);
 
     void setRetainedMessagesEnabled(final boolean enabled);
+    
+    void setAllowDollarTopicsEnabled(final boolean enabled);
 
     void setWildcardSubscriptionsEnabled(final boolean enabled);
 
