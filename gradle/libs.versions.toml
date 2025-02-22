@@ -1,15 +1,15 @@
 [versions]
-apache-commonsCompress = "1.26.2"
-apache-commonsIO = "2.16.1"
-apache-commonsLang = "3.14.0"
-awaitility = "4.2.2"
-bouncycastle = "1.78.1"
-byteBuddy = "1.14.19"
+apache-commonsCompress = "1.27.1"
+apache-commonsIO = "2.18.0"
+apache-commonsLang = "3.17.0"
+awaitility = "4.3.0"
+bouncycastle = "1.80"
+byteBuddy = "1.17.1"
 concurrentUnit = "0.4.6"
 dropwizard-metrics = "4.2.30"
 eclipse-collections = "11.1.0"
-equalsVerifier = "3.16.2"
-guava = "33.3.1-jre"
+equalsVerifier = "3.19.1"
+guava = "33.4.0-jre"
 guice = "5.1.0"
 hivemq-extensionSdk = "4.36.0"
 jackson = "2.18.2"
@@ -22,7 +22,7 @@ jctools = "4.0.5"
 junit = "4.13.2"
 kotlin = "1.9.25"
 logback = "1.5.16"
-mockito = "5.11.0"
+mockito = "5.15.2"
 netty = "4.1.118.Final"
 oshi = "6.6.6"
 rocksdb = "8.3.3"
@@ -80,8 +80,8 @@ zeroAllocationHashing = { module = "net.openhft:zero-allocation-hashing", versio
 
 [plugins]
 defaults = { id = "io.github.sgtsilvio.gradle.defaults", version = "0.2.0" }
-forbiddenApis = { id = "de.thetaphi.forbiddenapis", version = "3.7" }
-githubRelease = { id = "com.github.breadmoirai.github-release", version = "2.4.1" }
+forbiddenApis = { id = "de.thetaphi.forbiddenapis", version = "3.8" }
+githubRelease = { id = "com.github.breadmoirai.github-release", version = "2.5.2" }
 javadocLinks = { id = "io.github.sgtsilvio.gradle.javadoc-links", version = "0.8.0" }
 license = { id = "com.github.hierynomus.license", version = "0.16.1" }
 metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.6.0" }
