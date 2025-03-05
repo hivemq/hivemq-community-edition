@@ -33,6 +33,7 @@ import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.KEE
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAXIMUM_QOS_DEFAULT;
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX_EXPIRY_INTERVAL_DEFAULT;
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX_QUEUED_MESSAGES_DEFAULT;
+import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.ALLOW_DOLLAR_TOPICS_DEFAULT;
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.QUEUED_MESSAGES_STRATEGY_DEFAULT;
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.RETAINED_MESSAGES_ENABLED_DEFAULT;
 import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.SERVER_RECEIVE_MAXIMUM_DEFAULT;
@@ -64,6 +65,8 @@ public class MqttConfigurationServiceImpl implements MqttConfigurationService {
 
     private final AtomicBoolean retainedMessagesEnabled = new AtomicBoolean(RETAINED_MESSAGES_ENABLED_DEFAULT);
 
+    private final AtomicBoolean allowDollarTopics = new AtomicBoolean(ALLOW_DOLLAR_TOPICS_DEFAULT);
+    
     private final AtomicBoolean wildcardSubscriptionsEnabled =
             new AtomicBoolean(WILDCARD_SUBSCRIPTIONS_ENABLED_DEFAULT);
 
@@ -111,6 +114,9 @@ public class MqttConfigurationServiceImpl implements MqttConfigurationService {
     public boolean retainedMessagesEnabled() {
         return retainedMessagesEnabled.get();
     }
+
+    @Override
+    public boolean allowDollarTopicsEnabled() { return allowDollarTopics.get(); }
 
     @Override
     public boolean wildcardSubscriptionsEnabled() {
@@ -187,6 +193,12 @@ public class MqttConfigurationServiceImpl implements MqttConfigurationService {
     public void setRetainedMessagesEnabled(final boolean enabled) {
         log.debug("Setting retained messages enabled to {}", enabled);
         this.retainedMessagesEnabled.set(enabled);
+    }
+
+    @Override
+    public void setAllowDollarTopicsEnabled(final boolean enabled) {
+        log.debug("Setting allow dollar topics enabled to {}", enabled);
+        this.allowDollarTopics.set(enabled);
     }
 
     @Override
