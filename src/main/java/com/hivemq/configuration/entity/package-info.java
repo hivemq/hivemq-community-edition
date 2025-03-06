@@ -16,4 +16,4 @@
 @XmlJavaTypeAdapter(value = StringTrimAdapter.class, type = String.class)
 package com.hivemq.configuration.entity;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

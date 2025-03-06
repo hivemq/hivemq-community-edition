@@ -17,5 +17,4 @@
 package com.hivemq.extensions.config;
 
 import com.hivemq.configuration.entity.StringTrimAdapter;
-
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
