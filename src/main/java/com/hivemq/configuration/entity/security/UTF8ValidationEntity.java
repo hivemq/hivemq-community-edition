@@ -16,10 +16,9 @@
 package com.hivemq.configuration.entity.security;
 
 import com.hivemq.configuration.entity.EnabledEntity;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "utf8-validation")
 @XmlAccessorType(XmlAccessType.NONE)
