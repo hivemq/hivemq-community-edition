@@ -31,6 +31,7 @@ import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -62,10 +63,11 @@ public class TopicTreeStartupTest {
 
     private LocalTopicTree topicTree;
     private TopicTreeStartup topicTreeStartup;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
@@ -73,6 +75,11 @@ public class TopicTreeStartupTest {
                 clientSessionPersistence,
                 clientSessionSubscriptionPersistence,
                 sharedSubscriptionService);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

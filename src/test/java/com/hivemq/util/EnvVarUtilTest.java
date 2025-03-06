@@ -16,6 +16,7 @@
 package com.hivemq.util;
 
 import com.hivemq.exceptions.UnrecoverableException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,10 +40,17 @@ public class EnvVarUtilTest {
     @Mock
     EnvVarUtil envVarUtil;
 
+    private AutoCloseable closeable;
+
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(envVarUtil.replaceEnvironmentVariablePlaceholders(anyString())).thenCallRealMethod();
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -17,6 +17,7 @@ package com.hivemq.persistence.qos;
 
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -32,14 +33,20 @@ import static org.mockito.Mockito.verify;
 public class IncomingMessageFlowPersistenceImplTest {
 
     private IncomingMessageFlowPersistenceImpl incomingMessageFlowPersistence;
+    private AutoCloseable closeable;
 
     @Mock
     private IncomingMessageFlowLocalPersistence incomingMessageFlowLocalPersistence;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         incomingMessageFlowPersistence = new IncomingMessageFlowPersistenceImpl(incomingMessageFlowLocalPersistence);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

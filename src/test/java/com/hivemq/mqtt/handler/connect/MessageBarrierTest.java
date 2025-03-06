@@ -31,6 +31,7 @@ import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -48,16 +49,22 @@ public class MessageBarrierTest {
 
     private EmbeddedChannel channel;
     private MessageBarrier messageBarrier;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog());
 
         messageBarrier = new MessageBarrier(mqttServerDisconnector);
         channel = new EmbeddedChannel(new DummyHandler());
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addFirst(MQTT_MESSAGE_BARRIER, messageBarrier);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

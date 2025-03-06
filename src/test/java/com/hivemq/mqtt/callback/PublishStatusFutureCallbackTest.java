@@ -25,6 +25,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.services.PublishPollService;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -54,19 +55,16 @@ public class PublishStatusFutureCallbackTest {
     private FreePacketIdRanges messageIDPool;
 
     private boolean sharedSubscription;
-
     private String queueId;
-
     private PUBLISH publish;
-
     private Channel channel;
-
     private String client;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         sharedSubscription = false;
         queueId = "queueId";
         publish = TestMessageUtil.createMqtt5Publish();
@@ -88,6 +86,11 @@ public class PublishStatusFutureCallbackTest {
                 messageIDPool,
                 channel,
                 client);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
