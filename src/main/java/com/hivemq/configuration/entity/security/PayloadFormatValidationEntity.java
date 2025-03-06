@@ -16,10 +16,9 @@
 package com.hivemq.configuration.entity.security;
 
 import com.hivemq.configuration.entity.DisabledEntity;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "payload-format-validation")
 @XmlAccessorType(XmlAccessType.NONE)
