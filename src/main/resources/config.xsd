@@ -198,6 +198,17 @@
                     </xs:all>
                 </xs:complexType>
             </xs:element>
+            <xs:element name="dollar-topic-publishing" minOccurs="0">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="enabled" type="xs:boolean" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Default: false</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
             <xs:element name="wildcard-subscriptions" minOccurs="0">
                 <xs:complexType>
                     <xs:all>
