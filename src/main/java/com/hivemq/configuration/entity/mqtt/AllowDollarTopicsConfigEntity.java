@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Marcel Bartholet
  * @since 2025.1
  */
-@XmlRootElement(name = "allow-dollar-topics")
+@XmlRootElement(name = "dollar-topic-publishing")
 @XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 public class AllowDollarTopicsConfigEntity extends EnabledEntity {
