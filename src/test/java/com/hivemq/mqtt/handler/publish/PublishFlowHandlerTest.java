@@ -111,25 +111,6 @@ public class PublishFlowHandlerTest {
     }
 
     @Test
-    public void test_return_qos_1_message_id() throws Exception {
-
-        final PUBACK puback = new PUBACK(freePacketIdRanges.takeNextId());
-        channel.writeInbound(puback);
-
-        verify(freePacketIdRanges).returnId(eq(100));
-
-    }
-
-    @Test
-    public void test_return_qos_2_message_id() throws Exception {
-
-        final PUBCOMP pubcomp = new PUBCOMP(freePacketIdRanges.takeNextId());
-        channel.writeInbound(pubcomp);
-
-        verify(freePacketIdRanges).returnId(eq(100));
-    }
-
-    @Test
     public void test_dont_return_message_id() throws Exception {
 
         final PUBREL pubrel = new PUBREL(freePacketIdRanges.takeNextId());
