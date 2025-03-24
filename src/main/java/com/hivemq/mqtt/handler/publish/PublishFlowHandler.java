@@ -231,7 +231,6 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         log.trace("Client {}: Received PUBACK", clientId);
         final int messageId = msg.getPacketIdentifier();
         orderedTopicService.messageFlowComplete(ctx, messageId);
-        returnMessageId(ctx.channel(), msg, clientId);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBACK remove message id:[{}] ", clientId, messageId);
@@ -276,29 +275,9 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         log.trace("Client {}: Received PUBCOMP", clientId);
 
         orderedTopicService.messageFlowComplete(ctx, msg.getPacketIdentifier());
-        returnMessageId(ctx.channel(), msg, clientId);
 
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBCOMP remove message id:[{}]", clientId, msg.getPacketIdentifier());
-        }
-
-    }
-
-    private void returnMessageId(
-            final @NotNull Channel channel, final @NotNull MessageWithID msg, final @NotNull String clientId) {
-
-        final int messageId = msg.getPacketIdentifier();
-
-        //Such a message ID must never be zero, but better be safe than sorry
-        if (messageId > 0) {
-            final FreePacketIdRanges freePacketIdRanges = ClientConnection.of(channel).getFreePacketIdRanges();
-            freePacketIdRanges.returnId(messageId);
-            if (log.isTraceEnabled()) {
-                log.trace("Returning Message ID {} for client {} because of a {} message was received",
-                        messageId,
-                        clientId,
-                        msg.getClass().getSimpleName());
-            }
         }
 
     }
