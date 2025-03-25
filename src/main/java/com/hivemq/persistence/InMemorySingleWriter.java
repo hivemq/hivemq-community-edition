@@ -34,7 +34,7 @@ import java.util.concurrent.Executor;
  */
 public class InMemorySingleWriter implements SingleWriterService {
 
-    private static final @NotNull Logger log = LoggerFactory.getLogger(SingleWriterServiceImpl.class);
+    private static final @NotNull Logger log = LoggerFactory.getLogger(InMemorySingleWriter.class);
 
     private static final int AMOUNT_OF_PRODUCERS = 5;
     private static final int RETAINED_MESSAGE_QUEUE_INDEX = 0;
@@ -45,7 +45,6 @@ public class InMemorySingleWriter implements SingleWriterService {
 
     private final @NotNull InMemoryProducerQueues @NotNull [] producers =
             new InMemoryProducerQueues[AMOUNT_OF_PRODUCERS];
-    private final @NotNull InMemoryProducerQueues callbackProducerQueue;
 
     private final int persistenceBucketCount;
 
@@ -54,15 +53,11 @@ public class InMemorySingleWriter implements SingleWriterService {
 
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         final int threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
-        final int creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
         final int amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new InMemoryProducerQueues(persistenceBucketCount, amountOfQueues);
         }
-        callbackProducerQueue = new InMemoryProducerQueues(persistenceBucketCount, amountOfQueues);
-
-
     }
 
     @VisibleForTesting
@@ -93,13 +88,6 @@ public class InMemorySingleWriter implements SingleWriterService {
 
     public @NotNull ProducerQueues getAttributeStoreQueue() {
         return producers[ATTRIBUTE_STORE_QUEUE_INDEX];
-    }
-
-    public @NotNull Executor callbackExecutor(final @NotNull String key) {
-        return command -> callbackProducerQueue.submit(key, (bucketIndex) -> {
-            command.run();
-            return null; // this is fine, because Executors dont return anything. The return value will not be used.
-        });
     }
 
     public int getPersistenceBucketCount() {
