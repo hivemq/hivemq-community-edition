@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.hivemq.persistence.SingleWriterServiceImpl.Task;
+import static com.hivemq.persistence.SingleWriterService.Task;
 
 /**
  * @author Lukas Brandl
@@ -69,7 +69,6 @@ public class ProducerQueuesImpl implements ProducerQueues {
     private long shutdownStartTime = Long.MAX_VALUE;
     // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
 
-
     public ProducerQueuesImpl(final SingleWriterServiceImpl singleWriterServiceImpl, final int amountOfQueues) {
         this.singleWriterServiceImpl = singleWriterServiceImpl;
 
@@ -96,30 +95,19 @@ public class ProducerQueuesImpl implements ProducerQueues {
     @NotNull
     public <R> ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
         //noinspection ConstantConditions (futuer is never null if the callbacks are null)
-        return submitInternal(getBucket(key), task, null, null, false);
+        return submitInternal(getBucket(key), task, false);
     }
 
     @NotNull
     public <R> ListenableFuture<R> submit(final int bucketIndex, @NotNull final Task<R> task) {
         //noinspection ConstantConditions (futuer is never null if the callbacks are null)
-        return submitInternal(bucketIndex, task, null, null, false);
-    }
-
-    @Nullable
-    public <R> ListenableFuture<R> submit(
-            final int bucketIndex,
-            @NotNull final Task<R> task,
-            @Nullable final SingleWriterServiceImpl.SuccessCallback<R> successCallback,
-            @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback) {
-        return submitInternal(bucketIndex, task, successCallback, failedCallback, false);
+        return submitInternal(bucketIndex, task, false);
     }
 
     @Nullable
     public <R> ListenableFuture<R> submitInternal(
             final int bucketIndex,
             @NotNull final Task<R> task,
-            @Nullable final SingleWriterServiceImpl.SuccessCallback<R> successCallback,
-            @Nullable final SingleWriterServiceImpl.FailedCallback failedCallback,
             final boolean ignoreShutdown) {
         if (!ignoreShutdown &&
                 shutdown.get() &&
@@ -128,14 +116,9 @@ public class ProducerQueuesImpl implements ProducerQueues {
         }
         final int queueIndex = bucketIndex / bucketsPerQueue;
         final Queue<TaskWithFuture<?>> queue = queues.get(queueIndex);
-        final SettableFuture<R> resultFuture;
-        if (successCallback == null) {
-            resultFuture = SettableFuture.create();
-        } else {
-            resultFuture = null;
-        }
+        final SettableFuture<R> resultFuture = SettableFuture.create();
 
-        queue.add(new TaskWithFuture<>(resultFuture, task, bucketIndex, successCallback, failedCallback));
+        queue.add(new TaskWithFuture<>(resultFuture, task, bucketIndex));
         taskCount.incrementAndGet();
         singleWriterServiceImpl.getGlobalTaskCount().incrementAndGet();
         if (queueTaskCounter.get(queueIndex).getAndIncrement() == 0) {
@@ -153,7 +136,8 @@ public class ProducerQueuesImpl implements ProducerQueues {
      * @return a list of listenableFutures of type R
      */
     public @NotNull <R> List<ListenableFuture<R>> submitToAllBuckets(
-            final @NotNull Task<R> task, final boolean parallel) {
+            final @NotNull Task<R> task,
+            final boolean parallel) {
         if (parallel) {
             return submitToAllBucketsParallel(task, false);
         } else {
@@ -173,12 +157,13 @@ public class ProducerQueuesImpl implements ProducerQueues {
     }
 
     private @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(
-            final @NotNull Task<R> task, final boolean ignoreShutdown) {
+            final @NotNull Task<R> task,
+            final boolean ignoreShutdown) {
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
         final int bucketCount = singleWriterServiceImpl.getPersistenceBucketCount();
         for (int bucket = 0; bucket < bucketCount; bucket++) {
             //noinspection ConstantConditions (futuer is never null if the callbacks are null)
-            builder.add(submitInternal(bucket, task, null, null, ignoreShutdown));
+            builder.add(submitInternal(bucket, task, ignoreShutdown));
         }
         return builder.build();
     }
@@ -222,23 +207,11 @@ public class ProducerQueuesImpl implements ProducerQueues {
                     creditCount++;
                     try {
                         final Object result = taskWithFuture.getTask().doTask(taskWithFuture.getBucketIndex());
-                        if (taskWithFuture.getFuture() != null) {
-                            taskWithFuture.getFuture().set(result);
-                        } else {
-                            if (taskWithFuture.getSuccessCallback() != null) {
-                                singleWriterServiceImpl.getCallbackExecutors()[queueIndex].submit(() -> taskWithFuture.getSuccessCallback()
-                                        .afterTask(result));
-                            }
-                        }
+                        taskWithFuture.getFuture();
+                        taskWithFuture.getFuture().set(result);
                     } catch (final Throwable e) {
-                        if (taskWithFuture.getFuture() != null) {
-                            taskWithFuture.getFuture().setException(e);
-                        } else {
-                            if (taskWithFuture.getFailedCallback() != null) {
-                                singleWriterServiceImpl.getCallbackExecutors()[queueIndex].submit(() -> taskWithFuture.getFailedCallback()
-                                        .afterTask(e));
-                            }
-                        }
+                        taskWithFuture.getFuture();
+                        taskWithFuture.getFuture().setException(e);
                     }
                     taskCount.decrementAndGet();
                     singleWriterServiceImpl.getGlobalTaskCount().decrementAndGet();
@@ -304,45 +277,29 @@ public class ProducerQueuesImpl implements ProducerQueues {
     @VisibleForTesting
     static class TaskWithFuture<T> {
 
-        private final @Nullable SettableFuture<T> future;
+        private final @NotNull SettableFuture<T> future;
         private final @NotNull Task task;
         private final int bucketIndex;
-        private final @Nullable SingleWriterServiceImpl.SuccessCallback<T> successCallback;
-        private final @Nullable SingleWriterServiceImpl.FailedCallback failedCallback;
 
         private TaskWithFuture(
-                final @Nullable SettableFuture<T> future,
+                final @NotNull SettableFuture<T> future,
                 final @NotNull Task task,
-                final int bucketIndex,
-                final @Nullable SingleWriterServiceImpl.SuccessCallback<T> successCallback,
-                final @Nullable SingleWriterServiceImpl.FailedCallback failedCallback) {
+                final int bucketIndex) {
             this.future = future;
             this.task = task;
             this.bucketIndex = bucketIndex;
-            this.successCallback = successCallback;
-            this.failedCallback = failedCallback;
         }
 
-        @Nullable
-        public SettableFuture getFuture() {
+        public @NotNull SettableFuture getFuture() {
             return future;
         }
 
-        @NotNull
-        public Task getTask() {
+        public @NotNull Task getTask() {
             return task;
         }
 
         public int getBucketIndex() {
             return bucketIndex;
-        }
-
-        @Nullable SingleWriterServiceImpl.SuccessCallback<T> getSuccessCallback() {
-            return successCallback;
-        }
-
-        @Nullable SingleWriterServiceImpl.FailedCallback getFailedCallback() {
-            return failedCallback;
         }
     }
 }

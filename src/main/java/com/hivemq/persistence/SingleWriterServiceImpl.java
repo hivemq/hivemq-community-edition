@@ -69,12 +69,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
     @NotNull ExecutorService singleWriterExecutor;
 
     @VisibleForTesting
-    public final @NotNull ExecutorService @NotNull [] callbackExecutors;
-
-    @VisibleForTesting
     final @NotNull ScheduledExecutorService checkScheduler;
-
-    private final int amountOfQueues;
 
     @Inject
     public SingleWriterServiceImpl() {
@@ -87,19 +82,11 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("single-writer-%d");
         singleWriterExecutor = Executors.newFixedThreadPool(threadPoolSize, threadFactory);
 
-        amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
+        final int amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
 
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new ProducerQueuesImpl(this, amountOfQueues);
         }
-
-        callbackExecutors = new ExecutorService[amountOfQueues];
-        for (int i = 0; i < amountOfQueues; i++) {
-            final ThreadFactory callbackThreadFactory = ThreadFactoryUtil.create("single-writer-callback-" + i);
-            final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(callbackThreadFactory);
-            callbackExecutors[i] = executorService;
-        }
-
 
         final ThreadFactory checkThreadFactory =
                 new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
@@ -150,15 +137,6 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         } else {
             runningThreadsCount.decrementAndGet();
         }
-    }
-
-
-    @NotNull
-    public ExecutorService callbackExecutor(@NotNull final String key) {
-        final int bucketsPerQueue = persistenceBucketCount / amountOfQueues;
-        final int bucketIndex = BucketUtils.getBucket(key, persistenceBucketCount);
-        final int queueIndex = bucketIndex / bucketsPerQueue;
-        return callbackExecutors[queueIndex];
     }
 
     public void decrementNonemptyQueueCounter() {
@@ -213,10 +191,6 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         return runningThreadsCount;
     }
 
-    public @NotNull ExecutorService @NotNull [] getCallbackExecutors() {
-        return callbackExecutors;
-    }
-
     public void stop() {
         final long start = System.currentTimeMillis();
         if (log.isTraceEnabled()) {
@@ -234,9 +208,6 @@ public class SingleWriterServiceImpl implements SingleWriterService {
             //ignore
         }
         singleWriterExecutor.shutdownNow();
-        for (final ExecutorService callbackExecutor : callbackExecutors) {
-            callbackExecutor.shutdownNow();
-        }
         checkScheduler.shutdownNow();
     }
 
@@ -252,7 +223,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
 
         private static final @NotNull SplittableRandom RANDOM = new SplittableRandom();
 
-        public SingleWriterTask(
+        SingleWriterTask(
                 final @NotNull AtomicLong nonemptyQueueCounter,
                 final @NotNull AtomicLong globalTaskCount,
                 final @NotNull AtomicInteger runningThreadsCount,
@@ -267,7 +238,6 @@ public class SingleWriterServiceImpl implements SingleWriterService {
 
         public void run() {
             try {
-
                 final SplittableRandom random = RANDOM.split();
 
                 // It is possible that all tasks stop running while there are still non-empty queues.
@@ -332,6 +302,4 @@ public class SingleWriterServiceImpl implements SingleWriterService {
             }
         }
     }
-
-
 }

@@ -31,21 +31,11 @@ public interface SingleWriterService {
 
     @NotNull ProducerQueues getAttributeStoreQueue();
 
-    @NotNull Executor callbackExecutor(@NotNull final String key);
-
     int getPersistenceBucketCount();
 
     void stop();
 
     interface Task<R> {
         @NotNull R doTask(int bucketIndex);
-    }
-
-    interface SuccessCallback<R> {
-        void afterTask(@NotNull R result);
-    }
-
-    interface FailedCallback {
-        void afterTask(@NotNull Throwable exception);
     }
 }
