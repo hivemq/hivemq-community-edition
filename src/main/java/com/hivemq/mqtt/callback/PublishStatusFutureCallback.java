@@ -93,14 +93,15 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
             log.error("Exceptions in publish status callback handling, queue ID = {}", queueId, e);
         }
 
+        if (packetIdentifier != 0) {
+            messageIDPool.returnId(packetIdentifier);
+        }
+
         if (status != PublishStatus.NOT_CONNECTED) {
             final AtomicInteger inFlightMessages = ClientConnection.of(channel).getInFlightMessageCount();
             if (inFlightMessages == null || inFlightMessages.decrementAndGet() <= 0) {
                 publishPollService.pollMessages(client, channel);
             }
-        }
-        if (packetIdentifier != 0) {
-            messageIDPool.returnId(packetIdentifier);
         }
     }
 
