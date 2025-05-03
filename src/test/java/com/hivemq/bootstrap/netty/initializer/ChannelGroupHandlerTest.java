@@ -19,6 +19,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.group.ChannelGroup;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -44,14 +45,20 @@ public class ChannelGroupHandlerTest {
     ChannelPipeline channelPipeline;
 
     private ChannelGroupHandler channelGroupHandler;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         channelGroupHandler = new ChannelGroupHandler(channelGroup);
 
         when(ctx.channel()).thenReturn(channel);
         when(ctx.pipeline()).thenReturn(channelPipeline);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

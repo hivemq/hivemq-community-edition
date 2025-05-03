@@ -16,6 +16,7 @@
 package com.hivemq.extensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -38,12 +39,18 @@ public class ExtensionPriorityComparatorTest {
     private HiveMQExtensions hiveMQExtensions;
 
     private ExtensionPriorityComparator comparator;
+    private AutoCloseable closeable;
 
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         comparator = new ExtensionPriorityComparator(hiveMQExtensions);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
