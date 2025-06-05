@@ -5,7 +5,7 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    alias(libs.plugins.nexusPublish)
+    alias(libs.plugins.mavenCentralPublishing)
     alias(libs.plugins.shadow)
     alias(libs.plugins.defaults)
     alias(libs.plugins.metadata)
@@ -357,12 +357,6 @@ signing {
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["embedded"])
-}
-
-nexusPublishing {
-    repositories {
-        sonatype()
-    }
 }
 
 githubRelease {
