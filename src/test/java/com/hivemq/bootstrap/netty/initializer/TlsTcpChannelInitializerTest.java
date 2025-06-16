@@ -22,6 +22,7 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
+import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -106,6 +107,7 @@ public class TlsTcpChannelInitializerTest {
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(socketChannel.isActive()).thenReturn(true);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
+        when(fullConfigurationService.mqttConfiguration()).thenReturn(new MqttConfigurationServiceImpl());
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
 
