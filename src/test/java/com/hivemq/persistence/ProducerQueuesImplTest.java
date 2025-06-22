@@ -16,6 +16,7 @@
 package com.hivemq.persistence;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -39,15 +40,22 @@ public class ProducerQueuesImplTest {
 
     @NotNull ProducerQueuesImpl producerQueues;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         when(singleWriterServiceImpl.getPersistenceBucketCount()).thenReturn(64);
         when(singleWriterServiceImpl.getThreadPoolSize()).thenReturn(4);
         when(singleWriterServiceImpl.getGlobalTaskCount()).thenReturn(new AtomicLong());
 
         producerQueues = new ProducerQueuesImpl(singleWriterServiceImpl, 4);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

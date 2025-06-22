@@ -22,6 +22,7 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.dropping.MessageDroppedServiceImpl;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -37,10 +38,11 @@ import static org.mockito.Mockito.when;
 public class MQTTHandlerModuleTest {
 
     private Injector injector;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -51,6 +53,11 @@ public class MQTTHandlerModuleTest {
                 bindScope(LazySingleton.class, LazySingletonScope.get());
             }
         });
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
