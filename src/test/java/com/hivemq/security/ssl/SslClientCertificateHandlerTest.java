@@ -30,6 +30,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -58,6 +59,7 @@ public class SslClientCertificateHandlerTest {
 
     private EmbeddedChannel channel;
     private UndefinedClientConnection clientConnection;
+    private AutoCloseable closeable;
 
     @Mock
     private MqttServerDisconnectorImpl mqttServerDisconnector;
@@ -76,7 +78,7 @@ public class SslClientCertificateHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         when(sslHandler.engine()).thenReturn(sslEngine);
         when(sslEngine.getSession()).thenReturn(sslSession);
@@ -88,6 +90,11 @@ public class SslClientCertificateHandlerTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

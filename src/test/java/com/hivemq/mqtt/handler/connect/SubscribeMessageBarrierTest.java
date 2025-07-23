@@ -24,6 +24,7 @@ import com.hivemq.mqtt.message.subscribe.SUBSCRIBE;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -39,13 +40,19 @@ public class SubscribeMessageBarrierTest {
 
     private EmbeddedChannel channel;
     private SubscribeMessageBarrier subscribeMessageBarrier;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         subscribeMessageBarrier = new SubscribeMessageBarrier();
         channel = new EmbeddedChannel();
         channel.pipeline().addFirst(MQTT_SUBSCRIBE_MESSAGE_BARRIER, subscribeMessageBarrier);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

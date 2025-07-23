@@ -31,6 +31,7 @@ import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -53,11 +54,11 @@ public class AuthInProgressMessageHandlerTest {
 
     private MqttConnacker connacker;
     private EmbeddedChannel channel;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
+        closeable = MockitoAnnotations.openMocks(this);
         connacker = new MqttConnackerImpl(eventLog);
 
         channel = new EmbeddedChannel();
@@ -65,6 +66,11 @@ public class AuthInProgressMessageHandlerTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.pipeline().addFirst(new AuthInProgressMessageHandler(connacker));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 5000)

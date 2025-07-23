@@ -45,6 +45,7 @@ import com.hivemq.mqtt.handler.unsubscribe.UnsubscribeHandler;
 import com.hivemq.security.ssl.SslParameterHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -145,10 +146,11 @@ public class ChannelDependenciesTest {
     private @NotNull ShutdownHooks shutdownHooks;
 
     private @NotNull ChannelDependencies channelDependencies;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         channelDependencies = new ChannelDependencies(noConnectIdleHandler,
                 () -> connectHandler,
@@ -180,6 +182,11 @@ public class ChannelDependenciesTest {
                 interceptorHandler,
                 globalMQTTMessageCounter,
                 shutdownHooks);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

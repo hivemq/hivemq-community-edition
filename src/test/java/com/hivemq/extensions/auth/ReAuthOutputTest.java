@@ -23,6 +23,7 @@ import com.hivemq.extensions.packets.general.ModifiableDefaultPermissionsImpl;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.util.Bytes;
 import com.hivemq.util.ReasonStrings;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -48,15 +49,21 @@ public class ReAuthOutputTest {
     private PluginOutPutAsyncer asyncer;
 
     private ReAuthOutput authTaskOutput;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         authTaskOutput = new ReAuthOutput(asyncer,
                 true,
                 new ModifiableDefaultPermissionsImpl(),
                 new ModifiableClientSettingsImpl(10, null),
                 30);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 5000)
