@@ -9,4 +9,7 @@
     ],
     useBaseBranchConfig: 'merge',
     branchPrefix: 'renovate/hivemq-community-edition/',
+    addLabels: [
+      'broker-core-team',
+    ],    
 }
