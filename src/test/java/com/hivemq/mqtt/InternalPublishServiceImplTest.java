@@ -28,6 +28,7 @@ import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.mqtt.topic.tree.TopicSubscribers;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -73,11 +74,12 @@ public class InternalPublishServiceImplTest {
     private ExecutorService executorService;
 
     private InternalPublishServiceImpl publishService;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         executorService = MoreExecutors.newDirectExecutorService();
 
@@ -89,6 +91,11 @@ public class InternalPublishServiceImplTest {
                 eq(executorService))).thenReturn(Futures.immediateFuture(null));
 
         publishService = new InternalPublishServiceImpl(retainedMessagePersistence, topicTree, publishDistributor);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(timeout = 20000)

@@ -30,6 +30,7 @@ import com.hivemq.mqtt.message.publish.PublishWithFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -63,10 +64,11 @@ public class DropOutgoingPublishesHandlerTest {
     Counter counter;
 
     private DropOutgoingPublishesHandler handler;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(ctx.channel()).thenReturn(channel);
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setClientId("clientId");
@@ -74,6 +76,11 @@ public class DropOutgoingPublishesHandlerTest {
                 clientConnection));
         InternalConfigurations.NOT_WRITABLE_QUEUE_SIZE.set(0);
         handler = new DropOutgoingPublishesHandler(messageDroppedService);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

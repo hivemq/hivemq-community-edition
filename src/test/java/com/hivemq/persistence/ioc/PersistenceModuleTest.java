@@ -42,6 +42,7 @@ import com.hivemq.persistence.local.xodus.RetainedMessageRocksDBLocalPersistence
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -62,9 +63,11 @@ public class PersistenceModuleTest {
     @Mock
     private Injector persistenceInjector;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(persistenceInjector.getInstance(PublishPayloadPersistence.class)).thenReturn(Mockito.mock(
                 PublishPayloadPersistence.class));
 
@@ -83,6 +86,11 @@ public class PersistenceModuleTest {
         when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(Mockito.mock(PersistenceStartup.class));
 
         when(persistenceInjector.getInstance(ShutdownHooks.class)).thenReturn(Mockito.mock(ShutdownHooks.class));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
