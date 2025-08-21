@@ -17,7 +17,7 @@ package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import oshi.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
 import java.util.Iterator;
 

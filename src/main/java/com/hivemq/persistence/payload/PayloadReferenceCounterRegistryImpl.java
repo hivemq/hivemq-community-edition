@@ -22,7 +22,7 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import org.eclipse.collections.api.tuple.primitive.LongIntPair;
 import org.eclipse.collections.impl.map.mutable.primitive.LongIntHashMap;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import oshi.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
