@@ -188,6 +188,11 @@ public class ConnectionPersistenceImpl implements ConnectionPersistence {
         }, MoreExecutors.directExecutor());
     }
 
+    @Override
+    public int getConnectionCount() {
+        return clientConnectionMap.size();
+    }
+
     @VisibleForTesting
     public @NotNull Set<Map.Entry<String, ClientConnection>> entries() {
         return clientConnectionMap.entrySet();

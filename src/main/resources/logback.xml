@@ -40,5 +40,7 @@
     <logger name="org.eclipse.jetty" level="ERROR"/>
     <logger name="com.google.common.util.concurrent.Futures.CombinedFuture" level="OFF"/>
     <logger name="oshi" level="ERROR"/>
+    <logger name="org.jboss.resteasy" level="WARN"/>
+    <logger name="io.undertow" level="WARN"/>
 
 </configuration>

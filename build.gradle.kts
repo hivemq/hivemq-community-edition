@@ -139,6 +139,14 @@ dependencies {
 
     /* primitive data structures */
     implementation(libs.eclipse.collections)
+
+    // MCP Server
+    implementation("org.jboss.resteasy:resteasy-undertow:6.2.11.Final")
+    implementation("org.jboss.resteasy:resteasy-jackson2-provider:6.2.11.Final")
+    implementation("jakarta.ws.rs:jakarta.ws.rs-api:3.1.0")
+
+    // OAuth/JWT for MCP
+    implementation("com.auth0:java-jwt:4.4.0")
 }
 
 /* ******************** test ******************** */
@@ -315,6 +323,7 @@ forbiddenApis {
 tasks.forbiddenApisMain {
     exclude("**/BatchedException.class")
     exclude("**/LoggingBootstrap.class")
+    exclude("**/McpStdioWrapper.class")
 }
 
 tasks.forbiddenApisTest { enabled = false }

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "hivemq": {
+      "command": "/Users/vladimir.podolskiy/hivemq/hivemq-community-edition-composite/hivemq-community-edition/mcp-stdio-wrapper.sh"
+    }
+  }
+}

@@ -47,6 +47,16 @@ public class InternalConfigurations {
     public static final AtomicBoolean IN_MEMORY_SINGLE_WRITER = new AtomicBoolean(true);
 
 
+    /* **************
+     *  MCP Server  *
+     ****************/
+
+    /**
+     * The port on which the MCP server listens.
+     */
+    public static final AtomicInteger MCP_SERVER_PORT = new AtomicInteger(8888);
+
+
     /* ***************
      *  Persistences *
      *****************/

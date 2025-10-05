@@ -63,4 +63,11 @@ public interface ConnectionPersistence {
     @NotNull ListenableFuture<Void> shutDown();
 
     void interruptShutdown();
+
+    /**
+     * Get the current number of active client connections.
+     *
+     * @return the count of active connections
+     */
+    int getConnectionCount();
 }

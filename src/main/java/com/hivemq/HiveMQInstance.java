@@ -17,6 +17,7 @@ package com.hivemq;
 
 import com.hivemq.bootstrap.HiveMQNettyBootstrap;
 import com.hivemq.bootstrap.ListenerStartupInformation;
+import com.hivemq.bootstrap.McpServerBootstrap;
 import com.hivemq.bootstrap.StartupListenerVerifier;
 import com.hivemq.embedded.EmbeddedExtension;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -40,18 +41,21 @@ public class HiveMQInstance {
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull ExtensionBootstrap extensionBootstrap;
     private final @NotNull AdminService adminService;
+    private final @NotNull McpServerBootstrap mcpServerBootstrap;
 
     @Inject
     HiveMQInstance(
             final @NotNull HiveMQNettyBootstrap nettyBootstrap,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull ExtensionBootstrap extensionBootstrap,
-            final @NotNull AdminService adminService) {
+            final @NotNull AdminService adminService,
+            final @NotNull McpServerBootstrap mcpServerBootstrap) {
 
         this.nettyBootstrap = nettyBootstrap;
         this.payloadPersistence = payloadPersistence;
         this.extensionBootstrap = extensionBootstrap;
         this.adminService = adminService;
+        this.mcpServerBootstrap = mcpServerBootstrap;
     }
 
     public void start(final @Nullable EmbeddedExtension embeddedExtension) throws Exception {
@@ -62,6 +66,9 @@ public class HiveMQInstance {
         final List<ListenerStartupInformation> startupInformation = nettyBootstrap.bootstrapServer().get();
         Checkpoints.checkpoint("listener-started");
         new StartupListenerVerifier(startupInformation).verifyAndPrint();
+
+        // Start MCP server
+        mcpServerBootstrap.start();
 
         ((AdminServiceImpl) adminService).hivemqStarted();
     }
