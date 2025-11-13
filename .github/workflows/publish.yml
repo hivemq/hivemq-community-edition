@@ -17,7 +17,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       - name: Publish to Maven Central
-        run: ./gradlew publishToMavenCentral
+        run: ./gradlew publishEmbeddedPublicationToMavenCentral
         env:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
