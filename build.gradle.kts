@@ -353,6 +353,7 @@ publishing {
 }
 
 signing {
+    isRequired = !"true".equals(project.findProperty("signingDisabled") as String?, true)
     val signingKey: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
