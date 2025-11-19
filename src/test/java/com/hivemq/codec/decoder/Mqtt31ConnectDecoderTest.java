@@ -30,6 +30,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -59,17 +60,18 @@ public class Mqtt31ConnectDecoderTest {
     @Mock
     private @NotNull ChannelFuture channelFuture;
 
-    private @NotNull Mqtt31ConnectDecoder decoder;
-    private ClientConnection clientConnection;
-
     @Mock
     private @NotNull MqttConnacker connacker;
+
+    private @NotNull Mqtt31ConnectDecoder decoder;
+    private ClientConnection clientConnection;
+    private AutoCloseable closeable;
 
     private static final byte fixedHeader = 0b0001_0000;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
 
         clientConnection = new DummyClientConnection(channel, null);
@@ -82,6 +84,11 @@ public class Mqtt31ConnectDecoderTest {
                 new ClientIds(new HivemqId()),
                 new TestConfigurationBootstrap().getFullConfigurationService(),
                 new HivemqId());
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

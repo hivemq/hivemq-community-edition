@@ -17,6 +17,7 @@ package com.hivemq.bootstrap;
 
 import com.hivemq.configuration.service.entity.TcpListener;
 import io.netty.channel.ChannelFuture;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -31,11 +32,17 @@ public class BindInformationTest {
     ChannelFuture future;
 
     private TcpListener listener;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         listener = new TcpListener(1883, "0.0.0.0");
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
