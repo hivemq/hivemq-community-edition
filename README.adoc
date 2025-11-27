@@ -352,6 +352,9 @@ public class Main {
 }
 ----
 
+// Scarf Tracking Pixel
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=39c2b98a-0d1a-4a1c-8ce2-1cce4d0fbcf1&page=README.adoc" />
+
 == Contributing
 
 If you want to contribute to HiveMQ CE, see the link:CONTRIBUTING.adoc[contribution guidelines].
