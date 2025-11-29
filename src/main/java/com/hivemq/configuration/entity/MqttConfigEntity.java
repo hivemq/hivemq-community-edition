@@ -15,6 +15,7 @@
  */
 package com.hivemq.configuration.entity;
 
+import com.hivemq.configuration.entity.mqtt.AllowDollarTopicsConfigEntity;
 import com.hivemq.configuration.entity.mqtt.KeepAliveConfigEntity;
 import com.hivemq.configuration.entity.mqtt.MessageExpiryConfigEntity;
 import com.hivemq.configuration.entity.mqtt.PacketsConfigEntity;
@@ -47,6 +48,9 @@ public class MqttConfigEntity {
     @XmlElementRef(required = false)
     private @NotNull RetainedMessagesConfigEntity retainedMessagesConfigEntity = new RetainedMessagesConfigEntity();
 
+    @XmlElementRef(required = false)
+    private @NotNull AllowDollarTopicsConfigEntity allowDollarTopicsEntity = new AllowDollarTopicsConfigEntity();
+    
     @XmlElementRef(required = false)
     private @NotNull WildcardSubscriptionsConfigEntity wildcardSubscriptionsConfigEntity =
             new WildcardSubscriptionsConfigEntity();
@@ -99,6 +103,11 @@ public class MqttConfigEntity {
     public @NotNull RetainedMessagesConfigEntity getRetainedMessagesConfigEntity() {
         return retainedMessagesConfigEntity;
     }
+
+    public @NotNull AllowDollarTopicsConfigEntity getAllowDollarTopicConfigEntity() {
+        return allowDollarTopicsEntity;
+    }
+
 
     public @NotNull WildcardSubscriptionsConfigEntity getWildcardSubscriptionsConfigEntity() {
         return wildcardSubscriptionsConfigEntity;
