@@ -87,10 +87,11 @@ public class PublishFlowHandlerTest {
     private OrderedTopicService orderedTopicService;
 
     private EmbeddedChannel channel;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 5;
         when(freePacketIdRanges.takeNextId()).thenReturn(100);
         orderedTopicService = new OrderedTopicService();
@@ -108,6 +109,11 @@ public class PublishFlowHandlerTest {
     @After
     public void tearDown() throws Exception {
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 50;
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

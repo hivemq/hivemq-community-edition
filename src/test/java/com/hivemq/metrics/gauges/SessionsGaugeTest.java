@@ -16,6 +16,7 @@
 package com.hivemq.metrics.gauges;
 
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -33,12 +34,18 @@ public class SessionsGaugeTest {
     ClientSessionLocalPersistence sessionPersistence;
 
     private SessionsGauge sessionsGauge;
+    private AutoCloseable closeable;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         sessionsGauge = new SessionsGauge(sessionPersistence);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

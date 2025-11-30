@@ -26,6 +26,7 @@ import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -59,10 +60,11 @@ public class PersistenceShutdownHookTest {
     private ClientQueuePersistence clientQueuePersistence;
 
     private PersistenceShutdownHook persistenceShutdownHook;
+    private AutoCloseable closeable;
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         persistenceShutdownHook = new PersistenceShutdownHook(clientSessionPersistence,
                 clientSessionSubscriptionPersistence,
                 incomingMessageFlowPersistence,
@@ -78,6 +80,11 @@ public class PersistenceShutdownHookTest {
         when(clientSessionSubscriptionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(retainedMessagePersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(clientQueuePersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
