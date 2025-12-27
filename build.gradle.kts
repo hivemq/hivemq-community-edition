@@ -5,7 +5,7 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    alias(libs.plugins.nexusPublish)
+    alias(libs.plugins.mavenCentralPublishing)
     alias(libs.plugins.shadow)
     alias(libs.plugins.defaults)
     alias(libs.plugins.metadata)
@@ -229,7 +229,7 @@ oci {
         imageName = "hivemq/hivemq-ce"
         allPlatforms {
             dependencies {
-                runtime("library:eclipse-temurin:sha256!ebeb51a2a147be42b7d42342fecbeb2d9cb764f7742054024ac9a17bc1c8a21b") // 21.0.5_11-jre-jammy
+                runtime("library:eclipse-temurin:sha256!67fc762eabacb56e5444b367889e04ce8c839b8f4b3d8ef3e459c5579fbefd8a") // 21-jre-noble
             }
             config {
                 user = "10000"
@@ -353,16 +353,11 @@ publishing {
 }
 
 signing {
+    isRequired = !"true".equals(project.findProperty("signingDisabled") as String?, true)
     val signingKey: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["embedded"])
-}
-
-nexusPublishing {
-    repositories {
-        sonatype()
-    }
 }
 
 githubRelease {

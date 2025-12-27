@@ -10,4 +10,4 @@ before_install:
   - cd ../hivemq-community-edition
 
 install:
-  - ./gradlew publishToMavenLocal -x signEmbeddedPublication :hivemq-extension-sdk:publishToMavenLocal -x :hivemq-extension-sdk:signMavenPublication
+  - ./gradlew publishToMavenLocal :hivemq-extension-sdk:publishToMavenLocal -PsigningDisabled=true
