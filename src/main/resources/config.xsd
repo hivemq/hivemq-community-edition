@@ -40,12 +40,12 @@
                     <xs:complexType>
                         <xs:all>
                             <xs:element name="port" type="port"/>
-                            <xs:element name="bind-address" type="nonEmtpyString" minOccurs="0">
+                            <xs:element name="bind-address" type="nonEmptyString" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>Default: 0.0.0.0</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="name" type="nonEmtpyString" minOccurs="0"/>
+                            <xs:element name="name" type="nonEmptyString" minOccurs="0"/>
                         </xs:all>
                     </xs:complexType>
                 </xs:element>
@@ -53,12 +53,12 @@
                     <xs:complexType>
                         <xs:all>
                             <xs:element name="port" type="port"/>
-                            <xs:element name="bind-address" type="nonEmtpyString" minOccurs="0">
+                            <xs:element name="bind-address" type="nonEmptyString" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>Default: 0.0.0.0</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="name" type="nonEmtpyString" minOccurs="0"/>
+                            <xs:element name="name" type="nonEmptyString" minOccurs="0"/>
                             <xs:element name="tls" type="listenerTLSEntity"/>
                         </xs:all>
                     </xs:complexType>
@@ -67,13 +67,13 @@
                     <xs:complexType>
                         <xs:all>
                             <xs:element name="port" type="port"/>
-                            <xs:element name="bind-address" type="nonEmtpyString" minOccurs="0">
+                            <xs:element name="bind-address" type="nonEmptyString" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>Default: 0.0.0.0</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="name" type="nonEmtpyString" minOccurs="0"/>
-                            <xs:element name="path" type="nonEmtpyString" minOccurs="0">
+                            <xs:element name="name" type="nonEmptyString" minOccurs="0"/>
+                            <xs:element name="path" type="nonEmptyString" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>Default: /mqtt</xs:documentation>
                                 </xs:annotation>
@@ -81,7 +81,7 @@
                             <xs:element name="subprotocols" minOccurs="0">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element name="subprotocol" type="nonEmtpyString" minOccurs="0"
+                                        <xs:element name="subprotocol" type="nonEmptyString" minOccurs="0"
                                                     maxOccurs="unbounded"/>
                                     </xs:sequence>
                                 </xs:complexType>
@@ -98,13 +98,13 @@
                     <xs:complexType>
                         <xs:all>
                             <xs:element name="port" type="port"/>
-                            <xs:element name="bind-address" type="nonEmtpyString" minOccurs="0">
+                            <xs:element name="bind-address" type="nonEmptyString" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>Default: 0.0.0.0</xs:documentation>
                                 </xs:annotation>
                             </xs:element>
-                            <xs:element name="name" type="nonEmtpyString" minOccurs="0"/>
-                            <xs:element name="path" type="nonEmtpyString" minOccurs="0">
+                            <xs:element name="name" type="nonEmptyString" minOccurs="0"/>
+                            <xs:element name="path" type="nonEmptyString" minOccurs="0">
                                 <xs:annotation>
                                     <xs:documentation>Default: /mqtt</xs:documentation>
                                 </xs:annotation>
@@ -112,7 +112,7 @@
                             <xs:element name="subprotocols" minOccurs="0">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element name="subprotocol" type="nonEmtpyString" minOccurs="0"
+                                        <xs:element name="subprotocol" type="nonEmptyString" minOccurs="0"
                                                     maxOccurs="unbounded"/>
                                     </xs:sequence>
                                 </xs:complexType>
@@ -137,14 +137,14 @@
             <xs:element name="protocols" minOccurs="0">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element name="protocol" type="nonEmtpyString" minOccurs="0" maxOccurs="unbounded"/>
+                        <xs:element name="protocol" type="nonEmptyString" minOccurs="0" maxOccurs="unbounded"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="cipher-suites" minOccurs="0">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element name="cipher-suite" type="nonEmtpyString" minOccurs="0" maxOccurs="unbounded"/>
+                        <xs:element name="cipher-suite" type="nonEmptyString" minOccurs="0" maxOccurs="unbounded"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -508,7 +508,7 @@
 
     <xs:complexType name="keystoreEntity">
         <xs:all>
-            <xs:element name="path" type="nonEmtpyString"/>
+            <xs:element name="path" type="nonEmptyString"/>
             <xs:element name="password" type="xs:string"/>
             <xs:element name="private-key-password" type="xs:string"/>
         </xs:all>
@@ -516,7 +516,7 @@
 
     <xs:complexType name="truststoreEntity">
         <xs:all>
-            <xs:element name="path" type="nonEmtpyString"/>
+            <xs:element name="path" type="nonEmptyString"/>
             <xs:element name="password" type="xs:string"/>
         </xs:all>
     </xs:complexType>
@@ -536,7 +536,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="nonEmtpyString">
+    <xs:simpleType name="nonEmptyString">
         <xs:restriction base="xs:string">
             <xs:minLength value="1"/>
             <xs:whiteSpace value="collapse"/>
@@ -544,4 +544,3 @@
     </xs:simpleType>
 
 </xs:schema>
-
