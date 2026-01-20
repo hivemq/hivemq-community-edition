@@ -47,7 +47,7 @@ if %errorlevel% == 0 (
 
 java -version >nul 2>&1
 if errorlevel 1 (
-    echo ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/?variant=openjdk11 and try again.
+    echo ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/temurin/releases and try again.
     goto EXIT
 )
 

@@ -27,7 +27,7 @@ echo '  HiveMQ Start Script for Linux/Unix v1.14'
 echo ''
 
 if ! hash java 2>/dev/null; then
-    echo 'ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/?variant=openjdk11 and try again.' >&2
+    echo 'ERROR! You do not have the Java Runtime Environment installed, please install Java JRE from https://adoptium.net/temurin/releases and try again.' >&2
     exit 1
 fi
 
