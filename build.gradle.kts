@@ -362,9 +362,9 @@ signing {
 
 githubRelease {
     token(System.getenv("GITHUB_TOKEN"))
-    tagName(project.version.toString())
     releaseAssets(hivemqZip)
-    allowUploadToExisting(true)
+    tagName = project.version.toString()
+    allowUploadToExisting = true
 }
 
 val javaComponent = components["java"] as AdhocComponentWithVariants
