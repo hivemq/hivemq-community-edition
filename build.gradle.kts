@@ -278,6 +278,18 @@ oci {
 }
 
 tasks.javadoc {
+    doFirst {
+        // create stub element-list files for Kotlin dependencies (transitive from xodus) that don't have Javadoc on javadoc.io
+        listOf(
+            "org.jetbrains.kotlin/kotlin-stdlib/${libs.versions.kotlin.get()}",
+            "io.github.microutils/kotlin-logging/1.4.1",
+        ).forEach {
+            val dir = layout.buildDirectory.dir("tmp/javadocLinks/$it").get().asFile
+            dir.mkdirs()
+            dir.resolve("element-list").createNewFile()
+        }
+    }
+
     (options as StandardJavadocDocletOptions).addStringOption("-html5")
 
     include("com/hivemq/embedded/*")
@@ -288,7 +300,8 @@ tasks.javadoc {
         }
     }
 
-    doLast { // javadoc search fix for jdk 11 https://bugs.openjdk.java.net/browse/JDK-8215291
+    doLast {
+        // Javadoc search fix for JDK 11 https://bugs.openjdk.java.net/browse/JDK-8215291
         copy {
             from(destinationDir!!.resolve("search.js"))
             into(temporaryDir)
