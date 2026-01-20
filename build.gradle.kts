@@ -151,7 +151,7 @@ dependencies {
     testImplementation(libs.shrinkwrap.api)
     testRuntimeOnly(libs.shrinkwrap.impl)
     testImplementation(libs.byteBuddy)
-    testImplementation(libs.wiremock.jre8.standalone)
+    testImplementation(libs.wiremock.standalone)
     testImplementation(libs.javassist)
     testImplementation(libs.awaitility)
     testImplementation(libs.stefanBirkner.systemRules) {
