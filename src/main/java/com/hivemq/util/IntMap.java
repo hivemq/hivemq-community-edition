@@ -16,13 +16,13 @@
 package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.Immutable;
+import oshi.annotation.concurrent.NotThreadSafe;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- * This int to int map designed for minimal memory overhead for instaces with very few entries.
+ * This int to int map designed for minimal memory overhead for instances with very few entries.
  * Access is to the map is linear at best, therefore this implementation should not be used if cpu time is a concern.
  * This class is not thread save.
  * Each instance of this IntMap must not be accessed by more than one thread at a time.

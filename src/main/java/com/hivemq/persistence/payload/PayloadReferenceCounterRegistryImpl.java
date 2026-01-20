@@ -21,14 +21,14 @@ import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import org.eclipse.collections.api.tuple.primitive.LongIntPair;
 import org.eclipse.collections.impl.map.mutable.primitive.LongIntHashMap;
+import oshi.annotation.concurrent.NotThreadSafe;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller
+ * Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller.
  * The reason is that the caller (primarily PublishPayloadPersistence) calls often multiple methods and the lock
- * must cover all sequential calls to methods
+ * must cover all sequential calls to methods.
  */
 @NotThreadSafe
 public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCounterRegistry {
