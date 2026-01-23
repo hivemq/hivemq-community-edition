@@ -26,6 +26,7 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.mqtt.message.publish.PUBLISHFactory;
 import com.hivemq.mqtt.message.pubrel.PUBREL;
 import jetbrains.exodus.ByteIterable;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -44,12 +45,18 @@ import static org.junit.Assert.assertTrue;
 public class ClientQueuePersistenceSerializerTest {
 
     private ClientQueuePersistenceSerializer serializer;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         serializer = new ClientQueuePersistenceSerializer();
         ClientQueuePersistenceSerializer.NEXT_PUBLISH_NUMBER.set(Long.MAX_VALUE / 2);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

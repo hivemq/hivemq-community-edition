@@ -29,6 +29,7 @@ import com.hivemq.persistence.local.memory.RetainedMessageMemoryLocalPersistence
 import com.hivemq.persistence.payload.PublishPayloadNoopPersistenceImpl;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -53,10 +54,17 @@ public class PersistenceMigrationModuleTest {
     @Mock
     private PersistenceConfigurationService persistenceConfigurationService;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceConfigurationService.PersistenceMode.FILE);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

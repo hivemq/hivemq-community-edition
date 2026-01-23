@@ -29,6 +29,7 @@ import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServi
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.statistics.UsageStatisticsConfig;
 import com.hivemq.util.EnvVarUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -63,10 +64,11 @@ public class ConfigFileReaderTest {
     private ListenerConfigurationService listenerConfigurationService;
 
     ConfigFileReader reader;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         listenerConfigurationService = new ListenerConfigurationServiceImpl();
 
         final ConfigurationFile configurationFile = new ConfigurationFile(null);
@@ -78,6 +80,11 @@ public class ConfigFileReaderTest {
                 new MqttConfigurator(mqttConfigurationService),
                 new ListenerConfigurator(listenerConfigurationService, systemInformation),
                 new PersistenceConfigurator(persistenceConfigurationService));
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

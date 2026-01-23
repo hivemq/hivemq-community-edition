@@ -74,10 +74,11 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
     private final long byteLimit = 5 * 1024 * 1024;
     private MetricRegistry metricRegistry;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR.set(10000);
@@ -91,6 +92,11 @@ public class ClientQueueMemoryLocalPersistenceTest {
     @After
     public void tearDown() throws Exception {
         InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED = false;
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

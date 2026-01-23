@@ -42,6 +42,7 @@ import com.hivemq.persistence.clientsession.ClientSession;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionWill;
 import io.netty.channel.embedded.EmbeddedChannel;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -89,15 +90,21 @@ public class ClientServiceImplTest {
 
     private final String clientId = "clientID";
     private final long sessionExpiry = 123546L;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         clientService = new ClientServiceImpl(pluginServiceRateLimitService,
                 clientSessionPersistence,
                 getManagedExtensionExecutorService(),
                 asyncIteratorFactory);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test(expected = RateLimitExceededException.class)
