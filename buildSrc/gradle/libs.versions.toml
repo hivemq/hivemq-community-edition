@@ -1,5 +1,5 @@
 [versions]
-jackson = "2.20.1"
+jackson = "2.21.0"
 
 [libraries]
 jackson-dataformat-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson" }
