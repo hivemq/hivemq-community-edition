@@ -1,0 +1,35 @@
+name: Run Snyk monitor on releases
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  run-snyk-monitor:
+    runs-on: ubuntu-latest
+    environment: snyk-monitor-releases
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          path: hivemq-community-edition
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: temurin
+          java-version: |
+            11
+            21
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1
+
+      - name: Run Snyk monitor
+        run: >
+          snyk monitor --configuration-matching=^runtimeClasspath$ --target-reference=${{ github.ref_name }}
+          --org=hivemq-releases --project-name=hivemq-community-edition --remote-repo-url=hivemq-community-edition
+          --project-lifecycle=production -d hivemq-community-edition
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

@@ -1,0 +1,37 @@
+name: Run Snyk scan on PRs
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  monitor-baseline-project:
+    uses: ./.github/workflows/snyk-push.yml
+    with:
+      github_ref: ${{ github.base_ref }}
+    secrets: inherit
+
+  scan-for-new-issues:
+    runs-on: ubuntu-latest
+    needs: monitor-baseline-project
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          path: hivemq-community-edition
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: temurin
+          java-version: |
+            11
+            21
+
+      - name: Check for new issues
+        uses: hivemq/hivemq-snyk-composite-action@344969d844a085dfbf2d050e2758d5d356aebea7 # v2
+        with:
+          snyk-args: --org=hivemq-community-broker --project-name=hivemq-community-edition --configuration-matching=^runtimeClasspath$ -d hivemq-community-edition
+          snyk-token: ${{ secrets.SNYK_TOKEN }}

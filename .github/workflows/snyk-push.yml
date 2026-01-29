@@ -1,0 +1,51 @@
+name: Run Snyk monitor on push
+
+on:
+  push:
+    branches:
+      - master
+  workflow_call:
+    inputs:
+      github_ref:
+        required: true
+        type: string
+    secrets:
+      SNYK_TOKEN:
+        required: true
+
+jobs:
+  run-snyk-monitor:
+    runs-on: ubuntu-latest
+    environment: snyk-monitor-development
+
+    steps:
+      - name: Select GitHub ref
+        id: select_github_ref
+        run: |
+          workflow_call_github_ref=${{ inputs.github_ref }}
+          echo "selected_github_ref=${workflow_call_github_ref:-${{ github.ref_name }}}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        with:
+          path: hivemq-community-edition
+          ref: ${{ steps.select_github_ref.outputs.selected_github_ref }}
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: temurin
+          java-version: |
+            11
+            21
+
+      - name: Setup Snyk
+        uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1
+
+      - name: Run Snyk monitor
+        run: >
+          snyk monitor --configuration-matching=^runtimeClasspath$ --target-reference=${{ steps.select_github_ref.outputs.selected_github_ref }}
+          --org=hivemq-community-broker --project-name=hivemq-community-edition --remote-repo-url=hivemq-community-edition
+          --project-lifecycle=development -d hivemq-community-edition
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
