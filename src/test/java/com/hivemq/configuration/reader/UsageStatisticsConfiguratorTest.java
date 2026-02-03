@@ -19,35 +19,29 @@ import com.google.common.io.Files;
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UsageStatisticsConfiguratorTest extends AbstractConfigurationTest {
 
     @Test
     public void test_usage_statistics_xml() throws Exception {
-
-        final String contents = "<hivemq>" +
-                "    <anonymous-usage-statistics>\n" +
-                "        <enabled>true</enabled>\n" +
-                "    </anonymous-usage-statistics\n>" +
-                "</hivemq>";
+        final String contents = """
+                <hivemq>
+                    <anonymous-usage-statistics>
+                        <enabled>true</enabled>
+                    </anonymous-usage-statistics>
+                </hivemq>""";
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
-        assertEquals(true, usageStatisticsConfig.isEnabled());
+        assertTrue(usageStatisticsConfig.isEnabled());
     }
 
     @Test
     public void test_usage_statistics_default() throws Exception {
-
-        final String contents = "<hivemq>" + "</hivemq>";
+        final String contents = "<hivemq></hivemq>";
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
-        assertEquals(false, usageStatisticsConfig.isEnabled());
+        assertFalse(usageStatisticsConfig.isEnabled());
     }
-
-
 }

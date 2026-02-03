@@ -35,7 +35,6 @@ import util.LogbackCapturingAppender;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -45,20 +44,16 @@ import static org.junit.Assert.fail;
  */
 public class LoggingBootstrapTest {
 
-
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
     private Level level;
 
-
     @Before
     public void setUp() throws Exception {
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-
         level = logger.getLevel();
 
         logger.setLevel(Level.INFO);
-
     }
 
     @After
@@ -70,75 +65,63 @@ public class LoggingBootstrapTest {
         resetLogToOriginal();
     }
 
-
     @Test
     public void test_override_standard_logback() throws Exception {
-
-        final String overridenContents = "" +
-                "<configuration>\n" +
-                "\n" +
-                "    <appender name=\"STDOUT\" class=\"ch.qos.logback.core.ConsoleAppender\">\n" +
-                "        <!-- encoders are assigned the type\n" +
-                "             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->\n" +
-                "        <encoder>\n" +
-                "            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>\n" +
-                "        </encoder>\n" +
-                "    </appender>\n" +
-                "\n" +
-                "    <root level=\"trace\">\n" +
-                "        <appender-ref ref=\"STDOUT\"/>\n" +
-                "    </root>\n" +
-                "\n" +
-                "</configuration>";
+        final String overriddenContents = """
+                <configuration>
+                
+                    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                        <!-- encoders are assigned the type
+                             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+                        <encoder>
+                            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                        </encoder>
+                    </appender>
+                
+                    <root level="trace">
+                        <appender-ref ref="STDOUT"/>
+                    </root>
+                
+                </configuration>""";
 
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-
-
-        assertEquals(false, logger.isTraceEnabled());
+        assertFalse(logger.isTraceEnabled());
 
         try {
-
             final File configFolder = temporaryFolder.newFolder();
-
-            Files.write(overridenContents, new File(configFolder, "logback.xml"), StandardCharsets.UTF_8);
+            Files.write(overriddenContents, new File(configFolder, "logback.xml"), StandardCharsets.UTF_8);
 
             LoggingBootstrap.initLogging(configFolder);
 
-            assertEquals(true, logger.isTraceEnabled());
+            assertTrue(logger.isTraceEnabled());
         } finally {
-            //Set back to the original level, otherwise we interfere with other tests
+            // set back to the original level, otherwise we interfere with other tests
             resetLogToOriginal();
         }
     }
 
     @Test
     public void test_dont_override_standard_logback_no_file_in_folder() throws Exception {
-
-
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-
-
-        assertEquals(false, logger.isTraceEnabled());
+        assertFalse(logger.isTraceEnabled());
 
         try {
             final File configFolder = temporaryFolder.newFolder();
 
             LoggingBootstrap.prepareLogging();
-            //No file was written
+            // no file was written
             LoggingBootstrap.initLogging(configFolder);
 
-            assertEquals(false, logger.isTraceEnabled());
+            assertFalse(logger.isTraceEnabled());
         } finally {
-            //Set back to the original level, otherwise we interfere with other tests
+            // set back to the original level, otherwise we interfere with other tests
             resetLogToOriginal();
         }
     }
 
     @Test
     public void test_logger_prepare_holds_back_logger_until_init_logging() throws Exception {
-
         try {
-
             final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
             final LogbackCapturingAppender testAppender = LogbackCapturingAppender.Factory.weaveInto(logger);
@@ -146,18 +129,15 @@ public class LoggingBootstrapTest {
 
             logger.info("testlog");
 
-            //The logging statement is cached and is not available yet
+            // the logging statement is cached and is not available yet
             assertFalse(testAppender.isLogCaptured());
 
-            //This "resets" to the original logger
+            // this "resets" to the original logger
             LoggingBootstrap.initLogging(temporaryFolder.newFolder());
-
-
             assertTrue(testAppender.isLogCaptured());
 
             final ImmutableList<Appender<ILoggingEvent>> appenders =
                     ImmutableList.copyOf(logger.iteratorForAppenders());
-
 
             for (final Appender<ILoggingEvent> appender : appenders) {
                 if (appender instanceof ListAppender) {
@@ -172,52 +152,47 @@ public class LoggingBootstrapTest {
     }
 
     @Test
-    public void test_log_file_overriden() throws Exception {
-
-        final String overridenContents = "" +
-                "<configuration>\n" +
-                "\n" +
-                "    <appender name=\"APP\" class=\"ch.qos.logback.core.ConsoleAppender\">\n" +
-                "        <!-- encoders are assigned the type\n" +
-                "             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->\n" +
-                "        <encoder>\n" +
-                "            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>\n" +
-                "        </encoder>\n" +
-                "    </appender>\n" +
-                "\n" +
-                "    <root level=\"trace\">\n" +
-                "        <appender-ref ref=\"APP\"/>\n" +
-                "    </root>\n" +
-                "\n" +
-                "</configuration>";
+    public void test_log_file_overridden() throws Exception {
+        final String overriddenContents = """
+                <configuration>
+                
+                    <appender name="APP" class="ch.qos.logback.core.ConsoleAppender">
+                        <!-- encoders are assigned the type
+                             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+                        <encoder>
+                            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                        </encoder>
+                    </appender>
+                
+                    <root level="trace">
+                        <appender-ref ref="APP"/>
+                    </root>
+                
+                </configuration>""";
 
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-
         try {
-
             LoggingBootstrap.prepareLogging();
             final File configFolder = temporaryFolder.newFolder();
 
-            Files.write(overridenContents, new File(configFolder, "logback.xml"), StandardCharsets.UTF_8);
+            Files.write(overriddenContents, new File(configFolder, "logback.xml"), StandardCharsets.UTF_8);
 
             LoggingBootstrap.initLogging(configFolder);
 
             final ImmutableList<Appender<ILoggingEvent>> appenders =
                     ImmutableList.copyOf(logger.iteratorForAppenders());
 
-            //We expect only 2 Appenders: The Instrumented Appender and a Console Appender we created above
+            // we expect only 2 Appenders: The Instrumented Appender and a Console Appender we created above
 
             for (final Appender<ILoggingEvent> appender : appenders) {
                 assertTrue(appender + " was not expected",
                         appender.getName().equals("com.hivemq.logging") || appender.getName().equals("APP"));
             }
-
         } finally {
-            //Set back to the original level, otherwise we interfere with other tests
+            // set back to the original level, otherwise we interfere with other tests
             resetLogToOriginal();
         }
     }
-
 
     public void resetLogToOriginal() throws Exception {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -227,5 +202,4 @@ public class LoggingBootstrapTest {
         configurator.setContext(context);
         configurator.doConfigure(this.getClass().getClassLoader().getResource("logback-test.xml"));
     }
-
 }
