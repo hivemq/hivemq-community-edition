@@ -523,15 +523,19 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
         int found = 0;
         for (final Topic subscription : subscriptions) {
-            if (subscription.getTopic().equals("topic/a")) {
-                assertEquals(subscription.getSubscriptionIdentifier().intValue(), 1);
-                found++;
-            } else if (subscription.getTopic().equals("topic/#")) {
-                assertEquals(subscription.getSubscriptionIdentifier().intValue(), 2);
-                found++;
-            } else if (subscription.getTopic().equals("topic/+")) {
-                assertEquals(subscription.getSubscriptionIdentifier().intValue(), 3);
-                found++;
+            switch (subscription.getTopic()) {
+                case "topic/a" -> {
+                    assertEquals(1, subscription.getSubscriptionIdentifier().intValue());
+                    found++;
+                }
+                case "topic/#" -> {
+                    assertEquals(2, subscription.getSubscriptionIdentifier().intValue());
+                    found++;
+                }
+                case "topic/+" -> {
+                    assertEquals(3, subscription.getSubscriptionIdentifier().intValue());
+                    found++;
+                }
             }
         }
         assertEquals(3, found);
@@ -737,8 +741,7 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
     }
 
-    @NotNull
-    public ArrayList<String> getRandomUniqueIds() {
+    public @NotNull ArrayList<String> getRandomUniqueIds() {
         final Set<String> clientIdSet = new HashSet<>();
 
         final Random random = new Random();
@@ -761,5 +764,4 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
             }
         });
     }
-
 }
