@@ -150,7 +150,7 @@ public class TlsWebsocketChannelInitializerTest {
         assertEquals(MQTT_WEBSOCKET_ENCODER, pipeline.names().get(8));
         assertEquals(WEBSOCKET_CONTINUATION_FRAME_HANDLER, pipeline.names().get(9));
         assertEquals(NEW_CONNECTION_IDLE_HANDLER, pipeline.names().get(pipeline.names().size() - 2));
-        assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().get(pipeline.names().size() - 1));
+        assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().getLast());
     }
 
 }

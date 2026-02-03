@@ -189,7 +189,7 @@ public class PublishPollServiceImplTest {
         final ArgumentCaptor<List<PublishWithFuture>> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
         verify(publishFlushHandler, times(1)).sendPublishes(argumentCaptor.capture());
-        argumentCaptor.getValue().get(0).getFuture().set(PublishStatus.NOT_CONNECTED);
+        argumentCaptor.getValue().getFirst().getFuture().set(PublishStatus.NOT_CONNECTED);
         verify(freePacketIdRanges, times(50)).returnId(anyInt()); // The id must be returned
     }
 
@@ -267,7 +267,7 @@ public class PublishPollServiceImplTest {
         verify(freePacketIdRanges, times(2)).takeNextId();
 
         final List<PublishWithFuture> values = captor.getValue();
-        assertEquals(2, values.get(0).getPacketIdentifier());
+        assertEquals(2, values.getFirst().getPacketIdentifier());
         assertEquals(QoS.AT_LEAST_ONCE, values.get(0).getQoS());
         assertEquals(1, values.get(0).getSubscriptionIdentifiers().get(0));
 

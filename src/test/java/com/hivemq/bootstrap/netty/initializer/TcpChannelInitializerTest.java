@@ -69,6 +69,6 @@ public class TcpChannelInitializerTest {
     public void test_add_special_handlers() throws Exception {
 
         tcpChannelInitializer.addSpecialHandlers(socketChannel);
-        assertEquals(NON_SSL_HANDLER, pipeline.names().get(0));
+        assertEquals(NON_SSL_HANDLER, pipeline.names().getFirst());
     }
 }

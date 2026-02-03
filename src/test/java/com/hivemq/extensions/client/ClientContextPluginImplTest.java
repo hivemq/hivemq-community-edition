@@ -55,9 +55,9 @@ public class ClientContextPluginImplTest {
                 new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
 
         final IsolatedExtensionClassloader classloader =
-                (IsolatedExtensionClassloader) interceptorList.get(0).getClass().getClassLoader();
+                (IsolatedExtensionClassloader) interceptorList.getFirst().getClass().getClassLoader();
         final IsolatedExtensionClassloader anotherClassLoader =
-                (IsolatedExtensionClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
+                (IsolatedExtensionClassloader) anotherInterceptorList.getFirst().getClass().getClassLoader();
 
         assertNotNull(classloader);
         assertNotNull(anotherClassLoader);
@@ -99,9 +99,9 @@ public class ClientContextPluginImplTest {
                 new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
 
         final IsolatedExtensionClassloader classloader =
-                (IsolatedExtensionClassloader) interceptorList.get(0).getClass().getClassLoader();
+                (IsolatedExtensionClassloader) interceptorList.getFirst().getClass().getClassLoader();
         final IsolatedExtensionClassloader anotherClassLoader =
-                (IsolatedExtensionClassloader) anotherInterceptorList.get(0).getClass().getClassLoader();
+                (IsolatedExtensionClassloader) anotherInterceptorList.getFirst().getClass().getClassLoader();
 
         assertNotNull(classloader);
         assertNotNull(anotherClassLoader);

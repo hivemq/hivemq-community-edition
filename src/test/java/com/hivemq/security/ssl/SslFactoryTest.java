@@ -169,7 +169,7 @@ public class SslFactoryTest {
 
         final List<String> supportedCipherSuites = getSupportedCipherSuites();
 
-        final String chosenCipher = supportedCipherSuites.get(supportedCipherSuites.size() - 1);
+        final String chosenCipher = supportedCipherSuites.getLast();
 
         cipherSuites.add(chosenCipher);
 
@@ -203,7 +203,7 @@ public class SslFactoryTest {
 
         final List<String> supportedProtocols = getSupportedProtocols();
 
-        final String chosenProtocol = supportedProtocols.get(supportedProtocols.size() - 1);
+        final String chosenProtocol = supportedProtocols.getLast();
 
         protocols.add(chosenProtocol);
 

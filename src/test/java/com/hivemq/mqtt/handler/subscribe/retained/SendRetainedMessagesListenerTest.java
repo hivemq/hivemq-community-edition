@@ -199,7 +199,7 @@ public class SendRetainedMessagesListenerTest {
         final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
-        final PUBLISH publish = captor.getValue().get(0);
+        final PUBLISH publish = captor.getValue().getFirst();
         assertEquals("topic", publish.getTopic());
         assertEquals(QoS.EXACTLY_ONCE, publish.getQoS());
         assertArrayEquals("test".getBytes(UTF_8), publish.getPayload());
@@ -282,7 +282,7 @@ public class SendRetainedMessagesListenerTest {
         final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
-        final PUBLISH publish = captor.getValue().get(0);
+        final PUBLISH publish = captor.getValue().getFirst();
         assertEquals("topic", publish.getTopic());
         assertEquals(QoS.EXACTLY_ONCE, publish.getQoS());
         assertArrayEquals("test".getBytes(UTF_8), publish.getPayload());
@@ -315,7 +315,7 @@ public class SendRetainedMessagesListenerTest {
         final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
-        final PUBLISH publish = captor.getAllValues().get(0).get(0);
+        final PUBLISH publish = captor.getAllValues().getFirst().getFirst();
         assertEquals("topic", publish.getTopic());
         assertEquals(QoS.EXACTLY_ONCE, publish.getQoS());
         assertArrayEquals("test".getBytes(UTF_8), publish.getPayload());
@@ -474,13 +474,13 @@ public class SendRetainedMessagesListenerTest {
                 eq(true),
                 anyLong());
 
-        final PUBLISH publish = captor.getAllValues().get(0).get(0);
+        final PUBLISH publish = captor.getAllValues().getFirst().getFirst();
         assertEquals("topic", publish.getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, publish.getQoS());
         assertArrayEquals("test".getBytes(UTF_8), publish.getPayload());
         assertEquals(true, publish.isRetain());
 
-        final PUBLISH publish2 = captor.getAllValues().get(1).get(0);
+        final PUBLISH publish2 = captor.getAllValues().get(1).getFirst();
         assertEquals("topic2", publish2.getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, publish2.getQoS());
         assertArrayEquals("test".getBytes(UTF_8), publish2.getPayload());

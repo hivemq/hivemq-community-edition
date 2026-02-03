@@ -89,7 +89,7 @@ public class EmbeddedHiveMQImplTest {
         final List<Listener> listeners = listenerConfigurationService.getListeners();
 
         assertEquals(1, listeners.size());
-        assertEquals(randomPort, listeners.get(0).getPort());
+        assertEquals(randomPort, listeners.getFirst().getPort());
 
         embeddedHiveMQ.stop().join();
         embeddedHiveMQ.close();
