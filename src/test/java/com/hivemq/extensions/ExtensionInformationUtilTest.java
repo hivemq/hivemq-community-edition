@@ -200,7 +200,7 @@ public class ExtensionInformationUtilTest {
     }
 
 
-    private class TestCert extends X509Certificate {
+    private static class TestCert extends X509Certificate {
 
         @Override
         public void checkValidity() {

@@ -66,6 +66,7 @@ bin/run.sh
 
 [IMPORTANT]
 At least Java version 11 is required to run HiveMQ CE.
+To compile the project and run tests at least Java version 21 is required.
 If you are in doubt, you can check the installed Java version by entering `java -version` on your command line.
 
 You can now connect MQTT clients to `<ip address>:1883`.

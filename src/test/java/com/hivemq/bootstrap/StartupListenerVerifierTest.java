@@ -28,7 +28,7 @@ import java.util.List;
 public class StartupListenerVerifierTest {
 
     @Test(expected = UnrecoverableException.class)
-    public void test_verifier_verify_only_listener_failed() throws Exception {
+    public void test_verifier_verify_only_listener_failed() {
         final ListenerStartupInformation failed =
                 ListenerStartupInformation.failedListenerStartup(new TcpListener(2000, "0.0.0.0"),
                         new RuntimeException("reason"));
@@ -36,7 +36,7 @@ public class StartupListenerVerifierTest {
     }
 
     @Test(expected = UnrecoverableException.class)
-    public void test_verifier_verify_all_listeners_failed() throws Exception {
+    public void test_verifier_verify_all_listeners_failed() {
         final ListenerStartupInformation failed =
                 ListenerStartupInformation.failedListenerStartup(new TcpListener(2000, "0.0.0.0"),
                         new RuntimeException("reason"));
@@ -48,7 +48,7 @@ public class StartupListenerVerifierTest {
     }
 
     @Test
-    public void test_verifier_verify_some_listeners_failed() throws Exception {
+    public void test_verifier_verify_some_listeners_failed() {
         final ListenerStartupInformation failed =
                 ListenerStartupInformation.failedListenerStartup(new TcpListener(2000, "0.0.0.0"),
                         new RuntimeException("reason"));
@@ -61,12 +61,12 @@ public class StartupListenerVerifierTest {
     }
 
     @Test(expected = UnrecoverableException.class)
-    public void test_verifier_verify_empty_listeners() throws Exception {
-        new StartupListenerVerifier(new ArrayList<ListenerStartupInformation>()).verifyAndPrint();
+    public void test_verifier_verify_empty_listeners() {
+        new StartupListenerVerifier(new ArrayList<>()).verifyAndPrint();
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_verifier_doesnt_accept_null() throws Exception {
+    public void test_verifier_doesnt_accept_null() {
         new StartupListenerVerifier(null);
     }
 }

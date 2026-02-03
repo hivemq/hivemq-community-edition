@@ -46,7 +46,7 @@ public class AllItemsFetchCallbackTest {
             }
 
             @Override
-            protected @NotNull Collection<Object> transform(@NotNull Object o) {
+            protected @NotNull Collection<Object> transform(final @NotNull Object o) {
                 return Collections.EMPTY_LIST;
             }
         };

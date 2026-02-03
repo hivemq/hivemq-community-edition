@@ -128,11 +128,11 @@ public class ClientContextImplTest {
 
         clientContext.addPubackInboundInterceptor(pubackInboundInterceptor);
         assertEquals(1, clientContext.getPubackInboundInterceptors().size());
-        assertSame(pubackInboundInterceptor, clientContext.getPubackInboundInterceptors().get(0));
+        assertSame(pubackInboundInterceptor, clientContext.getPubackInboundInterceptors().getFirst());
 
         clientContext.addPubackOutboundInterceptor(pubackOutboundInterceptor);
         assertEquals(1, clientContext.getPubackOutboundInterceptors().size());
-        assertSame(pubackOutboundInterceptor, clientContext.getPubackOutboundInterceptors().get(0));
+        assertSame(pubackOutboundInterceptor, clientContext.getPubackOutboundInterceptors().getFirst());
 
         assertEquals(2, clientContext.getAllInterceptors().size());
 
@@ -151,11 +151,11 @@ public class ClientContextImplTest {
 
         clientContext.addPubrecInboundInterceptor(pubrecInboundInterceptor);
         assertEquals(1, clientContext.getPubrecInboundInterceptors().size());
-        assertSame(pubrecInboundInterceptor, clientContext.getPubrecInboundInterceptors().get(0));
+        assertSame(pubrecInboundInterceptor, clientContext.getPubrecInboundInterceptors().getFirst());
 
         clientContext.addPubrecOutboundInterceptor(pubrecOutboundInterceptor);
         assertEquals(1, clientContext.getPubrecOutboundInterceptors().size());
-        assertSame(pubrecOutboundInterceptor, clientContext.getPubrecOutboundInterceptors().get(0));
+        assertSame(pubrecOutboundInterceptor, clientContext.getPubrecOutboundInterceptors().getFirst());
 
         assertEquals(2, clientContext.getAllInterceptors().size());
 
@@ -174,11 +174,11 @@ public class ClientContextImplTest {
 
         clientContext.addPubrelInboundInterceptor(pubrelInboundInterceptor);
         assertEquals(1, clientContext.getPubrelInboundInterceptors().size());
-        assertSame(pubrelInboundInterceptor, clientContext.getPubrelInboundInterceptors().get(0));
+        assertSame(pubrelInboundInterceptor, clientContext.getPubrelInboundInterceptors().getFirst());
 
         clientContext.addPubrelOutboundInterceptor(pubrelOutboundInterceptor);
         assertEquals(1, clientContext.getPubrelOutboundInterceptors().size());
-        assertSame(pubrelOutboundInterceptor, clientContext.getPubrelOutboundInterceptors().get(0));
+        assertSame(pubrelOutboundInterceptor, clientContext.getPubrelOutboundInterceptors().getFirst());
 
         assertEquals(2, clientContext.getAllInterceptors().size());
 
@@ -197,11 +197,11 @@ public class ClientContextImplTest {
 
         clientContext.addPubcompInboundInterceptor(pubcompInboundInterceptor);
         assertEquals(1, clientContext.getPubcompInboundInterceptors().size());
-        assertSame(pubcompInboundInterceptor, clientContext.getPubcompInboundInterceptors().get(0));
+        assertSame(pubcompInboundInterceptor, clientContext.getPubcompInboundInterceptors().getFirst());
 
         clientContext.addPubcompOutboundInterceptor(pubcompOutboundInterceptor);
         assertEquals(1, clientContext.getPubcompOutboundInterceptors().size());
-        assertSame(pubcompOutboundInterceptor, clientContext.getPubcompOutboundInterceptors().get(0));
+        assertSame(pubcompOutboundInterceptor, clientContext.getPubcompOutboundInterceptors().getFirst());
 
         assertEquals(2, clientContext.getAllInterceptors().size());
 

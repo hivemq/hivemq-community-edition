@@ -228,7 +228,7 @@ public class ChannelInitializerFactoryImplTest {
         }
     }
 
-    private class FakeListener implements Listener {
+    private static class FakeListener implements Listener {
 
         @Override
         public int getPort() {

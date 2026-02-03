@@ -39,7 +39,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
@@ -90,7 +89,7 @@ public class EmbeddedHiveMQImplTest {
         final List<Listener> listeners = listenerConfigurationService.getListeners();
 
         assertEquals(1, listeners.size());
-        assertEquals(randomPort, listeners.get(0).getPort());
+        assertEquals(randomPort, listeners.getFirst().getPort());
 
         embeddedHiveMQ.stop().join();
         embeddedHiveMQ.close();
