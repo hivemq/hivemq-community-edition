@@ -347,6 +347,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
         for (final File listFile : listFiles) {
             if (listFile != null && listFile.getName().equals("DISABLED")) {
                 disabledFileFound = true;
+                break;
             }
         }
         assertFalse(disabledFileFound);
@@ -380,6 +381,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
         for (final File listFile : listFiles) {
             if (listFile != null && listFile.getName().equals("DISABLED")) {
                 disabledFileFound = true;
+                break;
             }
         }
         assertFalse(disabledFileFound);
@@ -645,6 +647,7 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
         for (final File listFile : listFiles) {
             if (listFile != null && listFile.getName().equals("DISABLED")) {
                 disabledFileFound = true;
+                break;
             }
         }
         assertFalse(disabledFileFound);
