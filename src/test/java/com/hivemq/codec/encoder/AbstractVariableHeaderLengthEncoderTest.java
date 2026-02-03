@@ -99,7 +99,7 @@ public class AbstractVariableHeaderLengthEncoderTest {
     }
 
     @SuppressWarnings("NullabilityAnnotations")
-    private class TestAbstractVariableHeaderLengthEncoder extends AbstractVariableHeaderLengthEncoder<PUBLISH> {
+    private static class TestAbstractVariableHeaderLengthEncoder extends AbstractVariableHeaderLengthEncoder<PUBLISH> {
 
         public ByteBuf getRemainingLength(final int length) {
             int val = length;
