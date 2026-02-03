@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("NullabilityAnnotations")
 public class PermissionTopicMatcherUtilsTest {
 
-    private @NotNull String actual = "my/test/topic/for/the/unit/test";
+    private final @NotNull String actual = "my/test/topic/for/the/unit/test";
 
     @Test
     public void testMatchesWithoutWildcards() throws Exception {

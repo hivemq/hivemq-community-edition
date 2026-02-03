@@ -74,7 +74,7 @@ public class DisconnectHandlerTest {
                 clientSessionPersistence,
                 connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
-        ClientConnectionContext clientConnectionContext =
+        final ClientConnectionContext clientConnectionContext =
                 new UndefinedClientConnection(channel, null, mock(TcpListener.class));
         clientConnectionContext.setClientId("clientId");
         clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
