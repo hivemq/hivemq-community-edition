@@ -21,6 +21,7 @@ import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.when;
 public class SslParameterHandlerTest {
 
     private EmbeddedChannel channel;
+    private AutoCloseable closeable;
 
     @Mock
     private SslHandler sslHandler;
@@ -54,12 +56,17 @@ public class SslParameterHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(new SslParameterHandler());
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test

@@ -64,11 +64,12 @@ public class AuthHandlerTest {
     private AuthHandler authHandler;
     private EmbeddedChannel channel;
     private ClientConnection clientConnection;
+    private AutoCloseable closeable;
 
     @Before
     public void setUp() throws Exception {
 
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
 
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, null);
@@ -81,6 +82,11 @@ public class AuthHandlerTest {
     @After
     public void tearDown() throws Exception {
         verify(mqttAuthSender).logAuth(eq(channel), any(), anyBoolean());
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        closeable. close();
     }
 
     @Test
