@@ -214,7 +214,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -237,7 +237,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -340,7 +340,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -580,7 +580,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -607,7 +607,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -630,7 +630,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -659,7 +659,7 @@ public class IncomingPublishServiceTest {
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
@@ -685,7 +685,7 @@ public class IncomingPublishServiceTest {
         assertEquals(true, channel.isActive());
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
-        while (channel.outboundMessages().size() == 0) {
+        while (channel.outboundMessages().isEmpty()) {
             channel.runScheduledPendingTasks();
             channel.runPendingTasks();
             Thread.sleep(10);
