@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -57,11 +58,8 @@ public class SystemInformationImplTest {
             //check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
             final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
 
-            if (valueFromManifest == null) {
-                assertEquals("Development Snapshot", systemInformation.getHiveMQVersion());
-            } else {
-                assertEquals(valueFromManifest, systemInformation.getHiveMQVersion());
-            }
+            assertEquals(Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
+                    systemInformation.getHiveMQVersion());
         });
     }
 
@@ -75,11 +73,8 @@ public class SystemInformationImplTest {
             //check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
             final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
 
-            if (valueFromManifest == null) {
-                assertEquals("Development Snapshot", systemInformation.getHiveMQVersion());
-            } else {
-                assertEquals(valueFromManifest, systemInformation.getHiveMQVersion());
-            }
+            assertEquals(Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
+                    systemInformation.getHiveMQVersion());
         });
     }
 
