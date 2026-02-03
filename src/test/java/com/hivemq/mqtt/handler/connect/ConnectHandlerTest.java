@@ -592,8 +592,8 @@ public class ConnectHandlerTest {
         assertTrue(connackLatch.await(10, TimeUnit.SECONDS));
 
         assertEquals(1, userProps.get().asList().size());
-        assertEquals("name", userProps.get().asList().get(0).getName());
-        assertEquals("value", userProps.get().asList().get(0).getValue());
+        assertEquals("name", userProps.get().asList().getFirst().getName());
+        assertEquals("value", userProps.get().asList().getFirst().getValue());
 
         assertNull(ClientConnection.of(channel).getAuthUserProperties());
     }

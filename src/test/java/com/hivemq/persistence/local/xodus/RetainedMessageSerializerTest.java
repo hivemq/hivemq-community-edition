@@ -211,7 +211,7 @@ public class RetainedMessageSerializerTest {
         final RetainedMessage messageFromStore = RetainedMessageSerializer.deserializeValue(bytes);
         final Mqtt5UserProperties userProperties = messageFromStore.getUserProperties();
         assertEquals(1, userProperties.asList().size());
-        final MqttUserProperty property = userProperties.asList().get(0);
+        final MqttUserProperty property = userProperties.asList().getFirst();
         assertEquals("name", property.getName());
         assertEquals("value", property.getValue());
         assertEquals("responseTopic", messageFromStore.getResponseTopic());

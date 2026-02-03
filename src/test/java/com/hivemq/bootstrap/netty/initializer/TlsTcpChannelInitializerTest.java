@@ -122,7 +122,7 @@ public class TlsTcpChannelInitializerTest {
         assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
         assertEquals(SSL_CLIENT_CERTIFICATE_HANDLER, pipeline.names().get(3));
         assertEquals(NEW_CONNECTION_IDLE_HANDLER, pipeline.names().get(pipeline.names().size() - 2));
-        assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().get(pipeline.names().size() - 1));
+        assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().getLast());
     }
 
     @Test

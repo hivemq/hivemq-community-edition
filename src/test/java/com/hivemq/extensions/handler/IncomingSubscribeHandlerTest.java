@@ -185,7 +185,7 @@ public class IncomingSubscribeHandlerTest {
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
-        clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
+        clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.getFirst());
 
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new DummyClientConnection(channel, publishFlushHandler));
@@ -205,7 +205,7 @@ public class IncomingSubscribeHandlerTest {
 
         final SUBSCRIBE message = (SUBSCRIBE) messageAtomicReference.get();
 
-        assertEquals("topicmodified", message.getTopics().get(0).getTopic());
+        assertEquals("topicmodified", message.getTopics().getFirst().getTopic());
     }
 
     @Test(timeout = 5000)
@@ -215,7 +215,7 @@ public class IncomingSubscribeHandlerTest {
 
         final List<SubscribeInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
-        clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.get(0));
+        clientContext.addSubscribeInboundInterceptor(isolatedInterceptors.getFirst());
 
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new DummyClientConnection(channel, publishFlushHandler));
@@ -235,7 +235,7 @@ public class IncomingSubscribeHandlerTest {
 
         final SUBSCRIBE message = (SUBSCRIBE) messageAtomicReference.get();
 
-        assertEquals("topicmodified", message.getTopics().get(0).getTopic());
+        assertEquals("topicmodified", message.getTopics().getFirst().getTopic());
     }
 
     @Test(timeout = 5000)
@@ -263,7 +263,7 @@ public class IncomingSubscribeHandlerTest {
                     final @NotNull ChannelPromise promise) throws Exception {
 
                 if (msg instanceof SUBACK &&
-                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
+                        ((SUBACK) msg).getReasonCodes().getFirst().equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
                     subackLatch.countDown();
                 }
 
@@ -354,7 +354,7 @@ public class IncomingSubscribeHandlerTest {
                     final @NotNull ChannelPromise promise) throws Exception {
 
                 if (msg instanceof SUBACK &&
-                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
+                        ((SUBACK) msg).getReasonCodes().getFirst().equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
                     subackLatch.countDown();
                 }
 
@@ -400,7 +400,7 @@ public class IncomingSubscribeHandlerTest {
                     final @NotNull ChannelPromise promise) throws Exception {
 
                 if (msg instanceof SUBACK &&
-                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
+                        ((SUBACK) msg).getReasonCodes().getFirst().equals(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR)) {
                     subackLatch.countDown();
                 }
 
@@ -445,7 +445,7 @@ public class IncomingSubscribeHandlerTest {
                     final @NotNull ChannelPromise promise) throws Exception {
 
                 if (msg instanceof SUBACK &&
-                        ((SUBACK) msg).getReasonCodes().get(0).equals(Mqtt5SubAckReasonCode.GRANTED_QOS_1)) {
+                        ((SUBACK) msg).getReasonCodes().getFirst().equals(Mqtt5SubAckReasonCode.GRANTED_QOS_1)) {
                     subackLatch.countDown();
                 }
 
@@ -464,7 +464,7 @@ public class IncomingSubscribeHandlerTest {
         }
 
         final SUBSCRIBE message = (SUBSCRIBE) messageAtomicReference.get();
-        assertEquals("topic", message.getTopics().get(0).getTopic());
+        assertEquals("topic", message.getTopics().getFirst().getTopic());
     }
 
     private List<SubscribeInboundInterceptor> getIsolatedInterceptor() throws Exception {
@@ -496,8 +496,8 @@ public class IncomingSubscribeHandlerTest {
                 final @NotNull SubscribeInboundOutput output) {
             output.getSubscribePacket()
                     .getSubscriptions()
-                    .get(0)
-                    .setTopicFilter(input.getSubscribePacket().getSubscriptions().get(0).getTopicFilter() + "modified");
+                    .getFirst()
+                    .setTopicFilter(input.getSubscribePacket().getSubscriptions().getFirst().getTopicFilter() + "modified");
         }
     }
 

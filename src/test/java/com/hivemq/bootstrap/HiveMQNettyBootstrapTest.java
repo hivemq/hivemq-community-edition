@@ -100,7 +100,7 @@ public class HiveMQNettyBootstrapTest {
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
 
         assertEquals(1, listenableFuture.get().size());
-        assertTrue(listenableFuture.get().get(0).isSuccessful());
+        assertTrue(listenableFuture.get().getFirst().isSuccessful());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class HiveMQNettyBootstrapTest {
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
 
         assertEquals(1, listenableFuture.get().size());
-        assertTrue(listenableFuture.get().get(0).isSuccessful());
+        assertTrue(listenableFuture.get().getFirst().isSuccessful());
     }
 
     @Test
@@ -128,7 +128,7 @@ public class HiveMQNettyBootstrapTest {
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
 
         assertEquals(1, listenableFuture.get().size());
-        assertTrue(listenableFuture.get().get(0).isSuccessful());
+        assertTrue(listenableFuture.get().getFirst().isSuccessful());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class HiveMQNettyBootstrapTest {
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
 
         assertEquals(1, listenableFuture.get().size());
-        assertTrue(listenableFuture.get().get(0).isSuccessful());
+        assertTrue(listenableFuture.get().getFirst().isSuccessful());
     }
 
     @Test

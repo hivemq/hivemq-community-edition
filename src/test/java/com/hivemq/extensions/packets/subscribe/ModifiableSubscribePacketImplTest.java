@@ -65,10 +65,10 @@ public class ModifiableSubscribePacketImplTest {
 
         assertFalse(modifiablePacket.isModified());
 
-        modifiablePacket.getSubscriptions().get(0).setTopicFilter("test");
+        modifiablePacket.getSubscriptions().getFirst().setTopicFilter("test");
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals("test", modifiablePacket.getSubscriptions().get(0).getTopicFilter());
+        assertEquals("test", modifiablePacket.getSubscriptions().getFirst().getTopicFilter());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ModifiableSubscribePacketImplTest {
         final ModifiableSubscribePacketImpl modifiablePacket =
                 new ModifiableSubscribePacketImpl(packet, configurationService);
 
-        modifiablePacket.getSubscriptions().get(0).setTopicFilter("test");
+        modifiablePacket.getSubscriptions().getFirst().setTopicFilter("test");
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final SubscribePacketImpl copy = modifiablePacket.copy();
 

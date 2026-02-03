@@ -103,7 +103,7 @@ public class UnsubscribeHandlerTest {
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
         assertEquals(1, response.getReasonCodes().size());
-        assertEquals(Mqtt5UnsubAckReasonCode.SUCCESS, response.getReasonCodes().get(0));
+        assertEquals(Mqtt5UnsubAckReasonCode.SUCCESS, response.getReasonCodes().getFirst());
 
         verify(clientSessionSubscriptionPersistence).remove("myTestClient", topic);
     }
@@ -128,7 +128,7 @@ public class UnsubscribeHandlerTest {
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
         assertEquals(1, response.getReasonCodes().size());
-        assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().get(0));
+        assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().getFirst());
 
         verify(clientSessionSubscriptionPersistence).remove("myTestClient", topic);
     }

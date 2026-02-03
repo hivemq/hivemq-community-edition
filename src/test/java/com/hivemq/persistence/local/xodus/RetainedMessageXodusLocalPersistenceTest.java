@@ -282,7 +282,7 @@ public class RetainedMessageXodusLocalPersistenceTest {
         assertArrayEquals(new byte[]{1, 2, 3}, retainedMessage.getCorrelationData());
         assertEquals(Mqtt5PayloadFormatIndicator.UTF_8, retainedMessage.getPayloadFormatIndicator());
 
-        final MqttUserProperty property = retainedMessage.getUserProperties().asList().get(0);
+        final MqttUserProperty property = retainedMessage.getUserProperties().asList().getFirst();
 
         assertEquals("name", property.getName());
         assertEquals("value", property.getValue());

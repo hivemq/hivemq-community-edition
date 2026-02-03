@@ -384,8 +384,8 @@ public class Mqtt3SubscribeDecoderTest {
         assertEquals(12345, subscribe.getPacketIdentifier());
         assertEquals(1, subscribe.getTopics().size());
 
-        assertEquals(1, subscribe.getTopics().get(0).getQoS().getQosNumber());
-        assertEquals(maxTopic1, subscribe.getTopics().get(0).getTopic());
+        assertEquals(1, subscribe.getTopics().getFirst().getQoS().getQosNumber());
+        assertEquals(maxTopic1, subscribe.getTopics().getFirst().getTopic());
 
         assertTrue(channel.isActive());
 

@@ -152,7 +152,7 @@ public class InternalPublishServiceImplTest {
                 any(),
                 any());
 
-        final Map map = mapArgumentCaptor.getAllValues().get(0);
+        final Map map = mapArgumentCaptor.getAllValues().getFirst();
 
         assertEquals(1, map.size());
         assertNull(map.get("sub1"));
@@ -177,7 +177,7 @@ public class InternalPublishServiceImplTest {
                 any(),
                 any());
 
-        final Map map = mapArgumentCaptor.getAllValues().get(0);
+        final Map map = mapArgumentCaptor.getAllValues().getFirst();
 
         assertEquals(2, map.size());
         assertNotNull(map.get("sub1"));
@@ -241,7 +241,7 @@ public class InternalPublishServiceImplTest {
                 any(),
                 any());
 
-        final Set set = setArgumentCaptor.getAllValues().get(0);
+        final Set set = setArgumentCaptor.getAllValues().getFirst();
 
         assertEquals(2, set.size());
 
@@ -264,7 +264,7 @@ public class InternalPublishServiceImplTest {
                 any(),
                 any());
 
-        final Set set = sharedSubsCaptor.getAllValues().get(0);
+        final Set set = sharedSubsCaptor.getAllValues().getFirst();
 
         assertEquals(2, set.size());
 
@@ -291,8 +291,8 @@ public class InternalPublishServiceImplTest {
                 any());
         verify(publishDistributor, atLeastOnce()).distributeToNonSharedSubscribers(subsCaptor.capture(), any(), any());
 
-        final Set<String> sharedSet = sharedSubsCaptor.getAllValues().get(0);
-        final Map<String, Integer> map = subsCaptor.getAllValues().get(0);
+        final Set<String> sharedSet = sharedSubsCaptor.getAllValues().getFirst();
+        final Map<String, Integer> map = subsCaptor.getAllValues().getFirst();
 
         assertEquals(1, map.size());
         assertEquals(1, sharedSet.size());

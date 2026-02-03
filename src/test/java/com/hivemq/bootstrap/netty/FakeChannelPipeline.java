@@ -39,13 +39,13 @@ public class FakeChannelPipeline implements ChannelPipeline {
 
     @Override
     public ChannelPipeline addFirst(final String name, final ChannelHandler handler) {
-        names.add(0, name);
+        names.addFirst(name);
         return this;
     }
 
     @Override
     public ChannelPipeline addFirst(final EventExecutorGroup group, final String name, final ChannelHandler handler) {
-        names.add(0, name);
+        names.addFirst(name);
         return this;
     }
 
@@ -131,13 +131,13 @@ public class FakeChannelPipeline implements ChannelPipeline {
 
     @Override
     public ChannelHandler removeFirst() {
-        names.remove(0);
+        names.removeFirst();
         return null;
     }
 
     @Override
     public ChannelHandler removeLast() {
-        names.remove(names.size() - 1);
+        names.removeLast();
         return null;
     }
 

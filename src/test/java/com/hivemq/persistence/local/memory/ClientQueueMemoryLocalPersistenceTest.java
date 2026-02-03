@@ -100,9 +100,9 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableList<PUBLISH> publishes =
                 persistence.readNew("client1", false, ImmutableIntArray.of(2, 3, 4), 256000, 0);
         assertEquals(1, publishes.size());
-        assertEquals(2, publishes.get(0).getPacketIdentifier());
-        assertEquals(publish.getQoS(), publishes.get(0).getQoS());
-        assertEquals(publish.getTopic(), publishes.get(0).getTopic());
+        assertEquals(2, publishes.getFirst().getPacketIdentifier());
+        assertEquals(publish.getQoS(), publishes.getFirst().getQoS());
+        assertEquals(publish.getTopic(), publishes.getFirst().getTopic());
     }
 
     @Test
@@ -148,8 +148,8 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 persistence.readNew("client1", false, ImmutableIntArray.of(5), 256000, 0);
 
         assertEquals(1, messages1.size());
-        assertEquals(5, messages1.get(0).getPacketIdentifier());
-        assertEquals("topic0", messages1.get(0).getTopic());
+        assertEquals(5, messages1.getFirst().getPacketIdentifier());
+        assertEquals("topic0", messages1.getFirst().getTopic());
 
         final ImmutableIntArray packetIds = ImmutableIntArray.of(2, 3, 4);
         final ImmutableList<PUBLISH> messages2 = persistence.readNew("client1", false, packetIds, 256000, 0);
@@ -388,7 +388,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertNull(uniqueId);
         final ImmutableList<MessageWithID> messages = persistence.readInflight("client", false, 10, byteLimit, 0);
         assertEquals(1, messages.size());
-        assertEquals(1, messages.get(0).getPacketIdentifier());
+        assertEquals(1, messages.getFirst().getPacketIdentifier());
     }
 
     @Test
@@ -434,7 +434,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertNull(uniqueId);
         final ImmutableList<MessageWithID> messages = persistence.readInflight("client", false, 10, byteLimit, 0);
         assertEquals(1, messages.size());
-        assertEquals(1, messages.get(0).getPacketIdentifier());
+        assertEquals(1, messages.getFirst().getPacketIdentifier());
     }
 
     @Test
@@ -776,7 +776,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         final ImmutableList<PUBLISH> newMessages =
                 persistence.readNew("client1", false, ImmutableIntArray.of(1), 10000L, 0);
         assertEquals(1, newMessages.size());
-        assertEquals("topic2", newMessages.get(0).getTopic());
+        assertEquals("topic2", newMessages.getFirst().getTopic());
 
         final ImmutableSet<String> sharedQueues = persistence.cleanUp(0);
 
@@ -1026,7 +1026,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
         assertEquals(1, messages.size());
 
         assertTrue(gauge.getValue() > 0);
-        assertEquals(new PublishWithRetained(messages.get(0), false).getEstimatedSize() +
+        assertEquals(new PublishWithRetained(messages.getFirst(), false).getEstimatedSize() +
                 ObjectMemoryEstimation.linkedListNodeOverhead(), gauge.getValue().longValue());
     }
 
