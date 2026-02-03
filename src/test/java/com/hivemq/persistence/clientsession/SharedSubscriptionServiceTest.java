@@ -59,7 +59,6 @@ public class SharedSubscriptionServiceTest {
         service = new SharedSubscriptionService(topicTree);
     }
 
-
     @Test
     public void test_check_for_shared_subscription() {
         final String share = "$share";
@@ -70,18 +69,22 @@ public class SharedSubscriptionServiceTest {
 
         SharedSubscriptionService.SharedSubscription sharedSubscription;
 
-        sharedSubscription =
-                service.checkForSharedSubscription(share + oldDelimiter + group + oldDelimiter + topic + subtopic);
+        sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(share +
+                oldDelimiter +
+                group +
+                oldDelimiter +
+                topic +
+                subtopic);
         assertNotNull(sharedSubscription);
         assertEquals(group, sharedSubscription.getShareName());
         assertEquals(topic + subtopic, sharedSubscription.getTopicFilter());
 
-        sharedSubscription = service.checkForSharedSubscription(topic + subtopic);
+        sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(topic + subtopic);
         assertNull(sharedSubscription);
     }
 
     @Test
-    public void test_createSubscription_shared() throws Exception {
+    public void test_createSubscription_shared() {
 
         final Subscription subscription = service.createSubscription(new Topic("$share/group1/topic/1",
                 QoS.AT_LEAST_ONCE,
@@ -98,7 +101,7 @@ public class SharedSubscriptionServiceTest {
     }
 
     @Test
-    public void test_createSubscription_non_shared() throws Exception {
+    public void test_createSubscription_non_shared() {
 
         final Subscription subscription = service.createSubscription(new Topic("share/group1/topic/2",
                 QoS.AT_LEAST_ONCE,
@@ -130,7 +133,7 @@ public class SharedSubscriptionServiceTest {
     }
 
     @Test
-    public void test_get_shared_subscriber() throws ExecutionException, InterruptedException {
+    public void test_get_shared_subscriber() {
         service.postConstruct();
         final ImmutableSet<SubscriberWithQoS> result1 = ImmutableSet.of();
         when(topicTree.getSharedSubscriber("group", "topic")).thenReturn(ImmutableSet.of());
@@ -146,7 +149,7 @@ public class SharedSubscriptionServiceTest {
     }
 
     @Test
-    public void test_get_shared_subscriptions() throws ExecutionException, InterruptedException {
+    public void test_get_shared_subscriptions() throws ExecutionException {
         service.postConstruct();
 
         final ImmutableSet<Topic> topics1 = ImmutableSet.of();
@@ -166,7 +169,7 @@ public class SharedSubscriptionServiceTest {
 
     @Test
     public void test_remove_prefix() {
-        assertEquals("group/topic", service.removePrefix("$share/group/topic"));
-        assertEquals("topic/a", service.removePrefix("topic/a"));
+        assertEquals("group/topic", SharedSubscriptionService.removePrefix("$share/group/topic"));
+        assertEquals("topic/a", SharedSubscriptionService.removePrefix("topic/a"));
     }
 }
