@@ -168,7 +168,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             unsuback = channel.readOutbound();
         }
-        assertEquals(Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, unsuback.getReasonCodes().get(0));
+        assertEquals(Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, unsuback.getReasonCodes().getFirst());
         assertTrue(isTriggered.get());
     }
 

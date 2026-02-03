@@ -70,7 +70,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         reader.applyConfig();
 
-        final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().get(0);
+        final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().getFirst();
 
         assertEquals(8883, tlsTcpListener.getPort());
         assertEquals("0.0.0.0", tlsTcpListener.getBindAddress());
@@ -118,7 +118,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         reader.applyConfig();
 
-        final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().get(0);
+        final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().getFirst();
 
         assertEquals(8883, tlsTcpListener.getPort());
         assertEquals("0.0.0.0", tlsTcpListener.getBindAddress());
@@ -186,7 +186,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         reader.applyConfig();
 
-        final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().get(0);
+        final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().getFirst();
 
         assertEquals(1883, tcpListener.getPort());
         assertEquals("0.0.0.0", tcpListener.getBindAddress());
@@ -209,7 +209,7 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         reader.applyConfig();
 
-        final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().get(0);
+        final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().getFirst();
 
         assertEquals(1883, tcpListener.getPort());
         assertEquals("0.0.0.0", tcpListener.getBindAddress());
@@ -236,11 +236,11 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         reader.applyConfig();
 
-        final WebsocketListener websocketListener = listenerConfigurationService.getWebsocketListeners().get(0);
+        final WebsocketListener websocketListener = listenerConfigurationService.getWebsocketListeners().getFirst();
         assertEquals(8000, websocketListener.getPort());
         assertEquals("0.0.0.0", websocketListener.getBindAddress());
         assertEquals("/mqtt", websocketListener.getPath());
-        assertEquals("mqttv3.1", websocketListener.getSubprotocols().get(0));
+        assertEquals("mqttv3.1", websocketListener.getSubprotocols().getFirst());
         assertFalse(websocketListener.getAllowExtensions());
     }
 
@@ -278,11 +278,11 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
         reader.applyConfig();
 
-        final TlsWebsocketListener websocketListener = listenerConfigurationService.getTlsWebsocketListeners().get(0);
+        final TlsWebsocketListener websocketListener = listenerConfigurationService.getTlsWebsocketListeners().getFirst();
         assertEquals(8000, websocketListener.getPort());
         assertEquals("0.0.0.0", websocketListener.getBindAddress());
         assertEquals("/mqtt", websocketListener.getPath());
-        assertEquals("mqttv3.1", websocketListener.getSubprotocols().get(0));
+        assertEquals("mqttv3.1", websocketListener.getSubprotocols().getFirst());
         assertFalse(websocketListener.getAllowExtensions());
 
         assertEquals("/path/to/the/key/store.jks", websocketListener.getTls().getKeystorePath());

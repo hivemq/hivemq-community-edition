@@ -431,8 +431,8 @@ public class TestTopicTreeImplEdgeCases {
 
         topicTree.addTopic("client2", new Topic("a/b", QoS.EXACTLY_ONCE), (byte) 0, null);
         assertEquals(QoS.EXACTLY_ONCE.getQosNumber(),
-                topicTree.findTopicSubscribers("a/b").getSubscribers().asList().get(0).getQos());
-        assertEquals("client2", topicTree.findTopicSubscribers("a/b").getSubscribers().asList().get(0).getSubscriber());
+                topicTree.findTopicSubscribers("a/b").getSubscribers().asList().getFirst().getQos());
+        assertEquals("client2", topicTree.findTopicSubscribers("a/b").getSubscribers().asList().getFirst().getSubscriber());
 
     }
 

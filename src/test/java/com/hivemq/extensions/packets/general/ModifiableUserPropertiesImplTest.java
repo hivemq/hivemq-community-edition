@@ -84,7 +84,7 @@ public class ModifiableUserPropertiesImplTest {
 
         final List<String> one = filledProps.getAllForName("one");
         assertEquals(1, one.size());
-        assertEquals("one", one.get(0));
+        assertEquals("one", one.getFirst());
     }
 
     @Test(expected = NullPointerException.class)
@@ -186,8 +186,8 @@ public class ModifiableUserPropertiesImplTest {
     public void test_remove_name() {
         filledProps.removeName("one");
         assertEquals(1, filledProps.asList().size());
-        assertEquals("two", filledProps.asList().get(0).getName());
-        assertEquals("two", filledProps.asList().get(0).getValue());
+        assertEquals("two", filledProps.asList().getFirst().getName());
+        assertEquals("two", filledProps.asList().getFirst().getValue());
     }
 
     @Test
