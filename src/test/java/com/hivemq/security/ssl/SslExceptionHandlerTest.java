@@ -17,7 +17,6 @@ package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
-import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
