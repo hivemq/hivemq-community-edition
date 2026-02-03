@@ -469,7 +469,7 @@ public class ClientServiceImplTest {
 
         //noinspection unchecked
         when(asyncIteratorFactory.createIterator(any(FetchCallback.class),
-                any(AsyncIterator.ItemCallback.class))).thenReturn(new AsyncIterator() {
+                any(AsyncIterator.ItemCallback.class))).thenReturn(new AsyncIterator<>() {
             @Override
             public void fetchAndIterate() {
                 latch.countDown();

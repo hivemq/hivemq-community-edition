@@ -57,10 +57,9 @@ public class TestEncoderFactory extends EncoderFactory {
     }
 
     @Override
-    protected @Nullable MqttEncoder getEncoder(
+    protected @Nullable MqttEncoder<?> getEncoder(
             final @NotNull Message msg,
             final @NotNull ClientConnectionContext clientConnectionContext) {
-
         if (msg instanceof CONNECT) {
             return connectEncoder;
         }

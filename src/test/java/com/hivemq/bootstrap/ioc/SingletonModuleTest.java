@@ -23,13 +23,12 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class SingletonModuleTest {
 
     @Test
-    public void test_standard_guice_module_executed_twice() throws Exception {
+    public void test_standard_guice_module_executed_twice() {
         final StandardModuleWithConfiguredMethod module1 = new StandardModuleWithConfiguredMethod();
         final StandardModuleWithConfiguredMethod module2 = new StandardModuleWithConfiguredMethod();
 
@@ -39,7 +38,7 @@ public class SingletonModuleTest {
     }
 
     @Test
-    public void test_singleton_module_configured_executed_once() throws Exception {
+    public void test_singleton_module_configured_executed_once() {
         final SingletonModuleWithConfiguredMethod module1 = new SingletonModuleWithConfiguredMethod();
         final SingletonModuleWithConfiguredMethod module2 = new SingletonModuleWithConfiguredMethod();
 
@@ -49,7 +48,7 @@ public class SingletonModuleTest {
     }
 
     @Test
-    public void test_singleton_provider_module_configured_executed_once() throws Exception {
+    public void test_singleton_provider_module_configured_executed_once() {
         final SingletonProviderModuleWithConfiguredMethod module1 = new SingletonProviderModuleWithConfiguredMethod();
         final SingletonProviderModuleWithConfiguredMethod module2 = new SingletonProviderModuleWithConfiguredMethod();
 
@@ -61,10 +60,8 @@ public class SingletonModuleTest {
         assertTrue(module1.provided ^ module2.provided);
     }
 
-
     @Test
-    public void test_instantiate_on_startup() throws Exception {
-
+    public void test_instantiate_on_startup() {
         @SuppressWarnings("unchecked")
         class EagerModule extends SingletonModule {
 
@@ -79,14 +76,10 @@ public class SingletonModuleTest {
         }
 
         final EagerModule eagerModule = new EagerModule();
-
         Guice.createInjector(eagerModule);
 
-
-        assertEquals(true, OnStartup.executed.get());
+        assertTrue(OnStartup.executed.get());
         assertTrue(eagerModule.toString().contains("key=class"));
-
-
     }
 
     @SuppressWarnings("unchecked")
