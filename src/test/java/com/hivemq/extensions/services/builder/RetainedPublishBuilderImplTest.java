@@ -296,7 +296,7 @@ public class RetainedPublishBuilderImplTest {
         assertEquals(0, retainedPublish.getUserProperties().asList().size());
     }
 
-    class TestPublishPacket implements PublishPacket {
+    static class TestPublishPacket implements PublishPacket {
 
         @Override
         public boolean getDupFlag() {
@@ -380,7 +380,7 @@ public class RetainedPublishBuilderImplTest {
         }
     }
 
-    private class TestPublish implements Publish {
+    private static class TestPublish implements Publish {
 
         @Override
         public Qos getQos() {

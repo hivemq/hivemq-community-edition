@@ -131,7 +131,7 @@ public class PluginTaskExecutorServiceImplTest {
         }
     }
 
-    private class ExecutorProvider implements Provider<PluginTaskExecutor> {
+    private static class ExecutorProvider implements Provider<PluginTaskExecutor> {
 
         private final List<PluginTaskExecutor> executors;
         private Iterator<PluginTaskExecutor> iterator;
