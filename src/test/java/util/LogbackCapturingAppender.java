@@ -46,7 +46,7 @@ import java.util.List;
 public final class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> {
     public static class Factory {
 
-        private static final List<LogbackCapturingAppender> ALL = new ArrayList<LogbackCapturingAppender>();
+        private static final List<LogbackCapturingAppender> ALL = new ArrayList<>();
 
         private Factory() {
         }
@@ -68,7 +68,7 @@ public final class LogbackCapturingAppender extends AppenderBase<ILoggingEvent> 
     private final Logger log;
     private ILoggingEvent captured;
 
-    private final List<ILoggingEvent> allCaptured = new ArrayList<ILoggingEvent>();
+    private final List<ILoggingEvent> allCaptured = new ArrayList<>();
 
     public LogbackCapturingAppender(final org.slf4j.Logger sl4jLogger) {
         log = (Logger) sl4jLogger;

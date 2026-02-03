@@ -497,7 +497,7 @@ public class ClientServiceImplTest {
                 new ClientServiceImpl.AllClientsFetchCallback(null);
 
         final ChunkResult<SessionInformation> chunkResult =
-                fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ClientSession>>(Map.of(1,
+                fetchCallback.convertToChunkResult(new MultipleChunkResult<>(Map.of(1,
                         new BucketChunkResult<>(Map.of("client1", new ClientSession(true, 10)), true, "client1", 1),
                         2,
                         new BucketChunkResult<>(Map.of("client2",

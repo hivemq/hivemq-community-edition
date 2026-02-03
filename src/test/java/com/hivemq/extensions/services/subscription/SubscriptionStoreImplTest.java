@@ -784,13 +784,14 @@ public class SubscriptionStoreImplTest {
                 new SubscriptionStoreImpl.AllSubscribersFetchCallback(null);
 
         final ChunkResult<SubscriptionsForClientResult> chunkResult =
-                fetchCallback.convertToChunkResult(new MultipleChunkResult<Map<String, ImmutableSet<Topic>>>(Map.of(1,
-                        new BucketChunkResult<>(Map.of("client1",
-                                ImmutableSet.of(new Topic("topic1", QoS.AT_LEAST_ONCE))), true, "client1", 1),
+                fetchCallback.convertToChunkResult(new MultipleChunkResult<>(Map.of(1,
+                        new BucketChunkResult<>(Map.of("client1", ImmutableSet.of(new Topic("topic1", QoS.AT_LEAST_ONCE))),
+                                true,
+                                "client1",
+                                1),
                         2,
                         new BucketChunkResult<>(Map.of("client2",
-                                ImmutableSet.of(new Topic("topic2", QoS.AT_LEAST_ONCE),
-                                        new Topic("topic3", QoS.AT_LEAST_ONCE)),
+                                ImmutableSet.of(new Topic("topic2", QoS.AT_LEAST_ONCE), new Topic("topic3", QoS.AT_LEAST_ONCE)),
                                 "client3",
                                 ImmutableSet.of(new Topic("topic4", QoS.AT_LEAST_ONCE))), false, "client3", 2))));
 
