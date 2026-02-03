@@ -72,7 +72,7 @@ import static org.mockito.Mockito.when;
  */
 public class SubackOutboundInterceptorHandlerTest {
 
-    public static @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
+    public static final @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();

@@ -80,7 +80,7 @@ public class DisconnectHandlerTest {
                 clientSessionPersistence,
                 connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
-        ClientConnectionContext clientConnectionContext = new UndefinedClientConnection(channel,
+        final ClientConnectionContext clientConnectionContext = new UndefinedClientConnection(channel,
                 null,
                 mock(TcpListener.class));
         clientConnectionContext.setClientId("clientId");

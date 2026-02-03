@@ -568,7 +568,7 @@ public class SslFactoryTest {
 
             return ImmutableList.copyOf(engine.getSupportedCipherSuites());
 
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (final NoSuchAlgorithmException | KeyManagementException e) {
             throw new SslException("Not able to get list of supported cipher suites from JVM", e);
         }
     }
@@ -580,7 +580,7 @@ public class SslFactoryTest {
 
             return ImmutableList.copyOf(engine.getSupportedProtocols());
 
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (final NoSuchAlgorithmException | KeyManagementException e) {
             throw new SslException("Not able to get list of supported protocols from JVM", e);
         }
     }
