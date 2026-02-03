@@ -60,6 +60,7 @@ import java.util.concurrent.ExecutorService;
 
 import static com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties.NO_USER_PROPERTIES;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -156,7 +157,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
     }
 
     @Test
@@ -165,7 +166,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_MOST_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         assertEquals(0, channel.outboundMessages().size());
 
@@ -182,7 +183,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_MOST_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         assertEquals(0, channel.outboundMessages().size());
 
@@ -195,7 +196,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_LEAST_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -214,7 +215,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -237,7 +238,7 @@ public class IncomingPublishServiceTest {
         final PublishAuthorizerResult authorizerResult = new PublishAuthorizerResult(AckReasonCode.SUCCESS, null, true);
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -282,7 +283,7 @@ public class IncomingPublishServiceTest {
         final PublishAuthorizerResult authorizerResult = new PublishAuthorizerResult(AckReasonCode.SUCCESS, null, true);
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -340,7 +341,7 @@ public class IncomingPublishServiceTest {
         final PublishAuthorizerResult authorizerResult = new PublishAuthorizerResult(AckReasonCode.SUCCESS, null, true);
 
         incomingPublishService.processPublish(ctx, publish, authorizerResult);
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -392,7 +393,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -490,7 +491,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -534,7 +535,7 @@ public class IncomingPublishServiceTest {
 
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
@@ -580,7 +581,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_LEAST_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -607,7 +608,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_LEAST_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -630,7 +631,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.EXACTLY_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -659,7 +660,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.EXACTLY_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
@@ -686,7 +687,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.EXACTLY_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
 
         while (channel.outboundMessages().isEmpty()) {
@@ -707,7 +708,7 @@ public class IncomingPublishServiceTest {
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("testtopic", "1234".getBytes(), QoS.AT_MOST_ONCE);
         incomingPublishService.processPublish(ctx, publish, null);
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
 
         verify(publishService).publish(any(PUBLISH.class), any(ExecutorService.class), anyString());
     }
