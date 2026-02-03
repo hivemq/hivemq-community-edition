@@ -171,9 +171,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
                 new ModifiableOutboundDisconnectPacketImpl(packet, configurationService);
 
         final StringBuilder s = new StringBuilder("s");
-        for (int i = 0; i < 65535; i++) {
-            s.append("s");
-        }
+        s.append("s".repeat(65535));
         modifiablePacket.setReasonString(s.toString());
     }
 
@@ -255,9 +253,7 @@ public class ModifiableOutboundDisconnectPacketImplTest {
                 new ModifiableOutboundDisconnectPacketImpl(packet, configurationService);
 
         final StringBuilder s = new StringBuilder("s");
-        for (int i = 0; i < 65535; i++) {
-            s.append("s");
-        }
+        s.append("s".repeat(65535));
         modifiablePacket.setServerReference(s.toString());
     }
 
