@@ -1,4 +1,10 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
+
+interface InjectedExecOps {
+    @get:Inject val execOps: ExecOperations
+}
 
 plugins {
     java
@@ -63,15 +69,23 @@ metadata {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(21)
     }
     withJavadocJar()
     withSourcesJar()
 }
 
+tasks.compileJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 repositories {
     mavenCentral()
 }
+
+val injectedExecOps: InjectedExecOps = objects.newInstance()
 
 dependencies {
     api(libs.hivemq.extensionSdk)
@@ -295,7 +309,7 @@ tasks.javadoc {
     include("com/hivemq/embedded/*")
 
     doLast {
-        javaexec {
+        injectedExecOps.execOps.javaexec {
             classpath("gradle/tools/javadoc-cleaner-1.0.jar")
         }
     }
