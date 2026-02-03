@@ -345,7 +345,7 @@ public class MqttConnackerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
             @Override
-            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
                 if (evt instanceof OnServerDisconnectEvent) {
                     latch.countDown();
                 }
@@ -375,7 +375,7 @@ public class MqttConnackerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
             @Override
-            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
                 if (evt instanceof OnAuthFailedEvent) {
                     latch.countDown();
                 }
@@ -407,7 +407,7 @@ public class MqttConnackerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
             @Override
-            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
                 if (evt instanceof OnServerDisconnectEvent) {
                     latch.countDown();
                 }
@@ -437,7 +437,7 @@ public class MqttConnackerTest {
         final CountDownLatch latch = new CountDownLatch(1);
         channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
             @Override
-            public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+            public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
                 if (evt instanceof OnAuthFailedEvent) {
                     latch.countDown();
                 }

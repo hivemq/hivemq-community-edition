@@ -36,16 +36,16 @@ import static org.junit.Assert.assertEquals;
 
 public class ClassServiceLoaderTest {
 
-    public static @NotNull String theInterface =
+    public static final @NotNull String theInterface =
             "" + " public interface TheInterface {" + "   int doSomething();" + " }";
 
-    public static @NotNull String theImpl = "" +
+    public static final @NotNull String theImpl = "" +
             " public class TheImpl implements TheInterface {" +
             "        public int doSomething() {" +
             "            return 1;}" +
             " }";
 
-    public static @NotNull String theImpl2 = "" +
+    public static final @NotNull String theImpl2 = "" +
             " public class TheImpl2 implements TheInterface {" +
             "        public int doSomething() {" +
             "            return 2;}" +

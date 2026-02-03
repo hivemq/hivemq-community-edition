@@ -1301,7 +1301,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
         assertTrue(gauge.getValue() > 0);
 
-        int byteLimit = totalPublishBytes / 2;
+        final int byteLimit = totalPublishBytes / 2;
         final ImmutableList<PUBLISH> allReadPublishes =
                 persistence.readNew("client", false, createPacketIds(1, 100), byteLimit, 0);
         assertEquals(51, allReadPublishes.size());
@@ -1335,7 +1335,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
         assertTrue(gauge.getValue() > 0);
 
-        int byteLimit = totalPublishBytes / 2;
+        final int byteLimit = totalPublishBytes / 2;
         System.out.println(byteLimit);
         final ImmutableList<PUBLISH> allReadPublishes =
                 persistence.readNew("client", false, createPacketIds(1, 100), byteLimit, 0);
@@ -1379,7 +1379,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
                 metricRegistry.getGauges().get(HiveMQMetrics.QUEUED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name());
         assertTrue(gauge.getValue() > 0);
 
-        int byteLimit = totalPublishBytes / 2;
+        final int byteLimit = totalPublishBytes / 2;
         final ImmutableList<PUBLISH> allReadPublishes =
                 persistence.readNew("client", false, createPacketIds(1, 100), byteLimit, 0);
         assertEquals(51, allReadPublishes.size());
