@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           path: hivemq-community-edition
 
@@ -31,7 +31,7 @@ jobs:
             21
 
       - name: Check for new issues
-        uses: hivemq/hivemq-snyk-composite-action@344969d844a085dfbf2d050e2758d5d356aebea7 # v2
+        uses: hivemq/hivemq-snyk-composite-action@87155e0bc5cddd95ad2d4d184952bb2dbb9d225f # v2
         with:
           snyk-args: --org=hivemq-community-broker --project-name=hivemq-community-edition --configuration-matching=^runtimeClasspath$ -d hivemq-community-edition
           snyk-token: ${{ secrets.SNYK_TOKEN }}
