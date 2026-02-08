@@ -84,8 +84,8 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
         assertEquals(1, subscribe.getPacketIdentifier());
         assertEquals(123, subscribe.getSubscriptionIdentifier());
-        assertEquals("user", subscribe.getUserProperties().asList().get(0).getName());
-        assertEquals("property", subscribe.getUserProperties().asList().get(0).getValue());
+        assertEquals("user", subscribe.getUserProperties().asList().getFirst().getName());
+        assertEquals("property", subscribe.getUserProperties().asList().getFirst().getValue());
 
         assertEquals("topic/#", topic1.getTopic());
         assertTrue(topic1.isNoLocal());

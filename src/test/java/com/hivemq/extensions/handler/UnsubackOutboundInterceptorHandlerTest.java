@@ -69,7 +69,7 @@ import static org.mockito.Mockito.when;
 
 public class UnsubackOutboundInterceptorHandlerTest {
 
-    public static @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
+    public static final @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
 
     @Rule
     public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -168,7 +168,7 @@ public class UnsubackOutboundInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             unsuback = channel.readOutbound();
         }
-        assertEquals(Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, unsuback.getReasonCodes().get(0));
+        assertEquals(Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, unsuback.getReasonCodes().getFirst());
         assertTrue(isTriggered.get());
     }
 

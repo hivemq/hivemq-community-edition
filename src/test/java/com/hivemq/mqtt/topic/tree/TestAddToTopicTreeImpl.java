@@ -85,7 +85,7 @@ public class TestAddToTopicTreeImpl {
 
         assertEquals(1, topicTree.rootWildcardSubscribers.size());
         assertEquals(new SubscriberWithQoS("sub1", 0, (byte) 0, null, null, null),
-                topicTree.rootWildcardSubscribers.get(0));
+                topicTree.rootWildcardSubscribers.getFirst());
     }
 
     @Test

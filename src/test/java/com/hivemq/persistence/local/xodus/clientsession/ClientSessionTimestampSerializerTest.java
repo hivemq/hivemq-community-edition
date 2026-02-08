@@ -36,7 +36,7 @@ public class ClientSessionTimestampSerializerTest {
     @Test
     public void test_timestamp_conversions_standalone() throws Exception {
         final long[] values =
-                {1, System.currentTimeMillis(), /* max 5 byte*/ 549755813887l, /* max 6 byte */ 140737488355327l};
+                {1, System.currentTimeMillis(), /* max 5 byte*/ 549755813887L, /* max 6 byte */ 140737488355327L};
 
         for (final long value : values) {
             final byte[] bytes = serializer.timestampLongToByteArray(value);

@@ -46,11 +46,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 public class SslFactoryTest {
@@ -180,7 +176,7 @@ public class SslFactoryTest {
 
         final List<String> supportedCipherSuites = getSupportedCipherSuites();
 
-        final String chosenCipher = supportedCipherSuites.get(supportedCipherSuites.size() - 1);
+        final String chosenCipher = supportedCipherSuites.getLast();
 
         cipherSuites.add(chosenCipher);
 
@@ -214,7 +210,7 @@ public class SslFactoryTest {
 
         final List<String> supportedProtocols = getSupportedProtocols();
 
-        final String chosenProtocol = supportedProtocols.get(supportedProtocols.size() - 1);
+        final String chosenProtocol = supportedProtocols.getLast();
 
         protocols.add(chosenProtocol);
 
@@ -568,7 +564,7 @@ public class SslFactoryTest {
 
             return ImmutableList.copyOf(engine.getSupportedCipherSuites());
 
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (final NoSuchAlgorithmException | KeyManagementException e) {
             throw new SslException("Not able to get list of supported cipher suites from JVM", e);
         }
     }
@@ -580,7 +576,7 @@ public class SslFactoryTest {
 
             return ImmutableList.copyOf(engine.getSupportedProtocols());
 
-        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+        } catch (final NoSuchAlgorithmException | KeyManagementException e) {
             throw new SslException("Not able to get list of supported protocols from JVM", e);
         }
     }

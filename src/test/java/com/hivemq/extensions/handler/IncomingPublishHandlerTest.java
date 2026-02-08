@@ -409,7 +409,7 @@ public class IncomingPublishHandlerTest {
 
         final List<PublishInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
-        clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
+        clientContext.addPublishInboundInterceptor(isolatedInterceptors.getFirst());
 
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
@@ -435,7 +435,7 @@ public class IncomingPublishHandlerTest {
 
         final List<PublishInboundInterceptor> isolatedInterceptors = getIsolatedInterceptor();
 
-        clientContext.addPublishInboundInterceptor(isolatedInterceptors.get(0));
+        clientContext.addPublishInboundInterceptor(isolatedInterceptors.getFirst());
 
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);

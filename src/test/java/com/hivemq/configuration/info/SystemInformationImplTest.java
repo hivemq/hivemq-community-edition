@@ -28,6 +28,7 @@ import util.ClearHiveMQPropertiesRule;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -49,46 +50,37 @@ public class SystemInformationImplTest {
 
     @Before
     public void before() {
-
         tempFolderPath = tempFolder.getRoot().getAbsolutePath();
 
         System.setProperty(SystemProperties.HIVEMQ_HOME, tempFolderPath);
     }
 
     @Test
-    public void test_getHiveMQVersion() throws Exception {
+    public void test_getHiveMQVersion() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
         //check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
         final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
 
-        if (valueFromManifest == null) {
-            assertEquals("Development Snapshot", systemInformation.getHiveMQVersion());
-        } else {
-            assertEquals(valueFromManifest, systemInformation.getHiveMQVersion());
-        }
-
+        assertEquals(Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
+                systemInformation.getHiveMQVersion());
     }
 
     @Test
-    public void test_getHiveMQVersion_from_system_information_with_path() throws Exception {
+    public void test_getHiveMQVersion_from_system_information_with_path() {
         systemInformation = new SystemInformationImpl(true);
         systemInformation.init();
 
         //check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
         final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
 
-        if (valueFromManifest == null) {
-            assertEquals("Development Snapshot", systemInformation.getHiveMQVersion());
-        } else {
-            assertEquals(valueFromManifest, systemInformation.getHiveMQVersion());
-        }
+        assertEquals(Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
+                systemInformation.getHiveMQVersion());
     }
 
     @Test
-    public void test_getHiveMQHomeFolder() throws Exception {
-
+    public void test_getHiveMQHomeFolder() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
@@ -96,8 +88,7 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_getHiveMQHomeFolder_from_system_information_with_path() throws Exception {
-
+    public void test_getHiveMQHomeFolder_from_system_information_with_path() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
@@ -106,7 +97,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getHiveMQHomeFolder_environmentVariable() throws Exception {
-
         final File testfolder = tempFolder.newFolder("home");
 
         System.getProperties().remove(SystemProperties.HIVEMQ_HOME);
@@ -121,8 +111,7 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_getConfigFolder_default() throws Exception {
-
+    public void test_getConfigFolder_default() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
@@ -131,7 +120,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getConfigFolder_property() throws Exception {
-
         final File testfolder = tempFolder.newFolder("testconfig");
 
         System.setProperty(SystemProperties.CONFIG_FOLDER, testfolder.getAbsolutePath());
@@ -144,7 +132,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getConfigFolder_environmentVariable() throws Exception {
-
         final File testfolder = tempFolder.newFolder("testconfig");
 
         setEnvironmentVariable(EnvironmentVariables.CONFIG_FOLDER, testfolder.getAbsolutePath());
@@ -158,8 +145,7 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_getLogFolder_default() throws Exception {
-
+    public void test_getLogFolder_default() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
@@ -168,7 +154,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getLogFolder_property() throws Exception {
-
         final File testfolder = tempFolder.newFolder("testlogs");
 
         System.setProperty(SystemProperties.LOG_FOLDER, testfolder.getAbsolutePath());
@@ -181,7 +166,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getLogFolder_environmentVariable() throws Exception {
-
         final File testfolder = tempFolder.newFolder("testlogs");
 
         setEnvironmentVariable(EnvironmentVariables.LOG_FOLDER, testfolder.getAbsolutePath());
@@ -194,10 +178,8 @@ public class SystemInformationImplTest {
         assertEquals(testfolder.getAbsolutePath(), systemInformation.getLogFolder().getAbsolutePath());
     }
 
-
     @Test
-    public void test_getDataFolder_default() throws Exception {
-
+    public void test_getDataFolder_default() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
@@ -206,7 +188,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getDataFolder_property() throws Exception {
-
         final File testfolder = tempFolder.newFolder("testdatas");
 
         System.setProperty(SystemProperties.DATA_FOLDER, testfolder.getAbsolutePath());
@@ -219,7 +200,6 @@ public class SystemInformationImplTest {
 
     @Test
     public void test_getDataFolder_environmentVariable() throws Exception {
-
         final File testfolder = tempFolder.newFolder("testdatas");
 
         setEnvironmentVariable(EnvironmentVariables.DATA_FOLDER, testfolder.getAbsolutePath());
@@ -233,30 +213,27 @@ public class SystemInformationImplTest {
     }
 
     @Test
-    public void test_create_plugin_folder_if_not_exists() throws Exception {
-
+    public void test_create_plugin_folder_if_not_exists() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
-        assertEquals(true, systemInformation.getExtensionsFolder().exists());
+        assertTrue(systemInformation.getExtensionsFolder().exists());
     }
 
     @Test
-    public void test_create_data_folder_if_not_exists() throws Exception {
-
+    public void test_create_data_folder_if_not_exists() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
-        assertEquals(true, systemInformation.getDataFolder().exists());
+        assertTrue(systemInformation.getDataFolder().exists());
     }
 
     @Test
-    public void test_create_log_folder_if_not_exists() throws Exception {
-
+    public void test_create_log_folder_if_not_exists() {
         systemInformation = new SystemInformationImpl();
         systemInformation.init();
 
-        assertEquals(true, systemInformation.getLogFolder().exists());
+        assertTrue(systemInformation.getLogFolder().exists());
     }
 
     @Test
@@ -281,5 +258,4 @@ public class SystemInformationImplTest {
     private static void removeEnvironmentVariable(final String key) throws Exception {
         getModifiableEnvironmentVariables().remove(key);
     }
-
 }

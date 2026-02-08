@@ -52,39 +52,32 @@ public class WebSocketInitializerTest {
     }
 
     @Test
-    public void test_handler_in_pipeline() throws Exception {
-
+    public void test_handler_in_pipeline() {
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
 
         webSocketInitializer.addHandlers(channel, "dummy");
 
         final List<String> handlerNames = channel.pipeline().names();
-
-        assertEquals(true, handlerNames.contains(HTTP_SERVER_CODEC));
-        assertEquals(true, handlerNames.contains(HTTP_OBJECT_AGGREGATOR));
-        assertEquals(true, handlerNames.contains(WEBSOCKET_SERVER_PROTOCOL_HANDLER));
-        assertEquals(true, handlerNames.contains(WEBSOCKET_BINARY_FRAME_HANDLER));
-        assertEquals(true, handlerNames.contains(WEBSOCKET_TEXT_FRAME_HANDLER));
-        assertEquals(true, handlerNames.contains(MQTT_WEBSOCKET_ENCODER));
-
+        assertTrue(handlerNames.contains(HTTP_SERVER_CODEC));
+        assertTrue(handlerNames.contains(HTTP_OBJECT_AGGREGATOR));
+        assertTrue(handlerNames.contains(WEBSOCKET_SERVER_PROTOCOL_HANDLER));
+        assertTrue(handlerNames.contains(WEBSOCKET_BINARY_FRAME_HANDLER));
+        assertTrue(handlerNames.contains(WEBSOCKET_TEXT_FRAME_HANDLER));
+        assertTrue(handlerNames.contains(MQTT_WEBSOCKET_ENCODER));
     }
 
     @Test
-    public void test_handler_order() throws Exception {
-
+    public void test_handler_order() {
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
-
         webSocketInitializer.addHandlers(channel, "dummy");
 
         final List<String> handlerNames = channel.pipeline().names();
-
         final int hscIdx = handlerNames.indexOf(HTTP_SERVER_CODEC);
         final int hoaIdx = handlerNames.indexOf(HTTP_OBJECT_AGGREGATOR);
         final int wsphIdx = handlerNames.indexOf(WEBSOCKET_SERVER_PROTOCOL_HANDLER);
         final int wbfhIdx = handlerNames.indexOf(WEBSOCKET_BINARY_FRAME_HANDLER);
         final int wtfhIdx = handlerNames.indexOf(WEBSOCKET_TEXT_FRAME_HANDLER);
         final int mweIdx = handlerNames.indexOf(MQTT_WEBSOCKET_ENCODER);
-
         assertTrue(hscIdx < hoaIdx);
         assertTrue(hoaIdx < wsphIdx);
         assertTrue(wsphIdx < wbfhIdx);
@@ -93,10 +86,10 @@ public class WebSocketInitializerTest {
     }
 
     @Test
-    public void test_no_subprotocols() throws Exception {
+    public void test_no_subprotocols() {
         websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
-                .subprotocols(new ArrayList<String>())
+                .subprotocols(new ArrayList<>())
                 .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
@@ -104,7 +97,7 @@ public class WebSocketInitializerTest {
     }
 
     @Test
-    public void test_one_subprotocol() throws Exception {
+    public void test_one_subprotocol() {
         websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1"))
@@ -116,7 +109,7 @@ public class WebSocketInitializerTest {
     }
 
     @Test
-    public void test_multiple_subprotocols() throws Exception {
+    public void test_multiple_subprotocols() {
         websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))

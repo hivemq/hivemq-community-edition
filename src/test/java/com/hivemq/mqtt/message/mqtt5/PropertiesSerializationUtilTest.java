@@ -50,8 +50,8 @@ public class PropertiesSerializationUtilTest {
         final Mqtt5UserProperties read = PropertiesSerializationUtil.read(bytes, 0);
         final ImmutableList<MqttUserProperty> readProperties = read.asList();
         assertEquals(1, readProperties.size());
-        assertEquals("name", readProperties.get(0).getName());
-        assertEquals("value", readProperties.get(0).getValue());
+        assertEquals("name", readProperties.getFirst().getName());
+        assertEquals("value", readProperties.getFirst().getValue());
     }
 
     @Test

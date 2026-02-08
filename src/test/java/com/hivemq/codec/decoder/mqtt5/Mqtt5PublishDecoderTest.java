@@ -106,8 +106,8 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
         final ImmutableList<MqttUserProperty> userProperties = publishInternal.getUserProperties().asList();
         assertEquals(1, userProperties.size());
-        assertEquals("test", userProperties.get(0).getName());
-        assertEquals("value", userProperties.get(0).getValue());
+        assertEquals("test", userProperties.getFirst().getName());
+        assertEquals("value", userProperties.getFirst().getValue());
 
         assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, publishInternal.getPayload());
 
@@ -756,8 +756,8 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
         final PUBLISH publish = decode(encoded);
         final ImmutableList<MqttUserProperty> userProperties = publish.getUserProperties().asList();
         assertEquals(1, userProperties.size());
-        assertEquals("test", userProperties.get(0).getName());
-        assertEquals("value", userProperties.get(0).getValue());
+        assertEquals("test", userProperties.getFirst().getName());
+        assertEquals("value", userProperties.getFirst().getValue());
     }
 
     @Test

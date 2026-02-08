@@ -15,15 +15,12 @@
  */
 package com.hivemq.security.ssl;
 
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
 import com.hivemq.configuration.service.entity.Listener;
-import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -34,7 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import util.DummyClientConnection;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -178,7 +174,7 @@ public class SslClientCertificateHandlerTest {
         verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
-    private class WrongHandler extends SimpleChannelInboundHandler<Object> {
+    private static class WrongHandler extends SimpleChannelInboundHandler<Object> {
 
         @Override
         protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final Object o)

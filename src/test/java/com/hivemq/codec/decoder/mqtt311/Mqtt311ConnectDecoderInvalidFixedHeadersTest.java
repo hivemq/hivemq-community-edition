@@ -70,7 +70,7 @@ public class Mqtt311ConnectDecoderInvalidFixedHeadersTest {
         final Channel channel = mock(Channel.class);
         connacker = mock(MqttConnacker.class);
         clientConnection = new DummyClientConnection(channel, null);
-        when(channel.attr(any(AttributeKey.class))).thenReturn(new TestChannelAttribute(clientConnection));
+        when(channel.attr(any(AttributeKey.class))).thenReturn(new TestChannelAttribute<>(clientConnection));
 
         decoder = new Mqtt311ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

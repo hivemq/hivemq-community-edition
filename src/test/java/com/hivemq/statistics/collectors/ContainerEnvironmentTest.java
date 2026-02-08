@@ -26,6 +26,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -38,9 +39,7 @@ public class ContainerEnvironmentTest {
 
     @Test
     public void test_getContainerEnvironment_file_not_present() {
-
         assumeTrue(Platform.isLinux());
-
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
             @NotNull
             @Override
@@ -48,25 +47,21 @@ public class ContainerEnvironmentTest {
                 return new File("/this/file/does/not/exist");
             }
         };
-
-        assertEquals(null, containerEnvironment.getContainerEnvironment());
+        assertNull(containerEnvironment.getContainerEnvironment());
     }
 
     @Test
     public void test_getContainerEnvironment_docker_file_present() throws Exception {
-
         assumeTrue(Platform.isLinux());
-
         final File cgroupFile = new File(temporaryFolder.getRoot(), "cgroup");
-
-        final String exampleContent = "11:name=systemd:/\n" +
-                "9:perf_event:/\n" +
-                "6:devices:/docker/435454325452353780436aa50e472bb46231663bb99a6bb8927649\n" +
-                "5:memory:/\n" +
-                "4:cpuacct:/\n" +
-                "3:cpu:/docker/234a23a4e23a4e234243e2a4e23a4e23a42ea42e34a2e3a423bb\n" +
-                "2:cpuset:/";
-
+        final String exampleContent = """
+                11:name=systemd:/
+                9:perf_event:/
+                6:devices:/docker/435454325452353780436aa50e472bb46231663bb99a6bb8927649
+                5:memory:/
+                4:cpuacct:/
+                3:cpu:/docker/234a23a4e23a4e234243e2a4e23a4e23a42ea42e34a2e3a423bb
+                2:cpuset:/""";
         FileUtils.writeStringToFile(cgroupFile, exampleContent, StandardCharsets.UTF_8);
 
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
@@ -76,26 +71,21 @@ public class ContainerEnvironmentTest {
                 return cgroupFile;
             }
         };
-
         assertEquals("Docker", containerEnvironment.getContainerEnvironment());
     }
 
-
     @Test
     public void test_getContainerEnvironment_not_docker_file_present() throws Exception {
-
         assumeTrue(Platform.isLinux());
-
         final File cgroupFile = new File(temporaryFolder.getRoot(), "cgroup");
-
-        final String exampleContent = "11:name=systemd:/\n" +
-                "9:perf_event:/\n" +
-                "6:devices:/other/435454325452353780436aa50e472bb46231663bb99a6bb8927649\n" +
-                "5:memory:/\n" +
-                "4:cpuacct:/\n" +
-                "3:cpu:/other/234a23a4e23a4e234243e2a4e23a4e23a42ea42e34a2e3a423bb\n" +
-                "2:cpuset:/";
-
+        final String exampleContent = """
+                11:name=systemd:/
+                9:perf_event:/
+                6:devices:/other/435454325452353780436aa50e472bb46231663bb99a6bb8927649
+                5:memory:/
+                4:cpuacct:/
+                3:cpu:/other/234a23a4e23a4e234243e2a4e23a4e23a42ea42e34a2e3a423bb
+                2:cpuset:/""";
         FileUtils.writeStringToFile(cgroupFile, exampleContent, StandardCharsets.UTF_8);
 
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
@@ -105,8 +95,6 @@ public class ContainerEnvironmentTest {
                 return cgroupFile;
             }
         };
-
-        assertEquals(null, containerEnvironment.getContainerEnvironment());
+        assertNull(containerEnvironment.getContainerEnvironment());
     }
-
 }

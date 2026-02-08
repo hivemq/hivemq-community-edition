@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -59,7 +60,7 @@ public class EnvVarUtilTest {
     }
 
     @Test
-    public void test_getValue_existing_java_prop() throws Exception {
+    public void test_getValue_existing_java_prop() {
         when(envVarUtil.getValue(anyString())).thenCallRealMethod();
 
         System.setProperty("test.existing.envvar", "iamset2");
@@ -86,16 +87,16 @@ public class EnvVarUtilTest {
     }
 
     @Test
-    public void test_getValue_non_existing() throws Exception {
+    public void test_getValue_non_existing() {
         when(envVarUtil.getValue(anyString())).thenCallRealMethod();
 
         final String result = envVarUtil.getValue("TEST_NON_EXISTING_ENVVAR");
 
-        assertEquals(null, result);
+        assertNull(result);
     }
 
     @Test
-    public void test_replaceEnvironmentVariablePlaceholders() throws Exception {
+    public void test_replaceEnvironmentVariablePlaceholders() {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
@@ -112,8 +113,7 @@ public class EnvVarUtilTest {
     }
 
     @Test
-    public void test_replaceEnvironmentVariablePlaceholders_withLegacyAtTheEnd_variablesReplacedCorrectly()
-            throws Exception {
+    public void test_replaceEnvironmentVariablePlaceholders_withLegacyAtTheEnd_variablesReplacedCorrectly() {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
@@ -130,8 +130,7 @@ public class EnvVarUtilTest {
     }
 
     @Test
-    public void test_replaceEnvironmentVariablePlaceholders_withLegacyAtTheBeginning_variablesReplacedCorrectly()
-            throws Exception {
+    public void test_replaceEnvironmentVariablePlaceholders_withLegacyAtTheBeginning_variablesReplacedCorrectly() {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
@@ -148,35 +147,33 @@ public class EnvVarUtilTest {
     }
 
     @Test(expected = UnrecoverableException.class)
-    public void test_replaceEnvironmentVariablePlaceholders_unknown_varname() throws Exception {
-
+    public void test_replaceEnvironmentVariablePlaceholders_unknown_varname() {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value1");
 
         final String testString = "<test1>${VALUE1}</test1><test2>${VALUE2}</test2>";
 
-        final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
+        envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
     }
 
     /**
      * Modifies the in-memory map which is returned when System.getenv is called.
      * Does not set Env-Vars at all
      *
-     * @param newenv the new Map which should be uses by System.getenv
-     * @throws Exception
+     * @param newEnv the new Map which should be uses by System.getenv
      */
-    private void setTempEnvVars(final Map<String, String> newenv) throws Exception {
-        final Class[] classes = Collections.class.getDeclaredClasses();
+    @SuppressWarnings("unchecked")
+    private void setTempEnvVars(final Map<String, String> newEnv) throws Exception {
+        final Class<?>[] classes = Collections.class.getDeclaredClasses();
         final Map<String, String> env = System.getenv();
-        for (final Class cl : classes) {
+        for (final Class<?> cl : classes) {
             if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
                 final Field field = cl.getDeclaredField("m");
                 field.setAccessible(true);
                 final Object obj = field.get(env);
                 final Map<String, String> map = (Map<String, String>) obj;
                 map.clear();
-                map.putAll(newenv);
+                map.putAll(newEnv);
             }
         }
     }
-
 }

@@ -72,7 +72,7 @@ import static org.mockito.Mockito.when;
  */
 public class SubackOutboundInterceptorHandlerTest {
 
-    public static @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
+    public static final @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -172,7 +172,7 @@ public class SubackOutboundInterceptorHandlerTest {
             subAck = channel.readOutbound();
         }
         assertTrue(isTriggered.get());
-        assertEquals(SubackReasonCode.GRANTED_QOS_1, subAck.getReasonCodes().get(0).toSubackReasonCode());
+        assertEquals(SubackReasonCode.GRANTED_QOS_1, subAck.getReasonCodes().getFirst().toSubackReasonCode());
         assertNotNull(subAck);
     }
 

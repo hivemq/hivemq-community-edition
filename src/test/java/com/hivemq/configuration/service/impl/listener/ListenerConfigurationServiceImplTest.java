@@ -69,10 +69,10 @@ public class ListenerConfigurationServiceImplTest {
         assertEquals(1, listenerConfigurationService.getWebsocketListeners().size());
         assertEquals(1, listenerConfigurationService.getTlsWebsocketListeners().size());
 
-        assertSame(listenerConfigurationService.getTcpListeners().get(0), tcpListener);
-        assertSame(listenerConfigurationService.getTlsTcpListeners().get(0), tlsTcpListener);
-        assertSame(listenerConfigurationService.getWebsocketListeners().get(0), websocketListener);
-        assertSame(listenerConfigurationService.getTlsWebsocketListeners().get(0), tlsWebsocketListener);
+        assertSame(listenerConfigurationService.getTcpListeners().getFirst(), tcpListener);
+        assertSame(listenerConfigurationService.getTlsTcpListeners().getFirst(), tlsTcpListener);
+        assertSame(listenerConfigurationService.getWebsocketListeners().getFirst(), websocketListener);
+        assertSame(listenerConfigurationService.getTlsWebsocketListeners().getFirst(), tlsWebsocketListener);
     }
 
     @Test(expected = IllegalArgumentException.class)
