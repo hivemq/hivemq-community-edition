@@ -140,13 +140,16 @@ public class SslClientCertificateHandlerTest {
 
     @Test
     public void test_class_cast_exception_no_ssl_handler() {
-        channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
-        channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, new WrongHandler());
+        final EmbeddedChannel freshChannel = new EmbeddedChannel();
+        final UndefinedClientConnection freshClientConnection =
+                new UndefinedClientConnection(freshChannel, null, mock());
+        freshChannel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(freshClientConnection);
+        freshChannel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
+        freshChannel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, new WrongHandler());
 
-        channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
+        freshChannel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
-        verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
+        verify(mqttServerDisconnector).logAndClose(eq(freshChannel), isNull(), anyString());
     }
 
     private static class WrongHandler extends SimpleChannelInboundHandler<Object> {
