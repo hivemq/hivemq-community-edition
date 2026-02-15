@@ -168,9 +168,7 @@ dependencies {
     testImplementation(libs.wiremock.standalone)
     testImplementation(libs.javassist)
     testImplementation(libs.awaitility)
-    testImplementation(libs.stefanBirkner.systemRules) {
-        exclude("junit", "junit-dep")
-    }
+    testImplementation(libs.systemStubs)
 }
 
 tasks.test {
