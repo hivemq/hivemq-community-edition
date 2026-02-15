@@ -28,14 +28,13 @@ import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.configuration.service.entity.TlsWebsocketListener;
 import com.hivemq.configuration.service.entity.WebsocketListener;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.connection.ConnectionPersistence;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.RandomPortGenerator;
 
 import java.util.List;
@@ -44,6 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static util.TlsTestUtil.createDefaultTLS;
@@ -53,27 +53,17 @@ public class HiveMQNettyBootstrapTest {
 
     private HiveMQNettyBootstrap hiveMQNettyBootstrap;
 
-    @Mock
-    private ShutdownHooks shutdownHooks;
-
-    @Mock
-    private ListenerConfigurationService listenerConfigurationService;
-
-    @Mock
-    private ChannelInitializerFactoryImpl channelInitializerFactoryImpl;
-
-    @Mock
-    private ConnectionPersistence connectionPersistence;
-
-    @Mock
-    private AbstractChannelInitializer abstractChannelInitializer;
+    private final @NotNull ShutdownHooks shutdownHooks = mock();
+    private final @NotNull ListenerConfigurationService listenerConfigurationService = mock();
+    private final @NotNull ChannelInitializerFactoryImpl channelInitializerFactoryImpl = mock();
+    private final @NotNull ConnectionPersistence connectionPersistence = mock();
+    private final @NotNull AbstractChannelInitializer abstractChannelInitializer = mock();
 
 
     private final int randomPort = RandomPortGenerator.get();
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         hiveMQNettyBootstrap = new HiveMQNettyBootstrap(shutdownHooks,
                 listenerConfigurationService,
                 channelInitializerFactoryImpl,

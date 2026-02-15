@@ -31,7 +31,6 @@ import io.netty.channel.EventLoop;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -55,12 +54,9 @@ public class PublishFlushHandlerTest {
 
     private final @NotNull EmbeddedChannel embeddedChannel = new EmbeddedChannel();
 
-    @Mock
-    private @NotNull Channel channel;
-    @Mock
-    private @NotNull ChannelHandlerContext channelHandlerContext;
-    @Mock
-    private @NotNull EventLoop eventLoop;
+    private final @NotNull Channel channel = mock();
+    private final @NotNull ChannelHandlerContext channelHandlerContext = mock();
+    private final @NotNull EventLoop eventLoop = mock();
 
     private final @NotNull MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 

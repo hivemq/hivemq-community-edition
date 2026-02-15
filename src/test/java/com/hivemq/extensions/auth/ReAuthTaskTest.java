@@ -34,28 +34,21 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import util.IsolatedExtensionClassloaderUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class ReAuthTaskTest {
 
     public static AtomicBoolean connect;
 
-    @Mock
-    private WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
+    private final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider = mock();
+
     public static AtomicBoolean auth;
 
     private EnhancedAuthenticator enhancedAuthenticator;
@@ -64,17 +57,13 @@ public class ReAuthTaskTest {
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private ReAuthTask authTask;
-    @Mock
-    private AuthenticatorProviderInput authenticatorProviderInput;
+    private final @NotNull AuthenticatorProviderInput authenticatorProviderInput = mock();
+
     private IsolatedExtensionClassloader classloader;
-    @Mock
-    private HiveMQExtensions extensions;
+    private final @NotNull HiveMQExtensions extensions = mock();
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         connect = new AtomicBoolean();
         auth = new AtomicBoolean();
         reAuth = new AtomicBoolean();

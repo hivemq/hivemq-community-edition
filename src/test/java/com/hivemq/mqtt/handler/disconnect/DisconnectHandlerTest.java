@@ -24,7 +24,6 @@ import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
@@ -33,17 +32,12 @@ import com.hivemq.mqtt.message.disconnect.DISCONNECT;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
 import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
-import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
 import com.hivemq.persistence.connection.ConnectionPersistence;
-import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
-import util.TestSingleWriterFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -80,9 +74,8 @@ public class DisconnectHandlerTest {
                 clientSessionPersistence,
                 connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
-        ClientConnectionContext clientConnectionContext = new UndefinedClientConnection(channel,
-                null,
-                mock(TcpListener.class));
+        ClientConnectionContext clientConnectionContext =
+                new UndefinedClientConnection(channel, null, mock(TcpListener.class));
         clientConnectionContext.setClientId("clientId");
         clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnectionContext.proposeClientState(ClientState.CONNECTING);
@@ -91,7 +84,9 @@ public class DisconnectHandlerTest {
         clientConnection = ClientConnection.from(clientConnectionContext);
 
         when(connectionPersistence.get(anyString())).thenReturn(clientConnection);
-        when(clientSessionPersistence.clientDisconnected(anyString(), anyBoolean(), anyLong())).thenReturn(Futures.immediateFuture(null));
+        when(clientSessionPersistence.clientDisconnected(anyString(),
+                anyBoolean(),
+                anyLong())).thenReturn(Futures.immediateFuture(null));
     }
 
     @Test

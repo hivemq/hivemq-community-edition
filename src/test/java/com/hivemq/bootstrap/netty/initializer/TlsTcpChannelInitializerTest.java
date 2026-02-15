@@ -23,6 +23,7 @@ import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -37,8 +38,6 @@ import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE_HANDLER;
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER;
@@ -48,45 +47,23 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_HANDLER;
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_PARAMETER_HANDLER;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TlsTcpChannelInitializerTest {
 
-    @Mock
-    private SocketChannel socketChannel;
-
-    @Mock
-    private Attribute<Listener> attribute;
-
-    @Mock
-    private ChannelDependencies channelDependencies;
-
-    @Mock
-    private SslHandler sslHandler;
-
-    @Mock
-    private TlsTcpListener tlsTcpListener;
-
-    @Mock
-    private Tls tls;
-
-    @Mock
-    private SslFactory sslFactory;
-
-    @Mock
-    private SslContext sslContext;
-
-    @Mock
-    private Future<Channel> future;
-
-    @Mock
-    private EventLog eventLog;
-
-    @Mock
-    private FullConfigurationService fullConfigurationService;
-
-    @Mock
-    private RestrictionsConfigurationService restrictionsConfigurationService;
+    private final @NotNull SocketChannel socketChannel = mock();
+    private final @NotNull Attribute<Listener> attribute = mock();
+    private final @NotNull ChannelDependencies channelDependencies = mock();
+    private final @NotNull SslHandler sslHandler = mock();
+    private final @NotNull TlsTcpListener tlsTcpListener = mock();
+    private final @NotNull Tls tls = mock();
+    private final @NotNull SslFactory sslFactory = mock();
+    private final @NotNull SslContext sslContext = mock();
+    private final @NotNull Future<Channel> future = mock();
+    private final @NotNull EventLog eventLog = mock();
+    private final @NotNull FullConfigurationService fullConfigurationService = mock();
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
 
     private ChannelPipeline pipeline;
 
@@ -94,8 +71,6 @@ public class TlsTcpChannelInitializerTest {
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         pipeline = new FakeChannelPipeline();
 
         when(tlsTcpListener.getTls()).thenReturn(tls);

@@ -74,7 +74,7 @@ import static org.mockito.Mockito.when;
 public class ClientSessionXodusLocalPersistenceTest {
 
     private static final int BUCKET_COUNT = 4;
-    
+
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -323,8 +323,7 @@ public class ClientSessionXodusLocalPersistenceTest {
                 new ClientSession(false, SESSION_EXPIRY_MAX),
                 timestamp,
                 BucketUtils.getBucket("clientId", BUCKET_COUNT));
-        assertEquals(
-                timestamp,
+        assertEquals(timestamp,
                 Objects.requireNonNull(persistence.getTimestamp("clientId",
                         BucketUtils.getBucket("clientId", BUCKET_COUNT))).longValue());
     }

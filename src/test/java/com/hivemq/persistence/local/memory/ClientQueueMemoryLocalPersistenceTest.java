@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.HiveMQMetrics;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
@@ -37,8 +38,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,6 +52,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -65,8 +65,7 @@ public class ClientQueueMemoryLocalPersistenceTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private MessageDroppedService messageDroppedService;
+    private final @NotNull MessageDroppedService messageDroppedService = mock();
 
     private ClientQueueMemoryLocalPersistence persistence;
 
@@ -77,8 +76,6 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         InternalConfigurations.QOS_0_MEMORY_HARD_LIMIT_DIVISOR.set(10000);
         InternalConfigurations.QOS_0_MEMORY_LIMIT_PER_CLIENT_BYTES.set(1024);
@@ -1458,7 +1455,11 @@ public class ClientQueueMemoryLocalPersistenceTest {
 
 
     private PUBLISH createPublish(
-            final int packetId, final QoS qos, final String topic, final int publishId, final byte[] message) {
+            final int packetId,
+            final QoS qos,
+            final String topic,
+            final int publishId,
+            final byte[] message) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
                 .withOnwardQos(qos)
@@ -1471,7 +1472,11 @@ public class ClientQueueMemoryLocalPersistenceTest {
     }
 
     private PUBLISH createBigPublish(
-            final int packetId, final QoS qos, final String topic, final int publishId, final int queueLimit) {
+            final int packetId,
+            final QoS qos,
+            final String topic,
+            final int publishId,
+            final int queueLimit) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
                 .withOnwardQos(qos)

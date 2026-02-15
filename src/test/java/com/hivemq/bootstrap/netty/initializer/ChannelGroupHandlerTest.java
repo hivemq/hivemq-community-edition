@@ -15,39 +15,31 @@
  */
 package com.hivemq.bootstrap.netty.initializer;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.group.ChannelGroup;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ChannelGroupHandlerTest {
 
-    @Mock
-    ChannelGroup channelGroup;
-
-    @Mock
-    Channel channel;
-
-    @Mock
-    ChannelHandlerContext ctx;
-
-    @Mock
-    ChannelPipeline channelPipeline;
+    private final @NotNull ChannelGroup channelGroup = mock();
+    private final @NotNull Channel channel = mock();
+    private final @NotNull ChannelHandlerContext ctx = mock();
+    private final @NotNull ChannelPipeline channelPipeline = mock();
 
     private ChannelGroupHandler channelGroupHandler;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         channelGroupHandler = new ChannelGroupHandler(channelGroup);
 
         when(ctx.channel()).thenReturn(channel);

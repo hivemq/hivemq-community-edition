@@ -24,7 +24,8 @@ import io.netty.channel.Channel;
 public class DummyClientConnection extends ClientConnection {
 
     public DummyClientConnection(
-            final @NotNull Channel channel, final @NotNull PublishFlushHandler publishFlushHandler) {
+            final @NotNull Channel channel,
+            final @NotNull PublishFlushHandler publishFlushHandler) {
 
         super(channel,
                 publishFlushHandler,

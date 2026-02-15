@@ -15,14 +15,14 @@
  */
 package com.hivemq.persistence.qos;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.publish.PUBLISH;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestMessageUtil;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -33,12 +33,10 @@ public class IncomingMessageFlowPersistenceImplTest {
 
     private IncomingMessageFlowPersistenceImpl incomingMessageFlowPersistence;
 
-    @Mock
-    private IncomingMessageFlowLocalPersistence incomingMessageFlowLocalPersistence;
+    private final @NotNull IncomingMessageFlowLocalPersistence incomingMessageFlowLocalPersistence = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         incomingMessageFlowPersistence = new IncomingMessageFlowPersistenceImpl(incomingMessageFlowLocalPersistence);
     }
 

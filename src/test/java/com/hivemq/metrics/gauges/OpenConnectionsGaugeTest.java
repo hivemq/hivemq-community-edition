@@ -15,13 +15,13 @@
  */
 package com.hivemq.metrics.gauges;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.group.ChannelGroup;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -29,14 +29,12 @@ import static org.mockito.Mockito.when;
  */
 public class OpenConnectionsGaugeTest {
 
-    @Mock
-    ChannelGroup channelGroup;
+    private final @NotNull ChannelGroup channelGroup = mock();
 
     private OpenConnectionsGauge gauge;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         gauge = new OpenConnectionsGauge(channelGroup);
     }
 

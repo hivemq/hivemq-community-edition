@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.publish;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -31,8 +32,6 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestMqttDecoder;
 
@@ -41,6 +40,7 @@ import java.nio.channels.ClosedChannelException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -54,14 +54,10 @@ public class FlowControlHandlerTest {
 
     private MqttConfigurationServiceImpl mqttConfigurationService;
 
-    @Mock
-    EventLog eventLog;
+    private final @NotNull EventLog eventLog = mock();
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         mqttConfigurationService = new MqttConfigurationServiceImpl();
         mqttConfigurationService.setServerReceiveMaximum(10);
 

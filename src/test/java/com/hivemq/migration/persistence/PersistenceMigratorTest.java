@@ -16,6 +16,7 @@
 package com.hivemq.migration.persistence;
 
 import com.google.common.collect.ImmutableMap;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.migration.MigrationUnit;
 import com.hivemq.migration.meta.PersistenceType;
 import com.hivemq.migration.persistence.payload.PublishPayloadTypeMigration;
@@ -24,9 +25,8 @@ import com.hivemq.migration.persistence.retained.RetainedMessagePayloadIDMigrati
 import com.hivemq.migration.persistence.retained.RetainedMessageTypeMigration;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -35,18 +35,13 @@ import static org.mockito.Mockito.verify;
 public class PersistenceMigratorTest {
 
     PersistenceMigrator persistenceMigrator;
-    @Mock
-    private PublishPayloadTypeMigration publishPayloadTypeMigration;
-    @Mock
-    private RetainedMessageTypeMigration retainedMessageTypeMigration;
-    @Mock
-    private ClientQueuePayloadIDMigration clientQueuePayloadIDMigration;
-    @Mock
-    private RetainedMessagePayloadIDMigration retainedMessagePayloadIDMigration;
+    private final @NotNull PublishPayloadTypeMigration publishPayloadTypeMigration = mock();
+    private final @NotNull RetainedMessageTypeMigration retainedMessageTypeMigration = mock();
+    private final @NotNull ClientQueuePayloadIDMigration clientQueuePayloadIDMigration = mock();
+    private final @NotNull RetainedMessagePayloadIDMigration retainedMessagePayloadIDMigration = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         persistenceMigrator = new PersistenceMigrator(() -> publishPayloadTypeMigration,
                 () -> retainedMessageTypeMigration,
                 () -> retainedMessagePayloadIDMigration,

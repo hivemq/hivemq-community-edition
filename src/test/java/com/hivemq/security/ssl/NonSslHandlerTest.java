@@ -17,7 +17,6 @@ package com.hivemq.security.ssl;
 
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
-import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
@@ -27,10 +26,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
-import util.DummyClientConnection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -38,10 +38,6 @@ import static org.mockito.Mockito.mock;
  * @since 4.1.0
  */
 public class NonSslHandlerTest {
-
-    private @NotNull EmbeddedChannel channel;
-
-    private @NotNull MqttServerDisconnector disconnector;
 
     private static final byte @NotNull [] VALID_SSL_PACKET = {
             22,
@@ -653,14 +649,14 @@ public class NonSslHandlerTest {
             3,
             1};
 
+    private final @NotNull EmbeddedChannel channel = new EmbeddedChannel();
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        final Listener listener = mock(TcpListener.class);
-        channel = new EmbeddedChannel();
+        final TcpListener listener = mock();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new UndefinedClientConnection(channel, null, listener));
-        disconnector = new MqttServerDisconnectorImpl(new EventLog());
+        final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(new EventLog());
         channel.pipeline().addLast(new NonSslHandler(disconnector));
     }
 

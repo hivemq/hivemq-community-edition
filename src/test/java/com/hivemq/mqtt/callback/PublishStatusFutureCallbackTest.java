@@ -18,6 +18,7 @@ package com.hivemq.mqtt.callback;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.pool.FreePacketIdRanges;
@@ -27,8 +28,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestMessageUtil;
 
@@ -36,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,11 +47,8 @@ public class PublishStatusFutureCallbackTest {
 
     private PublishStatusFutureCallback publishStatusFutureCallback;
 
-    @Mock
-    private PublishPollService publishPollService;
-
-    @Mock
-    private FreePacketIdRanges messageIDPool;
+    private final @NotNull PublishPollService publishPollService = mock();
+    private final @NotNull FreePacketIdRanges messageIDPool = mock();
 
     private boolean sharedSubscription;
 
@@ -65,8 +62,6 @@ public class PublishStatusFutureCallbackTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         sharedSubscription = false;
         queueId = "queueId";
         publish = TestMessageUtil.createMqtt5Publish();

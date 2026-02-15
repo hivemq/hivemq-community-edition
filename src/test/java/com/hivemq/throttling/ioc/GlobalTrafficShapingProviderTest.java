@@ -19,32 +19,28 @@ package com.hivemq.throttling.ioc;
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.throttling.GlobalTrafficShaperExecutorShutdownHook;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class GlobalTrafficShapingProviderTest {
 
-    private AutoCloseable closeableMock;
-
-    @Mock
-    private RestrictionsConfigurationService configurationService;
+    private final @NotNull RestrictionsConfigurationService configurationService = mock();
 
     private ShutdownHooks shutdownHooks;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
         when(configurationService.incomingLimit()).thenReturn(20L);
 
         shutdownHooks = new ShutdownHooks();
@@ -55,7 +51,6 @@ public class GlobalTrafficShapingProviderTest {
         for (final HiveMQShutdownHook hook : shutdownHooks.getShutdownHooks().values()) {
             hook.run();
         }
-        closeableMock.close();
     }
 
     @Test

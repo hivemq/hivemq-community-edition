@@ -22,6 +22,7 @@ import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.ProtocolVersion;
 import com.hivemq.mqtt.message.QoS;
@@ -35,8 +36,6 @@ import io.netty.channel.ChannelFuture;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
@@ -58,17 +57,10 @@ import static org.mockito.Mockito.when;
 
 public class Mqtt311ConnectDecoderTest {
 
-    @Mock
-    Channel channel;
-
-    @Mock
-    private FullConfigurationService fullConfiguration;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
-
-    @Mock
-    private MqttConnacker connacker;
+    private final @NotNull Channel channel = mock();
+    private final @NotNull FullConfigurationService fullConfiguration = mock();
+    private final @NotNull SecurityConfigurationService securityConfigurationService = mock();
+    private final @NotNull MqttConnacker connacker = mock();
 
     private Mqtt311ConnectDecoder decoder;
 
@@ -78,9 +70,6 @@ public class Mqtt311ConnectDecoderTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         clientConnection = new DummyClientConnection(channel, null);
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
                 clientConnection));

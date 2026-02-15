@@ -16,17 +16,17 @@
 package com.hivemq.mqtt.handler.ping;
 
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.PINGREQ;
 import com.hivemq.mqtt.message.PINGRESP;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christoph Schäbel
@@ -34,12 +34,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class PingRequestHandlerTest {
 
-    @Mock
-    ChannelHandlerContext ctx;
+    private final @NotNull ChannelHandlerContext ctx = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

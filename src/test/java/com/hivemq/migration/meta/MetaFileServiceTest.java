@@ -16,20 +16,20 @@
 package com.hivemq.migration.meta;
 
 import com.hivemq.configuration.info.SystemInformation;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -41,15 +41,12 @@ public class MetaFileServiceTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private SystemInformation systemInformation;
+    private final @NotNull SystemInformation systemInformation = mock();
 
     private File dataFolder;
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
     }

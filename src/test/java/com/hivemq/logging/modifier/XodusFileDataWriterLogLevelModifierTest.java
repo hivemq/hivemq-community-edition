@@ -88,7 +88,8 @@ public class XodusFileDataWriterLogLevelModifierTest {
     }
 
     private @NotNull Filter<ILoggingEvent> createFilter(
-            final @NotNull AtomicInteger loggedCounter, final @NotNull String text) {
+            final @NotNull AtomicInteger loggedCounter,
+            final @NotNull String text) {
 
         return new Filter<>() {
             @Override

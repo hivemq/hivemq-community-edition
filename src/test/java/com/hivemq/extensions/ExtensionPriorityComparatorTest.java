@@ -18,8 +18,6 @@ package com.hivemq.extensions;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.TreeMap;
 
@@ -34,15 +32,13 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class ExtensionPriorityComparatorTest {
 
-    @Mock
-    private HiveMQExtensions hiveMQExtensions;
+    private final @NotNull HiveMQExtensions hiveMQExtensions = mock();
 
     private ExtensionPriorityComparator comparator;
 
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         comparator = new ExtensionPriorityComparator(hiveMQExtensions);
     }
 

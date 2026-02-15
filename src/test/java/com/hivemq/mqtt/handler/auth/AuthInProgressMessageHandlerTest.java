@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.auth;
 
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.connack.MqttConnackerImpl;
@@ -33,14 +34,13 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
 import static com.hivemq.mqtt.message.disconnect.DISCONNECT.SESSION_EXPIRY_NOT_SET;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Georg Held
@@ -48,16 +48,13 @@ import static org.junit.Assert.assertSame;
 @SuppressWarnings("NullabilityAnnotations")
 public class AuthInProgressMessageHandlerTest {
 
-    @Mock
-    private EventLog eventLog;
+    private final @NotNull EventLog eventLog = mock();
 
     private MqttConnacker connacker;
     private EmbeddedChannel channel;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         connacker = new MqttConnackerImpl(eventLog);
 
         channel = new EmbeddedChannel();

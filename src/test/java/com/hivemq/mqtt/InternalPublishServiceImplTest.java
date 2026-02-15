@@ -18,6 +18,7 @@ package com.hivemq.mqtt;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.PublishReturnCode;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -31,8 +32,6 @@ import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestException;
 import util.TestMessageUtil;
 
@@ -54,6 +53,7 @@ import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.anySet;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,14 +61,9 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 public class InternalPublishServiceImplTest {
 
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
-
-    @Mock
-    private LocalTopicTree topicTree;
-
-    @Mock
-    private PublishDistributor publishDistributor;
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
+    private final @NotNull LocalTopicTree topicTree = mock();
+    private final @NotNull PublishDistributor publishDistributor = mock();
 
     private ExecutorService executorService;
 
@@ -76,9 +71,6 @@ public class InternalPublishServiceImplTest {
 
     @Before
     public void before() {
-
-        MockitoAnnotations.initMocks(this);
-
         executorService = MoreExecutors.newDirectExecutorService();
 
         when(publishDistributor.distributeToNonSharedSubscribers(anyMap(),

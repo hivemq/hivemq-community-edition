@@ -20,12 +20,9 @@ import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.persistence.RetainedMessage;
 import com.hivemq.persistence.SingleWriterService;
 import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
-import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
@@ -38,7 +35,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -61,9 +57,8 @@ public class RetainedMessagePersistenceImplTest {
     public void setUp() throws Exception {
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence,
-                singleWriterService,
-                new Chunker());
+        retainedMessagePersistence =
+                new RetainedMessagePersistenceImpl(localPersistence, singleWriterService, new Chunker());
     }
 
     @After

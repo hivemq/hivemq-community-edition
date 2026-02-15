@@ -15,13 +15,13 @@
  */
 package com.hivemq.metrics.gauges;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -29,15 +29,12 @@ import static org.mockito.Mockito.when;
  */
 public class SessionsGaugeTest {
 
-    @Mock
-    ClientSessionLocalPersistence sessionPersistence;
+    private final @NotNull ClientSessionLocalPersistence sessionPersistence = mock();
 
     private SessionsGauge sessionsGauge;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         sessionsGauge = new SessionsGauge(sessionPersistence);
     }
 

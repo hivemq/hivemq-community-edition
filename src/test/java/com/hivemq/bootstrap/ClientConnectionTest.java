@@ -35,15 +35,14 @@ import static org.mockito.Mockito.when;
 
 public class ClientConnectionTest {
 
-    private @NotNull Channel channel;
+    private final @NotNull Channel channel = mock();
     private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() {
-        channel = mock(Channel.class);
-        final ChannelPipeline pipeline = mock(ChannelPipeline.class);
+        final ChannelPipeline pipeline = mock();
         when(channel.pipeline()).thenReturn(pipeline);
-        final PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
+        final PublishFlushHandler publishFlushHandler = mock();
         clientConnection = new DummyClientConnection(channel, publishFlushHandler);
     }
 

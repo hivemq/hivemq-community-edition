@@ -37,7 +37,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import util.DummyClientConnection;
 import util.TestMessageUtil;
 import util.encoder.TestMessageEncoder;
@@ -45,16 +44,14 @@ import util.encoder.TestMessageEncoder;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class MQTTMessageEncoderTest {
 
     private @NotNull EmbeddedChannel channel;
 
-    @Mock
-    private @NotNull MessageDroppedService messageDroppedService;
-
-    @Mock
-    private @NotNull SecurityConfigurationService securityConfigurationService;
+    private final @NotNull MessageDroppedService messageDroppedService = mock();
+    private final @NotNull SecurityConfigurationService securityConfigurationService = mock();
 
     @Before
     public void setUp() throws Exception {

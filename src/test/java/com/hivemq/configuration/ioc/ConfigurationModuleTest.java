@@ -26,20 +26,19 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("deprecation")
 public class ConfigurationModuleTest {
 
-    @Mock
-    SharedSubscriptionService sharedSubscriptionService;
+    private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
 
     private Injector injector;
     private TestConfigurationBootstrap testConfigurationBootstrap;
@@ -47,9 +46,6 @@ public class ConfigurationModuleTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         testConfigurationBootstrap = new TestConfigurationBootstrap();
         final FullConfigurationService fullConfigurationService =
                 testConfigurationBootstrap.getFullConfigurationService();

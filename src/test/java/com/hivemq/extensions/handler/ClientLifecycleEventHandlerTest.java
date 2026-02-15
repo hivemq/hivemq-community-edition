@@ -318,8 +318,8 @@ public class ClientLifecycleEventHandlerTest {
     }
 
     private Map<String, ClientLifecycleEventListenerProvider> createMap(
-            final @NotNull CountDownLatch countDownLatch1, final @NotNull CountDownLatch countDownLatch2)
-            throws Exception {
+            final @NotNull CountDownLatch countDownLatch1,
+            final @NotNull CountDownLatch countDownLatch2) throws Exception {
         final Map<String, ClientLifecycleEventListenerProvider> map = new TreeMap<>();
         map.put("plugin1", getTestProvider(countDownLatch1));
         map.put("plugin2", getTestProvider(countDownLatch2));

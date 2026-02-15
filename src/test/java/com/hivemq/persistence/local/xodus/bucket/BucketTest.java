@@ -15,30 +15,26 @@
  */
 package com.hivemq.persistence.local.xodus.bucket;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Lukas Brandl
  */
 public class BucketTest {
 
-    @Mock
-    Environment environment;
-
-    @Mock
-    Store store;
+    private final @NotNull Environment environment = mock();
+    private final @NotNull Store store = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

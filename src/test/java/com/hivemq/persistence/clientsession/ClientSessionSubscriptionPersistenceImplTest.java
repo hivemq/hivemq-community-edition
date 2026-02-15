@@ -18,6 +18,7 @@ package com.hivemq.persistence.clientsession;
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.iteration.Chunker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.message.QoS;
@@ -35,8 +36,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestSingleWriterFactory;
 
@@ -60,25 +59,12 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientSessionSubscriptionPersistenceImplTest {
 
-    private AutoCloseable closeableMock;
-
-    @Mock
-    private ClientSessionSubscriptionLocalPersistence localPersistence;
-
-    @Mock
-    private LocalTopicTree topicTree;
-
-    @Mock
-    private SharedSubscriptionService sharedSubscriptionService;
-
-    @Mock
-    private ConnectionPersistence connectionPersistence;
-
-    @Mock
-    private ClientSessionLocalPersistence clientSessionLocalPersistence;
-
-    @Mock
-    private PublishPollService publishPollService;
+    private final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence = mock();
+    private final @NotNull LocalTopicTree topicTree = mock();
+    private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
+    private final @NotNull ConnectionPersistence connectionPersistence = mock();
+    private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence = mock();
+    private final @NotNull PublishPollService publishPollService = mock();
 
     private ClientSessionSubscriptionPersistenceImpl persistence;
 
@@ -86,7 +72,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
         when(topicTree.addTopic(anyString(), any(Topic.class), anyByte(), anyString())).thenReturn(true);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence,
@@ -104,7 +89,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void tearDown() throws Exception {
         persistence.closeDB();
         singleWriterService.stop();
-        closeableMock.close();
     }
 
     @Test(timeout = 60000)

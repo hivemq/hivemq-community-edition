@@ -16,13 +16,13 @@
 package com.hivemq.mqtt.message.dropping;
 
 import com.codahale.metrics.MetricRegistry;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,17 +35,13 @@ public class MessageDroppedServiceImplTest {
     private final String topic = "topic";
     private final int qos = 1;
 
-    @Mock
-    private EventLog eventLog;
+    private final @NotNull EventLog eventLog = mock();
 
     private MessageDroppedService messageDroppedService;
 
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         messageDroppedService = new MessageDroppedServiceImpl(new MetricsHolder(new MetricRegistry()), eventLog);
     }
 

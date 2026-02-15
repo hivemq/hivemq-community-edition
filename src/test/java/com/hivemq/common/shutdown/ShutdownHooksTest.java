@@ -154,7 +154,8 @@ public class ShutdownHooksTest {
     }
 
     private @NotNull HiveMQShutdownHook createShutdownHook(
-            final @NotNull String name, final @NotNull Priority priority) {
+            final @NotNull String name,
+            final @NotNull Priority priority) {
 
         return new HiveMQShutdownHook() {
             @Override

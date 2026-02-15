@@ -15,13 +15,12 @@
  */
 package com.hivemq.extensions.auth.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.CONTINUE;
 import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT;
@@ -29,6 +28,7 @@ import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.A
 import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.SUCCESS;
 import static com.hivemq.extensions.auth.parameter.PublishAuthorizerOutputImpl.AuthorizationState.UNDECIDED;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christoph Schäbel
@@ -36,14 +36,12 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("NullabilityAnnotations")
 public class PublishAuthorizerOutputImplTest {
 
-    @Mock
-    private PluginOutPutAsyncer asyncer;
+    private final @NotNull PluginOutPutAsyncer asyncer = mock();
 
     private PublishAuthorizerOutputImpl output;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         output = new PublishAuthorizerOutputImpl(asyncer);
     }
 

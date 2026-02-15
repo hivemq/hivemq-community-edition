@@ -35,8 +35,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -67,8 +66,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private LocalPersistenceFileUtil localPersistenceFileUtil;
+    private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil = mock();
 
     private ClientSessionSubscriptionMemoryLocalPersistence persistence;
 
@@ -77,8 +75,6 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
 
     @Before
     public void before() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString())).thenReturn(
                 temporaryFolder.newFolder());

@@ -23,9 +23,8 @@ import com.hivemq.extension.sdk.api.events.client.ClientLifecycleEventListenerPr
 import com.hivemq.extension.sdk.api.events.client.parameters.ClientLifecycleEventListenerProviderInput;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -35,15 +34,12 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("ALL")
 public class EventRegistryImplTest {
 
-    @Mock
-    private LifecycleEventListeners eventListeners;
+    private final @NotNull LifecycleEventListeners eventListeners = mock();
 
     private EventRegistry registry;
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         registry = new EventRegistryImpl(eventListeners);
 
     }

@@ -31,8 +31,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 import util.LogbackCapturingAppender;
 import util.TestKeyStoreGenerator;
@@ -51,18 +49,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class SslFactoryTest {
 
-    @Mock
-    private @NotNull SocketChannel socketChannel;
-
-    @Mock
-    private @NotNull ByteBufAllocator byteBufAllocator;
-
-    @Mock
-    private @NotNull ListeningScheduledExecutorService executorService;
+    private final @NotNull SocketChannel socketChannel = mock();
+    private final @NotNull ByteBufAllocator byteBufAllocator = mock();
+    private final @NotNull ListeningScheduledExecutorService executorService = mock();
 
     private @NotNull SslFactory sslFactory;
 
@@ -70,12 +64,8 @@ public class SslFactoryTest {
 
     private @NotNull LogbackCapturingAppender logCapture;
 
-    private @NotNull AutoCloseable openMocks;
-
     @Before
     public void before() {
-        openMocks = MockitoAnnotations.openMocks(this);
-
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logCapture = LogbackCapturingAppender.Factory.weaveInto(logger);
 
@@ -89,7 +79,6 @@ public class SslFactoryTest {
 
     @After
     public void tearDown() throws Exception {
-        openMocks.close();
         LogbackCapturingAppender.Factory.cleanUp();
         testKeyStoreGenerator.release();
     }

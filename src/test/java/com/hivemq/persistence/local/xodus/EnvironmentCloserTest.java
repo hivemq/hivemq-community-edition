@@ -15,6 +15,7 @@
  */
 package com.hivemq.persistence.local.xodus;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import jetbrains.exodus.ExodusException;
 import jetbrains.exodus.env.Environment;
@@ -24,8 +25,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -43,13 +42,10 @@ public class EnvironmentCloserTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    LocalPersistenceFileUtil localPersistenceFileUtil;
+    private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         when(localPersistenceFileUtil.getLocalPersistenceFolder()).thenReturn(temporaryFolder.newFolder());
     }
 

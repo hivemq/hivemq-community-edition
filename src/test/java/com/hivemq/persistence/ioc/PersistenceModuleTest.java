@@ -27,6 +27,7 @@ import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -44,9 +45,7 @@ import com.hivemq.persistence.payload.PublishPayloadPersistenceImpl;
 import com.hivemq.persistence.payload.PublishPayloadRocksDBLocalPersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.assertSame;
@@ -59,12 +58,10 @@ import static org.mockito.Mockito.when;
  */
 public class PersistenceModuleTest {
 
-    @Mock
-    private Injector persistenceInjector;
+    private final @NotNull Injector persistenceInjector = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         when(persistenceInjector.getInstance(PublishPayloadPersistence.class)).thenReturn(Mockito.mock(
                 PublishPayloadPersistence.class));
 

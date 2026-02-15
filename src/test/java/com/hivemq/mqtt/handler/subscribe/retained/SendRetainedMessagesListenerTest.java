@@ -22,6 +22,7 @@ import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -36,8 +37,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
 import java.io.IOException;
@@ -55,6 +54,7 @@ import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -63,23 +63,16 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class SendRetainedMessagesListenerTest {
 
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
 
     private Set<Topic> ignoredTopics;
 
-    @Mock
-    private ChannelFuture channelFuture;
-
-    @Mock
-    private ClientQueuePersistence queuePersistence;
-
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
+    private final @NotNull ChannelFuture channelFuture = mock();
+    private final @NotNull ClientQueuePersistence queuePersistence = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         ignoredTopics = new LinkedHashSet<>();
     }
 
@@ -203,8 +196,7 @@ public class SendRetainedMessagesListenerTest {
 
         channel.runPendingTasks();
 
-        final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getValue().get(0);
@@ -287,8 +279,7 @@ public class SendRetainedMessagesListenerTest {
 
         channel.runPendingTasks();
 
-        final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getValue().get(0);
@@ -321,8 +312,7 @@ public class SendRetainedMessagesListenerTest {
         channel.runPendingTasks();
         channel.runPendingTasks();
 
-        final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
 
         final PUBLISH publish = captor.getAllValues().get(0).get(0);
@@ -477,8 +467,7 @@ public class SendRetainedMessagesListenerTest {
         channel.runPendingTasks();
         channel.runPendingTasks();
 
-        final ArgumentCaptor<List<PUBLISH>> captor =
-                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class) List.class);
         verify(queuePersistence, timeout(5000).times(2)).add(eq("client"),
                 eq(false),
                 captor.capture(),
@@ -499,7 +488,8 @@ public class SendRetainedMessagesListenerTest {
     }
 
     private SendRetainedMessagesListener createListener(
-            final List<SubscriptionResult> subscriptions, final Set<Topic> ignoredTopics) {
+            final List<SubscriptionResult> subscriptions,
+            final Set<Topic> ignoredTopics) {
 
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
                 retainedMessagePersistence,

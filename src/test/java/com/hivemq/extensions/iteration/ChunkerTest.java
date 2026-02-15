@@ -56,7 +56,9 @@ public class ChunkerTest {
         chunker.getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
             @Override
             public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
-                    final int bucket, final @NotNull String lastKey, final int maxResults) {
+                    final int bucket,
+                    final @NotNull String lastKey,
+                    final int maxResults) {
                 assertEquals(1, maxResults);
                 return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), true, "last", bucket));
             }
@@ -72,7 +74,9 @@ public class ChunkerTest {
                 chunker.getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
                     @Override
                     public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
-                            final int bucket, final @NotNull String lastKey, final int maxResults) {
+                            final int bucket,
+                            final @NotNull String lastKey,
+                            final int maxResults) {
 
                         counter[0]++;
                         return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), false, "last", bucket));
@@ -103,7 +107,9 @@ public class ChunkerTest {
                 chunker.getAllLocalChunk(cursor, 4, new Chunker.SingleWriterCall<String>() {
                     @Override
                     public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
-                            final int bucket, final @NotNull String lastKey, final int maxResults) {
+                            final int bucket,
+                            final @NotNull String lastKey,
+                            final int maxResults) {
                         counter[0]++;
                         return Futures.immediateFuture(new BucketChunkResult<>(Map.of(), false, "last", bucket));
                     }

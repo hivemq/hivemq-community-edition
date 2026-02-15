@@ -18,15 +18,15 @@ package com.hivemq.statistics;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,27 +37,16 @@ import static org.mockito.Mockito.when;
  */
 public class UsageStatisticsTest {
 
-    private AutoCloseable closeableMock;
-
-    @Mock
-    private UsageStatisticsCollector collector;
-
-    @Mock
-    private UsageStatisticsSender sender;
-
-    @Mock
-    private SystemInformation systemInformation;
-
-    @Mock
-    private ShutdownHooks shutdownHooks;
+    private final @NotNull UsageStatisticsCollector collector = mock();
+    private final @NotNull UsageStatisticsSender sender = mock();
+    private final @NotNull SystemInformation systemInformation = mock();
+    private final @NotNull ShutdownHooks shutdownHooks = mock();
 
     private UsageStatistics usageStatistics;
     private FullConfigurationService configurationService;
 
     @Before
     public void before() {
-        closeableMock = MockitoAnnotations.openMocks(this);
-
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
 
         usageStatistics =
@@ -67,7 +56,6 @@ public class UsageStatisticsTest {
     @After
     public void tearDown() throws Exception {
         usageStatistics.stop();
-        closeableMock.close();
     }
 
     @Test

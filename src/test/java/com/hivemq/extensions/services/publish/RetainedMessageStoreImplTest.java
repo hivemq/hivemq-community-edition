@@ -18,6 +18,7 @@ package com.hivemq.extensions.services.publish;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -34,9 +35,7 @@ import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import util.TestException;
 
 import java.nio.ByteBuffer;
@@ -51,6 +50,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -63,21 +63,16 @@ public class RetainedMessageStoreImplTest {
 
     private RetainedMessageStore retainedMessageStore;
 
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
-
-    @Mock
-    private PluginServiceRateLimitService pluginServiceRateLimitService;
-
-    @Mock
-    private AsyncIteratorFactory asyncIteratorFactory;
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
+    private final @NotNull PluginServiceRateLimitService pluginServiceRateLimitService = mock();
+    private final @NotNull AsyncIteratorFactory asyncIteratorFactory = mock();
 
     private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
-        managedPluginExecutorService = new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
+        closeableMock = managedPluginExecutorService =
+                new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
         managedPluginExecutorService.postConstruct();
         retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence,
                 managedPluginExecutorService,

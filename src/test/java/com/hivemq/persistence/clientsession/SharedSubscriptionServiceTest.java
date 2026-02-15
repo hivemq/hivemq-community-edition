@@ -17,6 +17,7 @@ package com.hivemq.persistence.clientsession;
 
 import com.google.common.collect.ImmutableSet;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
 import com.hivemq.mqtt.message.subscribe.Topic;
@@ -24,8 +25,6 @@ import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.ExecutionException;
 
@@ -36,6 +35,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,18 +46,13 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("deprecation")
 public class SharedSubscriptionServiceTest {
 
-    @Mock
-    LocalTopicTree topicTree;
-
-    @Mock
-    ClientSessionSubscriptionPersistence subscriptionPersistence;
+    private final @NotNull LocalTopicTree topicTree = mock();
+    private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence = mock();
 
     private SharedSubscriptionService service;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         InternalConfigurations.SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.set(1);
         InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.set(1);
 

@@ -16,7 +16,6 @@
 package com.hivemq.logging;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.configuration.service.entity.TcpListener;
@@ -26,10 +25,7 @@ import io.netty.util.Attribute;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
-import util.DummyClientConnection;
 import util.LogbackCapturingAppender;
 
 import java.net.InetSocketAddress;
@@ -73,10 +69,7 @@ public class EventLogTest {
 
     @Before
     public void setUp() throws Exception {
-        clientConnection = new UndefinedClientConnection(channel,
-                null,
-                new TcpListener(0, "localhost", "")
-        );
+        clientConnection = new UndefinedClientConnection(channel, null, new TcpListener(0, "localhost", ""));
         clientConnection.setClientSessionExpiryInterval(sessionExpiry);
         clientConnection.setCleanStart(cleanStart);
         clientConnection.setClientId(clientId);

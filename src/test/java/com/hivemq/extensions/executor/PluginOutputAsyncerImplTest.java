@@ -24,8 +24,6 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extensions.executor.task.PluginTaskOutput;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,14 +43,11 @@ public class PluginOutputAsyncerImplTest {
 
     private PluginOutPutAsyncer asyncer;
 
-    @Mock
-    private ShutdownHooks shutdownHooks;
+    private final @NotNull ShutdownHooks shutdownHooks = mock();
 
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         asyncer = new PluginOutputAsyncerImpl(shutdownHooks);
     }
 

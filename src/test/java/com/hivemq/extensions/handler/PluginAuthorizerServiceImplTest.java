@@ -511,8 +511,8 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private Map<String, AuthorizerProvider> createSubscriptionAuthorizerMap(
-            final @NotNull CountDownLatch countDownLatch1, final @NotNull CountDownLatch countDownLatch2)
-            throws Exception {
+            final @NotNull CountDownLatch countDownLatch1,
+            final @NotNull CountDownLatch countDownLatch2) throws Exception {
         final Map<String, AuthorizerProvider> map = new TreeMap<>();
         map.put("extension1", getTestAuthorizerProvider(TestAuthorizerNextProvider.class, countDownLatch1));
         map.put("extension2", getTestAuthorizerProvider(TestAuthorizerNextProvider.class, countDownLatch2));
@@ -520,8 +520,8 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private Map<String, AuthorizerProvider> createPublishAuthorizerMap(
-            final @NotNull CountDownLatch countDownLatch1, final @NotNull CountDownLatch countDownLatch2)
-            throws Exception {
+            final @NotNull CountDownLatch countDownLatch1,
+            final @NotNull CountDownLatch countDownLatch2) throws Exception {
         final Map<String, AuthorizerProvider> map = new TreeMap<>();
         map.put("extension1", getTestAuthorizerProvider(TestPubAuthorizerNextProvider.class, countDownLatch1));
         map.put("extension2", getTestAuthorizerProvider(TestPubAuthorizerNextProvider.class, countDownLatch2));
@@ -529,7 +529,8 @@ public class PluginAuthorizerServiceImplTest {
     }
 
     private AuthorizerProvider getTestAuthorizerProvider(
-            final @NotNull Class<?> clazz, final @NotNull CountDownLatch countDownLatch) throws Exception {
+            final @NotNull Class<?> clazz,
+            final @NotNull CountDownLatch countDownLatch) throws Exception {
         final Class<?> providerClass =
                 IsolatedExtensionClassloaderUtil.loadClass(temporaryFolder.getRoot().toPath(), clazz);
         return (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)

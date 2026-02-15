@@ -127,7 +127,8 @@ public class AbstractVariableHeaderLengthEncoderTest {
 
         @Override
         public int bufferSize(
-                final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull PUBLISH msg) {
+                final @NotNull ClientConnectionContext clientConnectionContext,
+                final @NotNull PUBLISH msg) {
             return 256;
         }
 

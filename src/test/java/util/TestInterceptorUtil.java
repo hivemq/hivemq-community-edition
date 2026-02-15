@@ -43,13 +43,14 @@ public class TestInterceptorUtil {
     }
 
     public static <T extends Interceptor> @NotNull T getIsolatedInterceptor(
-            final @NotNull Class<T> type, final @NotNull TemporaryFolder temporaryFolder) throws Exception {
+            final @NotNull Class<T> type,
+            final @NotNull TemporaryFolder temporaryFolder) throws Exception {
         return getIsolatedInterceptors(List.of(type), temporaryFolder).get(0);
     }
 
     public static <T extends Interceptor> @NotNull List<T> getIsolatedInterceptors(
-            final @NotNull List<Class<? extends T>> types, final @NotNull TemporaryFolder temporaryFolder)
-            throws Exception {
+            final @NotNull List<Class<? extends T>> types,
+            final @NotNull TemporaryFolder temporaryFolder) throws Exception {
         try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
                 .toPath(), types.toArray(new Class[0]))) {
             final LinkedList<T> list = new LinkedList<>();
@@ -66,7 +67,8 @@ public class TestInterceptorUtil {
 
         @Override
         public void onInboundPublish(
-                final @NotNull PublishInboundInput input, final @NotNull PublishInboundOutput output) {
+                final @NotNull PublishInboundInput input,
+                final @NotNull PublishInboundOutput output) {
         }
     }
 

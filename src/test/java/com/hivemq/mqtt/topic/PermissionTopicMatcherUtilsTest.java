@@ -112,8 +112,8 @@ public class PermissionTopicMatcherUtilsTest {
         assertFalse(matches("my/t+t", "my/ttt"));
     }
 
-    private boolean matches(
-            final @NotNull String permissionTopic, final @NotNull String actualTopic) throws InvalidTopicException {
+    private boolean matches(final @NotNull String permissionTopic, final @NotNull String actualTopic)
+            throws InvalidTopicException {
 
         final String stripedPermissionTopic = StringUtils.stripEnd(permissionTopic, "/");
         final String[] splitPermissionTopic = StringUtils.splitPreserveAllTokens(stripedPermissionTopic, "/");

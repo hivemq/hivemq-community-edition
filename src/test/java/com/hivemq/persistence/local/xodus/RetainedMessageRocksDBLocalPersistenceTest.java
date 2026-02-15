@@ -33,8 +33,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +44,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,26 +55,19 @@ import static org.mockito.Mockito.when;
  */
 public class RetainedMessageRocksDBLocalPersistenceTest {
 
-    private AutoCloseable closeableMock;
-
     private static final int BUCKETSIZE = 4;
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private RetainedMessageRocksDBLocalPersistence persistence;
 
-    @Mock
-    private LocalPersistenceFileUtil localPersistenceFileUtil;
-
-    @Mock
-    private PublishPayloadPersistence payloadPersistence;
+    private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil = mock();
+    private final @NotNull PublishPayloadPersistence payloadPersistence = mock();
 
     private PersistenceStartup persistenceStartup;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
-
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(BUCKETSIZE);
@@ -105,7 +97,6 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
     public void cleanUp() throws Exception {
         persistence.closeDB();
         persistenceStartup.finish();
-        closeableMock.close();
     }
 
     @Test

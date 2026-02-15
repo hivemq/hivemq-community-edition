@@ -15,13 +15,12 @@
  */
 package com.hivemq.extensions.auth.parameter;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.disconnect.DisconnectReasonCode;
 import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
 import com.hivemq.extensions.executor.PluginOutPutAsyncer;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl.AuthorizationState.CONTINUE;
 import static com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl.AuthorizationState.DISCONNECT;
@@ -29,6 +28,7 @@ import static com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputI
 import static com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl.AuthorizationState.SUCCESS;
 import static com.hivemq.extensions.auth.parameter.SubscriptionAuthorizerOutputImpl.AuthorizationState.UNDECIDED;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christoph Schäbel
@@ -36,14 +36,12 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("NullabilityAnnotations")
 public class SubscriptionAuthorizerOutputImplTest {
 
-    @Mock
-    private PluginOutPutAsyncer asyncer;
+    private final @NotNull PluginOutPutAsyncer asyncer = mock();
 
     private SubscriptionAuthorizerOutputImpl output;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         output = new SubscriptionAuthorizerOutputImpl(asyncer);
     }
 

@@ -21,6 +21,7 @@ import com.google.common.primitives.ImmutableIntArray;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.MessageWithID;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.publish.PUBLISH;
@@ -38,8 +39,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestSingleWriterFactory;
 
@@ -54,6 +53,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -62,27 +62,13 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class ClientQueuePersistenceImplTest {
 
-    private AutoCloseable closeableMock;
-
-    @Mock
-    ClientQueueXodusLocalPersistence localPersistence;
-
-    @Mock
-    PublishPayloadPersistence payloadPersistence;
-
-    @Mock
-    MqttConfigurationService mqttConfigurationService;
-
-    @Mock
-    ClientSessionLocalPersistence clientSessionLocalPersistence;
-
-    @Mock
-    LocalTopicTree topicTree;
-
-    @Mock
-    private ConnectionPersistence connectionPersistence;
-    @Mock
-    private PublishPollService publishPollService;
+    private final @NotNull ClientQueueXodusLocalPersistence localPersistence = mock();
+    private final @NotNull PublishPayloadPersistence payloadPersistence = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
+    private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence = mock();
+    private final @NotNull LocalTopicTree topicTree = mock();
+    private final @NotNull ConnectionPersistence connectionPersistence = mock();
+    private final @NotNull PublishPollService publishPollService = mock();
 
     private ClientQueuePersistenceImpl clientQueuePersistence;
 
@@ -92,7 +78,6 @@ public class ClientQueuePersistenceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         when(mqttConfigurationService.maxQueuedMessages()).thenReturn(1000L);
         when(mqttConfigurationService.getQueuedMessagesStrategy()).thenReturn(QueuedMessagesStrategy.DISCARD);
@@ -109,7 +94,6 @@ public class ClientQueuePersistenceImplTest {
     public void tearDown() throws Exception {
         clientQueuePersistence.closeDB();
         singleWriterService.stop();
-        closeableMock.close();
     }
 
     @Test(timeout = 5000)

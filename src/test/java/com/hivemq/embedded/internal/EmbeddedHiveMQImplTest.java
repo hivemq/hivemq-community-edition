@@ -39,7 +39,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
@@ -268,8 +267,7 @@ public class EmbeddedHiveMQImplTest {
         final EmbeddedExtensionImpl extension =
                 new EmbeddedExtensionImpl("id", "name", "123", "luke_skywalker", 0, 1000, embeddedMain);
 
-        final EmbeddedHiveMQImpl embeddedHiveMQ =
-                new EmbeddedHiveMQImpl(conf, data, extensions, extension, true);
+        final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions, extension, true);
         embeddedHiveMQ.start().get();
 
         assertTrue(embeddedMain.running.get());

@@ -46,8 +46,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -59,40 +57,25 @@ import static org.mockito.Mockito.verify;
  */
 public class InterceptorHandlerTest {
 
-    @Mock
-    private @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler;
-    @Mock
-    private @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler;
-    @Mock
-    private @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler;
-    @Mock
-    private @NotNull PubackInterceptorHandler pubackInterceptorHandler;
-    @Mock
-    private @NotNull PubrecInterceptorHandler pubrecInterceptorHandler;
-    @Mock
-    private @NotNull PubrelInterceptorHandler pubrelInterceptorHandler;
-    @Mock
-    private @NotNull PubcompInterceptorHandler pubcompInterceptorHandler;
-    @Mock
-    private @NotNull SubackOutboundInterceptorHandler subackOutboundInterceptorHandler;
-    @Mock
-    private @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler;
-    @Mock
-    private @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler;
-    @Mock
-    private @NotNull PingInterceptorHandler pingInterceptorHandler;
-    @Mock
-    private @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler;
-    @Mock
-    private @NotNull ChannelHandlerContext channelHandlerContext;
-    @Mock
-    private @NotNull ChannelPromise channelPromise;
+    private final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler = mock();
+    private final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler = mock();
+    private final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler = mock();
+    private final @NotNull PubackInterceptorHandler pubackInterceptorHandler = mock();
+    private final @NotNull PubrecInterceptorHandler pubrecInterceptorHandler = mock();
+    private final @NotNull PubrelInterceptorHandler pubrelInterceptorHandler = mock();
+    private final @NotNull PubcompInterceptorHandler pubcompInterceptorHandler = mock();
+    private final @NotNull SubackOutboundInterceptorHandler subackOutboundInterceptorHandler = mock();
+    private final @NotNull UnsubscribeInboundInterceptorHandler unsubscribeInboundInterceptorHandler = mock();
+    private final @NotNull UnsubackOutboundInterceptorHandler unsubackOutboundInterceptorHandler = mock();
+    private final @NotNull PingInterceptorHandler pingInterceptorHandler = mock();
+    private final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler = mock();
+    private final @NotNull ChannelHandlerContext channelHandlerContext = mock();
+    private final @NotNull ChannelPromise channelPromise = mock();
 
     private @NotNull InterceptorHandler interceptorHandler;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         interceptorHandler = new InterceptorHandler(connectInboundInterceptorHandler,
                 connackOutboundInterceptorHandler,
                 publishOutboundInterceptorHandler,

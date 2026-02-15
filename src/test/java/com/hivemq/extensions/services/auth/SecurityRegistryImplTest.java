@@ -237,8 +237,7 @@ public class SecurityRegistryImplTest {
     public static class TestSimpleAuthenticator implements SimpleAuthenticator {
 
         @Override
-        public void onConnect(
-                final @NotNull SimpleAuthInput input, final @NotNull SimpleAuthOutput output) {
+        public void onConnect(final @NotNull SimpleAuthInput input, final @NotNull SimpleAuthOutput output) {
         }
     }
 

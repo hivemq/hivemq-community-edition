@@ -44,8 +44,6 @@ import com.hivemq.persistence.clientsession.ClientSessionWill;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestException;
 
@@ -78,21 +76,15 @@ public class ClientServiceImplTest {
 
     private ClientService clientService;
 
-    @Mock
-    private ClientSessionPersistence clientSessionPersistence;
-
-    @Mock
-    private PluginServiceRateLimitService pluginServiceRateLimitService;
-
-    @Mock
-    AsyncIteratorFactory asyncIteratorFactory;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull PluginServiceRateLimitService pluginServiceRateLimitService = mock();
+    private final @NotNull AsyncIteratorFactory asyncIteratorFactory = mock();
 
     private final String clientId = "clientID";
     private final long sessionExpiry = 123546L;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         clientService = new ClientServiceImpl(pluginServiceRateLimitService,
                 clientSessionPersistence,
                 getManagedExtensionExecutorService(),

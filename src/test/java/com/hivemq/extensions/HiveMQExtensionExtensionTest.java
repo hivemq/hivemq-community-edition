@@ -117,7 +117,8 @@ public class HiveMQExtensionExtensionTest extends AbstractExtensionTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
             start = true;
         }
 
@@ -132,7 +133,8 @@ public class HiveMQExtensionExtensionTest extends AbstractExtensionTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
         }
 
         @Override
@@ -147,7 +149,8 @@ public class HiveMQExtensionExtensionTest extends AbstractExtensionTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
             output.preventExtensionStartup(reason);
         }
 

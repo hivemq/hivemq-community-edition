@@ -264,7 +264,9 @@ public class IsolatedExtensionClassloaderTest {
     }
 
     private void replaceFileContent(
-            final @NotNull File file, final @NotNull String original, final @NotNull String modified) throws Exception {
+            final @NotNull File file,
+            final @NotNull String original,
+            final @NotNull String modified) throws Exception {
         String content = FileUtils.readFileToString(file, UTF_8);
         content = content.replaceAll(original, modified);
         FileUtils.writeStringToFile(file, content, UTF_8);

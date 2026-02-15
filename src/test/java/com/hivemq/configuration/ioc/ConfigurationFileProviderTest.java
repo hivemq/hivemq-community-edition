@@ -22,15 +22,13 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.hivemq.configuration.info.SystemInformation;
 import com.hivemq.configuration.reader.ConfigurationFile;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -38,6 +36,7 @@ import java.io.File;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,21 +47,16 @@ public class ConfigurationFileProviderTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
-    @Mock
-    private Appender<ILoggingEvent> mockAppender;
+    private final @NotNull Appender<ILoggingEvent> mockAppender = mock();
+    private final @NotNull SystemInformation systemInformation = mock();
 
-    @Mock
-    private SystemInformation systemInformation;
-
-    @Captor
-    private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
+    private final @NotNull ArgumentCaptor<LoggingEvent> captorLoggingEvent =
+            ArgumentCaptor.forClass(LoggingEvent.class);
 
     private File confFolder;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logger.addAppender(mockAppender);
 

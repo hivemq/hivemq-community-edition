@@ -31,8 +31,8 @@ import static org.junit.Assert.assertTrue;
 public class FreePacketIdRangesTest {
 
     @Test
-    public void takeNextId_whenTakingIdsSequentiallyAndReturning_thenSequentialIdsAreProvided() throws
-            NoMessageIdAvailableException {
+    public void takeNextId_whenTakingIdsSequentiallyAndReturning_thenSequentialIdsAreProvided()
+            throws NoMessageIdAvailableException {
 
         final List<Integer> integers = new ArrayList<>();
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
@@ -51,8 +51,10 @@ public class FreePacketIdRangesTest {
             integers.add(id);
         }
 
-        assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(0)));
-        assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(1)));
+        assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID)
+                .get(0)));
+        assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID)
+                .get(1)));
     }
 
     @Test
@@ -69,8 +71,7 @@ public class FreePacketIdRangesTest {
     }
 
     @Test(expected = NoMessageIdAvailableException.class)
-    public void takeNextId_whenNoMoreIdsAvailable_thenExceptionIsThrown() throws
-            NoMessageIdAvailableException {
+    public void takeNextId_whenNoMoreIdsAvailable_thenExceptionIsThrown() throws NoMessageIdAvailableException {
 
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID; i++) {
@@ -80,8 +81,7 @@ public class FreePacketIdRangesTest {
     }
 
     @Test
-    public void returnId_whenSingleIdIsReturned_thenOnlyThisIdIsAvailable() throws
-            NoMessageIdAvailableException {
+    public void returnId_whenSingleIdIsReturned_thenOnlyThisIdIsAvailable() throws NoMessageIdAvailableException {
 
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID; i++) {

@@ -36,8 +36,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +56,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -65,13 +64,10 @@ import static org.mockito.Mockito.when;
  */
 public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
-    private AutoCloseable closeableMock;
-
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private LocalPersistenceFileUtil localPersistenceFileUtil;
+    private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil = mock();
 
     private ClientSessionSubscriptionXodusLocalPersistence persistence;
 
@@ -81,8 +77,6 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
 
     @Before
     public void before() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
-
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(bucketCount);
@@ -101,7 +95,6 @@ public class ClientSessionSubscriptionXodusLocalPersistenceTest {
     public void cleanUp() throws Exception {
         persistence.closeDB();
         persistenceStartup.finish();
-        closeableMock.close();
     }
 
     @Test

@@ -49,8 +49,6 @@ import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence
 import com.hivemq.persistence.clientsession.callback.SubscriptionResult;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestException;
 
 import java.util.ArrayList;
@@ -87,22 +85,13 @@ public class SubscriptionStoreImplTest {
 
     private SubscriptionStore subscriptionStore;
 
-    @Mock
-    private ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
-
-    @Mock
-    private PluginServiceRateLimitService rateLimitService;
-
-    @Mock
-    private LocalTopicTree topicTree;
-
-    @Mock
-    private AsyncIteratorFactory asyncIteratorFactory;
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
+    private final @NotNull PluginServiceRateLimitService rateLimitService = mock();
+    private final @NotNull LocalTopicTree topicTree = mock();
+    private final @NotNull AsyncIteratorFactory asyncIteratorFactory = mock();
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         subscriptionStore = new SubscriptionStoreImpl(clientSessionSubscriptionPersistence,
                 rateLimitService,
                 topicTree,
