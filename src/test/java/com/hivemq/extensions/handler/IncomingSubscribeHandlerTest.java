@@ -492,7 +492,8 @@ public class IncomingSubscribeHandlerTest {
 
         @Override
         public void onInboundSubscribe(
-                final @NotNull SubscribeInboundInput input, final @NotNull SubscribeInboundOutput output) {
+                final @NotNull SubscribeInboundInput input,
+                final @NotNull SubscribeInboundOutput output) {
             output.getSubscribePacket()
                     .getSubscriptions()
                     .get(0)
@@ -504,7 +505,8 @@ public class IncomingSubscribeHandlerTest {
 
         @Override
         public void onInboundSubscribe(
-                final @NotNull SubscribeInboundInput input, final @NotNull SubscribeInboundOutput output) {
+                final @NotNull SubscribeInboundInput input,
+                final @NotNull SubscribeInboundOutput output) {
             final Async<SubscribeInboundOutput> async = output.async(Duration.ofMillis(10), TimeoutFallback.FAILURE);
             try {
                 Thread.sleep(100);
@@ -519,7 +521,8 @@ public class IncomingSubscribeHandlerTest {
 
         @Override
         public void onInboundSubscribe(
-                final @NotNull SubscribeInboundInput input, final @NotNull SubscribeInboundOutput output) {
+                final @NotNull SubscribeInboundInput input,
+                final @NotNull SubscribeInboundOutput output) {
             throw new NullPointerException();
         }
     }

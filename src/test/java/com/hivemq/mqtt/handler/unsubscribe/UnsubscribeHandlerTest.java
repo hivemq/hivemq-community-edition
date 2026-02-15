@@ -31,8 +31,6 @@ import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.DummyHandler;
 
@@ -44,17 +42,15 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 public class UnsubscribeHandlerTest {
 
-    @Mock
-    private @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
-
-    @Mock
-    private @NotNull SharedSubscriptionService sharedSubscriptionService;
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
+    private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
 
     private @NotNull UnsubscribeHandler unsubscribeHandler;
     private @NotNull EmbeddedChannel channel;
@@ -62,7 +58,6 @@ public class UnsubscribeHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
         clientConnection = new DummyClientConnection(channel, null);
         channel = new EmbeddedChannel(unsubscribeHandler);

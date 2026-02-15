@@ -15,11 +15,11 @@
  */
 package com.hivemq.security.ssl;
 
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -28,9 +28,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.ssl.NotSslRecordException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.DummyClientConnection;
 import util.TestChannelAttribute;
 
 import javax.net.ssl.SSLException;
@@ -47,35 +44,25 @@ import static org.mockito.Mockito.when;
  */
 public class SslExceptionHandlerTest {
 
-    @Mock
-    ChannelHandlerContext ctx;
-
-    @Mock
-    Channel channel;
-
-    @Mock
-    Throwable throwable;
-
-    @Mock
-    EventLog eventLog;
+    private final @NotNull ChannelHandlerContext ctx = mock();
+    private final @NotNull Channel channel = mock();
+    private final @NotNull Throwable throwable = mock();
+    private final @NotNull EventLog eventLog = mock();
 
     SslExceptionHandler sslExceptionHandler;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
 
-        final Listener listener = mock(TcpListener.class);
+        final TcpListener listener = mock();
         final ClientConnectionContext clientConnection = new UndefinedClientConnection(channel, null, listener);
         clientConnection.setClientId("client");
-
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
                 clientConnection));
         when(channel.isActive()).thenReturn(true);
 
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
-
         sslExceptionHandler = new SslExceptionHandler(mqttServerDisconnector);
     }
 

@@ -45,11 +45,11 @@ import static org.mockito.Mockito.when;
 public class KeepAliveDisconnectHandlerTest {
 
     public static final long READER_IDLE_TIME = KeepAliveDisconnectHandler.MIN_TIMEOUT_NANOS * 2;
-    private final @NotNull ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-    private final @NotNull Channel channel = mock(Channel.class);
-    private final @NotNull EventLoop executor = mock(EventLoop.class);
-    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService =
-            mock(KeepAliveDisconnectService.class);
+
+    private final @NotNull ChannelHandlerContext ctx = mock();
+    private final @NotNull Channel channel = mock();
+    private final @NotNull EventLoop executor = mock();
+    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService = mock();
 
     @Before
     public void setUp() {

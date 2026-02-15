@@ -16,15 +16,15 @@
 package com.hivemq.persistence.clientsession.task;
 
 import com.google.common.collect.ImmutableSet;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl;
 import com.hivemq.persistence.clientsession.PendingWillMessages;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -32,20 +32,14 @@ import static org.mockito.Mockito.verify;
  */
 public class ClientSessionCleanUpTaskTest {
 
-    @Mock
-    private ClientSessionLocalPersistence localPersistence;
-
-    @Mock
-    private ClientSessionPersistenceImpl clientSessionPersistence;
-
-    @Mock
-    private PendingWillMessages pendingWillMessages;
+    private final @NotNull ClientSessionLocalPersistence localPersistence = mock();
+    private final @NotNull ClientSessionPersistenceImpl clientSessionPersistence = mock();
+    private final @NotNull PendingWillMessages pendingWillMessages = mock();
 
     private ClientSessionCleanUpTask task;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         task = new ClientSessionCleanUpTask(localPersistence, clientSessionPersistence, pendingWillMessages);
     }
 

@@ -29,6 +29,7 @@ import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.PersistenceConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
@@ -57,9 +58,7 @@ import com.hivemq.persistence.retained.RetainedMessageLocalPersistence;
 import com.hivemq.throttling.ioc.ThrottlingModule;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.configuration.service.PersistenceConfigurationService.PersistenceMode;
 import static com.hivemq.migration.meta.PersistenceType.FILE;
@@ -74,45 +73,21 @@ import static org.mockito.Mockito.when;
  */
 public class LocalPersistenceModuleTest {
 
-    @Mock
-    private TopicMatcher topicMatcher;
-
-    @Mock
-    private SystemInformation systemInformation;
-
-    @Mock
-    private ListeningExecutorService listeningExecutorService;
-
-    @Mock
-    private ListeningScheduledExecutorService listeningScheduledExecutorService;
-
-    @Mock
-    private MetricsHolder metricsHolder;
-
-    @Mock
-    private FullConfigurationService configurationService;
-
-    @Mock
-    private SingleWriterServiceImpl singleWriterServiceImpl;
-
-    @Mock
-    private EventLog eventLog;
-
-    @Mock
-    private MessageDroppedService messageDroppedService;
-
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
-
-    @Mock
-    private PersistenceConfigurationService persistenceConfigurationService;
-
-    @Mock
-    private Injector persistenceInjector;
+    private final @NotNull TopicMatcher topicMatcher = mock();
+    private final @NotNull SystemInformation systemInformation = mock();
+    private final @NotNull ListeningExecutorService listeningExecutorService = mock();
+    private final @NotNull ListeningScheduledExecutorService listeningScheduledExecutorService = mock();
+    private final @NotNull MetricsHolder metricsHolder = mock();
+    private final @NotNull FullConfigurationService configurationService = mock();
+    private final @NotNull SingleWriterServiceImpl singleWriterServiceImpl = mock();
+    private final @NotNull EventLog eventLog = mock();
+    private final @NotNull MessageDroppedService messageDroppedService = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
+    private final @NotNull PersistenceConfigurationService persistenceConfigurationService = mock();
+    private final @NotNull Injector persistenceInjector = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         when(metricsHolder.getMetricRegistry()).thenReturn(new MetricRegistry());
 
         when(persistenceInjector.getInstance(PublishPayloadPersistence.class)).thenReturn(Mockito.mock(

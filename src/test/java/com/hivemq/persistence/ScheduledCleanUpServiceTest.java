@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
@@ -28,8 +29,6 @@ import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
 import java.util.concurrent.Executors;
@@ -58,23 +57,15 @@ public class ScheduledCleanUpServiceTest {
     private final ListeningScheduledExecutorService scheduledExecutorService =
             MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
 
-    @Mock
-    private ClientSessionPersistence clientSessionPersistence;
-
-    @Mock
-    private ClientSessionSubscriptionPersistence subscriptionPersistence;
-
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
-
-    @Mock
-    private ClientQueuePersistence clientQueuePersistence;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence = mock();
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
+    private final @NotNull ClientQueuePersistence clientQueuePersistence = mock();
 
     private ScheduledCleanUpService scheduledCleanUpService;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         scheduledCleanUpService = new ScheduledCleanUpService(scheduledExecutorService,
                 clientSessionPersistence,
                 subscriptionPersistence,

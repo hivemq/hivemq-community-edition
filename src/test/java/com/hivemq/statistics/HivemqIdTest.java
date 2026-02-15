@@ -16,18 +16,18 @@
 package com.hivemq.statistics;
 
 import com.hivemq.configuration.info.SystemInformation;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -38,15 +38,12 @@ public class HivemqIdTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private SystemInformation systemInformation;
+    private final @NotNull SystemInformation systemInformation = mock();
 
     private HivemqId hivemqId;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         when(systemInformation.getDataFolder()).thenReturn(temporaryFolder.getRoot());
 
         hivemqId = new HivemqId(systemInformation);

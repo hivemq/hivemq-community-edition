@@ -71,7 +71,11 @@ public class TestMessageUtil {
     }
 
     public static PUBLISH createMqtt3Publish(
-            final String hivemqId, final String topic, final QoS qoS, final byte[] payload, final boolean retain) {
+            final String hivemqId,
+            final String topic,
+            final QoS qoS,
+            final byte[] payload,
+            final boolean retain) {
         return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
                 .withOnwardQos(qoS)
                 .withTopic(topic)
@@ -96,7 +100,10 @@ public class TestMessageUtil {
     }
 
     public static PUBLISH createMqtt3Publish(
-            final String hivemqId, final PUBLISH publish, final long timestamp, final long publishId) {
+            final String hivemqId,
+            final PUBLISH publish,
+            final long timestamp,
+            final long publishId) {
         return new PUBLISHFactory.Mqtt3Builder().fromPublish(publish)
                 .withHivemqId(hivemqId)
                 .withTimestamp(timestamp)

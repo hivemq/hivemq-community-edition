@@ -40,17 +40,15 @@ import static org.mockito.Mockito.when;
 
 public class KeepAliveDisconnectServiceTest {
 
-    private final @NotNull ShutdownHooks shutdownHooks = new ShutdownHooks();
+    private final @NotNull MqttServerDisconnector mqttServerDisconnector = mock();
     private final @NotNull ArgumentCaptor<Channel> channelArgumentCaptor = ArgumentCaptor.forClass(Channel.class);
 
-    private final @NotNull MqttServerDisconnector mqttServerDisconnector = mock(MqttServerDisconnector.class);
-
-    private @NotNull KeepAliveDisconnectService keepAliveDisconnectService;
-
+    private final @NotNull ShutdownHooks shutdownHooks = new ShutdownHooks();
+    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService =
+            new KeepAliveDisconnectService(mqttServerDisconnector, shutdownHooks);
 
     @Before
     public void setUp() {
-        keepAliveDisconnectService = new KeepAliveDisconnectService(mqttServerDisconnector, shutdownHooks);
         doAnswer(invocation -> null).when(mqttServerDisconnector)
                 .disconnect(channelArgumentCaptor.capture(), any(), any(), any(), any());
     }
@@ -141,8 +139,8 @@ public class KeepAliveDisconnectServiceTest {
     @Test
     public void test_whenTasksAreSlowlySubmittedAndThrowExceptions_thenAllTasksWillBeExecuted() {
         // TestChannel behaves odd sometimes, this is safe
-        final Channel channel = mock(Channel.class);
-        final EventLoop eventLoop = mock(EventLoop.class);
+        final Channel channel = mock();
+        final EventLoop eventLoop = mock();
         when(channel.eventLoop()).thenReturn(eventLoop);
         final Random random = new Random();
         final AtomicInteger withoutException = new AtomicInteger(0);

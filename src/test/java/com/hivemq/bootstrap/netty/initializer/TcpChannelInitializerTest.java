@@ -20,43 +20,30 @@ import com.hivemq.bootstrap.netty.FakeChannelPipeline;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import com.hivemq.security.ssl.NonSslHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import javax.inject.Provider;
 
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NON_SSL_HANDLER;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class TcpChannelInitializerTest {
 
-    @Mock
-    private SocketChannel socketChannel;
-
-    @Mock
-    private ChannelDependencies channelDependencies;
-
-    @Mock
-    private Provider<NonSslHandler> nonSslHandlerProvider;
-
-    @Mock
-    private TcpListener tcpListener;
-
-    @Mock
-    private MqttServerDisconnectorImpl mqttServerDisconnector;
-
-    @Mock
-    private FullConfigurationService fullConfigurationService;
-
-    @Mock
-    private RestrictionsConfigurationService restrictionsConfigurationService;
+    private final @NotNull SocketChannel socketChannel = mock();
+    private final @NotNull ChannelDependencies channelDependencies = mock();
+    private final @NotNull Provider<NonSslHandler> nonSslHandlerProvider = mock();
+    private final @NotNull TcpListener tcpListener = mock();
+    private final @NotNull MqttServerDisconnectorImpl mqttServerDisconnector = mock();
+    private final @NotNull FullConfigurationService fullConfigurationService = mock();
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
 
 
     private ChannelPipeline pipeline;
@@ -65,8 +52,6 @@ public class TcpChannelInitializerTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);

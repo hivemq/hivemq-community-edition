@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.mqtt5.Mqtt5RetainHandling;
@@ -33,8 +34,6 @@ import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence
 import com.hivemq.persistence.clientsession.SharedSubscriptionService;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Set;
 
@@ -45,19 +44,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class TopicTreeStartupTest {
 
-    @Mock
-    ClientSessionPersistence clientSessionPersistence;
-
-    @Mock
-    ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
-
-    @Mock
-    SharedSubscriptionService sharedSubscriptionService;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
+    private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
 
 
     private LocalTopicTree topicTree;
@@ -65,8 +60,6 @@ public class TopicTreeStartupTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
 
         topicTreeStartup = new TopicTreeStartup(topicTree,

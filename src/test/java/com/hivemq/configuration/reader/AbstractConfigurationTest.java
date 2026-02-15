@@ -27,18 +27,18 @@ import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImp
 import com.hivemq.configuration.service.impl.SecurityConfigurationServiceImpl;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.statistics.UsageStatisticsConfig;
 import com.hivemq.statistics.UsageStatisticsConfigImpl;
 import com.hivemq.util.EnvVarUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class AbstractConfigurationTest {
@@ -46,31 +46,23 @@ public class AbstractConfigurationTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    EnvVarUtil envVarUtil;
+    final @NotNull EnvVarUtil envVarUtil = mock();
 
-    ListenerConfigurationService listenerConfigurationService;
+    final ListenerConfigurationService listenerConfigurationService = new ListenerConfigurationServiceImpl();
+    final MqttConfigurationService mqttConfigurationService = new MqttConfigurationServiceImpl();
+    final RestrictionsConfigurationService restrictionsConfigurationService =
+            new RestrictionsConfigurationServiceImpl();
+    final SecurityConfigurationService securityConfigurationService = new SecurityConfigurationServiceImpl();
+    final UsageStatisticsConfig usageStatisticsConfig = new UsageStatisticsConfigImpl();
+    final SystemInformation systemInformation = new SystemInformationImpl(false);
+    final PersistenceConfigurationService persistenceConfigurationService = new PersistenceConfigurationServiceImpl();
+
     File xmlFile;
     ConfigFileReader reader;
-    MqttConfigurationService mqttConfigurationService;
-    RestrictionsConfigurationService restrictionsConfigurationService;
-    SecurityConfigurationService securityConfigurationService;
-    UsageStatisticsConfig usageStatisticsConfig;
-    SystemInformation systemInformation;
-    PersistenceConfigurationService persistenceConfigurationService;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        listenerConfigurationService = new ListenerConfigurationServiceImpl();
-
         xmlFile = temporaryFolder.newFile();
-        securityConfigurationService = new SecurityConfigurationServiceImpl();
-        mqttConfigurationService = new MqttConfigurationServiceImpl();
-        restrictionsConfigurationService = new RestrictionsConfigurationServiceImpl();
-        usageStatisticsConfig = new UsageStatisticsConfigImpl();
-        systemInformation = new SystemInformationImpl(false);
-        persistenceConfigurationService = new PersistenceConfigurationServiceImpl();
 
         when(envVarUtil.replaceEnvironmentVariablePlaceholders(anyString())).thenCallRealMethod();
         final ConfigurationFile configurationFile = new ConfigurationFile(xmlFile);
@@ -83,5 +75,4 @@ public class AbstractConfigurationTest {
                 new ListenerConfigurator(listenerConfigurationService, systemInformation),
                 new PersistenceConfigurator(persistenceConfigurationService));
     }
-
 }

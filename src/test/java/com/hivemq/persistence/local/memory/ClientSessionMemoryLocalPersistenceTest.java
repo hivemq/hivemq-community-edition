@@ -38,13 +38,10 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.persistence.payload.PublishPayloadPersistence;
 import com.hivemq.util.LocalPersistenceFileUtil;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestBucketUtil;
 
 import java.util.ArrayList;
@@ -74,27 +71,18 @@ public class ClientSessionMemoryLocalPersistenceTest {
 
     private static final int BUCKET_COUNT = 4;
 
-    private @NotNull AutoCloseable closeableMock;
-
     @Rule
     public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
-
-    @Mock
-    private @NotNull PublishPayloadPersistence payloadPersistence;
-
-    @Mock
-    private @NotNull EventLog eventLog;
+    private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil = mock();
+    private final @NotNull PublishPayloadPersistence payloadPersistence = mock();
+    private final @NotNull EventLog eventLog = mock();
 
     private @NotNull Gauge<Long> memoryGauge;
     private @NotNull ClientSessionMemoryLocalPersistence persistence;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
-
         InternalConfigurations.PERSISTENCE_CLOSE_RETRIES.set(3);
         InternalConfigurations.PERSISTENCE_CLOSE_RETRY_INTERVAL_MSEC.set(5);
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(BUCKET_COUNT);
@@ -105,17 +93,9 @@ public class ClientSessionMemoryLocalPersistenceTest {
         when(metricsHolder.getStoredWillMessagesCount()).thenReturn(mock(Counter.class));
 
         final MetricRegistry metricRegistry = new MetricRegistry();
-        persistence = new ClientSessionMemoryLocalPersistence(
-                payloadPersistence,
-                metricRegistry,
-                metricsHolder,
-                eventLog);
+        persistence =
+                new ClientSessionMemoryLocalPersistence(payloadPersistence, metricRegistry, metricsHolder, eventLog);
         memoryGauge = metricRegistry.gauge(HiveMQMetrics.CLIENT_SESSIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(), null);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        closeableMock.close();
     }
 
     @Test
@@ -280,8 +260,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertEquals(321L, Objects.requireNonNull(persistence.getTimestamp("clientId")).longValue());
 
         assertFalse(Objects.requireNonNull(persistence.getSession("clientId2", false)).isConnected());
-        assertEquals(
-                SESSION_EXPIRE_ON_DISCONNECT,
+        assertEquals(SESSION_EXPIRE_ON_DISCONNECT,
                 Objects.requireNonNull(persistence.getSession("clientId2", false)).getSessionExpiryIntervalSec());
         assertEquals(4321L, Objects.requireNonNull(persistence.getTimestamp("clientId2")).longValue());
     }
@@ -413,8 +392,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
                 new ClientSession(false, SESSION_EXPIRY_MAX),
                 timestamp,
                 BucketUtils.getBucket("clientId", BUCKET_COUNT));
-        assertEquals(
-                timestamp,
+        assertEquals(timestamp,
                 Objects.requireNonNull(persistence.getTimestamp("clientId",
                         BucketUtils.getBucket("clientId", BUCKET_COUNT))).longValue());
     }

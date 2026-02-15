@@ -16,30 +16,21 @@
 package com.hivemq.bootstrap;
 
 import com.hivemq.configuration.service.entity.TcpListener;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.ChannelFuture;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 public class BindInformationTest {
 
+    private final @NotNull ChannelFuture future = mock();
 
-    @Mock
-    ChannelFuture future;
-
-    private TcpListener listener;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        listener = new TcpListener(1883, "0.0.0.0");
-    }
+    private final @NotNull TcpListener listener = new TcpListener(1883, "0.0.0.0", "test");
 
     @Test
-    public void test_bind_information() throws Exception {
+    public void test_bind_information() {
         final BindInformation bindInformation = new BindInformation(listener, future);
 
         assertSame(listener, bindInformation.getListener());
@@ -47,12 +38,12 @@ public class BindInformationTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_listener_null() throws Exception {
+    public void test_listener_null() {
         new BindInformation(null, future);
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_future_null() throws Exception {
+    public void test_future_null() {
         new BindInformation(listener, null);
     }
 }

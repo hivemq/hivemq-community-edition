@@ -23,8 +23,6 @@ import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christoph Schäbel
@@ -48,12 +47,10 @@ public class PluginTaskExecutorTest {
 
     private List<Integer> executionOrder;
 
-    @Mock
-    IsolatedExtensionClassloader classloader;
+    private final @NotNull IsolatedExtensionClassloader classloader = mock();
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         executionOrder = Collections.synchronizedList(new ArrayList<>());
 
         pluginTaskExecutor = new PluginTaskExecutor(new AtomicLong(0));

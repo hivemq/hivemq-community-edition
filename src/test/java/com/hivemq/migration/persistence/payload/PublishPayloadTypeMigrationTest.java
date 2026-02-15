@@ -43,8 +43,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +50,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -63,15 +62,13 @@ public class PublishPayloadTypeMigrationTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private SystemInformation systemInformation;
+    private final @NotNull SystemInformation systemInformation = mock();
 
     private File dataFolder;
     private FullConfigurationService configurationService;
 
     @Before
     public void before() throws IOException {
-        MockitoAnnotations.initMocks(this);
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());

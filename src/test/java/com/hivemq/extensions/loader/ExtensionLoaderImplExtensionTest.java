@@ -764,7 +764,8 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
         }
 
         @Override
@@ -782,7 +783,8 @@ public class ExtensionLoaderImplExtensionTest extends AbstractExtensionTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
             System.out.println(badString);
         }
 

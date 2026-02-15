@@ -45,7 +45,8 @@ public class IsolatedExtensionClassloaderUtil {
      * @return the loaded class
      */
     public static <T> @NotNull Class<T> loadClass(
-            final @NotNull Path temporaryFolder, final @NotNull Class<T> mainClass) throws Exception {
+            final @NotNull Path temporaryFolder,
+            final @NotNull Class<T> mainClass) throws Exception {
         final String mainClassName = mainClass.getName();
 
         // get referenced classes from same package
@@ -101,7 +102,8 @@ public class IsolatedExtensionClassloaderUtil {
      * @return an instance of the given class (using the default constructor)
      */
     public static <T> @NotNull T loadInstance(
-            final @NotNull IsolatedExtensionClassloader classLoader, final @NotNull Class<T> clazz) throws Exception {
+            final @NotNull IsolatedExtensionClassloader classLoader,
+            final @NotNull Class<T> clazz) throws Exception {
         //noinspection unchecked
         final Class<T> isolatedClazz = (Class<T>) classLoader.loadClass(clazz.getName());
         return isolatedClazz.getDeclaredConstructor().newInstance();
@@ -124,7 +126,8 @@ public class IsolatedExtensionClassloaderUtil {
      * @return an {@link IsolatedExtensionClassloader} for the given classes
      */
     public static @NotNull IsolatedExtensionClassloader buildClassLoader(
-            final @NotNull Path temporaryFolder, final @NotNull Class<?> @NotNull [] classes) throws Exception {
+            final @NotNull Path temporaryFolder,
+            final @NotNull Class<?> @NotNull [] classes) throws Exception {
         final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class).addClasses(classes);
         final File jarFile = createJarFile(temporaryFolder, classes[0], javaArchive);
         return buildClassLoader(new URL[]{jarFile.toURI().toURL()});
@@ -135,7 +138,9 @@ public class IsolatedExtensionClassloaderUtil {
     }
 
     private static @NotNull File createJarFile(
-            final @NotNull Path temporaryFolder, final @NotNull Class<?> mainClass, final JavaArchive javaArchive) {
+            final @NotNull Path temporaryFolder,
+            final @NotNull Class<?> mainClass,
+            final JavaArchive javaArchive) {
         // just in case someone uses this with an inner class like TestClass$1
         final String jarFileName = mainClass.getSimpleName().replace("$", "_") + ".jar";
         final File jarFile = temporaryFolder.resolve(jarFileName).toFile();

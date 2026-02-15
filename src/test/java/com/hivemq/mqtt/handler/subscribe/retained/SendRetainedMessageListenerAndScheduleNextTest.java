@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.subscribe.retained;
 import com.google.common.util.concurrent.Futures;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.mqtt.message.pool.exception.NoMessageIdAvailableException;
 import com.hivemq.mqtt.message.subscribe.Topic;
@@ -25,8 +26,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.DefaultEventLoop;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestChannelAttribute;
 
@@ -36,6 +35,7 @@ import java.util.concurrent.Executors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -46,17 +46,13 @@ import static org.mockito.Mockito.when;
  */
 public class SendRetainedMessageListenerAndScheduleNextTest {
 
-    @Mock
-    private RetainedMessagesSender retainedMessagesSender;
-
-    @Mock
-    private Channel channel;
+    private final @NotNull RetainedMessagesSender retainedMessagesSender = mock();
+    private final @NotNull Channel channel = mock();
 
     private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         clientConnection = new DummyClientConnection(channel, null);
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
                 clientConnection));

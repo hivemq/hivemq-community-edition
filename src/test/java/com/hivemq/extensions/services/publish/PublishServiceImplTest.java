@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.hivemq.common.shutdown.ShutdownHooks;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.packets.general.Qos;
 import com.hivemq.extension.sdk.api.packets.general.UserProperties;
 import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
@@ -40,8 +41,6 @@ import com.hivemq.mqtt.topic.SubscriptionFlag;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import java.nio.ByteBuffer;
@@ -55,6 +54,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,20 +63,11 @@ import static org.mockito.Mockito.when;
  */
 public class PublishServiceImplTest {
 
-    @Mock
-    PluginServiceRateLimitService rateLimitService;
-
-    @Mock
-    InternalPublishService internalPublishService;
-
-    @Mock
-    ShutdownHooks shutdownHooks;
-
-    @Mock
-    PublishDistributor publishDistributor;
-
-    @Mock
-    LocalTopicTree topicTree;
+    private final @NotNull PluginServiceRateLimitService rateLimitService = mock();
+    private final @NotNull InternalPublishService internalPublishService = mock();
+    private final @NotNull ShutdownHooks shutdownHooks = mock();
+    private final @NotNull PublishDistributor publishDistributor = mock();
+    private final @NotNull LocalTopicTree topicTree = mock();
 
     private GlobalManagedExtensionExecutorService managedPluginExecutorService;
 
@@ -87,7 +78,6 @@ public class PublishServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
         managedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
         managedPluginExecutorService.postConstruct();

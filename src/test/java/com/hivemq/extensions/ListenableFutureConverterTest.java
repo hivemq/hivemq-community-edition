@@ -18,12 +18,11 @@ package com.hivemq.extensions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import util.TestException;
 
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +34,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,12 +43,10 @@ import static org.mockito.Mockito.when;
  */
 public class ListenableFutureConverterTest {
 
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

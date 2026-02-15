@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.clientqueue.ClientQueuePersistence;
 import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import com.hivemq.persistence.clientsession.ClientSessionSubscriptionPersistence;
@@ -28,41 +29,29 @@ import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class PersistenceShutdownHookTest {
 
-    @Mock
-    private ClientSessionPersistence clientSessionPersistence;
-    @Mock
-    private ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
-    @Mock
-    private IncomingMessageFlowPersistence incomingMessageFlowPersistence;
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
-    @Mock
-    private ListeningExecutorService persistenceExecutorService;
-    @Mock
-    private ListeningScheduledExecutorService persistenceScheduledExecutorService;
-    @Mock
-    private SingleWriterService singleWriterService;
-    @Mock
-    private PublishPayloadPersistence payloadPersistence;
-    @Mock
-    private ListeningScheduledExecutorService payloadPersistenceExecutor;
-    @Mock
-    private ClientQueuePersistence clientQueuePersistence;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
+    private final @NotNull IncomingMessageFlowPersistence incomingMessageFlowPersistence = mock();
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
+    private final @NotNull ListeningExecutorService persistenceExecutorService = mock();
+    private final @NotNull ListeningScheduledExecutorService persistenceScheduledExecutorService = mock();
+    private final @NotNull SingleWriterService singleWriterService = mock();
+    private final @NotNull PublishPayloadPersistence payloadPersistence = mock();
+    private final @NotNull ListeningScheduledExecutorService payloadPersistenceExecutor = mock();
+    private final @NotNull ClientQueuePersistence clientQueuePersistence = mock();
 
     private PersistenceShutdownHook persistenceShutdownHook;
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
         persistenceShutdownHook = new PersistenceShutdownHook(clientSessionPersistence,
                 clientSessionSubscriptionPersistence,
                 incomingMessageFlowPersistence,

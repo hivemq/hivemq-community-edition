@@ -15,13 +15,13 @@
  */
 package com.hivemq.metrics.gauges;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -29,15 +29,12 @@ import static org.mockito.Mockito.when;
  */
 public class RetainedMessagesGaugeTest {
 
-    @Mock
-    RetainedMessagePersistence retainedMessagePersistence;
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
 
     private RetainedMessagesGauge retainedMessagesGauge;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         retainedMessagesGauge = new RetainedMessagesGauge(retainedMessagePersistence);
     }
 

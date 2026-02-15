@@ -240,7 +240,8 @@ public class ExtensionBootstrapImplTest {
 
         @Override
         public void extensionStart(
-                final @NotNull ExtensionStartInput input, final @NotNull ExtensionStartOutput output) {
+                final @NotNull ExtensionStartInput input,
+                final @NotNull ExtensionStartOutput output) {
         }
 
         @Override

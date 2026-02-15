@@ -32,8 +32,6 @@ import com.hivemq.persistence.clientsession.ClientSessionPersistence;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.TestMessageUtil;
 import util.TestSingleWriterFactory;
 
@@ -46,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,21 +53,15 @@ import static org.mockito.Mockito.when;
  */
 public class PublishDistributorImplTest {
 
-    private AutoCloseable closeableMock;
-
-    @Mock
-    private @NotNull ClientQueuePersistence clientQueuePersistence;
-    @Mock
-    private @NotNull ClientSessionPersistence clientSessionPersistence;
-    @Mock
-    private @NotNull MqttConfigurationService mqttConfigurationService;
+    private final @NotNull ClientQueuePersistence clientQueuePersistence = mock();
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
 
     private @NotNull PublishDistributorImpl publishDistributor;
     private @NotNull SingleWriterService singleWriterService;
 
     @Before
     public void setUp() throws Exception {
-        closeableMock = MockitoAnnotations.openMocks(this);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         publishDistributor = new PublishDistributorImpl(clientQueuePersistence,
                 clientSessionPersistence,
@@ -79,7 +72,6 @@ public class PublishDistributorImplTest {
     @After
     public void tearDown() throws Exception {
         singleWriterService.stop();
-        closeableMock.close();
     }
 
     @Test(timeout = 5000)

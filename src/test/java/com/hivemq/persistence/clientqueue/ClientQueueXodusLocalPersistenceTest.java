@@ -1520,7 +1520,11 @@ public class ClientQueueXodusLocalPersistenceTest {
 
 
     private PUBLISH createPublish(
-            final int packetId, final QoS qos, final String topic, final int publishId, final byte[] message) {
+            final int packetId,
+            final QoS qos,
+            final String topic,
+            final int publishId,
+            final byte[] message) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
                 .withPublishId(1L)
@@ -1532,7 +1536,11 @@ public class ClientQueueXodusLocalPersistenceTest {
     }
 
     private PUBLISH createBigPublish(
-            final int packetId, final QoS qos, final String topic, final int publishId, final int queueLimit) {
+            final int packetId,
+            final QoS qos,
+            final String topic,
+            final int publishId,
+            final int queueLimit) {
         return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
                 .withQoS(qos)
                 .withOnwardQos(qos)

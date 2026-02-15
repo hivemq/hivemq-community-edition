@@ -49,8 +49,6 @@ import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 
@@ -64,6 +62,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,32 +70,15 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("ALL")
 public class IncomingSubscribeServiceTest {
 
-    @Mock
-    private ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
-
-    @Mock
-    private RetainedMessagePersistence retainedMessagePersistence;
-
-    @Mock
-    private ChannelHandlerContext ctx;
-
-    @Mock
-    private ChannelFuture channelFuture;
-
-    @Mock
-    private EventLog eventLog;
-
-    @Mock
-    private RetainedMessagesSender retainedMessagesSender;
-
-    @Mock
-    private SharedSubscriptionService sharedSubscriptionService;
-
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
-
-    @Mock
-    private RestrictionsConfigurationService restrictionsConfigurationService;
+    private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
+    private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
+    private final @NotNull ChannelHandlerContext ctx = mock();
+    private final @NotNull ChannelFuture channelFuture = mock();
+    private final @NotNull EventLog eventLog = mock();
+    private final @NotNull RetainedMessagesSender retainedMessagesSender = mock();
+    private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
 
     private EmbeddedChannel channel;
     private IncomingSubscribeService incomingSubscribeService;
@@ -105,8 +87,6 @@ public class IncomingSubscribeServiceTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence,
                 retainedMessagePersistence,
                 sharedSubscriptionService,

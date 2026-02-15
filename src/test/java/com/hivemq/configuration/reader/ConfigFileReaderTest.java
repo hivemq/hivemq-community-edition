@@ -26,39 +26,26 @@ import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.SecurityConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationService;
 import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 import com.hivemq.statistics.UsageStatisticsConfig;
 import com.hivemq.util.EnvVarUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class ConfigFileReaderTest {
 
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
-
-    @Mock
-    private RestrictionsConfigurationService restrictionsConfigurationService;
-
-    @Mock
-    private SecurityConfigurationService securityConfigurationService;
-
-    @Mock
-    private UsageStatisticsConfig usageStatisticsConfig;
-
-    @Mock
-    private EnvVarUtil envVarUtil;
-
-    @Mock
-    private SystemInformation systemInformation;
-
-    @Mock
-    private PersistenceConfigurationService persistenceConfigurationService;
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
+    private final @NotNull SecurityConfigurationService securityConfigurationService = mock();
+    private final @NotNull UsageStatisticsConfig usageStatisticsConfig = mock();
+    private final @NotNull EnvVarUtil envVarUtil = mock();
+    private final @NotNull SystemInformation systemInformation = mock();
+    private final @NotNull PersistenceConfigurationService persistenceConfigurationService = mock();
 
     private ListenerConfigurationService listenerConfigurationService;
 
@@ -66,7 +53,6 @@ public class ConfigFileReaderTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         listenerConfigurationService = new ListenerConfigurationServiceImpl();
 
         final ConfigurationFile configurationFile = new ConfigurationFile(null);

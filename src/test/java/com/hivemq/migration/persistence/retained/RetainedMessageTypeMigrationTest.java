@@ -48,8 +48,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.Map;
@@ -58,6 +56,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,20 +67,14 @@ import static org.mockito.Mockito.when;
  */
 public class RetainedMessageTypeMigrationTest {
 
-    @Mock
-    private PublishPayloadLocalPersistence payloadLocalPersistence;
-
-    @Mock
-    private RetainedMessageRocksDBLocalPersistence rocksDBLocalPersistence;
-
-    @Mock
-    private PayloadExceptionLogging payloadExceptionLogging;
+    private final @NotNull PublishPayloadLocalPersistence payloadLocalPersistence = mock();
+    private final @NotNull RetainedMessageRocksDBLocalPersistence rocksDBLocalPersistence = mock();
+    private final @NotNull PayloadExceptionLogging payloadExceptionLogging = mock();
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Mock
-    private SystemInformation systemInformation;
+    private final @NotNull SystemInformation systemInformation = mock();
 
     private File dataFolder;
     private FullConfigurationService configurationService;
@@ -90,7 +83,6 @@ public class RetainedMessageTypeMigrationTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());

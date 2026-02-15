@@ -16,15 +16,15 @@
 package com.hivemq.util;
 
 import com.hivemq.exceptions.UnrecoverableException;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.org.webcompere.systemstubs.SystemStubs.restoreSystemProperties;
 import static uk.org.webcompere.systemstubs.SystemStubs.withEnvironmentVariable;
@@ -34,12 +34,10 @@ import static uk.org.webcompere.systemstubs.SystemStubs.withEnvironmentVariable;
  */
 public class EnvVarUtilTest {
 
-    @Mock
-    EnvVarUtil envVarUtil;
+    private final @NotNull EnvVarUtil envVarUtil = mock();
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         when(envVarUtil.replaceEnvironmentVariablePlaceholders(anyString())).thenCallRealMethod();
     }
 

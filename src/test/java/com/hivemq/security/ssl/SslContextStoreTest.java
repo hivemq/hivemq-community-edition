@@ -16,7 +16,6 @@
 package com.hivemq.security.ssl;
 
 import com.google.common.hash.HashCode;
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.exceptions.UnrecoverableException;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -49,23 +48,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("NullabilityAnnotations")
 public class SslContextStoreTest {
 
-    private SslContextStore sslContextStore;
-    private TestKeyStoreGenerator keyStoreGenerator;
+    private final @NotNull SslContext sslContext = mock();
+    private final @NotNull ScheduledExecutorService executorService = mock();
+    private final @NotNull ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
 
-    private SslContext sslContext;
-    private ScheduledExecutorService executorService;
-    private ArgumentCaptor<Runnable> captor;
+    private final @NotNull TestKeyStoreGenerator keyStoreGenerator = new TestKeyStoreGenerator();
+
+    private SslContextStore sslContextStore;
 
     @Before
     public void before() {
-        sslContext = mock(SslContext.class);
-        executorService = mock(ListeningScheduledExecutorService.class);
-        captor = ArgumentCaptor.forClass(Runnable.class);
-
-        final SslContextFactory sslContextFactory = mock(SslContextFactory.class);
+        final SslContextFactory sslContextFactory = mock();
         when(sslContextFactory.createSslContext(any())).thenReturn(sslContext);
 
         doAnswer(invocation -> {
@@ -74,8 +69,6 @@ public class SslContextStoreTest {
         }).when(executorService).execute(any());
 
         sslContextStore = new SslContextStore(executorService, sslContextFactory);
-        keyStoreGenerator = new TestKeyStoreGenerator();
-
     }
 
     @After

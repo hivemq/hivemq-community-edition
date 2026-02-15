@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions.auth;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 import com.hivemq.extension.sdk.api.packets.general.DisconnectedReasonCode;
 import com.hivemq.extensions.auth.parameter.ModifiableClientSettingsImpl;
@@ -25,8 +26,6 @@ import com.hivemq.util.Bytes;
 import com.hivemq.util.ReasonStrings;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -38,20 +37,19 @@ import static com.hivemq.extensions.auth.AuthenticationState.NEXT_EXTENSION_OR_D
 import static com.hivemq.extensions.auth.AuthenticationState.SUCCESS;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Florian Limpöck
  */
 public class ReAuthOutputTest {
 
-    @Mock
-    private PluginOutPutAsyncer asyncer;
+    private final @NotNull PluginOutPutAsyncer asyncer = mock();
 
     private ReAuthOutput authTaskOutput;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         authTaskOutput = new ReAuthOutput(asyncer,
                 true,
                 new ModifiableDefaultPermissionsImpl(),

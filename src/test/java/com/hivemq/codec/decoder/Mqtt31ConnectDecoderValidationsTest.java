@@ -21,6 +21,7 @@ import com.hivemq.codec.decoder.mqtt3.Mqtt31ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.configuration.service.MqttConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ClientIds;
@@ -32,8 +33,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
@@ -49,17 +48,10 @@ import static org.mockito.Mockito.when;
 
 public class Mqtt31ConnectDecoderValidationsTest {
 
-    @Mock
-    private Channel channel;
-
-    @Mock
-    private FullConfigurationService fullConfigurationService;
-
-    @Mock
-    private MqttConfigurationService mqttConfigurationService;
-
-    @Mock
-    private MqttConnacker connacker;
+    private final @NotNull Channel channel = mock();
+    private final @NotNull FullConfigurationService fullConfigurationService = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
+    private final @NotNull MqttConnacker connacker = mock();
 
     private Mqtt31ConnectDecoder decoder;
     private ClientConnection clientConnection;
@@ -68,8 +60,6 @@ public class Mqtt31ConnectDecoderValidationsTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         when(fullConfigurationService.mqttConfiguration()).thenReturn(mqttConfigurationService);
         decoder = new Mqtt31ConnectDecoder(connacker,
                 new ClientIds(new HivemqId()),

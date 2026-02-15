@@ -187,7 +187,8 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
         @Override
         public void onInboundUnsubscribe(
-                final @NotNull UnsubscribeInboundInput input, final @NotNull UnsubscribeInboundOutput output) {
+                final @NotNull UnsubscribeInboundInput input,
+                final @NotNull UnsubscribeInboundOutput output) {
             isTriggered.set(true);
         }
     }
@@ -196,7 +197,8 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
         @Override
         public void onInboundUnsubscribe(
-                final @NotNull UnsubscribeInboundInput input, final @NotNull UnsubscribeInboundOutput output) {
+                final @NotNull UnsubscribeInboundInput input,
+                final @NotNull UnsubscribeInboundOutput output) {
             final ModifiableUnsubscribePacket packet = output.getUnsubscribePacket();
             packet.setTopicFilters(Collections.singletonList("not topics"));
             isTriggered.set(true);

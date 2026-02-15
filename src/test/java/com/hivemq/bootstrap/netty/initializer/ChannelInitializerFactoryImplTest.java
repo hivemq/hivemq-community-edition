@@ -32,13 +32,12 @@ import com.hivemq.security.ssl.SslFactory;
 import io.netty.channel.Channel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import javax.inject.Provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static util.TlsTestUtil.createDefaultTLS;
 
@@ -50,29 +49,17 @@ public class ChannelInitializerFactoryImplTest {
     private static final String TYPE_WEBSOCKET = "TYPE_WEBSOCKET";
     private static final String TYPE_TLS_WEBSOCKET = "TYPE_TLS_WEBSOCKET";
 
-    @Mock
-    private ChannelDependencies channelDependencies;
-
-    @Mock
-    private SslFactory sslFactory;
-
-    @Mock
-    private Provider<NonSslHandler> nonSslHandlerProvider;
-
-    @Mock
-    private EventLog eventLog;
-
-    @Mock
-    private FullConfigurationService fullConfigurationService;
-
-    @Mock
-    private RestrictionsConfigurationService restrictionsConfigurationService;
+    private final @NotNull ChannelDependencies channelDependencies = mock();
+    private final @NotNull SslFactory sslFactory = mock();
+    private final @NotNull Provider<NonSslHandler> nonSslHandlerProvider = mock();
+    private final @NotNull EventLog eventLog = mock();
+    private final @NotNull FullConfigurationService fullConfigurationService = mock();
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
 
     private ChannelInitializerFactoryImpl channelInitializerFactory;
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);

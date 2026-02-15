@@ -37,8 +37,6 @@ import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import javax.inject.Provider;
 import java.util.Iterator;
@@ -57,19 +55,12 @@ public class PluginTaskExecutorServiceImplTest {
 
     private PluginTaskExecutorServiceImpl executorService;
 
-    @Mock
-    private PluginTaskExecutor executor1;
-
-    @Mock
-    private PluginTaskExecutor executor2;
-
-    @Mock
-    IsolatedExtensionClassloader classloader;
+    private final @NotNull PluginTaskExecutor executor1 = mock();
+    private final @NotNull PluginTaskExecutor executor2 = mock();
+    private final @NotNull IsolatedExtensionClassloader classloader = mock();
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
-
         InternalConfigurations.EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.set(2);
 
         executorService =

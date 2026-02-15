@@ -20,6 +20,7 @@ import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.codec.decoder.mqtt3.Mqtt311ConnectDecoder;
 import com.hivemq.configuration.HivemqId;
 import com.hivemq.configuration.service.FullConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ClientIds;
@@ -30,8 +31,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
@@ -49,11 +48,9 @@ import static org.mockito.Mockito.when;
 public class Mqtt311ConnectDecoderValidationsTest {
 
 
-    @Mock
-    private Channel channel;
+    private final @NotNull Channel channel = mock();
+    private final @NotNull MqttConnacker connacker = mock();
 
-    @Mock
-    private MqttConnacker connacker;
     private ClientConnection clientConnection;
     private Mqtt311ConnectDecoder decoder;
 
@@ -61,9 +58,6 @@ public class Mqtt311ConnectDecoderValidationsTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         clientConnection = new DummyClientConnection(channel, null);
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(new DummyClientConnection(
                 channel,

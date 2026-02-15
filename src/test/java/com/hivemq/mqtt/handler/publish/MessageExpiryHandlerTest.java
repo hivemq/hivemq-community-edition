@@ -31,8 +31,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.LogbackCapturingAppender;
 import util.TestMessageUtil;
@@ -43,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -51,8 +50,7 @@ import static org.mockito.Mockito.when;
  */
 public class MessageExpiryHandlerTest {
 
-    @Mock
-    private ChannelHandlerContext ctx;
+    private final @NotNull ChannelHandlerContext ctx = mock();
 
     private EmbeddedChannel channel;
 
@@ -60,7 +58,6 @@ public class MessageExpiryHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         final MessageExpiryHandler messageExpiryHandler = new MessageExpiryHandler();
         channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);

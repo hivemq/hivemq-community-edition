@@ -93,8 +93,6 @@ import net.jodah.concurrentunit.Waiter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.CollectUserEventsHandler;
 import util.DummyClientConnection;
 import util.DummyHandler;
@@ -135,18 +133,12 @@ public class ConnectHandlerTest {
 
     private EmbeddedChannel channel;
 
-    @Mock
-    private ClientSessionPersistence clientSessionPersistence;
-    @Mock
-    private EventLog eventLog;
-    @Mock
-    private ChannelDependencies channelDependencies;
-    @Mock
-    private Authorizers authorizers;
-    @Mock
-    private PluginAuthorizerService pluginAuthorizerService;
-    @Mock
-    private PluginAuthenticatorServiceImpl internalAuthServiceImpl;
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull EventLog eventLog = mock();
+    private final @NotNull ChannelDependencies channelDependencies = mock();
+    private final @NotNull Authorizers authorizers = mock();
+    private final @NotNull PluginAuthorizerService pluginAuthorizerService = mock();
+    private final @NotNull PluginAuthenticatorServiceImpl internalAuthServiceImpl = mock();
 
     private FullConfigurationService configurationService;
     private MqttConnacker mqttConnacker;
@@ -159,8 +151,6 @@ public class ConnectHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         when(clientSessionPersistence.isExistent(anyString())).thenReturn(false);
         when(clientSessionPersistence.clientConnected(anyString(),
                 anyBoolean(),
@@ -1502,8 +1492,7 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_contextWantsPasswordErasure_passwordCleared() {
         createHandler();
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
+        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
 
         clientConnectionContext.setClearPasswordAfterAuth(true);
         clientConnectionContext.setAuthPassword("password".getBytes(StandardCharsets.UTF_8));
@@ -1518,8 +1507,7 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_contextDoesNotWantPasswordErasure_passwordKept() {
         createHandler();
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
+        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
 
         clientConnectionContext.setClearPasswordAfterAuth(false);
         clientConnectionContext.setAuthPassword("password".getBytes(StandardCharsets.UTF_8));
@@ -1534,8 +1522,7 @@ public class ConnectHandlerTest {
     @Test(timeout = 5000)
     public void test_contextDoesNotDecidePasswordErasure_passwordKeptOrCleared() {
         createHandler();
-        final CONNECT connect =
-                new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
+        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
 
         clientConnectionContext.setClearPasswordAfterAuth(null);
         clientConnectionContext.setAuthPassword("password".getBytes(StandardCharsets.UTF_8));
@@ -1544,7 +1531,7 @@ public class ConnectHandlerTest {
         handler.connectSuccessfulAuthenticated(ctx, clientConnectionContext, connect, clientSettings);
 
         final ClientConnection clientConnection = ClientConnection.of(channel);
-        if(MQTT_CONNECTION_AUTH_CLEAR_PASSWORD) {
+        if (MQTT_CONNECTION_AUTH_CLEAR_PASSWORD) {
             assertNull(clientConnection.getAuthPassword());
         } else {
             assertNotNull(clientConnection.getAuthPassword());
@@ -1756,8 +1743,9 @@ public class ConnectHandlerTest {
 
         @Override
         public void write(
-                final ChannelHandlerContext channelHandlerContext, final Object o, final ChannelPromise channelPromise)
-                throws Exception {
+                final ChannelHandlerContext channelHandlerContext,
+                final Object o,
+                final ChannelPromise channelPromise) throws Exception {
             if (o instanceof DISCONNECT) {
                 disconnectMessage = (DISCONNECT) o;
                 if (disconnectExpected) {

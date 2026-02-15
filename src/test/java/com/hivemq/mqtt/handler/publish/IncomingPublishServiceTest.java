@@ -25,6 +25,7 @@ import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
 import com.hivemq.configuration.service.impl.MqttConfigurationServiceImpl;
 import com.hivemq.configuration.service.impl.RestrictionsConfigurationServiceImpl;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.auth.parameter.TopicPermission;
 import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
 import com.hivemq.extensions.handler.tasks.PublishAuthorizerResult;
@@ -47,9 +48,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import util.CheckUserEventTriggeredOnSuper;
 import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
@@ -63,6 +62,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,10 +73,8 @@ public class IncomingPublishServiceTest {
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector();
 
-    @Mock
-    private InternalPublishService publishService;
-    @Mock
-    private MqttServerDisconnectorImpl mqttServerDisconnector;
+    private final @NotNull InternalPublishService publishService = mock();
+    private final @NotNull MqttServerDisconnectorImpl mqttServerDisconnector = mock();
 
     private MqttConfigurationService mqttConfigurationService;
     private RestrictionsConfigurationService restrictionsConfigurationService;
@@ -87,8 +85,6 @@ public class IncomingPublishServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mqttConfigurationService = Mockito.spy(new MqttConfigurationServiceImpl());
         restrictionsConfigurationService = Mockito.spy(new RestrictionsConfigurationServiceImpl());
         when(publishService.publish(any(PUBLISH.class),

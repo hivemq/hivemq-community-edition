@@ -105,7 +105,8 @@ public class XodusEnvironmentImplLogLevelModifierTest {
     }
 
     private @NotNull Filter<ILoggingEvent> createFilter(
-            final @NotNull CountDownLatch countDownLatch, final @NotNull String text) {
+            final @NotNull CountDownLatch countDownLatch,
+            final @NotNull String text) {
 
         return new Filter<>() {
             @Override

@@ -18,6 +18,7 @@ package com.hivemq.mqtt.handler.auth;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.PluginAuthenticatorService;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -32,8 +33,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
 import static com.hivemq.mqtt.handler.auth.AuthHandler.REAUTHENTICATE_DURING_AUTH;
@@ -44,6 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -52,29 +52,21 @@ import static org.mockito.Mockito.verify;
  */
 public class AuthHandlerTest {
 
-    @Mock
-    private PluginAuthenticatorService pluginAuthenticatorService;
-    @Mock
-    private MqttConnacker connacker;
-    @Mock
-    private MqttAuthSender mqttAuthSender;
-    @Mock
-    private MqttServerDisconnectorImpl disconnector;
+    private final @NotNull PluginAuthenticatorService pluginAuthenticatorService = mock();
+    private final @NotNull MqttConnacker connacker = mock();
+    private final @NotNull MqttAuthSender mqttAuthSender = mock();
+    private final @NotNull MqttServerDisconnectorImpl disconnector = mock();
 
-    private AuthHandler authHandler;
     private EmbeddedChannel channel;
     private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
-
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        authHandler = new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
-
+        final AuthHandler authHandler =
+                new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
         channel.pipeline().addLast(authHandler);
     }
 

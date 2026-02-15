@@ -35,9 +35,8 @@ public class SslSniHandlerTest {
 
     @Test
     public void test_replaceHandler() throws Exception {
-
-        final SslHandler sslHandler = mock(SslHandler.class);
-        final SslContext sslContext = mock(SslContext.class);
+        final SslHandler sslHandler = mock();
+        final SslContext sslContext = mock();
 
         final SslSniHandler sslSniHandler = new SslSniHandler(sslHandler, sslContext);
         final Channel channel = new EmbeddedChannel(sslSniHandler);

@@ -18,13 +18,12 @@ package com.hivemq.security.ssl;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
 import javax.net.ssl.SSLEngine;
@@ -33,6 +32,7 @@ import javax.net.ssl.SSLSession;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,19 +43,12 @@ public class SslParameterHandlerTest {
 
     private EmbeddedChannel channel;
 
-    @Mock
-    private SslHandler sslHandler;
-
-    @Mock
-    private SSLEngine sslEngine;
-
-    @Mock
-    private SSLSession sslSession;
+    private final @NotNull SslHandler sslHandler = mock();
+    private final @NotNull SSLEngine sslEngine = mock();
+    private final @NotNull SSLSession sslSession = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(new SslParameterHandler());

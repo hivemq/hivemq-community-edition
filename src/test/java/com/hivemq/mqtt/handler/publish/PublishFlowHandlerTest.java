@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.handler.IncomingPublishHandler;
 import com.hivemq.mqtt.event.PublishDroppedEvent;
 import com.hivemq.mqtt.message.MessageWithID;
@@ -46,8 +47,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestMessageUtil;
 
@@ -72,17 +71,10 @@ public class PublishFlowHandlerTest {
 
     public static final String CLIENT_ID = "client";
 
-    @Mock
-    private IncomingMessageFlowPersistence incomingMessageFlowPersistence;
-
-    @Mock
-    private PublishPollService publishPollService;
-
-    @Mock
-    private FreePacketIdRanges freePacketIdRanges;
-
-    @Mock
-    private IncomingPublishHandler incomingPublishHandler;
+    private final @NotNull IncomingMessageFlowPersistence incomingMessageFlowPersistence = mock();
+    private final @NotNull PublishPollService publishPollService = mock();
+    private final @NotNull FreePacketIdRanges freePacketIdRanges = mock();
+    private final @NotNull IncomingPublishHandler incomingPublishHandler = mock();
 
     private OrderedTopicService orderedTopicService;
 
@@ -90,7 +82,6 @@ public class PublishFlowHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 5;
         when(freePacketIdRanges.takeNextId()).thenReturn(100);
         orderedTopicService = new OrderedTopicService();

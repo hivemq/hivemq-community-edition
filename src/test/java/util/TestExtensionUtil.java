@@ -39,7 +39,8 @@ public class TestExtensionUtil {
             "</hivemq-extension>";
 
     public static @NotNull File createValidExtension(
-            final @NotNull File extensionsFolder, final @NotNull String extensionId) throws Exception {
+            final @NotNull File extensionsFolder,
+            final @NotNull String extensionId) throws Exception {
         return createValidExtension(extensionsFolder, extensionId, true, true);
     }
 

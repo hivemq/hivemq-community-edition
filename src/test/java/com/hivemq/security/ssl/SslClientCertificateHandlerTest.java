@@ -15,15 +15,12 @@
  */
 package com.hivemq.security.ssl;
 
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.bootstrap.netty.ChannelHandlerNames;
-import com.hivemq.configuration.service.entity.Listener;
-import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.configuration.service.entity.Tls;
 import com.hivemq.configuration.service.entity.TlsTcpListener;
-import com.hivemq.extension.sdk.api.auth.parameter.OverloadProtectionThrottlingLevel;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -32,9 +29,6 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import util.DummyClientConnection;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -56,35 +50,23 @@ import static org.mockito.Mockito.when;
  */
 public class SslClientCertificateHandlerTest {
 
-    private EmbeddedChannel channel;
+    private final @NotNull MqttServerDisconnectorImpl mqttServerDisconnector = mock();
+    private final @NotNull Tls tls = mock();
+    private final @NotNull SslHandler sslHandler = mock();
+    private final @NotNull SSLEngine sslEngine = mock();
+    private final @NotNull SSLSession sslSession = mock();
+
+    private final @NotNull EmbeddedChannel channel = new EmbeddedChannel();
+
     private UndefinedClientConnection clientConnection;
-
-    @Mock
-    private MqttServerDisconnectorImpl mqttServerDisconnector;
-
-    @Mock
-    private Tls tls;
-
-    @Mock
-    private SslHandler sslHandler;
-
-    @Mock
-    private SSLEngine sslEngine;
-
-    @Mock
-    private SSLSession sslSession;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         when(sslHandler.engine()).thenReturn(sslEngine);
         when(sslEngine.getSession()).thenReturn(sslSession);
 
-        final Listener listener = mock(TlsTcpListener.class);
-        channel = new EmbeddedChannel();
-        clientConnection =
-                new UndefinedClientConnection(channel, null, listener);
+        final TlsTcpListener listener = mock();
+        clientConnection = new UndefinedClientConnection(channel, null, listener);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);
@@ -92,32 +74,27 @@ public class SslClientCertificateHandlerTest {
 
     @Test
     public void test_user_event_not_ssl_cert_event() {
-
         channel.pipeline().fireUserEventTriggered("");
         assertNotNull(channel.pipeline().get(SslClientCertificateHandler.class));
     }
 
     @Test
-    public void test_success() throws SSLPeerUnverifiedException {
-
+    public void test_success() throws Exception {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenReturn(new Certificate[0]);
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
 
         assertNotNull(clientConnection.getAuthCertificate());
-
     }
 
     @Test
     public void test_not_success() {
-
         channel.pipeline().fireUserEventTriggered(new SslHandshakeCompletionEvent(new RuntimeException()));
         verify(sslHandler, never()).engine();
     }
 
     @Test
-    public void test_peer_not_authenticated_but_required() throws SSLPeerUnverifiedException, InterruptedException {
-
+    public void test_peer_not_authenticated_but_required() throws Exception {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not authenticated"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
@@ -126,8 +103,7 @@ public class SslClientCertificateHandlerTest {
     }
 
     @Test
-    public void test_peer_not_authenticated_but_optional() throws SSLPeerUnverifiedException, InterruptedException {
-
+    public void test_peer_not_authenticated_but_optional() throws Exception {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not authenticated"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
@@ -136,8 +112,7 @@ public class SslClientCertificateHandlerTest {
     }
 
     @Test
-    public void test_peer_not_verified_but_required() throws SSLPeerUnverifiedException, InterruptedException {
-
+    public void test_peer_not_verified_but_required() throws Exception {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not verified"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
@@ -146,8 +121,7 @@ public class SslClientCertificateHandlerTest {
     }
 
     @Test
-    public void test_peer_not_verified_but_optional() throws SSLPeerUnverifiedException, InterruptedException {
-
+    public void test_peer_not_verified_but_optional() throws Exception {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not verified"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
@@ -156,8 +130,7 @@ public class SslClientCertificateHandlerTest {
     }
 
     @Test
-    public void test_peer_other_exception() throws SSLPeerUnverifiedException, InterruptedException {
-
+    public void test_peer_other_exception() throws Exception {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("other exception"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
@@ -166,9 +139,7 @@ public class SslClientCertificateHandlerTest {
     }
 
     @Test
-    public void test_class_cast_exception_no_ssl_handler() throws SSLPeerUnverifiedException, InterruptedException {
-
-        channel = new EmbeddedChannel();
+    public void test_class_cast_exception_no_ssl_handler() {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, new WrongHandler());
@@ -178,7 +149,7 @@ public class SslClientCertificateHandlerTest {
         verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
-    private class WrongHandler extends SimpleChannelInboundHandler<Object> {
+    private static class WrongHandler extends SimpleChannelInboundHandler<Object> {
 
         @Override
         protected void channelRead0(final ChannelHandlerContext channelHandlerContext, final Object o)
@@ -186,5 +157,4 @@ public class SslClientCertificateHandlerTest {
             super.channelRead(channelHandlerContext, o);
         }
     }
-
 }

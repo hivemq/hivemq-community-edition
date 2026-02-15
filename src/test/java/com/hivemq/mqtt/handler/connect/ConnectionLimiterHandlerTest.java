@@ -16,6 +16,7 @@
 package com.hivemq.mqtt.handler.connect;
 
 import com.hivemq.configuration.service.RestrictionsConfigurationService;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.metrics.gauges.OpenConnectionsGauge;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.connect.CONNECT;
@@ -26,8 +27,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
@@ -35,6 +34,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,31 +45,16 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class ConnectionLimiterHandlerTest {
 
-    @Mock
-    OpenConnectionsGauge connectionCounter;
-
-    @Mock
-    ChannelHandlerContext ctx;
-
-    @Mock
-    ChannelPipeline pipeline;
-
-    @Mock
-    Channel channel;
-
-    @Mock
-    MqttConnacker mqttConnacker;
-
-    @Mock
-    RestrictionsConfigurationService restrictionsEntity;
-
-    @Mock
-    CONNECT connect;
+    private final @NotNull OpenConnectionsGauge connectionCounter = mock();
+    private final @NotNull ChannelHandlerContext ctx = mock();
+    private final @NotNull ChannelPipeline pipeline = mock();
+    private final @NotNull Channel channel = mock();
+    private final @NotNull MqttConnacker mqttConnacker = mock();
+    private final @NotNull RestrictionsConfigurationService restrictionsEntity = mock();
+    private final @NotNull CONNECT connect = mock();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         when(ctx.channel()).thenReturn(channel);
         when(ctx.pipeline()).thenReturn(pipeline);
     }

@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.InternalConfigurations;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.publish.DropOutgoingPublishesHandler;
 import com.hivemq.mqtt.handler.publish.PublishStatus;
 import com.hivemq.mqtt.message.QoS;
@@ -32,8 +33,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestChannelAttribute;
 
@@ -41,32 +40,23 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class DropOutgoingPublishesHandlerTest {
 
-    @Mock
-    ChannelHandlerContext ctx;
-
-    @Mock
-    ChannelPromise promise;
-
-    @Mock
-    Channel channel;
-
-    @Mock
-    MessageDroppedService messageDroppedService;
-
-    @Mock
-    Counter counter;
+    private final @NotNull ChannelHandlerContext ctx = mock();
+    private final @NotNull ChannelPromise promise = mock();
+    private final @NotNull Channel channel = mock();
+    private final @NotNull MessageDroppedService messageDroppedService = mock();
+    private final @NotNull Counter counter = mock();
 
     private DropOutgoingPublishesHandler handler;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         when(ctx.channel()).thenReturn(channel);
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setClientId("clientId");

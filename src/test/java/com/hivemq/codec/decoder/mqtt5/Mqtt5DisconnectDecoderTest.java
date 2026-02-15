@@ -31,8 +31,6 @@ import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
@@ -42,6 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -49,15 +48,11 @@ import static org.mockito.Mockito.when;
  */
 public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
 
-    @Mock
-    private @NotNull MessageDroppedService messageDroppedService;
-
-    @Mock
-    private @NotNull SecurityConfigurationService securityConfigurationService;
+    private final @NotNull MessageDroppedService messageDroppedService = mock();
+    private final @NotNull SecurityConfigurationService securityConfigurationService = mock();
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         when(securityConfigurationService.allowRequestProblemInformation()).thenReturn(true);
         ClientConnection.of(channel).setClientSessionExpiryInterval(100L);
     }

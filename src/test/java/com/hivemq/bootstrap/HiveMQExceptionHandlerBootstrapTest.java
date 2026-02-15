@@ -48,9 +48,9 @@ public class HiveMQExceptionHandlerBootstrapTest {
 
     @Test
     public void test_provisionException() {
-        final ProvisionException provisionException =
-                new ProvisionException(Collections.singletonList(new Message("test",
-                        new UnrecoverableException(false))));
+        final ProvisionException provisionException = new ProvisionException(Collections.singletonList(new Message(
+                "test",
+                new UnrecoverableException(false))));
 
         HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
                 provisionException,

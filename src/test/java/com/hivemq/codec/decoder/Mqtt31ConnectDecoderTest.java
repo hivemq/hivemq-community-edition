@@ -32,8 +32,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestChannelAttribute;
 import util.TestConfigurationBootstrap;
@@ -53,23 +51,18 @@ import static org.mockito.Mockito.when;
 
 public class Mqtt31ConnectDecoderTest {
 
-    @Mock
-    private @NotNull Channel channel;
-
-    @Mock
-    private @NotNull ChannelFuture channelFuture;
+    private final @NotNull Channel channel = mock();
+    private final @NotNull ChannelFuture channelFuture = mock();
 
     private @NotNull Mqtt31ConnectDecoder decoder;
     private ClientConnection clientConnection;
 
-    @Mock
-    private @NotNull MqttConnacker connacker;
+    private final @NotNull MqttConnacker connacker = mock();
 
     private static final byte fixedHeader = 0b0001_0000;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
 
         clientConnection = new DummyClientConnection(channel, null);
