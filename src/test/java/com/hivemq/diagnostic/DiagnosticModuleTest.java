@@ -21,46 +21,43 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.hivemq.configuration.SystemProperties;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static uk.org.webcompere.systemstubs.SystemStubs.restoreSystemProperties;
 
 public class DiagnosticModuleTest {
 
-    @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
-
     @Test
     public void test_diagnostic_mode_enabled() throws Exception {
-        System.setProperty(SystemProperties.DIAGNOSTIC_MODE, "true");
-        try {
-
-            Guice.createInjector(new DiagnosticModule());
-            fail();
-        } catch (final CreationException e) {
-            //If Guice tries to create the dependency chain for the Module, then the diagnostic mode is enabled
-        }
+        restoreSystemProperties(() -> {
+            System.setProperty(SystemProperties.DIAGNOSTIC_MODE, "true");
+            try {
+                Guice.createInjector(new DiagnosticModule());
+                fail();
+            } catch (final CreationException e) {
+                // if Guice tries to create the dependency chain for the Module, then the diagnostic mode is enabled
+            }
+        });
     }
 
     @Test
     public void test_diagnostic_mode_disabled() throws Exception {
-        System.setProperty(SystemProperties.DIAGNOSTIC_MODE, "false");
-
-        final Injector injector = Guice.createInjector(new DiagnosticModule());
-
-        final Binding<DiagnosticMode> binding = injector.getExistingBinding(Key.get(DiagnosticMode.class));
-        assertNull(binding);
+        restoreSystemProperties(() -> {
+            System.setProperty(SystemProperties.DIAGNOSTIC_MODE, "false");
+            final Injector injector = Guice.createInjector(new DiagnosticModule());
+            final Binding<DiagnosticMode> binding = injector.getExistingBinding(Key.get(DiagnosticMode.class));
+            assertNull(binding);
+        });
     }
 
     @Test
     public void test_diagnostic_mode_not_set() throws Exception {
-
-        final Injector injector = Guice.createInjector(new DiagnosticModule());
-
-        final Binding<DiagnosticMode> binding = injector.getExistingBinding(Key.get(DiagnosticMode.class));
-        assertNull(binding);
+        restoreSystemProperties(() -> {
+            final Injector injector = Guice.createInjector(new DiagnosticModule());
+            final Binding<DiagnosticMode> binding = injector.getExistingBinding(Key.get(DiagnosticMode.class));
+            assertNull(binding);
+        });
     }
 }

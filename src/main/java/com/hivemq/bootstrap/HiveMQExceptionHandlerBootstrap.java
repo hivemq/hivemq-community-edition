@@ -41,38 +41,32 @@ public class HiveMQExceptionHandlerBootstrap {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(final Thread t, final Throwable e) {
-
-                handleUncaughtException(t, e);
+                handleUncaughtException(t, e, () -> System.exit(1));
             }
         });
     }
 
     @VisibleForTesting
-    static void handleUncaughtException(final Thread t, final Throwable e) {
+    static void handleUncaughtException(final Thread t, final Throwable e, final Runnable shutdownAction) {
         if (e instanceof UnrecoverableException) {
             if (((UnrecoverableException) e).isShowException()) {
-                log.error("An unrecoverable Exception occurred. Exiting HiveMQ", t, e);
+                log.error("An unrecoverable Exception occurred. Exiting HiveMQ", e);
             }
-            System.exit(1);
+            shutdownAction.run();
         } else if (e instanceof CreationException) {
             if (e.getCause() instanceof UnrecoverableException) {
                 log.error("An unrecoverable Exception occurred. Exiting HiveMQ");
-                System.exit(1);
+                shutdownAction.run();
             }
-
             final CreationException creationException = (CreationException) e;
-            checkGuiceErrorsForUnrecoverable(creationException.getErrorMessages());
-
+            checkGuiceErrorsForUnrecoverable(creationException.getErrorMessages(), shutdownAction);
         } else if (e instanceof ProvisionException) {
             if (e.getCause() instanceof UnrecoverableException) {
                 log.error("An unrecoverable Exception occurred. Exiting HiveMQ");
-                System.exit(1);
+                shutdownAction.run();
             }
-
             final ProvisionException provisionException = (ProvisionException) e;
-            checkGuiceErrorsForUnrecoverable(provisionException.getErrorMessages());
-
-
+            checkGuiceErrorsForUnrecoverable(provisionException.getErrorMessages(), shutdownAction);
         }
         final Throwable rootCause = Throwables.getRootCause(e);
         if (rootCause instanceof UnrecoverableException) {
@@ -85,19 +79,18 @@ public class HiveMQExceptionHandlerBootstrap {
         }
     }
 
-    private static void checkGuiceErrorsForUnrecoverable(final Collection<Message> errorMessages) {
+    private static void checkGuiceErrorsForUnrecoverable(final Collection<Message> errorMessages,
+                                                         final Runnable shutdownAction) {
         if (errorMessages == null) {
             return;
         }
-
-        //when more than one Exception is caught by Guice the ProvisionException or CreationException contains as cause null,
-        //but all the caught Exceptions are in the messages field of the ProvisionException/CreationException so we have
-        //to check them as well
-
+        // when more than one Exception is caught by Guice the ProvisionException or CreationException contains as cause null,
+        // but all the caught Exceptions are in the messages field of the ProvisionException/CreationException so we have
+        // to check them as well
         for (final Message message : errorMessages) {
             if (message.getCause() instanceof UnrecoverableException) {
                 log.error("An unrecoverable Exception occurred. Exiting HiveMQ");
-                System.exit(1);
+                shutdownAction.run();
             }
         }
     }
