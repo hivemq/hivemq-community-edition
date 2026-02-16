@@ -196,7 +196,7 @@ public class ChannelInitializerFactoryImplTest {
         }
     }
 
-    private class FakeAbstractChannelInitializer extends AbstractChannelInitializer {
+    private static class FakeAbstractChannelInitializer extends AbstractChannelInitializer {
 
         private final String type;
 
