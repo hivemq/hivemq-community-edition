@@ -38,7 +38,6 @@ public class TestConfigurationBootstrap {
     private RestrictionsConfigurationServiceImpl restrictionsConfigurationService;
     private final SecurityConfigurationServiceImpl securityConfigurationService;
     private ConfigurationServiceImpl configurationService;
-    private final UsageStatisticsConfig usageStatisticsConfig;
     private final PersistenceConfigurationService persistenceConfigurationService;
 
     public TestConfigurationBootstrap() {
@@ -46,7 +45,7 @@ public class TestConfigurationBootstrap {
         mqttConfigurationService = new MqttConfigurationServiceImpl();
         restrictionsConfigurationService = new RestrictionsConfigurationServiceImpl();
         securityConfigurationService = new SecurityConfigurationServiceImpl();
-        usageStatisticsConfig = new UsageStatisticsConfigImpl();
+        final UsageStatisticsConfig usageStatisticsConfig = new UsageStatisticsConfigImpl();
         persistenceConfigurationService = new PersistenceConfigurationServiceImpl();
 
         configurationService = new ConfigurationServiceImpl(listenerConfigurationService,

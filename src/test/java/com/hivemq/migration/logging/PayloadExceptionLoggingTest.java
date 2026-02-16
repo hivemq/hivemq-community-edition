@@ -39,13 +39,12 @@ import static org.junit.Assert.assertTrue;
 public class PayloadExceptionLoggingTest {
 
     private PayloadExceptionLogging payloadExceptionLogging;
-    private Logger migrationLogger;
     private LogbackCapturingAppender capturingAppender;
 
     @Before
     public void setUp() throws Exception {
         payloadExceptionLogging = new PayloadExceptionLogging();
-        migrationLogger = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
+        final Logger migrationLogger = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
         capturingAppender = LogbackCapturingAppender.Factory.weaveInto(migrationLogger);
     }
 
@@ -55,8 +54,7 @@ public class PayloadExceptionLoggingTest {
     }
 
     @Test(timeout = 5000)
-    public void test_message_logging() throws Exception {
-
+    public void test_message_logging() {
         payloadExceptionLogging.addLogging(1, null, null);
         payloadExceptionLogging.addLogging(1, null, null);
         payloadExceptionLogging.addLogging(1, null, null);
@@ -85,7 +83,7 @@ public class PayloadExceptionLoggingTest {
     }
 
     @Test(timeout = 5000)
-    public void test_message_logging_gets_cleared() throws Exception {
+    public void test_message_logging_gets_cleared() {
         payloadExceptionLogging.addLogging(1, null, "topic");
 
         final Map<Long, PayloadExceptionLogging.MissingMessageInformation> map1 = payloadExceptionLogging.getMap();
@@ -102,9 +100,8 @@ public class PayloadExceptionLoggingTest {
     }
 
     @Test(timeout = 5000)
-    public void test_nothing_gets_logged_if_empty() throws Exception {
+    public void test_nothing_gets_logged_if_empty() {
         payloadExceptionLogging.logAndClear();
         assertFalse(capturingAppender.isLogCaptured());
     }
-
 }

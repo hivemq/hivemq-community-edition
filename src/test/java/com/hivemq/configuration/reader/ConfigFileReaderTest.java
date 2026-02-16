@@ -47,13 +47,11 @@ public class ConfigFileReaderTest {
     private final @NotNull SystemInformation systemInformation = mock();
     private final @NotNull PersistenceConfigurationService persistenceConfigurationService = mock();
 
-    private ListenerConfigurationService listenerConfigurationService;
-
     ConfigFileReader reader;
 
     @Before
     public void setUp() throws Exception {
-        listenerConfigurationService = new ListenerConfigurationServiceImpl();
+        final ListenerConfigurationService listenerConfigurationService = new ListenerConfigurationServiceImpl();
 
         final ConfigurationFile configurationFile = new ConfigurationFile(null);
         reader = new ConfigFileReader(configurationFile,
@@ -119,8 +117,6 @@ public class ConfigFileReaderTest {
 
     @Test
     public void verify_security_default_values() {
-
-
         reader.applyConfig();
 
         final SecurityConfigEntity defaultSecurityValues = new SecurityConfigEntity();
@@ -136,7 +132,6 @@ public class ConfigFileReaderTest {
 
     @Test
     public void verify_persistence_default_values() {
-
         reader.applyConfig();
 
         final PersistenceEntity defaultPersistenceValues = new PersistenceEntity();

@@ -69,8 +69,6 @@ public class PublishServiceImplTest {
     private final @NotNull PublishDistributor publishDistributor = mock();
     private final @NotNull LocalTopicTree topicTree = mock();
 
-    private GlobalManagedExtensionExecutorService managedPluginExecutorService;
-
     private final HivemqId hiveMQId = new HivemqId();
     private final FullConfigurationService fullConfigurationService =
             new TestConfigurationBootstrap().getFullConfigurationService();
@@ -79,7 +77,8 @@ public class PublishServiceImplTest {
     @Before
     public void setUp() throws Exception {
         when(rateLimitService.rateLimitExceeded()).thenReturn(false);
-        managedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
+        final GlobalManagedExtensionExecutorService managedPluginExecutorService =
+                new GlobalManagedExtensionExecutorService(shutdownHooks);
         managedPluginExecutorService.postConstruct();
         publishService = new PublishServiceImpl(rateLimitService,
                 managedPluginExecutorService,

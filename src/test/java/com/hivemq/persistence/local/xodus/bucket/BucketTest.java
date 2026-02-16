@@ -18,7 +18,6 @@ package com.hivemq.persistence.local.xodus.bucket;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -32,10 +31,6 @@ public class BucketTest {
 
     private final @NotNull Environment environment = mock();
     private final @NotNull Store store = mock();
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     @Test
     public void close() throws Exception {

@@ -39,8 +39,14 @@ import util.IsolatedExtensionClassloaderUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("NullabilityAnnotations")
 public class ReAuthTaskTest {
@@ -51,7 +57,6 @@ public class ReAuthTaskTest {
 
     public static AtomicBoolean auth;
 
-    private EnhancedAuthenticator enhancedAuthenticator;
     public static AtomicBoolean reAuth;
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -70,7 +75,8 @@ public class ReAuthTaskTest {
 
         classloader = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
                 new Class[]{TestAuthenticator.class});
-        enhancedAuthenticator = IsolatedExtensionClassloaderUtil.loadInstance(classloader, TestAuthenticator.class);
+        final EnhancedAuthenticator enhancedAuthenticator =
+                IsolatedExtensionClassloaderUtil.loadInstance(classloader, TestAuthenticator.class);
 
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(
                 enhancedAuthenticator);
@@ -82,7 +88,6 @@ public class ReAuthTaskTest {
 
     @Test(timeout = 5000)
     public void test_authenticator_is_same() {
-
         when(wrappedAuthenticatorProvider.getClassLoader()).thenReturn(classloader);
 
         final EnhancedAuthenticator authenticator1 = authTask.updateAndGetAuthenticator();
@@ -183,7 +188,6 @@ public class ReAuthTaskTest {
         authTask.apply(input, output);
         assertFalse(auth.get());
     }
-
 
     @Test(timeout = 5000)
     public void test_decided() {

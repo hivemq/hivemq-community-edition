@@ -62,7 +62,6 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_connack_encoded() {
-
         channel.writeOutbound(CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).build());
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
@@ -70,7 +69,6 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_pingresp_encoded() {
-
         channel.writeOutbound(new PINGRESP());
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
@@ -78,7 +76,6 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_puback_encoded() {
-
         channel.writeOutbound(new PUBACK(10));
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
@@ -86,7 +83,6 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_pubrec_encoded() {
-
         channel.writeOutbound(new PUBREC(10));
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
@@ -94,7 +90,6 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_pubrel_encoded() {
-
         channel.writeOutbound(new PUBREL(10));
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
@@ -102,34 +97,27 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_pubcomp_encoded() {
-
         channel.writeOutbound(new PUBCOMP(10));
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
     }
 
-
     @Test
     public void test_suback_encoded() {
-
         channel.writeOutbound(new SUBACK(10, Mqtt5SubAckReasonCode.fromCode(0)));
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
     }
 
-
     @Test
     public void test_unsuback_encoded() {
-
         channel.writeOutbound(new UNSUBACK(10));
         final ByteBuf buf = channel.readOutbound();
         assertTrue(buf.readableBytes() > 0);
     }
 
-
     @Test
     public void test_publish_encoded() {
-
         final PUBLISH publish = TestMessageUtil.createMqtt3Publish("clusterid",
                 "topic",
                 QoS.EXACTLY_ONCE,

@@ -54,7 +54,7 @@ public class Mqtt3SubackEncoderTest {
     }
 
     @Test
-    public void test_mqtt_3_1_return_codes() throws Exception {
+    public void test_mqtt_3_1_return_codes() {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
@@ -78,7 +78,7 @@ public class Mqtt3SubackEncoderTest {
     }
 
     @Test
-    public void test_mqtt_3_1_return_codes_huge_size() throws Exception {
+    public void test_mqtt_3_1_return_codes_huge_size() {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
@@ -106,7 +106,7 @@ public class Mqtt3SubackEncoderTest {
     }
 
     @Test
-    public void test_mqtt_3_1_1_return_codes() throws Exception {
+    public void test_mqtt_3_1_1_return_codes() {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
@@ -131,7 +131,7 @@ public class Mqtt3SubackEncoderTest {
     }
 
     @Test
-    public void test_mqtt_5_suback_for_mqtt_3() throws Exception {
+    public void test_mqtt_5_suback_for_mqtt_3() {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
@@ -158,7 +158,7 @@ public class Mqtt3SubackEncoderTest {
     }
 
     @Test
-    public void test_invalid_mqtt_3_1_client_failure_code() throws Exception {
+    public void test_invalid_mqtt_3_1_client_failure_code() {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
@@ -174,7 +174,7 @@ public class Mqtt3SubackEncoderTest {
     }
 
     @Test
-    public void test_invalid_send_wrong_byte() throws Exception {
+    public void test_invalid_send_wrong_byte() {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);

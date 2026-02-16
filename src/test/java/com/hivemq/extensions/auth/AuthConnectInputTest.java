@@ -36,19 +36,17 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("NullabilityAnnotations")
 public class AuthConnectInputTest {
 
-    private CONNECT connect;
     private AuthConnectInput taskInput;
 
     @Before
     public void setUp() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setConnectReceivedTimestamp(12345L);
 
-        connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client")
+        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client")
                 .withUsername("user")
                 .withPassword("password".getBytes(Charset.defaultCharset()))
                 .withAuthMethod("method")
@@ -59,7 +57,6 @@ public class AuthConnectInputTest {
 
     @Test(timeout = 5000)
     public void test_connect_packet_contains_auth_information() {
-
         final ConnectPacket connectPacket = taskInput.getConnectPacket();
 
         assertEquals("method", connectPacket.getAuthenticationMethod().get());

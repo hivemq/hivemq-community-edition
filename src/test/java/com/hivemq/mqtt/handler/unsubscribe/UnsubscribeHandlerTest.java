@@ -52,13 +52,13 @@ public class UnsubscribeHandlerTest {
     private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
     private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
 
-    private @NotNull UnsubscribeHandler unsubscribeHandler;
     private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
-        unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
+        @NotNull final UnsubscribeHandler unsubscribeHandler =
+                new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
         clientConnection = new DummyClientConnection(channel, null);
         channel = new EmbeddedChannel(unsubscribeHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);

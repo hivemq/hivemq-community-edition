@@ -97,14 +97,13 @@ public class IncomingSubscribeHandlerTest {
     private final @NotNull EventLog eventLog = mock(EventLog.class);
     private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
 
-    private @NotNull ClientConnection clientConnection;
     private @NotNull PluginTaskExecutor executor;
     private @NotNull AtomicReference<Message> messageAtomicReference;
     private @NotNull EmbeddedChannel channel;
 
     @Before
     public void setUp() throws Exception {
-        clientConnection = new DummyClientConnection(channel, publishFlushHandler);
+        @NotNull final ClientConnection clientConnection = new DummyClientConnection(channel, publishFlushHandler);
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
 

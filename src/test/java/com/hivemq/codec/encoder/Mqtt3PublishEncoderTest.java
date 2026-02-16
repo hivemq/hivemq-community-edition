@@ -36,18 +36,17 @@ import static org.junit.Assert.assertFalse;
 public class Mqtt3PublishEncoderTest {
 
     private EmbeddedChannel channel;
-    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
         channel.config().setAllocator(new UnpooledByteBufAllocator(false));
-        clientConnection = new DummyClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 
     @Test
-    public void test_qos_0_message() throws Exception {
+    public void test_qos_0_message() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
@@ -71,7 +70,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_0_message_utf_8() throws Exception {
+    public void test_qos_0_message_utf_8() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topié");
         builder.withQoS(QoS.AT_MOST_ONCE);
@@ -95,7 +94,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_0_message_dup() throws Exception {
+    public void test_qos_0_message_dup() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
@@ -120,7 +119,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_0_message_retain() throws Exception {
+    public void test_qos_0_message_retain() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
@@ -145,7 +144,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_0_message_retain_dup() throws Exception {
+    public void test_qos_0_message_retain_dup() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_MOST_ONCE);
@@ -171,7 +170,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_1_message() throws Exception {
+    public void test_qos_1_message() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
@@ -196,7 +195,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_1_message_dup() throws Exception {
+    public void test_qos_1_message_dup() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
@@ -222,7 +221,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_1_message_retain() throws Exception {
+    public void test_qos_1_message_retain() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
@@ -248,7 +247,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_1_message_dup_retain() throws Exception {
+    public void test_qos_1_message_dup_retain() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.AT_LEAST_ONCE);
@@ -275,7 +274,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_2_message() throws Exception {
+    public void test_qos_2_message() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
@@ -300,7 +299,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_2_message_dup() throws Exception {
+    public void test_qos_2_message_dup() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
@@ -326,7 +325,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_2_message_retain() throws Exception {
+    public void test_qos_2_message_retain() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);
@@ -352,7 +351,7 @@ public class Mqtt3PublishEncoderTest {
     }
 
     @Test
-    public void test_qos_2_message_dup_retain() throws Exception {
+    public void test_qos_2_message_dup_retain() {
         final PUBLISHFactory.Mqtt3Builder builder = new PUBLISHFactory.Mqtt3Builder();
         builder.withTopic("topic");
         builder.withQoS(QoS.EXACTLY_ONCE);

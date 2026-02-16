@@ -25,11 +25,10 @@ import static org.junit.Assert.assertEquals;
 public class PayloadReferenceCounterRegistryImplTest {
 
     private @NotNull PayloadReferenceCounterRegistryImpl payloadReferenceCounterRegistry;
-    private @NotNull BucketLock bucketLock;
 
     @Before
     public void setUp() throws Exception {
-        bucketLock = new BucketLock(10);
+        @NotNull final BucketLock bucketLock = new BucketLock(10);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
     }
 
@@ -90,7 +89,6 @@ public class PayloadReferenceCounterRegistryImplTest {
         assertEquals(2, referenceCounter);
     }
 
-
     @Test
     public void test_decrement_whenNodeIsUnknown_thenReturnNegativeValueButDontSetValueInRegistry() {
         final int referenceCounter = payloadReferenceCounterRegistry.decrementAndGet(1L);
@@ -98,7 +96,6 @@ public class PayloadReferenceCounterRegistryImplTest {
         final int referenceCounter2 = payloadReferenceCounterRegistry.get(1L);
         assertEquals(UNKNOWN_PAYLOAD, referenceCounter2);
     }
-
 
     @Test
     public void test_decrement_whenNodeIsKnownButUniqueIsUnknown_thenReturnNegativeValueButDontSetValueInRegistry() {
@@ -128,7 +125,6 @@ public class PayloadReferenceCounterRegistryImplTest {
         final int referenceCounter = payloadReferenceCounterRegistry.get(1L);
         assertEquals(2, referenceCounter);
     }
-
 
     @Test
     public void test_size_whenMultipleNodesArePresent_thenSizeCoversAll() {
