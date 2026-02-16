@@ -15,7 +15,7 @@
  */
 package util;
 
-import com.google.common.io.Files;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.apache.commons.io.filefilter.NameFileFilter;
 
 import javax.tools.FileObject;
@@ -34,6 +34,8 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,9 +66,10 @@ public class OnTheFlyCompilationUtil {
         fileManager.close();
     }
 
-    public static ClassLoader compile(final StringJavaFileObject... toCompile) throws Exception {
+    public static ClassLoader compile(final @NotNull Path tempDir, final StringJavaFileObject... toCompile)
+            throws Exception {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        final MemClassLoader classLoader = new MemClassLoader();
+        final MemClassLoader classLoader = new MemClassLoader(tempDir);
         final JavaFileManager fileManager = new MemJavaFileManager(compiler, classLoader);
 
         final Collection<? extends JavaFileObject> units = Arrays.asList(toCompile);
@@ -98,24 +101,22 @@ public class OnTheFlyCompilationUtil {
     static class MemClassLoader extends ClassLoader {
 
         private final Map<String, MemJavaFileObject> classFiles = new HashMap<>();
-        private final File tempDir;
+        private final Path tempDir;
 
-        public MemClassLoader() throws Exception {
+        public MemClassLoader(final @NotNull Path tempDir) {
             super(ClassLoader.getSystemClassLoader());
-            final File tempDir = Files.createTempDir();
-            tempDir.deleteOnExit();
             this.tempDir = tempDir;
         }
 
-        public void addClassFile(final MemJavaFileObject memJavaFileObject) throws IOException {
+        public void addClassFile(final MemJavaFileObject memJavaFileObject) {
             classFiles.put(memJavaFileObject.getClassName(), memJavaFileObject);
         }
 
         public void persist() throws Exception {
             for (final Map.Entry<String, MemJavaFileObject> objectEntry : classFiles.entrySet()) {
                 final MemJavaFileObject value = objectEntry.getValue();
-                final File file = new File(tempDir, value.getClassName() + ".class");
-                Files.write(value.getClassBytes(), file);
+                final Path file = tempDir.resolve(value.getClassName() + ".class");
+                Files.write(file, value.getClassBytes());
             }
         }
 
@@ -131,12 +132,12 @@ public class OnTheFlyCompilationUtil {
 
         @Override
         public URL getResource(final String name) {
-            final String[] list = tempDir.list(new NameFileFilter(name));
+            final String[] list = tempDir.toFile().list(new NameFileFilter(name));
             if (list.length == 0) {
                 return super.getResource(name);
             } else {
                 try {
-                    return new File(tempDir, list[0]).toURI().toURL();
+                    return tempDir.resolve(list[0]).toUri().toURL();
                 } catch (final MalformedURLException e) {
                     return null;
                 }
@@ -183,7 +184,7 @@ public class OnTheFlyCompilationUtil {
                 final Location location,
                 final String className,
                 final JavaFileObject.Kind kind,
-                final FileObject sibling) throws IOException {
+                final FileObject sibling) {
             final MemJavaFileObject fileObject = new MemJavaFileObject(className);
             classLoader.addClassFile(fileObject);
             return fileObject;
