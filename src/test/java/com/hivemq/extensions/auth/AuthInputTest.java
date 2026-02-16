@@ -47,20 +47,16 @@ public class AuthInputTest {
     private final Mqtt5AuthReasonCode reasonCode = Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION;
     private final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("test", "1"));
     private final String reasonString = "testString";
-    private AUTH auth;
     private AuthInput authInput;
-    private ClientConnection clientConnection;
 
     @Before
     public void setUp() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
-        clientConnection = new DummyClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
 
-        auth = new AUTH(method, authData, reasonCode, userProperties, reasonString);
-
+        final AUTH auth = new AUTH(method, authData, reasonCode, userProperties, reasonString);
         authInput = new AuthInput("client", channel, auth, false);
     }
 
@@ -78,5 +74,4 @@ public class AuthInputTest {
         assertFalse(authInput.isReAuthentication());
         assertEquals(authInput, authInput.get());
     }
-
 }

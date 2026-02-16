@@ -29,7 +29,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 
 import static org.junit.Assert.assertEquals;
@@ -44,14 +43,11 @@ import static org.junit.Assert.assertTrue;
 public class SubscriptionAuthorizerInputImplTest {
 
     private Channel channel;
-    private ClientConnection clientConnection;
-
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         channel = new EmbeddedChannel();
-        clientConnection = new DummyClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }

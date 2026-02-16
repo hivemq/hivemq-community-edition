@@ -31,12 +31,11 @@ import static org.junit.Assert.assertFalse;
 public class Mqtt3UnsubackEncoderTest {
 
     private EmbeddedChannel channel;
-    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
-        clientConnection = new DummyClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 

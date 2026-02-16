@@ -35,22 +35,19 @@ import static org.junit.Assert.assertNotNull;
 public class PublishAuthorizerInputImplTest {
 
     private Channel channel;
-    private ClientConnection clientConnection;
 
     @Before
     public void before() {
         channel = new EmbeddedChannel();
-        clientConnection = new DummyClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
     }
-
 
     @Test(expected = NullPointerException.class)
     public void test_publish_null() {
         new PublishAuthorizerInputImpl((PUBLISH) null, channel, "client");
     }
-
 
     @Test(expected = NullPointerException.class)
     public void test_channel_null() {
@@ -84,5 +81,4 @@ public class PublishAuthorizerInputImplTest {
         assertNotNull(input.getConnectionInformation());
         assertNotNull(input.getPublishPacket());
     }
-
 }

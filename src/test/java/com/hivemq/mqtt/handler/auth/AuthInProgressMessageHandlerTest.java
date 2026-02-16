@@ -50,12 +50,11 @@ public class AuthInProgressMessageHandlerTest {
 
     private final @NotNull EventLog eventLog = mock();
 
-    private MqttConnacker connacker;
     private EmbeddedChannel channel;
 
     @Before
     public void setUp() {
-        connacker = new MqttConnackerImpl(eventLog);
+        final MqttConnacker connacker = new MqttConnackerImpl(eventLog);
 
         channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);

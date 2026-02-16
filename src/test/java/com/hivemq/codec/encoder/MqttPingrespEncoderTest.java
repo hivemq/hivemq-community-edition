@@ -34,17 +34,16 @@ import static org.junit.Assert.assertFalse;
 public class MqttPingrespEncoderTest {
 
     private EmbeddedChannel channel;
-    private ClientConnection clientConnection;
 
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
-        clientConnection = new DummyClientConnection(channel, null);
+        final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
     }
 
     @Test
-    public void test_pingresp_sent() throws Exception {
+    public void test_pingresp_sent() {
         channel.writeOutbound(new PINGRESP());
 
         final ByteBuf buf = channel.readOutbound();
