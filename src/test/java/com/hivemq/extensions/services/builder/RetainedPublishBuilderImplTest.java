@@ -211,7 +211,7 @@ public class RetainedPublishBuilderImplTest {
         assertEquals(retainedPublish.getUserProperties().asList().size(), built.getUserProperties().asList().size());
 
         assertEquals(Qos.AT_MOST_ONCE, built.getQos());
-        assertEquals(true, built.getRetain());
+        assertTrue(built.getRetain());
         assertEquals("topic", built.getTopic());
         assertTrue(built.getPayloadFormatIndicator().isPresent());
         assertEquals(PayloadFormatIndicator.UTF_8, built.getPayloadFormatIndicator().get());
@@ -247,7 +247,7 @@ public class RetainedPublishBuilderImplTest {
         assertEquals(publishPacket.getUserProperties().asList().size(), built.getUserProperties().asList().size());
 
         assertEquals(Qos.EXACTLY_ONCE, built.getQos());
-        assertEquals(true, built.getRetain());
+        assertTrue(built.getRetain());
         assertEquals("topic", built.getTopic());
         assertTrue(built.getPayloadFormatIndicator().isPresent());
         assertEquals(PayloadFormatIndicator.UTF_8, built.getPayloadFormatIndicator().get());

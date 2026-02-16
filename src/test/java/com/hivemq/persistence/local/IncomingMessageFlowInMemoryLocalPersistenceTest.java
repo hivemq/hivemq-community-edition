@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -44,7 +45,7 @@ public class IncomingMessageFlowInMemoryLocalPersistenceTest {
     public void test_get_no_entry_available() throws Exception {
 
         final MessageWithID notAvailable = persistence.get("not_available", 1);
-        assertEquals(null, notAvailable);
+        assertNull(notAvailable);
     }
 
     @Test
@@ -67,7 +68,7 @@ public class IncomingMessageFlowInMemoryLocalPersistenceTest {
 
         final MessageWithID result = persistence.get("client", 1);
 
-        assertEquals(null, result);
+        assertNull(result);
     }
 
     @Test
@@ -95,7 +96,7 @@ public class IncomingMessageFlowInMemoryLocalPersistenceTest {
         persistence.addOrReplace("client", 1, new PUBACK(1));
         persistence.remove("client", 2);
 
-        assertEquals(null, persistence.get("client", 2));
+        assertNull(persistence.get("client", 2));
         assertNotNull(null, persistence.get("client", 1));
     }
 
@@ -117,8 +118,8 @@ public class IncomingMessageFlowInMemoryLocalPersistenceTest {
 
         persistence.delete("client");
 
-        assertEquals(null, persistence.get("client", 1));
-        assertEquals(null, persistence.get("client", 2));
+        assertNull(persistence.get("client", 1));
+        assertNull(persistence.get("client", 2));
         assertEquals(message, persistence.get("client2", 1));
     }
 }

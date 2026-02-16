@@ -60,6 +60,7 @@ import java.util.concurrent.Executors;
 import static com.hivemq.persistence.clientsession.ClientSessionPersistenceImpl.DisconnectSource.EXTENSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -223,7 +224,7 @@ public class ClientServiceImplTest {
         final Optional<SessionInformation> sessionInformation = clientService.getSession(clientId).get();
 
         assertTrue(sessionInformation.isPresent());
-        assertEquals(true, sessionInformation.get().isConnected());
+        assertTrue(sessionInformation.get().isConnected());
         assertEquals(clientId, sessionInformation.get().getClientIdentifier());
         assertEquals(sessionExpiry, sessionInformation.get().getSessionExpiryInterval());
     }
@@ -235,7 +236,7 @@ public class ClientServiceImplTest {
                 EXTENSION,
                 null,
                 null)).thenReturn(Futures.immediateFuture(null));
-        assertEquals(null, clientService.disconnectClient(clientId).get());
+        assertNull(clientService.disconnectClient(clientId).get());
     }
 
     @Test(timeout = 20000)
@@ -265,7 +266,7 @@ public class ClientServiceImplTest {
                 EXTENSION,
                 null,
                 null)).thenReturn(Futures.immediateFuture(null));
-        assertEquals(null, clientService.disconnectClient(clientId, true).get());
+        assertNull(clientService.disconnectClient(clientId, true).get());
     }
 
     @Test(timeout = 20000)
@@ -331,7 +332,7 @@ public class ClientServiceImplTest {
     @Test(timeout = 20000, expected = ExecutionException.class)
     public void test_invalidate_session_null_failed() throws Throwable {
         when(clientSessionPersistence.invalidateSession(clientId, EXTENSION)).thenReturn(Futures.immediateFuture(null));
-        assertEquals(null, clientService.invalidateSession(clientId).get());
+        assertNull(clientService.invalidateSession(clientId).get());
     }
 
     @Test(timeout = 20000)

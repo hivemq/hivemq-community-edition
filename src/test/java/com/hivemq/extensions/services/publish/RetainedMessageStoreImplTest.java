@@ -170,19 +170,19 @@ public class RetainedMessageStoreImplTest {
 
         assertTrue(retainedPublish.isPresent());
         assertEquals(Qos.AT_LEAST_ONCE, retainedPublish.get().getQos());
-        assertEquals(true, retainedPublish.get().getRetain());
+        assertTrue(retainedPublish.get().getRetain());
         assertEquals("topic", retainedPublish.get().getTopic());
         assertTrue(retainedPublish.get().getPayloadFormatIndicator().isPresent());
         assertEquals(PayloadFormatIndicator.UTF_8, retainedPublish.get().getPayloadFormatIndicator().get());
-        assertEquals(true, retainedPublish.get().getMessageExpiryInterval().isPresent());
+        assertTrue(retainedPublish.get().getMessageExpiryInterval().isPresent());
         assertEquals(12345L, retainedPublish.get().getMessageExpiryInterval().get().longValue());
-        assertEquals(true, retainedPublish.get().getResponseTopic().isPresent());
+        assertTrue(retainedPublish.get().getResponseTopic().isPresent());
         assertEquals("response_topic", retainedPublish.get().getResponseTopic().get());
-        assertEquals(true, retainedPublish.get().getContentType().isPresent());
+        assertTrue(retainedPublish.get().getContentType().isPresent());
         assertEquals("content_type", retainedPublish.get().getContentType().get());
-        assertEquals(true, retainedPublish.get().getCorrelationData().isPresent());
-        assertEquals(true, retainedPublish.get().getPayload().isPresent());
-        assertEquals(true, retainedPublish.get().getUserProperties().asList().isEmpty());
+        assertTrue(retainedPublish.get().getCorrelationData().isPresent());
+        assertTrue(retainedPublish.get().getPayload().isPresent());
+        assertTrue(retainedPublish.get().getUserProperties().asList().isEmpty());
 
     }
 

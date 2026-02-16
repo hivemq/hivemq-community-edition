@@ -22,6 +22,8 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ConfigurationFileTest {
 
@@ -32,7 +34,7 @@ public class ConfigurationFileTest {
     public void test_null_configuration_file() throws Exception {
         final ConfigurationFile configurationFile = new ConfigurationFile(null);
 
-        assertEquals(false, configurationFile.file().isPresent());
+        assertFalse(configurationFile.file().isPresent());
     }
 
     @Test
@@ -40,7 +42,7 @@ public class ConfigurationFileTest {
         final File file = temporaryFolder.newFile();
         final ConfigurationFile configurationFile = new ConfigurationFile(file);
 
-        assertEquals(true, configurationFile.file().isPresent());
+        assertTrue(configurationFile.file().isPresent());
         assertEquals(file, configurationFile.file().get());
     }
 }

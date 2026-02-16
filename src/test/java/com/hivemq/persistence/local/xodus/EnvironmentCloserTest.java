@@ -30,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -79,7 +80,7 @@ public class EnvironmentCloserTest {
         });
         latch.await();
         final EnvironmentCloser closer = new EnvironmentCloser("name", environment, 10, 100);
-        assertEquals(true, closer.close());
+        assertTrue(closer.close());
         assertTrue(closer.getTryNo() > 0);
 
     }
@@ -93,7 +94,7 @@ public class EnvironmentCloserTest {
         final Transaction transaction = environment.beginReadonlyTransaction();
 
         final EnvironmentCloser closer = new EnvironmentCloser("name", environment, 3, 100);
-        assertEquals(false, closer.close());
+        assertFalse(closer.close());
         assertEquals(3, closer.getTryNo());
 
     }
@@ -106,7 +107,7 @@ public class EnvironmentCloserTest {
         environment.close();
 
         final EnvironmentCloser closer = new EnvironmentCloser("name", environment, 3, 100);
-        assertEquals(false, closer.close());
+        assertFalse(closer.close());
         assertEquals(0, closer.getTryNo());
     }
 

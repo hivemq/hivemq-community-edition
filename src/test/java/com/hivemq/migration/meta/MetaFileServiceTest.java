@@ -27,6 +27,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -58,7 +59,7 @@ public class MetaFileServiceTest {
 
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
 
-        assertEquals(false, metaFile.isDataFolderPresent());
+        assertFalse(metaFile.isDataFolderPresent());
     }
 
     @Test
@@ -66,8 +67,8 @@ public class MetaFileServiceTest {
 
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
 
-        assertEquals(true, metaFile.isDataFolderPresent());
-        assertEquals(false, metaFile.isPersistenceFolderPresent());
+        assertTrue(metaFile.isDataFolderPresent());
+        assertFalse(metaFile.isPersistenceFolderPresent());
     }
 
     @Test
@@ -77,9 +78,9 @@ public class MetaFileServiceTest {
 
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
 
-        assertEquals(true, metaFile.isDataFolderPresent());
-        assertEquals(true, metaFile.isPersistenceFolderPresent());
-        assertEquals(false, metaFile.isMetaFilePresent());
+        assertTrue(metaFile.isDataFolderPresent());
+        assertTrue(metaFile.isPersistenceFolderPresent());
+        assertFalse(metaFile.isMetaFilePresent());
     }
 
     @Test

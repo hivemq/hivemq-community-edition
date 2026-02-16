@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -65,7 +66,7 @@ public class PluginOutputAsyncerImplTest {
 
 
         assertEquals(Async.Status.DONE, asyncOutput.getStatus());
-        assertEquals(true, asyncOutput.getOutput().getAsyncFuture().isDone());
+        assertTrue(asyncOutput.getOutput().getAsyncFuture().isDone());
     }
 
 
@@ -83,7 +84,7 @@ public class PluginOutputAsyncerImplTest {
         Thread.sleep(200);
 
         assertEquals(Async.Status.CANCELED, asyncOutput.getStatus());
-        assertEquals(true, asyncOutput.getOutput().getAsyncFuture().isDone());
+        assertTrue(asyncOutput.getOutput().getAsyncFuture().isDone());
     }
 
 

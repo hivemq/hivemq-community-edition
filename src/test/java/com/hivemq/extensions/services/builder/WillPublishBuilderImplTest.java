@@ -42,6 +42,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
@@ -110,7 +111,7 @@ public class WillPublishBuilderImplTest {
         assertEquals("topic", publish.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, publish.getPayload().get().array());
         assertEquals(2, publish.getQos().getQosNumber());
-        assertEquals(true, publish.getRetain());
+        assertTrue(publish.getRetain());
         assertEquals("TYPE", publish.getContentType().get());
         assertArrayEquals(new byte[]{1, 2, 3, 4}, publish.getCorrelationData().get().array());
         assertEquals("responseTopic", publish.getResponseTopic().get());
@@ -184,7 +185,7 @@ public class WillPublishBuilderImplTest {
         assertEquals("topic", willPublishPacket.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, Bytes.getBytesFromReadOnlyBuffer(willPublishPacket.getPayload()));
         assertEquals(2, willPublishPacket.getQos().getQosNumber());
-        assertEquals(true, willPublishPacket.getRetain());
+        assertTrue(willPublishPacket.getRetain());
         assertEquals("TYPE", willPublishPacket.getContentType().get());
         assertArrayEquals(new byte[]{1, 2, 3, 4},
                 Bytes.getBytesFromReadOnlyBuffer(willPublishPacket.getCorrelationData()));

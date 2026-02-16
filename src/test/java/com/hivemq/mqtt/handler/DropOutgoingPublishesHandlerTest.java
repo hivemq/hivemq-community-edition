@@ -100,7 +100,7 @@ public class DropOutgoingPublishesHandlerTest {
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false);
         final boolean messageDropped = handler.checkChannelNotWritable(ctx, publishWithFuture, promise);
         assertFalse(messageDropped);
-        assertEquals(false, future.isDone()); // will be set in the Ordered topic handler
+        assertFalse(future.isDone()); // will be set in the Ordered topic handler
         verify(promise, never()).setSuccess();
         verify(counter, never()).inc();
     }
@@ -120,7 +120,7 @@ public class DropOutgoingPublishesHandlerTest {
         final PublishWithFuture publishWithFuture = new PublishWithFuture(publish, future, false);
         final boolean messageDropped = handler.checkChannelNotWritable(ctx, publishWithFuture, promise);
         assertFalse(messageDropped);
-        assertEquals(false, future.isDone()); // will be set in the Ordered topic handler
+        assertFalse(future.isDone()); // will be set in the Ordered topic handler
         verify(promise, never()).setSuccess();
         verify(counter, never()).inc();
     }

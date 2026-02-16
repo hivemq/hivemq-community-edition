@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.time.Duration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -158,7 +159,7 @@ public class PublishInboundOutputImplTest {
 
         assertEquals(TimeoutFallback.FAILURE, output.getTimeoutFallback());
         assertEquals(AckReasonCode.NOT_AUTHORIZED, output.getReasonCode());
-        assertEquals(null, output.getReasonString());
+        assertNull(output.getReasonString());
     }
 
     @Test
@@ -171,7 +172,7 @@ public class PublishInboundOutputImplTest {
         output.preventPublishDelivery();
 
         assertEquals(AckReasonCode.SUCCESS, output.getReasonCode());
-        assertEquals(null, output.getReasonString());
+        assertNull(output.getReasonString());
         assertTrue(output.isPreventDelivery());
     }
 
@@ -231,7 +232,7 @@ public class PublishInboundOutputImplTest {
         output.preventPublishDelivery(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR);
 
         assertEquals(AckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR, output.getReasonCode());
-        assertEquals(null, output.getReasonString());
+        assertNull(output.getReasonString());
         assertTrue(output.isPreventDelivery());
     }
 

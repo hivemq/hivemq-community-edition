@@ -71,7 +71,7 @@ public class LocalPersistenceFileUtilTest {
 
         final File localPersistenceFolder = util.getLocalPersistenceFolder();
 
-        assertEquals(true, new File(dataFolder, "persistence").exists());
+        assertTrue(new File(dataFolder, "persistence").exists());
 
         assertEquals(new File(dataFolder, "persistence").getAbsolutePath(), localPersistenceFolder.getAbsolutePath());
     }
@@ -93,7 +93,7 @@ public class LocalPersistenceFileUtilTest {
         util.getLocalPersistenceFolder();
 
         //File wasn't overwritten
-        assertEquals(true, tempFile.exists());
+        assertTrue(tempFile.exists());
     }
 
     @NotNull

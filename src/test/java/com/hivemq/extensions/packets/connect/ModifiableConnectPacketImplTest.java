@@ -230,7 +230,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setCleanStart(true);
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals(true, modifiablePacket.getCleanStart());
+        assertTrue(modifiablePacket.getCleanStart());
     }
 
     @Test
@@ -259,7 +259,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setCleanStart(false);
 
         assertFalse(modifiablePacket.isModified());
-        assertEquals(false, modifiablePacket.getCleanStart());
+        assertFalse(modifiablePacket.getCleanStart());
     }
 
     @Test
@@ -653,7 +653,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setRequestProblemInformation(false);
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals(false, modifiablePacket.getRequestProblemInformation());
+        assertFalse(modifiablePacket.getRequestProblemInformation());
     }
 
     @Test
@@ -682,7 +682,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setRequestProblemInformation(true);
 
         assertFalse(modifiablePacket.isModified());
-        assertEquals(true, modifiablePacket.getRequestProblemInformation());
+        assertTrue(modifiablePacket.getRequestProblemInformation());
     }
 
     @Test
@@ -711,7 +711,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setRequestResponseInformation(false);
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals(false, modifiablePacket.getRequestResponseInformation());
+        assertFalse(modifiablePacket.getRequestResponseInformation());
     }
 
     @Test
@@ -740,7 +740,7 @@ public class ModifiableConnectPacketImplTest {
         modifiablePacket.setRequestResponseInformation(true);
 
         assertFalse(modifiablePacket.isModified());
-        assertEquals(true, modifiablePacket.getRequestResponseInformation());
+        assertTrue(modifiablePacket.getRequestResponseInformation());
     }
 
     @Test
