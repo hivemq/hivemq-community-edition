@@ -26,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import util.OnTheFlyCompilationUtil;
+import util.OnTheFlyCompilationUtil.StringJavaFileObject;
 
 import java.io.File;
 import java.net.URL;
@@ -36,20 +37,23 @@ import static org.junit.Assert.assertEquals;
 
 public class ClassServiceLoaderTest {
 
-    public static final @NotNull String theInterface =
-            "" + " public interface TheInterface {" + "   int doSomething();" + " }";
+    public static final @NotNull String theInterface = """
+            public interface TheInterface {
+               int doSomething();
+            }""";
 
-    public static final @NotNull String theImpl = "" +
-            " public class TheImpl implements TheInterface {" +
-            "        public int doSomething() {" +
-            "            return 1;}" +
-            " }";
+    public static final @NotNull String theImpl = """
+            public class TheImpl implements TheInterface {
+              public int doSomething() {
+                return 1;
+              }
+            }""";
 
-    public static final @NotNull String theImpl2 = "" +
-            " public class TheImpl2 implements TheInterface {" +
-            "        public int doSomething() {" +
-            "            return 2;}" +
-            " }";
+    public static final @NotNull String theImpl2 = """
+            public class TheImpl2 implements TheInterface {
+              public int doSomething() {
+                return 2;}
+            }""";
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -67,9 +71,9 @@ public class ClassServiceLoaderTest {
     @Test
     public void test_load_classes_from_jar_file_with_service_loader() throws Exception {
         // compile classes on the fly
-        final ClassLoader compile = OnTheFlyCompilationUtil.compile(new OnTheFlyCompilationUtil.StringJavaFileObject(
-                "TheInterface",
-                theInterface), new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl", theImpl));
+        final ClassLoader compile = OnTheFlyCompilationUtil.compile(temporaryFolder.getRoot().toPath(),
+                new StringJavaFileObject("TheInterface", theInterface),
+                new StringJavaFileObject("TheImpl", theImpl));
 
         // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
@@ -96,9 +100,8 @@ public class ClassServiceLoaderTest {
     @Test
     public void test_load_classes_from_jar_file_with_service_loader_empty_services_file() throws Exception {
         // compile classes on the fly
-        final ClassLoader compile = OnTheFlyCompilationUtil.compile(new OnTheFlyCompilationUtil.StringJavaFileObject(
-                "TheInterface",
-                theInterface));
+        final ClassLoader compile = OnTheFlyCompilationUtil.compile(temporaryFolder.getRoot().toPath(),
+                new StringJavaFileObject("TheInterface", theInterface));
 
         // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
@@ -122,11 +125,10 @@ public class ClassServiceLoaderTest {
     @Test
     public void test_load_classes_from_jar_file_with_service_loader_multiple_classes() throws Exception {
         // compile classes on the fly
-        final ClassLoader compile = OnTheFlyCompilationUtil.compile(new OnTheFlyCompilationUtil.StringJavaFileObject(
-                        "TheInterface",
-                        theInterface),
-                new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl", theImpl),
-                new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl2", theImpl2));
+        final ClassLoader compile = OnTheFlyCompilationUtil.compile(temporaryFolder.getRoot().toPath(),
+                new StringJavaFileObject("TheInterface", theInterface),
+                new StringJavaFileObject("TheImpl", theImpl),
+                new StringJavaFileObject("TheImpl2", theImpl2));
 
         // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
@@ -152,11 +154,10 @@ public class ClassServiceLoaderTest {
     @Test
     public void test_load_classes_from_jar_file_with_service_loader_with_comments() throws Exception {
         // compile classes on the fly
-        final ClassLoader compile = OnTheFlyCompilationUtil.compile(new OnTheFlyCompilationUtil.StringJavaFileObject(
-                        "TheInterface",
-                        theInterface),
-                new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl", theImpl),
-                new OnTheFlyCompilationUtil.StringJavaFileObject("TheImpl2", theImpl2));
+        final ClassLoader compile = OnTheFlyCompilationUtil.compile(temporaryFolder.getRoot().toPath(),
+                new StringJavaFileObject("TheInterface", theInterface),
+                new StringJavaFileObject("TheImpl", theImpl),
+                new StringJavaFileObject("TheImpl2", theImpl2));
 
         // creating the JAR file with the compiled classes + service loader
         final Class<?> interfaceClass = Class.forName("TheInterface", false, compile);
