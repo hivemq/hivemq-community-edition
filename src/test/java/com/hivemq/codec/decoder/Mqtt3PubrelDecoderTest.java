@@ -23,9 +23,7 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestMqttDecoder;
 
@@ -35,17 +33,10 @@ import static org.junit.Assert.assertTrue;
 
 public class Mqtt3PubrelDecoderTest {
 
-    private @NotNull EmbeddedChannel channel;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        channel = new EmbeddedChannel(TestMqttDecoder.create());
-    }
+    private final @NotNull EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create());
 
     @Test
     public void test_pubrel_received() {
-
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
@@ -55,15 +46,12 @@ public class Mqtt3PubrelDecoderTest {
         channel.writeInbound(buf);
 
         final PUBREL pubrel = channel.readInbound();
-
         assertEquals(55555, pubrel.getPacketIdentifier());
-
         assertTrue(channel.isActive());
     }
 
     @Test
     public void test_pubrel_invalid_header_mqtt_311() {
-
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
@@ -72,14 +60,12 @@ public class Mqtt3PubrelDecoderTest {
         buf.writeShort(55555);
         channel.writeInbound(buf);
 
-
         //The client needs to get disconnected
         assertFalse(channel.isActive());
     }
 
     @Test
     public void test_pubrel_invalid_header_mqtt_31() {
-
         //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
@@ -90,10 +76,7 @@ public class Mqtt3PubrelDecoderTest {
         channel.writeInbound(buf);
 
         final PUBREL pubrel = channel.readInbound();
-
         assertEquals(55555, pubrel.getPacketIdentifier());
-
         assertTrue(channel.isActive());
     }
-
 }

@@ -19,9 +19,7 @@ import com.google.common.collect.Lists;
 import jetbrains.exodus.ByteIterable;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
@@ -37,13 +35,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class XodusUtilsTest {
 
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void test_byteiterable_to_string_conversion() throws Exception {
+    public void test_byteiterable_to_string_conversion() {
         final String[] input = new String[]{
                 "string",
                 RandomStringUtils.randomAlphabetic(65535),
@@ -84,7 +77,7 @@ public class XodusUtilsTest {
     }
 
     @Test
-    public void test_byteiterable_to_bytes_conversion() throws Exception {
+    public void test_byteiterable_to_bytes_conversion() {
         final List<byte[]> bytes = Lists.newArrayList(RandomUtils.nextBytes(1),
                 RandomUtils.nextBytes(1024),
                 RandomUtils.nextBytes(65535),
@@ -99,23 +92,22 @@ public class XodusUtilsTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_string_to_byte_iterable_NPE() throws Exception {
+    public void test_string_to_byte_iterable_NPE() {
         stringToByteIterable(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_bytes_to_byte_iterable_NPE() throws Exception {
+    public void test_bytes_to_byte_iterable_NPE() {
         bytesToByteIterable(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_byte_iterable_to_string_NPE() throws Exception {
+    public void test_byte_iterable_to_string_NPE() {
         byteIterableToString(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_byte_iterable_to_bytes_NPE() throws Exception {
+    public void test_byte_iterable_to_bytes_NPE() {
         byteIterableToBytes(null);
     }
-
 }

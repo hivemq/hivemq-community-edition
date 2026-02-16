@@ -33,7 +33,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.DummyHandler;
 import util.TestMessageUtil;
@@ -43,6 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.hivemq.bootstrap.netty.ChannelHandlerNames.MQTT_MESSAGE_BARRIER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MessageBarrierTest {
 
@@ -51,7 +51,6 @@ public class MessageBarrierTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(new EventLog());
 
         messageBarrier = new MessageBarrier(mqttServerDisconnector);
@@ -62,29 +61,25 @@ public class MessageBarrierTest {
 
     @Test
     public void test_default() {
-        assertEquals(false, messageBarrier.getConnectReceived());
+        assertFalse(messageBarrier.getConnectReceived());
     }
 
     @Test
     public void test_connect_sent() {
-
         channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier("clientID")
                 .build());
-        assertEquals(true, messageBarrier.getConnectReceived());
+        assertTrue(messageBarrier.getConnectReceived());
     }
 
     @Test
     public void test_message_sent_before_connect() {
-
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
-        assertEquals(false, channel.isActive());
-
+        assertFalse(channel.isActive());
     }
 
     @Test
     public void test_queue_messages_after_connect() {
-
         channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier("clientID")
                 .build());
@@ -96,13 +91,12 @@ public class MessageBarrierTest {
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new DISCONNECT());
 
-        assertEquals(true, channel.isActive());
+        assertTrue(channel.isActive());
         assertEquals(6, messageBarrier.getQueue().size());
     }
 
     @Test
     public void test_messages_not_sent_on_connack_fail() {
-
         channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier("clientID")
                 .build());
@@ -113,7 +107,6 @@ public class MessageBarrierTest {
         assertEquals(2, messageBarrier.getQueue().size());
 
         final AtomicInteger counter = new AtomicInteger(0);
-
         channel.pipeline().addFirst(new ChannelDuplexHandler() {
 
             @Override
@@ -123,13 +116,11 @@ public class MessageBarrierTest {
         });
 
         channel.writeOutbound(CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED).build());
-
         assertEquals(0, counter.get());
     }
 
     @Test
     public void test_messages_sent_on_connack_success() {
-
         channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
                 .withClientIdentifier("clientID")
                 .build());
@@ -140,7 +131,6 @@ public class MessageBarrierTest {
         assertEquals(2, messageBarrier.getQueue().size());
 
         final AtomicInteger counter = new AtomicInteger(0);
-
         channel.pipeline().addAfter(MQTT_MESSAGE_BARRIER, "test", new ChannelDuplexHandler() {
 
             @Override
@@ -155,9 +145,7 @@ public class MessageBarrierTest {
         final CONNACK connack =
                 CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).withSessionPresent(false).build();
         channel.writeOutbound(connack);
-
         assertEquals(2, counter.get());
         assertFalse(channel.pipeline().names().contains(MQTT_MESSAGE_BARRIER));
     }
-
 }

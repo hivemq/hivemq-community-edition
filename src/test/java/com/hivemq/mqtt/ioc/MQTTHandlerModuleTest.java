@@ -22,9 +22,7 @@ import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingletonScope;
 import com.hivemq.mqtt.message.dropping.MessageDroppedService;
 import com.hivemq.mqtt.message.dropping.MessageDroppedServiceImpl;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -36,22 +34,15 @@ import static org.mockito.Mockito.when;
  */
 public class MQTTHandlerModuleTest {
 
-    private Injector injector;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                final Injector persistenceInjector = mock(Injector.class);
-                when(persistenceInjector.getInstance(MessageDroppedService.class)).thenReturn(mock(
-                        MessageDroppedServiceImpl.class));
-                install(new MQTTHandlerModule(persistenceInjector));
-                bindScope(LazySingleton.class, LazySingletonScope.get());
-            }
-        });
-    }
+    private final Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+            final Injector persistenceInjector = mock();
+            when(persistenceInjector.getInstance(MessageDroppedService.class)).thenReturn(mock(MessageDroppedServiceImpl.class));
+            install(new MQTTHandlerModule(persistenceInjector));
+            bindScope(LazySingleton.class, LazySingletonScope.get());
+        }
+    });
 
     @Test
     public void test_message_dropped_service_is_singleton() {
@@ -59,8 +50,6 @@ public class MQTTHandlerModuleTest {
         final MessageDroppedService instance2 = injector.getInstance(MessageDroppedService.class);
 
         assertSame(instance1, instance2);
-
         assertTrue(instance1 instanceof MessageDroppedServiceImpl);
     }
-
 }

@@ -23,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -53,21 +52,16 @@ public class AsyncLocalChunkIteratorTest {
 
     @Before
     public void before() {
-        MockitoAnnotations.initMocks(this);
         executorService = Executors.newFixedThreadPool(2);
         fetchCallback = new TestFetchCallback(executorService);
         itemCallback = new TestItemCallback();
         asyncIterator = new AsyncLocalChunkIterator<>(fetchCallback, itemCallback, executorService);
     }
 
-
     @Test(timeout = 15_000, expected = RuntimeException.class)
     public void test_fetch_failed() throws Throwable {
-
         fetchCallback.setException(new RuntimeException("test-exception"));
-
         asyncIterator.fetchAndIterate();
-
         try {
             asyncIterator.getFetchFuture().get();
         } catch (final Exception e) {
@@ -77,11 +71,8 @@ public class AsyncLocalChunkIteratorTest {
 
     @Test(timeout = 15_000, expected = RuntimeException.class)
     public void test_failed() throws Throwable {
-
         fetchCallback.setException(new RuntimeException("test-exception"));
-
         asyncIterator.fetchAndIterate();
-
         try {
             asyncIterator.getFinishedFuture().get();
         } catch (final Exception e) {
@@ -91,12 +82,9 @@ public class AsyncLocalChunkIteratorTest {
 
     @Test(timeout = 15_000, expected = NullPointerException.class)
     public void test_fetch_result_null() throws Throwable {
-
         asyncIterator =
                 new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback, executorService);
-
         asyncIterator.fetchAndIterate();
-
         try {
             asyncIterator.getFinishedFuture().get();
         } catch (final Exception e) {
@@ -106,41 +94,28 @@ public class AsyncLocalChunkIteratorTest {
 
     @Test(timeout = 15_000)
     public void test_iterate_multiple() throws Exception {
-
         fetchCallback.setChunks(new ArrayDeque<>(List.of(List.of("a1", "b", "c1"), List.of("a2", "b", "d", "e"))));
-
         asyncIterator.fetchAndIterate();
-
         asyncIterator.getFinishedFuture().get();
-
         assertEquals(7, itemCallback.getItems().size());
         assertEquals(itemCallback.getItems(), ImmutableList.of("a1", "b", "c1", "a2", "b", "d", "e"));
     }
 
     @Test(timeout = 15_000)
     public void test_iterate_emtpy_result() throws Exception {
-
         fetchCallback.setChunks(new ArrayDeque<>(List.of(List.of())));
-
         asyncIterator.fetchAndIterate();
-
         asyncIterator.getFetchFuture().get();
         asyncIterator.getFinishedFuture().get();
-
         assertEquals(0, itemCallback.getItems().size());
     }
 
     @Test(timeout = 15_000)
     public void test_abort_on_first_item() throws Exception {
-
         fetchCallback.setChunks(new ArrayDeque<>(List.of(List.of("a1", "b", "c1"), List.of("d", "e"))));
-
         itemCallback.setAbort(true);
-
         asyncIterator.fetchAndIterate();
-
         asyncIterator.getFinishedFuture().get();
-
         assertTrue("Should only contain max 3 item, was " + itemCallback.getItems().size() + " items",
                 itemCallback.getItems().size() <= 3);
     }
@@ -182,14 +157,12 @@ public class AsyncLocalChunkIteratorTest {
 
         @Override
         public @NotNull ListenableFuture<ChunkResult<String>> fetchNextResults(@Nullable final ChunkCursor cursor) {
-
             if (exception != null) {
                 return Futures.immediateFailedFuture(exception);
             }
 
             final SettableFuture<ChunkResult<String>> resultFuture = SettableFuture.create();
             executorService.submit(() -> {
-
                 final Queue<Collection<String>> chunkQueue = chunks.get();
                 if (block.get()) {
                     blockingLatch.countDown();
@@ -208,7 +181,6 @@ public class AsyncLocalChunkIteratorTest {
                     resultFuture.set(new ChunkResult<>(nextChunk, cursor, chunkQueue.peek() == null));
                 }
             });
-
             return resultFuture;
         }
 

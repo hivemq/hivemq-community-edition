@@ -22,7 +22,6 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import com.hivemq.mqtt.topic.SubscriberWithQoS;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import static com.hivemq.configuration.service.InternalConfigurations.TOPIC_TREE_MAP_CREATION_THRESHOLD;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -37,10 +36,8 @@ public class TestRemoveSubscriberFromTopicInTopicTreeImpl {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         TOPIC_TREE_MAP_CREATION_THRESHOLD.set(1);
         topicTree = new LocalTopicTree(new MetricsHolder(new MetricRegistry()));
-
     }
 
     @Test
