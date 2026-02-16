@@ -26,6 +26,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -50,7 +51,7 @@ public class CloudPlatformTest {
             }
         };
 
-        assertEquals(null, cloudPlatform.getCloudPlatform());
+        assertNull(cloudPlatform.getCloudPlatform());
     }
 
     @Test
@@ -120,7 +121,7 @@ public class CloudPlatformTest {
             }
         };
 
-        assertEquals(null, cloudPlatform.getCloudPlatform());
+        assertNull(cloudPlatform.getCloudPlatform());
     }
 
 }

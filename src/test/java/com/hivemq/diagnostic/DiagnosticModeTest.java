@@ -160,7 +160,7 @@ public class DiagnosticModeTest {
         // Expect init to have failed and logged an error message. No need to get the shutdownHook.
 
         //No Exception, this is good!
-        assertTrue(hivemqHomeFolder.listFiles().length == 0);
+        assertEquals(0, hivemqHomeFolder.listFiles().length);
     }
 
     @Test

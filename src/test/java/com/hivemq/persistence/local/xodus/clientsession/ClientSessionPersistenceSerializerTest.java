@@ -29,6 +29,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Christoph Schäbel
@@ -122,7 +123,7 @@ public class ClientSessionPersistenceSerializerTest {
         assertEquals(2L, resultWill.getPublishId());
         assertEquals(3, resultWill.getMessageExpiryInterval());
         assertEquals(QoS.AT_MOST_ONCE, resultWill.getQos());
-        assertEquals(true, resultWill.isRetain());
+        assertTrue(resultWill.isRetain());
         assertEquals("hivemqId", resultWill.getHivemqId());
     }
 
@@ -160,7 +161,7 @@ public class ClientSessionPersistenceSerializerTest {
         assertEquals(2, resultWill.getPublishId());
         assertEquals(3, resultWill.getMessageExpiryInterval());
         assertEquals(QoS.AT_MOST_ONCE, resultWill.getQos());
-        assertEquals(true, resultWill.isRetain());
+        assertTrue(resultWill.isRetain());
         assertEquals("hivemqId", resultWill.getHivemqId());
 
         assertEquals(Mqtt5PayloadFormatIndicator.UTF_8, resultWill.getPayloadFormatIndicator());
@@ -206,7 +207,7 @@ public class ClientSessionPersistenceSerializerTest {
         assertEquals(2, resultWill.getPublishId());
         assertEquals(3, resultWill.getMessageExpiryInterval());
         assertEquals(QoS.AT_MOST_ONCE, resultWill.getQos());
-        assertEquals(true, resultWill.isRetain());
+        assertTrue(resultWill.isRetain());
         assertEquals("hivemqId", resultWill.getHivemqId());
 
         assertNull(resultWill.getPayloadFormatIndicator());

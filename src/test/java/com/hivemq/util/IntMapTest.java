@@ -20,6 +20,7 @@ import org.junit.Test;
 import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -112,7 +113,7 @@ public class IntMapTest {
         assertEquals(3, entry3.getKey());
         assertEquals(-15, entry3.getValue());
 
-        assertEquals(false, iterator.hasNext());
+        assertFalse(iterator.hasNext());
         assertNull(iterator.next());
     }
 

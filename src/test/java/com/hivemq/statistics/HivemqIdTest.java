@@ -27,6 +27,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +58,7 @@ public class HivemqIdTest {
 
         final String hivemqIdString = this.hivemqId.getHivemqId();
         assertEquals(36, hivemqIdString.length());
-        assertEquals(true, new File(temporaryFolder.getRoot(), "meta.id").exists());
+        assertTrue(new File(temporaryFolder.getRoot(), "meta.id").exists());
 
         //test if the same id is returned
         assertEquals(hivemqIdString, hivemqId.getHivemqId());
@@ -73,7 +74,7 @@ public class HivemqIdTest {
         hivemqId.postConstruct();
 
         assertEquals(id, hivemqId.getHivemqId());
-        assertEquals(true, idFile.exists());
+        assertTrue(idFile.exists());
 
         //test if the same id is returned
         assertEquals(id, hivemqId.getHivemqId());

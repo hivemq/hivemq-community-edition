@@ -23,7 +23,8 @@ import org.junit.Test;
 import javax.inject.Singleton;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dominik Obermaier
@@ -42,8 +43,8 @@ public class LazySingletonModuleTest {
                     }
                 });
 
-        assertEquals(true, StandardSingleton.executed.get());
-        assertEquals(false, LazySingletonClass.executed.get());
+        assertTrue(StandardSingleton.executed.get());
+        assertFalse(LazySingletonClass.executed.get());
     }
 
 

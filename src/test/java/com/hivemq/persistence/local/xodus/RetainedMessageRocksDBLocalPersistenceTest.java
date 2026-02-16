@@ -314,7 +314,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
                 persistence.getAllRetainedMessagesChunk(1, null, 100);
 
         assertEquals(1, chunk.getBucketIndex());
-        assertEquals(null, chunk.getLastKey());
+        assertNull(chunk.getLastKey());
         assertTrue(chunk.isFinished());
         assertTrue(chunk.getValue().isEmpty());
     }
@@ -328,7 +328,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
                 persistence.getAllRetainedMessagesChunk(1, null, 1);
 
         assertEquals(1, chunk1.getBucketIndex());
-        assertTrue(chunk1.getLastKey() != null);
+        assertNotNull(chunk1.getLastKey());
         assertFalse(chunk1.isFinished());
         assertEquals(1, chunk1.getValue().size());
 
@@ -336,7 +336,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
                 persistence.getAllRetainedMessagesChunk(1, chunk1.getLastKey(), 1);
 
         assertEquals(1, chunk2.getBucketIndex());
-        assertTrue(chunk2.getLastKey() != null);
+        assertNotNull(chunk2.getLastKey());
         assertTrue(chunk2.isFinished());
         assertEquals(1, chunk2.getValue().size());
     }
@@ -350,7 +350,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
                 persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
 
         assertEquals(1, chunk.getBucketIndex());
-        assertTrue(chunk.getLastKey() != null);
+        assertNotNull(chunk.getLastKey());
         assertTrue(chunk.isFinished());
         assertEquals(2, chunk.getValue().size());
     }
@@ -364,7 +364,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
                 persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
 
         assertEquals(1, chunk.getBucketIndex());
-        assertTrue(chunk.getLastKey() != null);
+        assertNotNull(chunk.getLastKey());
         assertTrue(chunk.isFinished());
         assertEquals(1, chunk.getValue().size());
     }
@@ -379,7 +379,7 @@ public class RetainedMessageRocksDBLocalPersistenceTest {
                 persistence.getAllRetainedMessagesChunk(1, null, Integer.MAX_VALUE);
 
         assertEquals(1, chunk.getBucketIndex());
-        assertTrue(chunk.getLastKey() != null);
+        assertNotNull(chunk.getLastKey());
         assertTrue(chunk.isFinished());
         assertEquals(1, chunk.getValue().size());
     }

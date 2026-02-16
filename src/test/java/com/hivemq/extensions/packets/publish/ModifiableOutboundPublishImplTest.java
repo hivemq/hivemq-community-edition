@@ -354,7 +354,7 @@ public class ModifiableOutboundPublishImplTest {
         modifiablePacket.setRetain(true);
 
         assertTrue(modifiablePacket.isModified());
-        assertEquals(true, modifiablePacket.getRetain());
+        assertTrue(modifiablePacket.getRetain());
     }
 
     @Test
@@ -382,7 +382,7 @@ public class ModifiableOutboundPublishImplTest {
         modifiablePacket.setRetain(false);
 
         assertFalse(modifiablePacket.isModified());
-        assertEquals(false, modifiablePacket.getRetain());
+        assertFalse(modifiablePacket.getRetain());
     }
 
     @Test

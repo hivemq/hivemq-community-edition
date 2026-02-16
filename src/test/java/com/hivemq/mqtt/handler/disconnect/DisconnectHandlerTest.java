@@ -117,7 +117,7 @@ public class DisconnectHandlerTest {
                 null,
                 2000L));
 
-        assertEquals(true, clientConnection.isSendWill());
+        assertTrue(clientConnection.isSendWill());
 
         //verify that the client was disconnected
         assertFalse(channel.isOpen());
@@ -133,7 +133,7 @@ public class DisconnectHandlerTest {
                 null,
                 2000L));
 
-        assertEquals(false, clientConnection.isSendWill());
+        assertFalse(clientConnection.isSendWill());
 
         //verify that the client was disconnected
         assertFalse(channel.isOpen());

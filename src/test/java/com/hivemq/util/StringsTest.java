@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 public class StringsTest {
@@ -94,7 +95,7 @@ public class StringsTest {
         final ByteBuf buf = Strings.createPrefixedBytesFromString("", Unpooled.buffer());
 
         assertEquals(0, buf.readShort());
-        assertEquals(false, buf.isReadable());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -105,7 +106,7 @@ public class StringsTest {
         System.out.println(buf);
         assertEquals(12, buf.readShort());
         buf.readBytes(12);
-        assertEquals(false, buf.isReadable());
+        assertFalse(buf.isReadable());
     }
 
     @Test
@@ -115,7 +116,7 @@ public class StringsTest {
 
         assertEquals(Short.MAX_VALUE, buf.readShort());
         buf.readBytes(Short.MAX_VALUE);
-        assertEquals(false, buf.isReadable());
+        assertFalse(buf.isReadable());
     }
 
     @Test(expected = NullPointerException.class)

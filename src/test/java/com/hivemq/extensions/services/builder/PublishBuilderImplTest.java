@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Lukas Brandl
@@ -209,7 +210,7 @@ public class PublishBuilderImplTest {
         assertEquals("topic", publish.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, publish.getPayload().get().array());
         assertEquals(2, publish.getQos().getQosNumber());
-        assertEquals(true, publish.getRetain());
+        assertTrue(publish.getRetain());
         assertEquals("TYPE", publish.getContentType().get());
         assertArrayEquals(new byte[]{1, 2, 3, 4}, publish.getCorrelationData().get().array());
         assertEquals("responseTopic", publish.getResponseTopic().get());
@@ -235,7 +236,7 @@ public class PublishBuilderImplTest {
         assertEquals("topic", original.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, original.getPayload().get().array());
         assertEquals(2, original.getQos().getQosNumber());
-        assertEquals(true, original.getRetain());
+        assertTrue(original.getRetain());
         assertEquals("TYPE", original.getContentType().get());
         assertArrayEquals(new byte[]{1, 2, 3, 4}, original.getCorrelationData().get().array());
         assertEquals("responseTopic", original.getResponseTopic().get());
@@ -247,7 +248,7 @@ public class PublishBuilderImplTest {
         assertEquals("topic", copy.getTopic());
         assertArrayEquals(new byte[]{1, 2, 3}, copy.getPayload().get().array());
         assertEquals(2, copy.getQos().getQosNumber());
-        assertEquals(true, copy.getRetain());
+        assertTrue(copy.getRetain());
         assertEquals("TYPE", copy.getContentType().get());
         assertArrayEquals(new byte[]{1, 2, 3, 4}, copy.getCorrelationData().get().array());
         assertEquals("responseTopic", copy.getResponseTopic().get());

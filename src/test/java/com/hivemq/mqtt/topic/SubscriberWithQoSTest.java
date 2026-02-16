@@ -21,6 +21,7 @@ import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -56,15 +57,15 @@ public class SubscriberWithQoSTest {
     public void test_with_mqtt5_flags() throws Exception {
         final SubscriberWithQoS subscriber = new SubscriberWithQoS("subscriber", 2, (byte) 14, null, 0, null);
 
-        assertEquals(true, subscriber.isSharedSubscription());
-        assertEquals(true, subscriber.isRetainAsPublished());
-        assertEquals(true, subscriber.isNoLocal());
+        assertTrue(subscriber.isSharedSubscription());
+        assertTrue(subscriber.isRetainAsPublished());
+        assertTrue(subscriber.isNoLocal());
 
         final SubscriberWithQoS subscriber2 = new SubscriberWithQoS("subscriber", 2, (byte) 9, null, 0, null);
 
-        assertEquals(false, subscriber2.isSharedSubscription());
-        assertEquals(false, subscriber2.isRetainAsPublished());
-        assertEquals(true, subscriber2.isNoLocal());
+        assertFalse(subscriber2.isSharedSubscription());
+        assertFalse(subscriber2.isRetainAsPublished());
+        assertTrue(subscriber2.isNoLocal());
     }
 
 
@@ -72,11 +73,11 @@ public class SubscriberWithQoSTest {
     public void test_equals() throws Exception {
         final SubscriberWithQoS initial = new SubscriberWithQoS("sub", 0, (byte) 0, null, 0, null);
 
-        assertTrue(initial.equals(new SubscriberWithQoS("sub", 0, (byte) 0, null, 0, null)));
+        assertEquals(initial, new SubscriberWithQoS("sub", 0, (byte) 0, null, 0, null));
 
-        assertFalse(initial.equals(new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null)));
-        assertFalse(initial.equals(new SubscriberWithQoS("sub", 1, (byte) 0, null, 0, null)));
-        assertFalse(initial.equals(new SubscriberWithQoS("sub", 2, (byte) 0, null, 0, null)));
+        assertNotEquals(initial, new SubscriberWithQoS("sub2", 0, (byte) 0, null, 0, null));
+        assertNotEquals(initial, new SubscriberWithQoS("sub", 1, (byte) 0, null, 0, null));
+        assertNotEquals(initial, new SubscriberWithQoS("sub", 2, (byte) 0, null, 0, null));
     }
 
     @Test

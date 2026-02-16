@@ -255,7 +255,7 @@ public class ModifiableSubscriptionImplTest {
         modifiableSubscription.setNoLocal(true);
 
         assertTrue(modifiableSubscription.isModified());
-        assertEquals(true, modifiableSubscription.getNoLocal());
+        assertTrue(modifiableSubscription.getNoLocal());
     }
 
     @Test
@@ -270,7 +270,7 @@ public class ModifiableSubscriptionImplTest {
         modifiableSubscription.setNoLocal(false);
 
         assertFalse(modifiableSubscription.isModified());
-        assertEquals(false, modifiableSubscription.getNoLocal());
+        assertFalse(modifiableSubscription.getNoLocal());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -295,7 +295,7 @@ public class ModifiableSubscriptionImplTest {
         modifiableSubscription.setRetainAsPublished(true);
 
         assertTrue(modifiableSubscription.isModified());
-        assertEquals(true, modifiableSubscription.getRetainAsPublished());
+        assertTrue(modifiableSubscription.getRetainAsPublished());
     }
 
     @Test
@@ -310,6 +310,6 @@ public class ModifiableSubscriptionImplTest {
         modifiableSubscription.setRetainAsPublished(false);
 
         assertFalse(modifiableSubscription.isModified());
-        assertEquals(false, modifiableSubscription.getRetainAsPublished());
+        assertFalse(modifiableSubscription.getRetainAsPublished());
     }
 }

@@ -24,7 +24,9 @@ import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class BytesTest {
 
@@ -98,7 +100,7 @@ public class BytesTest {
         assertEquals(0, byteBuf.readByte());
         assertEquals(1, byteBuf.readByte());
         assertEquals((byte) 128, byteBuf.readByte());
-        assertEquals(false, byteBuf.isReadable());
+        assertFalse(byteBuf.isReadable());
     }
 
 
@@ -108,7 +110,7 @@ public class BytesTest {
         final int size = byteBuf.readUnsignedShort();
 
         assertEquals(0, size);
-        assertEquals(false, byteBuf.isReadable());
+        assertFalse(byteBuf.isReadable());
     }
 
     @Test(expected = NullPointerException.class)
@@ -139,7 +141,7 @@ public class BytesTest {
         final byte b = 0b0000_0000;
 
         for (int i = 0; i < 8; i++) {
-            assertEquals(false, Bytes.isBitSet(b, i));
+            assertFalse(Bytes.isBitSet(b, i));
         }
     }
 
@@ -149,7 +151,7 @@ public class BytesTest {
         final byte b = (byte) 0b1111_1111;
 
         for (int i = 0; i < 8; i++) {
-            assertEquals(true, Bytes.isBitSet(b, i));
+            assertTrue(Bytes.isBitSet(b, i));
         }
     }
 
@@ -158,14 +160,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0000_0001;
 
-        assertEquals(true, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertTrue(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -173,14 +175,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0000_0010;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(true, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertTrue(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -188,14 +190,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0000_0100;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(true, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertTrue(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -203,14 +205,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0000_1000;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(true, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertTrue(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -218,14 +220,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0001_0000;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(true, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertTrue(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -233,14 +235,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0010_0000;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(true, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertTrue(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -248,14 +250,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b0100_0000;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(true, Bytes.isBitSet(b, 6));
-        assertEquals(false, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertTrue(Bytes.isBitSet(b, 6));
+        assertFalse(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -263,14 +265,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b1000_0000;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(false, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(false, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(false, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(true, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertFalse(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertFalse(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertFalse(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertTrue(Bytes.isBitSet(b, 7));
     }
 
     @Test
@@ -278,14 +280,14 @@ public class BytesTest {
 
         final byte b = (byte) 0b1010_1010;
 
-        assertEquals(false, Bytes.isBitSet(b, 0));
-        assertEquals(true, Bytes.isBitSet(b, 1));
-        assertEquals(false, Bytes.isBitSet(b, 2));
-        assertEquals(true, Bytes.isBitSet(b, 3));
-        assertEquals(false, Bytes.isBitSet(b, 4));
-        assertEquals(true, Bytes.isBitSet(b, 5));
-        assertEquals(false, Bytes.isBitSet(b, 6));
-        assertEquals(true, Bytes.isBitSet(b, 7));
+        assertFalse(Bytes.isBitSet(b, 0));
+        assertTrue(Bytes.isBitSet(b, 1));
+        assertFalse(Bytes.isBitSet(b, 2));
+        assertTrue(Bytes.isBitSet(b, 3));
+        assertFalse(Bytes.isBitSet(b, 4));
+        assertTrue(Bytes.isBitSet(b, 5));
+        assertFalse(Bytes.isBitSet(b, 6));
+        assertTrue(Bytes.isBitSet(b, 7));
     }
 
     @Test
