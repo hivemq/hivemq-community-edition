@@ -80,8 +80,8 @@ public class KeepAliveDisconnectServiceTest {
 
     @Test
     public void test_whenMoreThanOneBatchIsSubmitted_thenTheTaskIsScheduledAndExecuted() {
-        final Channel channel = mock(Channel.class);
-        final EventLoop eventLoop = mock(EventLoop.class);
+        final Channel channel = mock();
+        final EventLoop eventLoop = mock();
         when(channel.eventLoop()).thenReturn(eventLoop);
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
         doAnswer(invocation -> {
@@ -106,8 +106,8 @@ public class KeepAliveDisconnectServiceTest {
     @Test
     public void test_whenTasksAreSlowlySubmitted_thenAllTasksWillBeExecuted() {
         // TestChannel behaves odd sometimes, this is safe
-        final Channel channel = mock(Channel.class);
-        final EventLoop eventLoop = mock(EventLoop.class);
+        final Channel channel = mock();
+        final EventLoop eventLoop = mock();
         when(channel.eventLoop()).thenReturn(eventLoop);
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
         doAnswer(invocation -> {

@@ -60,21 +60,16 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("NullabilityAnnotations")
 public class MqttConnackerTest {
 
-    private EventLog eventLog;
-    private MqttConnacker mqttConnacker;
-    private EmbeddedChannel channel;
-    private LogbackCapturingAppender logbackCapturingAppender;
-    private ClientConnection clientConnection;
+    private final EventLog eventLog = mock();
+    private final EmbeddedChannel channel = new EmbeddedChannel(new DummyHandler());
+    private final LogbackCapturingAppender logbackCapturingAppender =
+            LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttConnackerImpl.class));
+    private MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog);
+    private ClientConnection clientConnection = new DummyClientConnection(channel, null);
 
     @Before
     public void setUp() throws Exception {
-        eventLog = mock(EventLog.class);
-        mqttConnacker = new MqttConnackerImpl(eventLog);
-        channel = new EmbeddedChannel(new DummyHandler());
-        clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        logbackCapturingAppender =
-                LogbackCapturingAppender.Factory.weaveInto(LoggerFactory.getLogger(MqttConnackerImpl.class));
     }
 
     @After

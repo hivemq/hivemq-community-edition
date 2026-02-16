@@ -19,7 +19,6 @@ package com.hivemq.mqtt.handler.connect;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.UndefinedClientConnection;
 import com.hivemq.configuration.service.entity.Listener;
-import com.hivemq.configuration.service.entity.TlsTcpListener;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -47,11 +46,11 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("NullabilityAnnotations")
 public class NoTlsHandshakeIdleHandlerTest {
 
+    private final Listener connectedListener = mock();
     private MqttServerDisconnector mqttServerDisconnector;
     private NoTlsHandshakeIdleHandler handler;
     private EmbeddedChannel channel;
     private AtomicBoolean userEventTriggered;
-    private final Listener connectedListener = mock(TlsTcpListener.class);
 
     @Before
     public void setUp() throws Exception {

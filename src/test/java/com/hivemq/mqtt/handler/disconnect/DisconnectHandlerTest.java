@@ -22,7 +22,6 @@ import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ClientState;
 import com.hivemq.bootstrap.UndefinedClientConnection;
-import com.hivemq.configuration.service.entity.TcpListener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.limitation.TopicAliasLimiter;
 import com.hivemq.logging.EventLog;
@@ -57,9 +56,9 @@ public class DisconnectHandlerTest {
 
     private EmbeddedChannel channel;
 
-    private final @NotNull TopicAliasLimiter topicAliasLimiter = mock(TopicAliasLimiter.class);
-    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock(ClientSessionPersistence.class);
-    private final @NotNull ConnectionPersistence connectionPersistence = mock(ConnectionPersistence.class);
+    private final @NotNull TopicAliasLimiter topicAliasLimiter = mock();
+    private final @NotNull ClientSessionPersistence clientSessionPersistence = mock();
+    private final @NotNull ConnectionPersistence connectionPersistence = mock();
     private final @NotNull EventLog eventLog = spy(new EventLog());
     private final @NotNull MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
 
@@ -67,15 +66,13 @@ public class DisconnectHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-
         final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog,
                 metricsHolder,
                 topicAliasLimiter,
                 clientSessionPersistence,
                 connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
-        final ClientConnectionContext clientConnectionContext =
-                new UndefinedClientConnection(channel, null, mock(TcpListener.class));
+        final ClientConnectionContext clientConnectionContext = new UndefinedClientConnection(channel, null, mock());
         clientConnectionContext.setClientId("clientId");
         clientConnectionContext.setProtocolVersion(ProtocolVersion.MQTTv5);
         clientConnectionContext.proposeClientState(ClientState.CONNECTING);
@@ -147,7 +144,7 @@ public class DisconnectHandlerTest {
     }
 
     @Test
-    public void test_graceful_disconnect_metric() throws Exception {
+    public void test_graceful_disconnect_metric() {
 
         channel.writeInbound(new DISCONNECT());
 
@@ -155,7 +152,7 @@ public class DisconnectHandlerTest {
     }
 
     @Test
-    public void test_graceful_disconnect_remove_mapping() throws Exception {
+    public void test_graceful_disconnect_remove_mapping() {
 
         final String[] topics = {"topic1", "topic2", "topic3"};
         clientConnection.setTopicAliasMapping(topics);
