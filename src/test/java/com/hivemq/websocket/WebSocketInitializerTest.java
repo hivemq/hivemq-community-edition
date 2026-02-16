@@ -20,7 +20,6 @@ import com.hivemq.configuration.service.entity.WebsocketListener;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.DummyHandler;
 
 import java.util.ArrayList;
@@ -37,22 +36,17 @@ import static org.junit.Assert.assertTrue;
 
 public class WebSocketInitializerTest {
 
-    private EmbeddedChannel channel;
-
-    private WebsocketListener websocketListener;
+    private final EmbeddedChannel channel = new EmbeddedChannel();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        channel = new EmbeddedChannel();
-
         channel.pipeline().addLast("dummy", new DummyHandler());
-
-        websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
     }
 
     @Test
     public void test_handler_in_pipeline() {
+        final WebsocketListener websocketListener =
+                new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
 
         webSocketInitializer.addHandlers(channel, "dummy");
@@ -68,6 +62,8 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_handler_order() {
+        final WebsocketListener websocketListener =
+                new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         webSocketInitializer.addHandlers(channel, "dummy");
 
@@ -87,7 +83,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_no_subprotocols() {
-        websocketListener = new WebsocketListener.Builder().port(8000)
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(new ArrayList<>())
                 .build();
@@ -98,7 +94,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_one_subprotocol() {
-        websocketListener = new WebsocketListener.Builder().port(8000)
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1"))
                 .build();
@@ -110,7 +106,7 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_multiple_subprotocols() {
-        websocketListener = new WebsocketListener.Builder().port(8000)
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
                 .bindAddress("0.0.0.0")
                 .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
                 .build();

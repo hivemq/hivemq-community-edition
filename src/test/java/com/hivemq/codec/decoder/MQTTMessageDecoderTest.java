@@ -28,7 +28,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
@@ -41,14 +40,11 @@ import static org.junit.Assert.assertTrue;
 
 public class MQTTMessageDecoderTest {
 
-    private @NotNull EmbeddedChannel channel;
-    private @NotNull ClientConnection clientConnection;
+    private @NotNull EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create());
+    private @NotNull ClientConnection clientConnection = new DummyClientConnection(channel, null);
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        channel = new EmbeddedChannel(TestMqttDecoder.create());
-        clientConnection = new DummyClientConnection(channel, null);
         //setting version to fake "connected" state
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -60,92 +56,72 @@ public class MQTTMessageDecoderTest {
 
     @Test
     public void decode_whenReceivesReservedZero_thenConnectionIsClosed() {
-
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0000_0000);
         buf.writeByte(0b0000_000);
         channel.writeInbound(buf);
-
         assertNull(channel.readInbound());
-
         assertFalse(channel.isActive());
     }
 
     @Test
     public void decode_whenReceivesReservedFifteen_thenConnectionIsClosed() {
-
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1111_0000);
         buf.writeByte(0b0000_000);
         channel.writeInbound(buf);
-
         assertNull(channel.readInbound());
-
         assertFalse(channel.isActive());
     }
 
     @Test
     public void decode_whenReceivesCONNACK_thenConnectionIsClosed() {
-
         //We must not receive CONNACK from clients because only servers must send CONNACKs
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b0010_0000);
         buf.writeByte(0b0000_000);
         channel.writeInbound(buf);
-
         assertNull(channel.readInbound());
-
         assertFalse(channel.isActive());
     }
 
     @Test
     public void decode_whenReceivesSUBACK_thenConnectionIsClosed() {
-
         //We must not receive a SUBACK from clients because only servers must send SUBACKs
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1001_0000);
         buf.writeByte(0b0000_000);
         channel.writeInbound(buf);
-
         assertNull(channel.readInbound());
-
         assertFalse(channel.isActive());
     }
 
     @Test
     public void decode_whenReceivesUNSUBACK_thenConnectionIsClosed() {
-
         //We must not receive a UNSUBACK from clients because only servers must send UNSUBACKs
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1011_0000);
         buf.writeByte(0b0000_000);
         channel.writeInbound(buf);
-
         assertNull(channel.readInbound());
-
         assertFalse(channel.isActive());
     }
 
     @Test
     public void decode_whenReceivesPINGRESP_thenConnectionIsClosed() {
-
         //We must not receive a PINGRESP from clients because only servers must send PINGRESPs
         final ByteBuf buf = Unpooled.buffer();
         buf.writeByte(0b1101_0000);
         buf.writeByte(0b0000_000);
         channel.writeInbound(buf);
-
         assertNull(channel.readInbound());
-
         assertFalse(channel.isActive());
     }
 
     @Test
     public void decode_whenReceivesSecondCONNECT_thenConnectionIsClosed() {
-
         clientConnection.setProtocolVersion(null);
-
         final byte[] connect = {
                 // fixed header
                 //   type, reserved
@@ -170,16 +146,13 @@ public class MQTTMessageDecoderTest {
         final ByteBuf buf = Unpooled.buffer();
         buf.writeBytes(connect);
         channel.writeInbound(buf);
-
         assertTrue(channel.isOpen());
 
         final ByteBuf buf2 = Unpooled.buffer();
         buf2.writeBytes(connect);
         channel.writeInbound(buf2);
-
         //verify that the client was disconnected
         assertFalse(channel.isOpen());
-
     }
 
     @Test
@@ -540,5 +513,4 @@ public class MQTTMessageDecoderTest {
         buf.writeBytes(connect);
         channel.writeInbound(buf);
     }
-
 }

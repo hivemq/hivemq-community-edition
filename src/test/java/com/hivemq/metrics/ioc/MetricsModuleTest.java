@@ -27,11 +27,8 @@ import com.hivemq.metrics.MetricsHolder;
 import com.hivemq.mqtt.topic.tree.LocalTopicTree;
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.retained.RetainedMessagePersistence;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
@@ -39,39 +36,30 @@ import static org.mockito.Mockito.when;
 
 public class MetricsModuleTest {
 
-    private Injector injector;
+    private final Injector injector = Guice.createInjector(new AbstractModule() {
+        @Override
+        protected void configure() {
+            final Injector persistenceInjector = mock();
+            when(persistenceInjector.getInstance(MetricsHolder.class)).thenReturn(mock());
+            final NettyConfiguration nettyConfiguration = mock();
+            when(nettyConfiguration.getChildEventLoopGroup()).thenReturn(mock());
 
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
+            bind(NettyConfiguration.class).toInstance(nettyConfiguration);
+            bind(ChannelGroup.class).toInstance(mock(ChannelGroup.class));
+            bind(ClientSessionLocalPersistence.class).toInstance(mock());
+            bind(LocalTopicTree.class).toInstance(mock(LocalTopicTree.class));
+            bind(RetainedMessagePersistence.class).toInstance(mock());
+            bind(SystemInformation.class).toInstance(mock(SystemInformation.class));
+            bindScope(LazySingleton.class, LazySingletonScope.get());
 
-        injector = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                final Injector persistenceInjector = mock(Injector.class);
-                when(persistenceInjector.getInstance(MetricsHolder.class)).thenReturn(mock(MetricsHolder.class));
-                final NettyConfiguration nettyConfiguration = mock(NettyConfiguration.class);
-                when(nettyConfiguration.getChildEventLoopGroup()).thenReturn(mock(EventLoopGroup.class));
-
-                bind(NettyConfiguration.class).toInstance(nettyConfiguration);
-                bind(ChannelGroup.class).toInstance(mock(ChannelGroup.class));
-                bind(ClientSessionLocalPersistence.class).toInstance(mock(ClientSessionLocalPersistence.class));
-                bind(LocalTopicTree.class).toInstance(mock(LocalTopicTree.class));
-                bind(RetainedMessagePersistence.class).toInstance(mock(RetainedMessagePersistence.class));
-                bind(SystemInformation.class).toInstance(mock(SystemInformation.class));
-                bindScope(LazySingleton.class, LazySingletonScope.get());
-
-                install(new MetricsModule(new MetricRegistry(), persistenceInjector));
-            }
-        });
-    }
+            install(new MetricsModule(new MetricRegistry(), persistenceInjector));
+        }
+    });
 
     @Test
-    public void test_metrics_registry_singleton() throws Exception {
-
+    public void test_metrics_registry_singleton() {
         final MetricRegistry instance = injector.getInstance(MetricRegistry.class);
         final MetricRegistry instance2 = injector.getInstance(MetricRegistry.class);
-
         assertSame(instance, instance2);
     }
 }

@@ -28,7 +28,6 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.DummyClientConnection;
 import util.TestConfigurationBootstrap;
 import util.TestMqttDecoder;
@@ -44,20 +43,16 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("NullabilityAnnotations")
 public class Mqtt3PublishDecoderTest {
 
-    private EmbeddedChannel channel;
+    private final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create());
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
-        channel = new EmbeddedChannel(TestMqttDecoder.create());
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
     }
 
     @Test
     public void test_valid_pub_qos_0() {
-
         final String topic = "topic";
         final String payload = "payload";
 
@@ -70,7 +65,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertEquals(QoS.AT_MOST_ONCE, publish.getQoS());
         assertEquals(topic, publish.getTopic());
         assertFalse(publish.isDuplicateDelivery());
@@ -89,7 +83,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_valid_pub_qos_1() {
-
         final String topic = "topic";
         final String payload = "payload";
 
@@ -103,7 +96,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertEquals(QoS.AT_LEAST_ONCE, publish.getQoS());
         assertEquals(topic, publish.getTopic());
         assertFalse(publish.isDuplicateDelivery());
@@ -115,10 +107,8 @@ public class Mqtt3PublishDecoderTest {
         assertTrue(channel.isActive());
     }
 
-
     @Test
     public void test_valid_pub_qos_2() {
-
         final String topic = "topic";
         final String payload = "payload";
 
@@ -132,7 +122,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertEquals(QoS.EXACTLY_ONCE, publish.getQoS());
         assertEquals(topic, publish.getTopic());
         assertFalse(publish.isDuplicateDelivery());
@@ -146,7 +135,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_valid_pub_qos_0_retained() {
-
         final String topic = "topic";
         final String payload = "payload";
 
@@ -159,7 +147,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertEquals(QoS.AT_MOST_ONCE, publish.getQoS());
         assertEquals(topic, publish.getTopic());
         assertFalse(publish.isDuplicateDelivery());
@@ -173,13 +160,11 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_valid_pub_retain_not_supported() {
-
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.mqttConfiguration().setRetainedMessagesEnabled(false);
 
-        channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
+        final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
 
         final String topic = "topic";
         final String payload = "payload";
@@ -193,14 +178,12 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
         assertFalse(channel.isActive());
     }
 
     @Test
     public void test_valid_pub_qos_1_dup() {
-
         final String topic = "topic";
         final String payload = "payload";
 
@@ -214,7 +197,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertEquals(QoS.AT_LEAST_ONCE, publish.getQoS());
         assertEquals(topic, publish.getTopic());
         assertTrue(publish.isDuplicateDelivery());
@@ -228,7 +210,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_dup_set_for_qos0() {
-
         final String topic = "topic";
 
         final ByteBuf buf = Unpooled.buffer();
@@ -239,7 +220,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final Object publish = channel.readInbound();
-
         assertNull(publish);
 
         //We got disconnected because an invalid qos was received
@@ -248,7 +228,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_qos() {
-
         final String topic = "topic";
 
         final ByteBuf buf = Unpooled.buffer();
@@ -259,7 +238,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final Object publish = channel.readInbound();
-
         assertNull(publish);
 
         //We got disconnected because an invalid qos was received
@@ -268,7 +246,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_message_id_for_qos1_message_0() {
-
         final String topic = "topic";
 
         final ByteBuf buf = Unpooled.buffer();
@@ -280,7 +257,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final Object publish = channel.readInbound();
-
         assertNull(publish);
 
         //We got disconnected because an invalid qos was received
@@ -289,7 +265,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_message_id_for_qos2_message_0() {
-
         final String topic = "topic";
 
         final ByteBuf buf = Unpooled.buffer();
@@ -301,7 +276,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final Object publish = channel.readInbound();
-
         assertNull(publish);
 
         //We got disconnected because an invalid qos was received
@@ -310,7 +284,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_topic_wildcard_subtree_level() {
-
         final String topic = "topic/#";
 
         final ByteBuf buf = Unpooled.buffer();
@@ -321,17 +294,14 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final Object publish = channel.readInbound();
-
         assertNull(publish);
 
         //We got disconnected because an invalid qos was received
         assertFalse(channel.isActive());
     }
 
-
     @Test
     public void test_invalid_topic_wildcard_topic_level() {
-
         final String topic = "topic/+/subtopic";
 
         final ByteBuf buf = Unpooled.buffer();
@@ -342,7 +312,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final Object publish = channel.readInbound();
-
         assertNull(publish);
 
         //We got disconnected because an invalid qos was received
@@ -351,7 +320,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_valid_pub_max_topic_length() {
-
         final String topic = RandomStringUtils.randomAlphabetic(65535);
         final String payload = "payload";
 
@@ -380,7 +348,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_topic_length() {
-
         final int invalidLength = 1000;
 
         final String topic = "topic";
@@ -395,7 +362,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
 
         //Make sure we did get disconnected
@@ -404,7 +370,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_invalid_topic_empty() {
-
         final int invalidLength = 0;
 
         final String topic = "";
@@ -419,7 +384,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
 
         //Make sure we did get disconnected
@@ -428,7 +392,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_topic_contains_control_character() {
-
         final String topic = "topic" + '\u0013';
         final String payload = "payload";
 
@@ -442,7 +405,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
 
         //Make sure we did get disconnected
@@ -451,7 +413,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_topic_contains_non_character() {
-
         final String topic = "topic" + '\uFFFF';
         final String payload = "payload";
 
@@ -465,7 +426,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
 
         //Make sure we did get disconnected
@@ -474,7 +434,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_topic_contains_bad_utf_8_character() {
-
         final byte[] bytes = {(byte) 0xE0, (byte) 0x80};
 
         final byte[] topic = Bytes.concat("topic".getBytes(), bytes);
@@ -490,7 +449,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
 
         //Make sure we did get disconnected
@@ -499,7 +457,6 @@ public class Mqtt3PublishDecoderTest {
 
     @Test
     public void test_topic_contains_another_bad_utf_8_character() {
-
         final byte[] bytes = {(byte) 0xED, (byte) 0xA0};
 
         final byte[] topic = Bytes.concat("topic".getBytes(), bytes);
@@ -515,7 +472,6 @@ public class Mqtt3PublishDecoderTest {
         channel.writeInbound(buf);
 
         final PUBLISH publish = channel.readInbound();
-
         assertNull(publish);
 
         //Make sure we did get disconnected

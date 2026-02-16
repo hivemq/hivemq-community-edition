@@ -17,9 +17,7 @@ package com.hivemq.persistence;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -33,14 +31,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class InMemoryProducerQueuesTest {
 
-    @NotNull
-    private InMemoryProducerQueues producerQueues;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        producerQueues = new InMemoryProducerQueues(64, 4);
-    }
+    private final @NotNull InMemoryProducerQueues producerQueues = new InMemoryProducerQueues(64, 4);
 
     @Test
     public void test_create_bucket_indexes() {
@@ -62,22 +53,19 @@ public class InMemoryProducerQueuesTest {
     }
 
     @Test
-    public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently()
-            throws InterruptedException {
-
+    public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws Exception {
         final LinkedList<Integer> list = new LinkedList<>();
         list.add(0);
 
-        final List<Thread> threads = new ArrayList<>();
-        final int numberOfConcurrentThreads = 4;
-
         // this is highly un-thread-safe, when this is concurrently executed
         // there are many sources for exceptions
+        final List<Thread> threads = new ArrayList<>();
         final Runnable runnable = () -> {
             final Integer poll = list.pollFirst();
-            list.add(poll + 1);
+            if (poll != null) {
+                list.add(poll + 1);
+            }
         };
-
         for (int j = 0; j < 4; j++) {
             final Thread thread = new Thread(() -> {
                 for (int i = 0; i < 10_000; i++) {
@@ -99,5 +87,4 @@ public class InMemoryProducerQueuesTest {
         // 4 threads with 10_000 adds = 40_000
         assertEquals(40_000, (int) list.getFirst());
     }
-
 }

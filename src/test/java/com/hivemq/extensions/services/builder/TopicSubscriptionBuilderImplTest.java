@@ -30,7 +30,6 @@ import com.hivemq.mqtt.message.subscribe.Topic;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockitoAnnotations;
 import util.TestConfigurationBootstrap;
 
 import static org.junit.Assert.assertEquals;
@@ -46,16 +45,12 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Before
     public void setUp() throws Exception {
-
-        MockitoAnnotations.initMocks(this);
         fullConfigurationService = new TestConfigurationBootstrap().getFullConfigurationService();
         topicSubscriptionBuilder = new TopicSubscriptionBuilderImpl(fullConfigurationService);
-
     }
 
     @Test
     public void test_from_subscription() {
-
         final SubscriptionImpl subscription = new SubscriptionImpl(new Topic("topic",
                 QoS.AT_LEAST_ONCE,
                 false,
@@ -68,16 +63,14 @@ public class TopicSubscriptionBuilderImplTest {
 
         assertEquals("topic", topic.getTopicFilter());
         assertEquals(Qos.AT_LEAST_ONCE, topic.getQos());
-        assertEquals(true, topic.getRetainAsPublished());
-        assertEquals(false, topic.getNoLocal());
+        assertTrue(topic.getRetainAsPublished());
+        assertFalse(topic.getNoLocal());
         assertTrue(topic.getSubscriptionIdentifier().isPresent());
         assertEquals(1, topic.getSubscriptionIdentifier().get().intValue());
-
     }
 
     @Test
     public void test_with_all() {
-
         final TopicSubscription topic = topicSubscriptionBuilder.topicFilter("topic")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -87,16 +80,14 @@ public class TopicSubscriptionBuilderImplTest {
 
         assertEquals("topic", topic.getTopicFilter());
         assertEquals(Qos.AT_LEAST_ONCE, topic.getQos());
-        assertEquals(true, topic.getRetainAsPublished());
-        assertEquals(false, topic.getNoLocal());
+        assertTrue(topic.getRetainAsPublished());
+        assertFalse(topic.getNoLocal());
         assertTrue(topic.getSubscriptionIdentifier().isPresent());
         assertEquals(1, topic.getSubscriptionIdentifier().get().intValue());
-
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_sub_id_to_small() {
-
         topicSubscriptionBuilder.topicFilter("topic")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -107,7 +98,6 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_sub_id_not_allowed() {
-
         fullConfigurationService.mqttConfiguration().setSubscriptionIdentifierEnabled(false);
 
         topicSubscriptionBuilder.topicFilter("topic")
@@ -120,7 +110,6 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_empty() {
-
         topicSubscriptionBuilder.topicFilter("")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -131,7 +120,6 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_to_large() {
-
         topicSubscriptionBuilder.topicFilter(RandomStringUtils.randomAlphanumeric(70000))
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -142,9 +130,7 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_contains_forbidden_wildcard_hashtag() {
-
         fullConfigurationService.mqttConfiguration().setWildcardSubscriptionsEnabled(false);
-
         topicSubscriptionBuilder.topicFilter("#")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -161,7 +147,6 @@ public class TopicSubscriptionBuilderImplTest {
                 .noLocal(false)
                 .subscriptionIdentifier(1)
                 .build();
-
         assertEquals("#", topic.getTopicFilter());
     }
 
@@ -173,15 +158,12 @@ public class TopicSubscriptionBuilderImplTest {
                 .noLocal(false)
                 .subscriptionIdentifier(1)
                 .build();
-
         assertEquals("+", topic.getTopicFilter());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_contains_forbidden_wildcard_plus() {
-
         fullConfigurationService.mqttConfiguration().setWildcardSubscriptionsEnabled(false);
-
         topicSubscriptionBuilder.topicFilter("topic/a/+/asd")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -192,9 +174,7 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_contains_forbidden_shared_sub() {
-
         fullConfigurationService.mqttConfiguration().setSharedSubscriptionsEnabled(false);
-
         topicSubscriptionBuilder.topicFilter("$share/group/topic")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -205,21 +185,16 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_contains_forbidden_utf8_should_not_char() {
-
         topicSubscriptionBuilder.topicFilter("topic" + '\u0001');
-
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_contains_forbidden_utf8_must_not_char() {
-
         topicSubscriptionBuilder.topicFilter("topic" + '\uD800');
-
     }
 
     @Test(expected = DoNotImplementException.class)
-    public void test_from_subcription_falsely_implemtented() {
-
+    public void test_from_subscription_falsely_implemented() {
         topicSubscriptionBuilder.fromSubscription(new Subscription() {
             @Override
             public @NotNull String getTopicFilter() {
@@ -246,25 +221,21 @@ public class TopicSubscriptionBuilderImplTest {
                 return false;
             }
         });
-
     }
 
     @Test
     public void test_with_topic_contains_allowed_shared_sub() {
-
         final TopicSubscription topic = topicSubscriptionBuilder.topicFilter("$share/group/topic")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
                 .noLocal(false)
                 .subscriptionIdentifier(1)
                 .build();
-
         assertEquals("$share/group/topic", topic.getTopicFilter());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_shared_sub_with_no_local() {
-
         topicSubscriptionBuilder.topicFilter("$share/group/topic")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -280,7 +251,6 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_topic_bad_char() {
-
         topicSubscriptionBuilder.topicFilter("123" + "\u0000")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -291,7 +261,6 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_sub_id_to_big() {
-
         topicSubscriptionBuilder.topicFilter("topic")
                 .qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
@@ -302,18 +271,15 @@ public class TopicSubscriptionBuilderImplTest {
 
     @Test(expected = NullPointerException.class)
     public void test_without_topic() {
-
         topicSubscriptionBuilder.qos(Qos.AT_LEAST_ONCE)
                 .retainAsPublished(true)
                 .noLocal(false)
                 .subscriptionIdentifier(1)
                 .build();
-
     }
 
     @Test
     public void test_without_qos() {
-
         final TopicSubscription topic = topicSubscriptionBuilder.topicFilter("topic")
                 .retainAsPublished(true)
                 .noLocal(false)
@@ -322,21 +288,20 @@ public class TopicSubscriptionBuilderImplTest {
 
         assertEquals("topic", topic.getTopicFilter());
         assertEquals(Qos.AT_MOST_ONCE, topic.getQos());
-        assertEquals(true, topic.getRetainAsPublished());
-        assertEquals(false, topic.getNoLocal());
+        assertTrue(topic.getRetainAsPublished());
+        assertFalse(topic.getNoLocal());
         assertTrue(topic.getSubscriptionIdentifier().isPresent());
         assertEquals(1, topic.getSubscriptionIdentifier().get().intValue());
     }
 
     @Test
     public void test_with_min() {
-
         final TopicSubscription topic = topicSubscriptionBuilder.topicFilter("topic").build();
 
         assertEquals("topic", topic.getTopicFilter());
         assertEquals(Qos.AT_MOST_ONCE, topic.getQos());
-        assertEquals(false, topic.getRetainAsPublished());
-        assertEquals(false, topic.getNoLocal());
+        assertFalse(topic.getRetainAsPublished());
+        assertFalse(topic.getNoLocal());
         assertFalse(topic.getSubscriptionIdentifier().isPresent());
     }
 }
