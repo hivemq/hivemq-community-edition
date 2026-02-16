@@ -65,11 +65,11 @@ import static org.mockito.Mockito.when;
 
 public class AbstractChannelInitializerTest {
 
-    private final @NotNull SocketChannel socketChannel = mock(SocketChannel.class);
-    private final @NotNull ChannelDependencies channelDependencies = mock(ChannelDependencies.class);
-    private final @NotNull FullConfigurationService configurationService = mock(FullConfigurationService.class);
-    private final @NotNull MqttConfigurationService mqttConfigurationService = mock(MqttConfigurationService.class);
-    private final @NotNull ChannelPipeline pipeline = mock(ChannelPipeline.class);
+    private final @NotNull SocketChannel socketChannel = mock();
+    private final @NotNull ChannelDependencies channelDependencies = mock();
+    private final @NotNull FullConfigurationService configurationService = mock();
+    private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
+    private final @NotNull ChannelPipeline pipeline = mock();
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService =
             mock(RestrictionsConfigurationService.class);
     private final @NotNull EventLog eventLog = mock(EventLog.class);

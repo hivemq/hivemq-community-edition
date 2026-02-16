@@ -22,9 +22,9 @@ import com.google.inject.Stage;
 import com.hivemq.mqtt.topic.TopicMatcher;
 import io.netty.util.concurrent.EventExecutorGroup;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.junit.Assert.assertNotSame;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Florian Limpöck
@@ -34,18 +34,14 @@ public class HiveMQMainModuleTest {
 
     @Test
     public void test_topic_matcher_not_same() {
-
         final Injector injector = Guice.createInjector(Stage.PRODUCTION, new HiveMQMainModule(), new AbstractModule() {
             @Override
             protected void configure() {
-                bind(EventExecutorGroup.class).toInstance(Mockito.mock(EventExecutorGroup.class));
+                bind(EventExecutorGroup.class).toInstance(mock());
             }
         });
-
         final TopicMatcher instance1 = injector.getInstance(TopicMatcher.class);
         final TopicMatcher instance2 = injector.getInstance(TopicMatcher.class);
-
         assertNotSame(instance1, instance2);
-
     }
 }

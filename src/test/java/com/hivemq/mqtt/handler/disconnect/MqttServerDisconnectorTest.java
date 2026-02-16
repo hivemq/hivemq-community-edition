@@ -31,7 +31,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import util.DummyClientConnection;
 
@@ -49,17 +48,10 @@ import static org.mockito.Mockito.mock;
  * @author Florian Limpöck
  * @since 4.0.0
  */
-@SuppressWarnings("ALL")
 public class MqttServerDisconnectorTest {
 
-    private MqttServerDisconnector mqttServerDisconnector;
-    private EventLog eventLog;
-
-    @Before
-    public void setUp() throws Exception {
-        eventLog = mock(EventLog.class);
-        mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
-    }
+    private final EventLog eventLog = mock();
+    private final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
     @After
     public void tearDown() throws Exception {
@@ -68,8 +60,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_log_and_close_with_event() throws InterruptedException {
-
+    public void test_log_and_close_with_event() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -88,8 +79,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_log_and_close_without_event() throws InterruptedException {
-
+    public void test_log_and_close_without_event() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -108,12 +98,11 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_without_reason_code_and_reason_string() throws InterruptedException {
-
+    public void test_disconnect_channel_without_reason_code_and_reason_string() throws Exception {
         InternalConfigurations.DISCONNECT_WITH_REASON_CODE_ENABLED.set(false);
         InternalConfigurations.DISCONNECT_WITH_REASON_STRING_ENABLED.set(false);
 
-        mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
@@ -143,8 +132,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code_and_reason_string() throws InterruptedException {
-
+    public void test_disconnect_channel_with_reason_code_and_reason_string() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -177,11 +165,10 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code_and_reason_string_not_wanted() throws InterruptedException {
-
+    public void test_disconnect_channel_with_reason_code_and_reason_string_not_wanted() throws Exception {
         InternalConfigurations.DISCONNECT_WITH_REASON_STRING_ENABLED.set(false);
 
-        mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
+        final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
 
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
@@ -208,15 +195,14 @@ public class MqttServerDisconnectorTest {
         assertNotNull(disconnect);
 
         assertEquals(Mqtt5DisconnectReasonCode.SERVER_BUSY, disconnect.getReasonCode());
-        assertEquals(null, disconnect.getReasonString());
+        assertNull(disconnect.getReasonString());
 
         assertFalse(channel.isActive());
         assertTrue(eventLatch.await(10, TimeUnit.SECONDS));
     }
 
     @Test
-    public void test_disconnect_channel_with_client_id() throws InterruptedException {
-
+    public void test_disconnect_channel_with_client_id() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).proposeClientState(ClientState.AUTHENTICATED);
@@ -241,8 +227,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code() throws InterruptedException {
-
+    public void test_disconnect_channel_with_reason_code() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -268,15 +253,14 @@ public class MqttServerDisconnectorTest {
         assertNotNull(disconnect);
 
         assertEquals(Mqtt5DisconnectReasonCode.MALFORMED_PACKET, disconnect.getReasonCode());
-        assertEquals(null, disconnect.getReasonString());
+        assertNull(disconnect.getReasonString());
 
         assertFalse(channel.isActive());
         assertTrue(eventLatch.await(10, TimeUnit.SECONDS));
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code_and_reason_string_at_auth() throws InterruptedException {
-
+    public void test_disconnect_channel_with_reason_code_and_reason_string_at_auth() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
 
@@ -301,9 +285,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code_and_reason_string_at_auth_mqtt3_1_1()
-            throws InterruptedException {
-
+    public void test_disconnect_channel_with_reason_code_and_reason_string_at_auth_mqtt3_1_1() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -329,9 +311,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code_and_reason_string_at_auth_mqtt_3_1()
-            throws InterruptedException {
-
+    public void test_disconnect_channel_with_reason_code_and_reason_string_at_auth_mqtt_3_1() throws Exception {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -357,7 +337,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_disconnect_channel_with_reason_code_null() throws InterruptedException {
+    public void test_disconnect_channel_with_reason_code_null() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -373,7 +353,7 @@ public class MqttServerDisconnectorTest {
     }
 
     @Test
-    public void test_disconnect_channel_with_reason_code_null_mqtt_3() throws InterruptedException {
+    public void test_disconnect_channel_with_reason_code_null_mqtt_3() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -390,21 +370,22 @@ public class MqttServerDisconnectorTest {
     }
 
     private static class TestDisconnectEventHandler extends SimpleChannelInboundHandler<CONNECT> {
+
         private final CountDownLatch eventLatch;
         private final CountDownLatch authLatch;
 
-        public TestDisconnectEventHandler(CountDownLatch eventLatch, CountDownLatch authLatch) {
+        public TestDisconnectEventHandler(final CountDownLatch eventLatch, final CountDownLatch authLatch) {
             this.eventLatch = eventLatch;
             this.authLatch = authLatch;
         }
 
         @Override
-        protected void channelRead0(ChannelHandlerContext ctx, CONNECT msg) throws Exception {
+        protected void channelRead0(final ChannelHandlerContext ctx, final CONNECT msg) {
             ctx.fireChannelRead(msg);
         }
 
         @Override
-        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) {
             if (evt instanceof OnServerDisconnectEvent) {
                 eventLatch.countDown();
             }
