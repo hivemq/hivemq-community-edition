@@ -1,10 +1,4 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.process.ExecOperations
-import javax.inject.Inject
-
-interface InjectedExecOps {
-    @get:Inject val execOps: ExecOperations
-}
 
 plugins {
     java
@@ -84,8 +78,6 @@ tasks.compileJava {
 repositories {
     mavenCentral()
 }
-
-val injectedExecOps: InjectedExecOps = objects.newInstance()
 
 dependencies {
     api(libs.hivemq.extensionSdk)
@@ -306,10 +298,11 @@ tasks.javadoc {
 
     include("com/hivemq/embedded/*")
 
+    val javadocCleanerResult = providers.javaexec {
+        classpath("gradle/tools/javadoc-cleaner-1.0.jar")
+    }.result
     doLast {
-        injectedExecOps.execOps.javaexec {
-            classpath("gradle/tools/javadoc-cleaner-1.0.jar")
-        }
+        javadocCleanerResult.get()
     }
 
     doLast {
