@@ -304,20 +304,6 @@ tasks.javadoc {
     doLast {
         javadocCleanerResult.get()
     }
-
-    doLast {
-        // Javadoc search fix for JDK 11 https://bugs.openjdk.java.net/browse/JDK-8215291
-        copy {
-            from(destinationDir!!.resolve("search.js"))
-            into(temporaryDir)
-            filter { line -> line.replace("if (ui.item.p == item.l) {", "if (item.m && ui.item.p == item.l) {") }
-        }
-        delete(destinationDir!!.resolve("search.js"))
-        copy {
-            from(temporaryDir.resolve("search.js"))
-            into(destinationDir!!)
-        }
-    }
 }
 
 /* ******************** checks ******************** */
