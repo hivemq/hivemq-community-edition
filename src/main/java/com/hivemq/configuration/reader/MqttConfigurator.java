@@ -52,6 +52,9 @@ public class MqttConfigurator {
         mqttConfigurationService.setRetainedMessagesEnabled(mqttConfigEntity.getRetainedMessagesConfigEntity()
                 .isEnabled());
 
+        mqttConfigurationService.setAllowDollarTopicsEnabled(mqttConfigEntity.getAllowDollarTopicConfigEntity()
+                .isEnabled());
+
         mqttConfigurationService.setWildcardSubscriptionsEnabled(mqttConfigEntity.getWildcardSubscriptionsConfigEntity()
                 .isEnabled());
         mqttConfigurationService.setSubscriptionIdentifierEnabled(mqttConfigEntity.getSubscriptionIdentifierConfigEntity()
