@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.common.shutdown.ShutdownHooks;
+import com.hivemq.configuration.service.MqttConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.client.parameter.ServerInformation;
 import com.hivemq.extension.sdk.api.services.auth.provider.AuthorizerProvider;
@@ -97,6 +98,7 @@ public class PluginAuthorizerServiceImplTest {
     private final @NotNull EventLog eventLog = mock(EventLog.class);
     private final @NotNull IncomingPublishService incomingPublishService = mock(IncomingPublishService.class);
     private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
+    private final @NotNull MqttConfigurationService mqttConfigService = mock(MqttConfigurationService.class);
 
     private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
@@ -139,7 +141,8 @@ public class PluginAuthorizerServiceImplTest {
                 hiveMQExtensions,
                 mqttServerDisconnector,
                 incomingPublishService,
-                incomingSubscribeService);
+                incomingSubscribeService,
+                mqttConfigService);
 
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);
