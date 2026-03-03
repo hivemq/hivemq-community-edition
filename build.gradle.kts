@@ -221,6 +221,7 @@ val hivemqZip by tasks.registering(Zip::class) {
     from("src/main/resources/config.xml") { into("conf") }
     from("src/main/resources/config.xsd") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
+    from(tasks.named("cyclonedxDirectBom")) { into("sbom").include("bom.json", "bom.xml") }
     into(name)
 }
 
