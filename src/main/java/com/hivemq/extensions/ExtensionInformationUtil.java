@@ -42,14 +42,14 @@ import java.security.cert.X509Certificate;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ExtensionInformationUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ExtensionInformationUtil.class);
-
     public static @NotNull ClientInformation getAndSetClientInformation(
-            @NotNull final Channel channel, @NotNull final String clientId) {
+            @NotNull final Channel channel,
+            @NotNull final String clientId) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         if (clientConnectionContext.getExtensionClientInformation() == null) {
             clientConnectionContext.setExtensionClientInformation(new ClientInformationImpl(clientId));
@@ -60,48 +60,43 @@ public class ExtensionInformationUtil {
     public static @NotNull ConnectionInformation getAndSetConnectionInformation(@NotNull final Channel channel) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         if (clientConnectionContext.getExtensionConnectionInformation() == null) {
-            clientConnectionContext.setExtensionConnectionInformation(new ConnectionInformationImpl(
-                    clientConnectionContext));
+            clientConnectionContext
+                    .setExtensionConnectionInformation(new ConnectionInformationImpl(clientConnectionContext));
         }
         return clientConnectionContext.getExtensionConnectionInformation();
     }
 
     public static @NotNull MqttVersion mqttVersionFromChannel(final @NotNull Channel channel) {
-
         Preconditions.checkNotNull(channel, "channel must never be null");
         final ProtocolVersion protocolVersion = ClientConnectionContext.of(channel).getProtocolVersion();
         Preconditions.checkNotNull(protocolVersion, "protocol version must never be null");
-
         return mqttVersionFromProtocolVersion(protocolVersion);
     }
 
     public static @NotNull MqttVersion mqttVersionFromProtocolVersion(final @NotNull ProtocolVersion protocolVersion) {
         switch (protocolVersion) {
-            case MQTTv3_1:
+            case MQTTv3_1 :
                 return MqttVersion.V_3_1;
-            case MQTTv3_1_1:
+            case MQTTv3_1_1 :
                 return MqttVersion.V_3_1_1;
-            case MQTTv5:
-            default:
+            case MQTTv5 :
+            default :
                 return MqttVersion.V_5;
         }
     }
 
     public static @Nullable Listener getListenerFromChannel(final @NotNull Channel channel) {
-
         Preconditions.checkNotNull(channel, "channel must never be null");
-        final com.hivemq.configuration.service.entity.Listener hiveMQListener =
-                ClientConnectionContext.of(channel).getConnectedListener();
+        final com.hivemq.configuration.service.entity.Listener hiveMQListener = ClientConnectionContext.of(channel)
+                .getConnectedListener();
         if (hiveMQListener == null) {
             return null;
         }
-
         return new ListenerImpl(hiveMQListener);
-
     }
 
-    public static @NotNull ListenerType listenerTypeFromInstance(final @NotNull com.hivemq.configuration.service.entity.Listener hiveMQListener) {
-
+    public static @NotNull ListenerType listenerTypeFromInstance(
+            final @NotNull com.hivemq.configuration.service.entity.Listener hiveMQListener) {
         if (hiveMQListener instanceof TlsTcpListener) {
             return ListenerType.TLS_TCP_LISTENER;
         } else if (hiveMQListener instanceof TcpListener) {
@@ -114,35 +109,26 @@ public class ExtensionInformationUtil {
     }
 
     public static @Nullable ClientTlsInformation getTlsInformationFromChannel(final @NotNull Channel channel) {
-
         Preconditions.checkNotNull(channel, "channel must never be null");
-
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         try {
             final String cipher = clientConnectionContext.getAuthCipherSuite();
             final String protocol = clientConnectionContext.getAuthProtocol();
             final String sniHostname = clientConnectionContext.getAuthSniHostname();
-
             final SslClientCertificate sslClientCertificate = clientConnectionContext.getAuthCertificate();
-
             if (cipher == null || protocol == null) {
                 return null;
             }
-
             if (sslClientCertificate == null) {
                 return new ClientTlsInformationImpl(null, null, cipher, protocol, sniHostname);
-
             } else {
                 final X509Certificate certificate = (X509Certificate) sslClientCertificate.certificate();
                 final X509Certificate[] certificateChain = (X509Certificate[]) sslClientCertificate.certificateChain();
-
                 return new ClientTlsInformationImpl(certificate, certificateChain, cipher, protocol, sniHostname);
             }
-
         } catch (final Exception e) {
             log.debug("Tls information creation failed: ", e);
         }
-
         return null;
     }
 }

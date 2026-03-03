@@ -35,29 +35,25 @@ import java.util.Objects;
 public class WrappedAuthenticatorProvider {
 
     private static final Logger log = LoggerFactory.getLogger(WrappedAuthenticatorProvider.class);
-    private static final String WRONG_CLASS_LOG_STATEMENT =
-            "An extension provided an Authenticator instance of {} that was " +
-                    "neither an implementation of SimpleAuthenticator " +
-                    "nor EnhancedAuthenticator. The authenticator will be ignored.";
-    private static final String UNCAUGHT_EXCEPTION_LOG_STATEMENT = "Uncaught exception was thrown in " +
-            "AuthenticatorProvider from extension. Extensions are responsible on their own to handle exceptions.";
-
+    private static final String WRONG_CLASS_LOG_STATEMENT = "An extension provided an Authenticator instance of {} that was "
+            + "neither an implementation of SimpleAuthenticator "
+            + "nor EnhancedAuthenticator. The authenticator will be ignored.";
+    private static final String UNCAUGHT_EXCEPTION_LOG_STATEMENT = "Uncaught exception was thrown in "
+            + "AuthenticatorProvider from extension. Extensions are responsible on their own to handle exceptions.";
     @Nullable
     private final AuthenticatorProvider simpleAuthenticatorProvider;
     @Nullable
     private final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider;
     @NotNull
     private final ClassLoader classLoader;
-
-    public WrappedAuthenticatorProvider(
-            @NotNull final AuthenticatorProvider simpleAuthenticatorProvider, @NotNull final ClassLoader classLoader) {
+    public WrappedAuthenticatorProvider(@NotNull final AuthenticatorProvider simpleAuthenticatorProvider,
+            @NotNull final ClassLoader classLoader) {
         this.simpleAuthenticatorProvider = simpleAuthenticatorProvider;
         this.classLoader = classLoader;
         this.enhancedAuthenticatorProvider = null;
     }
 
-    public WrappedAuthenticatorProvider(
-            @NotNull final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider,
+    public WrappedAuthenticatorProvider(@NotNull final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider,
             @NotNull final ClassLoader classLoader) {
         this.enhancedAuthenticatorProvider = enhancedAuthenticatorProvider;
         this.classLoader = classLoader;
@@ -70,24 +66,18 @@ public class WrappedAuthenticatorProvider {
 
     @Nullable
     public SimpleAuthenticator getAuthenticator(@NotNull final AuthenticatorProviderInput authenticatorProviderInput) {
-
         if (enhancedAuthenticatorProvider != null) {
             return null;
         }
-
         try {
-
-            final Authenticator authenticator =
-                    Objects.requireNonNull(simpleAuthenticatorProvider).getAuthenticator(authenticatorProviderInput);
-
+            final Authenticator authenticator = Objects.requireNonNull(simpleAuthenticatorProvider)
+                    .getAuthenticator(authenticatorProviderInput);
             if (authenticator == null) {
                 return null;
             }
-
             if (authenticator instanceof SimpleAuthenticator) {
                 return (SimpleAuthenticator) authenticator;
             }
-
             log.warn(WRONG_CLASS_LOG_STATEMENT, authenticator.getClass());
             return null;
         } catch (final Throwable throwable) {
@@ -97,12 +87,11 @@ public class WrappedAuthenticatorProvider {
     }
 
     @Nullable
-    public EnhancedAuthenticator getEnhancedAuthenticator(@NotNull final AuthenticatorProviderInput authenticatorProviderInput) {
-
+    public EnhancedAuthenticator getEnhancedAuthenticator(
+            @NotNull final AuthenticatorProviderInput authenticatorProviderInput) {
         if (enhancedAuthenticatorProvider == null) {
             return null;
         }
-
         try {
             return Objects.requireNonNull(enhancedAuthenticatorProvider)
                     .getEnhancedAuthenticator(authenticatorProviderInput);

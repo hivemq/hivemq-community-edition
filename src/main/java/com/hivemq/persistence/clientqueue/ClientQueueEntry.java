@@ -26,9 +26,7 @@ public class ClientQueueEntry {
 
     @NotNull
     private final MessageWithID messageWithID;
-
     private final boolean retained;
-
     public ClientQueueEntry(@NotNull final MessageWithID messageWithID, final boolean retained) {
         this.messageWithID = messageWithID;
         this.retained = retained;

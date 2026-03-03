@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNull;
  * @author Lukas Brandl
  */
 public class MqttUserPropertyTest {
+
     @Test
     public void test_decode() {
         final byte[] binary = {0, 4, 'n', 'a', 'm', 'e', 0, 5, 'v', 'a', 'l', 'u', 'e'};

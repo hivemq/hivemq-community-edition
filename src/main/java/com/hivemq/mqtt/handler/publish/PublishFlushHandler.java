@@ -38,7 +38,6 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
     private final @NotNull Counter channelNotWritable;
     private final int maxWritesBeforeFlush;
     private boolean wasWritable = true; // will only ever be updated in the channel's eventloop
-
     public PublishFlushHandler(final @NotNull MetricsHolder metricsHolder) {
         channelNotWritable = metricsHolder.getChannelNotWritableCounter();
         maxWritesBeforeFlush = InternalConfigurations.COUNT_OF_PUBLISHES_WRITTEN_TO_CHANNEL_TO_TRIGGER_FLUSH.get();
@@ -55,7 +54,6 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
         if (channel.isWritable() && !wasWritable) {
             wasWritable = true;
             channelNotWritable.dec();
-
             channel.eventLoop().execute(this);
         }
         ctx.fireChannelWritabilityChanged();
@@ -94,7 +92,6 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
         assert ctx != null : "ctx can not be null because consumeQueue is called after handlerAdded";
         int written = 0;
         while (!messagesToWrite.isEmpty()) {
-
             if (!ctx.channel().isWritable()) {
                 if (wasWritable) {
                     wasWritable = false;
@@ -102,9 +99,7 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
                 }
                 break;
             }
-
             final PublishWithFuture publish = messagesToWrite.poll();
-
             ctx.write(publish).addListener(new PublishWriteFailedListener(publish.getFuture()));
             written++;
             if (written >= maxWritesBeforeFlush) {
@@ -116,5 +111,4 @@ public class PublishFlushHandler extends ChannelInboundHandlerAdapter implements
             ctx.flush();
         }
     }
-
 }

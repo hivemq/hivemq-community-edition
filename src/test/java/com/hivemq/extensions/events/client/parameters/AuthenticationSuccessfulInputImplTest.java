@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class AuthenticationSuccessfulInputImplTest {
 
@@ -41,8 +41,8 @@ public class AuthenticationSuccessfulInputImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final AuthenticationSuccessfulInputImpl successfulInput =
-                new AuthenticationSuccessfulInputImpl("client", channel);
+        final AuthenticationSuccessfulInputImpl successfulInput = new AuthenticationSuccessfulInputImpl("client",
+                channel);
         assertNotNull(successfulInput);
         assertNotNull(successfulInput.get());
         assertNotNull(successfulInput.getClientInformation());

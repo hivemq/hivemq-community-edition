@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ExtensionStartOutputImpl implements ExtensionStartOutput {
 
     private @Nullable String reason = null;
-
     @Override
     public void preventExtensionStartup(@NotNull final String reason) {
         checkNotNull(reason, "A reason for preventing an extension startup must be given.");

@@ -15,7 +15,6 @@
  */
 package com.hivemq.diagnostic.data;
 
-
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -26,25 +25,18 @@ import java.time.LocalDateTime;
  */
 public class DiagnosticData {
 
-
-    private static final String BANNER =
-            "   __ ___          __  _______     ___  _                         __  _       \n" +
-                    "  / // (_)  _____ /  |/  / __ \\   / _ \\(_)__ ____ ____  ___  ___ / /_(_)______\n" +
-                    " / _  / / |/ / -_) /|_/ / /_/ /  / // / / _ `/ _ `/ _ \\/ _ \\(_-</ __/ / __(_-<\n" +
-                    "/_//_/_/|___/\\__/_/  /_/\\___\\_\\ /____/_/\\_,_/\\_, /_//_/\\___/___/\\__/_/\\__/___/\n" +
-                    "                                            /___/                             \n";
-
+    private static final String BANNER = "   __ ___          __  _______     ___  _                         __  _       \n"
+            + "  / // (_)  _____ /  |/  / __ \\   / _ \\(_)__ ____ ____  ___  ___ / /_(_)______\n"
+            + " / _  / / |/ / -_) /|_/ / /_/ /  / // / / _ `/ _ `/ _ \\/ _ \\(_-</ __/ / __(_-<\n"
+            + "/_//_/_/|___/\\__/_/  /_/\\___\\_\\ /____/_/\\_,_/\\_, /_//_/\\___/___/\\__/_/\\__/___/\n"
+            + "                                            /___/                             \n";
     private static final String SECTION_HEADLINE = "##############################\n";
     private final SystemPropertyInformation systemPropertyInformation;
     private final HiveMQInformation hiveMQInformation;
     private final HiveMQSystemInformation systemInformation;
     private final NetworkInterfaceInformation networkInterfaceInformation;
-
-
     @Inject
-    DiagnosticData(
-            final SystemPropertyInformation systemPropertyInformation,
-            final HiveMQInformation hiveMQInformation,
+    DiagnosticData(final SystemPropertyInformation systemPropertyInformation, final HiveMQInformation hiveMQInformation,
             final HiveMQSystemInformation systemInformation,
             final NetworkInterfaceInformation networkInterfaceInformation) {
         this.systemPropertyInformation = systemPropertyInformation;
@@ -54,28 +46,20 @@ public class DiagnosticData {
     }
 
     public String get() {
-
         final StringBuilder diagnosticWriter = new StringBuilder();
         diagnosticWriter.append(BANNER);
         diagnosticWriter.append("\n");
-
         diagnosticWriter.append(String.format("Generated at %s \n", LocalDateTime.now().toString()));
         diagnosticWriter.append(
                 "Please send this file along with any other files in the 'diagnostic' folder to support@hivemq.com.\n\n");
-
         diagnosticWriter.append(createHeadline("HiveMQ Information"));
-
         diagnosticWriter.append(hiveMQInformation.getHiveMQInformation());
-
         diagnosticWriter.append(createHeadline("Java System Properties"));
         diagnosticWriter.append(systemPropertyInformation.getSystemPropertyInformation());
-
         diagnosticWriter.append(createHeadline("System Information"));
         diagnosticWriter.append(systemInformation.getSystemInformation());
-
         diagnosticWriter.append(createHeadline("Network Interfaces"));
         diagnosticWriter.append(networkInterfaceInformation.getNetworkInterfaceInformation());
-
         return diagnosticWriter.toString();
     }
 

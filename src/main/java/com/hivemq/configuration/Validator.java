@@ -23,17 +23,16 @@ import java.util.List;
  * The configuration validator
  *
  * @author Dominik Obermaier
- * @since 3.0
+ * @since  3.0
  */
 public interface Validator<T> {
-
 
     /**
      * Validate a given parameter for a given name.
      *
-     * @param parameter The parameter to validate.
-     * @param name      The name of the parameter.
-     * @return A list of {@link ValidationError}s.
+     * @param  parameter The parameter to validate.
+     * @param  name      The name of the parameter.
+     * @return           A list of {@link ValidationError}s.
      */
     List<ValidationError> validate(final T parameter, final String name);
 }

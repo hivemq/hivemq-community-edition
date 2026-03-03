@@ -37,10 +37,8 @@ public class SubscribeInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final SubscribePacketImpl packet = mock(SubscribePacketImpl.class);
-
-        final SubscribeInboundInputImpl input =
-                new SubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final SubscribeInboundInputImpl input = new SubscribeInboundInputImpl(clientInformation, connectionInformation,
+                packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getSubscribePacket());
@@ -51,18 +49,14 @@ public class SubscribeInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final SubscribePacketImpl packet = mock(SubscribePacketImpl.class);
-
-        final SubscribeInboundInputImpl input =
-                new SubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final SubscribeInboundInputImpl input = new SubscribeInboundInputImpl(clientInformation, connectionInformation,
+                packet);
         final ModifiableSubscribePacketImpl modifiablePacket = mock(ModifiableSubscribePacketImpl.class);
         final SubscribePacketImpl newPacket = mock(SubscribePacketImpl.class);
         final SubscribeInboundOutputImpl output = mock(SubscribeInboundOutputImpl.class);
         when(output.getSubscribePacket()).thenReturn(modifiablePacket);
         when(modifiablePacket.copy()).thenReturn(newPacket);
-
         final SubscribeInboundInputImpl updated = input.update(output);
-
         assertNotSame(input, updated);
         assertSame(input.getClientInformation(), updated.getClientInformation());
         assertSame(input.getConnectionInformation(), updated.getConnectionInformation());

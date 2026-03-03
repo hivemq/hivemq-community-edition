@@ -23,10 +23,10 @@ import com.hivemq.mqtt.message.subscribe.Topic;
  */
 @Immutable
 public class Subscription {
+
     private final Topic topic;
     private final byte flags;
     private final String sharedGroup;
-
     public Subscription(final Topic topic, final byte flags, final String sharedGroup) {
         this.topic = topic;
         this.flags = flags;

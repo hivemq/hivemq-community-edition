@@ -23,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public class DefaultPluginTaskInput implements PluginTaskInput {
 
     private static final DefaultPluginTaskInput INSTANCE = new DefaultPluginTaskInput();
-
     @NotNull
     public static DefaultPluginTaskInput getInstance() {
         return INSTANCE;
@@ -31,5 +30,4 @@ public class DefaultPluginTaskInput implements PluginTaskInput {
 
     private DefaultPluginTaskInput() {
     }
-
 }

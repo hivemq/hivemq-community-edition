@@ -36,7 +36,6 @@ public class PersistenceScheduledExecutorProvider implements Provider<ListeningS
 
     @Nullable
     private ListeningScheduledExecutorService executorService;
-
     @Override
     @LazySingleton
     @Persistence
@@ -44,8 +43,8 @@ public class PersistenceScheduledExecutorProvider implements Provider<ListeningS
     public ListeningScheduledExecutorService get() {
         if (executorService == null) {
             final ThreadFactory threadFactory = ThreadFactoryUtil.create("scheduled-persistence-executor");
-            final ScheduledExecutorService singleThreadExecutor =
-                    Executors.newSingleThreadScheduledExecutor(threadFactory);
+            final ScheduledExecutorService singleThreadExecutor = Executors
+                    .newSingleThreadScheduledExecutor(threadFactory);
             this.executorService = MoreExecutors.listeningDecorator(singleThreadExecutor);
         }
         return executorService;

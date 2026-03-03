@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.services.initializer;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -30,16 +29,12 @@ import static org.mockito.Mockito.verify;
 public class InitializerRegistryImplTest {
 
     private final @NotNull Initializers initializers = mock(Initializers.class);
-
     private final @NotNull InitializerRegistry registry = new InitializerRegistryImpl(initializers);
-
     @Test
     public void test_set() {
         final ClientInitializer clientInitializer = (input, pipeline) -> {
         };
-
         registry.setClientInitializer(clientInitializer);
-
         verify(initializers).addClientInitializer(clientInitializer);
     }
 

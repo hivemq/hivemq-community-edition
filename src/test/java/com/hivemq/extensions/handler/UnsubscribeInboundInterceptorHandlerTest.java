@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -68,26 +67,20 @@ import static org.mockito.Mockito.when;
 public class UnsubscribeInboundInterceptorHandlerTest {
 
     public static final @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
-
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull HiveMQExtensions extensions = mock(HiveMQExtensions.class);
     private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
     private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
-
     private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
     private @NotNull UnsubscribeInboundInterceptorHandler handler;
-
     @Before
     public void setup() {
         isTriggered.set(false);
-
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
-
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -95,18 +88,15 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
-
-        final FullConfigurationService configurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
+        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
+                .getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService =
-                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
-
-        handler = new UnsubscribeInboundInterceptorHandler(configurationService,
-                asyncer,
-                extensions,
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
+                mock(ShutdownHooks.class));
+        handler = new UnsubscribeInboundInterceptorHandler(configurationService, asyncer, extensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelInboundHandlerAdapter() {
+
             @Override
             public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
                 handler.handleInboundUnsubscribe(ctx, ((UNSUBSCRIBE) msg));
@@ -130,19 +120,15 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
     @Test
     public void test_simple_intercept() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubscribeInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        SimpleUnsubscribeTestInterceptor.class);
+        final ClientContextImpl clientContext = new ClientContextImpl(extensions,
+                new ModifiableDefaultPermissionsImpl());
+        final UnsubscribeInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), SimpleUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
-
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-
-        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(
-                extension);
-
+        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class)))
+                .thenReturn(extension);
         channel.writeInbound(testUnsubscribe());
         UNSUBSCRIBE unsubscribe = channel.readInbound();
         while (unsubscribe == null) {
@@ -156,19 +142,15 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
     @Test
     public void test_modifying_topics() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
-        final UnsubscribeInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        ModifyUnsubscribeTestInterceptor.class);
+        final ClientContextImpl clientContext = new ClientContextImpl(extensions,
+                new ModifiableDefaultPermissionsImpl());
+        final UnsubscribeInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), ModifyUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
-
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-
-        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class))).thenReturn(
-                extension);
-
+        when(extensions.getExtensionForClassloader(ArgumentMatchers.any(IsolatedExtensionClassloader.class)))
+                .thenReturn(extension);
         channel.writeInbound(testUnsubscribe());
         UNSUBSCRIBE unsubscribe = channel.readInbound();
         while (unsubscribe == null) {
@@ -182,7 +164,6 @@ public class UnsubscribeInboundInterceptorHandlerTest {
     private @NotNull UNSUBSCRIBE testUnsubscribe() {
         return new UNSUBSCRIBE(ImmutableList.of("topics"), 1, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
-
     public static class SimpleUnsubscribeTestInterceptor implements UnsubscribeInboundInterceptor {
 
         @Override

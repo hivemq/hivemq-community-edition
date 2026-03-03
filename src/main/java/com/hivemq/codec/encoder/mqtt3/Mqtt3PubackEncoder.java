@@ -29,21 +29,17 @@ public class Mqtt3PubackEncoder implements MqttEncoder<PUBACK> {
     public static final int ENCODED_PUBACK_SIZE = 4;
     private static final byte PUBACK_FIXED_HEADER = 0b0100_0000;
     private static final byte PUBACK_REMAINING_LENGTH = 0b0000_0010;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull PUBACK msg,
             final @NotNull ByteBuf out) {
-
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
         }
-
         out.writeByte(PUBACK_FIXED_HEADER);
-        //The remaining length is always static for PUBACKs
+        // The remaining length is always static for PUBACKs
         out.writeByte(PUBACK_REMAINING_LENGTH);
-
         out.writeShort(msg.getPacketIdentifier());
     }
 

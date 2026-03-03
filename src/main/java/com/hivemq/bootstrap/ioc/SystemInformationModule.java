@@ -24,7 +24,6 @@ import com.hivemq.configuration.info.SystemInformation;
 public class SystemInformationModule extends AbstractModule {
 
     private final SystemInformation systemInformation;
-
     public SystemInformationModule(final SystemInformation systemInformation) {
         this.systemInformation = systemInformation;
     }

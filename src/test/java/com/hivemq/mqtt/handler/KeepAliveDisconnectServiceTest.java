@@ -42,11 +42,9 @@ public class KeepAliveDisconnectServiceTest {
 
     private final @NotNull MqttServerDisconnector mqttServerDisconnector = mock();
     private final @NotNull ArgumentCaptor<Channel> channelArgumentCaptor = ArgumentCaptor.forClass(Channel.class);
-
     private final @NotNull ShutdownHooks shutdownHooks = new ShutdownHooks();
-    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService =
-            new KeepAliveDisconnectService(mqttServerDisconnector, shutdownHooks);
-
+    private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService = new KeepAliveDisconnectService(
+            mqttServerDisconnector, shutdownHooks);
     @Before
     public void setUp() {
         doAnswer(invocation -> null).when(mqttServerDisconnector)
@@ -89,14 +87,11 @@ public class KeepAliveDisconnectServiceTest {
             executorService.execute(runnable);
             return null;
         }).when(eventLoop).execute(any());
-
         for (int i = 0; i < 10000; i++) {
             keepAliveDisconnectService.submitKeepAliveDisconnect(channel);
         }
-
         try {
-            await().pollInterval(1, TimeUnit.MILLISECONDS)
-                    .timeout(30, TimeUnit.SECONDS)
+            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() == 2000);
         } finally {
             executorService.shutdown();
@@ -115,7 +110,6 @@ public class KeepAliveDisconnectServiceTest {
             executorService.execute(runnable);
             return null;
         }).when(eventLoop).execute(any());
-
         new Thread(() -> {
             for (int i = 0; i < 2000; i++) {
                 keepAliveDisconnectService.submitKeepAliveDisconnect(channel);
@@ -126,10 +120,8 @@ public class KeepAliveDisconnectServiceTest {
                 }
             }
         }).start();
-
         try {
-            await().pollInterval(1, TimeUnit.MILLISECONDS)
-                    .timeout(30, TimeUnit.SECONDS)
+            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() == 2000);
         } finally {
             executorService.shutdown();
@@ -152,11 +144,9 @@ public class KeepAliveDisconnectServiceTest {
             } else {
                 withoutException.incrementAndGet();
             }
-
             executorService.execute(runnable);
             return null;
         }).when(eventLoop).execute(any());
-
         new Thread(() -> {
             while (withoutException.get() <= 100) {
                 keepAliveDisconnectService.submitKeepAliveDisconnect(channel);
@@ -167,10 +157,8 @@ public class KeepAliveDisconnectServiceTest {
                 }
             }
         }).start();
-
         try {
-            await().pollInterval(1, TimeUnit.MILLISECONDS)
-                    .timeout(30, TimeUnit.SECONDS)
+            await().pollInterval(1, TimeUnit.MILLISECONDS).timeout(30, TimeUnit.SECONDS)
                     .until(() -> channelArgumentCaptor.getAllValues().size() >= 100);
         } finally {
             executorService.shutdown();

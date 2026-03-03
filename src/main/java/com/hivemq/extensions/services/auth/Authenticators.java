@@ -30,7 +30,8 @@ import java.util.Map;
 @ThreadSafe
 public interface Authenticators {
 
-    @NotNull Map<@NotNull String, @NotNull WrappedAuthenticatorProvider> getAuthenticatorProviderMap();
+    @NotNull
+    Map<@NotNull String, @NotNull WrappedAuthenticatorProvider> getAuthenticatorProviderMap();
 
     /**
      * Register a {@link WrappedAuthenticatorProvider}. Will replace an other WrappedAuthenticatorProvider with the same

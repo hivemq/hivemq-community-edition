@@ -26,7 +26,6 @@ import javax.inject.Singleton;
 public class HivemqId {
 
     private String hivemqId;
-
     public HivemqId() {
         hivemqId = generateId();
     }
@@ -35,7 +34,7 @@ public class HivemqId {
         return hivemqId;
     }
 
-    //needs to be at least 5 characters long to provide acceptable uniqueness
+    // needs to be at least 5 characters long to provide acceptable uniqueness
     public String generateId() {
         return RandomStringUtils.randomAlphanumeric(5);
     }

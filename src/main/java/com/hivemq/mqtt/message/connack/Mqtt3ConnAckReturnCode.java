@@ -24,20 +24,14 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
  * @author Dominik Obermaier
  * @author Christian Goetz
  * @author Florian Limpöck
- * @since 1.4
+ * @since  1.4
  */
 public enum Mqtt3ConnAckReturnCode {
-    ACCEPTED(0),
-    REFUSED_UNACCEPTABLE_PROTOCOL_VERSION(1),
-    REFUSED_IDENTIFIER_REJECTED(2),
-    REFUSED_SERVER_UNAVAILABLE(3),
-    REFUSED_BAD_USERNAME_OR_PASSWORD(4),
-    REFUSED_NOT_AUTHORIZED(5);
 
+    ACCEPTED(0), REFUSED_UNACCEPTABLE_PROTOCOL_VERSION(1), REFUSED_IDENTIFIER_REJECTED(2), REFUSED_SERVER_UNAVAILABLE(
+            3), REFUSED_BAD_USERNAME_OR_PASSWORD(4), REFUSED_NOT_AUTHORIZED(5);
     private static final @NotNull Mqtt3ConnAckReturnCode @NotNull [] VALUES = values();
-
     private final int code;
-
     Mqtt3ConnAckReturnCode(final int code) {
         this.code = code;
     }
@@ -56,34 +50,34 @@ public enum Mqtt3ConnAckReturnCode {
 
     public static @NotNull Mqtt3ConnAckReturnCode fromReasonCode(final @NotNull Mqtt5ConnAckReasonCode reasonCode) {
         switch (reasonCode) {
-            case SUCCESS:
+            case SUCCESS :
                 return ACCEPTED;
-            case UNSUPPORTED_PROTOCOL_VERSION:
+            case UNSUPPORTED_PROTOCOL_VERSION :
                 return REFUSED_UNACCEPTABLE_PROTOCOL_VERSION;
-            case CLIENT_IDENTIFIER_NOT_VALID:
+            case CLIENT_IDENTIFIER_NOT_VALID :
                 return REFUSED_IDENTIFIER_REJECTED;
-            case SERVER_UNAVAILABLE:
-            case SERVER_BUSY:
-            case USE_ANOTHER_SERVER:
-            case SERVER_MOVED:
+            case SERVER_UNAVAILABLE :
+            case SERVER_BUSY :
+            case USE_ANOTHER_SERVER :
+            case SERVER_MOVED :
                 return REFUSED_SERVER_UNAVAILABLE;
-            case BAD_USER_NAME_OR_PASSWORD:
-            case BAD_AUTHENTICATION_METHOD:
+            case BAD_USER_NAME_OR_PASSWORD :
+            case BAD_AUTHENTICATION_METHOD :
                 return REFUSED_BAD_USERNAME_OR_PASSWORD;
-            case UNSPECIFIED_ERROR:
-            case MALFORMED_PACKET:
-            case PROTOCOL_ERROR:
-            case IMPLEMENTATION_SPECIFIC_ERROR:
-            case NOT_AUTHORIZED:
-            case BANNED:
-            case TOPIC_NAME_INVALID:
-            case PACKET_TOO_LARGE:
-            case QUOTA_EXCEEDED:
-            case PAYLOAD_FORMAT_INVALID:
-            case RETAIN_NOT_SUPPORTED:
-            case QOS_NOT_SUPPORTED:
-            case CONNECTION_RATE_EXCEEDED:
-            default:
+            case UNSPECIFIED_ERROR :
+            case MALFORMED_PACKET :
+            case PROTOCOL_ERROR :
+            case IMPLEMENTATION_SPECIFIC_ERROR :
+            case NOT_AUTHORIZED :
+            case BANNED :
+            case TOPIC_NAME_INVALID :
+            case PACKET_TOO_LARGE :
+            case QUOTA_EXCEEDED :
+            case PAYLOAD_FORMAT_INVALID :
+            case RETAIN_NOT_SUPPORTED :
+            case QOS_NOT_SUPPORTED :
+            case CONNECTION_RATE_EXCEEDED :
+            default :
                 return REFUSED_NOT_AUTHORIZED;
         }
     }

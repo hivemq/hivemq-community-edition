@@ -27,9 +27,7 @@ public class RemovablePayload {
 
     private final long id;
     private final long timestamp;
-
     final AtomicBoolean inProgress;
-
     public RemovablePayload(final long id, final long timestamp) {
         this.id = id;
         this.timestamp = timestamp;
@@ -52,14 +50,11 @@ public class RemovablePayload {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final RemovablePayload that = (RemovablePayload) o;
-
         if (id != that.id) {
             return false;
         }
         return timestamp == that.timestamp;
-
     }
 
     @Override

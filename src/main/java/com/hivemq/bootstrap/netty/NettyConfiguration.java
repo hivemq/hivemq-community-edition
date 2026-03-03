@@ -31,25 +31,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class NettyConfiguration {
 
     private final Class<? extends ServerSocketChannel> serverSocketChannelClass;
-
     private final Class<? extends SocketChannel> clientSocketChannelClass;
-
     private final EventLoopGroup parentEventLoopGroup;
-
     private final EventLoopGroup childEventLoopGroup;
-
-
-    public NettyConfiguration(
-            final Class<? extends ServerSocketChannel> serverSocketChannelClass,
-            final Class<? extends SocketChannel> clientSocketChannelClass,
-            final EventLoopGroup parentEventLoopGroup,
+    public NettyConfiguration(final Class<? extends ServerSocketChannel> serverSocketChannelClass,
+            final Class<? extends SocketChannel> clientSocketChannelClass, final EventLoopGroup parentEventLoopGroup,
             final EventLoopGroup childEventLoopGroup) {
-
         checkNotNull(serverSocketChannelClass, "Server Socket Channel Class must not be null");
         checkNotNull(clientSocketChannelClass, "Client Socket Channel Class must not be null");
         checkNotNull(parentEventLoopGroup, "Parent Event Loop Group must not be null");
         checkNotNull(childEventLoopGroup, "Child Event Loop Group must not be null");
-
         this.serverSocketChannelClass = serverSocketChannelClass;
         this.clientSocketChannelClass = clientSocketChannelClass;
         this.parentEventLoopGroup = parentEventLoopGroup;

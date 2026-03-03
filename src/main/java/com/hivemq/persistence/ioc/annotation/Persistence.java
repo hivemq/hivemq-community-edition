@@ -28,7 +28,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * @author Lukas Brandl
  */
-
 @BindingAnnotation
 @Target({FIELD, PARAMETER, METHOD})
 @Retention(RUNTIME)

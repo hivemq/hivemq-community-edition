@@ -30,7 +30,6 @@ public class PropertiesSerializationUtilTest {
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(ImmutableList.of());
         final int encodedSize = PropertiesSerializationUtil.encodedSize(userProperties);
         assertEquals(4, encodedSize);
-
         final byte[] bytes = new byte[encodedSize];
         PropertiesSerializationUtil.write(userProperties, bytes, 0);
         final Mqtt5UserProperties read = PropertiesSerializationUtil.read(bytes, 0);
@@ -40,11 +39,10 @@ public class PropertiesSerializationUtilTest {
 
     @Test
     public void test_one_property() {
-        final Mqtt5UserProperties userProperties =
-                Mqtt5UserProperties.of(ImmutableList.of(new MqttUserProperty("name", "value")));
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties
+                .of(ImmutableList.of(new MqttUserProperty("name", "value")));
         final int encodedSize = PropertiesSerializationUtil.encodedSize(userProperties);
         assertEquals("name".length() + "value".length() + (4 * userProperties.asList().size()) + 4, encodedSize);
-
         final byte[] bytes = new byte[encodedSize];
         PropertiesSerializationUtil.write(userProperties, bytes, 0);
         final Mqtt5UserProperties read = PropertiesSerializationUtil.read(bytes, 0);
@@ -56,20 +54,16 @@ public class PropertiesSerializationUtilTest {
 
     @Test
     public void test_multiple_property() {
-        final Mqtt5UserProperties userProperties =
-                Mqtt5UserProperties.of(ImmutableList.of(new MqttUserProperty("name1", "value1"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
+                ImmutableList.of(
+                        new MqttUserProperty("name1", "value1"),
                         new MqttUserProperty("name2", "value2"),
                         new MqttUserProperty("name3", "value3")));
         final int encodedSize = PropertiesSerializationUtil.encodedSize(userProperties);
-        assertEquals("name1".length() +
-                "value1".length() +
-                "name2".length() +
-                "value3".length() +
-                "name3".length() +
-                "value3".length() +
-                (4 * userProperties.asList().size()) +
-                4, encodedSize);
-
+        assertEquals(
+                "name1".length() + "value1".length() + "name2".length() + "value3".length() + "name3".length()
+                        + "value3".length() + (4 * userProperties.asList().size()) + 4,
+                encodedSize);
         final byte[] bytes = new byte[encodedSize];
         PropertiesSerializationUtil.write(userProperties, bytes, 0);
         final Mqtt5UserProperties read = PropertiesSerializationUtil.read(bytes, 0);

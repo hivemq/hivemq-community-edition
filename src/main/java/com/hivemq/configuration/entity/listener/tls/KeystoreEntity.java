@@ -31,13 +31,10 @@ public class KeystoreEntity {
 
     @XmlElement(name = "path", required = true)
     private @NotNull String path = "";
-
     @XmlElement(name = "password", required = true)
     private @NotNull String password = "";
-
     @XmlElement(name = "private-key-password", required = true)
     private @NotNull String privateKeyPassword = "";
-
     public @NotNull String getPath() {
         return path;
     }
@@ -49,5 +46,4 @@ public class KeystoreEntity {
     public @NotNull String getPrivateKeyPassword() {
         return privateKeyPassword;
     }
-
 }

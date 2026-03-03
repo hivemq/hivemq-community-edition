@@ -40,16 +40,13 @@ import static org.mockito.Mockito.when;
 public class PublishPayloadPersistenceImplTest {
 
     private final @NotNull PublishPayloadLocalPersistence localPersistence = mock(PublishPayloadLocalPersistence.class);
-    private final @NotNull ListeningScheduledExecutorService scheduledExecutorService =
-            mock(ListeningScheduledExecutorService.class);
-
+    private final @NotNull ListeningScheduledExecutorService scheduledExecutorService = mock(
+            ListeningScheduledExecutorService.class);
     private @NotNull PublishPayloadPersistenceImpl persistence;
-
     @Before
     public void setUp() throws Exception {
         InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.set(10000);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(64);
-
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
         persistence.init();
     }
@@ -60,7 +57,6 @@ public class PublishPayloadPersistenceImplTest {
         final byte[] payload2 = "payload2".getBytes();
         persistence.add(payload1, 123);
         persistence.add(payload2, 234);
-
         assertEquals(1, persistence.getReferenceCountersAsMap().get(123L).intValue());
         assertEquals(1, persistence.getReferenceCountersAsMap().get(234L).intValue());
     }
@@ -71,7 +67,6 @@ public class PublishPayloadPersistenceImplTest {
         persistence.add(payload, 123);
         persistence.add(payload, 123);
         persistence.add(payload, 123);
-
         assertEquals(3, persistence.getReferenceCountersAsMap().get(123L).intValue());
     }
 
@@ -82,7 +77,6 @@ public class PublishPayloadPersistenceImplTest {
         when(localPersistence.get(123)).thenReturn(payload);
         assertEquals(1, persistence.getReferenceCountersAsMap().get(123L).intValue());
         final byte[] result = persistence.get(123);
-
         verify(localPersistence, times(1)).get(anyLong());
         assertArrayEquals(payload, result);
     }
@@ -139,32 +133,22 @@ public class PublishPayloadPersistenceImplTest {
         InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.set(4);
         persistence = new PublishPayloadPersistenceImpl(localPersistence, scheduledExecutorService);
         persistence.init();
-
-        verify(scheduledExecutorService, times(4)).scheduleWithFixedDelay(any(RemoveEntryTask.class),
-                eq(250L),
-                eq(250L),
-                eq(TimeUnit.MILLISECONDS));
+        verify(scheduledExecutorService, times(4))
+                .scheduleWithFixedDelay(any(RemoveEntryTask.class), eq(250L), eq(250L), eq(TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void partitionBucketResponsibilities_whenRemovablePayloadsDividesEvenly_thenEveryThreadHasSameAmountOfResponsibilities() {
-
-        final RemovablePayloads[] removablePayloadsArray = {
-                new RemovablePayloads(1, new LinkedList<>()),
-                new RemovablePayloads(2, new LinkedList<>()),
-                new RemovablePayloads(3, new LinkedList<>()),
+        final RemovablePayloads[] removablePayloadsArray = {new RemovablePayloads(1, new LinkedList<>()),
+                new RemovablePayloads(2, new LinkedList<>()), new RemovablePayloads(3, new LinkedList<>()),
                 new RemovablePayloads(4, new LinkedList<>())};
-
-        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads =
-                PublishPayloadPersistenceImpl.partitionBucketResponsibilities(removablePayloadsArray, 2);
-
+        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads = PublishPayloadPersistenceImpl
+                .partitionBucketResponsibilities(removablePayloadsArray, 2);
         assertNotNull(removablePayloads);
         assertEquals(2, removablePayloads.length);
-
         assertEquals(2, removablePayloads[0].length);
         assertEquals(1, removablePayloads[0][0].getBucketIndex());
         assertEquals(2, removablePayloads[0][1].getBucketIndex());
-
         assertEquals(2, removablePayloads[1].length);
         assertEquals(3, removablePayloads[1][0].getBucketIndex());
         assertEquals(4, removablePayloads[1][1].getBucketIndex());
@@ -172,40 +156,26 @@ public class PublishPayloadPersistenceImplTest {
 
     @Test
     public void partitionBucketResponsibilities_whenRemovablePayloadsDividesUnevenly_thenRemainingBucketsAreDistributed() {
-
         final LinkedList<Long> queue = new LinkedList<>();
-
-        final RemovablePayloads[] removablePayloadsArray = {
-                new RemovablePayloads(1, queue),
-                new RemovablePayloads(2, queue),
-                new RemovablePayloads(3, queue),
-                new RemovablePayloads(4, queue),
-                new RemovablePayloads(5, queue),
-                new RemovablePayloads(6, queue),
-                new RemovablePayloads(7, queue),
-                new RemovablePayloads(8, queue),
-                new RemovablePayloads(9, queue),
-                new RemovablePayloads(10, queue),
+        final RemovablePayloads[] removablePayloadsArray = {new RemovablePayloads(1, queue),
+                new RemovablePayloads(2, queue), new RemovablePayloads(3, queue), new RemovablePayloads(4, queue),
+                new RemovablePayloads(5, queue), new RemovablePayloads(6, queue), new RemovablePayloads(7, queue),
+                new RemovablePayloads(8, queue), new RemovablePayloads(9, queue), new RemovablePayloads(10, queue),
                 new RemovablePayloads(11, queue)};
-
-        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads =
-                PublishPayloadPersistenceImpl.partitionBucketResponsibilities(removablePayloadsArray, 3);
-
+        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads = PublishPayloadPersistenceImpl
+                .partitionBucketResponsibilities(removablePayloadsArray, 3);
         assertNotNull(removablePayloads);
         assertEquals(3, removablePayloads.length);
-
         assertEquals(4, removablePayloads[0].length);
         assertEquals(1, removablePayloads[0][0].getBucketIndex());
         assertEquals(2, removablePayloads[0][1].getBucketIndex());
         assertEquals(3, removablePayloads[0][2].getBucketIndex());
         assertEquals(11, removablePayloads[0][3].getBucketIndex());
-
         assertEquals(4, removablePayloads[1].length);
         assertEquals(4, removablePayloads[1][0].getBucketIndex());
         assertEquals(5, removablePayloads[1][1].getBucketIndex());
         assertEquals(6, removablePayloads[1][2].getBucketIndex());
         assertEquals(10, removablePayloads[1][3].getBucketIndex());
-
         assertEquals(3, removablePayloads[2].length);
         assertEquals(7, removablePayloads[2][0].getBucketIndex());
         assertEquals(8, removablePayloads[2][1].getBucketIndex());
@@ -214,30 +184,19 @@ public class PublishPayloadPersistenceImplTest {
 
     @Test
     public void partitionBucketResponsibilities_whenRemovablePayloadsLessThenThreads_thenAllBucketsAreDistributed() {
-
         final LinkedList<Long> queue = new LinkedList<>();
-
-        final RemovablePayloads[] removablePayloadsArray = {
-                new RemovablePayloads(1, queue),
-                new RemovablePayloads(2, queue),
-                new RemovablePayloads(3, queue),
-                new RemovablePayloads(4, queue),};
-
-        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads =
-                PublishPayloadPersistenceImpl.partitionBucketResponsibilities(removablePayloadsArray, 6);
-
+        final RemovablePayloads[] removablePayloadsArray = {new RemovablePayloads(1, queue),
+                new RemovablePayloads(2, queue), new RemovablePayloads(3, queue), new RemovablePayloads(4, queue),};
+        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads = PublishPayloadPersistenceImpl
+                .partitionBucketResponsibilities(removablePayloadsArray, 6);
         assertNotNull(removablePayloads);
         assertEquals(6, removablePayloads.length);
-
         assertEquals(1, removablePayloads[0].length);
         assertEquals(4, removablePayloads[0][0].getBucketIndex());
-
         assertEquals(1, removablePayloads[1].length);
         assertEquals(3, removablePayloads[1][0].getBucketIndex());
-
         assertEquals(1, removablePayloads[2].length);
         assertEquals(2, removablePayloads[2][0].getBucketIndex());
-
         assertEquals(1, removablePayloads[3].length);
         assertEquals(1, removablePayloads[3][0].getBucketIndex());
     }

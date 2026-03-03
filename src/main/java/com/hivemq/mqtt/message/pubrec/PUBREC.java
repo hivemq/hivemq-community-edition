@@ -28,23 +28,19 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
  *
  * @author Dominik Obermaier
  * @author Waldemar Ruck
- * @since 1.4
+ * @since  1.4
  */
 public class PUBREC extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubRecReasonCode>
         implements Mqtt3PUBREC, Mqtt5PUBREC {
 
-    //MQTT 3
+    // MQTT 3
     public PUBREC(final int packetIdentifier) {
         super(packetIdentifier, Mqtt5PubRecReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    //MQTT 5
-    public PUBREC(
-            final int packetIdentifier,
-            final @NotNull Mqtt5PubRecReasonCode reasonCode,
-            final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties) {
-
+    // MQTT 5
+    public PUBREC(final int packetIdentifier, final @NotNull Mqtt5PubRecReasonCode reasonCode,
+            final @Nullable String reasonString, final @NotNull Mqtt5UserProperties userProperties) {
         super(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 
@@ -54,8 +50,7 @@ public class PUBREC extends MqttMessageWithUserProperties.MqttMessageWithIdAndRe
     }
 
     public static @NotNull PUBREC from(final @NotNull PubrecPacketImpl packet) {
-        return new PUBREC(packet.getPacketIdentifier(),
-                Mqtt5PubRecReasonCode.from(packet.getReasonCode()),
+        return new PUBREC(packet.getPacketIdentifier(), Mqtt5PubRecReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }

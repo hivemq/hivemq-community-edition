@@ -27,12 +27,11 @@ import javax.inject.Provider;
 public class ClientSessionSubscriptionPersistenceProvider implements Provider<ClientSessionSubscriptionPersistence> {
 
     private final Provider<ClientSessionSubscriptionPersistenceImpl> provider;
-
     @Inject
-    public ClientSessionSubscriptionPersistenceProvider(final Provider<ClientSessionSubscriptionPersistenceImpl> provider) {
+    public ClientSessionSubscriptionPersistenceProvider(
+            final Provider<ClientSessionSubscriptionPersistenceImpl> provider) {
         this.provider = provider;
     }
-
 
     @Override
     public ClientSessionSubscriptionPersistence get() {

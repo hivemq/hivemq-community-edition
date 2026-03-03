@@ -24,7 +24,6 @@ public class TopicFilter {
 
     private final @NotNull String topic;
     private final @Nullable String sharedName;
-
     public TopicFilter(final @NotNull String topic, final @Nullable String sharedName) {
         this.topic = topic;
         this.sharedName = sharedName;

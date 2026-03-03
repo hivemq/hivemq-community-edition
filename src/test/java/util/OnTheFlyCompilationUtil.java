@@ -52,12 +52,11 @@ public class OnTheFlyCompilationUtil {
 
     public static void compileJavaFile(final File javaFile, final File toFolder) throws IOException {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(toFolder));
-
         // compile the file
-        compiler.getTask(null,
+        compiler.getTask(
+                null,
                 fileManager,
                 null,
                 null,
@@ -71,22 +70,17 @@ public class OnTheFlyCompilationUtil {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         final MemClassLoader classLoader = new MemClassLoader(tempDir);
         final JavaFileManager fileManager = new MemJavaFileManager(compiler, classLoader);
-
         final Collection<? extends JavaFileObject> units = Arrays.asList(toCompile);
         final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, null, null, units);
         task.call();
         fileManager.close();
-
         classLoader.persist();
         return classLoader;
     }
-
     // Utils for the compiler API for in-memory compilation
-
     public static class StringJavaFileObject extends SimpleJavaFileObject {
 
         private final CharSequence code;
-
         public StringJavaFileObject(final String name, final CharSequence code) {
             super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
             this.code = code;
@@ -102,7 +96,6 @@ public class OnTheFlyCompilationUtil {
 
         private final Map<String, MemJavaFileObject> classFiles = new HashMap<>();
         private final Path tempDir;
-
         public MemClassLoader(final @NotNull Path tempDir) {
             super(ClassLoader.getSystemClassLoader());
             this.tempDir = tempDir;
@@ -149,7 +142,6 @@ public class OnTheFlyCompilationUtil {
 
         private final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
         private final String className;
-
         MemJavaFileObject(final String className) {
             super(URI.create("string:///" + className.replace('.', '/') + Kind.CLASS.extension), Kind.CLASS);
             this.className = className;
@@ -172,10 +164,8 @@ public class OnTheFlyCompilationUtil {
     static class MemJavaFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
 
         private final MemClassLoader classLoader;
-
         public MemJavaFileManager(final JavaCompiler compiler, final MemClassLoader classLoader) {
             super(compiler.getStandardFileManager(null, null, null));
-
             this.classLoader = classLoader;
         }
 

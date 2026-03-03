@@ -64,19 +64,15 @@ public class TlsTcpChannelInitializerTest {
     private final @NotNull EventLog eventLog = mock();
     private final @NotNull FullConfigurationService fullConfigurationService = mock();
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
-
     private ChannelPipeline pipeline;
-
     private TlsTcpChannelInitializer tlstcpChannelInitializer;
-
     @Before
     public void before() throws Exception {
         pipeline = new FakeChannelPipeline();
-
         when(tlsTcpListener.getTls()).thenReturn(tls);
         when(sslFactory.getSslContext(any(Tls.class))).thenReturn(sslContext);
-        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(
-                sslHandler);
+        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class)))
+                .thenReturn(sslHandler);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
@@ -85,22 +81,15 @@ public class TlsTcpChannelInitializerTest {
         when(fullConfigurationService.mqttConfiguration()).thenReturn(new MqttConfigurationServiceImpl());
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
-
-
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
-
         tlstcpChannelInitializer = new TlsTcpChannelInitializer(channelDependencies, tlsTcpListener, sslFactory);
-
     }
 
     @Test
     public void test_add_special_handlers() {
-
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
-
         tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
-
         assertEquals(4, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
@@ -110,12 +99,9 @@ public class TlsTcpChannelInitializerTest {
 
     @Test
     public void test_add_special_handlers_with_timeout() {
-
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
         when(tls.getHandshakeTimeout()).thenReturn(30);
-
         tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
-
         assertEquals(6, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
@@ -127,17 +113,11 @@ public class TlsTcpChannelInitializerTest {
 
     @Test
     public void test_add_special_handlers_no_cert() {
-
-
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.NONE);
-
         tlstcpChannelInitializer.addSpecialHandlers(socketChannel);
-
         assertEquals(3, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
         assertEquals(SSL_PARAMETER_HANDLER, pipeline.names().get(2));
     }
-
-
 }

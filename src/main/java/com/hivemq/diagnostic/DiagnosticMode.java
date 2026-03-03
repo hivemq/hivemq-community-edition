@@ -47,47 +47,32 @@ import java.util.concurrent.TimeUnit;
 public class DiagnosticMode {
 
     private static final Logger log = LoggerFactory.getLogger(DiagnosticMode.class);
-
     private static final String THREAD_NAME_FORMAT = "diagnostic-mode-%d";
-
     public static final String FILE_NAME_METRIC_LOG = "metric.log";
     public static final String FILE_NAME_TRACE_LOG = "tracelog.log";
     public static final String FILE_NAME_DIAGNOSTICS_FILE = "diagnostics.txt";
     public static final String FILE_NAME_DIAGNOSTICS_FOLDER = "diagnostics";
     public static final String FILE_NAME_MIGRATION_LOG = "migration.log";
-
     private final @NotNull DiagnosticData diagnosticData;
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull MetricRegistry metricRegistry;
     private final @NotNull ShutdownHooks shutdownHooks;
     private final @NotNull ScheduledExecutorService executor;
-
     private @Nullable ConsoleReporter metricReporter;
-
     @Inject
-    DiagnosticMode(
-            final @NotNull DiagnosticData diagnosticData,
-            final @NotNull SystemInformation systemInformation,
-            final @NotNull MetricRegistry metricRegistry,
-            final @NotNull ShutdownHooks shutdownHooks) {
-        this(diagnosticData,
-                systemInformation,
-                metricRegistry,
-                shutdownHooks,
+    DiagnosticMode(final @NotNull DiagnosticData diagnosticData, final @NotNull SystemInformation systemInformation,
+            final @NotNull MetricRegistry metricRegistry, final @NotNull ShutdownHooks shutdownHooks) {
+        this(diagnosticData, systemInformation, metricRegistry, shutdownHooks,
                 Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create(THREAD_NAME_FORMAT)));
     }
 
     /**
-     * @param executor This instance adopts ownership of the passed executor.
-     *                 Used only for testing purposes, as the otherwise internally created executor of ConsoleReporter
-     *                 can't be accessed.
+     * @param executor This instance adopts ownership of the passed executor. Used only for testing purposes, as the
+     *                 otherwise internally created executor of ConsoleReporter can't be accessed.
      */
     @VisibleForTesting
-    DiagnosticMode(
-            final @NotNull DiagnosticData diagnosticData,
-            final @NotNull SystemInformation systemInformation,
-            final @NotNull MetricRegistry metricRegistry,
-            final @NotNull ShutdownHooks shutdownHooks,
+    DiagnosticMode(final @NotNull DiagnosticData diagnosticData, final @NotNull SystemInformation systemInformation,
+            final @NotNull MetricRegistry metricRegistry, final @NotNull ShutdownHooks shutdownHooks,
             final @NotNull ScheduledExecutorService executor) {
         this.diagnosticData = diagnosticData;
         this.systemInformation = systemInformation;
@@ -98,14 +83,10 @@ public class DiagnosticMode {
 
     @PostConstruct
     public void init() {
-
         final Optional<File> diagnosticsFolder = createDiagnosticsFolder();
-
         if (diagnosticsFolder.isPresent()) {
             createDiagnosticsFile(diagnosticsFolder.get());
-
             DiagnosticLogging.setTraceLog(new File(diagnosticsFolder.get(), FILE_NAME_TRACE_LOG).getAbsolutePath());
-
             copyMigrationLog(diagnosticsFolder);
             startLoggingMetrics(diagnosticsFolder.get());
         }
@@ -113,20 +94,15 @@ public class DiagnosticMode {
 
     private void startLoggingMetrics(final File diagnosticFolder) {
         final File metricLog = new File(diagnosticFolder, FILE_NAME_METRIC_LOG);
-
         try {
             final PrintStream logStream = new PrintStream(metricLog, Charset.defaultCharset().name());
-            metricReporter = ConsoleReporter.forRegistry(metricRegistry)
-                    .scheduleOn(executor)
+            metricReporter = ConsoleReporter.forRegistry(metricRegistry).scheduleOn(executor)
                     // Shut this executor down on stop. We can configure this here because we own it.
-                    .shutdownExecutorOnStop(true)
-                    .convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MILLISECONDS)
-                    .outputTo(logStream)
-                    .build();
+                    .shutdownExecutorOnStop(true).convertRatesTo(TimeUnit.SECONDS)
+                    .convertDurationsTo(TimeUnit.MILLISECONDS).outputTo(logStream).build();
             metricReporter.start(1, TimeUnit.SECONDS);
-
             shutdownHooks.add(new HiveMQShutdownHook() {
+
                 @Override
                 public @NotNull String name() {
                     return "HiveMQ Diagnostic Mode Shutdown";
@@ -134,10 +110,13 @@ public class DiagnosticMode {
 
                 @Override
                 public @NotNull Priority priority() {
-                    // DiagnosticMode must not access other JNI components that might be shut down before it by trying to
-                    // retrieve current metrics from them. These components may dispose their internal state outside the JVM
+                    // DiagnosticMode must not access other JNI components that might be shut down before it by trying
+                    // to
+                    // retrieve current metrics from them. These components may dispose their internal state outside the
+                    // JVM
                     // which might lead to SIGSEGV upon access.
-                    // Since DiagnosticMode itself isn't expected to be accessed by other components, shut it down ASAP for
+                    // Since DiagnosticMode itself isn't expected to be accessed by other components, shut it down ASAP
+                    // for
                     // simplicity.
                     // No interference is expected with other shutdown hooks of the same priority.
                     return Priority.FIRST;
@@ -148,17 +127,14 @@ public class DiagnosticMode {
                     metricReporter.stop();
                 }
             });
-
         } catch (final IOException e) {
             log.error("Not able to create metric.log, for {}", e.getCause());
         }
     }
 
     private void copyMigrationLog(final @NotNull Optional<File> diagnosticsFolder) {
-
-        //copy migration log if available
+        // copy migration log if available
         final File migrationLog = new File(systemInformation.getLogFolder(), FILE_NAME_MIGRATION_LOG);
-
         if (migrationLog.exists()) {
             try {
                 FileUtils.copyFileToDirectory(migrationLog, diagnosticsFolder.get());
@@ -170,13 +146,10 @@ public class DiagnosticMode {
 
     private void createDiagnosticsFile(final @NotNull File diagnosticsFolder) {
         final File diagnosticsFile = new File(diagnosticsFolder, FILE_NAME_DIAGNOSTICS_FILE);
-
         try {
             log.info("Creating Diagnostics file: {}", diagnosticsFile.getAbsolutePath());
             diagnosticsFile.createNewFile();
-
             Files.write(diagnosticData.get(), diagnosticsFile, Charsets.UTF_8);
-
         } catch (final IOException e) {
             log.error("Could not create the diagnostics.txt file. Stopping Diagnostic Mode");
         }
@@ -184,9 +157,7 @@ public class DiagnosticMode {
 
     private @NotNull Optional<File> createDiagnosticsFolder() {
         final File hiveMQHomeFolder = systemInformation.getHiveMQHomeFolder();
-
         final File diagnosticsFolder = new File(hiveMQHomeFolder, FILE_NAME_DIAGNOSTICS_FOLDER);
-
         if (diagnosticsFolder.exists()) {
             try {
                 log.warn("Diagnostics folder already exists, deleting old folder");
@@ -196,7 +167,6 @@ public class DiagnosticMode {
                 return Optional.empty();
             }
         }
-
         try {
             log.info("Creating 'diagnostics' folder in HiveMQ home folder: {}", hiveMQHomeFolder.getAbsolutePath());
             FileUtils.forceMkdir(diagnosticsFolder);
@@ -204,7 +174,6 @@ public class DiagnosticMode {
             log.error("Could not create diagnostics folder. Stopping Diagnostic Mode");
             return Optional.empty();
         }
-
         return Optional.of(diagnosticsFolder);
     }
 }

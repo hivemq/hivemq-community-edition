@@ -21,5 +21,4 @@ package com.hivemq.mqtt.message.pool.exception;
  * @author Dominik Obermaier
  */
 public class NoMessageIdAvailableException extends Exception {
-
 }

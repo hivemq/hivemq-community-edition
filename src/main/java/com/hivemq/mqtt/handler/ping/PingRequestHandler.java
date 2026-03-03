@@ -35,9 +35,7 @@ import javax.inject.Singleton;
 public class PingRequestHandler extends SimpleChannelInboundHandler<PINGREQ> {
 
     private final Logger log = LoggerFactory.getLogger(PingRequestHandler.class);
-
     private static final PINGRESP PING_RESPONSE = new PINGRESP();
-
     @Inject
     PingRequestHandler() {
     }
@@ -52,5 +50,4 @@ public class PingRequestHandler extends SimpleChannelInboundHandler<PINGREQ> {
             log.trace("PingResp sent for client {}.", ClientConnectionContext.of(ctx.channel()).getClientId());
         }
     }
-
 }

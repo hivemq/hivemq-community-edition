@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.metrics.jmx;
 
 import com.codahale.metrics.MetricRegistry;
@@ -36,12 +35,9 @@ import javax.management.ObjectName;
 public class JmxReporterBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(JmxReporterBootstrap.class);
-
     private final MetricRegistry metricRegistry;
-
     @VisibleForTesting
     JmxReporter jmxReporter;
-
     @Inject
     public JmxReporterBootstrap(final MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
@@ -53,14 +49,11 @@ public class JmxReporterBootstrap {
             return;
         }
         /*
-         * The default object name factory in Dropwizard Metrics for JMX reporter was updated and changes the format.
-         * We need to support the old format as our customers are using them for their integrations.
-         * <p>
-         * - Old name format, that we support:  "metrics:name=kafka-extension.total.success.count"
-         * - New name format:                   "metrics:name=kafka-extension.total.success.count,type=counters"
-         * <p>
-         * The behavior was changed in this commit: https://github.com/dropwizard/metrics/pull/1310/files
-         * The code below was copied also from this commit.
+         * The default object name factory in Dropwizard Metrics for JMX reporter was updated and changes the format. We
+         * need to support the old format as our customers are using them for their integrations. <p> - Old name format,
+         * that we support: "metrics:name=kafka-extension.total.success.count" - New name format:
+         * "metrics:name=kafka-extension.total.success.count,type=counters" <p> The behavior was changed in this commit:
+         * https://github.com/dropwizard/metrics/pull/1310/files The code below was copied also from this commit.
          */
         jmxReporter = JmxReporter.forRegistry(metricRegistry).createsObjectNamesWith((type, domain, name) -> {
             try {

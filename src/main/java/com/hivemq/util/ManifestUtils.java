@@ -30,15 +30,12 @@ import java.util.jar.Manifest;
 public class ManifestUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ManifestUtils.class);
-
     public static String getValueFromManifest(final Class clazz, final String name) {
         try {
             final URL resource = getResource(clazz, "META-INF/MANIFEST.MF");
-
             if (resource == null) {
                 return null;
             }
-
             final Manifest manifest = new Manifest(resource.openStream());
             // do stuff with it
             final Attributes attributes = manifest.getMainAttributes();
@@ -50,13 +47,10 @@ public class ManifestUtils {
 
     @VisibleForTesting
     public static URL getResource(final Class clazz, final String resourcePath) {
-
         try {
-
             if (clazz == null || resourcePath == null) {
                 return null;
             }
-
             final ClassLoader cl = clazz.getClassLoader();
             final Enumeration<URL> resources = cl.getResources(resourcePath);
             final List<URL> urls = new ArrayList<>();
@@ -85,7 +79,6 @@ public class ManifestUtils {
                     url = urls.get(0);
                 }
             }
-
             return url;
         } catch (final IOException e) {
             log.warn("Could not read resource " + resourcePath);

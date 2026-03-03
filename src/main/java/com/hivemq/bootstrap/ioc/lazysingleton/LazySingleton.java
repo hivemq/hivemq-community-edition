@@ -23,12 +23,10 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-
 /**
  * An annotation for Singletons which should <b>not</b> be created eagerly on application startup.
  * <p>
- * For true lazy behaviour, make sure to use a {@link javax.inject.Provider} for these lazy singleton
- * objects
+ * For true lazy behaviour, make sure to use a {@link javax.inject.Provider} for these lazy singleton objects
  *
  * @author Dominik Obermaier
  */

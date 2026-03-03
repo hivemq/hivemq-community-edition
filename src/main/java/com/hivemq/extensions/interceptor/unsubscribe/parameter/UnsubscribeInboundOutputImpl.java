@@ -32,11 +32,8 @@ public class UnsubscribeInboundOutputImpl extends AbstractAsyncOutput<Unsubscrib
 
     private final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket;
     private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
-
-    public UnsubscribeInboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer,
+    public UnsubscribeInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableUnsubscribePacketImpl unsubscribePacket) {
-
         super(asyncer);
         this.unsubscribePacket = unsubscribePacket;
     }

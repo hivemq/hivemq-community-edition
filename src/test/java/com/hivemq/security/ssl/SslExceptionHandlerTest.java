@@ -47,20 +47,16 @@ public class SslExceptionHandlerTest {
     private final @NotNull Channel channel = mock();
     private final @NotNull Throwable throwable = mock();
     private final @NotNull EventLog eventLog = mock();
-
     SslExceptionHandler sslExceptionHandler;
-
     @Before
     public void setUp() {
         when(ctx.channel()).thenReturn(channel);
-
         final TcpListener listener = mock();
         final ClientConnectionContext clientConnection = new UndefinedClientConnection(channel, null, listener);
         clientConnection.setClientId("client");
-        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
-                clientConnection));
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME))
+                .thenReturn(new TestChannelAttribute<>(clientConnection));
         when(channel.isActive()).thenReturn(true);
-
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
         sslExceptionHandler = new SslExceptionHandler(mqttServerDisconnector);
     }
@@ -93,6 +89,5 @@ public class SslExceptionHandlerTest {
         sslExceptionHandler.exceptionCaught(ctx, throwable);
         verify(channel, never()).close();
         verify(ctx).fireExceptionCaught(any(Throwable.class));
-
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -74,21 +73,17 @@ public class PubrecInterceptorHandlerTest {
 
     @Rule
     public @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
     private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
     private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
-
     private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
     private @NotNull PubrecInterceptorHandler handler;
-
     @Before
     public void setUp() throws Exception {
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
-
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -96,18 +91,15 @@ public class PubrecInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("plugin");
-
-        final FullConfigurationService configurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
+        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
+                .getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService =
-                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
-
-        handler = new PubrecInterceptorHandler(configurationService,
-                asyncer,
-                hiveMQExtensions,
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
+                mock(ShutdownHooks.class));
+        handler = new PubrecInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
+
             @Override
             public void write(
                     final @NotNull ChannelHandlerContext ctx,
@@ -117,6 +109,7 @@ public class PubrecInterceptorHandlerTest {
             }
         });
         channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
+
             @Override
             public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
                 handler.handleInboundPubrec(ctx, ((PUBREC) msg));
@@ -127,21 +120,16 @@ public class PubrecInterceptorHandlerTest {
     @Test(timeout = 5000)
     public void test_inbound_client_id_not_set() {
         ClientConnection.of(channel).setClientId(null);
-
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
-
         assertNull(channel.readInbound());
     }
 
     @Test(timeout = 5000)
     public void test_inbound_channel_inactive() {
         channel.close();
-
         channel.pipeline().fireChannelRead(testPubrec());
-
         channel.runPendingTasks();
-
         assertNotNull(channel.readInbound());
     }
 
@@ -150,7 +138,6 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(ImmutableList.of());
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         final PUBREC testPubrec = testPubrec();
         channel.writeInbound(testPubrec);
         channel.runPendingTasks();
@@ -165,16 +152,12 @@ public class PubrecInterceptorHandlerTest {
 
     @Test
     public void test_inbound_modify() throws Exception {
-        final PubrecInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestModifyInboundInterceptor.class);
+        final PubrecInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestModifyInboundInterceptor.class);
         final List<PubrecInboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
         PUBREC pubrec = channel.readInbound();
@@ -183,20 +166,17 @@ public class PubrecInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pubrec = channel.readInbound();
         }
-
         assertEquals("modified", pubrec.getReasonString());
     }
 
     @Test(timeout = 5000)
     public void test_inbound_plugin_null() throws Exception {
-        final PubrecInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestModifyInboundInterceptor.class);
+        final PubrecInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestModifyInboundInterceptor.class);
         final List<PubrecInboundInterceptor> list = ImmutableList.of(interceptor);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
-
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
         PUBREC pubrec = channel.readInbound();
@@ -205,62 +185,47 @@ public class PubrecInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pubrec = channel.readInbound();
         }
-
         assertEquals("reason", pubrec.getReasonString());
     }
 
     @Test(timeout = 10_000)
     public void test_inbound_timeout_failed() throws Exception {
-        final PubrecInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestTimeoutFailedInboundInterceptor.class);
+        final PubrecInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestTimeoutFailedInboundInterceptor.class);
         final List<PubrecInboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
         channel.runScheduledPendingTasks();
         Thread.sleep(10);
-
         assertTrue(channel.isActive());
     }
 
     @Test(timeout = 5000)
     public void test_inbound_exception() throws Exception {
-        final PubrecInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestExceptionInboundInterceptor.class);
+        final PubrecInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestExceptionInboundInterceptor.class);
         final List<PubrecInboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
         channel.runScheduledPendingTasks();
         Thread.sleep(10);
-
         assertTrue(channel.isActive());
     }
 
     @Test(timeout = 5000)
     public void test_inbound_noPartialModificationWhenException() throws Exception {
-        final PubrecInboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestPartialModifiedInboundInterceptor.class);
+        final PubrecInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestPartialModifiedInboundInterceptor.class);
         final List<PubrecInboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecInboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeInbound(testPubrec());
         channel.runPendingTasks();
         PUBREC pubrec = channel.readInbound();
@@ -269,7 +234,6 @@ public class PubrecInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pubrec = channel.readInbound();
         }
-
         assertNotEquals("modified", pubrec.getReasonString());
         assertNotEquals(Mqtt5PubRecReasonCode.NOT_AUTHORIZED, pubrec.getReasonCode());
     }
@@ -277,21 +241,16 @@ public class PubrecInterceptorHandlerTest {
     @Test(timeout = 5000)
     public void test_outbound_client_id_not_set() {
         ClientConnection.of(channel).setClientId(null);
-
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
-
         assertNull(channel.readOutbound());
     }
 
     @Test(timeout = 5000)
     public void test_outbound_channel_inactive() {
         channel.close();
-
         channel.pipeline().write(testPubrec());
-
         channel.runPendingTasks();
-
         assertNull(channel.readOutbound());
     }
 
@@ -300,7 +259,6 @@ public class PubrecInterceptorHandlerTest {
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(ImmutableList.of());
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         final PUBREC testPubrec = testPubrec();
         channel.writeOutbound(testPubrec);
         channel.runPendingTasks();
@@ -315,16 +273,12 @@ public class PubrecInterceptorHandlerTest {
 
     @Test(timeout = 5000)
     public void test_outbound_modify() throws Exception {
-        final PubrecOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestModifyOutboundInterceptor.class);
+        final PubrecOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestModifyOutboundInterceptor.class);
         final List<PubrecOutboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
         PUBREC pubrec = channel.readOutbound();
@@ -333,20 +287,17 @@ public class PubrecInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pubrec = channel.readOutbound();
         }
-
         assertEquals("modified", pubrec.getReasonString());
     }
 
     @Test(timeout = 5000)
     public void test_outbound_plugin_null() throws Exception {
-        final PubrecOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestModifyOutboundInterceptor.class);
+        final PubrecOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestModifyOutboundInterceptor.class);
         final List<PubrecOutboundInterceptor> list = ImmutableList.of(interceptor);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(null);
-
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
         PUBREC pubrec = channel.readOutbound();
@@ -355,62 +306,46 @@ public class PubrecInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pubrec = channel.readOutbound();
         }
-
         assertEquals("reason", pubrec.getReasonString());
     }
 
     @Test(timeout = 10_000)
     public void test_outbound_timeout_failed() throws Exception {
-        final PubrecOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestTimeoutFailedOutboundInterceptor.class);
+        final PubrecOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestTimeoutFailedOutboundInterceptor.class);
         final List<PubrecOutboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeOutbound(testPubrec());
-
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
         channel.runScheduledPendingTasks();
-
         assertTrue(channel.isActive());
     }
 
     @Test(timeout = 5000)
     public void test_outbound_exception() throws Exception {
-        final PubrecOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestExceptionOutboundInterceptor.class);
+        final PubrecOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestExceptionOutboundInterceptor.class);
         final List<PubrecOutboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
         channel.runScheduledPendingTasks();
-
         assertTrue(channel.isActive());
     }
 
     @Test(timeout = 5000)
     public void test_outbound_noPartialModificationWhenException() throws Exception {
-        final PubrecOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestPartialModifiedOutboundInterceptor.class);
+        final PubrecOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestPartialModifiedOutboundInterceptor.class);
         final List<PubrecOutboundInterceptor> list = ImmutableList.of(interceptor);
-
         when(clientContext.getPubrecOutboundInterceptors()).thenReturn(list);
         when(hiveMQExtensions.getExtensionForClassloader(any())).thenReturn(extension);
-
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         channel.writeOutbound(testPubrec());
         channel.runPendingTasks();
         PUBREC pubrec = channel.readOutbound();
@@ -419,7 +354,6 @@ public class PubrecInterceptorHandlerTest {
             channel.runScheduledPendingTasks();
             pubrec = channel.readOutbound();
         }
-
         assertNotEquals("modified", pubrec.getReasonString());
         assertNotEquals(Mqtt5PubRecReasonCode.NOT_AUTHORIZED, pubrec.getReasonCode());
     }
@@ -428,7 +362,6 @@ public class PubrecInterceptorHandlerTest {
     private PUBREC testPubrec() {
         return new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
-
     public static class TestModifyInboundInterceptor implements PubrecInboundInterceptor {
 
         @Override
@@ -479,7 +412,8 @@ public class PubrecInterceptorHandlerTest {
         public void onOutboundPubrec(
                 final @NotNull PubrecOutboundInput pubrecOutboundInput,
                 final @NotNull PubrecOutboundOutput pubrecOutboundOutput) {
-            @Immutable final ModifiablePubrecPacket pubrecPacket = pubrecOutboundOutput.getPubrecPacket();
+            @Immutable
+            final ModifiablePubrecPacket pubrecPacket = pubrecOutboundOutput.getPubrecPacket();
             pubrecPacket.setReasonString("modified");
         }
     }

@@ -34,7 +34,7 @@ import static com.hivemq.mqtt.message.connack.CONNACK.SESSION_EXPIRY_NOT_SET;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 @Immutable
 public class ConnackPacketImpl implements ConnackPacket {
@@ -44,10 +44,8 @@ public class ConnackPacketImpl implements ConnackPacket {
     final long sessionExpiryInterval;
     final int serverKeepAlive;
     final @Nullable String assignedClientId;
-
     final @Nullable String authenticationMethod;
     final @Nullable ByteBuffer authenticationData;
-
     final int receiveMaximum;
     final int maximumPacketSize;
     final int topicAliasMaximum;
@@ -56,33 +54,18 @@ public class ConnackPacketImpl implements ConnackPacket {
     final boolean wildCardSubscriptionAvailable;
     final boolean sharedSubscriptionsAvailable;
     final boolean subscriptionIdentifiersAvailable;
-
     final @Nullable String responseInformation;
     final @Nullable String serverReference;
     final @Nullable String reasonString;
     final @NotNull UserPropertiesImpl userProperties;
-
-    public ConnackPacketImpl(
-            final @NotNull ConnackReasonCode reasonCode,
-            final boolean sessionPresent,
-            final long sessionExpiryInterval,
-            final int serverKeepAlive,
-            final @Nullable String assignedClientId,
-            final @Nullable String authenticationMethod,
-            final @Nullable ByteBuffer authenticationData,
-            final int receiveMaximum,
-            final int maximumPacketSize,
-            final int topicAliasMaximum,
-            final @Nullable Qos maximumQos,
-            final boolean retainAvailable,
-            final boolean wildCardSubscriptionAvailable,
-            final boolean sharedSubscriptionsAvailable,
-            final boolean subscriptionIdentifiersAvailable,
-            final @Nullable String responseInformation,
-            final @Nullable String serverReference,
-            final @Nullable String reasonString,
-            final @NotNull UserPropertiesImpl userProperties) {
-
+    public ConnackPacketImpl(final @NotNull ConnackReasonCode reasonCode, final boolean sessionPresent,
+            final long sessionExpiryInterval, final int serverKeepAlive, final @Nullable String assignedClientId,
+            final @Nullable String authenticationMethod, final @Nullable ByteBuffer authenticationData,
+            final int receiveMaximum, final int maximumPacketSize, final int topicAliasMaximum,
+            final @Nullable Qos maximumQos, final boolean retainAvailable, final boolean wildCardSubscriptionAvailable,
+            final boolean sharedSubscriptionsAvailable, final boolean subscriptionIdentifiersAvailable,
+            final @Nullable String responseInformation, final @Nullable String serverReference,
+            final @Nullable String reasonString, final @NotNull UserPropertiesImpl userProperties) {
         this.reasonCode = reasonCode;
         this.sessionPresent = sessionPresent;
         this.sessionExpiryInterval = sessionExpiryInterval;
@@ -105,24 +88,15 @@ public class ConnackPacketImpl implements ConnackPacket {
     }
 
     public ConnackPacketImpl(final @NotNull CONNACK connack) {
-        this(connack.getReasonCode().toConnackReasonCode(),
-                connack.isSessionPresent(),
-                connack.getSessionExpiryInterval(),
-                connack.getServerKeepAlive(),
-                connack.getAssignedClientIdentifier(),
+        this(connack.getReasonCode().toConnackReasonCode(), connack.isSessionPresent(),
+                connack.getSessionExpiryInterval(), connack.getServerKeepAlive(), connack.getAssignedClientIdentifier(),
                 connack.getAuthMethod(),
                 (connack.getAuthData() == null) ? null : ByteBuffer.wrap(connack.getAuthData()),
-                connack.getReceiveMaximum(),
-                connack.getMaximumPacketSize(),
-                connack.getTopicAliasMaximum(),
-                (connack.getMaximumQoS() == null) ? null : connack.getMaximumQoS().toQos(),
-                connack.isRetainAvailable(),
-                connack.isWildcardSubscriptionAvailable(),
-                connack.isSharedSubscriptionAvailable(),
-                connack.isSubscriptionIdentifierAvailable(),
-                connack.getResponseInformation(),
-                connack.getServerReference(),
-                connack.getReasonString(),
+                connack.getReceiveMaximum(), connack.getMaximumPacketSize(), connack.getTopicAliasMaximum(),
+                (connack.getMaximumQoS() == null) ? null : connack.getMaximumQoS().toQos(), connack.isRetainAvailable(),
+                connack.isWildcardSubscriptionAvailable(), connack.isSharedSubscriptionAvailable(),
+                connack.isSubscriptionIdentifierAvailable(), connack.getResponseInformation(),
+                connack.getServerReference(), connack.getReasonString(),
                 UserPropertiesImpl.of(connack.getUserProperties().asList()));
     }
 
@@ -236,30 +210,26 @@ public class ConnackPacketImpl implements ConnackPacket {
             return false;
         }
         final ConnackPacketImpl that = (ConnackPacketImpl) o;
-        return (reasonCode == that.reasonCode) &&
-                (sessionPresent == that.sessionPresent) &&
-                (sessionExpiryInterval == that.sessionExpiryInterval) &&
-                (serverKeepAlive == that.serverKeepAlive) &&
-                Objects.equals(assignedClientId, that.assignedClientId) &&
-                Objects.equals(authenticationMethod, that.authenticationMethod) &&
-                Objects.equals(authenticationData, that.authenticationData) &&
-                (receiveMaximum == that.receiveMaximum) &&
-                (maximumPacketSize == that.maximumPacketSize) &&
-                (topicAliasMaximum == that.topicAliasMaximum) &&
-                (maximumQos == that.maximumQos) &&
-                (retainAvailable == that.retainAvailable) &&
-                (wildCardSubscriptionAvailable == that.wildCardSubscriptionAvailable) &&
-                (sharedSubscriptionsAvailable == that.sharedSubscriptionsAvailable) &&
-                (subscriptionIdentifiersAvailable == that.subscriptionIdentifiersAvailable) &&
-                Objects.equals(responseInformation, that.responseInformation) &&
-                Objects.equals(serverReference, that.serverReference) &&
-                Objects.equals(reasonString, that.reasonString) &&
-                userProperties.equals(that.userProperties);
+        return (reasonCode == that.reasonCode) && (sessionPresent == that.sessionPresent)
+                && (sessionExpiryInterval == that.sessionExpiryInterval) && (serverKeepAlive == that.serverKeepAlive)
+                && Objects.equals(assignedClientId, that.assignedClientId)
+                && Objects.equals(authenticationMethod, that.authenticationMethod)
+                && Objects.equals(authenticationData, that.authenticationData)
+                && (receiveMaximum == that.receiveMaximum) && (maximumPacketSize == that.maximumPacketSize)
+                && (topicAliasMaximum == that.topicAliasMaximum) && (maximumQos == that.maximumQos)
+                && (retainAvailable == that.retainAvailable)
+                && (wildCardSubscriptionAvailable == that.wildCardSubscriptionAvailable)
+                && (sharedSubscriptionsAvailable == that.sharedSubscriptionsAvailable)
+                && (subscriptionIdentifiersAvailable == that.subscriptionIdentifiersAvailable)
+                && Objects.equals(responseInformation, that.responseInformation)
+                && Objects.equals(serverReference, that.serverReference)
+                && Objects.equals(reasonString, that.reasonString) && userProperties.equals(that.userProperties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reasonCode,
+        return Objects.hash(
+                reasonCode,
                 sessionPresent,
                 sessionExpiryInterval,
                 serverKeepAlive,

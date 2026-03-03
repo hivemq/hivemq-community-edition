@@ -37,7 +37,6 @@ import static org.junit.Assert.assertTrue;
 public class WebSocketInitializerTest {
 
     private final EmbeddedChannel channel = new EmbeddedChannel();
-
     @Before
     public void setUp() throws Exception {
         channel.pipeline().addLast("dummy", new DummyHandler());
@@ -45,12 +44,10 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_handler_in_pipeline() {
-        final WebsocketListener websocketListener =
-                new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
+                .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
-
         webSocketInitializer.addHandlers(channel, "dummy");
-
         final List<String> handlerNames = channel.pipeline().names();
         assertTrue(handlerNames.contains(HTTP_SERVER_CODEC));
         assertTrue(handlerNames.contains(HTTP_OBJECT_AGGREGATOR));
@@ -62,11 +59,10 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_handler_order() {
-        final WebsocketListener websocketListener =
-                new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
+                .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         webSocketInitializer.addHandlers(channel, "dummy");
-
         final List<String> handlerNames = channel.pipeline().names();
         final int hscIdx = handlerNames.indexOf(HTTP_SERVER_CODEC);
         final int hoaIdx = handlerNames.indexOf(HTTP_OBJECT_AGGREGATOR);
@@ -83,10 +79,8 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_no_subprotocols() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
-                .bindAddress("0.0.0.0")
-                .subprotocols(new ArrayList<>())
-                .build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
+                .subprotocols(new ArrayList<>()).build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
         assertEquals("", subprotocolString);
@@ -94,11 +88,8 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_one_subprotocol() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
-                .bindAddress("0.0.0.0")
-                .subprotocols(Lists.newArrayList("mqttv3.1"))
-                .build();
-
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
+                .subprotocols(Lists.newArrayList("mqttv3.1")).build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
         assertEquals("mqttv3.1", subprotocolString);
@@ -106,11 +97,8 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_multiple_subprotocols() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
-                .bindAddress("0.0.0.0")
-                .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
-                .build();
-
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
+                .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt")).build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
         assertEquals("mqttv3.1,mqtt", subprotocolString);

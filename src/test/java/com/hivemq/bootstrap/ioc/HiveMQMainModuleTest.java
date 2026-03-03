@@ -28,13 +28,14 @@ import static org.mockito.Mockito.mock;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class HiveMQMainModuleTest {
 
     @Test
     public void test_topic_matcher_not_same() {
         final Injector injector = Guice.createInjector(Stage.PRODUCTION, new HiveMQMainModule(), new AbstractModule() {
+
             @Override
             protected void configure() {
                 bind(EventExecutorGroup.class).toInstance(mock());

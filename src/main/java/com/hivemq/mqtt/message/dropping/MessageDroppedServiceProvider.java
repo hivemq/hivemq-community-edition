@@ -30,18 +30,14 @@ public class MessageDroppedServiceProvider implements Provider<MessageDroppedSer
 
     private final MetricsHolder metricsHolder;
     private final EventLog eventLog;
-
-
     @Inject
-    MessageDroppedServiceProvider(
-            final MetricsHolder metricsHolder, final EventLog eventLog) {
+    MessageDroppedServiceProvider(final MetricsHolder metricsHolder, final EventLog eventLog) {
         this.metricsHolder = metricsHolder;
         this.eventLog = eventLog;
     }
 
     @Override
     public MessageDroppedService get() {
-
         return new MessageDroppedServiceImpl(metricsHolder, eventLog);
     }
 }

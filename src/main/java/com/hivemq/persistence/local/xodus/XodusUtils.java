@@ -27,27 +27,25 @@ import java.nio.charset.StandardCharsets;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Various utilities for dealing with Xodus. This util class
- * mainly contains handy conversion methods
+ * Various utilities for dealing with Xodus. This util class mainly contains handy conversion methods
  *
  * @author Dominik Obermaier
  */
 public class XodusUtils {
 
     private XodusUtils() {
-        //Utility class, don't instantiate
+        // Utility class, don't instantiate
     }
 
     /**
      * Converts a UTF-8 String to a ByteIterable
      *
-     * @param string a UTF-8 String
-     * @return a ByteIterable
+     * @param  string a UTF-8 String
+     * @return        a ByteIterable
      */
     @NotNull
     public static ByteIterable stringToByteIterable(@NotNull final String string) {
         checkNotNull(string, "String must not be null");
-
         final byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
         return new ArrayByteIterable(bytes);
     }
@@ -55,48 +53,44 @@ public class XodusUtils {
     /**
      * Converts a byte array to a ByteIterable.
      *
-     * @param bytes the byte array
-     * @return a byte iterable, backed by the byte array
+     * @param  bytes the byte array
+     * @return       a byte iterable, backed by the byte array
      */
     @NotNull
     public static ByteIterable bytesToByteIterable(@NotNull final byte[] bytes) {
         checkNotNull(bytes, "bytes must not be null");
-
         return new ArrayByteIterable(bytes);
     }
 
     /**
      * Converts a ByteIterable to a String, encoded as UTF-8
      *
-     * @param byteIterable a ByteIterable
-     * @return an UTF-8 String
+     * @param  byteIterable a ByteIterable
+     * @return              an UTF-8 String
      */
     @NotNull
     public static String byteIterableToString(@NotNull final ByteIterable byteIterable) {
         checkNotNull(byteIterable, "ByteIterable must not be null");
-
         return new String(byteIterable.getBytesUnsafe(), 0, byteIterable.getLength(), StandardCharsets.UTF_8);
     }
 
     /**
      * Converts a ByteIterable to a byte array.
      *
-     * @param byteIterable the ByteIterable to convert
-     * @return a byte array
+     * @param  byteIterable the ByteIterable to convert
+     * @return              a byte array
      */
     @NotNull
     public static byte[] byteIterableToBytes(@NotNull final ByteIterable byteIterable) {
         checkNotNull(byteIterable, "ByteIterable must not be null");
-
         final byte[] unsafeBytes = byteIterable.getBytesUnsafe();
         if (unsafeBytes.length == byteIterable.getLength()) {
-            //Awesome, we don't need to copy the byte array
+            // Awesome, we don't need to copy the byte array
             return unsafeBytes;
         }
-        //We need to copy the array to an array with the exact size :(
+        // We need to copy the array to an array with the exact size :(
         final byte[] bytes = new byte[byteIterable.getLength()];
         System.arraycopy(unsafeBytes, 0, bytes, 0, bytes.length);
-
         return bytes;
     }
 
@@ -124,14 +118,19 @@ public class XodusUtils {
     }
 
     public static int serializeShortLengthString(
-            @Nullable final String string, @NotNull final byte[] serialized, final int offset) {
-        return serializeShortLengthArray((string == null) ? null : string.getBytes(StandardCharsets.UTF_8),
+            @Nullable final String string,
+            @NotNull final byte[] serialized,
+            final int offset) {
+        return serializeShortLengthArray(
+                (string == null) ? null : string.getBytes(StandardCharsets.UTF_8),
                 serialized,
                 offset);
     }
 
     public static int serializeShortLengthArray(
-            @Nullable final byte[] bytes, @NotNull final byte[] serialized, int offset) {
+            @Nullable final byte[] bytes,
+            @NotNull final byte[] serialized,
+            int offset) {
         final int length = (bytes == null) ? 0 : bytes.length;
         Bytes.copyUnsignedShortToByteArray(length, serialized, offset);
         offset += Short.BYTES;
@@ -141,5 +140,4 @@ public class XodusUtils {
         System.arraycopy(bytes, 0, serialized, offset, length);
         return offset + length;
     }
-
 }

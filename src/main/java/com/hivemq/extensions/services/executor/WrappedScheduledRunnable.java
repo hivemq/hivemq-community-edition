@@ -21,27 +21,20 @@ import com.hivemq.extensions.HiveMQExtensions;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class WrappedScheduledRunnable implements Runnable {
 
     @NotNull
     private final Runnable runnable;
-
     @NotNull
     private final ClassLoader classLoader;
-
     @NotNull
     private final CompletableScheduledFuture<?> future;
-
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
-
-    WrappedScheduledRunnable(
-            @NotNull final Runnable runnable,
-            @NotNull final ClassLoader classLoader,
-            @NotNull final CompletableScheduledFuture<?> future,
-            @NotNull final HiveMQExtensions hiveMQExtensions) {
+    WrappedScheduledRunnable(@NotNull final Runnable runnable, @NotNull final ClassLoader classLoader,
+            @NotNull final CompletableScheduledFuture<?> future, @NotNull final HiveMQExtensions hiveMQExtensions) {
         this.runnable = runnable;
         this.classLoader = classLoader;
         this.future = future;
@@ -50,22 +43,16 @@ public class WrappedScheduledRunnable implements Runnable {
 
     @Override
     public void run() {
-
         if (hiveMQExtensions.getExtensionForClassloader(classLoader) == null) {
             if (!future.isCancelled()) {
                 future.cancel(true);
             }
         }
-
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
-
         try {
-
             Thread.currentThread().setContextClassLoader(classLoader);
             runnable.run();
-
-            //scheduled futures don't complete normally so completable wont do either.
-
+            // scheduled futures don't complete normally so completable wont do either.
         } catch (final Throwable t) {
             future.completeExceptionally(t);
             throw t;

@@ -20,12 +20,11 @@ import com.hivemq.mqtt.message.reason.Mqtt5UnsubAckReasonCode;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface Mqtt3UNSUBACK {
 
     ImmutableList<Mqtt5UnsubAckReasonCode> getReasonCodes();
 
     int getPacketIdentifier();
-
 }

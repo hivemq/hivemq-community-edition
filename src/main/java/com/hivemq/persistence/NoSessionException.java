@@ -23,12 +23,11 @@ package com.hivemq.persistence;
  * @author Waldemar Ruck
  */
 public class NoSessionException extends RuntimeException {
-    public static final NoSessionException INSTANCE = new NoSessionException();
 
+    public static final NoSessionException INSTANCE = new NoSessionException();
     static {
         INSTANCE.setStackTrace(new StackTraceElement[0]);
     }
-
     private NoSessionException() {
     }
 }

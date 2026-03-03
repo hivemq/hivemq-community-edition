@@ -28,55 +28,37 @@ import java.util.Optional;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class PublishImpl implements Publish {
 
     @NotNull
     private final Qos qos;
-
     private final boolean retained;
-
     @NotNull
     private final String topic;
-
     @Nullable
     private final PayloadFormatIndicator payloadFormatIndicator;
-
     @Nullable
     private final Long messageExpiryInterval;
-
     @Nullable
     private final String responseTopic;
-
     @Nullable
     private final ByteBuffer correlationData;
-
     @Nullable
     private final String contentType;
-
     @Nullable
     private final ByteBuffer payload;
-
     @NotNull
     private final UserPropertiesImpl userProperties;
-
-    public PublishImpl(
-            @NotNull final Qos qos,
-            final boolean retained,
-            @NotNull final String topic,
-            @Nullable final PayloadFormatIndicator payloadFormatIndicator,
-            @Nullable final Long messageExpiryInterval,
-            @Nullable final String responseTopic,
-            @Nullable final ByteBuffer correlationData,
-            @Nullable final String contentType,
-            @Nullable final ByteBuffer payload,
+    public PublishImpl(@NotNull final Qos qos, final boolean retained, @NotNull final String topic,
+            @Nullable final PayloadFormatIndicator payloadFormatIndicator, @Nullable final Long messageExpiryInterval,
+            @Nullable final String responseTopic, @Nullable final ByteBuffer correlationData,
+            @Nullable final String contentType, @Nullable final ByteBuffer payload,
             @NotNull final UserPropertiesImpl userProperties) {
-
         Preconditions.checkNotNull(qos, "QoS must never be null");
         Preconditions.checkNotNull(topic, "Topic must never be null");
         Preconditions.checkNotNull(userProperties, "User properties must never be null");
-
         this.qos = qos;
         this.retained = retained;
         this.topic = topic;

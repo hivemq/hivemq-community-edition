@@ -31,71 +31,55 @@ import static org.junit.Assert.assertSame;
  */
 public class IncomingMessageFlowInMemoryLocalPersistenceTest {
 
-
     private IncomingMessageFlowInMemoryLocalPersistence persistence;
-
     @Before
     public void setUp() throws Exception {
-
         persistence = new IncomingMessageFlowInMemoryLocalPersistence();
-
     }
 
     @Test
     public void test_get_no_entry_available() throws Exception {
-
         final MessageWithID notAvailable = persistence.get("not_available", 1);
         assertNull(notAvailable);
     }
 
     @Test
     public void test_get_entry() throws Exception {
-
         final MessageWithID message = new PUBACK(1);
         persistence.addOrReplace("client", 1, message);
-
         final MessageWithID result = persistence.get("client", 1);
-
         assertSame(message, result);
     }
 
     @Test
     public void test_get_entry_deleted() throws Exception {
-
         final MessageWithID message = new PUBACK(1);
         persistence.addOrReplace("client", 1, message);
         persistence.remove("client", 1);
-
         final MessageWithID result = persistence.get("client", 1);
-
         assertNull(result);
     }
 
     @Test
     public void test_replace_entry() throws Exception {
-
         final MessageWithID message = new PUBACK(1);
         final MessageWithID message2 = new PUBACK(1);
         persistence.addOrReplace("client", 1, message);
         persistence.addOrReplace("client", 1, message2);
-
         final MessageWithID result = persistence.get("client", 1);
-
         assertSame(message2, result);
     }
 
     @Test
     public void test_remove_nonexistant_entry() throws Exception {
         persistence.remove("nonexistant", 1);
-
-        //Nothing happens
+        // Nothing happens
     }
 
     @Test
     public void test_remove_entry_for_same_client_but_different_message_id() throws Exception {
         persistence.addOrReplace("client", 1, new PUBACK(1));
         persistence.remove("client", 2);
-
         assertNull(persistence.get("client", 2));
         assertNotNull(null, persistence.get("client", 1));
     }
@@ -104,10 +88,8 @@ public class IncomingMessageFlowInMemoryLocalPersistenceTest {
     public void test_remove_entry_same_message_id_but_different_client() throws Exception {
         persistence.addOrReplace("client", 1, new PUBACK(1));
         persistence.remove("client2", 1);
-
         assertNotNull(null, persistence.get("client", 1));
     }
-
 
     @Test
     public void test_delete() throws Exception {
@@ -115,9 +97,7 @@ public class IncomingMessageFlowInMemoryLocalPersistenceTest {
         persistence.addOrReplace("client", 2, new PUBACK(1));
         final MessageWithID message = new PUBACK(1);
         persistence.addOrReplace("client2", 1, message);
-
         persistence.delete("client");
-
         assertNull(persistence.get("client", 1));
         assertNull(persistence.get("client", 2));
         assertEquals(message, persistence.get("client2", 1));

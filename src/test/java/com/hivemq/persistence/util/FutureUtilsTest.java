@@ -36,10 +36,7 @@ public class FutureUtilsTest {
     public void test_void_future_from_list() throws Exception {
         final SettableFuture<Void> future1 = SettableFuture.create();
         final SettableFuture<Void> future2 = SettableFuture.create();
-
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
-
-
         builder.add(future1).add(future2);
         final ListenableFuture<Void> resultFuture = FutureUtils.voidFutureFromList(builder.build());
         assertFalse(resultFuture.isDone());
@@ -52,12 +49,12 @@ public class FutureUtilsTest {
     @Test(timeout = 5000)
     public void test_void_future_from_list_concurrent() throws Exception {
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
-
         final CountDownLatch latch = new CountDownLatch(1);
         for (int i = 0; i < 100; i++) {
             final SettableFuture<Void> future = SettableFuture.create();
             builder.add(future);
             new Thread(new Runnable() {
+
                 @Override
                 public void run() {
                     try {
@@ -66,11 +63,9 @@ public class FutureUtilsTest {
                     } catch (final InterruptedException e) {
                         e.printStackTrace();
                     }
-
                 }
             }).start();
         }
-
         final ListenableFuture<Void> resultFuture = FutureUtils.voidFutureFromList(builder.build());
         latch.countDown();
         while (!resultFuture.isDone()) {
@@ -84,22 +79,18 @@ public class FutureUtilsTest {
         final SettableFuture<Void> future2 = SettableFuture.create();
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
         builder.add(future1).add(future2);
-
         final ListenableFuture<Void> resultFuture = FutureUtils.voidFutureFromList(builder.build());
-
         assertFalse(resultFuture.isDone());
         future1.set(null);
         assertFalse(resultFuture.isDone());
         future2.setException(new NullPointerException());
         assertTrue(resultFuture.isDone());
-
         Exception expected = null;
         try {
             resultFuture.get();
         } catch (final Exception ex) {
             expected = ex;
         }
-
         assertThat(expected.getCause(), instanceOf(NullPointerException.class));
     }
 
@@ -107,25 +98,20 @@ public class FutureUtilsTest {
     public void test_void_future_from_list_multiple_exceptions() throws Exception {
         final SettableFuture<Void> future1 = SettableFuture.create();
         final SettableFuture<Void> future2 = SettableFuture.create();
-
         final ImmutableList.Builder<ListenableFuture<Void>> builder = ImmutableList.builder();
         builder.add(future1).add(future2);
-
         final ListenableFuture<Void> resultFuture = FutureUtils.voidFutureFromList(builder.build());
-
         assertFalse(resultFuture.isDone());
         future1.setException(new IllegalAccessException());
         assertFalse(resultFuture.isDone());
         future2.setException(new NullPointerException());
         assertTrue(resultFuture.isDone());
-
         Exception expected = null;
         try {
             resultFuture.get();
         } catch (final Exception ex) {
             expected = ex;
         }
-
         assertThat(expected.getCause(), instanceOf(BatchedException.class));
     }
 }

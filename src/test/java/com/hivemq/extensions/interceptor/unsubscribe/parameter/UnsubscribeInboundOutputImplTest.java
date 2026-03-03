@@ -34,9 +34,7 @@ public class UnsubscribeInboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableUnsubscribePacketImpl modifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
-
         final UnsubscribeInboundOutputImpl output = new UnsubscribeInboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getUnsubscribePacket());
     }
 
@@ -44,17 +42,13 @@ public class UnsubscribeInboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableUnsubscribePacketImpl modifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
-
         final UnsubscribeInboundOutputImpl output = new UnsubscribeInboundOutputImpl(asyncer, modifiablePacket);
-
         final UnsubscribeInboundInputImpl input = mock(UnsubscribeInboundInputImpl.class);
         final UnsubscribePacketImpl packet = mock(UnsubscribePacketImpl.class);
         final ModifiableUnsubscribePacketImpl newModifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
         when(input.getUnsubscribePacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final UnsubscribeInboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getUnsubscribePacket());
     }
 }

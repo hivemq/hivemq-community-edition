@@ -34,9 +34,7 @@ public class PubcompOutboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiablePubcompPacketImpl modifiablePacket = mock(ModifiablePubcompPacketImpl.class);
-
         final PubcompOutboundOutputImpl output = new PubcompOutboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getPubcompPacket());
     }
 
@@ -44,17 +42,13 @@ public class PubcompOutboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiablePubcompPacketImpl modifiablePacket = mock(ModifiablePubcompPacketImpl.class);
-
         final PubcompOutboundOutputImpl output = new PubcompOutboundOutputImpl(asyncer, modifiablePacket);
-
         final PubcompOutboundInputImpl input = mock(PubcompOutboundInputImpl.class);
         final PubcompPacketImpl packet = mock(PubcompPacketImpl.class);
         final ModifiablePubcompPacketImpl newModifiablePacket = mock(ModifiablePubcompPacketImpl.class);
         when(input.getPubcompPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final PubcompOutboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getPubcompPacket());
     }
 }

@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.packets.general.Qos;
  * The Quality of Service level
  *
  * @author Dominik Obermaier
- * @since 1.4
+ * @since  1.4
  */
 public enum QoS {
 
@@ -39,12 +39,9 @@ public enum QoS {
      * At exactly once delivery. The message will be delivered once and only once
      */
     EXACTLY_ONCE(2);
-
     private static final @NotNull QoS @NotNull [] VALUES = values();
-
     private final int qosNumber;
     private final @NotNull Qos qos;
-
     QoS(final int qosNumber) {
         this.qosNumber = qosNumber;
         qos = Qos.valueOf(name());
@@ -60,20 +57,17 @@ public enum QoS {
     public @NotNull Qos toQos() {
         return qos;
     }
-
     private static final @NotNull QoS @NotNull [] LOOKUP = new QoS[Qos.values().length];
-
     static {
         for (final QoS qoS : values()) {
             LOOKUP[qoS.qos.ordinal()] = qoS;
         }
     }
-
     /**
      * Creates a QoS level enum from an integer
      *
-     * @param i the QoS level as integer (0,1,2)
-     * @return the QoS level or <code>null</code> if an invalid QoS level was passed
+     * @param  i the QoS level as integer (0,1,2)
+     * @return   the QoS level or <code>null</code> if an invalid QoS level was passed
      */
     @Nullable
     public static QoS valueOf(final int i) {
@@ -88,7 +82,6 @@ public enum QoS {
         if (qosFirst.getQosNumber() < qosSecond.getQosNumber()) {
             return qosFirst;
         }
-
         return qosSecond;
     }
 }

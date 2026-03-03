@@ -37,23 +37,20 @@ import static com.hivemq.persistence.clientsession.SharedSubscriptionService.Sha
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
 
     private final static int MAX_SUBSCRIPTION_IDENTIFIER = 268_435_455;
-
     private @Nullable String topicFilter;
     private @NotNull Qos qos = Qos.AT_MOST_ONCE;
     private boolean retainAsPublished;
     private boolean noLocal;
     private boolean shared = false;
     private @Nullable Integer subscriptionIdentifier;
-
     private final @NotNull MqttConfigurationService mqttConfig;
     private final @NotNull RestrictionsConfigurationService restrictionsConfig;
     private final @NotNull SecurityConfigurationService securityConfigurationService;
-
     @Inject
     public TopicSubscriptionBuilderImpl(final @NotNull FullConfigurationService configurationService) {
         this.mqttConfig = configurationService.mqttConfiguration();
@@ -64,11 +61,9 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
     @Override
     public @NotNull TopicSubscriptionBuilder fromSubscription(@NotNull final Subscription subscription) {
         Preconditions.checkNotNull(subscription, "Subscription must never be null");
-
         if (!(subscription instanceof SubscriptionImpl)) {
             throw new DoNotImplementException(Subscription.class.getSimpleName());
         }
-
         this.topicFilter = subscription.getTopicFilter();
         this.qos = subscription.getQos();
         this.retainAsPublished = subscription.getRetainAsPublished();
@@ -79,33 +74,29 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
     @Override
     public @NotNull TopicSubscriptionBuilder topicFilter(@NotNull final String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter must never be null");
-        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(),
-                "Topic filter length must not exceed '" +
-                        restrictionsConfig.maxTopicLength() +
-                        "' characters, but has '" +
-                        topicFilter.length() +
-                        "' characters");
-        Preconditions.checkArgument(!(!mqttConfig.wildcardSubscriptionsEnabled() &&
-                Topics.containsWildcard(topicFilter)), "Wildcard characters '+' or '#' are not allowed");
-
+        Preconditions.checkArgument(
+                topicFilter.length() <= restrictionsConfig.maxTopicLength(),
+                "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength()
+                        + "' characters, but has '" + topicFilter.length() + "' characters");
+        Preconditions.checkArgument(
+                !(!mqttConfig.wildcardSubscriptionsEnabled() && Topics.containsWildcard(topicFilter)),
+                "Wildcard characters '+' or '#' are not allowed");
         shared = Topics.isSharedSubscriptionTopic(topicFilter);
         if (shared) {
             Preconditions.checkArgument(mqttConfig.sharedSubscriptionsEnabled(), "Shared subscriptions not allowed");
             final SharedSubscription sharedSubscription = Topics.checkForSharedSubscription(topicFilter);
             if (sharedSubscription != null) {
-                Preconditions.checkArgument(!sharedSubscription.getTopicFilter().isEmpty(),
+                Preconditions.checkArgument(
+                        !sharedSubscription.getTopicFilter().isEmpty(),
                         "Shared subscription topic must not be empty");
             }
         }
-
         if (!Topics.isValidToSubscribe(topicFilter)) {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is invalid for subscriptions");
         }
-
         if (!PluginBuilderUtil.isValidUtf8String(topicFilter, securityConfigurationService.validateUTF8())) {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is UTF-8 malformed");
         }
-
         this.topicFilter = topicFilter;
         return this;
     }
@@ -131,10 +122,10 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
 
     @Override
     public @NotNull TopicSubscriptionBuilder subscriptionIdentifier(final int subscriptionIdentifier) {
-        Preconditions.checkArgument(mqttConfig.subscriptionIdentifierEnabled(),
-                "Subscription identifier are not allowed");
-        Preconditions.checkArgument(subscriptionIdentifier >= 1 &&
-                        subscriptionIdentifier <= MAX_SUBSCRIPTION_IDENTIFIER,
+        Preconditions
+                .checkArgument(mqttConfig.subscriptionIdentifierEnabled(), "Subscription identifier are not allowed");
+        Preconditions.checkArgument(
+                subscriptionIdentifier >= 1 && subscriptionIdentifier <= MAX_SUBSCRIPTION_IDENTIFIER,
                 "Subscription identifier must be between 1 and 268,435,455");
         this.subscriptionIdentifier = subscriptionIdentifier;
         return this;

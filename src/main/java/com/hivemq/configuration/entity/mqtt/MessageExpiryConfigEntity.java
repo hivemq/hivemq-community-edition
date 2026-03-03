@@ -24,7 +24,7 @@ import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlRootElement(name = "message-expiry")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -34,7 +34,6 @@ public class MessageExpiryConfigEntity {
     @XmlElement(name = "max-interval", defaultValue = "4294967296")
     // => 136 Years = Unsigned Integer Max Value in seconds
     private long maxInterval = MAX_EXPIRY_INTERVAL_DEFAULT;
-
     public long getMaxInterval() {
         return maxInterval;
     }

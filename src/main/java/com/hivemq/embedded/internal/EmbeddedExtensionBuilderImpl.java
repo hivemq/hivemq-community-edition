@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.embedded.internal;
 
 import com.google.common.base.Preconditions;
@@ -35,7 +34,6 @@ public class EmbeddedExtensionBuilderImpl implements EmbeddedExtensionBuilder {
     private int priority = DEFAULT_PRIORITY;
     private int startPriority = DEFAULT_START_PRIORITY;
     private @Nullable ExtensionMain extensionMain;
-
     @Override
     public @NotNull EmbeddedExtensionBuilder withId(final @NotNull String id) {
         this.id = id;
@@ -72,7 +70,6 @@ public class EmbeddedExtensionBuilderImpl implements EmbeddedExtensionBuilder {
         return this;
     }
 
-
     @Override
     public @NotNull EmbeddedExtensionBuilder withExtensionMain(final @NotNull ExtensionMain extensionMain) {
         this.extensionMain = extensionMain;
@@ -85,7 +82,6 @@ public class EmbeddedExtensionBuilderImpl implements EmbeddedExtensionBuilder {
         Preconditions.checkState(name != null, "name must never be null");
         Preconditions.checkState(version != null, "version must never be null");
         Preconditions.checkState(extensionMain != null, "extensionMain must never be null");
-
         return new EmbeddedExtensionImpl(id, name, version, author, priority, startPriority, extensionMain);
     }
 }

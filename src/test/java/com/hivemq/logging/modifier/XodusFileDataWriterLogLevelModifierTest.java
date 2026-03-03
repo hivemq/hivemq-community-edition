@@ -37,20 +37,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class XodusFileDataWriterLogLevelModifierTest {
 
     private ch.qos.logback.classic.Logger rootLogger;
     private Level level;
     private LoggerContext context;
-
     @Before
     public void setUp() throws Exception {
-
         context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
         rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-
         final LogLevelModifierTurboFilter logLevelModifierTurboFilter = new LogLevelModifierTurboFilter();
         logLevelModifierTurboFilter.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
         level = rootLogger.getLevel();
@@ -75,23 +70,20 @@ public class XodusFileDataWriterLogLevelModifierTest {
     @Test
     public void test_first_time_gets_modified_to_debug() {
         final String msg = "Can't open directory channel. Log directory fsync won't be performed.";
-
         final AtomicInteger loggedCounter = new AtomicInteger();
         final Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
-
         while (appenderIterator.hasNext()) {
             appenderIterator.next().addFilter(createFilter(loggedCounter, msg));
         }
         context.getLogger(FileDataWriter.class).warn(msg);
-
         assertEquals(1, loggedCounter.get());
     }
 
     private @NotNull Filter<ILoggingEvent> createFilter(
             final @NotNull AtomicInteger loggedCounter,
             final @NotNull String text) {
-
         return new Filter<>() {
+
             @Override
             public FilterReply decide(final ILoggingEvent event) {
                 if (event.getLevel().equals(Level.DEBUG)) {

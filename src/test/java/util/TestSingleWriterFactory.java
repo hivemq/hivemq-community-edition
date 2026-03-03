@@ -25,17 +25,13 @@ import com.hivemq.persistence.SingleWriterServiceImpl;
 public class TestSingleWriterFactory {
 
     public static SingleWriterService defaultSingleWriter() {
-
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(64);
         InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.set(1);
         InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.set(100);
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.set(1000);
         InternalConfigurations.SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.set(100);
-
         final SingleWriterServiceImpl singleWriterServiceImpl = new SingleWriterServiceImpl();
-
         singleWriterServiceImpl.postConstruct();
-
         return singleWriterServiceImpl;
     }
 }

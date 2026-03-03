@@ -25,7 +25,7 @@ import com.hivemq.mqtt.message.mqtt5.Mqtt5UserProperties;
  * The event to fire when client auth failed.
  *
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class OnAuthFailedEvent {
@@ -33,12 +33,8 @@ public class OnAuthFailedEvent {
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @Nullable UserPropertiesImpl userProperties;
-
-    public OnAuthFailedEvent(
-            final @Nullable DisconnectedReasonCode reasonCode,
-            final @Nullable String reasonString,
+    public OnAuthFailedEvent(final @Nullable DisconnectedReasonCode reasonCode, final @Nullable String reasonString,
             final @Nullable Mqtt5UserProperties userProperties) {
-
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
         this.userProperties = (userProperties == null) ? null : UserPropertiesImpl.of(userProperties.asList());

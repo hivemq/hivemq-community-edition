@@ -21,7 +21,7 @@ import java.security.cert.Certificate;
  * Represents information of a X509 client certificate.
  *
  * @author Christoph Schäbel
- * @since 3.0
+ * @since  3.0
  */
 public interface SslClientCertificate {
 
@@ -74,5 +74,4 @@ public interface SslClientCertificate {
      * @return the state from the last certificate in the chain
      */
     String state();
-
 }

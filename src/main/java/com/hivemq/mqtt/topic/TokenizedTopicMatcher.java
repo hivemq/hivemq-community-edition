@@ -27,18 +27,14 @@ public class TokenizedTopicMatcher implements TopicMatcher {
 
     public boolean matches(@NotNull final String topicSubscription, @NotNull final String actualTopic)
             throws InvalidTopicException {
-
         if (StringUtils.containsAny(actualTopic, "#+")) {
             throw new InvalidTopicException("The actual topic must not contain a wildcard character (# or +)");
         }
         final String subscription = StringUtils.stripEnd(topicSubscription, "/");
-
         String topic = actualTopic;
-
         if (topic.length() > 1) {
             topic = StringUtils.stripEnd(topic, "/");
         }
-
         if (StringUtils.containsNone(topicSubscription, "#+")) {
             return subscription.equals(topic);
         }
@@ -49,37 +45,32 @@ public class TokenizedTopicMatcher implements TopicMatcher {
     }
 
     private static boolean matchesWildcards(final String topicSubscription, final String actualTopic) {
-
         if (topicSubscription.contains("#")) {
             if (!StringUtils.endsWith(topicSubscription, "/#") && topicSubscription.length() > 1) {
                 return false;
             }
         }
-
         final String[] subscription = StringUtils.splitPreserveAllTokens(topicSubscription, "/");
         final String[] topic = StringUtils.splitPreserveAllTokens(actualTopic, "/");
-
         final int smallest = min(subscription.length, topic.length);
-
         for (int i = 0; i < smallest; i++) {
             final String sub = subscription[i];
             final String t = topic[i];
-
             if (!sub.equals(t)) {
                 if ("#".equals(sub)) {
                     return true;
                 } else if ("+".equals(sub)) {
-                    //Matches Topic Level wildcard, so we can just ignore
-
+                    // Matches Topic Level wildcard, so we can just ignore
                 } else {
-                    //Does not match a wildcard and is not equal to the topic token
+                    // Does not match a wildcard and is not equal to the topic token
                     return false;
                 }
             }
         }
-        //If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a wildcard,
-        //everything is alright.
-        return subscription.length == topic.length ||
-                (subscription.length - topic.length == 1 && ("#".equals(subscription[subscription.length - 1])));
+        // If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a
+        // wildcard,
+        // everything is alright.
+        return subscription.length == topic.length
+                || (subscription.length - topic.length == 1 && ("#".equals(subscription[subscription.length - 1])));
     }
 }

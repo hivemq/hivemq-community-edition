@@ -37,7 +37,6 @@ import static com.hivemq.configuration.service.InternalConfigurations.MQTT_EVENT
 public class MQTTHandlerModule extends SingletonModule<Class<MQTTHandlerModule>> {
 
     private final @NotNull Injector persistenceInjector;
-
     public MQTTHandlerModule(final @NotNull Injector persistenceInjector) {
         super(MQTTHandlerModule.class);
         this.persistenceInjector = persistenceInjector;
@@ -48,13 +47,9 @@ public class MQTTHandlerModule extends SingletonModule<Class<MQTTHandlerModule>>
         final DefaultEventExecutorGroup mqttHandlerWorker = new DefaultEventExecutorGroup(
                 MQTT_EVENT_EXECUTOR_THREAD_COUNT.get(),
                 new ThreadFactoryBuilder().setNameFormat("hivemq-event-executor-%d").build());
-
         bind(EventExecutorGroup.class).toInstance(mqttHandlerWorker);
-
         bind(MessageDroppedService.class).toInstance(persistenceInjector.getInstance(MessageDroppedService.class));
-
         bind(MqttServerDisconnector.class).to(MqttServerDisconnectorImpl.class).in(Singleton.class);
         bind(MqttConnacker.class).to(MqttConnackerImpl.class).in(Singleton.class);
-
     }
 }

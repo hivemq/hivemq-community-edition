@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class SslClientCertificateHandlerTest {
 
@@ -55,16 +55,12 @@ public class SslClientCertificateHandlerTest {
     private final @NotNull SslHandler sslHandler = mock();
     private final @NotNull SSLEngine sslEngine = mock();
     private final @NotNull SSLSession sslSession = mock();
-
     private final @NotNull EmbeddedChannel channel = new EmbeddedChannel();
-
     private UndefinedClientConnection clientConnection;
-
     @Before
     public void setUp() throws Exception {
         when(sslHandler.engine()).thenReturn(sslEngine);
         when(sslEngine.getSession()).thenReturn(sslSession);
-
         final TlsTcpListener listener = mock();
         clientConnection = new UndefinedClientConnection(channel, null, listener);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -83,7 +79,6 @@ public class SslClientCertificateHandlerTest {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenReturn(new Certificate[0]);
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         assertNotNull(clientConnection.getAuthCertificate());
     }
 
@@ -98,7 +93,6 @@ public class SslClientCertificateHandlerTest {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not authenticated"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
@@ -107,7 +101,6 @@ public class SslClientCertificateHandlerTest {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not authenticated"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         verify(mqttServerDisconnector, never()).logAndClose(eq(channel), anyString(), anyString());
     }
 
@@ -116,7 +109,6 @@ public class SslClientCertificateHandlerTest {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.REQUIRED);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not verified"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
@@ -125,7 +117,6 @@ public class SslClientCertificateHandlerTest {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("peer not verified"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         verify(mqttServerDisconnector, never()).logAndClose(eq(channel), anyString(), anyString());
     }
 
@@ -134,24 +125,20 @@ public class SslClientCertificateHandlerTest {
         when(tls.getClientAuthMode()).thenReturn(Tls.ClientAuthMode.OPTIONAL);
         when(sslSession.getPeerCertificates()).thenThrow(new SSLPeerUnverifiedException("other exception"));
         channel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         verify(mqttServerDisconnector).logAndClose(eq(channel), isNull(), anyString());
     }
 
     @Test
     public void test_class_cast_exception_no_ssl_handler() {
         final EmbeddedChannel freshChannel = new EmbeddedChannel();
-        final UndefinedClientConnection freshClientConnection =
-                new UndefinedClientConnection(freshChannel, null, mock());
+        final UndefinedClientConnection freshClientConnection = new UndefinedClientConnection(freshChannel, null,
+                mock());
         freshChannel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(freshClientConnection);
         freshChannel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         freshChannel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, new WrongHandler());
-
         freshChannel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
-
         verify(mqttServerDisconnector).logAndClose(eq(freshChannel), isNull(), anyString());
     }
-
     private static class WrongHandler extends SimpleChannelInboundHandler<Object> {
 
         @Override

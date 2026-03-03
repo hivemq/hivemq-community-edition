@@ -41,13 +41,15 @@ public interface RetainedMessagePersistence {
      *
      * @param topic for which the retained message should be removed
      */
-    @NotNull ListenableFuture<Void> remove(@NotNull String topic);
+    @NotNull
+    ListenableFuture<Void> remove(@NotNull String topic);
 
     /**
-     * @param topic of the retained message
-     * @return the retained message for the topic
+     * @param  topic of the retained message
+     * @return       the retained message for the topic
      */
-    @NotNull ListenableFuture<RetainedMessage> get(@NotNull String topic);
+    @NotNull
+    ListenableFuture<RetainedMessage> get(@NotNull String topic);
 
     /**
      * Add a new rained message to a given topic
@@ -55,11 +57,12 @@ public interface RetainedMessagePersistence {
      * @param topic           of the retained message
      * @param retainedMessage to be added
      */
-    @NotNull ListenableFuture<Void> persist(@NotNull String topic, @NotNull RetainedMessage retainedMessage);
+    @NotNull
+    ListenableFuture<Void> persist(@NotNull String topic, @NotNull RetainedMessage retainedMessage);
 
     /**
-     * @param topicWithWildcards for the retained messages
-     * @return all topics matching the given wildcard topic, that have retained messages
+     * @param  topicWithWildcards for the retained messages
+     * @return                    all topics matching the given wildcard topic, that have retained messages
      */
     @NotNull
     @ReadOnly
@@ -70,29 +73,33 @@ public interface RetainedMessagePersistence {
      *
      * @return a future which completes, when closing is done.
      */
-    @NotNull ListenableFuture<Void> closeDB();
+    @NotNull
+    ListenableFuture<Void> closeDB();
 
     /**
      * Trigger a clean up a in a given persistence bucket.
      *
-     * @param bucketIndex the persistence bucket index.
-     * @return a future which completes, when clean up is done.
+     * @param  bucketIndex the persistence bucket index.
+     * @return             a future which completes, when clean up is done.
      */
-    @NotNull ListenableFuture<Void> cleanUp(int bucketIndex);
+    @NotNull
+    ListenableFuture<Void> cleanUp(int bucketIndex);
 
     /**
      * Remove all retained messages in the persistence.
      *
      * @return a future which completes, when all messages are removed.
      */
-    @NotNull ListenableFuture<Void> clear();
+    @NotNull
+    ListenableFuture<Void> clear();
 
     /**
      * Process a request for a chunk of all the client sessions from this node
      *
-     * @param cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
-     * @return a result containing the new cursor and a map of clientIds to their session
+     * @param  cursor the cursor returned from the last chunk or a new (empty) cursor to start iterating the persistence
+     * @return        a result containing the new cursor and a map of clientIds to their session
      */
-    @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
+    @NotNull
+    ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
             @NotNull ChunkCursor cursor);
 }

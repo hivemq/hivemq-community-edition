@@ -36,9 +36,7 @@ import java.util.concurrent.ThreadFactory;
 public class ExtensionStartStopExecutorProvider implements Provider<ExecutorService> {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(ExtensionStartStopExecutorProvider.class);
-
     private final @NotNull ShutdownHooks shutdownHooks;
-
     @Inject
     public ExtensionStartStopExecutorProvider(final @NotNull ShutdownHooks shutdownHooks) {
         this.shutdownHooks = shutdownHooks;
@@ -51,11 +49,9 @@ public class ExtensionStartStopExecutorProvider implements Provider<ExecutorServ
         shutdownHooks.add(new ExtensionStartStopExecutorShutdownHook(executorService));
         return executorService;
     }
-
     private static class ExtensionStartStopExecutorShutdownHook implements HiveMQShutdownHook {
 
         private final @NotNull ExecutorService executorService;
-
         private ExtensionStartStopExecutorShutdownHook(final @NotNull ExecutorService executorService) {
             this.executorService = executorService;
         }

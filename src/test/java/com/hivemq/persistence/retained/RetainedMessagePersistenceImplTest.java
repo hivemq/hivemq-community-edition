@@ -48,17 +48,15 @@ import static org.mockito.Mockito.when;
 public class RetainedMessagePersistenceImplTest {
 
     private final RetainedMessageLocalPersistence localPersistence = mock(RetainedMessageLocalPersistence.class);
-
     private RetainedMessagePersistenceImpl retainedMessagePersistence;
     private RetainedMessage message;
     private SingleWriterService singleWriterService;
-
     @Before
     public void setUp() throws Exception {
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        retainedMessagePersistence =
-                new RetainedMessagePersistenceImpl(localPersistence, singleWriterService, new Chunker());
+        retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence, singleWriterService,
+                new Chunker());
     }
 
     @After
@@ -126,11 +124,9 @@ public class RetainedMessagePersistenceImplTest {
 
     @Test
     public void test_get_with_wildcards_success() throws Exception {
-        when(localPersistence.getAllTopics(anyString(), anyInt())).thenReturn(Sets.newHashSet("topic/1",
-                "topic/2",
-                "topic/3"));
+        when(localPersistence.getAllTopics(anyString(), anyInt()))
+                .thenReturn(Sets.newHashSet("topic/1", "topic/2", "topic/3"));
         final Set<String> topics = retainedMessagePersistence.getWithWildcards("topic/#").get();
-
         assertTrue(topics.contains("topic/1"));
         assertTrue(topics.contains("topic/2"));
         assertTrue(topics.contains("topic/3"));

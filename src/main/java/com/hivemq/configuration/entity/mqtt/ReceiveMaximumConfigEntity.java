@@ -22,7 +22,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlRootElement(name = "receive-maximum")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -31,7 +31,6 @@ public class ReceiveMaximumConfigEntity {
 
     @XmlElement(name = "server-receive-maximum", defaultValue = "10")
     private int serverReceiveMaximum = MqttConfigurationDefaults.SERVER_RECEIVE_MAXIMUM_DEFAULT;
-
     public int getServerReceiveMaximum() {
         return serverReceiveMaximum;
     }

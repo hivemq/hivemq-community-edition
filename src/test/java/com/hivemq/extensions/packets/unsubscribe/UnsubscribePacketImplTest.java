@@ -28,10 +28,10 @@ public class UnsubscribePacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(UnsubscribePacketImpl.class)
-                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
-                .withNonnullFields("topicFilters", "userProperties")
-                .suppress(Warning.STRICT_INHERITANCE)
-                .verify();
+        EqualsVerifier.forClass(UnsubscribePacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier
+                                                                                                   // thinks @NotNull
+                                                                                                   // Optional is
+                                                                                                   // @NotNull
+                .withNonnullFields("topicFilters", "userProperties").suppress(Warning.STRICT_INHERITANCE).verify();
     }
 }

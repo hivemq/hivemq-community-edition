@@ -22,10 +22,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- * This int to int map designed for minimal memory overhead for instances with very few entries.
- * Access is to the map is linear at best, therefore this implementation should not be used if cpu time is a concern.
- * This class is not thread save.
- * Each instance of this IntMap must not be accessed by more than one thread at a time.
+ * This int to int map designed for minimal memory overhead for instances with very few entries. Access is to the map is
+ * linear at best, therefore this implementation should not be used if cpu time is a concern. This class is not thread
+ * save. Each instance of this IntMap must not be accessed by more than one thread at a time.
  *
  * @author Lukas Brandl
  */
@@ -33,13 +32,12 @@ import java.util.Iterator;
 public class IntMap implements Iterable<IntMap.IntMapEntry> {
 
     private int[] backingArray = null;
-
     public IntMap() {
     }
 
     /**
-     * Fill the array with keys from 0 to initialSize mapped to 0.
-     * This is intended to avoid garbage when the array is growing.
+     * Fill the array with keys from 0 to initialSize mapped to 0. This is intended to avoid garbage when the array is
+     * growing.
      *
      * @param initialSize of the backing array
      */
@@ -64,8 +62,8 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
     }
 
     /**
-     * @param key is associated with a value
-     * @return the value associated with the key or zero
+     * @param  key is associated with a value
+     * @return     the value associated with the key or zero
      */
     public int get(final int key) {
         if (backingArray == null) {
@@ -80,16 +78,16 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
     }
 
     /**
-     * @param key   is associated with a value
-     * @param value will be accessible by the key
-     * @return the previous value
+     * @param  key   is associated with a value
+     * @param  value will be accessible by the key
+     * @return       the previous value
      */
     public int put(final int key, final int value) {
         // zero is default, so there is no need to put it
         if (value == 0) {
             return remove(key);
         }
-        //shortcut
+        // shortcut
         if (backingArray == null) {
             backingArray = new int[2];
             backingArray[0] = key;
@@ -110,8 +108,8 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
     }
 
     /**
-     * @param key for which the value is incremented
-     * @return the previous value
+     * @param  key for which the value is incremented
+     * @return     the previous value
      */
     public int increment(final int key) {
         // Zero is the default, therefore values of zero are not present
@@ -135,8 +133,8 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
     }
 
     /**
-     * This method will overwrite the current value at the given index
-     * WARNING: It will not check if the array is big enough or even initialised
+     * This method will overwrite the current value at the given index WARNING: It will not check if the array is big
+     * enough or even initialised
      *
      * @param key   is associated with a value
      * @param value will be accessible by the key
@@ -144,17 +142,15 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
      */
     public void putUnsafe(final int key, final int value, final int index) {
         final int keyIndex = index * 2;
-
         backingArray[keyIndex] = key;
         backingArray[keyIndex + 1] = value;
     }
 
-
     /**
      * Sets a value for a given key to zero
      *
-     * @param key to be removed
-     * @return the removed value
+     * @param  key to be removed
+     * @return     the removed value
      */
     public int remove(final int key) {
         if (backingArray == null) {
@@ -182,7 +178,6 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
         if (otherArray == null) {
             return;
         }
-
         for (int i = 0; i < otherArray.length; i += 2) {
             final int key = otherArray[i];
             final int currentValue = this.get(key);
@@ -233,9 +228,7 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final IntMap that = (IntMap) o;
-
         return Arrays.equals(backingArray, that.backingArray);
     }
 
@@ -246,15 +239,12 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
 
     @Override
     public Iterator<IntMapEntry> iterator() {
-
         return new IntMapIterator(this);
     }
-
     private static class IntMapIterator implements Iterator<IntMapEntry> {
 
         private final IntMap map;
         private int nextIndex = 0;
-
         private IntMapIterator(final IntMap map) {
             this.map = map;
         }
@@ -288,7 +278,6 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
 
         private final int key;
         private final int value;
-
         private IntMapEntry(final int key, final int value) {
             this.key = key;
             this.value = value;
@@ -310,9 +299,7 @@ public class IntMap implements Iterable<IntMap.IntMapEntry> {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-
             final IntMapEntry that = (IntMapEntry) o;
-
             if (key != that.key) {
                 return false;
             }

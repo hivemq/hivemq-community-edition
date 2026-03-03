@@ -25,7 +25,7 @@ import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.TOP
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlRootElement(name = "topic-alias")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -34,9 +34,7 @@ public class TopicAliasConfigEntity extends EnabledEntity {
 
     @XmlElement(name = "max-per-client", defaultValue = "5")
     private int maxPerClient = TOPIC_ALIAS_MAX_PER_CLIENT_DEFAULT;
-
     public int getMaxPerClient() {
         return maxPerClient;
     }
-
 }

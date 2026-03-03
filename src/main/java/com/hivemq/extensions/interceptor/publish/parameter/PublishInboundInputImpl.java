@@ -26,7 +26,7 @@ import com.hivemq.extensions.packets.publish.PublishPacketImpl;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class PublishInboundInputImpl implements PublishInboundInput, PluginTaskInput {
@@ -34,12 +34,9 @@ public class PublishInboundInputImpl implements PublishInboundInput, PluginTaskI
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull PublishPacketImpl publishPacket;
-
-    public PublishInboundInputImpl(
-            final @NotNull ClientInformation clientInformation,
+    public PublishInboundInputImpl(final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull PublishPacketImpl publishPacket) {
-
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.publishPacket = publishPacket;

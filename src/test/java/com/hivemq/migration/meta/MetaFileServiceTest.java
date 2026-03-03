@@ -41,11 +41,8 @@ public class MetaFileServiceTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull SystemInformation systemInformation = mock();
-
     private File dataFolder;
-
     @Before
     public void before() throws Exception {
         dataFolder = temporaryFolder.newFolder();
@@ -54,30 +51,22 @@ public class MetaFileServiceTest {
 
     @Test
     public void test_read_file_data_folder_not_present() throws Exception {
-
         when(systemInformation.getDataFolder()).thenReturn(new File(RandomStringUtils.random(123)));
-
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
-
         assertFalse(metaFile.isDataFolderPresent());
     }
 
     @Test
     public void test_read_file_persistence_folder_not_present() throws Exception {
-
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
-
         assertTrue(metaFile.isDataFolderPresent());
         assertFalse(metaFile.isPersistenceFolderPresent());
     }
 
     @Test
     public void test_read_file_meta_file_not_present() throws Exception {
-
         new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
-
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
-
         assertTrue(metaFile.isDataFolderPresent());
         assertTrue(metaFile.isPersistenceFolderPresent());
         assertFalse(metaFile.isMetaFilePresent());
@@ -85,9 +74,7 @@ public class MetaFileServiceTest {
 
     @Test
     public void test_read_write_meta_file() throws Exception {
-
         new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
-
         final MetaInformation metaInformation = new MetaInformation();
         metaInformation.setHivemqVersion("1.2.3");
         metaInformation.setSubscriptionPersistenceVersion("1.2.0");
@@ -97,11 +84,8 @@ public class MetaFileServiceTest {
         metaInformation.setPublishPayloadPersistenceVersion("6.3.33");
         metaInformation.setPublishPayloadPersistenceType(PersistenceType.FILE);
         metaInformation.setRetainedMessagesPersistenceType(PersistenceType.FILE_NATIVE);
-
         MetaFileService.writeMetaFile(systemInformation, metaInformation);
-
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
-
         assertTrue(metaFile.isDataFolderPresent());
         assertTrue(metaFile.isPersistenceFolderPresent());
         assertTrue(metaFile.isMetaFilePresent());
@@ -115,18 +99,12 @@ public class MetaFileServiceTest {
         assertEquals(PersistenceType.FILE_NATIVE, metaFile.getRetainedMessagesPersistenceType());
     }
 
-
     @Test
     public void test_read_write_meta_all_null() throws Exception {
-
         new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
-
         final MetaInformation metaInformation = new MetaInformation();
-
         MetaFileService.writeMetaFile(systemInformation, metaInformation);
-
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
-
         assertTrue(metaFile.isDataFolderPresent());
         assertTrue(metaFile.isPersistenceFolderPresent());
         assertTrue(metaFile.isMetaFilePresent());
@@ -139,5 +117,4 @@ public class MetaFileServiceTest {
         assertNull(metaFile.getRetainedMessagesPersistenceType());
         assertNull(metaFile.getPublishPayloadPersistenceType());
     }
-
 }

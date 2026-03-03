@@ -28,8 +28,8 @@ public final class MqttMessageEncoderUtil {
     /**
      * Calculates the encoded length of a MQTT message with the given remaining length.
      *
-     * @param remainingLength the remaining length of the MQTT message.
-     * @return the encoded length of the MQTT message.
+     * @param  remainingLength the remaining length of the MQTT message.
+     * @return                 the encoded length of the MQTT message.
      */
     public static int encodedPacketLength(final int remainingLength) {
         return 1 + encodedLengthWithHeader(remainingLength);
@@ -38,8 +38,8 @@ public final class MqttMessageEncoderUtil {
     /**
      * Calculates the encoded length with a prefixed header.
      *
-     * @param encodedLength the encoded length.
-     * @return the encoded length with a prefixed header.
+     * @param  encodedLength the encoded length.
+     * @return               the encoded length with a prefixed header.
      */
     public static int encodedLengthWithHeader(final int encodedLength) {
         return MqttVariableByteInteger.encodedLength(encodedLength) + encodedLength;

@@ -49,12 +49,9 @@ public class MqttDecoders {
 
     private final @Nullable MqttDecoder @NotNull [] mqtt3Decoder;
     private final @Nullable MqttDecoder @NotNull [] mqtt5Decoder;
-
     @Inject
-    public MqttDecoders(
-            final @NotNull Mqtt3PublishDecoder mqtt3PublishDecoder,
-            final @NotNull Mqtt3PubackDecoder mqtt3PubackDecoder,
-            final @NotNull Mqtt3PubrecDecoder mqtt3PubrecDecoder,
+    public MqttDecoders(final @NotNull Mqtt3PublishDecoder mqtt3PublishDecoder,
+            final @NotNull Mqtt3PubackDecoder mqtt3PubackDecoder, final @NotNull Mqtt3PubrecDecoder mqtt3PubrecDecoder,
             final @NotNull Mqtt3PubcompDecoder mqtt3PubcompDecoder,
             final @NotNull Mqtt3PubrelDecoder mqtt3PubrelDecoder,
             final @NotNull Mqtt3DisconnectDecoder mqtt3DisconnectDecoder,
@@ -64,16 +61,12 @@ public class MqttDecoders {
             final @NotNull Mqtt5PublishDecoder mqtt5PublishDecoder,
             final @NotNull Mqtt5DisconnectDecoder mqtt5DisconnectDecoder,
             final @NotNull Mqtt5SubscribeDecoder mqtt5SubscribeDecoder,
-            final @NotNull Mqtt5PubackDecoder mqtt5PubackDecoder,
-            final @NotNull Mqtt5PubrecDecoder mqtt5PubrecDecoder,
+            final @NotNull Mqtt5PubackDecoder mqtt5PubackDecoder, final @NotNull Mqtt5PubrecDecoder mqtt5PubrecDecoder,
             final @NotNull Mqtt5PubrelDecoder mqtt5PubrelDecoder,
-            final @NotNull Mqtt5PubcompDecoder mqtt5PubcompDecoder,
-            final @NotNull Mqtt5AuthDecoder mqtt5AuthDecoder,
+            final @NotNull Mqtt5PubcompDecoder mqtt5PubcompDecoder, final @NotNull Mqtt5AuthDecoder mqtt5AuthDecoder,
             final @NotNull Mqtt5UnsubscribeDecoder mqtt5UnsubscribeDecoder) {
-
         mqtt3Decoder = new MqttDecoder[16];
         mqtt5Decoder = new MqttDecoder[16];
-
         mqtt3Decoder[MessageType.PUBLISH.getType()] = mqtt3PublishDecoder;
         mqtt3Decoder[MessageType.PUBACK.getType()] = mqtt3PubackDecoder;
         mqtt3Decoder[MessageType.PUBREC.getType()] = mqtt3PubrecDecoder;
@@ -83,7 +76,6 @@ public class MqttDecoders {
         mqtt3Decoder[MessageType.UNSUBSCRIBE.getType()] = mqtt3UnsubscribeDecoder;
         mqtt3Decoder[MessageType.PINGREQ.getType()] = mqttPingreqDecoder;
         mqtt3Decoder[MessageType.DISCONNECT.getType()] = mqtt3DisconnectDecoder;
-
         mqtt5Decoder[MessageType.PUBLISH.getType()] = mqtt5PublishDecoder;
         mqtt5Decoder[MessageType.PUBACK.getType()] = mqtt5PubackDecoder;
         mqtt5Decoder[MessageType.PUBREC.getType()] = mqtt5PubrecDecoder;

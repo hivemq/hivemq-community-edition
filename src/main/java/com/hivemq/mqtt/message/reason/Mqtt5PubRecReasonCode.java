@@ -26,21 +26,18 @@ import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
  */
 public enum Mqtt5PubRecReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS),
-    NO_MATCHING_SUBSCRIBERS(MqttCommonReasonCode.NO_MATCHING_SUBSCRIBERS),
-    UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
-    IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
-    NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
-    TOPIC_NAME_INVALID(MqttCommonReasonCode.TOPIC_NAME_INVALID),
-    PACKET_IDENTIFIER_IN_USE(MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE),
-    QUOTA_EXCEEDED(MqttCommonReasonCode.QUOTA_EXCEEDED),
-    PAYLOAD_FORMAT_INVALID(MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID);
-
+    SUCCESS(MqttCommonReasonCode.SUCCESS), NO_MATCHING_SUBSCRIBERS(
+            MqttCommonReasonCode.NO_MATCHING_SUBSCRIBERS), UNSPECIFIED_ERROR(
+                    MqttCommonReasonCode.UNSPECIFIED_ERROR), IMPLEMENTATION_SPECIFIC_ERROR(
+                            MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), NOT_AUTHORIZED(
+                                    MqttCommonReasonCode.NOT_AUTHORIZED), TOPIC_NAME_INVALID(
+                                            MqttCommonReasonCode.TOPIC_NAME_INVALID), PACKET_IDENTIFIER_IN_USE(
+                                                    MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE), QUOTA_EXCEEDED(
+                                                            MqttCommonReasonCode.QUOTA_EXCEEDED), PAYLOAD_FORMAT_INVALID(
+                                                                    MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID);
     private static final @NotNull Mqtt5PubRecReasonCode[] VALUES = values();
-
     private final int code;
     private final @NotNull AckReasonCode ackReasonCode;
-
     Mqtt5PubRecReasonCode(final int code) {
         this.code = code;
         ackReasonCode = AckReasonCode.valueOf(name());
@@ -58,22 +55,19 @@ public enum Mqtt5PubRecReasonCode implements Mqtt5ReasonCode {
     public @NotNull AckReasonCode toAckReasonCode() {
         return ackReasonCode;
     }
-
-    private static final @NotNull Mqtt5PubRecReasonCode @NotNull [] ACK_LOOKUP =
-            new Mqtt5PubRecReasonCode[AckReasonCode.values().length];
-
+    private static final @NotNull Mqtt5PubRecReasonCode @NotNull [] ACK_LOOKUP = new Mqtt5PubRecReasonCode[AckReasonCode
+            .values().length];
     static {
         for (final Mqtt5PubRecReasonCode reasonCode : VALUES) {
             ACK_LOOKUP[reasonCode.ackReasonCode.ordinal()] = reasonCode;
         }
     }
-
     /**
      * Returns the PUBREC Reason Code belonging to the given byte code.
      *
-     * @param code the byte code.
-     * @return the PUBREC Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
-     *         valid PUBREC Reason Code.
+     * @param  code the byte code.
+     * @return      the PUBREC Reason Code belonging to the given byte code or <code>null</code> if the byte code is not
+     *              a valid PUBREC Reason Code.
      */
     public static @Nullable Mqtt5PubRecReasonCode fromCode(final int code) {
         for (final Mqtt5PubRecReasonCode reasonCode : VALUES) {

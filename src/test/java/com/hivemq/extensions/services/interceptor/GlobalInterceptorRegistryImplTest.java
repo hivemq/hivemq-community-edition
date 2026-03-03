@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.services.interceptor;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -32,9 +31,7 @@ import static org.mockito.Mockito.verify;
 public class GlobalInterceptorRegistryImplTest {
 
     private final @NotNull Interceptors interceptors = mock(Interceptors.class);
-
     private @NotNull GlobalInterceptorRegistryImpl globalInterceptorRegistry;
-
     @Before
     public void setUp() throws Exception {
         globalInterceptorRegistry = new GlobalInterceptorRegistryImpl(interceptors);

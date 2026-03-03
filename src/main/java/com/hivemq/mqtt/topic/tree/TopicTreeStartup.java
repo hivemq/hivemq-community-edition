@@ -43,15 +43,12 @@ import static com.hivemq.persistence.clientsession.SharedSubscriptionService.Sha
 public class TopicTreeStartup {
 
     private static final Logger log = LoggerFactory.getLogger(TopicTreeStartup.class);
-
     private final @NotNull LocalTopicTree topicTree;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
-
     @Inject
-    TopicTreeStartup(
-            final @NotNull LocalTopicTree topicTree,
+    TopicTreeStartup(final @NotNull LocalTopicTree topicTree,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
             final @NotNull SharedSubscriptionService sharedSubscriptionService) {
@@ -79,29 +76,23 @@ public class TopicTreeStartup {
                 final Set<Topic> clientSubscriptions = clientSessionSubscriptionPersistence.getSubscriptions(client);
                 final ClientSession session = clientSessionPersistence.getSession(client, false);
                 if (session == null || session.getSessionExpiryIntervalSec() == SESSION_EXPIRE_ON_DISCONNECT) {
-                    // We don't have to remove the subscription from the topic tree, since it is not added to the topic tree yet.
+                    // We don't have to remove the subscription from the topic tree, since it is not added to the topic
+                    // tree yet.
                     clientSessionSubscriptionPersistence.removeAllLocally(client);
                     continue;
                 }
-
                 for (final Topic topic : clientSubscriptions) {
-                    final SharedSubscription sharedSubscription =
-                            sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
-
+                    final SharedSubscription sharedSubscription = sharedSubscriptionService
+                            .checkForSharedSubscription(topic.getTopic());
                     if (sharedSubscription == null) {
-                        final byte flags =
-                                SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal());
-
+                        final byte flags = SubscriptionFlag
+                                .getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal());
                         topicTree.addTopic(client, topic, flags, null);
                     } else {
-                        final byte flags =
-                                SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal());
-
-                        final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(),
-                                topic.getQoS(),
-                                topic.isNoLocal(),
-                                topic.isRetainAsPublished());
-
+                        final byte flags = SubscriptionFlag
+                                .getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal());
+                        final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(),
+                                topic.isNoLocal(), topic.isRetainAsPublished());
                         topicTree.addTopic(client, sharedTopic, flags, sharedSubscription.getShareName());
                     }
                 }

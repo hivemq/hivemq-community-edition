@@ -31,7 +31,6 @@ import static com.hivemq.logging.LoggingUtils.appendListenerToMessage;
 public class NoTlsHandshakeIdleHandler extends ChannelInboundHandlerAdapter {
 
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
-
     @Inject
     public NoTlsHandshakeIdleHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         this.mqttServerDisconnector = mqttServerDisconnector;
@@ -40,11 +39,13 @@ public class NoTlsHandshakeIdleHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt)
             throws Exception {
-
         if (evt instanceof IdleStateEvent) {
             if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                final String eventLogMessage = appendListenerToMessage(ctx.channel(), "TLS handshake not finished in time");
-                mqttServerDisconnector.logAndClose(ctx.channel(),
+                final String eventLogMessage = appendListenerToMessage(
+                        ctx.channel(),
+                        "TLS handshake not finished in time");
+                mqttServerDisconnector.logAndClose(
+                        ctx.channel(),
                         "Client with IP {} disconnected. The client was idle for too long without finishing the TLS handshake.",
                         eventLogMessage);
                 return;

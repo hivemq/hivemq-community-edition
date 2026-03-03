@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableMap;
@@ -37,7 +36,6 @@ public class ExtensionBuilderDependenciesImpl implements ExtensionBuilderDepende
     private final @NotNull Provider<PublishBuilder> publishBuilderProvider;
     private final @NotNull Provider<TopicPermissionBuilder> topicPermissionBuilderProvider;
     private final @NotNull Provider<WillPublishBuilder> willPublishBuilderProvider;
-
     @Inject
     public ExtensionBuilderDependenciesImpl(
             final @NotNull Provider<RetainedPublishBuilder> retainedPublishBuilderProvider,
@@ -56,13 +54,11 @@ public class ExtensionBuilderDependenciesImpl implements ExtensionBuilderDepende
     public ImmutableMap<String, Supplier<Object>> getDependenciesMap() {
         // classLoader is unused but prepared here for future use
         final ImmutableMap.Builder<String, Supplier<Object>> builder = ImmutableMap.builder();
-
         builder.put(RetainedPublishBuilder.class.getCanonicalName(), retainedPublishBuilderProvider::get);
         builder.put(TopicSubscriptionBuilder.class.getCanonicalName(), topicSubscriptionBuilderProvider::get);
         builder.put(PublishBuilder.class.getCanonicalName(), publishBuilderProvider::get);
         builder.put(TopicPermissionBuilder.class.getCanonicalName(), topicPermissionBuilderProvider::get);
         builder.put(WillPublishBuilder.class.getCanonicalName(), willPublishBuilderProvider::get);
-
         return builder.build();
     }
 }

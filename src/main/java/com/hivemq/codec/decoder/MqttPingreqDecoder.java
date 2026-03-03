@@ -34,7 +34,6 @@ import io.netty.buffer.ByteBuf;
 public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
 
     private final @NotNull MqttServerDisconnector serverDisconnector;
-
     @Inject
     public MqttPingreqDecoder(final @NotNull MqttServerDisconnector serverDisconnector) {
         this.serverDisconnector = serverDisconnector;
@@ -45,13 +44,12 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte header) {
-
         final ProtocolVersion protocolVersion = clientConnectionContext.getProtocolVersion();
-
-        //Pingreq of MQTTv5 is equal to MQTTv3_1_1
+        // Pingreq of MQTTv5 is equal to MQTTv3_1_1
         if (protocolVersion == ProtocolVersion.MQTTv5 || protocolVersion == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                serverDisconnector.disconnect(clientConnectionContext.getChannel(),
+                serverDisconnector.disconnect(
+                        clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a PINGREQ with an invalid fixed header. Disconnecting client.",
                         "Sent a PINGREQ with invalid fixed header",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,

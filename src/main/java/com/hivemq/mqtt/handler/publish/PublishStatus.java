@@ -26,31 +26,24 @@ public enum PublishStatus {
      * message has been delivered
      */
     DELIVERED(1),
-
     /**
      * client is not connected
      */
     NOT_CONNECTED(2),
-
     /**
      * the message could not be delivered
      */
     FAILED(3),
-
     /**
      * the message is not yet delivered
      */
     IN_PROGRESS(4),
-
     /**
      * client socket is not writable (QoS 0 only)
      */
     CHANNEL_NOT_WRITABLE(5);
-
     private static final @NotNull PublishStatus @NotNull [] VALUES = values();
-
     private final int id;
-
     PublishStatus(final int id) {
         this.id = id;
     }

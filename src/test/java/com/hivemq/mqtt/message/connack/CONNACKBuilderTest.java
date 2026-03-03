@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 public class CONNACKBuilderTest {
 
@@ -43,12 +43,9 @@ public class CONNACKBuilderTest {
     private final CONNACKBuilder builder = CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS);
     private final String dataExceeded = new String(new char[65535 + 1]);
     private final int sizeExceeded = 65535 + 1;
-
     @Test
     public void test_builder_default_values() {
-
         final CONNACK connack = builder.build();
-
         assertEquals(connack.getReturnCode(), Mqtt3ConnAckReturnCode.ACCEPTED);
         assertNull(connack.getAssignedClientIdentifier());
         assertNull(connack.getAuthData());
@@ -75,7 +72,6 @@ public class CONNACKBuilderTest {
 
     @Test
     public void test_builder_set_values() {
-
         final int serverKeepAlive = 30;
         final int topicAliasMaximum = 5;
         final int maximumPacketSize = 300;
@@ -92,34 +88,19 @@ public class CONNACKBuilderTest {
         final boolean retainAvailable = true;
         final boolean sharedSubscriptionAvailable = true;
         final boolean subscriptionIdentifierAvailable = true;
-
         final MqttUserProperty userProperty = new MqttUserProperty("test1", "value");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(userProperty, userProperty);
-
         final boolean wildcardSubscriptionAvailable = true;
-
-        final CONNACK connack = CONNACK.builder()
-                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
-                .withServerKeepAlive(serverKeepAlive)
-                .withTopicAliasMaximum(topicAliasMaximum)
-                .withMaximumPacketSize(maximumPacketSize)
-                .withSessionExpiryInterval(sessionExpiryInterval)
-                .withServerReference(serverReference)
-                .withResponseInformation(responseInformation)
-                .withAuthData(authData)
-                .withAuthMethod(authMethod)
-                .withReceiveMaximum(receiveMaximum)
-                .withMaximumQoS(maximumQoS)
-                .withSessionPresent(sessionPresent)
-                .withAssignedClientIdentifier(assignedClientIdentifier)
-                .withReasonString(reasonString)
-                .withRetainAvailable(retainAvailable)
-                .withSharedSubscriptionAvailable(sharedSubscriptionAvailable)
-                .withSubscriptionIdentifierAvailable(subscriptionIdentifierAvailable)
-                .withUserProperties(userProperties)
-                .withWildcardSubscriptionAvailable(wildcardSubscriptionAvailable)
-                .build();
-
+        final CONNACK connack = CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
+                .withServerKeepAlive(serverKeepAlive).withTopicAliasMaximum(topicAliasMaximum)
+                .withMaximumPacketSize(maximumPacketSize).withSessionExpiryInterval(sessionExpiryInterval)
+                .withServerReference(serverReference).withResponseInformation(responseInformation)
+                .withAuthData(authData).withAuthMethod(authMethod).withReceiveMaximum(receiveMaximum)
+                .withMaximumQoS(maximumQoS).withSessionPresent(sessionPresent)
+                .withAssignedClientIdentifier(assignedClientIdentifier).withReasonString(reasonString)
+                .withRetainAvailable(retainAvailable).withSharedSubscriptionAvailable(sharedSubscriptionAvailable)
+                .withSubscriptionIdentifierAvailable(subscriptionIdentifierAvailable).withUserProperties(userProperties)
+                .withWildcardSubscriptionAvailable(wildcardSubscriptionAvailable).build();
         assertEquals(connack.getServerKeepAlive(), serverKeepAlive);
         assertEquals(connack.getTopicAliasMaximum(), topicAliasMaximum);
         assertEquals(connack.getMaximumPacketSize(), maximumPacketSize);
@@ -138,7 +119,6 @@ public class CONNACKBuilderTest {
         assertEquals(connack.isSubscriptionIdentifierAvailable(), subscriptionIdentifierAvailable);
         assertEquals(connack.getUserProperties(), userProperties);
         assertEquals(connack.isWildcardSubscriptionAvailable(), wildcardSubscriptionAvailable);
-
         assertEquals(connack.getReturnCode(), Mqtt3ConnAckReturnCode.ACCEPTED);
         assertEquals(connack.getType(), MessageType.CONNACK);
         assertEquals(connack.getPacketIdentifier(), 0);
@@ -161,7 +141,6 @@ public class CONNACKBuilderTest {
     public void test_authData_method_precondition() {
         exceptionRule.expect(NullPointerException.class);
         exceptionRule.expectMessage("Auth method must be set if auth data is set");
-
         final byte[] dataExceeded = new byte[65535];
         builder.withAuthData(dataExceeded).build();
     }

@@ -37,22 +37,17 @@ public class SslParameterHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
-
         if (!(evt instanceof SslHandshakeCompletionEvent)) {
             super.userEventTriggered(ctx, evt);
             return;
         }
-
         final Channel channel = ctx.channel();
         final SslHandler sslHandler = (SslHandler) channel.pipeline().get(ChannelHandlerNames.SSL_HANDLER);
         final SSLSession session = sslHandler.engine().getSession();
-
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         clientConnectionContext.setAuthCipherSuite(session.getCipherSuite());
         clientConnectionContext.setAuthProtocol(session.getProtocol());
-
         channel.pipeline().remove(this);
-
         super.userEventTriggered(ctx, evt);
     }
 }

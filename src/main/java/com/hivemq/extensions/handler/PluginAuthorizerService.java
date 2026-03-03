@@ -23,7 +23,7 @@ import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public interface PluginAuthorizerService {
 

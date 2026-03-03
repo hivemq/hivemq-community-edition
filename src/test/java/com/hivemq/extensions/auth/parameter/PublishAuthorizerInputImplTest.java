@@ -35,7 +35,6 @@ import static org.junit.Assert.assertNotNull;
 public class PublishAuthorizerInputImplTest {
 
     private Channel channel;
-
     @Before
     public void before() {
         channel = new EmbeddedChannel();
@@ -65,7 +64,6 @@ public class PublishAuthorizerInputImplTest {
     public void test_publish() {
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
         final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(publish, channel, "client");
-
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
         assertNotNull(input.getPublishPacket());
@@ -74,9 +72,8 @@ public class PublishAuthorizerInputImplTest {
     @Test
     public void test_will_publish() {
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
-        final PublishAuthorizerInputImpl input =
-                new PublishAuthorizerInputImpl(connect.getWillPublish(), channel, "client");
-
+        final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(connect.getWillPublish(), channel,
+                "client");
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());
         assertNotNull(input.getPublishPacket());

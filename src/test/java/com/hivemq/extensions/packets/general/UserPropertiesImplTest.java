@@ -37,11 +37,11 @@ public class UserPropertiesImplTest {
 
     @Test
     public void test_get_first() {
-        final UserProperties userProperties =
-                UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value1"),
+        final UserProperties userProperties = UserPropertiesImpl.of(
+                ImmutableList.of(
+                        MqttUserProperty.of("name", "value1"),
                         MqttUserProperty.of("name", "value2"),
                         MqttUserProperty.of("name", "value3")));
-
         assertTrue(userProperties.getFirst("name").isPresent());
         assertEquals("value1", userProperties.getFirst("name").get());
         assertEquals(Optional.empty(), userProperties.getFirst("name2"));
@@ -49,36 +49,31 @@ public class UserPropertiesImplTest {
 
     @Test
     public void test_get_all() {
-        final UserProperties userProperties =
-                UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("name", "value1"),
+        final UserProperties userProperties = UserPropertiesImpl.of(
+                ImmutableList.of(
+                        MqttUserProperty.of("name", "value1"),
                         MqttUserProperty.of("name", "value2"),
                         MqttUserProperty.of("name", "value3")));
-
         final List<String> all = userProperties.getAllForName("name");
         final List<String> none = userProperties.getAllForName("name2");
-
         assertEquals(3, all.size());
-
         assertEquals("value1", all.get(0));
         assertEquals("value2", all.get(1));
         assertEquals("value3", all.get(2));
-
         assertEquals(0, none.size());
     }
 
     @Test
     public void test_empty() {
         final UserProperties userProperties = UserPropertiesImpl.of(ImmutableList.of());
-
         assertTrue(userProperties.isEmpty());
     }
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(UserPropertiesImpl.class)
-                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
-                .withNonnullFields("list")
-                .suppress(Warning.STRICT_INHERITANCE)
-                .verify();
+        EqualsVerifier.forClass(UserPropertiesImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                                                                                                // @NotNull Optional is
+                                                                                                // @NotNull
+                .withNonnullFields("list").suppress(Warning.STRICT_INHERITANCE).verify();
     }
 }

@@ -53,36 +53,28 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
 
 /**
  * @author Lukas Brandl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @LazySingleton
 public class PublishServiceImpl implements PublishService {
 
     @NotNull
     private final PluginServiceRateLimitService rateLimitService;
-
     @NotNull
     private final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService;
-
     @NotNull
     private final InternalPublishService internalPublishService;
-
     @NotNull
     private final PublishDistributor publishDistributor;
-
     @NotNull
     private final HivemqId hiveMQId;
-
     @NotNull
     private final LocalTopicTree topicTree;
-
     @Inject
-    public PublishServiceImpl(
-            @NotNull final PluginServiceRateLimitService rateLimitService,
+    public PublishServiceImpl(@NotNull final PluginServiceRateLimitService rateLimitService,
             @NotNull final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService,
             @NotNull final InternalPublishService internalPublishService,
-            @NotNull final PublishDistributor publishDistributor,
-            @NotNull final HivemqId hiveMQId,
+            @NotNull final PublishDistributor publishDistributor, @NotNull final HivemqId hiveMQId,
             @NotNull final LocalTopicTree topicTree) {
         this.rateLimitService = rateLimitService;
         this.globalManagedExtensionExecutorService = globalManagedExtensionExecutorService;
@@ -102,17 +94,17 @@ public class PublishServiceImpl implements PublishService {
         if (!(publish instanceof PublishImpl)) {
             return CompletableFuture.failedFuture(new DoNotImplementException(Publish.class.getSimpleName()));
         }
-
         final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
-        final ListenableFuture<PublishReturnCode> publishFuture =
-                internalPublishService.publish(internalPublish, globalManagedExtensionExecutorService, null);
+        final ListenableFuture<PublishReturnCode> publishFuture = internalPublishService
+                .publish(internalPublish, globalManagedExtensionExecutorService, null);
         return ListenableFutureConverter.toVoidCompletable(publishFuture, globalManagedExtensionExecutorService);
     }
 
     @Override
     @NotNull
     public CompletableFuture<PublishToClientResult> publishToClient(
-            @NotNull final Publish publish, @NotNull final String clientId) {
+            @NotNull final Publish publish,
+            @NotNull final String clientId) {
         checkNotNull(publish, "Publish must never be null");
         checkNotNull(clientId, "Client ID must never be null");
         checkArgument(!clientId.isEmpty(), "Client ID must not be empty");
@@ -123,15 +115,12 @@ public class PublishServiceImpl implements PublishService {
             return CompletableFuture.failedFuture(new DoNotImplementException(Publish.class.getSimpleName()));
         }
         final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
-
         final SettableFuture<PublishToClientResult> sendPublishFuture = SettableFuture.create();
         final SubscriberWithIdentifiers subscriber = topicTree.findSubscriber(clientId, publish.getTopic());
-
         if (subscriber == null) {
             sendPublishFuture.set(PublishToClientResult.NOT_SUBSCRIBED);
             return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedExtensionExecutorService);
         }
-
         final ListenableFuture<PublishStatus> publishSendFuture = publishDistributor.sendMessageToSubscriber(
                 internalPublish,
                 clientId,
@@ -140,6 +129,7 @@ public class PublishServiceImpl implements PublishService {
                 subscriber.isRetainAsPublished(),
                 subscriber.getSubscriptionIdentifier());
         Futures.addCallback(publishSendFuture, new FutureCallback<>() {
+
             @Override
             public void onSuccess(@Nullable final PublishStatus result) {
                 sendPublishFuture.set(PublishToClientResult.SUCCESSFUL);
@@ -150,34 +140,24 @@ public class PublishServiceImpl implements PublishService {
                 sendPublishFuture.setException(t);
             }
         }, MoreExecutors.directExecutor());
-
-
         return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedExtensionExecutorService);
     }
 
     @NotNull
     private PUBLISH publishToPUBLISH(@NotNull final PublishImpl publish) {
         final byte[] payload = Bytes.getBytesFromReadOnlyBuffer(publish.getPayload());
-
         final byte[] correlationData = Bytes.getBytesFromReadOnlyBuffer(publish.getCorrelationData());
-
-        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent() ?
-                Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get()) :
-                null;
-
+        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent()
+                ? Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get())
+                : null;
         return new PUBLISHFactory.Mqtt5Builder().withHivemqId(hiveMQId.get())
                 .withQoS(QoS.valueOf(publish.getQos().getQosNumber()))
-                .withOnwardQos(QoS.valueOf(publish.getQos().getQosNumber()))
-                .withRetain(publish.getRetain())
-                .withTopic(publish.getTopic())
-                .withPayload(payload)
+                .withOnwardQos(QoS.valueOf(publish.getQos().getQosNumber())).withRetain(publish.getRetain())
+                .withTopic(publish.getTopic()).withPayload(payload)
                 .withMessageExpiryInterval(publish.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))
-                .withResponseTopic(publish.getResponseTopic().orElse(null))
-                .withCorrelationData(correlationData)
-                .withPayload(payload)
-                .withContentType(publish.getContentType().orElse(null))
+                .withResponseTopic(publish.getResponseTopic().orElse(null)).withCorrelationData(correlationData)
+                .withPayload(payload).withContentType(publish.getContentType().orElse(null))
                 .withPayloadFormatIndicator(payloadFormatIndicator)
-                .withUserProperties(Mqtt5UserProperties.of(publish.getUserProperties().asInternalList()))
-                .build();
+                .withUserProperties(Mqtt5UserProperties.of(publish.getUserProperties().asInternalList())).build();
     }
 }

@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence.ioc.provider.local;
 
-
 import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 import com.hivemq.persistence.local.xodus.clientsession.ClientSessionXodusLocalPersistence;
 import org.slf4j.Logger;
@@ -26,8 +25,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
- * The provider which is responsible for creating and providing the
- * local ClientSession Store.
+ * The provider which is responsible for creating and providing the local ClientSession Store.
  *
  * @author Dominik Obermaier
  */
@@ -35,9 +33,7 @@ import javax.inject.Singleton;
 public class ClientSessionLocalProvider implements Provider<ClientSessionLocalPersistence> {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSessionLocalProvider.class);
-
     private final Provider<ClientSessionXodusLocalPersistence> localFilePersistence;
-
     @Inject
     ClientSessionLocalProvider(final Provider<ClientSessionXodusLocalPersistence> localFilePersistence) {
         this.localFilePersistence = localFilePersistence;

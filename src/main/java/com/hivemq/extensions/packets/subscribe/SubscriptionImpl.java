@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class SubscriptionImpl implements Subscription {
@@ -38,14 +38,8 @@ public class SubscriptionImpl implements Subscription {
     final @NotNull RetainHandling retainHandling;
     final boolean retainAsPublished;
     final boolean noLocal;
-
-    public SubscriptionImpl(
-            final @NotNull String topicFilter,
-            final @NotNull Qos qos,
-            final @NotNull RetainHandling retainHandling,
-            final boolean retainAsPublished,
-            final boolean noLocal) {
-
+    public SubscriptionImpl(final @NotNull String topicFilter, final @NotNull Qos qos,
+            final @NotNull RetainHandling retainHandling, final boolean retainAsPublished, final boolean noLocal) {
         this.topicFilter = topicFilter;
         this.qos = qos;
         this.retainHandling = retainHandling;
@@ -54,11 +48,9 @@ public class SubscriptionImpl implements Subscription {
     }
 
     public SubscriptionImpl(final @NotNull Topic topic) {
-        this(topic.getTopic(),
-                topic.getQoS().toQos(),
+        this(topic.getTopic(), topic.getQoS().toQos(),
                 Objects.requireNonNull(RetainHandling.fromCode(topic.getRetainHandling().getCode())),
-                topic.isRetainAsPublished(),
-                topic.isNoLocal());
+                topic.isRetainAsPublished(), topic.isNoLocal());
     }
 
     @Override
@@ -95,11 +87,8 @@ public class SubscriptionImpl implements Subscription {
             return false;
         }
         final SubscriptionImpl that = (SubscriptionImpl) o;
-        return topicFilter.equals(that.topicFilter) &&
-                (qos == that.qos) &&
-                (retainHandling == that.retainHandling) &&
-                retainAsPublished == that.retainAsPublished &&
-                noLocal == that.noLocal;
+        return topicFilter.equals(that.topicFilter) && (qos == that.qos) && (retainHandling == that.retainHandling)
+                && retainAsPublished == that.retainAsPublished && noLocal == that.noLocal;
     }
 
     @Override

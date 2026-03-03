@@ -29,7 +29,6 @@ import org.slf4j.Marker;
 public class XodusEnvironmentImplLogLevelModifier implements LogLevelModifier {
 
     private final @NotNull Logger environmentalLogger;
-
     public XodusEnvironmentImplLogLevelModifier() {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         environmentalLogger = context.getLogger(EnvironmentImpl.class);
@@ -43,7 +42,6 @@ public class XodusEnvironmentImplLogLevelModifier implements LogLevelModifier {
             final @NotNull String format,
             final @Nullable Object @Nullable [] params,
             final @Nullable Throwable t) {
-
         if (level.isGreaterOrEqual(Level.INFO)) {
             if (logger.equals(environmentalLogger)) {
                 if (format.contains("transaction(s) not finished")) {
@@ -57,7 +55,9 @@ public class XodusEnvironmentImplLogLevelModifier implements LogLevelModifier {
             }
             if (level == Level.ERROR && t instanceof ExodusException) {
                 if (t.getMessage().contains("cleanFile") || t.getMessage().contains("There is no file by address")) {
-                    logger.trace(marker, "Xodus background job unable to cleanup stale data just now, trying again later");
+                    logger.trace(
+                            marker,
+                            "Xodus background job unable to cleanup stale data just now, trying again later");
                     return FilterReply.DENY;
                 }
             }

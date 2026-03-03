@@ -34,7 +34,7 @@ import java.util.Objects;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ConnectionStartInputImpl
         implements ConnectionStartInput, PluginTaskInput, Supplier<ConnectionStartInputImpl> {
@@ -44,17 +44,16 @@ public class ConnectionStartInputImpl
     private final @NotNull ConnectionInformation connectionInformation;
     private @Nullable ConnectPacket connectPacket;
     private final long connectTimestamp;
-
     public ConnectionStartInputImpl(final @NotNull CONNECT connect, final @NotNull Channel channel) {
         Preconditions.checkNotNull(connect, "connect message must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         this.connect = connect;
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation =
-                ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
-        this.connectTimestamp =
-                Objects.requireNonNullElse(ClientConnectionContext.of(channel).getConnectReceivedTimestamp(),
-                        System.currentTimeMillis());
+        this.clientInformation = ExtensionInformationUtil
+                .getAndSetClientInformation(channel, connect.getClientIdentifier());
+        this.connectTimestamp = Objects.requireNonNullElse(
+                ClientConnectionContext.of(channel).getConnectReceivedTimestamp(),
+                System.currentTimeMillis());
     }
 
     @Override

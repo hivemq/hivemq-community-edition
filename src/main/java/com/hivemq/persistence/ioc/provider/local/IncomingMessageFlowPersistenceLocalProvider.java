@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence.ioc.provider.local;
 
-
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.persistence.local.IncomingMessageFlowInMemoryLocalPersistence;
 import com.hivemq.persistence.local.IncomingMessageFlowLocalPersistence;
@@ -26,8 +25,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 /**
- * The provider which is responsible for creating and providing the
- * local Incoming Message Flow Store.
+ * The provider which is responsible for creating and providing the local Incoming Message Flow Store.
  *
  * @author Dominik Obermaier
  */
@@ -35,11 +33,10 @@ import javax.inject.Provider;
 public class IncomingMessageFlowPersistenceLocalProvider implements Provider<IncomingMessageFlowLocalPersistence> {
 
     private static final Logger log = LoggerFactory.getLogger(IncomingMessageFlowPersistenceLocalProvider.class);
-
     private final Provider<IncomingMessageFlowInMemoryLocalPersistence> memoryLocalPersistenceProvider;
-
     @Inject
-    IncomingMessageFlowPersistenceLocalProvider(final Provider<IncomingMessageFlowInMemoryLocalPersistence> memoryLocalPersistenceProvider) {
+    IncomingMessageFlowPersistenceLocalProvider(
+            final Provider<IncomingMessageFlowInMemoryLocalPersistence> memoryLocalPersistenceProvider) {
         this.memoryLocalPersistenceProvider = memoryLocalPersistenceProvider;
     }
 

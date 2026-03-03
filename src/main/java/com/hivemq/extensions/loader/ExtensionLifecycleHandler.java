@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableCollection;
@@ -30,5 +29,7 @@ public interface ExtensionLifecycleHandler {
      * @param hiveMQExtensionEvents {@link ImmutableCollection} of {@link HiveMQExtensionEvent}s which should be
      *                              processed.
      */
-    @NotNull CompletableFuture<Void> handleExtensionEvents(@NotNull ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents);
+    @NotNull
+    CompletableFuture<Void> handleExtensionEvents(
+            @NotNull ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents);
 }

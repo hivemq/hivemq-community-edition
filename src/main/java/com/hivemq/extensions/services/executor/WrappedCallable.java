@@ -23,22 +23,17 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class WrappedCallable<V> implements Callable<V> {
 
     @NotNull
     private final Callable<V> callable;
-
     @NotNull
     private final ClassLoader classLoader;
-
     @Nullable
     private final CompletableFuture<V> completableFuture;
-
-    WrappedCallable(
-            @NotNull final Callable<V> callable,
-            @NotNull final ClassLoader classLoader,
+    WrappedCallable(@NotNull final Callable<V> callable, @NotNull final ClassLoader classLoader,
             @Nullable final CompletableFuture<V> completableFuture) {
         this.callable = callable;
         this.classLoader = classLoader;
@@ -48,9 +43,7 @@ public class WrappedCallable<V> implements Callable<V> {
     @Nullable
     @Override
     public V call() throws Exception {
-
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
-
         try {
             Thread.currentThread().setContextClassLoader(classLoader);
             final V call = callable.call();

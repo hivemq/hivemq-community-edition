@@ -27,12 +27,8 @@ import io.netty.channel.Channel;
 public class AuthorizerProviderInputImpl extends ClientBasedInputImpl implements AuthorizerProviderInput {
 
     private final @NotNull ServerInformation serverInformation;
-
-    public AuthorizerProviderInputImpl(
-            final @NotNull Channel channel,
-            final @NotNull ServerInformation serverInformation,
-            final @NotNull String clientId) {
-
+    public AuthorizerProviderInputImpl(final @NotNull Channel channel,
+            final @NotNull ServerInformation serverInformation, final @NotNull String clientId) {
         super(clientId, channel);
         this.serverInformation = serverInformation;
     }

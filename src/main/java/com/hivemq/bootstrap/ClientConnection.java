@@ -56,7 +56,6 @@ public class ClientConnection implements ClientConnectionContext {
     private final @NotNull FreePacketIdRanges freePacketIdRanges = new FreePacketIdRanges();
     private final @NotNull Listener connectedListener;
     private volatile @NotNull ClientState clientState;
-
     private @NotNull ProtocolVersion protocolVersion;
     private @NotNull String clientId;
     private boolean cleanStart;
@@ -77,13 +76,10 @@ public class ClientConnection implements ClientConnectionContext {
     private boolean requestResponseInformation;
     private @Nullable Boolean requestProblemInformation;
     private @Nullable SettableFuture<Void> disconnectFuture;
-
     private @Nullable ConnectionAttributes connectionAttributes;
-
     private boolean sendWill;
     private boolean preventLwt;
     private boolean inFlightMessagesSent;
-
     private @Nullable SslClientCertificate authCertificate;
     private @Nullable String authSniHostname;
     private @Nullable String authCipherSuite;
@@ -96,117 +92,61 @@ public class ClientConnection implements ClientConnectionContext {
     private @Nullable Mqtt5UserProperties authUserProperties;
     private @Nullable ScheduledFuture<?> authFuture;
     private @Nullable Boolean clearPasswordAfterAuth;
-
     private @Nullable ClientContextImpl extensionClientContext;
     private @Nullable ClientEventListeners extensionClientEventListeners;
     private @Nullable ClientAuthenticators extensionClientAuthenticators;
     private @Nullable ClientAuthorizers extensionClientAuthorizers;
     private @Nullable ClientInformation extensionClientInformation;
     private @Nullable ConnectionInformation extensionConnectionInformation;
-
     public static @NotNull ClientConnection of(final @NotNull Channel channel) {
-
-        final ClientConnectionContext clientConnectionContext =
-                channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).get();
-
+        final ClientConnectionContext clientConnectionContext = channel
+                .attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).get();
         checkArgument(clientConnectionContext instanceof ClientConnection);
-
         return (ClientConnection) clientConnectionContext;
     }
 
     public static @NotNull ClientConnection from(final @NotNull ClientConnectionContext clientConnectionContext) {
         checkArgument(clientConnectionContext instanceof UndefinedClientConnection);
-
         final UndefinedClientConnection context = (UndefinedClientConnection) clientConnectionContext;
-
         checkNotNull(context.clientId, "Client id must not be null.");
         checkNotNull(context.clientState, "Client state must not be null.");
         checkNotNull(context.protocolVersion, "Protocol version must not be null.");
         checkNotNull(context.connectedListener, "Connected listener must not be null.");
-
-        final ClientConnection clientConnection = new ClientConnection(context.channel,
-                context.publishFlushHandler,
-                context.clientState,
-                context.protocolVersion,
-                context.clientId,
-                context.cleanStart,
-                context.authPermissions,
-                context.connectedListener,
-                context.willPublish,
-                context.clientReceiveMaximum,
-                context.connectKeepAlive,
-                context.queueSizeMaximum,
-                context.clientSessionExpiryInterval,
-                context.connectReceivedTimestamp,
-                context.topicAliasMapping,
-                context.clientIdAssigned,
-                context.incomingPublishesSkipRest,
-                context.requestResponseInformation,
-                context.requestProblemInformation,
-                context.disconnectFuture,
-                context.connectionAttributes,
-                context.sendWill,
-                context.preventLwt,
-                context.authCertificate,
-                context.authSniHostname,
-                context.authCipherSuite,
-                context.authProtocol,
-                context.authUsername,
-                context.authPassword,
-                context.authConnect,
-                context.authMethod,
-                context.authData,
-                context.authUserProperties,
-                context.authFuture,
-                context.maxPacketSizeSend,
-                context.extensionClientContext,
-                context.extensionClientEventListeners,
-                context.extensionClientAuthenticators,
-                context.extensionClientAuthorizers,
-                context.extensionClientInformation,
+        final ClientConnection clientConnection = new ClientConnection(context.channel, context.publishFlushHandler,
+                context.clientState, context.protocolVersion, context.clientId, context.cleanStart,
+                context.authPermissions, context.connectedListener, context.willPublish, context.clientReceiveMaximum,
+                context.connectKeepAlive, context.queueSizeMaximum, context.clientSessionExpiryInterval,
+                context.connectReceivedTimestamp, context.topicAliasMapping, context.clientIdAssigned,
+                context.incomingPublishesSkipRest, context.requestResponseInformation,
+                context.requestProblemInformation, context.disconnectFuture, context.connectionAttributes,
+                context.sendWill, context.preventLwt, context.authCertificate, context.authSniHostname,
+                context.authCipherSuite, context.authProtocol, context.authUsername, context.authPassword,
+                context.authConnect, context.authMethod, context.authData, context.authUserProperties,
+                context.authFuture, context.maxPacketSizeSend, context.extensionClientContext,
+                context.extensionClientEventListeners, context.extensionClientAuthenticators,
+                context.extensionClientAuthorizers, context.extensionClientInformation,
                 context.extensionConnectionInformation);
-
         context.getChannel().attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         return clientConnection;
     }
 
-    public ClientConnection(
-            final @NotNull Channel channel,
-            final @NotNull PublishFlushHandler publishFlushHandler,
-            final @NotNull ClientState clientState,
-            final @NotNull ProtocolVersion protocolVersion,
-            final @NotNull String clientId,
-            final boolean cleanStart,
-            final @Nullable ModifiableDefaultPermissions authPermissions,
-            final @NotNull Listener connectedListener,
-            final @Nullable MqttWillPublish mqttWillPublish,
-            final @Nullable Integer clientReceiveMaximum,
-            final @Nullable Integer connectKeepAlive,
-            final @Nullable Long queueSizeMaximum,
-            final @Nullable Long clientSessionExpiryInterval,
-            final @Nullable Long connectReceivedTimestamp,
-            final @NotNull String @Nullable [] topicAliasMapping,
-            final boolean clientIdAssigned,
-            final boolean incomingPublishesSkipRest,
-            final boolean requestResponseInformation,
-            final @Nullable Boolean requestProblemInformation,
-            final @Nullable SettableFuture<Void> disconnectFuture,
-            final @Nullable ConnectionAttributes connectionAttributes,
-            final boolean sendWill,
-            final boolean preventLwt,
-            final @Nullable SslClientCertificate authCertificate,
-            final @Nullable String authSniHostname,
-            final @Nullable String authCipherSuite,
-            final @Nullable String authProtocol,
-            final @Nullable String authUsername,
-            final byte @Nullable [] authPassword,
-            final @Nullable CONNECT authConnect,
-            final @Nullable String authMethod,
-            final @Nullable ByteBuffer authData,
-            final @Nullable Mqtt5UserProperties authUserProperties,
-            final @Nullable ScheduledFuture<?> authFuture,
-            final @Nullable Long maxPacketSizeSend,
-            final @Nullable ClientContextImpl extensionClientContext,
+    public ClientConnection(final @NotNull Channel channel, final @NotNull PublishFlushHandler publishFlushHandler,
+            final @NotNull ClientState clientState, final @NotNull ProtocolVersion protocolVersion,
+            final @NotNull String clientId, final boolean cleanStart,
+            final @Nullable ModifiableDefaultPermissions authPermissions, final @NotNull Listener connectedListener,
+            final @Nullable MqttWillPublish mqttWillPublish, final @Nullable Integer clientReceiveMaximum,
+            final @Nullable Integer connectKeepAlive, final @Nullable Long queueSizeMaximum,
+            final @Nullable Long clientSessionExpiryInterval, final @Nullable Long connectReceivedTimestamp,
+            final @NotNull String @Nullable [] topicAliasMapping, final boolean clientIdAssigned,
+            final boolean incomingPublishesSkipRest, final boolean requestResponseInformation,
+            final @Nullable Boolean requestProblemInformation, final @Nullable SettableFuture<Void> disconnectFuture,
+            final @Nullable ConnectionAttributes connectionAttributes, final boolean sendWill, final boolean preventLwt,
+            final @Nullable SslClientCertificate authCertificate, final @Nullable String authSniHostname,
+            final @Nullable String authCipherSuite, final @Nullable String authProtocol,
+            final @Nullable String authUsername, final byte @Nullable [] authPassword,
+            final @Nullable CONNECT authConnect, final @Nullable String authMethod, final @Nullable ByteBuffer authData,
+            final @Nullable Mqtt5UserProperties authUserProperties, final @Nullable ScheduledFuture<?> authFuture,
+            final @Nullable Long maxPacketSizeSend, final @Nullable ClientContextImpl extensionClientContext,
             final @Nullable ClientEventListeners extensionClientEventListeners,
             final @Nullable ClientAuthenticators extensionClientAuthenticators,
             final @Nullable ClientAuthorizers extensionClientAuthorizers,
@@ -539,7 +479,6 @@ public class ClientConnection implements ClientConnectionContext {
     @Override
     public synchronized @NotNull ConnectionAttributes setConnectionAttributesIfAbsent(
             final @NotNull ConnectionAttributes connectionAttributes) {
-
         if (this.connectionAttributes == null) {
             this.connectionAttributes = connectionAttributes;
         }
@@ -757,7 +696,6 @@ public class ClientConnection implements ClientConnectionContext {
 
     public @NotNull Optional<String> getChannelIP() {
         final Optional<InetAddress> inetAddress = getChannelAddress();
-
         return inetAddress.map(InetAddress::getHostAddress);
     }
 
@@ -765,12 +703,11 @@ public class ClientConnection implements ClientConnectionContext {
         final Optional<SocketAddress> socketAddress = Optional.ofNullable(channel.remoteAddress());
         if (socketAddress.isPresent()) {
             final SocketAddress sockAddress = socketAddress.get();
-            //If this is not an InetAddress, we're treating this as if there's no address
+            // If this is not an InetAddress, we're treating this as if there's no address
             if (sockAddress instanceof InetSocketAddress) {
                 return Optional.ofNullable(((InetSocketAddress) sockAddress).getAddress());
             }
         }
-
         return Optional.empty();
     }
 
@@ -785,8 +722,8 @@ public class ClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void clearPassword(){
-        if(authPassword == null) {
+    public void clearPassword() {
+        if (authPassword == null) {
             return;
         }
         Arrays.fill(authPassword, (byte) 0);

@@ -32,15 +32,14 @@ public final class MqttBinaryData {
 
     private static final int MAX_LENGTH = 65_535;
     private static final int EMPTY_LENGTH = 2;
-
     private MqttBinaryData() {
     }
 
     /**
      * Decodes binary data from the given byte buffer at the current reader index.
      *
-     * @param byteBuf the byte buffer to decode from.
-     * @return the decoded binary data or null if there are not enough bytes in the byte buffer.
+     * @param  byteBuf the byte buffer to decode from.
+     * @return         the decoded binary data or null if there are not enough bytes in the byte buffer.
      */
     public static byte @Nullable [] decode(final @NotNull ByteBuf byteBuf) {
         if (byteBuf.readableBytes() < EMPTY_LENGTH) {
@@ -52,7 +51,6 @@ public final class MqttBinaryData {
         }
         final byte[] binary = new byte[length];
         byteBuf.readBytes(binary);
-
         return binary;
     }
 
@@ -70,9 +68,9 @@ public final class MqttBinaryData {
     /**
      * Decodes binary data from the given byte buffer at the current reader index.
      *
-     * @param byteBuf the byte buffer to decode from.
-     * @param direct  whether the created byte buffer should be direct.
-     * @return the decoded binary data or null if there are not enough bytes in the byte buffer.
+     * @param  byteBuf the byte buffer to decode from.
+     * @param  direct  whether the created byte buffer should be direct.
+     * @return         the decoded binary data or null if there are not enough bytes in the byte buffer.
      */
     public static @Nullable ByteBuffer decode(final @NotNull ByteBuf byteBuf, final boolean direct) {
         if (byteBuf.readableBytes() < EMPTY_LENGTH) {
@@ -131,8 +129,8 @@ public final class MqttBinaryData {
     /**
      * Checks if the given byte array can be encoded as binary data.
      *
-     * @param binary the byte array to check.
-     * @return whether the byte array can be encoded as binary data.
+     * @param  binary the byte array to check.
+     * @return        whether the byte array can be encoded as binary data.
      */
     public static boolean isInRange(final byte @NotNull [] binary) {
         return binary.length <= MAX_LENGTH;
@@ -141,8 +139,8 @@ public final class MqttBinaryData {
     /**
      * Checks if the given byte buffer can be encoded as binary data.
      *
-     * @param byteBuffer the byte buffer to check.
-     * @return whether the byte buffer can be encoded as binary data.
+     * @param  byteBuffer the byte buffer to check.
+     * @return            whether the byte buffer can be encoded as binary data.
      */
     public static boolean isInRange(final @NotNull ByteBuffer byteBuffer) {
         return byteBuffer.remaining() <= MAX_LENGTH;
@@ -153,8 +151,8 @@ public final class MqttBinaryData {
      * <p>
      * This method does not check if the byte array can be encoded as binary data.
      *
-     * @param binary the byte array to calculate the encoded length for.
-     * @return the encoded length of the byte array.
+     * @param  binary the byte array to calculate the encoded length for.
+     * @return        the encoded length of the byte array.
      */
     public static int encodedLength(final byte @NotNull [] binary) {
         return EMPTY_LENGTH + binary.length;
@@ -169,8 +167,8 @@ public final class MqttBinaryData {
      * <p>
      * This method does not check if the byte buffer can be encoded as binary data.
      *
-     * @param byteBuffer the byte buffer to calculate the encoded length for.
-     * @return the encoded length of the byte buffer.
+     * @param  byteBuffer the byte buffer to calculate the encoded length for.
+     * @return            the encoded length of the byte buffer.
      */
     public static int encodedLength(final @NotNull ByteBuffer byteBuffer) {
         return EMPTY_LENGTH + byteBuffer.remaining();

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableMap;
@@ -48,22 +47,19 @@ public class ConnectionAttributesTest {
     private @NotNull ConnectionAttributes connectionAttributes;
     private @NotNull ClientConnection clientConnection;
     private @NotNull Channel channel;
-
     @Before
     public void setUp() {
         connectionAttributes = new ConnectionAttributes(1000);
         channel = mock(Channel.class);
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
-        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
-                clientConnection));
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME))
+                .thenReturn(new TestChannelAttribute<>(clientConnection));
     }
 
     @Test
     public void test_getInstanceIfPresent_present() {
         clientConnection.setConnectionAttributesIfAbsent(connectionAttributes);
-
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
-
         assertEquals(connectionAttributes, returnConnectionAttributes);
     }
 
@@ -71,18 +67,14 @@ public class ConnectionAttributesTest {
     public void test_getInstanceIfPresent_not_present() {
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
-
         assertNull(returnConnectionAttributes);
     }
 
     @Test
     public void test_getInstance_present() {
         clientConnection.setConnectionAttributesIfAbsent(connectionAttributes);
-
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstance(channel);
-
         assertEquals(connectionAttributes, returnConnectionAttributes);
     }
 
@@ -90,9 +82,7 @@ public class ConnectionAttributesTest {
     public void test_getInstance_not_present() {
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-
         final ConnectionAttributes returnConnectionAttributes = ConnectionAttributes.getInstance(channel);
-
         assertNotNull(returnConnectionAttributes);
     }
 
@@ -100,9 +90,7 @@ public class ConnectionAttributesTest {
     public void test_put() {
         final String key = "test.key";
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         connectionAttributes.put(key, value);
-
         // checks if test passes without exceptions
     }
 
@@ -110,10 +98,8 @@ public class ConnectionAttributesTest {
     public void test_put_present() {
         final String key = "test.key";
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         connectionAttributes.put(key, value);
         connectionAttributes.put(key, value);
-
         // checks if test passes without exceptions
     }
 
@@ -121,16 +107,12 @@ public class ConnectionAttributesTest {
     public void test_put_readOnly() {
         final String key = "test.key";
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         final ByteBuffer putValue = value.duplicate();
         connectionAttributes.put(key, putValue);
-
         byte i = putValue.get(0);
         i++;
         putValue.put(0, i);
-
         final Optional<ByteBuffer> getValue = connectionAttributes.get(key);
-
         assertTrue(getValue.isPresent());
         assertEquals(value, getValue.get());
     }
@@ -140,7 +122,6 @@ public class ConnectionAttributesTest {
     public void test_put_null_key() {
         final String key = null;
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         connectionAttributes.put(key, value);
     }
 
@@ -149,7 +130,6 @@ public class ConnectionAttributesTest {
     public void test_put_null_value() {
         final String key = "test.key";
         final ByteBuffer value = null;
-
         connectionAttributes.put(key, value);
     }
 
@@ -157,11 +137,8 @@ public class ConnectionAttributesTest {
     public void test_get() {
         final String key = "test.key";
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         connectionAttributes.put(key, value);
-
         final Optional<ByteBuffer> returnValue = connectionAttributes.get(key);
-
         assertTrue(returnValue.isPresent());
         assertEquals(value, returnValue.get());
     }
@@ -169,9 +146,7 @@ public class ConnectionAttributesTest {
     @Test
     public void test_get_not_present() {
         final String key = "test.key";
-
         final Optional<ByteBuffer> returnValue = connectionAttributes.get(key);
-
         assertFalse(returnValue.isPresent());
     }
 
@@ -179,38 +154,31 @@ public class ConnectionAttributesTest {
     public void test_get_immutable() {
         final String key = "test.key";
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         connectionAttributes.put(key, value);
-
         final Optional<ByteBuffer> returnValue1 = connectionAttributes.get(key);
         assertTrue(returnValue1.isPresent());
         assertEquals(value, returnValue1.get());
-
         returnValue1.get().put(0, (byte) 10);
-
     }
 
     @Test(expected = NullPointerException.class)
     @SuppressWarnings("ConstantConditions")
     public void test_get_null_key() {
         final String key = null;
-
         connectionAttributes.get(key);
     }
 
     @Test
     public void test_getAll() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of("test.key1",
+        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
+                "test.key1",
                 ByteBuffer.wrap("test.value1".getBytes()),
                 "test.key2",
                 ByteBuffer.wrap("test.value2".getBytes()));
-
         for (final Map.Entry<String, ByteBuffer> value : values.entrySet()) {
             connectionAttributes.put(value.getKey(), value.getValue());
         }
-
         final Optional<Map<String, ByteBuffer>> returnValues = connectionAttributes.getAll();
-
         assertTrue(returnValues.isPresent());
         assertAllEquals(values, returnValues.get());
     }
@@ -218,28 +186,23 @@ public class ConnectionAttributesTest {
     @Test
     public void test_getAll_empty() {
         final Optional<Map<String, ByteBuffer>> returnValues = connectionAttributes.getAll();
-
         assertFalse(returnValues.isPresent());
     }
 
     @Test
     public void test_getAll_immutable() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of("test.key1",
+        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
+                "test.key1",
                 ByteBuffer.wrap("test.value1".getBytes()),
                 "test.key2",
                 ByteBuffer.wrap("test.value2".getBytes()));
-
         for (final Map.Entry<String, ByteBuffer> value : values.entrySet()) {
             connectionAttributes.put(value.getKey(), value.getValue());
         }
-
         final Optional<Map<String, ByteBuffer>> returnValues1 = connectionAttributes.getAll();
-
         assertTrue(returnValues1.isPresent());
         assertAllEquals(values, returnValues1.get());
-
         final AtomicInteger exceptions = new AtomicInteger(0);
-
         for (final String key : values.keySet()) {
             try {
                 returnValues1.get().get(key).put(0, (byte) 10);
@@ -247,9 +210,7 @@ public class ConnectionAttributesTest {
                 exceptions.incrementAndGet();
             }
         }
-
         final Optional<Map<String, ByteBuffer>> returnValues2 = connectionAttributes.getAll();
-
         assertTrue(returnValues2.isPresent());
         assertAllEquals(values, returnValues2.get());
         assertEquals(values.size(), exceptions.get());
@@ -259,11 +220,8 @@ public class ConnectionAttributesTest {
     public void test_remove() {
         final String key = "test.key";
         final ByteBuffer value = ByteBuffer.wrap("test.value".getBytes());
-
         connectionAttributes.put(key, value);
-
         final Optional<ByteBuffer> returnValue = connectionAttributes.remove(key);
-
         assertTrue(returnValue.isPresent());
         assertEquals(value, returnValue.get());
     }
@@ -271,9 +229,7 @@ public class ConnectionAttributesTest {
     @Test
     public void test_remove_not_present() {
         final String key = "test.key";
-
         final Optional<ByteBuffer> returnValue = connectionAttributes.remove(key);
-
         assertFalse(returnValue.isPresent());
     }
 
@@ -281,7 +237,6 @@ public class ConnectionAttributesTest {
     @SuppressWarnings("ConstantConditions")
     public void test_remove_null_key() {
         final String key = null;
-
         connectionAttributes.remove(key);
     }
 
@@ -291,19 +246,15 @@ public class ConnectionAttributesTest {
         final ByteBuffer value1 = ByteBuffer.wrap("test.value1".getBytes());
         final String key2 = "test.key2";
         final ByteBuffer value2 = ByteBuffer.wrap("test.value2".getBytes());
-
         connectionAttributes.put(key1, value1);
         connectionAttributes.put(key2, value2);
-
         connectionAttributes.clear();
-
         assertFalse(connectionAttributes.getAll().isPresent());
     }
 
     @Test
     public void test_clear_empty() {
         connectionAttributes.clear();
-
         // checks if test passes without exceptions
     }
 
@@ -315,9 +266,7 @@ public class ConnectionAttributesTest {
     @Test
     public void test_limit_matched() {
         connectionAttributes.put("key", ByteBuffer.wrap(RandomUtils.nextBytes(1000)));
-
         final Optional<ByteBuffer> key = connectionAttributes.get("key");
-
         assertTrue(key.isPresent());
         assertEquals(1000, key.get().remaining());
     }
@@ -325,9 +274,7 @@ public class ConnectionAttributesTest {
     @Test
     public void test_limit_smaller() {
         connectionAttributes.put("key", ByteBuffer.wrap(RandomUtils.nextBytes(999)));
-
         final Optional<ByteBuffer> key = connectionAttributes.get("key");
-
         assertTrue(key.isPresent());
         assertEquals(999, key.get().remaining());
     }

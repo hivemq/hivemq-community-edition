@@ -29,17 +29,14 @@ public class Mqtt3UnsubackEncoder implements MqttEncoder<UNSUBACK> {
     public static final int ENCODED_UNSUBACK_SIZE = 4;
     private static final byte UNSUBACK_FIXED_HEADER = (byte) 0b1011_0000;
     private static final byte UNSUBACK_REMAINING_LENGTH = 0b0000_0010;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull UNSUBACK msg,
             final @NotNull ByteBuf out) {
-
         out.writeByte(UNSUBACK_FIXED_HEADER);
-        //The remaining length is always static for UNSUBACKs
+        // The remaining length is always static for UNSUBACKs
         out.writeByte(UNSUBACK_REMAINING_LENGTH);
-
         out.writeShort(msg.getPacketIdentifier());
     }
 

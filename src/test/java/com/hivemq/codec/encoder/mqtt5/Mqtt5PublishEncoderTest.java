@@ -45,7 +45,6 @@ import static org.junit.Assert.assertEquals;
 public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
 
     private HivemqId hiveMQId;
-
     @Before
     public void setUp() throws Exception {
         hiveMQId = new HivemqId();
@@ -55,55 +54,48 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
 
     @Test
     public void test_encode_all() {
-
         ClientConnection.of(channel).setMaxPacketSizeSend(200L);
-
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0000,
-                //   remaining length (157)
+                // remaining length (157)
                 (byte) (134 + 23), 1,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   properties (143)
+                // properties (143)
                 (byte) (134 + 9), 1,
-                //     message expiry interval
+                // message expiry interval
                 0x02, 0, 0, 0, 10,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0,
-                //     content type
+                // content type
                 0x03, 0, 13, 'm', 'y', 'C', 'o', 'n', 't', 'e', 'n', 't', 'T', 'y', 'p', 'e',
-                //     response topic
+                // response topic
                 0x08, 0, 13, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e', 'T', 'o', 'p', 'i', 'c',
-                //     correlation data
+                // correlation data
                 0x09, 0, 5, 1, 2, 3, 4, 5,
-                //     user properties
+                // user properties
                 0x26, 0, 5, 't', 'e', 's', 't', '1', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '1', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '1', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '1', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '1', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 5, 't', 'e', 's', 't', '1', 0, 5, 'v', 'a', 'l', 'u', 'e', //
-                //     subscription identifier
+                // subscription identifier
                 0x0B, 10, 0x0B, 20, 0x0B, 30,
                 // payload
                 1, 2, 3, 4, 5};
-
         final MqttUserProperty userProperty = new MqttUserProperty("test1", "value");
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(userProperty,
-                userProperty,
-                userProperty,
-                userProperty,
-                userProperty,
-                userProperty);
-
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties
+                .of(userProperty, userProperty, userProperty, userProperty, userProperty, userProperty);
         final TreeSet<Integer> identifiers = new TreeSet<>();
         identifiers.add(10);
         identifiers.add(20);
         identifiers.add(30);
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[]{1, 2, 3, 4, 5},
                 QoS.AT_MOST_ONCE,
@@ -119,7 +111,6 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 false,
                 true,
                 ImmutableList.copyOf(identifiers));
-
         encodeTestBufferSize(expected, publish);
     }
 
@@ -127,21 +118,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_simple() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0000,
-                //   remaining length
+                // remaining length
                 15,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0,
                 // payload
                 1, 2, 3, 4, 5};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[]{1, 2, 3, 4, 5},
                 QoS.AT_MOST_ONCE,
@@ -157,7 +148,6 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 false,
                 true,
                 null);
-
         encodeTestBufferSize(expected, publish);
     }
 
@@ -165,19 +155,19 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_minimum() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0000,
-                //   remaining length
+                // remaining length
                 5,
                 // variable header
-                //   topic name
+                // topic name
                 0, 1, 't',
-                //   properties
+                // properties
                 0,
                 // payload
                 1};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "t",
                 new byte[]{1},
                 QoS.AT_MOST_ONCE,
@@ -193,7 +183,6 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 false,
                 true,
                 null);
-
         encodeTestBufferSize(expected, publish);
     }
 
@@ -201,19 +190,19 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_retainTrue() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0001,
-                //   remaining length
+                // remaining length
                 10,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_MOST_ONCE,
@@ -236,21 +225,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_retainFalse() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_1010,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -273,21 +262,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_isDupFalse() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -310,21 +299,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_isDupTrue() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_1010,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 // Packet Identifier
                 0, 17,
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -347,21 +336,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_formatIndicatorUtf8() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -384,23 +373,23 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_expiryInterval() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 17,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 7,
-                //     message expiry interval
+                // message expiry interval
                 0x02, 0, 0, 0x3, (byte) 0xE8,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -416,8 +405,6 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 false,
                 true,
                 null);
-
-
         encodeTestBufferSize(expected, publish);
     }
 
@@ -425,23 +412,23 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_contentType() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 28,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 18,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1,
-                //     content type
+                // content type
                 0x03, 0, 13, 'm', 'y', 'C', 'o', 'n', 't', 'e', 'n', 't', 'T', 'y', 'p', 'e'};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -464,23 +451,23 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_responseTopic() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 28,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 18,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1,
-                //     response topic
+                // response topic
                 0x08, 0, 13, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e', 'T', 'o', 'p', 'i', 'c'};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -499,29 +486,28 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
         encodeTestBufferSize(expected, publish);
     }
 
-
     @Test
     public void test_encode_correlationData() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 20,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 10,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1,
-                //     correlation data
+                // correlation data
                 0x09, 0, 5, 1, 2, 3, 4, 5};
-
         final byte[] correlationData = {1, 2, 3, 4, 5};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -544,19 +530,19 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_withoutTopicAlias() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 10,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 0};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -579,19 +565,19 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_withoutTopicAliasUsingDefault() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_1010,
-                //   remaining length
+                // remaining length
                 10,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 2,
-                //   properties
+                // properties
                 0};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -614,67 +600,26 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_userProperties() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 46,
                 // variable header
-                //   topic name
-                0,
-                5,
-                't',
-                'o',
-                'p',
-                'i',
-                'c',
-                //   Packet Identifier
-                0,
-                15,
-                //   properties
+                // topic name
+                0, 5, 't', 'o', 'p', 'i', 'c',
+                // Packet Identifier
+                0, 15,
+                // properties
                 36,
-                //     payload format indicator
-                0x01,
-                1,
-                //     user properties
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                'r',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                'y',
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                'r',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                'y'};
-
+                // payload format indicator
+                0x01, 1,
+                // user properties
+                0x26, 0, 4, 'u', 's', 'e', 'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', 0x26, 0, 4, 'u', 's', 'e',
+                'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y'};
         final MqttUserProperty property = new MqttUserProperty("user", "property");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(property, property);
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -695,72 +640,29 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
 
     @Test
     public void test_encode_userProperties_request_problem_information_false() {
-
         ClientConnection.of(channel).setRequestProblemInformation(false);
-
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 46,
                 // variable header
-                //   topic name
-                0,
-                5,
-                't',
-                'o',
-                'p',
-                'i',
-                'c',
-                //   Packet Identifier
-                0,
-                15,
-                //   properties
+                // topic name
+                0, 5, 't', 'o', 'p', 'i', 'c',
+                // Packet Identifier
+                0, 15,
+                // properties
                 36,
-                //     payload format indicator
-                0x01,
-                1,
-                //     user properties
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                'r',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                'y',
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                'r',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                'y'};
-
+                // payload format indicator
+                0x01, 1,
+                // user properties
+                0x26, 0, 4, 'u', 's', 'e', 'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', 0x26, 0, 4, 'u', 's', 'e',
+                'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y'};
         final MqttUserProperty property = new MqttUserProperty("user", "property");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(property, property);
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -776,7 +678,6 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 false,
                 true,
                 null);
-
         // Do not omit reason string because it is a PUBLISH packet!
         encodeTestBufferSize(expected, publish);
     }
@@ -785,21 +686,21 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_singleSubscriptionIdentifier() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 2,
                 // subscription identifier
                 0x0b, 3};
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -822,28 +723,26 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_multipleSubscriptionIdentifiers() {
         final byte[] expected = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 14,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   Packet Identifier
+                // Packet Identifier
                 0, 15,
-                //   properties
+                // properties
                 4,
                 // subscription identifier
                 0x0b, 3,
                 // subscription identifier
                 0x0b, 4};
-
         final TreeSet<Integer> identifiers = new TreeSet<>();
         identifiers.add(3);
         identifiers.add(4);
-
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -866,50 +765,49 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     public void test_encode_qos() {
         final byte[] expectedQos0 = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0000,
-                //   remaining length
+                // remaining length
                 10,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-
         final byte[] expectedQos1 = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0010,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 // Packet Identifier
                 0, 7,
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-
         final byte[] expectedQos2 = {
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0100,
-                //   remaining length
+                // remaining length
                 12,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
                 // Packet Identifier
                 0, 7,
-                //   properties
+                // properties
                 2,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0};
-        final PUBLISH publishQos0 = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publishQos0 = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_MOST_ONCE,
@@ -926,8 +824,8 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 true,
                 null);
         encodeTestBufferSize(expectedQos0, publishQos0);
-
-        final PUBLISH publishQos1 = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publishQos1 = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -944,8 +842,8 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 true,
                 null);
         encodeTestBufferSize(expectedQos1, publishQos1);
-
-        final PUBLISH publishQos2 = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publishQos2 = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.EXACTLY_ONCE,
@@ -967,30 +865,28 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
     @Test
     public void test_encode_max_packet_size_exceeded() {
         final ByteBuf expected = Unpooled.buffer(MAXIMUM_PACKET_SIZE_LIMIT, MAXIMUM_PACKET_SIZE_LIMIT + 3);
-
         // 5 header + remaining length, 7 topic, 4 property length, 2 payload format, 5 payload
         // exceed packet size by 3 bytes since correlation data header is to much
         final int correlationDataLength = MAXIMUM_PACKET_SIZE_LIMIT - 5 - 7 - 4 - 2 - 5;
-
         // fixed header
-        //   type, flags
+        // type, flags
         expected.writeByte(0b0011_0000);
-        //   remaining length
+        // remaining length
         expected.writeByte(0xff);
         expected.writeByte(0xff);
         expected.writeByte(0xff);
         expected.writeByte(0x7f);
         // variable header
-        //   topic name
+        // topic name
         expected.writeBytes(new byte[]{0, 5, 't', 'o', 'p', 'i', 'c'});
-        //   properties
+        // properties
         expected.writeByte(0xef);
         expected.writeByte(0xff);
         expected.writeByte(0xff);
         expected.writeByte(0x7f);
-        //     payload format indicator
+        // payload format indicator
         expected.writeBytes(new byte[]{PAYLOAD_FORMAT_INDICATOR, 0});
-        //     correlation data
+        // correlation data
         expected.writeByte(CORRELATION_DATA);
         expected.writeShort(correlationDataLength);
         for (int i = 0; i < correlationDataLength; i++) {
@@ -998,11 +894,10 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
         }
         // payload
         expected.writeBytes(new byte[]{1, 2, 3, 4, 5});
-
         final byte[] correlationData = ByteBuffer.wrap(expected.array(), 21, correlationDataLength).array();
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user", "property"));
-
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
+                hiveMQId.get(),
                 "topic",
                 new byte[]{1, 2, 3, 4, 5},
                 QoS.AT_MOST_ONCE,
@@ -1018,13 +913,10 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 false,
                 true,
                 null);
-
         ClientConnection.of(channel).setClientId("clientid");
         channel.writeOutbound(publish);
         final ByteBuf buf = channel.readOutbound();
         assertEquals(0, buf.readableBytes());
-
         expected.release();
     }
-
 }

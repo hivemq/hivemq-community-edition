@@ -29,20 +29,19 @@ public class Mqtt3DisconnectEncoder implements MqttEncoder<DISCONNECT> {
     public static final int ENCODED_DISCONNECT_SIZE = 2;
     private static final byte DISCONNECT_FIXED_HEADER = (byte) 0b1110_0000;
     private static final byte DISCONNECT_REMAINING_LENGTH = 0b0000_0000;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull DISCONNECT msg,
             final @NotNull ByteBuf out) {
-
         out.writeByte(DISCONNECT_FIXED_HEADER);
         out.writeByte(DISCONNECT_REMAINING_LENGTH);
     }
 
     @Override
     public int bufferSize(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull DISCONNECT msg) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull DISCONNECT msg) {
         return ENCODED_DISCONNECT_SIZE;
     }
 }

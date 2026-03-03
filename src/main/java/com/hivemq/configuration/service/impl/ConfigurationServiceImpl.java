@@ -37,9 +37,7 @@ public class ConfigurationServiceImpl implements FullConfigurationService {
     private final SecurityConfigurationService securityConfigurationService;
     private final UsageStatisticsConfig usageStatisticsConfig;
     private final PersistenceConfigurationService persistenceConfigurationService;
-
-    public ConfigurationServiceImpl(
-            final ListenerConfigurationService listenerConfigurationService,
+    public ConfigurationServiceImpl(final ListenerConfigurationService listenerConfigurationService,
             final MqttConfigurationService mqttConfigurationService,
             final RestrictionsConfigurationService restrictionsConfigurationService,
             final SecurityConfigurationService securityConfigurationService,

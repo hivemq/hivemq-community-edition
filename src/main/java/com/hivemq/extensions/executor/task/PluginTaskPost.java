@@ -34,11 +34,11 @@ public interface PluginTaskPost<O extends PluginTaskOutput> {
      */
     void pluginPost(@NotNull final O pluginOutput);
 
-
     /**
      * A tangible identifier for the async option.
      *
      * @return the string that is used to calculate the Thread number, e.g. a ClientId.
      */
-    @NotNull String getIdentifier();
+    @NotNull
+    String getIdentifier();
 }

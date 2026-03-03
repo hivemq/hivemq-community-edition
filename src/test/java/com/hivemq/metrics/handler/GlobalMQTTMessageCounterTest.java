@@ -54,7 +54,6 @@ public class GlobalMQTTMessageCounterTest {
 
     private @NotNull MetricRegistry metricRegistry;
     private @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
-
     @Before
     public void setUp() throws Exception {
         metricRegistry = new MetricRegistry();
@@ -64,155 +63,115 @@ public class GlobalMQTTMessageCounterTest {
 
     @Test
     public void test_incoming_connects() {
-        globalMQTTMessageCounter.countInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                .withClientIdentifier("clientID")
-                .build());
-
+        globalMQTTMessageCounter.countInbound(
+                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                        .withClientIdentifier("clientID").build());
         final Counter totalIncoming = getCounter(HiveMQMetrics.INCOMING_CONNECT_COUNT.name());
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncoming.getCount());
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_versioned_connects() {
-        globalMQTTMessageCounter.countInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                .withClientIdentifier("clientID1")
-                .build());
-        globalMQTTMessageCounter.countInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1)
-                .withClientIdentifier("clientID2")
-                .build());
+        globalMQTTMessageCounter.countInbound(
+                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                        .withClientIdentifier("clientID1").build());
+        globalMQTTMessageCounter.countInbound(
+                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1)
+                        .withClientIdentifier("clientID2").build());
         globalMQTTMessageCounter.countInbound(new CONNECT.Mqtt5Builder().withClientIdentifier("clientID3").build());
         globalMQTTMessageCounter.countInbound(new CONNECT.Mqtt5Builder().withClientIdentifier("clientID4").build());
-
         final Counter totalIncoming = getCounter(HiveMQMetrics.INCOMING_CONNECT_COUNT.name());
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(4, totalIncoming.getCount());
         assertEquals(4, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_disconnects() {
         globalMQTTMessageCounter.countInbound(new DISCONNECT());
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_pingreq() {
         globalMQTTMessageCounter.countInbound(new PINGREQ());
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         globalMQTTMessageCounter.countInbound(new DISCONNECT());
-
         assertEquals(2, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
-
 
     @Test
     public void test_incoming_pubacks() {
         globalMQTTMessageCounter.countInbound(new PUBACK(1));
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_pubcomps() {
         globalMQTTMessageCounter.countInbound(new PUBCOMP(1));
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_pubrels() {
         globalMQTTMessageCounter.countInbound(new PUBREL(1));
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_pubrecs() {
         globalMQTTMessageCounter.countInbound(new PUBREC(1));
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_incoming_publishes() {
         globalMQTTMessageCounter.countInbound(TestMessageUtil.createMqtt3Publish());
-
         final Counter totalIncomingPublishes = getCounter(HiveMQMetrics.INCOMING_PUBLISH_COUNT.name());
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingPublishes.getCount());
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_PUBLISH_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_subscribe() throws Exception {
-
         globalMQTTMessageCounter.countInbound(new SUBSCRIBE(ImmutableList.of(), 1));
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_unsubscribes() throws Exception {
         globalMQTTMessageCounter.countInbound(new UNSUBSCRIBE(Lists.newArrayList("topic"), 1));
-
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_incoming_total_messages() {
         globalMQTTMessageCounter.countInbound(new PINGREQ());
-
         final Counter totalIncomingPublishes = getCounter(HiveMQMetrics.INCOMING_PUBLISH_COUNT.name());
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(0, totalIncomingPublishes.getCount());
         assertEquals(1, totalIncomingMessages.getCount());
     }
@@ -221,93 +180,68 @@ public class GlobalMQTTMessageCounterTest {
     public void test_incoming_total_messages_with_publish() {
         globalMQTTMessageCounter.countInbound(new PINGREQ());
         globalMQTTMessageCounter.countInbound(TestMessageUtil.createMqtt3Publish());
-
         final Counter totalIncomingPublishes = getCounter(HiveMQMetrics.INCOMING_PUBLISH_COUNT.name());
         final Counter totalIncomingMessages = getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalIncomingPublishes.getCount());
         assertEquals(2, totalIncomingMessages.getCount());
     }
 
-
     @Test
     public void test_count_outgoing_connacks() throws Exception {
-        globalMQTTMessageCounter.countOutbound(CONNACK.builder()
-                .withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED)
-                .build());
-
+        globalMQTTMessageCounter
+                .countOutbound(CONNACK.builder().withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED).build());
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_pingresp() {
         globalMQTTMessageCounter.countOutbound(new PINGRESP());
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_puback() {
         globalMQTTMessageCounter.countOutbound(new PUBACK(1));
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_pubcomp() {
         globalMQTTMessageCounter.countOutbound(new PUBCOMP(1));
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_pubrec() {
         globalMQTTMessageCounter.countOutbound(new PUBREC(1));
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_pubrel() {
         globalMQTTMessageCounter.countOutbound(new PUBREL(1));
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_publishes() {
         globalMQTTMessageCounter.countOutbound(TestMessageUtil.createMqtt3Publish());
-
         final Counter totalOutgoingPublishes = getCounter(HiveMQMetrics.OUTGOING_PUBLISH_COUNT.name());
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingPublishes.getCount());
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_PUBLISH_COUNT.name()).getCount());
     }
@@ -315,22 +249,16 @@ public class GlobalMQTTMessageCounterTest {
     @Test
     public void test_count_outgoing_suback() throws Exception {
         globalMQTTMessageCounter.countOutbound(new SUBACK(1, Mqtt5SubAckReasonCode.GRANTED_QOS_0));
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
     @Test
     public void test_count_outgoing_unsuback() {
         globalMQTTMessageCounter.countOutbound(new UNSUBACK(0));
-
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingMessages.getCount());
-
         assertEquals(0, getCounter(HiveMQMetrics.INCOMING_MESSAGE_COUNT.name()).getCount());
     }
 
@@ -338,16 +266,15 @@ public class GlobalMQTTMessageCounterTest {
     public void test_count_outgoing_total_messages() {
         globalMQTTMessageCounter.countOutbound(TestMessageUtil.createMqtt3Publish());
         globalMQTTMessageCounter.countOutbound(new PINGRESP());
-
         final Counter totalOutgoingPublishes = getCounter(HiveMQMetrics.OUTGOING_PUBLISH_COUNT.name());
         final Counter totalOutgoingMessages = getCounter(HiveMQMetrics.OUTGOING_MESSAGE_COUNT.name());
-
         assertEquals(1, totalOutgoingPublishes.getCount());
         assertEquals(2, totalOutgoingMessages.getCount());
     }
 
     public Counter getCounter(final String meterName) {
         final Set<Map.Entry<String, Counter>> entries = metricRegistry.getCounters(new MetricFilter() {
+
             @Override
             public boolean matches(final String name, final Metric metric) {
                 return name.equals(meterName);

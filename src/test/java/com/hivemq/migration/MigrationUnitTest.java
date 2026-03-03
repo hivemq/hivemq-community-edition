@@ -28,5 +28,4 @@ public class MigrationUnitTest {
     public void test_payloads_first() {
         assertEquals(MigrationUnit.values()[0], MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD);
     }
-
 }

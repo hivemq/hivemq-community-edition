@@ -26,5 +26,4 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 public class TCPListenerEntity extends ListenerEntity {
-
 }

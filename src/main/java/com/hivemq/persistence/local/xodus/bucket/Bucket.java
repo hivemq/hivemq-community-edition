@@ -28,7 +28,6 @@ public class Bucket {
     private final @NotNull Environment environment;
     private final @NotNull Store store;
     private final @NotNull AtomicBoolean closing = new AtomicBoolean(false);
-
     public Bucket(@NotNull final Environment environment, @NotNull final Store store) {
         this.environment = environment;
         this.store = store;

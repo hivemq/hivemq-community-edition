@@ -33,12 +33,9 @@ public class PubcompInboundInputImpl implements PubcompInboundInput, PluginTaskI
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull PubcompPacketImpl pubcompPacket;
-
-    public PubcompInboundInputImpl(
-            final @NotNull ClientInformation clientInformation,
+    public PubcompInboundInputImpl(final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull PubcompPacketImpl pubcompPacket) {
-
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.pubcompPacket = pubcompPacket;

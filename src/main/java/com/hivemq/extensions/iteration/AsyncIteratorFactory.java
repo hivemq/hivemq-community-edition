@@ -32,11 +32,11 @@ import java.util.concurrent.Executors;
 public class AsyncIteratorFactory {
 
     private final @NotNull ExecutorService executorService;
-
     @Inject
     public AsyncIteratorFactory(final @NotNull ShutdownHooks shutdownHooks) {
         executorService = Executors.newFixedThreadPool(4, ThreadFactoryUtil.create("async-iterator-executor-%d"));
         shutdownHooks.add(new HiveMQShutdownHook() {
+
             @Override
             public @NotNull String name() {
                 return "Async Iterator Executor Shutdown";
@@ -58,8 +58,6 @@ public class AsyncIteratorFactory {
     public <V> AsyncIterator<V> createIterator(
             @NotNull final FetchCallback<V> fetchCallback,
             @NotNull final AsyncIterator.ItemCallback<V> iterationCallback) {
-
         return new AsyncLocalChunkIterator<V>(fetchCallback, iterationCallback, executorService);
     }
-
 }

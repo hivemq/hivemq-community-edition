@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
  * @author Lukas Brandl
  */
 public class SegmentKeyUtilTest {
+
     @Test
     public void test_segnemt_key_util() {
         assertEquals("topic", SegmentKeyUtil.segmentKey("topic", 1));
@@ -61,7 +62,6 @@ public class SegmentKeyUtilTest {
         assertTrue(SegmentKeyUtil.containsWildcard("#"));
         assertTrue(SegmentKeyUtil.containsWildcard("/#"));
         assertTrue(SegmentKeyUtil.containsWildcard("/+"));
-
         assertFalse(SegmentKeyUtil.containsWildcard("topic"));
     }
 }

@@ -25,7 +25,6 @@ import java.util.Map;
 public class MultipleChunkResult<V> {
 
     private final @NotNull Map<Integer, BucketChunkResult<V>> values;
-
     public MultipleChunkResult(@NotNull final Map<Integer, BucketChunkResult<V>> values) {
         this.values = values;
     }

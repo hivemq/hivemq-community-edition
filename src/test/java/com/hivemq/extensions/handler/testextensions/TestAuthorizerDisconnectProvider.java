@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler.testextensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -32,15 +31,15 @@ import java.util.concurrent.CountDownLatch;
 public final class TestAuthorizerDisconnectProvider implements AuthorizerProvider {
 
     private final @NotNull CountDownLatch countDownLatch;
-
     public TestAuthorizerDisconnectProvider(final @NotNull CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
 
     @Override
     public @NotNull Authorizer getAuthorizer(final @NotNull AuthorizerProviderInput authorizerProviderInput) {
-        //noinspection Convert2Lambda
+        // noinspection Convert2Lambda
         return new SubscriptionAuthorizer() {
+
             @Override
             public void authorizeSubscribe(
                     final @NotNull SubscriptionAuthorizerInput subscriptionAuthorizerInput,

@@ -41,58 +41,43 @@ public class LocalPersistenceFileUtilTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private File systemFolder;
-
     @Before
     public void setUp() throws Exception {
         systemFolder = temporaryFolder.newFolder();
     }
 
-
     @Test
     public void test_is_singleton() {
-        final Injector injector = Guice.createInjector(new LazySingletonModule(),
+        final Injector injector = Guice.createInjector(
+                new LazySingletonModule(),
                 new SystemInformationModule(new SystemInformationImpl(false)));
         final LocalPersistenceFileUtil instance = injector.getInstance(LocalPersistenceFileUtil.class);
         final LocalPersistenceFileUtil instance2 = injector.getInstance(LocalPersistenceFileUtil.class);
-
         assertSame(instance, instance2);
     }
 
-
     @Test
     public void test_create_persistence_dir_if_it_doesnt_exist() throws Exception {
-
         final File dataFolder = temporaryFolder.newFolder();
         final SystemInformation systemInfoForTest = createInfoForTest(dataFolder);
         final LocalPersistenceFileUtil util = new LocalPersistenceFileUtil(systemInfoForTest);
-
-
         final File localPersistenceFolder = util.getLocalPersistenceFolder();
-
         assertTrue(new File(dataFolder, "persistence").exists());
-
         assertEquals(new File(dataFolder, "persistence").getAbsolutePath(), localPersistenceFolder.getAbsolutePath());
     }
 
     @Test
     public void test_dont_overwrite_if_folder_already_exists() throws Exception {
-
         final File dataFolder = temporaryFolder.newFolder();
         final File persistenceFolder = new File(dataFolder, "persistence");
         assertTrue(persistenceFolder.mkdir());
-
         final File tempFile = new File(persistenceFolder, "testfile.tmp");
         Files.touch(tempFile);
-
         final SystemInformation systemInfoForTest = createInfoForTest(dataFolder);
         final LocalPersistenceFileUtil util = new LocalPersistenceFileUtil(systemInfoForTest);
-
-
         util.getLocalPersistenceFolder();
-
-        //File wasn't overwritten
+        // File wasn't overwritten
         assertTrue(tempFile.exists());
     }
 
@@ -102,7 +87,6 @@ public class LocalPersistenceFileUtilTest {
 
             @Override
             public void init() {
-
             }
 
             @NotNull
@@ -157,5 +141,4 @@ public class LocalPersistenceFileUtilTest {
             }
         };
     }
-
 }

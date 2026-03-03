@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class IterationContextImpl implements IterationContext {
 
     private final AtomicBoolean aborted = new AtomicBoolean(false);
-
     @Override
     public void abortIteration() {
         aborted.set(true);

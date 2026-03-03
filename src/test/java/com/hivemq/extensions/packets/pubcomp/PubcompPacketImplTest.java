@@ -28,10 +28,9 @@ public class PubcompPacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(PubcompPacketImpl.class)
-                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
-                .withNonnullFields("reasonCode", "userProperties")
-                .suppress(Warning.STRICT_INHERITANCE)
-                .verify();
+        EqualsVerifier.forClass(PubcompPacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                                                                                               // @NotNull Optional is
+                                                                                               // @NotNull
+                .withNonnullFields("reasonCode", "userProperties").suppress(Warning.STRICT_INHERITANCE).verify();
     }
 }

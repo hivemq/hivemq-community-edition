@@ -27,7 +27,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  * Interface for {@link ChannelInitializerFactoryImpl}
  *
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface ChannelInitializerFactory {
 
@@ -40,11 +40,11 @@ public interface ChannelInitializerFactory {
      * <li>{@link TlsWebsocketChannelInitializer}</li>
      * </ul>
      *
-     * @param listener the listener to create a channel initializer for
-     * @return a channel initializer for a specific listener.
+     * @param  listener                 the listener to create a channel initializer for
+     * @return                          a channel initializer for a specific listener.
      * @throws NullPointerException     If listener is null.
      * @throws IllegalArgumentException If listener type is unknown.
      */
-    @NotNull AbstractChannelInitializer getChannelInitializer(final @NotNull Listener listener);
-
+    @NotNull
+    AbstractChannelInitializer getChannelInitializer(final @NotNull Listener listener);
 }

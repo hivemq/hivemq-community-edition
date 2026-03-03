@@ -33,16 +33,11 @@ import java.util.concurrent.TimeUnit;
 public class SendRetainedMessageResultListener implements FutureCallback<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(SendRetainedMessageResultListener.class);
-
     private final @NotNull Channel channel;
     private final @NotNull Topic subscription;
     private final @NotNull RetainedMessagesSender retainedMessagesSender;
-
-    SendRetainedMessageResultListener(
-            final @NotNull Channel channel,
-            final @NotNull Topic subscription,
+    SendRetainedMessageResultListener(final @NotNull Channel channel, final @NotNull Topic subscription,
             final @NotNull RetainedMessagesSender retainedMessagesSender) {
-
         this.channel = channel;
         this.subscription = subscription;
         this.retainedMessagesSender = retainedMessagesSender;
@@ -50,40 +45,36 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
 
     @Override
     public void onSuccess(final @Nullable Void aVoid) {
-        //noop: everything is good
+        // noop: everything is good
     }
 
     @Override
     public void onFailure(final @NotNull Throwable throwable) {
-
         if (Exceptions.isConnectionClosedException(throwable)) {
             // There is no need to send the retained message, if the client is disconnected.
             return;
         }
-
         if (throwable instanceof NoMessageIdAvailableException) {
             if (!channel.isActive()) {
                 return;
             }
-
-            //retry
+            // retry
             channel.eventLoop().schedule(() -> {
                 if (log.isTraceEnabled()) {
-                    log.trace("Retrying retained message for client '{}' on topic '{}'.",
+                    log.trace(
+                            "Retrying retained message for client '{}' on topic '{}'.",
                             ClientConnection.of(channel).getClientId(),
                             subscription.getTopic());
                 }
-                final ListenableFuture<Void> sentFuture =
-                        retainedMessagesSender.writeRetainedMessages(channel, subscription);
+                final ListenableFuture<Void> sentFuture = retainedMessagesSender
+                        .writeRetainedMessages(channel, subscription);
                 Futures.addCallback(sentFuture, this, channel.eventLoop());
             }, 1, TimeUnit.SECONDS);
-
         } else {
-            Exceptions.rethrowError("Unable to send retained message on topic " +
-                    subscription.getTopic() +
-                    " to client " +
-                    ClientConnection.of(channel).getClientId() +
-                    ".", throwable);
+            Exceptions.rethrowError(
+                    "Unable to send retained message on topic " + subscription.getTopic() + " to client "
+                            + ClientConnection.of(channel).getClientId() + ".",
+                    throwable);
         }
     }
 }

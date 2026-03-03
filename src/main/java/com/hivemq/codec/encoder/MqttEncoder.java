@@ -24,7 +24,7 @@ import io.netty.buffer.ByteBuf;
  * The Encoder is used to encode mqtt messages.
  *
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 public interface MqttEncoder<T extends Message> {
 
@@ -39,12 +39,12 @@ public interface MqttEncoder<T extends Message> {
     void encode(@NotNull ClientConnectionContext clientConnectionContext, @NotNull T msg, @NotNull ByteBuf out);
 
     /**
-     * Calculate the buffer size for an mqtt message. This method will be called everytime
-     * before {@link #encode} is called.
+     * Calculate the buffer size for an mqtt message. This method will be called everytime before {@link #encode} is
+     * called.
      *
-     * @param clientConnectionContext the {@link ClientConnectionContext} of the client
-     * @param msg                     the message for which the buffer size should be calculated.
-     * @return the required buffer size for the {@code msg}.
+     * @param  clientConnectionContext the {@link ClientConnectionContext} of the client
+     * @param  msg                     the message for which the buffer size should be calculated.
+     * @return                         the required buffer size for the {@code msg}.
      */
     int bufferSize(@NotNull ClientConnectionContext clientConnectionContext, @NotNull T msg);
 }

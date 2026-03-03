@@ -26,7 +26,6 @@ import io.netty.channel.group.ChannelGroup;
 public class ChannelGroupHandler extends ChannelInboundHandlerAdapter {
 
     private final @NotNull ChannelGroup channelGroup;
-
     public ChannelGroupHandler(final @NotNull ChannelGroup channelGroup) {
         this.channelGroup = channelGroup;
     }
@@ -37,5 +36,4 @@ public class ChannelGroupHandler extends ChannelInboundHandlerAdapter {
         ctx.fireChannelActive();
         ctx.pipeline().remove(this);
     }
-
 }

@@ -58,25 +58,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PubackInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PubackInterceptorHandler.class);
-
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull PluginTaskExecutorService executorService;
-
     @Inject
-    public PubackInterceptorHandler(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull HiveMQExtensions hiveMQExtensions,
+    public PubackInterceptorHandler(final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull PluginTaskExecutorService executorService) {
-
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
         this.executorService = executorService;
     }
-
 
     public void handleInboundPuback(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBACK puback) {
         final Channel channel = ctx.channel();
@@ -85,7 +79,6 @@ public class PubackInterceptorHandler {
         if (clientId == null) {
             return;
         }
-
         final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.fireChannelRead(puback);
@@ -96,31 +89,24 @@ public class PubackInterceptorHandler {
             ctx.fireChannelRead(puback);
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-
         final PubackPacketImpl packet = new PubackPacketImpl(puback);
         final PubackInboundInputImpl input = new PubackInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<PubackInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-
-        final ModifiablePubackPacketImpl modifiablePacket =
-                new ModifiablePubackPacketImpl(packet, configurationService);
+        final ModifiablePubackPacketImpl modifiablePacket = new ModifiablePubackPacketImpl(packet,
+                configurationService);
         final PubackInboundOutputImpl output = new PubackInboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubackInboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
-
-        final PubackInboundInterceptorContext context =
-                new PubackInboundInterceptorContext(clientId, interceptors.size(), ctx, inputHolder, outputHolder);
-
+        final PubackInboundInterceptorContext context = new PubackInboundInterceptorContext(clientId,
+                interceptors.size(), ctx, inputHolder, outputHolder);
         for (final PubackInboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions
+                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
             }
-
             final PubackInboundInterceptorTask task = new PubackInboundInterceptorTask(interceptor, extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
@@ -130,14 +116,12 @@ public class PubackInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PUBACK puback,
             final @NotNull ChannelPromise promise) {
-
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
         }
-
         final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(puback, promise);
@@ -148,41 +132,29 @@ public class PubackInterceptorHandler {
             ctx.write(puback, promise);
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-
         final PubackPacketImpl packet = new PubackPacketImpl(puback);
         final PubackOutboundInputImpl input = new PubackOutboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<PubackOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-
-        final ModifiablePubackPacketImpl modifiablePacket =
-                new ModifiablePubackPacketImpl(packet, configurationService);
+        final ModifiablePubackPacketImpl modifiablePacket = new ModifiablePubackPacketImpl(packet,
+                configurationService);
         final PubackOutboundOutputImpl output = new PubackOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
-
         final PubackOutboundInterceptorContext context = new PubackOutboundInterceptorContext(clientId,
-                interceptors.size(),
-                ctx,
-                promise,
-                inputHolder,
-                outputHolder);
-
+                interceptors.size(), ctx, promise, inputHolder, outputHolder);
         for (final PubackOutboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions
+                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
             }
-
-            final PubackOutboundInterceptorTask task =
-                    new PubackOutboundInterceptorTask(interceptor, extension.getId());
+            final PubackOutboundInterceptorTask task = new PubackOutboundInterceptorTask(interceptor,
+                    extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
-
     private static class PubackInboundInterceptorContext extends PluginInOutTaskContext<PubackInboundOutputImpl>
             implements Runnable {
 
@@ -191,14 +163,10 @@ public class PubackInterceptorHandler {
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ExtensionParameterHolder<PubackInboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<PubackInboundOutputImpl> outputHolder;
-
-        PubackInboundInterceptorContext(
-                final @NotNull String clientId,
-                final int interceptorCount,
+        PubackInboundInterceptorContext(final @NotNull String clientId, final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ExtensionParameterHolder<PubackInboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<PubackInboundOutputImpl> outputHolder) {
-
             super(clientId);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -240,23 +208,24 @@ public class PubackInterceptorHandler {
 
         private final @NotNull PubackInboundInterceptor interceptor;
         private final @NotNull String extensionId;
-
-        PubackInboundInterceptorTask(
-                final @NotNull PubackInboundInterceptor interceptor, final @NotNull String extensionId) {
-
+        PubackInboundInterceptorTask(final @NotNull PubackInboundInterceptor interceptor,
+                final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull PubackInboundOutputImpl apply(
-                final @NotNull PubackInboundInputImpl input, final @NotNull PubackInboundOutputImpl output) {
-
+                final @NotNull PubackInboundInputImpl input,
+                final @NotNull PubackInboundOutputImpl output) {
             try {
                 interceptor.onInboundPuback(input, output);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound PUBACK interception. " +
-                        "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBACK interception. "
+                                + "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }
@@ -278,15 +247,10 @@ public class PubackInterceptorHandler {
         private final @NotNull ChannelPromise promise;
         private final @NotNull ExtensionParameterHolder<PubackOutboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<PubackOutboundOutputImpl> outputHolder;
-
-        PubackOutboundInterceptorContext(
-                final @NotNull String clientId,
-                final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ChannelPromise promise,
+        PubackOutboundInterceptorContext(final @NotNull String clientId, final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx, final @NotNull ChannelPromise promise,
                 final @NotNull ExtensionParameterHolder<PubackOutboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<PubackOutboundOutputImpl> outputHolder) {
-
             super(clientId);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -329,23 +293,24 @@ public class PubackInterceptorHandler {
 
         private final @NotNull PubackOutboundInterceptor interceptor;
         private final @NotNull String extensionId;
-
-        PubackOutboundInterceptorTask(
-                final @NotNull PubackOutboundInterceptor interceptor, final @NotNull String extensionId) {
-
+        PubackOutboundInterceptorTask(final @NotNull PubackOutboundInterceptor interceptor,
+                final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull PubackOutboundOutputImpl apply(
-                final @NotNull PubackOutboundInputImpl input, final @NotNull PubackOutboundOutputImpl output) {
-
+                final @NotNull PubackOutboundInputImpl input,
+                final @NotNull PubackOutboundOutputImpl output) {
             try {
                 interceptor.onOutboundPuback(input, output);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on outbound PUBACK interception. " +
-                        "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBACK interception. "
+                                + "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.markAsFailed();
                 Exceptions.rethrowError(e);
             }

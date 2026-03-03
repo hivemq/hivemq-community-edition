@@ -38,19 +38,14 @@ public class RestrictionsEntity {
 
     @XmlElement(name = "max-connections", defaultValue = "-1")
     private @NotNull Long maxConnections = MAX_CONNECTIONS_DEFAULT;
-
     @XmlElement(name = "max-client-id-length", defaultValue = "65535")
     private @NotNull Integer maxClientIdLength = MAX_CLIENT_ID_LENGTH_DEFAULT;
-
     @XmlElement(name = "max-topic-length", defaultValue = "65535")
     private @NotNull Integer maxTopicLength = MAX_TOPIC_LENGTH_DEFAULT;
-
     @XmlElement(name = "no-connect-idle-timeout", defaultValue = "10000")
     private @NotNull Long noConnectIdleTimeout = NO_CONNECT_IDLE_TIMEOUT_DEFAULT;
-
     @XmlElement(name = "incoming-bandwidth-throttling", defaultValue = "0")
     private @NotNull Long incomingBandwidthThrottling = INCOMING_BANDWIDTH_THROTTLING_DEFAULT;
-
     public long getMaxConnections() {
         return maxConnections;
     }

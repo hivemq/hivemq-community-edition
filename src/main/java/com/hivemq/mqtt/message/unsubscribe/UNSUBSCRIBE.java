@@ -31,45 +31,39 @@ import java.util.List;
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- * @since 1.4
+ * @since  1.4
  */
 @Immutable
 public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3UNSUBSCRIBE, Mqtt5UNSUBSCRIBE {
 
     private final ImmutableList<String> topics;
-
-    //MQTT 3
+    // MQTT 3
     public UNSUBSCRIBE(@NotNull final ImmutableList<String> topics) {
         this(topics, 0);
     }
 
-    //MQTT 3
+    // MQTT 3
     public UNSUBSCRIBE(@NotNull final ImmutableList<String> topics, final int packetIdentifier) {
         this(topics, packetIdentifier, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    //MQTT 3
+    // MQTT 3
     public UNSUBSCRIBE(@NotNull final List<String> topics, final int packetIdentifier) {
         this(ImmutableList.copyOf(topics), packetIdentifier, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    //MQTT 5
-    public UNSUBSCRIBE(
-            @NotNull final ImmutableList<String> topicFilters,
-            final int packetIdentifier,
+    // MQTT 5
+    public UNSUBSCRIBE(@NotNull final ImmutableList<String> topicFilters, final int packetIdentifier,
             final Mqtt5UserProperties userProperties) {
         super(userProperties);
-
         Preconditions.checkNotNull(topicFilters);
         Preconditions.checkArgument(!topicFilters.isEmpty(), "topics may never be empty");
-
         this.topics = topicFilters;
         setPacketIdentifier(packetIdentifier);
     }
 
     public static @NotNull UNSUBSCRIBE from(final @NotNull UnsubscribePacketImpl packet) {
-        return new UNSUBSCRIBE(packet.getTopicFilters(),
-                packet.getPacketIdentifier(),
+        return new UNSUBSCRIBE(packet.getTopicFilters(), packet.getPacketIdentifier(),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }
 

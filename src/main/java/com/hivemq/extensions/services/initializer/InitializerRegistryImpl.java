@@ -25,14 +25,13 @@ import javax.inject.Singleton;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Singleton
 public class InitializerRegistryImpl implements InitializerRegistry {
 
     @NotNull
     private final Initializers initializers;
-
     @Inject
     public InitializerRegistryImpl(@NotNull final Initializers initializers) {
         this.initializers = initializers;

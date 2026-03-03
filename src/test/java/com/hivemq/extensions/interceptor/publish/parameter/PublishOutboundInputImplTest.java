@@ -37,10 +37,8 @@ public class PublishOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PublishPacketImpl packet = mock(PublishPacketImpl.class);
-
-        final PublishOutboundInputImpl input =
-                new PublishOutboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final PublishOutboundInputImpl input = new PublishOutboundInputImpl(clientInformation, connectionInformation,
+                packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPublishPacket());
@@ -51,18 +49,14 @@ public class PublishOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PublishPacketImpl packet = mock(PublishPacketImpl.class);
-
-        final PublishOutboundInputImpl input =
-                new PublishOutboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final PublishOutboundInputImpl input = new PublishOutboundInputImpl(clientInformation, connectionInformation,
+                packet);
         final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
         final PublishPacketImpl newPacket = mock(PublishPacketImpl.class);
         final PublishOutboundOutputImpl output = mock(PublishOutboundOutputImpl.class);
         when(output.getPublishPacket()).thenReturn(modifiablePacket);
         when(modifiablePacket.copy()).thenReturn(newPacket);
-
         final PublishOutboundInputImpl updated = input.update(output);
-
         assertNotSame(input, updated);
         assertSame(input.getClientInformation(), updated.getClientInformation());
         assertSame(input.getConnectionInformation(), updated.getConnectionInformation());

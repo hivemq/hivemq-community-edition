@@ -44,16 +44,9 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     private final @NotNull AtomicBoolean enabled;
     private @Nullable String previousVersion;
     protected @Nullable ExtensionMain extensionMain;
-
-    public AbstractHiveMQExtension(
-            final @NotNull String id,
-            final @NotNull String version,
-            final @NotNull String name,
-            final @Nullable String author,
-            final int priority,
-            final int startPriority,
-            final @NotNull ExtensionMain extensionMain,
-            final boolean enabled,
+    public AbstractHiveMQExtension(final @NotNull String id, final @NotNull String version, final @NotNull String name,
+            final @Nullable String author, final int priority, final int startPriority,
+            final @NotNull ExtensionMain extensionMain, final boolean enabled,
             final @NotNull Path extensionFolderPath) {
         this.id = id;
         this.version = version;
@@ -136,7 +129,6 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     public void start(
             final @NotNull ExtensionStartInput extensionStartInput,
             final @NotNull ExtensionStartOutput extensionStartOutput) {
-
         if (extensionMain != null) {
             extensionMain.extensionStart(extensionStartInput, extensionStartOutput);
         }
@@ -154,7 +146,6 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     @Override
     public void clean(final boolean disable) {
         extensionMain = null;
-
         if (disable) {
             final boolean disabled;
             try {
@@ -170,13 +161,11 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
                     getLogger().warn("Could not disable extension folder {}.", extensionFolderPath);
                 }
             } catch (final IOException e) {
-                getLogger().warn("Could not disable extension folder {}, reason {}",
-                        extensionFolderPath,
-                        e.getMessage());
+                getLogger()
+                        .warn("Could not disable extension folder {}, reason {}", extensionFolderPath, e.getMessage());
                 getLogger().trace("Original exception", e);
             }
             Checkpoints.checkpoint("extension-disabled");
         }
     }
-
 }

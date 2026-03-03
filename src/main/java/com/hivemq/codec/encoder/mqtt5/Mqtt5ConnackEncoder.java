@@ -61,12 +61,11 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.WILDCARD_SUBSCRIPT
  * @author Florian Limpöck
  */
 public class Mqtt5ConnackEncoder
-        extends Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<CONNACK> {
+        extends
+            Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithReasonStringEncoder<CONNACK> {
 
     private static final int CONNACK_FIXED_HEADER = MessageType.CONNACK.ordinal() << 4;
-
-    public Mqtt5ConnackEncoder(
-            final @NotNull MessageDroppedService messageDroppedService,
+    public Mqtt5ConnackEncoder(final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
@@ -75,7 +74,6 @@ public class Mqtt5ConnackEncoder
     void encode(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
-
         encodeFixedHeader(out, connack.getRemainingLength());
         encodeVariableHeader(connack, out);
     }
@@ -83,52 +81,46 @@ public class Mqtt5ConnackEncoder
     @Override
     int calculateRemainingLengthWithoutProperties(final @NotNull CONNACK connack) {
         checkNotNull(connack, "Connack must not be null.");
-
         return 2; // ConnectFlags Byte + ReasonCode Byte
     }
 
     @Override
     int calculatePropertyLength(final @NotNull CONNACK connack) {
         checkNotNull(connack, "Connack must not be null.");
-
         int propertyLength = 0;
-
         propertyLength += fixedPropertyLength(connack);
-
-        //omissible
+        // omissible
         propertyLength += nullablePropertyEncodedLength(connack.getReasonString());
         propertyLength += connack.getUserProperties().encodedLength();
-
         return propertyLength;
     }
 
     private static int fixedPropertyLength(final @NotNull CONNACK connack) {
         checkNotNull(connack, "Connack must not be null.");
-
         int propertyLength = 0;
-
         propertyLength += intPropertyEncodedLength(connack.getSessionExpiryInterval(), SESSION_EXPIRY_NOT_SET);
         propertyLength += shortPropertyEncodedLength(connack.getReceiveMaximum(), DEFAULT_RECEIVE_MAXIMUM);
         propertyLength += nullablePropertyEncodedLength(connack.getMaximumQoS());
         propertyLength += booleanPropertyEncodedLength(connack.isRetainAvailable(), DEFAULT_RETAIN_AVAILABLE);
-        propertyLength +=
-                intPropertyEncodedLength(connack.getMaximumPacketSize(), DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
+        propertyLength += intPropertyEncodedLength(
+                connack.getMaximumPacketSize(),
+                DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT);
         propertyLength += nullablePropertyEncodedLength(connack.getAssignedClientIdentifier());
         propertyLength += shortPropertyEncodedLength(connack.getTopicAliasMaximum(), DEFAULT_TOPIC_ALIAS_MAXIMUM);
-        propertyLength += booleanPropertyEncodedLength(connack.isWildcardSubscriptionAvailable(),
+        propertyLength += booleanPropertyEncodedLength(
+                connack.isWildcardSubscriptionAvailable(),
                 DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE);
-        propertyLength += booleanPropertyEncodedLength(connack.isSubscriptionIdentifierAvailable(),
+        propertyLength += booleanPropertyEncodedLength(
+                connack.isSubscriptionIdentifierAvailable(),
                 DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE);
-        propertyLength += booleanPropertyEncodedLength(connack.isSharedSubscriptionAvailable(),
+        propertyLength += booleanPropertyEncodedLength(
+                connack.isSharedSubscriptionAvailable(),
                 DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE);
-
         propertyLength += shortPropertyEncodedLength(connack.getServerKeepAlive(), KEEP_ALIVE_NOT_SET);
-
         propertyLength += nullablePropertyEncodedLength(connack.getResponseInformation());
         propertyLength += nullablePropertyEncodedLength(connack.getServerReference());
         propertyLength += nullablePropertyEncodedLength(connack.getAuthMethod());
         propertyLength += nullablePropertyEncodedLength(connack.getAuthData());
-
         return propertyLength;
     }
 
@@ -141,23 +133,18 @@ public class Mqtt5ConnackEncoder
     private void encodeVariableHeader(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
-
-        //Connect Acknowledge Flags
+        // Connect Acknowledge Flags
         out.writeByte(connack.isSessionPresent() ? 0x01 : 0x00);
-
-        //Reason Code
+        // Reason Code
         final Mqtt5ConnAckReasonCode reasonCode = connack.getReasonCode();
         out.writeByte(reasonCode.getCode());
-
         encodeProperties(connack, out);
     }
 
     private void encodeProperties(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
-
         MqttVariableByteInteger.encode(connack.getPropertyLength(), out);
-
         encodeFixedProperties(connack, out);
         encodeOmissibleProperties(connack, out);
     }
@@ -165,32 +152,33 @@ public class Mqtt5ConnackEncoder
     private static void encodeFixedProperties(final @NotNull CONNACK connack, final @NotNull ByteBuf out) {
         checkNotNull(connack, "Connack must not be null.");
         checkNotNull(out, "ByteBuf must not be null.");
-
         encodeIntProperty(SESSION_EXPIRY_INTERVAL, connack.getSessionExpiryInterval(), SESSION_EXPIRY_NOT_SET, out);
         encodeShortProperty(RECEIVE_MAXIMUM, connack.getReceiveMaximum(), DEFAULT_RECEIVE_MAXIMUM, out);
         encodeNullableProperty(MAXIMUM_QOS, connack.getMaximumQoS(), out);
         encodeBooleanProperty(RETAIN_AVAILABLE, connack.isRetainAvailable(), DEFAULT_RETAIN_AVAILABLE, out);
-        encodeIntProperty(MAXIMUM_PACKET_SIZE,
+        encodeIntProperty(
+                MAXIMUM_PACKET_SIZE,
                 connack.getMaximumPacketSize(),
                 DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
                 out);
         encodeNullableProperty(ASSIGNED_CLIENT_IDENTIFIER, connack.getAssignedClientIdentifier(), out);
         encodeShortProperty(TOPIC_ALIAS_MAXIMUM, connack.getTopicAliasMaximum(), DEFAULT_TOPIC_ALIAS_MAXIMUM, out);
-        encodeBooleanProperty(WILDCARD_SUBSCRIPTION_AVAILABLE,
+        encodeBooleanProperty(
+                WILDCARD_SUBSCRIPTION_AVAILABLE,
                 connack.isWildcardSubscriptionAvailable(),
                 DEFAULT_WILDCARD_SUBSCRIPTION_AVAILABLE,
                 out);
-        encodeBooleanProperty(SUBSCRIPTION_IDENTIFIER_AVAILABLE,
+        encodeBooleanProperty(
+                SUBSCRIPTION_IDENTIFIER_AVAILABLE,
                 connack.isSubscriptionIdentifierAvailable(),
                 DEFAULT_SUBSCRIPTION_IDENTIFIER_AVAILABLE,
                 out);
-        encodeBooleanProperty(SHARED_SUBSCRIPTION_AVAILABLE,
+        encodeBooleanProperty(
+                SHARED_SUBSCRIPTION_AVAILABLE,
                 connack.isSharedSubscriptionAvailable(),
                 DEFAULT_SHARED_SUBSCRIPTION_AVAILABLE,
                 out);
-
         encodeShortProperty(SERVER_KEEP_ALIVE, connack.getServerKeepAlive(), KEEP_ALIVE_NOT_SET, out);
-
         encodeNullableProperty(RESPONSE_INFORMATION, connack.getResponseInformation(), out);
         encodeNullableProperty(SERVER_REFERENCE, connack.getServerReference(), out);
         encodeNullableProperty(AUTHENTICATION_METHOD, connack.getAuthMethod(), out);

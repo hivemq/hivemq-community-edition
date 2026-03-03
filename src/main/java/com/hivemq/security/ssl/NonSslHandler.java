@@ -28,14 +28,12 @@ import java.util.List;
 
 import static com.hivemq.logging.LoggingUtils.appendListenerToMessage;
 
-
 /**
  * @author Christoph Schäbel
  */
 public class NonSslHandler extends ByteToMessageDecoder {
 
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
-
     @Inject
     public NonSslHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         this.mqttServerDisconnector = mqttServerDisconnector;
@@ -43,35 +41,29 @@ public class NonSslHandler extends ByteToMessageDecoder {
 
     @Override
     protected void decode(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull ByteBuf in, final @NotNull List<Object> out)
-            throws Exception {
-
-        //Needs minimum 5 bytes to be able to tell what it is.
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull ByteBuf in,
+            final @NotNull List<Object> out) throws Exception {
+        // Needs minimum 5 bytes to be able to tell what it is.
         if (in.readableBytes() < 11) {
             return;
         }
-
-        //Check for SSL bytes
+        // Check for SSL bytes
         final boolean encrypted = SslHandler.isEncrypted(in);
-
-        //With MQTT5 it is possible to craft a valid CONNECT packet, that matches an SSLv2 packet
+        // With MQTT5 it is possible to craft a valid CONNECT packet, that matches an SSLv2 packet
         final boolean isConnectPacket = in.getUnsignedByte(0) == 16;
-        final boolean isMqttPacket = in.getUnsignedByte(7) == 'M' &&
-                in.getUnsignedByte(8) == 'Q' &&
-                in.getUnsignedByte(9) == 'T' &&
-                in.getUnsignedByte(10) == 'T';
-
+        final boolean isMqttPacket = in.getUnsignedByte(7) == 'M' && in.getUnsignedByte(8) == 'Q'
+                && in.getUnsignedByte(9) == 'T' && in.getUnsignedByte(10) == 'T';
         if (encrypted && !(isConnectPacket && isMqttPacket)) {
             final Channel channel = ctx.channel();
             final String eventLogMessage = appendListenerToMessage(channel, "SSL connection to non-SSL listener");
-            mqttServerDisconnector.logAndClose(channel,
+            mqttServerDisconnector.logAndClose(
+                    channel,
                     "SSL connection on non-SSL listener, dropping connection for client with IP '{}'",
                     eventLogMessage);
             in.clear();
             return;
         }
-
         ctx.pipeline().remove(this);
     }
-
 }

@@ -59,7 +59,6 @@ import static com.hivemq.configuration.service.PersistenceConfigurationService.P
 public class HiveMQServer {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQServer.class);
-
     private final @NotNull HivemqId hivemqId;
     private final @NotNull LifecycleModule lifecycleModule;
     private final @NotNull DataLock dataLock;
@@ -67,20 +66,15 @@ public class HiveMQServer {
     private final @NotNull MetricRegistry metricRegistry;
     private final boolean migrate;
     private final boolean enableLoggingBootstrap;
-
     private @Nullable Injector injector;
     private @Nullable FullConfigurationService configService;
-
     public HiveMQServer() {
         this(new SystemInformationImpl(true), new MetricRegistry(), null, true, true);
     }
 
-    public HiveMQServer(
-            final @NotNull SystemInformation systemInformation,
-            final @Nullable MetricRegistry metricRegistry,
-            final @Nullable FullConfigurationService configService,
-            final boolean enableLoggingBootstrap,
-            final boolean migrate) {
+    public HiveMQServer(final @NotNull SystemInformation systemInformation,
+            final @Nullable MetricRegistry metricRegistry, final @Nullable FullConfigurationService configService,
+            final boolean enableLoggingBootstrap, final boolean migrate) {
         hivemqId = new HivemqId();
         lifecycleModule = new LifecycleModule();
         dataLock = new DataLock();
@@ -105,67 +99,48 @@ public class HiveMQServer {
         if (injector != null) {
             return;
         }
-
         metricRegistry.addListener(new MetricRegistryLogger());
-
         if (enableLoggingBootstrap) {
             LoggingBootstrap.prepareLogging();
         }
-
         log.info("Starting HiveMQ Community Edition Server");
-
         // Embedded has already called init as it is required to read the config file.
         if (!systemInformation.isEmbedded()) {
             log.trace("Initializing HiveMQ home directory");
-            //Create SystemInformation this early because logging depends on it
+            // Create SystemInformation this early because logging depends on it
             systemInformation.init();
         }
-
         if (enableLoggingBootstrap) {
             log.trace("Initializing Logging");
-
             LoggingBootstrap.initLogging(systemInformation.getConfigFolder());
         }
-
         log.trace("Initializing Exception handlers");
         HiveMQExceptionHandlerBootstrap.addUnrecoverableExceptionHandler();
-
         if (configService == null) {
             log.trace("Initializing configuration");
             configService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
         }
-
         if (configService.persistenceConfigurationService().getMode() == PersistenceMode.FILE) {
             log.trace("Locking data folder.");
             dataLock.lock(systemInformation.getDataFolder().toPath());
         }
-
         log.info("This HiveMQ ID is {}", hivemqId.get());
-
-        //ungraceful shutdown does not delete tmp folders, so we clean them up on broker start
+        // ungraceful shutdown does not delete tmp folders, so we clean them up on broker start
         log.trace("Cleaning up temporary folders");
         deleteTmpFolder(systemInformation.getDataFolder());
-
-        //must happen before persistence injector bootstrap as it creates the persistence folder.
+        // must happen before persistence injector bootstrap as it creates the persistence folder.
         log.trace("Checking for migrations");
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
         final Set<MigrationUnit> valueMigrations = Migrations.checkForValueMigration(systemInformation);
-
         log.trace("Initializing persistences");
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
-                metricRegistry,
-                hivemqId,
-                configService,
-                lifecycleModule);
-        //blocks until all persistences started
+        final Injector persistenceInjector = GuiceBootstrap
+                .persistenceInjector(systemInformation, metricRegistry, hivemqId, configService, lifecycleModule);
+        // blocks until all persistences started
         persistenceInjector.getInstance(PersistenceStartup.class).finish();
-
         if (persistenceInjector.getInstance(ShutdownHooks.class).isShuttingDown()) {
             throw new StartAbortedException("User aborted.");
         }
-
         if (migrate && configService.persistenceConfigurationService().getMode() != PersistenceMode.IN_MEMORY) {
-
             if (migrations.size() + valueMigrations.size() > 0) {
                 if (migrations.isEmpty()) {
                     log.info("Persistence values has been changed, migrating persistent data.");
@@ -180,18 +155,16 @@ public class HiveMQServer {
                 }
                 Migrations.migrate(persistenceInjector, migrations, valueMigrations);
             }
-
             Migrations.afterMigration(systemInformation);
         }
-
         if (configService.persistenceConfigurationService().getMode().equals(PersistenceMode.FILE)) {
             log.info("Starting with file persistence mode.");
         } else {
             log.info("Starting with in-memory persistence mode.");
         }
-
         log.trace("Initializing Guice");
-        injector = GuiceBootstrap.bootstrapInjector(systemInformation,
+        injector = GuiceBootstrap.bootstrapInjector(
+                systemInformation,
                 metricRegistry,
                 hivemqId,
                 configService,
@@ -207,27 +180,24 @@ public class HiveMQServer {
         if (shutdownHooks.isShuttingDown()) {
             throw new StartAbortedException("User aborted.");
         }
-
         final HiveMQInstance instance = injector.getInstance(HiveMQInstance.class);
-
         if (InternalConfigurations.GC_AFTER_STARTUP_ENABLED) {
             log.trace("Starting initial garbage collection after startup");
             final long start = System.currentTimeMillis();
-            //Start garbage collection of objects we don't need anymore after starting up
+            // Start garbage collection of objects we don't need anymore after starting up
             System.gc();
             log.trace("Finished initial garbage collection after startup in {}ms", System.currentTimeMillis() - start);
         }
-
         if (shutdownHooks.isShuttingDown()) {
             throw new StartAbortedException("User aborted.");
         }
-
-        /* It's important that we are modifying the log levels after Guice is initialized,
-        otherwise this somehow interferes with Singleton creation */
+        /*
+         * It's important that we are modifying the log levels after Guice is initialized, otherwise this somehow
+         * interferes with Singleton creation
+         */
         if (enableLoggingBootstrap) {
             LoggingBootstrap.addLoglevelModifiers();
         }
-
         instance.start(embeddedExtension);
     }
 
@@ -239,22 +209,16 @@ public class HiveMQServer {
         if (shutdownHooks.isShuttingDown()) {
             throw new StartAbortedException("User aborted.");
         }
-
         final UsageStatistics usageStatistics = injector.getInstance(UsageStatistics.class);
         usageStatistics.start();
     }
 
     public void start() throws Exception {
-
         final long startTime = System.nanoTime();
-
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "shutdown-thread," + hivemqId.get()));
-
         bootstrap();
         startInstance(null);
-
         log.info("Started HiveMQ in {}ms", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
-
         afterStart();
     }
 
@@ -267,9 +231,7 @@ public class HiveMQServer {
         if (shutdownHooks.isShuttingDown()) {
             return;
         }
-
         shutdownHooks.runShutdownHooks();
-
         if (configService.persistenceConfigurationService().getMode() == PersistenceMode.FILE) {
             dataLock.unlock();
         }
@@ -285,17 +247,16 @@ public class HiveMQServer {
     private static void deleteTmpFolder(final @NotNull File dataFolder) {
         final String tmpFolder = dataFolder.getPath() + File.separator + "tmp";
         try {
-            //ungraceful shutdown does not delete tmp folders, so we clean them up on broker start
+            // ungraceful shutdown does not delete tmp folders, so we clean them up on broker start
             FileUtils.deleteDirectory(new File(tmpFolder));
         } catch (IOException e) {
-            //No error because it's not business breaking
+            // No error because it's not business breaking
             log.warn("The temporary folder could not be deleted ({}).", tmpFolder);
             if (log.isDebugEnabled()) {
                 log.debug("Original Exception: ", e);
             }
         }
     }
-
     /**
      * Create a lock file in the data folder of HiveMQ and hold the lock until released in order to avoid a second
      * HiveMQ instance starting with the same data folder.
@@ -304,7 +265,6 @@ public class HiveMQServer {
 
         private @Nullable FileChannel channel;
         private @Nullable FileLock fileLock;
-
         public void lock(final @NotNull Path dataPath) {
             final Path lockFile = dataPath.resolve("data.lock");
             try {

@@ -45,10 +45,8 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     private @NotNull Retain retain = Retain.ALL;
     private @NotNull SharedSubscription sharedSubscription = SharedSubscription.ALL;
     private @NotNull String sharedGroup = "#";
-
     private final @NotNull RestrictionsConfigurationService restrictionsConfig;
     private final @NotNull SecurityConfigurationService securityConfigurationService;
-
     @Inject
     public TopicPermissionBuilderImpl(final @NotNull FullConfigurationService configurationService) {
         this.securityConfigurationService = configurationService.securityConfiguration();
@@ -60,23 +58,18 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     public TopicPermissionBuilder topicFilter(@NotNull final String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter cannot be null");
         Preconditions.checkArgument(!topicFilter.isEmpty(), "Topic filter cannot be empty");
-        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(),
-                "Topic filter length must not exceed '" +
-                        restrictionsConfig.maxTopicLength() +
-                        "' characters, but has '" +
-                        topicFilter.length() +
-                        "' characters");
+        Preconditions.checkArgument(
+                topicFilter.length() <= restrictionsConfig.maxTopicLength(),
+                "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength()
+                        + "' characters, but has '" + topicFilter.length() + "' characters");
         Preconditions.checkArgument(Topics.isValidToSubscribe(topicFilter), "Topic filter is invalid");
-
         if (Topics.isSharedSubscriptionTopic(topicFilter)) {
-            throw new IllegalArgumentException("Shared subscription topics are invalid," +
-                    " please use methods sharedSubscription and sharedGroup to apply permissions for shared subscriptions");
+            throw new IllegalArgumentException("Shared subscription topics are invalid,"
+                    + " please use methods sharedSubscription and sharedGroup to apply permissions for shared subscriptions");
         }
-
         if (!PluginBuilderUtil.isValidUtf8String(topicFilter, securityConfigurationService.validateUTF8())) {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is UTF-8 malformed");
         }
-
         this.topicFilter = topicFilter;
         return this;
     }
@@ -85,7 +78,6 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @Override
     public TopicPermissionBuilder type(@NotNull final PermissionType type) {
         Preconditions.checkNotNull(type, "Type cannot be null");
-
         this.type = type;
         return this;
     }
@@ -94,7 +86,6 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @Override
     public TopicPermissionBuilder qos(@NotNull final Qos qos) {
         Preconditions.checkNotNull(qos, "QoS cannot be null");
-
         this.qos = qos;
         return this;
     }
@@ -103,7 +94,6 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @Override
     public TopicPermissionBuilder activity(@NotNull final MqttActivity activity) {
         Preconditions.checkNotNull(activity, "Activity cannot be null");
-
         this.activity = activity;
         return this;
     }
@@ -112,7 +102,6 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @Override
     public TopicPermissionBuilder retain(@NotNull final Retain retain) {
         Preconditions.checkNotNull(retain, "Retain cannot be null");
-
         this.retain = retain;
         return this;
     }
@@ -121,7 +110,6 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     @Override
     public TopicPermissionBuilder sharedSubscription(@NotNull final SharedSubscription sharedSubscription) {
         Preconditions.checkNotNull(sharedSubscription, "Shared subscription cannot be null");
-
         this.sharedSubscription = sharedSubscription;
         return this;
     }
@@ -131,13 +119,14 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
     public TopicPermissionBuilder sharedGroup(@NotNull final String sharedGroup) {
         Preconditions.checkNotNull(sharedGroup, "Shared group cannot be null");
         Preconditions.checkArgument(!sharedGroup.isEmpty(), "Shared group cannot be empty");
-        Preconditions.checkArgument(!(sharedGroup.length() > 1 && sharedGroup.contains("#")),
+        Preconditions.checkArgument(
+                !(sharedGroup.length() > 1 && sharedGroup.contains("#")),
                 "Shared group cannot contain wildcard character '#' inside the name");
         Preconditions.checkArgument(!(sharedGroup.contains("+")), "Shared group cannot contain wildcard character '+'");
         Preconditions.checkArgument(!(sharedGroup.contains("/")), "Shared group cannot contain character '/'");
-        Preconditions.checkArgument(PluginBuilderUtil.isValidUtf8String(sharedGroup,
-                securityConfigurationService.validateUTF8()), "Shared group contains invalid UTF-8 character");
-
+        Preconditions.checkArgument(
+                PluginBuilderUtil.isValidUtf8String(sharedGroup, securityConfigurationService.validateUTF8()),
+                "Shared group contains invalid UTF-8 character");
         this.sharedGroup = sharedGroup;
         return this;
     }

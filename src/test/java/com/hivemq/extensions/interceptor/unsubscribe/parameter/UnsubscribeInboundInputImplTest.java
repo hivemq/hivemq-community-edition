@@ -37,10 +37,8 @@ public class UnsubscribeInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final UnsubscribePacketImpl packet = mock(UnsubscribePacketImpl.class);
-
-        final UnsubscribeInboundInputImpl input =
-                new UnsubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final UnsubscribeInboundInputImpl input = new UnsubscribeInboundInputImpl(clientInformation,
+                connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getUnsubscribePacket());
@@ -51,18 +49,14 @@ public class UnsubscribeInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final UnsubscribePacketImpl packet = mock(UnsubscribePacketImpl.class);
-
-        final UnsubscribeInboundInputImpl input =
-                new UnsubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final UnsubscribeInboundInputImpl input = new UnsubscribeInboundInputImpl(clientInformation,
+                connectionInformation, packet);
         final ModifiableUnsubscribePacketImpl modifiablePacket = mock(ModifiableUnsubscribePacketImpl.class);
         final UnsubscribePacketImpl newPacket = mock(UnsubscribePacketImpl.class);
         final UnsubscribeInboundOutputImpl output = mock(UnsubscribeInboundOutputImpl.class);
         when(output.getUnsubscribePacket()).thenReturn(modifiablePacket);
         when(modifiablePacket.copy()).thenReturn(newPacket);
-
         final UnsubscribeInboundInputImpl updated = input.update(output);
-
         assertNotSame(input, updated);
         assertSame(input.getClientInformation(), updated.getClientInformation());
         assertSame(input.getConnectionInformation(), updated.getConnectionInformation());

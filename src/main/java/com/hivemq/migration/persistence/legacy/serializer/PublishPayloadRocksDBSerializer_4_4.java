@@ -20,7 +20,7 @@ import com.hivemq.util.Bytes;
 
 /**
  * @author Florian Limpöck
- * @since 4.5.0
+ * @since  4.5.0
  */
 public class PublishPayloadRocksDBSerializer_4_4 {
 

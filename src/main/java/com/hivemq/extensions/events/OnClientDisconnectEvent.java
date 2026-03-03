@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.packets.general.UserProperties;
  * The event to fire when a client disconnects gracefully or ungracefully.
  *
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class OnClientDisconnectEvent {
 
@@ -31,13 +31,9 @@ public class OnClientDisconnectEvent {
     private final @Nullable String reasonString;
     private final @Nullable UserProperties userProperties;
     private final boolean graceful;
-
-    public OnClientDisconnectEvent(
-            final @Nullable DisconnectedReasonCode reasonCode,
-            final @Nullable String reasonString,
-            final @Nullable UserProperties userProperties,
+    public OnClientDisconnectEvent(final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString, final @Nullable UserProperties userProperties,
             final boolean graceful) {
-
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
         this.userProperties = userProperties;

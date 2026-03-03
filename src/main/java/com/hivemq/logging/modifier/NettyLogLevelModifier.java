@@ -32,7 +32,6 @@ public class NettyLogLevelModifier implements LogLevelModifier {
             final @NotNull String format,
             final @Nullable Object @Nullable [] params,
             final @Nullable Throwable t) {
-
         if (level == Level.DEBUG) {
             if (logger.getName().startsWith("io.netty")) {
                 if (logger.getName().startsWith("io.netty.handler.traffic.")) {
@@ -80,7 +79,6 @@ public class NettyLogLevelModifier implements LogLevelModifier {
             final @NotNull String format,
             final @Nullable Object @Nullable [] params,
             final @Nullable Throwable t) {
-
         if (t instanceof UnsupportedOperationException) {
             return;
         }

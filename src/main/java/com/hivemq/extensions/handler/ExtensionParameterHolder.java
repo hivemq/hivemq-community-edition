@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 public class ExtensionParameterHolder<T> implements Supplier<T> {
 
     private @NotNull T t;
-
     public ExtensionParameterHolder(final @NotNull T t) {
         this.t = t;
     }

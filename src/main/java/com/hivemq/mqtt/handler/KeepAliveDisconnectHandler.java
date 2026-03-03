@@ -30,21 +30,18 @@ import java.util.concurrent.TimeUnit;
  * Basically a {@link IdleStateHandler} where all functions besides the read idle state are removed.
  */
 public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
+
     static final long MIN_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(1);
     private static final byte NOT_INITIATED = 0;
     private static final byte INITIATED = 1;
     private static final byte DESTROYED = 2;
-
     private final long readerIdleTimeNanos;
     private @Nullable Future<?> timeoutTaskFuture;
     private long lastReadTime;
     private byte state = NOT_INITIATED;
     private boolean reading;
     private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService;
-
-    public KeepAliveDisconnectHandler(
-            final long readerIdleTime,
-            final @NotNull TimeUnit unit,
+    public KeepAliveDisconnectHandler(final long readerIdleTime, final @NotNull TimeUnit unit,
             final @NotNull KeepAliveDisconnectService keepAliveDisconnectService) {
         this.keepAliveDisconnectService = keepAliveDisconnectService;
         if (readerIdleTime <= 0) {
@@ -80,7 +77,7 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(final @NotNull ChannelHandlerContext ctx) throws Exception {
         // This method will be invoked only if this handler was added
-        // before channelActive() event is fired.  If a user adds this handler
+        // before channelActive() event is fired. If a user adds this handler
         // after the channelActive() event, initialize() will be called by beforeAdd().
         initialize(ctx.channel());
         super.channelActive(ctx);
@@ -111,7 +108,7 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
 
     @VisibleForTesting
     void initialize(final @NotNull Channel channel) {
-        //only initialize of it's not initialized
+        // only initialize of it's not initialized
         if (state > NOT_INITIATED) {
             return;
         }
@@ -127,7 +124,6 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     long ticksInNanos() {
         return System.nanoTime();
     }
-
 
     private void destroy() {
         state = DESTROYED;
@@ -149,11 +145,9 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     public boolean isReading() {
         return reading;
     }
-
     class ReaderIdleTimeoutTask implements Runnable {
 
         private final @NotNull Channel channel;
-
         ReaderIdleTimeoutTask(final @NotNull Channel channel) {
             this.channel = channel;
         }

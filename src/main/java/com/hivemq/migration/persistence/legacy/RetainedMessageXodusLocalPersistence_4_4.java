@@ -49,30 +49,23 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 
 /**
  * @author Florian Limpöck
- * @since 4.5.0
+ * @since  4.5.0
  */
 @LazySingleton
 public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageXodusLocalPersistence_4_4.class);
-
     public static final String PERSISTENCE_NAME = "retained_messages";
     public static final String PERSISTENCE_VERSION = "040000";
-
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final AtomicLong retainMessageCounter = new AtomicLong(0);
-
     @Inject
-    public RetainedMessageXodusLocalPersistence_4_4(
-            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull PublishPayloadPersistence payloadPersistence,
-            final @NotNull EnvironmentUtil environmentUtil,
+    public RetainedMessageXodusLocalPersistence_4_4(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PublishPayloadPersistence payloadPersistence, final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil,
-                localPersistenceFileUtil,
-                persistenceStartup,
+        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
-                //check if enabled
+                // check if enabled
                 false);
         this.payloadPersistence = payloadPersistence;
     }
@@ -108,7 +101,6 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
 
     @Override
     public void init() {
-
         try {
             for (final Bucket bucket : buckets) {
                 bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
@@ -119,7 +111,6 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
                     }
                 });
             }
-
         } catch (final ExodusException e) {
             log.error("An error occurred while preparing the Retained Message persistence.");
             log.debug("Original Exception:", e);
@@ -132,7 +123,6 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
     }
 
     public void iterate(final @NotNull RetainedMessageItemCallback_4_4 callback) {
-
         for (final Bucket bucket : buckets) {
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
@@ -147,37 +137,36 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
     }
 
     public void put(
-            @NotNull final RetainedMessage retainedMessage, @NotNull final String topic, final int bucketIndex) {
+            @NotNull final RetainedMessage retainedMessage,
+            @NotNull final String topic,
+            final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Bucket bucket = buckets[bucketIndex];
-
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 final ByteIterable byteIterable = cursor.getSearchKey(bytesToByteIterable(serializeKey(topic)));
                 if (byteIterable != null) {
-                    final RetainedMessage retainedMessageFromStore =
-                            deserializeValue(byteIterableToBytes(cursor.getValue()));
+                    final RetainedMessage retainedMessageFromStore = deserializeValue(
+                            byteIterableToBytes(cursor.getValue()));
                     log.trace("Replacing retained message for topic {}", topic);
-                    bucket.getStore()
-                            .put(txn,
-                                    bytesToByteIterable(serializeKey(topic)),
-                                    bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore().put(
+                            txn,
+                            bytesToByteIterable(serializeKey(topic)),
+                            bytesToByteIterable(serializeValue(retainedMessage)));
                     // The previous retained message is replaced, so we have to decrement the reference count.
                     payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPublishId());
                 } else {
-                    bucket.getStore()
-                            .put(txn,
-                                    bytesToByteIterable(serializeKey(topic)),
-                                    bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore().put(
+                            txn,
+                            bytesToByteIterable(serializeKey(topic)),
+                            bytesToByteIterable(serializeValue(retainedMessage)));
                     log.trace("Creating new retained message for topic {}", topic);
-                    //persist needs increment.
+                    // persist needs increment.
                     retainMessageCounter.incrementAndGet();
                 }
             }
         });
     }
-
 }

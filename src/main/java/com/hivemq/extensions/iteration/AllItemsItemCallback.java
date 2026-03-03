@@ -31,9 +31,8 @@ public class AllItemsItemCallback<T> implements AsyncIterator.ItemCallback<T> {
 
     private final @NotNull Executor callbackExecutor;
     private final @NotNull IterationCallback<T> callback;
-
-    public AllItemsItemCallback(
-            final @NotNull Executor callbackExecutor, final @NotNull IterationCallback<T> callback) {
+    public AllItemsItemCallback(final @NotNull Executor callbackExecutor,
+            final @NotNull IterationCallback<T> callback) {
         this.callbackExecutor = callbackExecutor;
         this.callback = callback;
     }
@@ -42,16 +41,12 @@ public class AllItemsItemCallback<T> implements AsyncIterator.ItemCallback<T> {
     public @NotNull ListenableFuture<Boolean> onItems(final @NotNull Collection<T> items) {
         final IterationContextImpl iterationContext = new IterationContextImpl();
         final SettableFuture<Boolean> resultFuture = SettableFuture.create();
-
         callbackExecutor.execute(() -> {
-
             final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(callback.getClass().getClassLoader());
                 for (final T item : items) {
-
                     callback.iterate(iterationContext, item);
-
                     if (iterationContext.isAborted()) {
                         resultFuture.set(false);
                         return;
@@ -65,8 +60,6 @@ public class AllItemsItemCallback<T> implements AsyncIterator.ItemCallback<T> {
             }
             resultFuture.set(true);
         });
-
         return resultFuture;
     }
 }
-

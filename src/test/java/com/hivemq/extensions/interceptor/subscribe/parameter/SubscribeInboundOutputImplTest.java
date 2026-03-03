@@ -33,9 +33,7 @@ public class SubscribeInboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableSubscribePacketImpl modifiablePacket = mock(ModifiableSubscribePacketImpl.class);
-
         final SubscribeInboundOutputImpl output = new SubscribeInboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getSubscribePacket());
     }
 
@@ -43,17 +41,13 @@ public class SubscribeInboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableSubscribePacketImpl modifiablePacket = mock(ModifiableSubscribePacketImpl.class);
-
         final SubscribeInboundOutputImpl output = new SubscribeInboundOutputImpl(asyncer, modifiablePacket);
-
         final SubscribeInboundInputImpl input = mock(SubscribeInboundInputImpl.class);
         final SubscribePacketImpl packet = mock(SubscribePacketImpl.class);
         final ModifiableSubscribePacketImpl newModifiablePacket = mock(ModifiableSubscribePacketImpl.class);
         when(input.getSubscribePacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final SubscribeInboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getSubscribePacket());
     }
 }

@@ -31,5 +31,4 @@ public interface UsageStatisticsConfig {
      * @param enabled true for enabled
      */
     void setEnabled(boolean enabled);
-
 }

@@ -37,29 +37,17 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
     private final @Nullable Integer subscriptionIdentifier;
     // The topic filter is only present for shared subscription
     private final @Nullable String topicFilter;
-
     private byte flags;
-
-    public SubscriberWithQoS(
-            final @NotNull String subscriber,
-            final int qos,
-            final byte flags,
+    public SubscriberWithQoS(final @NotNull String subscriber, final int qos, final byte flags,
             final @Nullable Integer subscriptionIdentifier) {
-
         this(subscriber, qos, flags, null, subscriptionIdentifier, null);
     }
 
-    public SubscriberWithQoS(
-            final @NotNull String subscriber,
-            final int qos,
-            final byte flags,
-            final @Nullable String sharedName,
-            final @Nullable Integer subscriptionIdentifier,
+    public SubscriberWithQoS(final @NotNull String subscriber, final int qos, final byte flags,
+            final @Nullable String sharedName, final @Nullable Integer subscriptionIdentifier,
             final @Nullable String topicFilter) {
-
         checkNotNull(subscriber, "Subscriber must not be null");
         checkArgument((qos <= 2 && qos >= 0), "Quality of Service level must be between 0 and 2");
-
         this.subscriber = subscriber;
         this.qos = qos;
         this.flags = flags;
@@ -129,12 +117,10 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
             return false;
         }
         final SubscriberWithQoS that = (SubscriberWithQoS) o;
-        return qos == that.qos &&
-                flags == that.flags &&
-                Objects.equals(subscriber, that.subscriber) &&
-                Objects.equals(sharedName, that.sharedName) &&
-                Objects.equals(subscriptionIdentifier, that.subscriptionIdentifier) &&
-                Objects.equals(topicFilter, that.topicFilter);
+        return qos == that.qos && flags == that.flags && Objects.equals(subscriber, that.subscriber)
+                && Objects.equals(sharedName, that.sharedName)
+                && Objects.equals(subscriptionIdentifier, that.subscriptionIdentifier)
+                && Objects.equals(topicFilter, that.topicFilter);
     }
 
     @Override

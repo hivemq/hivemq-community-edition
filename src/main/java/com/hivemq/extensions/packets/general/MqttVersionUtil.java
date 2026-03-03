@@ -23,16 +23,17 @@ import com.hivemq.mqtt.message.ProtocolVersion;
  * @author Georg Held
  */
 public class MqttVersionUtil {
+
     @NotNull
     public static MqttVersion toMqttVersion(@NotNull final ProtocolVersion protocolVersion) {
         switch (protocolVersion) {
-            case MQTTv3_1:
+            case MQTTv3_1 :
                 return MqttVersion.V_3_1;
-            case MQTTv3_1_1:
+            case MQTTv3_1_1 :
                 return MqttVersion.V_3_1_1;
-            case MQTTv5:
+            case MQTTv5 :
                 return MqttVersion.V_5;
-            default:
+            default :
                 throw new IllegalArgumentException();
         }
     }
@@ -40,13 +41,13 @@ public class MqttVersionUtil {
     @NotNull
     public static ProtocolVersion toProtocolVersion(@NotNull final MqttVersion mqttVersion) {
         switch (mqttVersion) {
-            case V_3_1:
+            case V_3_1 :
                 return ProtocolVersion.MQTTv3_1;
-            case V_3_1_1:
+            case V_3_1_1 :
                 return ProtocolVersion.MQTTv3_1_1;
-            case V_5:
+            case V_5 :
                 return ProtocolVersion.MQTTv5;
-            default:
+            default :
                 throw new IllegalArgumentException();
         }
     }

@@ -32,13 +32,12 @@ import java.util.Collection;
 public class HiveMQExceptionHandlerBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQExceptionHandlerBootstrap.class);
-
     /**
-     * Adds an uncaught Exception Handler for UnrecoverableExceptions.
-     * Logs the error and quits HiveMQ
+     * Adds an uncaught Exception Handler for UnrecoverableExceptions. Logs the error and quits HiveMQ
      */
     public static void addUnrecoverableExceptionHandler() {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+
             @Override
             public void uncaughtException(final Thread t, final Throwable e) {
                 handleUncaughtException(t, e, () -> System.exit(1));
@@ -79,13 +78,16 @@ public class HiveMQExceptionHandlerBootstrap {
         }
     }
 
-    private static void checkGuiceErrorsForUnrecoverable(final Collection<Message> errorMessages,
-                                                         final Runnable shutdownAction) {
+    private static void checkGuiceErrorsForUnrecoverable(
+            final Collection<Message> errorMessages,
+            final Runnable shutdownAction) {
         if (errorMessages == null) {
             return;
         }
-        // when more than one Exception is caught by Guice the ProvisionException or CreationException contains as cause null,
-        // but all the caught Exceptions are in the messages field of the ProvisionException/CreationException so we have
+        // when more than one Exception is caught by Guice the ProvisionException or CreationException contains as cause
+        // null,
+        // but all the caught Exceptions are in the messages field of the ProvisionException/CreationException so we
+        // have
         // to check them as well
         for (final Message message : errorMessages) {
             if (message.getCause() instanceof UnrecoverableException) {

@@ -48,70 +48,51 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE> {
 
     private static final Logger log = LoggerFactory.getLogger(UnsubscribeHandler.class);
-
     private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
-
     @Inject
-    public UnsubscribeHandler(
-            final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
+    public UnsubscribeHandler(final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
             final @NotNull SharedSubscriptionService sharedSubscriptionService) {
         this.clientSessionSubscriptionPersistence = clientSessionSubscriptionPersistence;
         this.sharedSubscriptionService = sharedSubscriptionService;
     }
 
     @Override
-    protected void channelRead0(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull UNSUBSCRIBE msg) throws Exception {
+    protected void channelRead0(final @NotNull ChannelHandlerContext ctx, final @NotNull UNSUBSCRIBE msg)
+            throws Exception {
         SubscribeMessageBarrier.addToPipeline(ctx);
-
         final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
         final String clientId = checkNotNull(clientConnection.getClientId());
-
-        final UnsubscribeOperationCompletionCallback unsubscribeOperationCompletionCallback =
-                new UnsubscribeOperationCompletionCallback(ctx,
-                        sharedSubscriptionService,
-                        clientConnection.getProtocolVersion(),
-                        clientId,
-                        msg.getTopics(),
-                        msg.getPacketIdentifier());
-
+        final UnsubscribeOperationCompletionCallback unsubscribeOperationCompletionCallback = new UnsubscribeOperationCompletionCallback(
+                ctx, sharedSubscriptionService, clientConnection.getProtocolVersion(), clientId, msg.getTopics(),
+                msg.getPacketIdentifier());
         if (msg.getTopics().size() == 1) { // Single unsubscribe.
             final String topic = msg.getTopics().get(0);
             final ListenableFuture<Void> future = clientSessionSubscriptionPersistence.remove(clientId, topic);
-
             future.addListener(() -> {
                 if (log.isTraceEnabled()) {
                     log.trace("Unsubscribed from topic [{}] for client [{}]", topic, clientId);
                 }
             }, MoreExecutors.directExecutor());
-
             Futures.addCallback(future, unsubscribeOperationCompletionCallback, ctx.executor());
-
             if (log.isTraceEnabled()) {
                 log.trace("Applied all unsubscriptions for client [{}]", clientId);
             }
-
             return;
         }
-
         // Batch unsubscribe. The decoded UNSUBSCRIBE message is guaranteed to have at least one topic filter.
-        final ListenableFuture<Void> future = clientSessionSubscriptionPersistence.removeSubscriptions(clientId,
-                ImmutableSet.copyOf(msg.getTopics()));
-
+        final ListenableFuture<Void> future = clientSessionSubscriptionPersistence
+                .removeSubscriptions(clientId, ImmutableSet.copyOf(msg.getTopics()));
         future.addListener(() -> msg.getTopics().forEach(topic -> {
             if (log.isTraceEnabled()) {
                 log.trace("Unsubscribed from topic [{}] for client [{}]", topic, clientId);
             }
         }), MoreExecutors.directExecutor());
-
         Futures.addCallback(future, unsubscribeOperationCompletionCallback, ctx.executor());
-
         if (log.isTraceEnabled()) {
             log.trace("Applied all unsubscriptions for client [{}]", clientId);
         }
     }
-
     private static class UnsubscribeOperationCompletionCallback implements FutureCallback<Void> {
 
         private final @NotNull ChannelHandlerContext ctx;
@@ -120,14 +101,10 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
         private final @NotNull String clientId;
         private final @NotNull ImmutableList<String> topicFilters;
         private final int packetIdentifier;
-
-        UnsubscribeOperationCompletionCallback(
-                final @NotNull ChannelHandlerContext ctx,
+        UnsubscribeOperationCompletionCallback(final @NotNull ChannelHandlerContext ctx,
                 final @NotNull SharedSubscriptionService sharedSubscriptionService,
-                final @NotNull ProtocolVersion protocolVersion,
-                final @NotNull String clientId,
-                final @NotNull ImmutableList<String> topicFilters,
-                final int packetIdentifier) {
+                final @NotNull ProtocolVersion protocolVersion, final @NotNull String clientId,
+                final @NotNull ImmutableList<String> topicFilters, final int packetIdentifier) {
             this.ctx = ctx;
             this.sharedSubscriptionService = sharedSubscriptionService;
             this.protocolVersion = protocolVersion;
@@ -141,16 +118,14 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
             // We only need to invalidate the caches for the node at which the client is connected,
             // since this node decides which client will receive messages for the shared subscriptions
             for (final String topicFilter : topicFilters) {
-                final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                        SharedSubscriptionService.checkForSharedSubscription(topicFilter);
+                final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
+                        .checkForSharedSubscription(topicFilter);
                 if (sharedSubscription != null) {
-                    sharedSubscriptionService.invalidateSharedSubscriberCache(sharedSubscription.getShareName() +
-                            "/" +
-                            sharedSubscription.getTopicFilter());
+                    sharedSubscriptionService.invalidateSharedSubscriberCache(
+                            sharedSubscription.getShareName() + "/" + sharedSubscription.getTopicFilter());
                     sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
                 }
             }
-
             if (ProtocolVersion.MQTTv5 == protocolVersion) {
                 final Mqtt5UnsubAckReasonCode[] reasonCodes = new Mqtt5UnsubAckReasonCode[topicFilters.size()];
                 Arrays.fill(reasonCodes, Mqtt5UnsubAckReasonCode.SUCCESS);
@@ -162,13 +137,12 @@ public class UnsubscribeHandler extends SimpleChannelInboundHandler<UNSUBSCRIBE>
 
         @Override
         public void onFailure(final @NotNull Throwable throwable) {
-            //DON'T ACK for MQTT 3
+            // DON'T ACK for MQTT 3
             if (ProtocolVersion.MQTTv5 == protocolVersion) {
                 final Mqtt5UnsubAckReasonCode[] reasonCodes = new Mqtt5UnsubAckReasonCode[topicFilters.size()];
                 Arrays.fill(reasonCodes, Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR);
                 ctx.writeAndFlush(new UNSUBACK(packetIdentifier, reasonCodes));
             }
-
             Exceptions.rethrowError("Unable to unsubscribe client " + clientId + ".", throwable);
         }
     }

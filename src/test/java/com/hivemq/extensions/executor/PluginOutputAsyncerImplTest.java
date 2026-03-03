@@ -41,12 +41,8 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("NullabilityAnnotations")
 public class PluginOutputAsyncerImplTest {
 
-
     private PluginOutPutAsyncer asyncer;
-
     private final @NotNull ShutdownHooks shutdownHooks = mock();
-
-
     @Before
     public void before() {
         asyncer = new PluginOutputAsyncerImpl(shutdownHooks);
@@ -54,59 +50,39 @@ public class PluginOutputAsyncerImplTest {
 
     @Test
     public void test_output_resume() {
-
         final TestPluginOutput output = new TestPluginOutput();
-
         final Async<TestPluginOutput> asyncOutput = asyncer.asyncify(output, Duration.ofSeconds(1));
-
         assertNotNull(asyncOutput.getOutput());
         assertEquals(Async.Status.RUNNING, asyncOutput.getStatus());
-
         asyncOutput.resume();
-
-
         assertEquals(Async.Status.DONE, asyncOutput.getStatus());
         assertTrue(asyncOutput.getOutput().getAsyncFuture().isDone());
     }
 
-
     @Test
     public void test_output_timeout() throws Exception {
-
         final TestPluginOutput output = new TestPluginOutput();
-
         final Async<TestPluginOutput> asyncOutput = asyncer.asyncify(output, Duration.ofMillis(100));
-
         assertNotNull(asyncOutput.getOutput());
         assertEquals(Async.Status.RUNNING, asyncOutput.getStatus());
-
-        //wait for timeout
+        // wait for timeout
         Thread.sleep(200);
-
         assertEquals(Async.Status.CANCELED, asyncOutput.getStatus());
         assertTrue(asyncOutput.getOutput().getAsyncFuture().isDone());
     }
 
-
     @Test
     public void test_shutdown_hook() {
-
         final ScheduledExecutorService scheduledExecutorService = mock(ScheduledExecutorService.class);
-
-        final PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook shutdownHook =
-                new PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook(scheduledExecutorService);
-
+        final PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook shutdownHook = new PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook(
+                scheduledExecutorService);
         shutdownHook.run();
-
         verify(scheduledExecutorService).shutdown();
     }
-
     private static class TestPluginOutput implements PluginTaskOutput {
 
         private final SettableFuture<Boolean> future = SettableFuture.create();
-
         private final AtomicBoolean async = new AtomicBoolean(false);
-
         @Override
         public boolean isAsync() {
             return async.get();
@@ -124,12 +100,10 @@ public class PluginOutputAsyncerImplTest {
 
         @Override
         public void markAsTimedOut() {
-
         }
 
         @Override
         public void resetAsyncStatus() {
-
         }
 
         @Nullable
@@ -143,5 +117,4 @@ public class PluginOutputAsyncerImplTest {
             return TimeoutFallback.FAILURE;
         }
     }
-
 }

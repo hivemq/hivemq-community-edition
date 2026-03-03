@@ -25,7 +25,6 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public abstract class AbstractPluginTaskContext implements PluginTaskContext {
 
     private final @NotNull String identifier;
-
     protected AbstractPluginTaskContext(@NotNull final String identifier) {
         this.identifier = identifier;
     }

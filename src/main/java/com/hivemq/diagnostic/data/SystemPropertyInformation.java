@@ -23,18 +23,14 @@ import java.util.Set;
 class SystemPropertyInformation extends AbstractInformation {
 
     public String getSystemPropertyInformation() {
-
         final StringBuilder systemPropertyBuilder = new StringBuilder();
         final RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-
         final Map<String, String> systemProperties = runtimeBean.getSystemProperties();
         final Set<String> keys = systemProperties.keySet();
         for (final String key : keys) {
-
             final String value = systemProperties.get(key);
             addInformation(systemPropertyBuilder, key, value);
         }
-
         return systemPropertyBuilder.toString();
     }
 }

@@ -37,13 +37,13 @@ import static org.mockito.Mockito.when;
 public class MetricsModuleTest {
 
     private final Injector injector = Guice.createInjector(new AbstractModule() {
+
         @Override
         protected void configure() {
             final Injector persistenceInjector = mock();
             when(persistenceInjector.getInstance(MetricsHolder.class)).thenReturn(mock());
             final NettyConfiguration nettyConfiguration = mock();
             when(nettyConfiguration.getChildEventLoopGroup()).thenReturn(mock());
-
             bind(NettyConfiguration.class).toInstance(nettyConfiguration);
             bind(ChannelGroup.class).toInstance(mock(ChannelGroup.class));
             bind(ClientSessionLocalPersistence.class).toInstance(mock());
@@ -51,11 +51,9 @@ public class MetricsModuleTest {
             bind(RetainedMessagePersistence.class).toInstance(mock());
             bind(SystemInformation.class).toInstance(mock(SystemInformation.class));
             bindScope(LazySingleton.class, LazySingletonScope.get());
-
             install(new MetricsModule(new MetricRegistry(), persistenceInjector));
         }
     });
-
     @Test
     public void test_metrics_registry_singleton() {
         final MetricRegistry instance = injector.getInstance(MetricRegistry.class);

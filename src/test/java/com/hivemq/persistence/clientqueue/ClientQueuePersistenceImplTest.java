@@ -69,24 +69,16 @@ public class ClientQueuePersistenceImplTest {
     private final @NotNull LocalTopicTree topicTree = mock();
     private final @NotNull ConnectionPersistence connectionPersistence = mock();
     private final @NotNull PublishPollService publishPollService = mock();
-
     private ClientQueuePersistenceImpl clientQueuePersistence;
-
     final int bucketSize = 64;
-
     private SingleWriterService singleWriterService;
-
     @Before
     public void setUp() throws Exception {
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
         when(mqttConfigurationService.maxQueuedMessages()).thenReturn(1000L);
         when(mqttConfigurationService.getQueuedMessagesStrategy()).thenReturn(QueuedMessagesStrategy.DISCARD);
-        clientQueuePersistence = new ClientQueuePersistenceImpl(localPersistence,
-                singleWriterService,
-                mqttConfigurationService,
-                clientSessionLocalPersistence,
-                topicTree,
-                connectionPersistence,
+        clientQueuePersistence = new ClientQueuePersistenceImpl(localPersistence, singleWriterService,
+                mqttConfigurationService, clientSessionLocalPersistence, topicTree, connectionPersistence,
                 publishPollService);
     }
 
@@ -99,7 +91,8 @@ public class ClientQueuePersistenceImplTest {
     @Test(timeout = 5000)
     public void test_add() throws ExecutionException, InterruptedException {
         clientQueuePersistence.add("client", false, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L).get();
-        verify(localPersistence).add(eq("client"),
+        verify(localPersistence).add(
+                eq("client"),
                 eq(false),
                 any(PUBLISH.class),
                 eq(1000L),
@@ -112,7 +105,8 @@ public class ClientQueuePersistenceImplTest {
     public void test_add_shared() throws ExecutionException, InterruptedException {
         clientQueuePersistence.add("name/topic", true, createPublish(1, QoS.AT_LEAST_ONCE, "topic"), false, 1000L)
                 .get();
-        verify(localPersistence).add(eq("name/topic"),
+        verify(localPersistence).add(
+                eq("name/topic"),
                 eq(true),
                 any(PUBLISH.class),
                 eq(1000L),
@@ -123,32 +117,26 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_publish_avaliable() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setInFlightMessagesSent(true);
         ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(0));
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
-
         verify(publishPollService, timeout(2000)).pollNewMessages("client", channel);
     }
 
     @Test(timeout = 5000)
     public void test_publish_avaliable_channel_inactive() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setInFlightMessagesSent(true);
         ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(0));
-
         channel.close();
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         clientQueuePersistence.publishAvailable("client");
@@ -158,15 +146,12 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_publish_avaliable_inflight_messages_not_sent() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(0));
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
-
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
         verify(publishPollService, never()).pollNewMessages("client", channel);
@@ -174,16 +159,13 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_publish_avaliable_inflight_messages_sending() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setInFlightMessagesSent(true);
         ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(10));
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
-
         clientQueuePersistence.publishAvailable("client");
         channel.runPendingTasks();
         verify(publishPollService, never()).pollNewMessages("client", channel);
@@ -191,7 +173,6 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_publish_avaliable_channel_null() {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 1000L));
         when(connectionPersistence.get("client")).thenReturn(null);
         clientQueuePersistence.publishAvailable("client");
@@ -207,33 +188,26 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_read_new() throws ExecutionException, InterruptedException {
-
-        when(localPersistence.readNew(anyString(),
-                anyBoolean(),
-                any(ImmutableIntArray.class),
-                anyLong(),
-                anyInt())).thenReturn(ImmutableList.of(createPublish(1, QoS.AT_MOST_ONCE, "topic"),
-                createPublish(2, QoS.AT_LEAST_ONCE, "topic")));
-
-        final ImmutableList<PUBLISH> publishes =
-                clientQueuePersistence.readNew("client", false, ImmutableIntArray.of(1, 2), 1000).get();
-
+        when(localPersistence.readNew(anyString(), anyBoolean(), any(ImmutableIntArray.class), anyLong(), anyInt()))
+                .thenReturn(
+                        ImmutableList.of(
+                                createPublish(1, QoS.AT_MOST_ONCE, "topic"),
+                                createPublish(2, QoS.AT_LEAST_ONCE, "topic")));
+        final ImmutableList<PUBLISH> publishes = clientQueuePersistence
+                .readNew("client", false, ImmutableIntArray.of(1, 2), 1000).get();
         assertEquals(2, publishes.size());
-
     }
 
     @Test(timeout = 5000)
     public void test_clear() throws ExecutionException, InterruptedException {
-
         clientQueuePersistence.clear("client", false).get();
         verify(localPersistence).clear("client", false, BucketUtils.getBucket("client", bucketSize));
-
     }
 
     @Test(timeout = 5000)
     public void test_read_inflight() throws ExecutionException, InterruptedException {
-        when(localPersistence.readInflight(anyString(), anyBoolean(), anyInt(), anyLong(), anyInt())).thenReturn(
-                ImmutableList.of(createPublish(1, QoS.AT_LEAST_ONCE, "topic")));
+        when(localPersistence.readInflight(anyString(), anyBoolean(), anyInt(), anyLong(), anyInt()))
+                .thenReturn(ImmutableList.of(createPublish(1, QoS.AT_LEAST_ONCE, "topic")));
         final ImmutableList<MessageWithID> messages = clientQueuePersistence.readInflight("client", 10, 11).get();
         assertEquals(1, messages.size());
         verify(localPersistence).readInflight(eq("client"), eq(false), eq(11), eq(10L), anyInt());
@@ -241,12 +215,9 @@ public class ClientQueuePersistenceImplTest {
 
     @Test(timeout = 5000)
     public void test_clean_up() throws ExecutionException, InterruptedException {
-
         when(localPersistence.cleanUp(eq(0))).thenReturn(ImmutableSet.of("group/topic"));
         when(topicTree.getSharedSubscriber(anyString(), anyString())).thenReturn(ImmutableSet.of());
-
         clientQueuePersistence.cleanUp(0).get();
-
         verify(topicTree).getSharedSubscriber(anyString(), anyString());
     }
 
@@ -265,27 +236,29 @@ public class ClientQueuePersistenceImplTest {
     @Test(timeout = 5000)
     public void test_batched_add_no_new_message() throws ExecutionException, InterruptedException {
         when(localPersistence.size(eq("client"), anyBoolean(), anyInt())).thenReturn(1);
-        final ImmutableList<PUBLISH> publishes = ImmutableList.of(createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
-                createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
+        final ImmutableList<PUBLISH> publishes = ImmutableList
+                .of(createPublish(1, QoS.AT_LEAST_ONCE, "topic1"), createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
         clientQueuePersistence.add("client", false, publishes, false, 1000L).get();
-        verify(localPersistence).add(eq("client"),
+        verify(localPersistence).add(
+                eq("client"),
                 eq(false),
                 eq(publishes),
                 eq(1000L),
                 eq(QueuedMessagesStrategy.DISCARD),
                 anyBoolean(),
                 anyInt());
-        verify(clientSessionLocalPersistence,
-                never()).getSession("client"); // Get session because new publishes are available
+        verify(clientSessionLocalPersistence, never()).getSession("client"); // Get session because new publishes are
+                                                                             // available
     }
 
     @Test(timeout = 5000)
     public void test_batched_add_new_message() throws ExecutionException, InterruptedException {
         when(localPersistence.size(eq("client"), anyBoolean(), anyInt())).thenReturn(0);
-        final ImmutableList<PUBLISH> publishes = ImmutableList.of(createPublish(1, QoS.AT_LEAST_ONCE, "topic1"),
-                createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
+        final ImmutableList<PUBLISH> publishes = ImmutableList
+                .of(createPublish(1, QoS.AT_LEAST_ONCE, "topic1"), createPublish(2, QoS.AT_LEAST_ONCE, "topic2"));
         clientQueuePersistence.add("client", false, publishes, false, 1000L).get();
-        verify(localPersistence).add(eq("client"),
+        verify(localPersistence).add(
+                eq("client"),
                 eq(false),
                 eq(publishes),
                 eq(1000L),
@@ -296,13 +269,7 @@ public class ClientQueuePersistenceImplTest {
     }
 
     private PUBLISH createPublish(final int packetId, final QoS qos, final String topic) {
-        return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId)
-                .withQoS(qos)
-                .withOnwardQos(qos)
-                .withPublishId(1L)
-                .withPayload("message".getBytes())
-                .withTopic(topic)
-                .withHivemqId("hivemqId")
-                .build();
+        return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(packetId).withQoS(qos).withOnwardQos(qos)
+                .withPublishId(1L).withPayload("message".getBytes()).withTopic(topic).withHivemqId("hivemqId").build();
     }
 }

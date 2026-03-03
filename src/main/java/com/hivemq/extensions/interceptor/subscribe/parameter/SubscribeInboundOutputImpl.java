@@ -26,17 +26,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 public class SubscribeInboundOutputImpl extends AbstractAsyncOutput<SubscribeInboundOutput>
         implements SubscribeInboundOutput {
 
     private final @NotNull ModifiableSubscribePacketImpl subscribePacket;
     private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
-
-    public SubscribeInboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull ModifiableSubscribePacketImpl subscribePacket) {
-
+    public SubscribeInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull ModifiableSubscribePacketImpl subscribePacket) {
         super(asyncer);
         this.subscribePacket = subscribePacket;
     }

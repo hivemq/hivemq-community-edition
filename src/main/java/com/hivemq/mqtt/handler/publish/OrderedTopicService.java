@@ -47,42 +47,32 @@ public class OrderedTopicService {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(OrderedTopicService.class);
     private static final @NotNull ClosedChannelException CLOSED_CHANNEL_EXCEPTION = new ClosedChannelException();
-
     static {
-        //remove the stacktrace from the static exception
+        // remove the stacktrace from the static exception
         CLOSED_CHANNEL_EXCEPTION.setStackTrace(new StackTraceElement[0]);
     }
-
     private final @NotNull Map<Integer, SettableFuture<PublishStatus>> messageIdToFutureMap = new ConcurrentHashMap<>();
-
     @VisibleForTesting
     final @NotNull Queue<QueuedMessage> queue = new ArrayDeque<>();
-
     private final @NotNull AtomicBoolean closedAlready = new AtomicBoolean(false);
     private final @NotNull Set<Integer> unacknowledgedMessages = ConcurrentHashMap.newKeySet();
-
     public void messageFlowComplete(final @NotNull ChannelHandlerContext ctx, final int packetId) {
         final SettableFuture<PublishStatus> publishStatusFuture = messageIdToFutureMap.get(packetId);
-
         if (publishStatusFuture != null) {
             messageIdToFutureMap.remove(packetId);
             publishStatusFuture.set(PublishStatus.DELIVERED);
         }
-
         final boolean removed = unacknowledgedMessages.remove(packetId);
         if (!removed) {
             return;
         }
-
         if (queue.isEmpty()) {
             return;
         }
-
         final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
-        final int maxInflightWindow = (clientConnection == null) ?
-                InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES :
-                clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
-
+        final int maxInflightWindow = (clientConnection == null)
+                ? InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES
+                : clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
         do {
             final QueuedMessage poll = queue.poll();
             if (poll == null) {
@@ -94,63 +84,55 @@ public class OrderedTopicService {
     }
 
     public boolean handlePublish(
-            final @NotNull Channel channel, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
-
+            final @NotNull Channel channel,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) {
         if (msg instanceof PubrelWithFuture) {
             final PubrelWithFuture pubrelWithFuture = (PubrelWithFuture) msg;
             messageIdToFutureMap.put(pubrelWithFuture.getPacketIdentifier(), pubrelWithFuture.getFuture());
             return false;
         }
-
         if (!(msg instanceof PUBLISH)) {
             return false;
         }
-
         SettableFuture<PublishStatus> future = null;
         if (msg instanceof PublishWithFuture) {
             final PublishWithFuture publishWithFuture = (PublishWithFuture) msg;
             future = publishWithFuture.getFuture();
         }
-
         final ClientConnection clientConnection = ClientConnection.of(channel);
         if (clientConnection == null) {
             return false;
         }
-
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return false;
         }
-
         final PUBLISH publish = (PUBLISH) msg;
         final int qosNumber = publish.getQoS().getQosNumber();
         if (log.isTraceEnabled()) {
-            log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}",
+            log.trace(
+                    "Client {}: Sending PUBLISH QoS {} Message with packet id {}",
                     clientId,
                     publish.getQoS().getQosNumber(),
                     publish.getPacketIdentifier());
         }
-
         if (qosNumber < 1) {
             if (future != null) {
                 future.set(PublishStatus.DELIVERED);
             }
             return false;
         }
-
         if (future != null) {
             messageIdToFutureMap.put(publish.getPacketIdentifier(), future);
         }
-
-        //do not store in OrderedTopicService if channelInactive has been called already
+        // do not store in OrderedTopicService if channelInactive has been called already
         if (closedAlready.get()) {
             promise.setFailure(CLOSED_CHANNEL_EXCEPTION);
             return true;
         }
-
-
-        if (unacknowledgedMessages.size() >=
-                clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES)) {
+        if (unacknowledgedMessages.size() >= clientConnection
+                .getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES)) {
             queueMessage(promise, publish, clientId);
             return true;
         } else {
@@ -160,9 +142,7 @@ public class OrderedTopicService {
     }
 
     public void handleInactive() {
-
         closedAlready.set(true);
-
         for (final QueuedMessage queuedMessage : queue) {
             if (queuedMessage != null) {
                 if (!queuedMessage.getPromise().isDone()) {
@@ -170,7 +150,6 @@ public class OrderedTopicService {
                 }
             }
         }
-
         // In case the client is disconnected, we return all the publish status futures
         // This is particularly important for shared subscriptions, because the publish will not be resent otherwise
         for (final Map.Entry<Integer, SettableFuture<PublishStatus>> entry : messageIdToFutureMap.entrySet()) {
@@ -180,8 +159,9 @@ public class OrderedTopicService {
     }
 
     private void queueMessage(
-            final @NotNull ChannelPromise promise, final @NotNull PUBLISH publish, final @NotNull String clientId) {
-
+            final @NotNull ChannelPromise promise,
+            final @NotNull PUBLISH publish,
+            final @NotNull String clientId) {
         if (log.isTraceEnabled()) {
             final String topic = publish.getTopic();
             final int messageId = publish.getPacketIdentifier();
@@ -192,7 +172,6 @@ public class OrderedTopicService {
                     topic,
                     clientId);
         }
-
         queue.add(new QueuedMessage(publish, promise));
     }
 
@@ -200,7 +179,6 @@ public class OrderedTopicService {
     public Set<Integer> unacknowledgedMessages() {
         return unacknowledgedMessages;
     }
-
     @Immutable
     @VisibleForTesting
     static class QueuedMessage {
@@ -209,9 +187,7 @@ public class OrderedTopicService {
         private final PUBLISH publish;
         @NotNull
         private final ChannelPromise promise;
-
         QueuedMessage(final @NotNull PUBLISH publish, final @NotNull ChannelPromise promise) {
-
             this.publish = publish;
             this.promise = promise;
         }

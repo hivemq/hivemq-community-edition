@@ -37,10 +37,8 @@ public class PubcompInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubcompPacketImpl packet = mock(PubcompPacketImpl.class);
-
-        final PubcompInboundInputImpl input =
-                new PubcompInboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final PubcompInboundInputImpl input = new PubcompInboundInputImpl(clientInformation, connectionInformation,
+                packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPubcompPacket());
@@ -51,18 +49,14 @@ public class PubcompInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubcompPacketImpl packet = mock(PubcompPacketImpl.class);
-
-        final PubcompInboundInputImpl input =
-                new PubcompInboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final PubcompInboundInputImpl input = new PubcompInboundInputImpl(clientInformation, connectionInformation,
+                packet);
         final ModifiablePubcompPacketImpl modifiablePacket = mock(ModifiablePubcompPacketImpl.class);
         final PubcompPacketImpl newPacket = mock(PubcompPacketImpl.class);
         final PubcompInboundOutputImpl output = mock(PubcompInboundOutputImpl.class);
         when(output.getPubcompPacket()).thenReturn(modifiablePacket);
         when(modifiablePacket.copy()).thenReturn(newPacket);
-
         final PubcompInboundInputImpl updated = input.update(output);
-
         assertNotSame(input, updated);
         assertSame(input.getClientInformation(), updated.getClientInformation());
         assertSame(input.getConnectionInformation(), updated.getConnectionInformation());

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.client.parameter;
 
 import com.google.common.collect.ImmutableList;
@@ -42,12 +41,10 @@ import static org.mockito.Mockito.when;
  */
 public class ServerInformationImplTest {
 
-    private final @NotNull ListenerConfigurationService listenerConfigurationService =
-            mock(ListenerConfigurationService.class);
-
+    private final @NotNull ListenerConfigurationService listenerConfigurationService = mock(
+            ListenerConfigurationService.class);
     private @NotNull ServerInformation serverInformation;
     private @NotNull SystemInformation systemInformation;
-
     @Before
     public void setUp() throws Exception {
         systemInformation = new SystemInformationImpl();
@@ -72,7 +69,6 @@ public class ServerInformationImplTest {
         final Iterator<Listener> iterator = listeners.iterator();
         final Listener first = iterator.next();
         final Listener second = iterator.next();
-
         if (first.getListenerType() == ListenerType.TCP_LISTENER) {
             assertEquals(ListenerType.TLS_TCP_LISTENER, second.getListenerType());
         } else {

@@ -46,24 +46,18 @@ public class ConfigurationFileProviderTest {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
-
     private final @NotNull Appender<ILoggingEvent> mockAppender = mock();
     private final @NotNull SystemInformation systemInformation = mock();
-
-    private final @NotNull ArgumentCaptor<LoggingEvent> captorLoggingEvent =
-            ArgumentCaptor.forClass(LoggingEvent.class);
-
+    private final @NotNull ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor
+            .forClass(LoggingEvent.class);
     private File confFolder;
-
     @Before
     public void setUp() throws Exception {
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         logger.addAppender(mockAppender);
-
         final File hivemqHomefolder = folder.newFolder();
         confFolder = new File(hivemqHomefolder, "conf");
         assertTrue(confFolder.mkdir());
-
         when(systemInformation.getHiveMQHomeFolder()).thenReturn(hivemqHomefolder);
         when(systemInformation.getConfigFolder()).thenReturn(confFolder);
     }
@@ -79,10 +73,8 @@ public class ConfigurationFileProviderTest {
         restoreSystemProperties(() -> {
             final File config = new File(confFolder, "config.xml");
             assertTrue(config.createNewFile());
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertTrue(configurationFile.file().isPresent());
-
             // no warning / error is logged
             verify(mockAppender, never()).doAppend(captorLoggingEvent.capture());
         });
@@ -92,10 +84,8 @@ public class ConfigurationFileProviderTest {
     public void test_conf_folder_does_not_exist() throws Exception {
         restoreSystemProperties(() -> {
             assertTrue(confFolder.delete());
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertFalse(configurationFile.file().isPresent());
-
             verifyLogStatementContains("does not exist");
         });
     }
@@ -105,10 +95,8 @@ public class ConfigurationFileProviderTest {
         restoreSystemProperties(() -> {
             assertTrue(confFolder.delete());
             assertTrue(confFolder.createNewFile());
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertFalse(configurationFile.file().isPresent());
-
             verifyLogStatementContains("is not a folder");
         });
     }
@@ -117,10 +105,8 @@ public class ConfigurationFileProviderTest {
     public void test_conf_folder_is_not_readable() throws Exception {
         restoreSystemProperties(() -> {
             assertTrue(confFolder.setReadable(false));
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertFalse(configurationFile.file().isPresent());
-
             verifyLogStatementContains("cannot be read by HiveMQ");
         });
     }
@@ -130,7 +116,6 @@ public class ConfigurationFileProviderTest {
         restoreSystemProperties(() -> {
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertFalse(configurationFile.file().isPresent());
-
             verifyLogStatementContains("config.xml does not exist");
         });
     }
@@ -140,10 +125,8 @@ public class ConfigurationFileProviderTest {
         restoreSystemProperties(() -> {
             final File config = new File(confFolder, "config.xml");
             assertTrue(config.mkdir());
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertFalse(configurationFile.file().isPresent());
-
             verifyLogStatementContains("config.xml is not file");
         });
     }
@@ -154,10 +137,8 @@ public class ConfigurationFileProviderTest {
             final File config = new File(confFolder, "config.xml");
             assertTrue(config.createNewFile());
             assertTrue(config.setReadable(false));
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             assertFalse(configurationFile.file().isPresent());
-
             verifyLogStatementContains("config.xml cannot be read by HiveMQ");
         });
     }
@@ -168,11 +149,9 @@ public class ConfigurationFileProviderTest {
             final File config = new File(confFolder, "config.xml");
             assertTrue(config.createNewFile());
             assertTrue(config.setWritable(false));
-
             final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
             // it's just a warning when the file is not writable
             assertTrue(configurationFile.file().isPresent());
-
             verifyLogStatementContains("config.xml is read only and cannot be written by HiveMQ");
             assertEquals(Level.WARN, captorLoggingEvent.getValue().getLevel());
         });

@@ -25,7 +25,7 @@ import com.hivemq.extension.sdk.api.interceptor.connack.parameter.ConnackOutboun
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 @Immutable
 public class ConnackOutboundProviderInputImpl implements ConnackOutboundProviderInput {
@@ -33,12 +33,9 @@ public class ConnackOutboundProviderInputImpl implements ConnackOutboundProvider
     private final @NotNull ServerInformation serverInformation;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-
-    public ConnackOutboundProviderInputImpl(
-            final @NotNull ServerInformation serverInformation,
+    public ConnackOutboundProviderInputImpl(final @NotNull ServerInformation serverInformation,
             final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation) {
-
         this.serverInformation = serverInformation;
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;

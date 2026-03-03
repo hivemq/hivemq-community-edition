@@ -28,10 +28,9 @@ public class SubackPacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(SubackPacketImpl.class)
-                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
-                .withNonnullFields("reasonCodes", "userProperties")
-                .suppress(Warning.STRICT_INHERITANCE)
-                .verify();
+        EqualsVerifier.forClass(SubackPacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                                                                                              // @NotNull Optional is
+                                                                                              // @NotNull
+                .withNonnullFields("reasonCodes", "userProperties").suppress(Warning.STRICT_INHERITANCE).verify();
     }
 }

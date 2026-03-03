@@ -37,12 +37,9 @@ public class MQTTServiceModule extends SingletonModule {
 
     @Override
     protected void configure() {
-
         bind(InternalPublishService.class).to(InternalPublishServiceImpl.class);
         bind(PublishDistributor.class).to(PublishDistributorImpl.class);
-
         bind(TopicAliasLimiter.class).to(TopicAliasLimiterImpl.class);
-
         bind(PublishPollService.class).to(PublishPollServiceImpl.class).in(LazySingleton.class);
     }
 }

@@ -18,11 +18,9 @@ package com.hivemq.common.shutdown;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
- * A interface for shutdown hooks used for registering HiveMQ shutdown hooks
- * in a proper, clean and manageable way.
+ * A interface for shutdown hooks used for registering HiveMQ shutdown hooks in a proper, clean and manageable way.
  * <p>
- * To register on of the Shutdown Hooks, use the {@link com.hivemq.common.shutdown.ShutdownHooks}
- * class.
+ * To register on of the Shutdown Hooks, use the {@link com.hivemq.common.shutdown.ShutdownHooks} class.
  *
  * @author Dominik Obermaier
  */
@@ -33,7 +31,8 @@ public interface HiveMQShutdownHook extends Runnable {
      *
      * @return the name of the HiveMQ shutdown hook
      */
-    @NotNull String name();
+    @NotNull
+    String name();
 
     /**
      * The {@link HiveMQShutdownHook.Priority} of the shutdown hook.
@@ -43,21 +42,12 @@ public interface HiveMQShutdownHook extends Runnable {
     default @NotNull Priority priority() {
         return Priority.DOES_NOT_MATTER;
     }
-
     enum Priority {
-        FIRST(Integer.MAX_VALUE),
-        CRITICAL(1_000_000),
-        VERY_HIGH(500_000),
-        HIGH(100_000),
-        MEDIUM(50_000),
-        LOW(10_000),
-        VERY_LOW(5_000),
-        DOES_NOT_MATTER(Integer.MIN_VALUE);
 
+        FIRST(Integer.MAX_VALUE), CRITICAL(1_000_000), VERY_HIGH(500_000), HIGH(100_000), MEDIUM(50_000), LOW(
+                10_000), VERY_LOW(5_000), DOES_NOT_MATTER(Integer.MIN_VALUE);
         private final int value;
-
         Priority(final int value) {
-
             this.value = value;
         }
 

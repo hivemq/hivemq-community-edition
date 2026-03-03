@@ -34,11 +34,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class ModifiableWillPublishImpl extends ModifiablePublishPacketImpl implements ModifiableWillPublish {
 
     private long willDelay;
-
-    public ModifiableWillPublishImpl(
-            final @NotNull WillPublishPacketImpl willPublishPacket,
+    public ModifiableWillPublishImpl(final @NotNull WillPublishPacketImpl willPublishPacket,
             final @NotNull FullConfigurationService configurationService) {
-
         super(willPublishPacket, configurationService);
         this.willDelay = willPublishPacket.willDelay;
     }
@@ -52,7 +49,6 @@ public class ModifiableWillPublishImpl extends ModifiablePublishPacketImpl imple
     public void setWillDelay(final long willDelay) {
         checkArgument(willDelay >= 0, "Will delay must NOT be less than 0");
         checkArgument(willDelay < UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE, "Will delay must be less than 4294967295");
-
         if (this.willDelay == willDelay) {
             return;
         }
@@ -62,18 +58,8 @@ public class ModifiableWillPublishImpl extends ModifiablePublishPacketImpl imple
 
     @Override
     public @NotNull WillPublishPacketImpl copy() {
-        return new WillPublishPacketImpl(topic,
-                qos,
-                payload,
-                retain,
-                messageExpiryInterval,
-                payloadFormatIndicator,
-                contentType,
-                responseTopic,
-                correlationData,
-                userProperties.copy(),
-                willDelay,
-                timestamp);
+        return new WillPublishPacketImpl(topic, qos, payload, retain, messageExpiryInterval, payloadFormatIndicator,
+                contentType, responseTopic, correlationData, userProperties.copy(), willDelay, timestamp);
     }
 
     @Override

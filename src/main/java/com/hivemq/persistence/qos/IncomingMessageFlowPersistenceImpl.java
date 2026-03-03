@@ -28,9 +28,7 @@ import javax.inject.Inject;
 @LazySingleton
 public class IncomingMessageFlowPersistenceImpl implements IncomingMessageFlowPersistence {
 
-
     private final @NotNull IncomingMessageFlowLocalPersistence localPersistence;
-
     @Inject
     public IncomingMessageFlowPersistenceImpl(final @NotNull IncomingMessageFlowLocalPersistence localPersistence) {
         this.localPersistence = localPersistence;

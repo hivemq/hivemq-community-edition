@@ -33,7 +33,7 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
 
     @Override
     public void add(final byte @NotNull [] payload, final long id) {
-        //NOOP
+        // NOOP
     }
 
     @Override
@@ -43,16 +43,16 @@ public class PublishPayloadNoopPersistenceImpl implements PublishPayloadPersiste
 
     @Override
     public void incrementReferenceCounterOnBootstrap(final long payloadId) {
-        //NOOP
+        // NOOP
     }
 
     @Override
     public void decrementReferenceCounter(final long id) {
-        //NOOP
+        // NOOP
     }
 
     @Override
     public void closeDB() {
-        //NOOP
+        // NOOP
     }
 }

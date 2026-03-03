@@ -39,9 +39,7 @@ import static org.mockito.Mockito.mock;
 public class SubscriptionAuthorizerOutputImplTest {
 
     private final @NotNull PluginOutPutAsyncer asyncer = mock();
-
     private SubscriptionAuthorizerOutputImpl output;
-
     @Before
     public void before() {
         output = new SubscriptionAuthorizerOutputImpl(asyncer);

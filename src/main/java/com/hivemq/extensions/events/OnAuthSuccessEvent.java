@@ -19,7 +19,7 @@ package com.hivemq.extensions.events;
  * The event to fire when client auth succeeded.
  *
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class OnAuthSuccessEvent {
 }

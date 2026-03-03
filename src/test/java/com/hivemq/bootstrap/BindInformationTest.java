@@ -26,13 +26,10 @@ import static org.mockito.Mockito.mock;
 public class BindInformationTest {
 
     private final @NotNull ChannelFuture future = mock();
-
     private final @NotNull TcpListener listener = new TcpListener(1883, "0.0.0.0", "test");
-
     @Test
     public void test_bind_information() {
         final BindInformation bindInformation = new BindInformation(listener, future);
-
         assertSame(listener, bindInformation.getListener());
         assertSame(future, bindInformation.getBindFuture());
     }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.client;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -40,32 +39,25 @@ public class ClientAuthorizersImplTest {
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-    private final @NotNull ExtensionPriorityComparator extensionPriorityComparator =
-            mock(ExtensionPriorityComparator.class);
-
+    private final @NotNull ExtensionPriorityComparator extensionPriorityComparator = mock(
+            ExtensionPriorityComparator.class);
     private @NotNull ClientAuthorizersImpl authorizers;
-
     @Before
     public void before() {
-        when(extensionPriorityComparator.compare(any(),
-                any())).thenAnswer(invocation -> Integer.compare(invocation.getArguments()[0].hashCode(),
-                invocation.getArguments()[1].hashCode()));
+        when(extensionPriorityComparator.compare(any(), any())).thenAnswer(
+                invocation -> Integer
+                        .compare(invocation.getArguments()[0].hashCode(), invocation.getArguments()[1].hashCode()));
         authorizers = new ClientAuthorizersImpl(extensionPriorityComparator);
     }
 
     @Test
     public void test_put_get_authorizers() throws Exception {
-        final SubscriptionAuthorizer authorizer1 =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestSubscriptionAuthorizer.class);
-        final SubscriptionAuthorizer authorizer2 =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestSubscriptionAuthorizer.class);
-
+        final SubscriptionAuthorizer authorizer1 = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestSubscriptionAuthorizer.class);
+        final SubscriptionAuthorizer authorizer2 = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestSubscriptionAuthorizer.class);
         authorizers.put("extension-1", authorizer1);
         authorizers.put("extension-2", authorizer2);
-
         final Map<String, SubscriptionAuthorizer> map = authorizers.getSubscriptionAuthorizersMap();
         assertEquals(2, map.size());
         assertSame(authorizer1, map.get("extension-1"));
@@ -74,26 +66,20 @@ public class ClientAuthorizersImplTest {
 
     @Test
     public void test_remove_authorizers() throws Exception {
-        final SubscriptionAuthorizer authorizer1 =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestSubscriptionAuthorizer.class);
-        final SubscriptionAuthorizer authorizer2 =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestSubscriptionAuthorizer.class);
-
+        final SubscriptionAuthorizer authorizer1 = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestSubscriptionAuthorizer.class);
+        final SubscriptionAuthorizer authorizer2 = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestSubscriptionAuthorizer.class);
         authorizers.put("extension-1", authorizer1);
         authorizers.put("extension-2", authorizer2);
         assertEquals(2, authorizers.getSubscriptionAuthorizersMap().size());
-
-        final IsolatedExtensionClassloader classloader =
-                (IsolatedExtensionClassloader) authorizer1.getClass().getClassLoader();
+        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) authorizer1.getClass()
+                .getClassLoader();
         authorizers.removeAllForPlugin(classloader);
-
         final Map<String, SubscriptionAuthorizer> map = authorizers.getSubscriptionAuthorizersMap();
         assertEquals(1, map.size());
         assertSame(authorizer2, map.get("extension-2"));
     }
-
     public static class TestSubscriptionAuthorizer implements SubscriptionAuthorizer {
 
         @Override

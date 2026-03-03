@@ -39,20 +39,18 @@ import static org.mockito.Mockito.mock;
 public class ConfigurationModuleTest {
 
     private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
-
     private Injector injector;
     private TestConfigurationBootstrap testConfigurationBootstrap;
-
-
     @Before
     public void setUp() throws Exception {
         testConfigurationBootstrap = new TestConfigurationBootstrap();
-        final FullConfigurationService fullConfigurationService =
-                testConfigurationBootstrap.getFullConfigurationService();
-
-        injector = Guice.createInjector(new SystemInformationModule(new SystemInformationImpl()),
+        final FullConfigurationService fullConfigurationService = testConfigurationBootstrap
+                .getFullConfigurationService();
+        injector = Guice.createInjector(
+                new SystemInformationModule(new SystemInformationImpl()),
                 new ConfigurationModule(fullConfigurationService, new HivemqId()),
                 new AbstractModule() {
+
                     @Override
                     protected void configure() {
                         bind(SharedSubscriptionService.class).toInstance(sharedSubscriptionService);
@@ -62,63 +60,53 @@ public class ConfigurationModuleTest {
 
     @Test
     public void test_listener_configuration_service_singleton() throws Exception {
-
         final ListenerConfigurationService instance = injector.getInstance(ListenerConfigurationService.class);
         final ListenerConfigurationService instance2 = injector.getInstance(ListenerConfigurationService.class);
-
         assertSame(instance, instance2);
         assertSame(testConfigurationBootstrap.getListenerConfigurationService(), instance);
     }
 
     @Test
     public void test_mqtt_configuration_service_singleton() throws Exception {
-
         final MqttConfigurationService instance = injector.getInstance(MqttConfigurationService.class);
         final MqttConfigurationService instance2 = injector.getInstance(MqttConfigurationService.class);
-
         assertSame(instance, instance2);
         assertSame(testConfigurationBootstrap.getMqttConfigurationService(), instance);
     }
 
     @Test
     public void test_throttling_configuration_service_singleton() throws Exception {
-
         final RestrictionsConfigurationService instance = injector.getInstance(RestrictionsConfigurationService.class);
         final RestrictionsConfigurationService instance2 = injector.getInstance(RestrictionsConfigurationService.class);
-
         assertSame(instance, instance2);
         assertSame(testConfigurationBootstrap.getRestrictionsConfigurationService(), instance);
     }
 
     @Test
     public void test_configuration_service_singleton() throws Exception {
-
         final ConfigurationService instance = injector.getInstance(ConfigurationService.class);
         final ConfigurationService instance2 = injector.getInstance(ConfigurationService.class);
-
         assertSame(instance, instance2);
         assertSame(testConfigurationBootstrap.getConfigurationService(), instance);
     }
 
     @Test
     public void test_configuration_service_same_as_full_configuration_service() throws Exception {
-
         final ConfigurationService instance = injector.getInstance(ConfigurationService.class);
         final FullConfigurationService instance2 = injector.getInstance(FullConfigurationService.class);
-
         assertSame(instance, instance2);
         assertSame(testConfigurationBootstrap.getFullConfigurationService(), instance);
     }
 
     @Test
     public void test_configuration_service_bindings_same_as_direct_binding() throws Exception {
-
         final FullConfigurationService configurationService = injector.getInstance(FullConfigurationService.class);
-
-        assertSame(configurationService.listenerConfiguration(),
+        assertSame(
+                configurationService.listenerConfiguration(),
                 injector.getInstance(ListenerConfigurationService.class));
         assertSame(configurationService.mqttConfiguration(), injector.getInstance(MqttConfigurationService.class));
-        assertSame(configurationService.restrictionsConfiguration(),
+        assertSame(
+                configurationService.restrictionsConfiguration(),
                 injector.getInstance(RestrictionsConfigurationService.class));
     }
 }

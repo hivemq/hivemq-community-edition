@@ -31,16 +31,14 @@ public interface PublishPollService {
     void pollMessages(@NotNull String client, @NotNull Channel channel);
 
     /**
-     * Polls new messages for the client.
-     * Only use this method if there are no in-flight messages for the client.
+     * Polls new messages for the client. Only use this method if there are no in-flight messages for the client.
      *
      * @param client the client for which to poll the messages
      */
     void pollNewMessages(@NotNull String client);
 
     /**
-     * Polls new messages for the client.
-     * Only use this method if there are no in-flight messages for the client.
+     * Polls new messages for the client. Only use this method if there are no in-flight messages for the client.
      *
      * @param client  the client for which to poll the messages
      * @param channel the channel of the client
@@ -62,7 +60,6 @@ public interface PublishPollService {
      * @param sharedSubscription of the queue for which messages are polled
      */
     void pollSharedPublishes(@NotNull String sharedSubscription);
-
 
     /**
      * Poll publishes from the shared subscription queue for a given client.
@@ -88,7 +85,8 @@ public interface PublishPollService {
      * @param client   for which the message is removed
      * @param packetId of the message that will be removed
      */
-    @NotNull ListenableFuture<Void> removeMessageFromQueue(@NotNull String client, int packetId);
+    @NotNull
+    ListenableFuture<Void> removeMessageFromQueue(@NotNull String client, int packetId);
 
     /**
      * Remove a message form the shared subscription queue.
@@ -96,8 +94,8 @@ public interface PublishPollService {
      * @param sharedSubscription for which the message is removed
      * @param uniqueId           of the message that will be removed
      */
-    @NotNull ListenableFuture<Void> removeMessageFromSharedQueue(
-            @NotNull String sharedSubscription, @NotNull String uniqueId);
+    @NotNull
+    ListenableFuture<Void> removeMessageFromSharedQueue(@NotNull String sharedSubscription, @NotNull String uniqueId);
 
     /**
      * Replace a PUBLISH with a PUBREL in the client queue.
@@ -105,7 +103,8 @@ public interface PublishPollService {
      * @param client   for which the PUBREL is put
      * @param packetId of the PUBREL
      */
-    @NotNull ListenableFuture<Void> putPubrelInQueue(@NotNull String client, int packetId);
+    @NotNull
+    ListenableFuture<Void> putPubrelInQueue(@NotNull String client, int packetId);
 
     /**
      * Remove the in-flight marker of a message in the shared subscription queue.
@@ -113,5 +112,6 @@ public interface PublishPollService {
      * @param sharedSubscription for which the marker is removed
      * @param uniqueId           of the message for which the marker is removed
      */
-    @NotNull ListenableFuture<Void> removeInflightMarker(@NotNull String sharedSubscription, @NotNull String uniqueId);
+    @NotNull
+    ListenableFuture<Void> removeInflightMarker(@NotNull String sharedSubscription, @NotNull String uniqueId);
 }

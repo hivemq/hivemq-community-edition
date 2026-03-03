@@ -30,12 +30,9 @@ public class ListenerStartupInformation {
     private final boolean successful;
     private final @NotNull Listener listener;
     private final @Nullable Throwable exception;
-
-    private ListenerStartupInformation(
-            final boolean successful, final @NotNull Listener listener, final @Nullable Throwable exception) {
-
+    private ListenerStartupInformation(final boolean successful, final @NotNull Listener listener,
+            final @Nullable Throwable exception) {
         checkNotNull(listener, "Original Listener must not be null");
-
         this.successful = successful;
         this.listener = listener;
         this.exception = exception;
@@ -58,7 +55,8 @@ public class ListenerStartupInformation {
     }
 
     public static ListenerStartupInformation failedListenerStartup(
-            final @NotNull Listener listener, final @Nullable Throwable exception) {
+            final @NotNull Listener listener,
+            final @Nullable Throwable exception) {
         return new ListenerStartupInformation(false, listener, exception);
     }
 }

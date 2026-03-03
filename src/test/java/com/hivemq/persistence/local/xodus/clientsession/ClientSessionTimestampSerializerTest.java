@@ -26,23 +26,19 @@ import static org.junit.Assert.assertEquals;
 public class ClientSessionTimestampSerializerTest {
 
     private ClientSessionTimestampSerializer serializer;
-
     @Before
     public void setUp() throws Exception {
         serializer = new ClientSessionTimestampSerializer();
-
     }
 
     @Test
     public void test_timestamp_conversions_standalone() throws Exception {
-        final long[] values =
-                {1, System.currentTimeMillis(), /* max 5 byte*/ 549755813887L, /* max 6 byte */ 140737488355327L};
-
+        final long[] values = {1, System.currentTimeMillis(), /* max 5 byte */ 549755813887L,
+                /* max 6 byte */ 140737488355327L};
         for (final long value : values) {
             final byte[] bytes = serializer.timestampLongToByteArray(value);
             final long result = serializer.byteArrayToTimestampLong(bytes);
             assertEquals(value, result);
         }
     }
-
 }

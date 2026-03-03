@@ -38,22 +38,16 @@ public class HiveMQConfigEntity {
     @XmlElementWrapper(name = "listeners", required = true)
     @XmlElementRef(required = false)
     private @NotNull List<ListenerEntity> listeners = new ArrayList<>();
-
     @XmlElementRef(required = false)
     private @NotNull MqttConfigEntity mqtt = new MqttConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull RestrictionsEntity restrictions = new RestrictionsEntity();
-
     @XmlElementRef(required = false)
     private @NotNull SecurityConfigEntity security = new SecurityConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull UsageStatisticsEntity usageStatistics = new UsageStatisticsEntity();
-
     @XmlElementRef(required = false)
     private @NotNull PersistenceEntity persistence = new PersistenceEntity();
-
     public @NotNull List<ListenerEntity> getListenerConfig() {
         return listeners;
     }

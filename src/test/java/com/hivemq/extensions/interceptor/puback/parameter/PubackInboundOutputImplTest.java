@@ -33,9 +33,7 @@ public class PubackInboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiablePubackPacketImpl modifiablePacket = mock(ModifiablePubackPacketImpl.class);
-
         final PubackInboundOutputImpl output = new PubackInboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getPubackPacket());
     }
 
@@ -43,17 +41,13 @@ public class PubackInboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiablePubackPacketImpl modifiablePacket = mock(ModifiablePubackPacketImpl.class);
-
         final PubackInboundOutputImpl output = new PubackInboundOutputImpl(asyncer, modifiablePacket);
-
         final PubackInboundInputImpl input = mock(PubackInboundInputImpl.class);
         final PubackPacketImpl packet = mock(PubackPacketImpl.class);
         final ModifiablePubackPacketImpl newModifiablePacket = mock(ModifiablePubackPacketImpl.class);
         when(input.getPubackPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final PubackInboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getPubackPacket());
     }
 }

@@ -29,7 +29,7 @@ import com.hivemq.util.Topics;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 @ThreadSafe
 public class ModifiableSubscriptionImpl implements ModifiableSubscription {
@@ -39,20 +39,15 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
     private @NotNull RetainHandling retainHandling;
     private boolean retainAsPublished;
     private boolean noLocal;
-
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
-
-    public ModifiableSubscriptionImpl(
-            final @NotNull SubscriptionImpl subscription,
+    public ModifiableSubscriptionImpl(final @NotNull SubscriptionImpl subscription,
             final @NotNull FullConfigurationService configurationService) {
-
         topicFilter = subscription.topicFilter;
         qos = subscription.qos;
         retainHandling = subscription.retainHandling;
         retainAsPublished = subscription.retainAsPublished;
         noLocal = subscription.noLocal;
-
         this.configurationService = configurationService;
     }
 
@@ -64,43 +59,41 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
     @Override
     public void setTopicFilter(final @NotNull String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter must never be null");
-        Preconditions.checkArgument(topicFilter.length() <=
-                        configurationService.restrictionsConfiguration().maxTopicLength(),
-                "Topic filter length must not exceed '" +
-                        configurationService.restrictionsConfiguration().maxTopicLength() +
-                        "' characters, but has '" +
-                        topicFilter.length() +
-                        "' characters");
-        Preconditions.checkArgument(!(!configurationService.mqttConfiguration().wildcardSubscriptionsEnabled() &&
-                Topics.containsWildcard(topicFilter)), "Wildcard characters '+' or '#' are not allowed");
-
+        Preconditions.checkArgument(
+                topicFilter.length() <= configurationService.restrictionsConfiguration().maxTopicLength(),
+                "Topic filter length must not exceed '"
+                        + configurationService.restrictionsConfiguration().maxTopicLength() + "' characters, but has '"
+                        + topicFilter.length() + "' characters");
+        Preconditions.checkArgument(
+                !(!configurationService.mqttConfiguration().wildcardSubscriptionsEnabled()
+                        && Topics.containsWildcard(topicFilter)),
+                "Wildcard characters '+' or '#' are not allowed");
         if (this.topicFilter.equals(topicFilter)) {
             return;
         }
-
         final boolean shared = Topics.isSharedSubscriptionTopic(topicFilter);
-        Preconditions.checkArgument(!(noLocal && shared),
+        Preconditions.checkArgument(
+                !(noLocal && shared),
                 "Shared subscription is not allowed with no local flag set to true");
         if (shared) {
-            Preconditions.checkArgument(configurationService.mqttConfiguration().sharedSubscriptionsEnabled(),
+            Preconditions.checkArgument(
+                    configurationService.mqttConfiguration().sharedSubscriptionsEnabled(),
                     "Shared subscriptions not allowed");
-            final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                    Topics.checkForSharedSubscription(topicFilter);
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = Topics
+                    .checkForSharedSubscription(topicFilter);
             if (sharedSubscription != null) {
-                Preconditions.checkArgument(!sharedSubscription.getTopicFilter().isEmpty(),
+                Preconditions.checkArgument(
+                        !sharedSubscription.getTopicFilter().isEmpty(),
                         "Shared subscription topic must not be empty");
             }
         }
-
         if (!Topics.isValidToSubscribe(topicFilter)) {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is invalid for subscriptions");
         }
-
-        if (!PluginBuilderUtil.isValidUtf8String(topicFilter,
-                configurationService.securityConfiguration().validateUTF8())) {
+        if (!PluginBuilderUtil
+                .isValidUtf8String(topicFilter, configurationService.securityConfiguration().validateUTF8())) {
             throw new IllegalArgumentException("The topic filter (" + topicFilter + ") is UTF-8 malformed");
         }
-
         this.topicFilter = topicFilter;
         modified = true;
     }
@@ -156,7 +149,8 @@ public class ModifiableSubscriptionImpl implements ModifiableSubscription {
 
     @Override
     public void setNoLocal(final boolean noLocal) {
-        Preconditions.checkArgument(!(noLocal && Topics.isSharedSubscriptionTopic(topicFilter)),
+        Preconditions.checkArgument(
+                !(noLocal && Topics.isSharedSubscriptionTopic(topicFilter)),
                 "No local is not allowed for shared subscriptions");
         if (this.noLocal == noLocal) {
             return;

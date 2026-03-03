@@ -34,25 +34,24 @@ public class Mqtt5UserProperties {
     /**
      * Creates a collection of User Properties of the given User Properties.
      *
-     * @param userProperties the User Properties.
-     * @return the created collection of User Properties.
+     * @param  userProperties the User Properties.
+     * @return                the created collection of User Properties.
      */
     @NotNull
     public static Mqtt5UserProperties of(final @NotNull MqttUserProperty... userProperties) {
         Preconditions.checkNotNull(userProperties);
         return Mqtt5UserProperties.of(ImmutableList.copyOf(userProperties));
     }
-
     /**
      * Empty collection of User Properties.
      */
     public static final Mqtt5UserProperties NO_USER_PROPERTIES = new Mqtt5UserProperties(ImmutableList.of());
-
     /**
      * Creates a collection of User Properties from the given immutable list of User Properties.
      *
-     * @param userProperties the immutable list of User Properties.
-     * @return the created collection of User Properties or {@link #NO_USER_PROPERTIES} if the list is empty.
+     * @param  userProperties the immutable list of User Properties.
+     * @return                the created collection of User Properties or {@link #NO_USER_PROPERTIES} if the list is
+     *                        empty.
      */
     public static @NotNull Mqtt5UserProperties of(final @NotNull ImmutableList<MqttUserProperty> userProperties) {
         return userProperties.isEmpty() ? NO_USER_PROPERTIES : new Mqtt5UserProperties(userProperties);
@@ -61,18 +60,16 @@ public class Mqtt5UserProperties {
     /**
      * Builds a collection of User Properties from the given builder.
      *
-     * @param userPropertiesBuilder the builder for the User Properties.
-     * @return the built collection of User Properties or {@link #NO_USER_PROPERTIES} if the builder is null.
+     * @param  userPropertiesBuilder the builder for the User Properties.
+     * @return                       the built collection of User Properties or {@link #NO_USER_PROPERTIES} if the
+     *                               builder is null.
      */
     public static @NotNull Mqtt5UserProperties build(
             final @Nullable ImmutableList.Builder<MqttUserProperty> userPropertiesBuilder) {
-
         return (userPropertiesBuilder == null) ? NO_USER_PROPERTIES : of(userPropertiesBuilder.build());
     }
-
     private final @NotNull ImmutableList<MqttUserProperty> userProperties;
     private int encodedLength = -1;
-
     private Mqtt5UserProperties(final @NotNull ImmutableList<MqttUserProperty> userProperties) {
         this.userProperties = userProperties;
     }

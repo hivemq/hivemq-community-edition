@@ -30,13 +30,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RestrictionsConfigurationServiceImpl implements RestrictionsConfigurationService {
 
     private static final Logger log = LoggerFactory.getLogger(RestrictionsConfigurationServiceImpl.class);
-
     private final AtomicLong maxConnections = new AtomicLong(MAX_CONNECTIONS_DEFAULT);
     private final AtomicInteger maxClientIdLength = new AtomicInteger(MAX_CLIENT_ID_LENGTH_DEFAULT);
     private final AtomicLong noConnectIdleTimeout = new AtomicLong(NO_CONNECT_IDLE_TIMEOUT_DEFAULT);
     private final AtomicLong incomingLimit = new AtomicLong(INCOMING_BANDWIDTH_THROTTLING_DEFAULT);
     private final AtomicInteger maxTopicLength = new AtomicInteger(MAX_TOPIC_LENGTH_DEFAULT);
-
     @Override
     public long maxConnections() {
         return maxConnections.get();
@@ -93,5 +91,4 @@ public class RestrictionsConfigurationServiceImpl implements RestrictionsConfigu
         log.debug("Setting the maximum topic length to {}", maxTopicLength);
         this.maxTopicLength.set(maxTopicLength);
     }
-
 }

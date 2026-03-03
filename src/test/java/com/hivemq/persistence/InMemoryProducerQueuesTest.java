@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 public class InMemoryProducerQueuesTest {
 
     private final @NotNull InMemoryProducerQueues producerQueues = new InMemoryProducerQueues(64, 4);
-
     @Test
     public void test_create_bucket_indexes() {
         final ImmutableList<Integer> indexes0 = producerQueues.createBucketIndexes(0, 3);
@@ -40,13 +39,11 @@ public class InMemoryProducerQueuesTest {
         assertTrue(indexes0.contains(1));
         assertTrue(indexes0.contains(2));
         assertEquals(3, indexes0.size());
-
         final ImmutableList<Integer> indexes1 = producerQueues.createBucketIndexes(1, 3);
         assertTrue(indexes1.contains(3));
         assertTrue(indexes1.contains(4));
         assertTrue(indexes1.contains(5));
         assertEquals(3, indexes1.size());
-
         final ImmutableList<Integer> indexes2 = producerQueues.createBucketIndexes(0, 1);
         assertTrue(indexes2.contains(0));
         assertEquals(1, indexes2.size());
@@ -56,7 +53,6 @@ public class InMemoryProducerQueuesTest {
     public void test_submit_whenManyThreadsSubmitConcurrently_thenOnlyOneThreadWorksConcurrently() throws Exception {
         final LinkedList<Integer> list = new LinkedList<>();
         list.add(0);
-
         // this is highly un-thread-safe, when this is concurrently executed
         // there are many sources for exceptions
         final List<Thread> threads = new ArrayList<>();
@@ -78,12 +74,10 @@ public class InMemoryProducerQueuesTest {
             threads.add(thread);
             thread.start();
         }
-
-        //wait for all threads to finish their submissions
+        // wait for all threads to finish their submissions
         for (final Thread thread : threads) {
             thread.join();
         }
-
         // 4 threads with 10_000 adds = 40_000
         assertEquals(40_000, (int) list.getFirst());
     }

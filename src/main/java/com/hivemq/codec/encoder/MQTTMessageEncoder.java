@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.codec.encoder;
 
 import com.google.inject.Inject;
@@ -34,10 +33,8 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
 
     private final @NotNull EncoderFactory encoderFactory;
     private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
-
     @Inject
-    public MQTTMessageEncoder(
-            final @NotNull EncoderFactory encoderFactory,
+    public MQTTMessageEncoder(final @NotNull EncoderFactory encoderFactory,
             final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
         this.encoderFactory = encoderFactory;
         this.globalMQTTMessageCounter = globalMQTTMessageCounter;
@@ -45,7 +42,9 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
 
     @Override
     protected void encode(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final @NotNull ByteBuf out) {
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Message msg,
+            final @NotNull ByteBuf out) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         globalMQTTMessageCounter.countOutbound(msg);
         encoderFactory.encode(clientConnectionContext, msg, out);
@@ -54,8 +53,9 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
 
     @Override
     protected @NotNull ByteBuf allocateBuffer(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Message msg, final boolean preferDirect) {
-
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Message msg,
+            final boolean preferDirect) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         return encoderFactory.allocateBuffer(clientConnectionContext, msg, preferDirect);
     }

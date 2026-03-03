@@ -15,7 +15,6 @@
  */
 package com.hivemq.migration.meta;
 
-
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
@@ -30,14 +29,11 @@ public class MetaInformation {
     private @Nullable String subscriptionPersistenceVersion = null;
     private @Nullable String retainedMessagesPersistenceVersion = null;
     private @Nullable String publishPayloadPersistenceVersion = null;
-
     private @Nullable PersistenceType retainedMessagesPersistenceType = null;
     private @Nullable PersistenceType publishPayloadPersistenceType = null;
-
     private boolean dataFolderPresent = false;
     private boolean persistenceFolderPresent = false;
     private boolean metaFilePresent = false;
-
     @Nullable
     public String getHivemqVersion() {
         return hivemqVersion;
@@ -116,7 +112,6 @@ public class MetaInformation {
         this.publishPayloadPersistenceVersion = publishPayloadPersistenceVersion;
     }
 
-
     @Nullable
     public PersistenceType getRetainedMessagesPersistenceType() {
         return retainedMessagesPersistenceType;
@@ -137,31 +132,13 @@ public class MetaInformation {
 
     @Override
     public String toString() {
-        return "MetaInformation{" +
-                "hivemqVersion='" +
-                hivemqVersion +
-                '\'' +
-                ", clientSessionPersistenceVersion='" +
-                clientSessionPersistenceVersion +
-                '\'' +
-                ", queuedMessagesPersistenceVersion='" +
-                queuedMessagesPersistenceVersion +
-                '\'' +
-                ", subscriptionPersistenceVersion='" +
-                subscriptionPersistenceVersion +
-                '\'' +
-                ", retainedMessagesPersistenceVersion='" +
-                retainedMessagesPersistenceVersion +
-                '\'' +
-                ", publishPayloadPersistenceVersion='" +
-                publishPayloadPersistenceVersion +
-                '\'' +
-                ", retainedMessagesPersistenceType='" +
-                retainedMessagesPersistenceType +
-                '\'' +
-                ", publishPayloadPersistenceType='" +
-                publishPayloadPersistenceType +
-                '\'' +
-                '}';
+        return "MetaInformation{" + "hivemqVersion='" + hivemqVersion + '\'' + ", clientSessionPersistenceVersion='"
+                + clientSessionPersistenceVersion + '\'' + ", queuedMessagesPersistenceVersion='"
+                + queuedMessagesPersistenceVersion + '\'' + ", subscriptionPersistenceVersion='"
+                + subscriptionPersistenceVersion + '\'' + ", retainedMessagesPersistenceVersion='"
+                + retainedMessagesPersistenceVersion + '\'' + ", publishPayloadPersistenceVersion='"
+                + publishPayloadPersistenceVersion + '\'' + ", retainedMessagesPersistenceType='"
+                + retainedMessagesPersistenceType + '\'' + ", publishPayloadPersistenceType='"
+                + publishPayloadPersistenceType + '\'' + '}';
     }
 }

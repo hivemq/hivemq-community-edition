@@ -48,22 +48,15 @@ import static com.hivemq.configuration.service.InternalConfigurations.EXTENSION_
 public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService {
 
     private final @NotNull PluginTaskExecutor[] taskExecutors;
-
     private final int taskExecutorCount;
-
     @Inject
-    public PluginTaskExecutorServiceImpl(
-            final @NotNull Provider<PluginTaskExecutor> taskExecutorProvider,
+    public PluginTaskExecutorServiceImpl(final @NotNull Provider<PluginTaskExecutor> taskExecutorProvider,
             final @NotNull ShutdownHooks shutdownHooks) {
-
         taskExecutorCount = EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.get();
-
         taskExecutors = new PluginTaskExecutor[taskExecutorCount];
-
         for (int i = 0; i < taskExecutorCount; i++) {
             taskExecutors[i] = taskExecutorProvider.get();
         }
-
         shutdownHooks.add(new PluginTaskExecutorServiceShutdownHook(taskExecutors));
     }
 
@@ -73,16 +66,12 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
             @NotNull final Supplier<I> pluginInputSupplier,
             @NotNull final PluginInTask<I> pluginTask) {
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginInTaskContext);
-
         checkNotNull(pluginInTaskContext, "Extension context cannot be null");
         checkNotNull(pluginInputSupplier, "Input supplier cannot be null");
         checkNotNull(pluginTask, "Extension task cannot be null");
-
-        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<I, DefaultPluginTaskOutput>(pluginInTaskContext,
-                pluginInputSupplier,
-                null,
-                pluginTask));
-
+        taskExecutor.handlePluginTaskExecution(
+                new PluginTaskExecution<I, DefaultPluginTaskOutput>(pluginInTaskContext, pluginInputSupplier, null,
+                        pluginTask));
     }
 
     @Override
@@ -90,16 +79,13 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
             @NotNull final PluginOutTaskContext<O> pluginOutTaskContext,
             @NotNull final Supplier<O> pluginOutputSupplier,
             @NotNull final PluginOutTask<O> pluginTask) {
-
         checkNotNull(pluginOutTaskContext, "Extension context cannot be null");
         checkNotNull(pluginOutputSupplier, "Output supplier cannot be null");
         checkNotNull(pluginTask, "Extension task cannot be null");
-
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginOutTaskContext);
-        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<DefaultPluginTaskInput, O>(pluginOutTaskContext,
-                null,
-                pluginOutputSupplier,
-                pluginTask));
+        taskExecutor.handlePluginTaskExecution(
+                new PluginTaskExecution<DefaultPluginTaskInput, O>(pluginOutTaskContext, null, pluginOutputSupplier,
+                        pluginTask));
     }
 
     @Override
@@ -108,17 +94,13 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
             @NotNull final Supplier<I> pluginInputSupplier,
             @NotNull final Supplier<O> pluginOutputSupplier,
             @NotNull final PluginInOutTask<I, O> pluginTask) {
-
         checkNotNull(pluginInOutContext, "Extension context cannot be null");
         checkNotNull(pluginInputSupplier, "Input supplier cannot be null");
         checkNotNull(pluginOutputSupplier, "Output supplier cannot be null");
         checkNotNull(pluginTask, "Extension task cannot be null");
-
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginInOutContext);
-        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<>(pluginInOutContext,
-                pluginInputSupplier,
-                pluginOutputSupplier,
-                pluginTask));
+        taskExecutor.handlePluginTaskExecution(
+                new PluginTaskExecution<>(pluginInOutContext, pluginInputSupplier, pluginOutputSupplier, pluginTask));
     }
 
     @NotNull
@@ -126,11 +108,9 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         final int bucket = BucketUtils.getBucket(pluginTaskContext.getIdentifier(), taskExecutorCount);
         return taskExecutors[bucket];
     }
-
     private static class PluginTaskExecutorServiceShutdownHook implements HiveMQShutdownHook {
 
         private final @NotNull PluginTaskExecutor[] taskExecutors;
-
         PluginTaskExecutorServiceShutdownHook(final @NotNull PluginTaskExecutor[] taskExecutors) {
             this.taskExecutors = taskExecutors;
         }

@@ -27,7 +27,6 @@ import static org.junit.Assert.assertNull;
 public class StringTrimAdapterTest {
 
     StringTrimAdapter stringTrimAdapter;
-
     @Before
     public void setUp() {
         stringTrimAdapter = new StringTrimAdapter();

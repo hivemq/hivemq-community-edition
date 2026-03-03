@@ -38,7 +38,6 @@ import java.security.cert.X509Certificate;
 public class SslClientCertificateImpl implements SslClientCertificate {
 
     private final Certificate[] certificates;
-
     public SslClientCertificateImpl(@NotNull final Certificate[] certificates) {
         Preconditions.checkNotNull(certificates, "Certificates must not be null");
         this.certificates = certificates;
@@ -95,28 +94,22 @@ public class SslClientCertificateImpl implements SslClientCertificate {
     }
 
     private String certificateProperty(final ASN1ObjectIdentifier objectIdentifier) {
-
         try {
             final X509Certificate cert = (X509Certificate) certificate();
-
-            //x500 name values may be here or in extension
+            // x500 name values may be here or in extension
             final String subjectProperty = subjectProperty(objectIdentifier, cert);
-
             if (subjectProperty != null) {
                 return subjectProperty;
             }
-
             if (objectIdentifier.equals(BCStyle.SN)) {
                 return cert.getSerialNumber().toString();
             }
-
-            //x500 name values may be here or in subject
+            // x500 name values may be here or in subject
             final Extension extension = new JcaX509CertificateHolder(cert).getExtension(objectIdentifier);
             if (extension == null) {
                 return null;
             }
             return extension.getParsedValue().toString();
-
         } catch (final Exception e) {
             throw new PropertyNotFoundException("Not able to get property from certificate", e);
         }
@@ -133,5 +126,4 @@ public class SslClientCertificateImpl implements SslClientCertificate {
         final RDN cn = rdNs[0];
         return IETFUtils.valueToString(cn.getFirst().getValue());
     }
-
 }

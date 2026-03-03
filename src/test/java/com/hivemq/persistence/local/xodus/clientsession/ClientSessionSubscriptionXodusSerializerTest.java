@@ -33,12 +33,10 @@ import static org.junit.Assert.assertTrue;
 public class ClientSessionSubscriptionXodusSerializerTest {
 
     private ClientSessionSubscriptionXodusSerializer serializer;
-
     @Before
     public void before() {
         serializer = new ClientSessionSubscriptionXodusSerializer();
     }
-
 
     @Test(expected = NullPointerException.class)
     public void test_serialize_null_value() throws Exception {
@@ -47,26 +45,18 @@ public class ClientSessionSubscriptionXodusSerializerTest {
 
     @Test
     public void test_serialize_deserialize_key() throws Exception {
-
         final byte[] bytes = serializer.serializeKey("clientid");
-
         final String key = serializer.deserializeKey(bytes);
-
         assertEquals("clientid", key);
     }
 
     @Test
     public void test_serialize_deserialize_value() throws Exception {
-
-        final byte[] bytes = serializer.serializeValue(new Topic("topic",
-                QoS.AT_MOST_ONCE,
-                false,
-                true,
-                Mqtt5RetainHandling.SEND,
-                1), 123456790L, 3L);
-
+        final byte[] bytes = serializer.serializeValue(
+                new Topic("topic", QoS.AT_MOST_ONCE, false, true, Mqtt5RetainHandling.SEND, 1),
+                123456790L,
+                3L);
         final Topic topic = serializer.deserializeValue(bytes);
-
         assertEquals("topic", topic.getTopic());
         assertEquals(QoS.AT_MOST_ONCE, topic.getQoS());
         assertFalse(topic.isNoLocal());
@@ -78,13 +68,9 @@ public class ClientSessionSubscriptionXodusSerializerTest {
 
     @Test
     public void test_serialize_deserialize_huge_utf8_topic_value() throws Exception {
-
         final String topicString = RandomStringUtils.random(20000);
-
         final byte[] bytes = serializer.serializeValue(new Topic(topicString, QoS.EXACTLY_ONCE), 123456790L, 1L);
-
         final Topic topic = serializer.deserializeValue(bytes);
-
         assertEquals(topicString, topic.getTopic());
         assertEquals(QoS.EXACTLY_ONCE, topic.getQoS());
         assertEquals(123456790L, serializer.deserializeTimestamp(bytes));
@@ -93,18 +79,13 @@ public class ClientSessionSubscriptionXodusSerializerTest {
 
     @Test
     public void test_serialize_deserialize_max_topic_value() throws Exception {
-
         final String topicString = RandomStringUtils.randomAlphanumeric(65535);
-
-        final byte[] bytes = serializer.serializeValue(new Topic(topicString,
-                QoS.EXACTLY_ONCE,
-                true,
-                false,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
-                1), 123456790L, 1L);
-
+        final byte[] bytes = serializer.serializeValue(
+                new Topic(topicString, QoS.EXACTLY_ONCE, true, false,
+                        Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1),
+                123456790L,
+                1L);
         final Topic topic = serializer.deserializeValue(bytes);
-
         assertEquals(topicString, topic.getTopic());
         assertEquals(QoS.EXACTLY_ONCE, topic.getQoS());
         assertTrue(topic.isNoLocal());
@@ -113,7 +94,6 @@ public class ClientSessionSubscriptionXodusSerializerTest {
         assertEquals(QoS.EXACTLY_ONCE, topic.getQoS());
         assertEquals(123456790L, serializer.deserializeTimestamp(bytes));
     }
-
 
     /*
      * This is necessary to search for the subscriptions of a certain topic

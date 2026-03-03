@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -36,10 +35,11 @@ import java.util.List;
 public class TestInterceptorUtil {
 
     // legacy
-    public static @NotNull List<Interceptor> getIsolatedInterceptors(
-            final @NotNull TemporaryFolder temporaryFolder) throws Exception {
-        return getIsolatedInterceptors(List.of(TestPublishInboundInterceptor.class,
-                TestSubscriberInboundInterceptor.class), temporaryFolder);
+    public static @NotNull List<Interceptor> getIsolatedInterceptors(final @NotNull TemporaryFolder temporaryFolder)
+            throws Exception {
+        return getIsolatedInterceptors(
+                List.of(TestPublishInboundInterceptor.class, TestSubscriberInboundInterceptor.class),
+                temporaryFolder);
     }
 
     public static <T extends Interceptor> @NotNull T getIsolatedInterceptor(
@@ -51,18 +51,17 @@ public class TestInterceptorUtil {
     public static <T extends Interceptor> @NotNull List<T> getIsolatedInterceptors(
             final @NotNull List<Class<? extends T>> types,
             final @NotNull TemporaryFolder temporaryFolder) throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
-                .toPath(), types.toArray(new Class[0]))) {
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil
+                .buildClassLoader(temporaryFolder.getRoot().toPath(), types.toArray(new Class[0]))) {
             final LinkedList<T> list = new LinkedList<>();
             for (final Class<? extends T> type : types) {
                 final Class<?> clazz = cl.loadClass(type.getName());
-                //noinspection unchecked
+                // noinspection unchecked
                 list.add((T) clazz.getDeclaredConstructor().newInstance());
             }
             return list;
         }
     }
-
     public static class TestPublishInboundInterceptor implements PublishInboundInterceptor {
 
         @Override

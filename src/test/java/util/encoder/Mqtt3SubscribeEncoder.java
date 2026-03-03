@@ -32,18 +32,14 @@ import java.util.List;
 public class Mqtt3SubscribeEncoder extends AbstractVariableHeaderLengthEncoder<SUBSCRIBE> {
 
     private static final byte SUBSCRIBE_FIXED_HEADER = (byte) 0b1000_0010;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull SUBSCRIBE msg,
             final @NotNull ByteBuf out) {
-
         out.writeByte(SUBSCRIBE_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);
-
         out.writeShort(msg.getPacketIdentifier());
-
         final List<Topic> topics = msg.getTopics();
         for (final Topic topic : topics) {
             Strings.createPrefixedBytesFromString(topic.getTopic(), out);

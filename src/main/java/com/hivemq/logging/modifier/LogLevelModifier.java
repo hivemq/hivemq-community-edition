@@ -24,7 +24,8 @@ import org.slf4j.Marker;
 
 public interface LogLevelModifier {
 
-    @NotNull FilterReply decide(
+    @NotNull
+    FilterReply decide(
             @Nullable Marker marker,
             @NotNull Logger logger,
             @NotNull Level level,

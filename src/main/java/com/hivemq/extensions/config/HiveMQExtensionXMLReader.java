@@ -38,11 +38,10 @@ import java.util.Optional;
 public class HiveMQExtensionXMLReader {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQExtensionXMLReader.class);
-
     @NotNull
     public static Optional<HiveMQExtensionEntity> getExtensionEntityFromXML(
-            @NotNull final Path extensionFolder, final boolean logging) {
-
+            @NotNull final Path extensionFolder,
+            final boolean logging) {
         final Path extensionXMLPath = extensionFolder.resolve(HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE);
         if (Files.exists(extensionXMLPath) && logging) {
             log.trace("Found hivemq-extension.xml {}", extensionXMLPath);
@@ -50,25 +49,24 @@ public class HiveMQExtensionXMLReader {
         try {
             final JAXBContext context = JAXBContext.newInstance(HiveMQExtensionEntity.class);
             final Unmarshaller unmarshaller = context.createUnmarshaller();
-            final HiveMQExtensionEntity unmarshal =
-                    (HiveMQExtensionEntity) unmarshaller.unmarshal(extensionXMLPath.toFile());
-
+            final HiveMQExtensionEntity unmarshal = (HiveMQExtensionEntity) unmarshaller
+                    .unmarshal(extensionXMLPath.toFile());
             final Optional<ValidationError> validationError = validateHiveMQExtensionEntity(unmarshal);
-
             if (validationError.isPresent()) {
                 if (logging) {
-                    log.warn("Could not parse \"{}\" in {} because of {}. Not loading extension.",
+                    log.warn(
+                            "Could not parse \"{}\" in {} because of {}. Not loading extension.",
                             HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE,
                             extensionFolder.toString(),
                             validationError.get().getMessage());
                 }
                 return Optional.empty();
             }
-
             return Optional.of(unmarshal);
         } catch (final JAXBException e) {
             if (logging) {
-                log.warn("Could not parse \"{}\" in {}. Not loading extension.",
+                log.warn(
+                        "Could not parse \"{}\" in {}. Not loading extension.",
                         HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE,
                         extensionFolder.toString(),
                         e);
@@ -78,16 +76,15 @@ public class HiveMQExtensionXMLReader {
     }
 
     @NotNull
-    private static Optional<ValidationError> validateHiveMQExtensionEntity(@Nullable final HiveMQExtensionEntity hiveMQExtensionEntity) {
+    private static Optional<ValidationError> validateHiveMQExtensionEntity(
+            @Nullable final HiveMQExtensionEntity hiveMQExtensionEntity) {
         final String message = "missing %s";
         if (hiveMQExtensionEntity == null || hiveMQExtensionEntity.getId().isEmpty()) {
             return Optional.of(new ValidationError(message, "<id>"));
         }
-
         if (hiveMQExtensionEntity.getName().isEmpty()) {
             return Optional.of(new ValidationError(message, "<name>"));
         }
-
         if (hiveMQExtensionEntity.getVersion().isEmpty()) {
             return Optional.of(new ValidationError(message, "<version>"));
         }

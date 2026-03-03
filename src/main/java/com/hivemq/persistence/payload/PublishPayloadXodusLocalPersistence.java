@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.persistence.payload;
 
 import com.google.common.collect.ImmutableList;
@@ -53,19 +52,12 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
         implements PublishPayloadLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadXodusLocalPersistence.class);
-
     public static final String PERSISTENCE_VERSION = "040500";
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
-
     @Inject
-    public PublishPayloadXodusLocalPersistence(
-            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull EnvironmentUtil environmentUtil,
-            final @NotNull PersistenceStartup persistenceStartup) {
-
-        super(environmentUtil,
-                localPersistenceFileUtil,
-                persistenceStartup,
+    public PublishPayloadXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull EnvironmentUtil environmentUtil, final @NotNull PersistenceStartup persistenceStartup) {
+        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE);
     }
@@ -112,7 +104,6 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
                 });
             }
             PUBLISH.PUBLISH_COUNTER.set(maxId.get() + 1);
-
         } catch (final ExodusException e) {
             log.error("An error occurred while preparing the Publish Payload persistence.");
             log.debug("Original Exception:", e);
@@ -122,11 +113,11 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public void put(final long id, final byte @NotNull [] payload) {
-
         final Bucket bucket = getBucket(Long.toString(id));
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             int chunkIndex = 0;
-            // We have to split the payload in chunks with less than 8MB, because Xodus can't handle entries that are bigger than the page size.
+            // We have to split the payload in chunks with less than 8MB, because Xodus can't handle entries that are
+            // bigger than the page size.
             // The chunks are associated with an index.
             do {
                 final ByteIterable key = bytesToByteIterable(serializeKey(id, chunkIndex));
@@ -148,25 +139,18 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public byte @Nullable [] get(final long id) {
-
         final Bucket bucket = getBucket(Long.toString(id));
         return bucket.getEnvironment().computeInReadonlyTransaction(transaction -> {
-
             final Map<Long, byte[]> chunks = new HashMap<>();
-
             try (final Cursor cursor = bucket.getStore().openCursor(transaction)) {
-
                 int chunkIndex = 0;
                 ByteIterable entry = cursor.getSearchKey(bytesToByteIterable(serializeKey(id, chunkIndex)));
                 while (entry != null) {
-
                     final KeyPair key = deserializeKey(byteIterableToBytes(cursor.getKey()));
                     chunks.put(key.getChunkIndex(), byteIterableToBytes(cursor.getValue()));
-
                     entry = cursor.getSearchKey(bytesToByteIterable(serializeKey(id, ++chunkIndex)));
                 }
             }
-
             if (chunks.isEmpty()) {
                 return null;
             }
@@ -174,15 +158,14 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
                 // Shortcut if there is only one chunk
                 return chunks.values().iterator().next();
             }
-
             int resultSize = 0;
             for (final byte[] bytes : chunks.values()) {
                 resultSize += bytes.length;
             }
-
             final byte[] result = new byte[resultSize];
             for (final Map.Entry<Long, byte[]> entry : chunks.entrySet()) {
-                System.arraycopy(entry.getValue(),
+                System.arraycopy(
+                        entry.getValue(),
                         0,
                         result,
                         (int) (entry.getKey() * CHUNK_SIZE),
@@ -194,12 +177,9 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public @NotNull ImmutableList<Long> getAllIds() {
-
         final ImmutableList.Builder<Long> payloadIdsBuilder = ImmutableList.builder();
         for (final Bucket bucket : buckets) {
-
             bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
-
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                     while (cursor.getNext()) {
                         final KeyPair key = deserializeKey(byteIterableToBytes(cursor.getKey()));
@@ -209,7 +189,6 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
                 return null;
             });
         }
-
         return payloadIdsBuilder.build();
     }
 
@@ -220,7 +199,6 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
         }
         final Bucket bucket = getBucket(Long.toString(id));
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
-
             int chunkIndex = 0;
             boolean deleted;
             do {
@@ -237,12 +215,10 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
             callback.call(id, bytes);
         }
     }
-
     public static class KeyPair {
 
         private final long id;
         private final long chunkIndex;
-
         KeyPair(final long id, final long chunkIndex) {
             this.id = id;
             this.chunkIndex = chunkIndex;

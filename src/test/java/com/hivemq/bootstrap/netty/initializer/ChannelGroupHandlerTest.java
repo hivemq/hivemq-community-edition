@@ -35,13 +35,10 @@ public class ChannelGroupHandlerTest {
     private final @NotNull Channel channel = mock();
     private final @NotNull ChannelHandlerContext ctx = mock();
     private final @NotNull ChannelPipeline channelPipeline = mock();
-
     private ChannelGroupHandler channelGroupHandler;
-
     @Before
     public void before() {
         channelGroupHandler = new ChannelGroupHandler(channelGroup);
-
         when(ctx.channel()).thenReturn(channel);
         when(ctx.pipeline()).thenReturn(channelPipeline);
     }
@@ -49,9 +46,7 @@ public class ChannelGroupHandlerTest {
     @Test
     public void test_channel_active() throws Exception {
         channelGroupHandler.channelActive(ctx);
-
         verify(channelGroup, times(1)).add(any(Channel.class));
         verify(channelPipeline).remove(any(ChannelGroupHandler.class));
     }
-
 }

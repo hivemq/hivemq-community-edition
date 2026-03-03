@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package util;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -37,7 +36,6 @@ public class TestExtensionUtil {
             "<priority>1000</priority>" + //
             "<start-priority>500</start-priority>" + //
             "</hivemq-extension>";
-
     public static @NotNull File createValidExtension(
             final @NotNull File extensionsFolder,
             final @NotNull String extensionId) throws Exception {
@@ -50,10 +48,8 @@ public class TestExtensionUtil {
             final boolean createJar,
             final boolean enable) throws Exception {
         final File validExtensionsFolder = new File(extensionsFolder, extensionId + (enable ? "" : ".disabled"));
-
         final File xmlFile = new File(validExtensionsFolder, "hivemq-extension.xml");
         FileUtils.writeStringToFile(xmlFile, String.format(validExtensionXML, extensionId), Charset.defaultCharset());
-
         if (createJar) {
             final File jarFile = new File(validExtensionsFolder, "extension.jar");
             assertTrue(jarFile.createNewFile());
@@ -67,8 +63,8 @@ public class TestExtensionUtil {
             final @NotNull Class<? extends ExtensionMain> mainClazz,
             final boolean enable) throws Exception {
         final File validExtension = createValidExtension(extensionsFolder, extensionId, false, enable);
-        final JavaArchive javaArchive =
-                ShrinkWrap.create(JavaArchive.class).addAsServiceProviderAndClasses(ExtensionMain.class, mainClazz);
+        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
+                .addAsServiceProviderAndClasses(ExtensionMain.class, mainClazz);
         javaArchive.as(ZipExporter.class).exportTo(new File(validExtension, "extension.jar"));
     }
 }

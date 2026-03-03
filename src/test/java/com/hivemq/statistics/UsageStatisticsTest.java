@@ -41,16 +41,13 @@ public class UsageStatisticsTest {
     private final @NotNull UsageStatisticsSender sender = mock();
     private final @NotNull SystemInformation systemInformation = mock();
     private final @NotNull ShutdownHooks shutdownHooks = mock();
-
     private UsageStatistics usageStatistics;
     private FullConfigurationService configurationService;
-
     @Before
     public void before() {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-
-        usageStatistics =
-                new UsageStatistics(collector, systemInformation, sender, configurationService, shutdownHooks);
+        usageStatistics = new UsageStatistics(collector, systemInformation, sender, configurationService,
+                shutdownHooks);
     }
 
     @After
@@ -60,48 +57,35 @@ public class UsageStatisticsTest {
 
     @Test
     public void test_usage_statistics_disabled() throws Exception {
-
         when(systemInformation.getHiveMQVersion()).thenReturn("4.5.6");
         configurationService.usageStatisticsConfiguration().setEnabled(false);
-
         usageStatistics.start();
-
         verify(collector, never()).getJson(anyString());
     }
 
     @Test
     public void test_usage_statistics_enabled_snapshot() throws Exception {
-
         when(systemInformation.getHiveMQVersion()).thenReturn("4.5.6-SNAPSHOT");
         configurationService.usageStatisticsConfiguration().setEnabled(true);
-
         usageStatistics.start();
-
         verify(collector, never()).getJson(anyString());
     }
 
     @Test
     public void test_usage_statistics_enabled_dev_snapshot() throws Exception {
-
         when(systemInformation.getHiveMQVersion()).thenReturn("Development Snapshot");
         configurationService.usageStatisticsConfiguration().setEnabled(true);
-
         usageStatistics.start();
-
         verify(collector, never()).getJson(anyString());
     }
 
     @Test
     public void test_usage_statistics_enabled() throws Exception {
-
         when(systemInformation.getHiveMQVersion()).thenReturn("4.5.6");
         configurationService.usageStatisticsConfiguration().setEnabled(true);
-
         usageStatistics.start();
-
-        //wait for scheduled jobs to run
+        // wait for scheduled jobs to run
         Thread.sleep(100);
-
         verify(collector, times(1)).getJson(eq("startup"));
     }
 }

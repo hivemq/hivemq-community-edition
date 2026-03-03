@@ -35,28 +35,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ExtensionUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ExtensionUtil.class);
-
     static boolean isValidExtensionFolder(@NotNull final Path path, final boolean logErrors) {
-
         checkNotNull(path, "extension path must not be null");
-
         final File file = path.toFile();
         if (!file.isDirectory()) {
             return false;
         }
-
         final File[] content = file.listFiles();
-
         if (content == null || content.length < 1) {
             return false;
         }
-
         boolean xmlPresent = false;
         boolean jarPresent = false;
-
         for (final File subfile : content) {
             final String name = subfile.getName();
-
             if ("hivemq-extension.xml".equals(name)) {
                 xmlPresent = true;
             }
@@ -64,28 +56,23 @@ public class ExtensionUtil {
                 jarPresent = true;
             }
         }
-
         if (xmlPresent && jarPresent) {
             return true;
         }
         if (!xmlPresent) {
-            //obviously no extension folder.
+            // obviously no extension folder.
             return false;
         }
-
-        //at this point jar-file is always missing and xml-file is not.
+        // at this point jar-file is always missing and xml-file is not.
         if (logErrors) {
             log.warn("Extension folder {} does not contain a .jar file, ignoring extension", path);
         }
         return false;
-
     }
 
     @NotNull
     public static List<Path> findAllExtensionFolders(@NotNull final Path extensionPath) throws IOException {
-
         checkNotNull(extensionPath, "provided extension folder path CAN NOT be null");
-
         final ImmutableList.Builder<Path> builder = ImmutableList.builder();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(extensionPath)) {
             for (final Path path : stream) {
@@ -99,12 +86,10 @@ public class ExtensionUtil {
     }
 
     public static boolean disableExtensionFolder(@NotNull final Path extensionFolderPath) throws IOException {
-
         final File disabledFile = extensionFolderPath.resolve("DISABLED").toFile();
         if (!disabledFile.exists()) {
             return disabledFile.createNewFile();
         }
         return true;
-
     }
 }

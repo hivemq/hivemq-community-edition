@@ -40,6 +40,7 @@ public class ThreadPreConditionsTest {
         final AtomicReference<Exception> result = new AtomicReference<>();
         ThreadPreConditions.enable();
         final Thread thread = new ThreadFactoryBuilder().setNameFormat("prefix-test").build().newThread(new Runnable() {
+
             @Override
             public void run() {
                 try {
@@ -49,7 +50,6 @@ public class ThreadPreConditionsTest {
                 }
             }
         });
-
         thread.start();
         thread.join();
         assertNull(result.get());
@@ -60,6 +60,7 @@ public class ThreadPreConditionsTest {
         final AtomicReference<Exception> result = new AtomicReference<>();
         ThreadPreConditions.enable();
         final Thread thread = new ThreadFactoryBuilder().setNameFormat("false-test").build().newThread(new Runnable() {
+
             @Override
             public void run() {
                 try {
@@ -69,7 +70,6 @@ public class ThreadPreConditionsTest {
                 }
             }
         });
-
         thread.start();
         thread.join();
         assertNotNull(result.get());
@@ -80,6 +80,7 @@ public class ThreadPreConditionsTest {
         final AtomicReference<Exception> result = new AtomicReference<>();
         ThreadPreConditions.disable();
         final Thread thread = new ThreadFactoryBuilder().setNameFormat("false-test").build().newThread(new Runnable() {
+
             @Override
             public void run() {
                 try {
@@ -89,7 +90,6 @@ public class ThreadPreConditionsTest {
                 }
             }
         });
-
         thread.start();
         thread.join();
         assertNull(result.get());

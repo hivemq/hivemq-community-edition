@@ -30,10 +30,8 @@ public class PubrecOutboundOutputImpl extends AbstractSimpleAsyncOutput<PubrecOu
 
     private final @NotNull ModifiablePubrecPacketImpl pubrecPacket;
     private boolean failed = false;
-
-    public PubrecOutboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull ModifiablePubrecPacketImpl pubrecPacket) {
-
+    public PubrecOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull ModifiablePubrecPacketImpl pubrecPacket) {
         super(asyncer);
         this.pubrecPacket = pubrecPacket;
     }

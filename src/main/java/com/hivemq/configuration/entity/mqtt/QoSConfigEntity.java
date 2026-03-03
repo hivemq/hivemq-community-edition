@@ -24,7 +24,7 @@ import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlRootElement(name = "quality-of-service")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -33,7 +33,6 @@ public class QoSConfigEntity {
 
     @XmlElement(name = "max-qos", defaultValue = "2")
     private int maxQos = MAXIMUM_QOS_DEFAULT.getQosNumber();
-
     public int getMaxQos() {
         return maxQos;
     }

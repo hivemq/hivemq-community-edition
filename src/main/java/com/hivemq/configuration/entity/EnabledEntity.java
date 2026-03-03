@@ -21,7 +21,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
@@ -29,7 +29,6 @@ public abstract class EnabledEntity {
 
     @XmlElement(name = "enabled", defaultValue = "true")
     private boolean enabled = true;
-
     public boolean isEnabled() {
         return enabled;
     }

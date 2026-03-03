@@ -29,7 +29,6 @@ import java.util.Set;
 public interface RetainedMessageLocalPersistence extends LocalPersistence {
 
     String PERSISTENCE_NAME = "retained_messages";
-
     /**
      * Due to concurrent access to the persistence, this value may not be correct.
      *
@@ -55,11 +54,12 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     /**
      * Get a retained message for a given topic from a persistence bucket.
      *
-     * @param topic       the topic of the retained message.
-     * @param bucketIndex The index of the bucket in which the retained messages are stored.
-     * @return the {@link RetainedMessage} or <null> if no retained message found.
+     * @param  topic       the topic of the retained message.
+     * @param  bucketIndex The index of the bucket in which the retained messages are stored.
+     * @return             the {@link RetainedMessage} or <null> if no retained message found.
      */
-    @Nullable RetainedMessage get(@NotNull String topic, int bucketIndex);
+    @Nullable
+    RetainedMessage get(@NotNull String topic, int bucketIndex);
 
     /**
      * Set a retained message for a given topic to the local persistence
@@ -69,12 +69,13 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     /**
      * Get the topics of all retained messages for a subscription from a persistence bucket
      *
-     * @param subscription The filter to receive retained messages for.
-     * @param bucket       The index of the bucket in which the retained messages are stored.
-     * @return a readonly set of topic strings.
+     * @param  subscription The filter to receive retained messages for.
+     * @param  bucket       The index of the bucket in which the retained messages are stored.
+     * @return              a readonly set of topic strings.
      */
     @ReadOnly
-    @NotNull Set<String> getAllTopics(@NotNull String subscription, int bucket);
+    @NotNull
+    Set<String> getAllTopics(@NotNull String subscription, int bucket);
 
     /**
      * Trigger a cleanup for a specific bucket.
@@ -86,25 +87,26 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
     /**
      * Gets a chunk of retained messages from the persistence.
      * <p>
-     * Messages are ignored if they have passed their message expiry interval.
-     * Messages are ignored if their payload can not be dereferenced.
-     * Tombstones are ignored.
+     * Messages are ignored if they have passed their message expiry interval. Messages are ignored if their payload can
+     * not be dereferenced. Tombstones are ignored.
      *
-     * @param bucketIndex the bucket index
-     * @param lastTopic   the last topic for this chunk. Pass {@code null} to start at the beginning.
-     * @param maxMemory   the max amount of memory for results contained in the chunk.
-     * @return a {@link BucketChunkResult} with the mapping of topic -> retained message and the information if more
-     *         chunks are available
-     * @since 4.4.0
+     * @param  bucketIndex the bucket index
+     * @param  lastTopic   the last topic for this chunk. Pass {@code null} to start at the beginning.
+     * @param  maxMemory   the max amount of memory for results contained in the chunk.
+     * @return             a {@link BucketChunkResult} with the mapping of topic -> retained message and the information
+     *                     if more chunks are available
+     * @since              4.4.0
      */
     @ExecuteInSingleWriter
-    @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
-            int bucketIndex, @Nullable String lastTopic, int maxMemory);
+    @NotNull
+    BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
+            int bucketIndex,
+            @Nullable String lastTopic,
+            int maxMemory);
 
     void iterate(@NotNull ItemCallback callback);
-
     interface ItemCallback {
+
         void onItem(@NotNull String topic, @NotNull RetainedMessage message);
     }
-
 }

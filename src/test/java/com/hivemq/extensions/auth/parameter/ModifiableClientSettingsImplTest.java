@@ -32,7 +32,6 @@ public class ModifiableClientSettingsImplTest {
 
     @NotNull
     private ModifiableClientSettingsImpl clientSettings;
-
     @Before
     public void setUp() throws Exception {
         clientSettings = new ModifiableClientSettingsImpl(65535, null);

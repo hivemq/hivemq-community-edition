@@ -37,7 +37,6 @@ import static org.junit.Assert.assertEquals;
 public class AuthConnectInputTest {
 
     private AuthConnectInput taskInput;
-
     @Before
     public void setUp() {
         final EmbeddedChannel channel = new EmbeddedChannel();
@@ -45,20 +44,15 @@ public class AuthConnectInputTest {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setConnectReceivedTimestamp(12345L);
-
-        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client")
-                .withUsername("user")
-                .withPassword("password".getBytes(Charset.defaultCharset()))
-                .withAuthMethod("method")
-                .withAuthData(new byte[]{'a', 'b', 'c'})
-                .build();
+        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").withUsername("user")
+                .withPassword("password".getBytes(Charset.defaultCharset())).withAuthMethod("method")
+                .withAuthData(new byte[]{'a', 'b', 'c'}).build();
         taskInput = new AuthConnectInput(connect, channel);
     }
 
     @Test(timeout = 5000)
     public void test_connect_packet_contains_auth_information() {
         final ConnectPacket connectPacket = taskInput.getConnectPacket();
-
         assertEquals("method", connectPacket.getAuthenticationMethod().get());
         assertEquals("user", connectPacket.getUserName().get());
         assertEquals(ByteBuffer.wrap("password".getBytes()), connectPacket.getPassword().get());

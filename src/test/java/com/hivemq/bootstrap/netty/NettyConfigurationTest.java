@@ -28,7 +28,6 @@ import org.junit.Test;
 public class NettyConfigurationTest {
 
     private NioEventLoopGroup eventloop;
-
     @Before
     public void setUp() throws Exception {
         eventloop = new NioEventLoopGroup(1);

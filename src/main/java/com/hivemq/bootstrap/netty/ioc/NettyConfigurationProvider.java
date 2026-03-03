@@ -40,16 +40,14 @@ public class NettyConfigurationProvider implements Provider<NettyConfiguration> 
     @NotNull
     @Override
     public NettyConfiguration get() {
-
         final EventLoopGroup parentGroup = createParentEventLoop();
         final EventLoopGroup childGroup = createChildEventLoop();
-
         return new NettyConfiguration(NioServerSocketChannel.class, NioSocketChannel.class, parentGroup, childGroup);
     }
 
     /**
-     * Creates the Parent Eventloop. Creates either a NIO Eventloop or a native Epoll Eventloop with a preference
-     * for native Epoll.
+     * Creates the Parent Eventloop. Creates either a NIO Eventloop or a native Epoll Eventloop with a preference for
+     * native Epoll.
      *
      * @return the Boss EventLoopGroup
      */
@@ -59,25 +57,24 @@ public class NettyConfigurationProvider implements Provider<NettyConfiguration> 
     }
 
     /**
-     * Creates the Child Eventloop. Creates either a NIO Eventloop or a native Epoll Eventloop with a preference
-     * for native Epoll.
+     * Creates the Child Eventloop. Creates either a NIO Eventloop or a native Epoll Eventloop with a preference for
+     * native Epoll.
      *
      * @return the Boss EventLoopGroup
      */
     @NotNull
     private EventLoopGroup createChildEventLoop() {
-        //Default Netty Threads.
+        // Default Netty Threads.
         return new NioEventLoopGroup(0, createThreadFactory("hivemq-eventloop-child-%d"));
     }
 
     /**
      * Creates a Thread Factory that names Threads with the given format
      *
-     * @param nameFormat the format
-     * @return a ThreadFactory that names Threads with the given format
+     * @param  nameFormat the format
+     * @return            a ThreadFactory that names Threads with the given format
      */
     private ThreadFactory createThreadFactory(final @NotNull String nameFormat) {
-
         checkNotNull(nameFormat, "Thread Factory Name Format must not be null");
         return new ThreadFactoryBuilder().setNameFormat(nameFormat).build();
     }

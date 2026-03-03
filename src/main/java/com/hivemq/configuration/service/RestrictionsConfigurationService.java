@@ -22,7 +22,7 @@ import com.hivemq.codec.encoder.mqtt5.UnsignedDataTypes;
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- * @since 4.0
+ * @since  4.0
  */
 public interface RestrictionsConfigurationService {
 
@@ -31,7 +31,6 @@ public interface RestrictionsConfigurationService {
      */
     int UNLIMITED_CONNECTIONS = -1;
     int UNLIMITED_BANDWIDTH = 0;
-
     /**
      * DEFAULT VALUES
      */
@@ -40,7 +39,6 @@ public interface RestrictionsConfigurationService {
     long NO_CONNECT_IDLE_TIMEOUT_DEFAULT = 10000;
     long INCOMING_BANDWIDTH_THROTTLING_DEFAULT = UNLIMITED_BANDWIDTH;
     int MAX_TOPIC_LENGTH_DEFAULT = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
-
     /**
      * BOUNDARY VALUES
      */
@@ -51,13 +49,11 @@ public interface RestrictionsConfigurationService {
     long INCOMING_BANDWIDTH_THROTTLING_MINIMUM = 0;
     int MAX_TOPIC_LENGTH_MINIMUM = 1;
     int MAX_TOPIC_LENGTH_MAXIMUM = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
-
-
     /**
      * Returns the maximum allowed connections.
      * <p>
-     * <b>This method only returns the configuration of maximum concurrent MQTT connections, not the value
-     * your HiveMQ license is limited to.</b>
+     * <b>This method only returns the configuration of maximum concurrent MQTT connections, not the value your HiveMQ
+     * license is limited to.</b>
      *
      * @return the maximum allowed connections.
      */
@@ -92,5 +88,4 @@ public interface RestrictionsConfigurationService {
     void setIncomingLimit(long incomingLimit);
 
     void setMaxTopicLength(int maxTopicLength);
-
 }

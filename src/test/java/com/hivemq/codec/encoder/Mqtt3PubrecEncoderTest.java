@@ -33,7 +33,6 @@ public class Mqtt3PubrecEncoderTest {
 
     private EmbeddedChannel channel;
     private ClientConnection clientConnection;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
@@ -44,16 +43,12 @@ public class Mqtt3PubrecEncoderTest {
     @Test
     public void test_pubrec_sent() {
         channel.writeOutbound(new PUBREC(10));
-
         final ByteBuf buf = channel.readOutbound();
-
         final Mqtt3PubrecEncoder encoder = new Mqtt3PubrecEncoder();
         assertEquals(encoder.bufferSize(clientConnection, new PUBREC(10)), buf.readableBytes());
-
         assertEquals((byte) 0b0101_0000, buf.readByte());
         assertEquals((byte) 0b0000_0010, buf.readByte());
         assertEquals(10, buf.readUnsignedShort());
-
         assertFalse(buf.isReadable());
     }
 }

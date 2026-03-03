@@ -37,10 +37,8 @@ public class PubackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubackPacketImpl packet = mock(PubackPacketImpl.class);
-
-        final PubackOutboundInputImpl input =
-                new PubackOutboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final PubackOutboundInputImpl input = new PubackOutboundInputImpl(clientInformation, connectionInformation,
+                packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPubackPacket());
@@ -51,18 +49,14 @@ public class PubackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubackPacketImpl packet = mock(PubackPacketImpl.class);
-
-        final PubackOutboundInputImpl input =
-                new PubackOutboundInputImpl(clientInformation, connectionInformation, packet);
-
+        final PubackOutboundInputImpl input = new PubackOutboundInputImpl(clientInformation, connectionInformation,
+                packet);
         final ModifiablePubackPacketImpl modifiablePacket = mock(ModifiablePubackPacketImpl.class);
         final PubackPacketImpl newPacket = mock(PubackPacketImpl.class);
         final PubackOutboundOutputImpl output = mock(PubackOutboundOutputImpl.class);
         when(output.getPubackPacket()).thenReturn(modifiablePacket);
         when(modifiablePacket.copy()).thenReturn(newPacket);
-
         final PubackOutboundInputImpl updated = input.update(output);
-
         assertNotSame(input, updated);
         assertSame(input.getClientInformation(), updated.getClientInformation());
         assertSame(input.getConnectionInformation(), updated.getConnectionInformation());

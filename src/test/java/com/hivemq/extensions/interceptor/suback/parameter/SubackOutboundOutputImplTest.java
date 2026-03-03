@@ -34,9 +34,7 @@ public class SubackOutboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableSubackPacketImpl modifiablePacket = mock(ModifiableSubackPacketImpl.class);
-
         final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getSubackPacket());
     }
 
@@ -44,17 +42,13 @@ public class SubackOutboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableSubackPacketImpl modifiablePacket = mock(ModifiableSubackPacketImpl.class);
-
         final SubackOutboundOutputImpl output = new SubackOutboundOutputImpl(asyncer, modifiablePacket);
-
         final SubackOutboundInputImpl input = mock(SubackOutboundInputImpl.class);
         final SubackPacketImpl packet = mock(SubackPacketImpl.class);
         final ModifiableSubackPacketImpl newModifiablePacket = mock(ModifiableSubackPacketImpl.class);
         when(input.getSubackPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final SubackOutboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getSubackPacket());
     }
 }

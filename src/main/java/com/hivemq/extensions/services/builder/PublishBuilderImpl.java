@@ -51,39 +51,27 @@ public class PublishBuilderImpl implements PublishBuilder {
 
     @NotNull
     private Qos qos = Qos.AT_MOST_ONCE;
-
     private boolean retain = false;
-
     @Nullable
     private String topic;
-
     @Nullable
     private PayloadFormatIndicator payloadFormatIndicator;
-
     @NotNull
     private Long messageExpiryInterval = PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
-
     @Nullable
     private String responseTopic;
-
     @Nullable
     private ByteBuffer correlationData;
-
     @Nullable
     private String contentType;
-
     @Nullable
     private ByteBuffer payload;
-
     @NotNull
     private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
-
     @NotNull
     private final SecurityConfigurationService securityConfigurationService;
-
     @NotNull
     @Inject
     public PublishBuilderImpl(@NotNull final FullConfigurationService configurationService) {
@@ -94,14 +82,12 @@ public class PublishBuilderImpl implements PublishBuilder {
     @NotNull
     @Override
     public PublishBuilder fromPublish(@NotNull final PublishPacket publish) {
-
         Preconditions.checkNotNull(publish, "publish must not be null");
-
         if (!(publish instanceof PublishPacketImpl)) {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
-
-        return fromComplete(publish.getQos(),
+        return fromComplete(
+                publish.getQos(),
                 publish.getRetain(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
@@ -116,14 +102,12 @@ public class PublishBuilderImpl implements PublishBuilder {
     @NotNull
     @Override
     public PublishBuilder fromPublish(@NotNull final Publish publish) {
-
         Preconditions.checkNotNull(publish, "publish must not be null");
-
         if (!(publish instanceof PublishImpl)) {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
-
-        return fromComplete(publish.getQos(),
+        return fromComplete(
+                publish.getQos(),
                 publish.getRetain(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
@@ -184,15 +168,12 @@ public class PublishBuilderImpl implements PublishBuilder {
     @Override
     public PublishBuilder topic(@NotNull final String topic) {
         checkNotNull(topic, "Topic must not be null");
-
         if (!Topics.isValidTopicToPublish(topic)) {
             throw new IllegalArgumentException("The topic (" + topic + ") is invalid for PUBLISH messages ");
         }
-
         if (!PluginBuilderUtil.isValidUtf8String(topic, securityConfigurationService.validateUTF8())) {
             throw new IllegalArgumentException("The topic (" + topic + ") is UTF-8 malformed");
         }
-
         this.topic = topic;
         return this;
     }
@@ -207,8 +188,8 @@ public class PublishBuilderImpl implements PublishBuilder {
     @NotNull
     @Override
     public PublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
-                mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil
+                .checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -255,23 +236,12 @@ public class PublishBuilderImpl implements PublishBuilder {
     @NotNull
     @Override
     public Publish build() {
-
         checkNotNull(topic, "Topic must never be null");
         checkNotNull(payload, "Payload must never be null");
-
         if (messageExpiryInterval == MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
-
-        return new PublishImpl(qos,
-                retain,
-                topic,
-                payloadFormatIndicator,
-                messageExpiryInterval,
-                responseTopic,
-                correlationData,
-                contentType,
-                payload,
-                UserPropertiesImpl.of(userPropertyBuilder.build()));
+        return new PublishImpl(qos, retain, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
+                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

@@ -27,5 +27,4 @@ public interface FullConfigurationService extends ConfigurationService {
     SecurityConfigurationService securityConfiguration();
 
     PersistenceConfigurationService persistenceConfigurationService();
-
 }

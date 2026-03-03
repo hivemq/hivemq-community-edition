@@ -25,17 +25,22 @@ import com.hivemq.mqtt.message.ProtocolVersion;
  */
 public interface Mqtt3CONNECT extends Message {
 
-    @NotNull ProtocolVersion getProtocolVersion();
+    @NotNull
+    ProtocolVersion getProtocolVersion();
 
-    @NotNull String getClientIdentifier();
+    @NotNull
+    String getClientIdentifier();
 
     int getKeepAlive();
 
-    @Nullable String getUsername();
+    @Nullable
+    String getUsername();
 
     byte @Nullable [] getPassword();
 
-    @Nullable String getPasswordAsUTF8String();
+    @Nullable
+    String getPasswordAsUTF8String();
 
-    @Nullable MqttWillPublish getWillPublish();
+    @Nullable
+    MqttWillPublish getWillPublish();
 }

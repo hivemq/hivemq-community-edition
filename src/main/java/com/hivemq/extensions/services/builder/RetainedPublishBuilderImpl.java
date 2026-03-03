@@ -48,45 +48,33 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
 
     @NotNull
     private Qos qos = Qos.AT_MOST_ONCE;
-
     @Nullable
     private String topic;
-
     @Nullable
     private PayloadFormatIndicator payloadFormatIndicator;
-
     private long messageExpiryInterval = PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
-
     @Nullable
     private String responseTopic;
-
     @Nullable
     private ByteBuffer correlationData;
-
     @Nullable
     private String contentType;
-
     @Nullable
     private ByteBuffer payload;
-
     @NotNull
     private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-
     @NotNull
     private final MqttConfigurationService mqttConfigurationService;
-
     @NotNull
     private final RestrictionsConfigurationService restrictionsConfig;
-
     @NotNull
     private final SecurityConfigurationService securityConfigurationService;
-
     @Inject
     public RetainedPublishBuilderImpl(final @NotNull FullConfigurationService fullConfigurationService) {
         this.mqttConfigurationService = fullConfigurationService.mqttConfiguration();
@@ -97,14 +85,12 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder fromPublish(@NotNull final PublishPacket publish) {
-
         Preconditions.checkNotNull(publish, "publish must not be null");
-
         if (!(publish instanceof PublishPacketImpl)) {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
-
-        return fromComplete(publish.getQos(),
+        return fromComplete(
+                publish.getQos(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
                 publish.getMessageExpiryInterval(),
@@ -118,14 +104,12 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder fromPublish(@NotNull final Publish publish) {
-
         Preconditions.checkNotNull(publish, "publish must not be null");
-
         if (!(publish instanceof PublishImpl)) {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
-
-        return fromComplete(publish.getQos(),
+        return fromComplete(
+                publish.getQos(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
                 publish.getMessageExpiryInterval(),
@@ -172,16 +156,16 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder topic(@NotNull final String topic) {
-        PluginBuilderUtil.checkTopic(topic,
-                restrictionsConfig.maxTopicLength(),
-                securityConfigurationService.validateUTF8());
+        PluginBuilderUtil
+                .checkTopic(topic, restrictionsConfig.maxTopicLength(), securityConfigurationService.validateUTF8());
         this.topic = topic;
         return this;
     }
 
     @NotNull
     @Override
-    public RetainedPublishBuilder payloadFormatIndicator(@Nullable final PayloadFormatIndicator payloadFormatIndicator) {
+    public RetainedPublishBuilder payloadFormatIndicator(
+            @Nullable final PayloadFormatIndicator payloadFormatIndicator) {
         this.payloadFormatIndicator = payloadFormatIndicator;
         return this;
     }
@@ -189,8 +173,8 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
-                mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil
+                .checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -237,22 +221,12 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublish build() {
-
         checkNotNull(topic, "Topic must never be null");
         checkNotNull(payload, "Payload must never be null");
-
         if (messageExpiryInterval == MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
-
-        return new RetainedPublishImpl(qos,
-                topic,
-                payloadFormatIndicator,
-                messageExpiryInterval,
-                responseTopic,
-                correlationData,
-                contentType,
-                payload,
-                UserPropertiesImpl.of(userPropertyBuilder.build()));
+        return new RetainedPublishImpl(qos, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
+                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

@@ -39,8 +39,8 @@ public class AllItemsFetchCallbackTest {
         final AllItemsFetchCallback<Object, Object> allItemsFetchCallback = new AllItemsFetchCallback<>() {
 
             @Override
-            protected @NotNull ListenableFuture<MultipleChunkResult<Object>> persistenceCall(final @NotNull ChunkCursor chunkCursor) {
-
+            protected @NotNull ListenableFuture<MultipleChunkResult<Object>> persistenceCall(
+                    final @NotNull ChunkCursor chunkCursor) {
                 assertNotNull(chunkCursor);
                 return SettableFuture.create();
             }
@@ -50,20 +50,18 @@ public class AllItemsFetchCallbackTest {
                 return Collections.EMPTY_LIST;
             }
         };
-
         allItemsFetchCallback.fetchNextResults(null);
     }
 
     @Test
     public void partiallyFinished() throws ExecutionException, InterruptedException {
-
         final AllItemsFetchCallback<String, String> allItemsFetchCallback = new AllItemsFetchCallback<>() {
-            @Override
-            protected @NotNull ListenableFuture<MultipleChunkResult<String>> persistenceCall(final @NotNull ChunkCursor chunkCursor) {
 
+            @Override
+            protected @NotNull ListenableFuture<MultipleChunkResult<String>> persistenceCall(
+                    final @NotNull ChunkCursor chunkCursor) {
                 final BucketChunkResult<String> one = new BucketChunkResult<>("1", true, "last", 1);
                 final BucketChunkResult<String> two = new BucketChunkResult<>("2", false, "two", 2);
-
                 return Futures.immediateFuture(new MultipleChunkResult<>(Map.of(1, one, 2, two)));
             }
 
@@ -72,7 +70,6 @@ public class AllItemsFetchCallbackTest {
                 return ImmutableList.of(s);
             }
         };
-
         final ChunkResult<String> result = allItemsFetchCallback.fetchNextResults(new ChunkCursor()).get();
         assertFalse(result.isFinished());
         assertTrue(result.getCursor().getFinishedBuckets().contains(1));
@@ -83,14 +80,13 @@ public class AllItemsFetchCallbackTest {
 
     @Test
     public void continues() throws ExecutionException, InterruptedException {
-
         final AllItemsFetchCallback<String, String> allItemsFetchCallback = new AllItemsFetchCallback<>() {
-            @Override
-            protected @NotNull ListenableFuture<MultipleChunkResult<String>> persistenceCall(final @NotNull ChunkCursor chunkCursor) {
 
+            @Override
+            protected @NotNull ListenableFuture<MultipleChunkResult<String>> persistenceCall(
+                    final @NotNull ChunkCursor chunkCursor) {
                 final BucketChunkResult<String> one = new BucketChunkResult<>("1", false, "last", 1);
                 final BucketChunkResult<String> two = new BucketChunkResult<>("2", false, "two", 2);
-
                 return Futures.immediateFuture(new MultipleChunkResult<>(Map.of(1, one, 2, two)));
             }
 
@@ -99,7 +95,6 @@ public class AllItemsFetchCallbackTest {
                 return ImmutableList.of(s);
             }
         };
-
         final ChunkResult<String> result = allItemsFetchCallback.fetchNextResults(new ChunkCursor()).get();
         assertFalse(result.isFinished());
         assertTrue(result.getCursor().getFinishedBuckets().isEmpty());
@@ -109,14 +104,13 @@ public class AllItemsFetchCallbackTest {
 
     @Test
     public void finished() throws ExecutionException, InterruptedException {
-
         final AllItemsFetchCallback<String, String> allItemsFetchCallback = new AllItemsFetchCallback<>() {
-            @Override
-            protected @NotNull ListenableFuture<MultipleChunkResult<String>> persistenceCall(final @NotNull ChunkCursor chunkCursor) {
 
+            @Override
+            protected @NotNull ListenableFuture<MultipleChunkResult<String>> persistenceCall(
+                    final @NotNull ChunkCursor chunkCursor) {
                 final BucketChunkResult<String> one = new BucketChunkResult<>("1", true, "last", 1);
                 final BucketChunkResult<String> two = new BucketChunkResult<>("2", true, "two", 2);
-
                 return Futures.immediateFuture(new MultipleChunkResult<>(Map.of(1, one, 2, two)));
             }
 
@@ -125,7 +119,6 @@ public class AllItemsFetchCallbackTest {
                 return ImmutableList.of(s);
             }
         };
-
         final ChunkResult<String> result = allItemsFetchCallback.fetchNextResults(new ChunkCursor()).get();
         assertTrue(result.isFinished());
         assertTrue(result.getCursor().getFinishedBuckets().contains(1));

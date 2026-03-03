@@ -30,9 +30,7 @@ import static org.mockito.Mockito.when;
 public class OpenConnectionsGaugeTest {
 
     private final @NotNull ChannelGroup channelGroup = mock();
-
     private OpenConnectionsGauge gauge;
-
     @Before
     public void before() {
         gauge = new OpenConnectionsGauge(channelGroup);
@@ -40,11 +38,8 @@ public class OpenConnectionsGaugeTest {
 
     @Test
     public void test_getValue() throws Exception {
-
         when(channelGroup.size()).thenReturn(243);
-
         final Integer value = gauge.getValue();
-
         assertEquals(243, value.intValue());
     }
 }

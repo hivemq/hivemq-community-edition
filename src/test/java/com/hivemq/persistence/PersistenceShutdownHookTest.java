@@ -47,22 +47,13 @@ public class PersistenceShutdownHookTest {
     private final @NotNull PublishPayloadPersistence payloadPersistence = mock();
     private final @NotNull ListeningScheduledExecutorService payloadPersistenceExecutor = mock();
     private final @NotNull ClientQueuePersistence clientQueuePersistence = mock();
-
     private PersistenceShutdownHook persistenceShutdownHook;
-
     @Before
     public void init() {
         persistenceShutdownHook = new PersistenceShutdownHook(clientSessionPersistence,
-                clientSessionSubscriptionPersistence,
-                incomingMessageFlowPersistence,
-                retainedMessagePersistence,
-                payloadPersistence,
-                clientQueuePersistence,
-                persistenceExecutorService,
-                persistenceScheduledExecutorService,
-                payloadPersistenceExecutor,
-                singleWriterService);
-
+                clientSessionSubscriptionPersistence, incomingMessageFlowPersistence, retainedMessagePersistence,
+                payloadPersistence, clientQueuePersistence, persistenceExecutorService,
+                persistenceScheduledExecutorService, payloadPersistenceExecutor, singleWriterService);
         when(clientSessionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(retainedMessagePersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
@@ -84,23 +75,19 @@ public class PersistenceShutdownHookTest {
 
     @Test(timeout = 15000)
     public void test_timeout_future_not_returning() throws Exception {
-
         final SettableFuture<Void> voidSettableFuture = SettableFuture.create();
         when(retainedMessagePersistence.closeDB()).thenReturn(voidSettableFuture);
-
         InternalConfigurations.PERSISTENCE_SHUTDOWN_TIMEOUT_SEC.set(1);
-
         final long start = System.currentTimeMillis();
         persistenceShutdownHook.run();
-
-        //check that it took less than this test's safety timeout to complete the run
+        // check that it took less than this test's safety timeout to complete the run
         assertTrue(start + 15000 > System.currentTimeMillis());
     }
 
     @Test
     public void test_exception() throws Exception {
-        when(retainedMessagePersistence.closeDB()).thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
+        when(retainedMessagePersistence.closeDB())
+                .thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
         persistenceShutdownHook.run();
     }
-
 }

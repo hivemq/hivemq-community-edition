@@ -30,11 +30,8 @@ public class DisconnectOutboundOutputImpl extends AbstractSimpleAsyncOutput<Disc
 
     private final @NotNull ModifiableOutboundDisconnectPacketImpl disconnectPacket;
     private boolean failed = false;
-
-    public DisconnectOutboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer,
+    public DisconnectOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableOutboundDisconnectPacketImpl disconnectPacket) {
-
         super(asyncer);
         this.disconnectPacket = disconnectPacket;
     }

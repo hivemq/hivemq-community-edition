@@ -35,14 +35,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Checkpoints {
 
     private static final Logger log = LoggerFactory.getLogger(Checkpoints.class);
-
     private static final ReadWriteLock readWriteLock = new ReentrantReadWriteLock(true);
     private static final ConcurrentHashMap<String, Integer> checkpointCounters = new ConcurrentHashMap<>(1);
     private static final ConcurrentHashMap<String, CountDownLatch> checkpointLatches = new ConcurrentHashMap<>(1);
     private static final ConcurrentHashMap<String, Runnable> checkPointCallbacks = new ConcurrentHashMap<>(1);
     private static boolean enabled;
     private static boolean debug;
-
     public static boolean enabled() {
         return enabled;
     }
@@ -71,30 +69,23 @@ public class Checkpoints {
         if (!enabled) {
             return;
         }
-
         CountDownLatch latch = null;
         Runnable callback = null;
-
         final Lock lock = readWriteLock.writeLock();
         lock.lock();
         try {
-
             if (debug) {
                 log.error("Checkpoint {} visited", name);
             }
-
             final Integer previousValue = checkpointCounters.putIfAbsent(name, 1);
             if (previousValue != null) {
                 checkpointCounters.put(name, previousValue + 1);
             }
-
             latch = checkpointLatches.get(name);
             callback = checkPointCallbacks.get(name);
-
         } finally {
             lock.unlock();
         }
-
         if (callback != null) {
             if (debug) {
                 log.error("Found callback for checkpoint {}", name);
@@ -105,7 +96,6 @@ public class Checkpoints {
                 log.error("ERROR at checkpoint callback", t);
             }
         }
-
         if (latch != null) {
             if (debug) {
                 log.error("Found block latch for {}, blocking execution until latch is resumed", name);
@@ -153,17 +143,13 @@ public class Checkpoints {
         if (!enabled) {
             return;
         }
-
         if (debug) {
             log.error("Waiting for checkpoint {} to be visited {} times...", name, numberOfOccurrences);
         }
-
-        for (; ; ) {
-
+        for (;;) {
             final Lock lock = readWriteLock.readLock();
             lock.lock();
             try {
-
                 final Integer currentValue = checkpointCounters.get(name);
                 if (currentValue != null && currentValue >= numberOfOccurrences) {
                     if (debug) {
@@ -187,14 +173,13 @@ public class Checkpoints {
     /**
      * blocks the executing code when it reaches the checkpoint until the latch is resumed (1 time)
      *
-     * @param name the checkpoint name
-     * @return a {@link  CountDownLatch} with value 1
+     * @param  name the checkpoint name
+     * @return      a {@link CountDownLatch} with value 1
      */
     public static CountDownLatch blockAtCheckpoint(final @NotNull String name) {
         if (!enabled) {
             return null;
         }
-
         final Lock lock = readWriteLock.readLock();
         lock.lock();
         try {
@@ -210,7 +195,6 @@ public class Checkpoints {
         if (!enabled) {
             return;
         }
-
         final Lock lock = readWriteLock.readLock();
         lock.lock();
         try {

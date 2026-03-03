@@ -32,14 +32,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
- * The EventLog class is used to log certain events that could be important for customers to separate files.
- * In a future state of the implementation it may also be used to display those events in the web-interface.
+ * The EventLog class is used to log certain events that could be important for customers to separate files. In a future
+ * state of the implementation it may also be used to display those events in the web-interface.
  */
 @LazySingleton
 public class EventLog {
 
     private static final Logger log = LoggerFactory.getLogger(EventLog.class);
-
     public static final String EVENT_CLIENT_CONNECTED = "event.client-connected";
     public static final String EVENT_CLIENT_DISCONNECTED = "event.client-disconnected";
     public static final String EVENT_MESSAGE_DROPPED = "event.message-dropped";
@@ -48,16 +47,13 @@ public class EventLog {
     /**
      * Events are logged to DEBUG, in case customers are using a custom logback.xml
      */
-
     private static final Logger logClientConnected = LoggerFactory.getLogger(EVENT_CLIENT_CONNECTED);
     private static final Logger logClientDisconnected = LoggerFactory.getLogger(EVENT_CLIENT_DISCONNECTED);
     private static final Logger logMessageDropped = LoggerFactory.getLogger(EVENT_MESSAGE_DROPPED);
     private static final Logger logClientSessionExpired = LoggerFactory.getLogger(EVENT_CLIENT_SESSION_EXPIRED);
     private static final Logger logAuthentication = LoggerFactory.getLogger(EVENT_AUTHENTICATION);
-
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final ZoneId ZONE = ZoneId.of("UTC");
-
     /**
      * Log that a outgoing publish message was dropped.
      *
@@ -108,8 +104,11 @@ public class EventLog {
      * @param reason      why the message was dropped
      */
     public void mqttMessageDropped(
-            @Nullable final String client, @Nullable final String messageType, @NotNull final String reason) {
-        logMessageDropped.debug("Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
+            @Nullable final String client,
+            @Nullable final String messageType,
+            @NotNull final String reason) {
+        logMessageDropped.debug(
+                "Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
                 valueOrUnknown(client),
                 valueOrUnknown(messageType),
                 reason);
@@ -126,8 +125,8 @@ public class EventLog {
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         final Long sessionExpiry = clientConnectionContext.getClientSessionExpiryInterval();
-
-        logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.",
+        logClientConnected.debug(
+                "Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.",
                 valueOrUnknown(clientId),
                 valueOrUnknown(ip),
                 valueOrUnknown(cleanStart),
@@ -142,21 +141,22 @@ public class EventLog {
      * @param reason                  reason specified by the client for the DISCONNECT.
      */
     public void clientDisconnectedGracefully(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @Nullable String reason) {
-
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @Nullable String reason) {
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
-
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected gracefully.", clientId);
         }
         if (reason != null) {
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}",
+            logClientDisconnected.debug(
+                    "Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip),
                     reason);
         } else {
-            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.",
+            logClientDisconnected.debug(
+                    "Client ID: {}, IP: {} disconnected gracefully.",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip));
         }
@@ -175,15 +175,11 @@ public class EventLog {
         final String listenerName = listener.readableName();
         final int listenerPort = listener.getPort();
         final String eventLogMessage = "Client ID: {}, IP: {} disconnected ungracefully from {} on port: {}.";
-
         if (log.isTraceEnabled()) {
             log.trace("Client {} disconnected ungracefully.", clientId);
         }
-        logClientDisconnected.debug(eventLogMessage,
-                valueOrUnknown(clientId),
-                valueOrUnknown(ip),
-                listenerName,
-                listenerPort);
+        logClientDisconnected
+                .debug(eventLogMessage, valueOrUnknown(clientId), valueOrUnknown(ip), listenerName, listenerPort);
     }
 
     /**
@@ -199,7 +195,8 @@ public class EventLog {
         if (log.isTraceEnabled()) {
             log.trace("Client {} was disconnected.", clientId);
         }
-        logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.",
+        logClientDisconnected.debug(
+                "Client ID: {}, IP: {} was disconnected. reason: {}.",
                 valueOrUnknown(clientId),
                 valueOrUnknown(ip),
                 reason);
@@ -212,17 +209,21 @@ public class EventLog {
      * @param reasonCode of the AUTH packet.
      */
     public void clientAuthentication(
-            @NotNull final Channel channel, @NotNull final Mqtt5AuthReasonCode reasonCode, final boolean received) {
+            @NotNull final Channel channel,
+            @NotNull final Mqtt5AuthReasonCode reasonCode,
+            final boolean received) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         if (received) {
-            logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.",
+            logAuthentication.debug(
+                    "Received AUTH from Client ID: {}, IP: {}, reason code: {}.",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip),
                     reasonCode.name());
         } else {
-            logAuthentication.debug("Sent AUTH to Client ID: {}, IP: {}, reason code: {}.",
+            logAuthentication.debug(
+                    "Sent AUTH to Client ID: {}, IP: {}, reason code: {}.",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip),
                     reasonCode.name());
@@ -236,9 +237,8 @@ public class EventLog {
      * @param clientId        of the expired session
      */
     public void clientSessionExpired(final Long expiryTimestamp, @Nullable final String clientId) {
-
-        final LocalDateTime disconnectedSinceDateTime =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZONE);
+        final LocalDateTime disconnectedSinceDateTime = LocalDateTime
+                .ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZONE);
         logClientSessionExpired.debug(
                 "Client ID: {} session has expired at {}. All persistent data for this client has been removed.",
                 valueOrUnknown(clientId),

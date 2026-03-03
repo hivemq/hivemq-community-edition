@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableList;
@@ -43,16 +42,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ClassServiceLoader {
 
     private static final String META_INF_SERVICES = "META-INF/services/";
-
     /**
-     * Loads all classes defined in the <code>META-INF/services/CLASS_TO_LOAD</code> file. The classes
-     * get initialized when loading. Comments in the file (prefixed with a # character) are ignored.
+     * Loads all classes defined in the <code>META-INF/services/CLASS_TO_LOAD</code> file. The classes get initialized
+     * when loading. Comments in the file (prefixed with a # character) are ignored.
      *
-     * @param classToLoad the class to load. Typically, this is an interface.
-     * @param classLoader the classloader to load the classes from
-     * @param <S>         The type of the class to load
-     * @return an immutable Iterable which contains all classes found via the service loader mechanism. All classes get
-     *         initialized.
+     * @param  classToLoad                    the class to load. Typically, this is an interface.
+     * @param  classLoader                    the classloader to load the classes from
+     * @param  <S>                            The type of the class to load
+     * @return                                an immutable Iterable which contains all classes found via the service
+     *                                        loader mechanism. All classes get initialized.
      * @throws IOException                    If an IO error happens
      * @throws ClassNotFoundException         If the found class can not be found and thus can't be initialized and
      *                                        loaded
@@ -60,18 +58,17 @@ public class ClassServiceLoader {
      */
     @ReadOnly
     public <S> @NotNull Iterable<Class<? extends S>> load(
-            final @NotNull Class<S> classToLoad, final @NotNull ClassLoader classLoader)
-            throws IOException, ClassNotFoundException {
+            final @NotNull Class<S> classToLoad,
+            final @NotNull ClassLoader classLoader) throws IOException, ClassNotFoundException {
         checkNotNull(classToLoad, "Class to load mus not be null");
         checkNotNull(classLoader, "Classloader must not be null");
-
         final ImmutableList.Builder<Class<? extends S>> services = ImmutableList.builder();
         final Enumeration<URL> urls = classLoader.getResources(META_INF_SERVICES + classToLoad.getName());
         while (urls.hasMoreElements()) {
             final URL url = urls.nextElement();
             try (final InputStream is = url.openStream();
-                 final InputStreamReader isr = new InputStreamReader(is, UTF_8);
-                 final BufferedReader r = new BufferedReader((isr))) {
+                    final InputStreamReader isr = new InputStreamReader(is, UTF_8);
+                    final BufferedReader r = new BufferedReader((isr))) {
                 // read until the stream is empty
                 while (true) {
                     String line = r.readLine();

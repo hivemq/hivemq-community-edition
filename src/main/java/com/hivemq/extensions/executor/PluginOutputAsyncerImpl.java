@@ -43,51 +43,40 @@ public class PluginOutputAsyncerImpl implements PluginOutPutAsyncer {
 
     @NotNull
     private final ScheduledExecutorService scheduledExecutor;
-
     @NotNull
     private final ShutdownHooks shutdownHooks;
-
     @PostConstruct
     public void postConstruct() {
-
         shutdownHooks.add(new PluginOutputAsyncerShutdownHook(scheduledExecutor));
     }
 
     @Inject
     public PluginOutputAsyncerImpl(@NotNull final ShutdownHooks shutdownHooks) {
         this.shutdownHooks = shutdownHooks;
-
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-        //enable removing canceled tasks from the executor queue
+        // enable removing canceled tasks from the executor queue
         executor.setRemoveOnCancelPolicy(true);
         executor.setThreadFactory(ThreadFactoryUtil.create("extension-timeout-executor-%d"));
-        //for instrumentation (metrics)
+        // for instrumentation (metrics)
         scheduledExecutor = executor;
     }
 
     @Override
     public @NotNull <T extends PluginTaskOutput> Async<T> asyncify(
-            @NotNull final T output, @NotNull final Duration timeout) {
-
+            @NotNull final T output,
+            @NotNull final Duration timeout) {
         output.markAsAsync();
-
         final SettableFuture<Boolean> asyncFuture = output.getAsyncFuture();
-
         Preconditions.checkNotNull(asyncFuture, "Async future cannot be null for async output");
-
         final ScheduledFuture<?> scheduledFuture = scheduledExecutor.schedule(() -> {
             output.markAsTimedOut();
             asyncFuture.set(false);
         }, timeout.toMillis(), TimeUnit.MILLISECONDS);
-
         return new AsyncOutputImpl<>(output, asyncFuture, scheduledFuture);
     }
-
-
     static class PluginOutputAsyncerShutdownHook implements HiveMQShutdownHook {
 
         private final @NotNull ScheduledExecutorService scheduledExecutor;
-
         @VisibleForTesting
         PluginOutputAsyncerShutdownHook(final @NotNull ScheduledExecutorService scheduledExecutor) {
             this.scheduledExecutor = scheduledExecutor;

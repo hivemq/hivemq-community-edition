@@ -35,9 +35,7 @@ public class ClientSessionCleanUpTaskTest {
     private final @NotNull ClientSessionLocalPersistence localPersistence = mock();
     private final @NotNull ClientSessionPersistenceImpl clientSessionPersistence = mock();
     private final @NotNull PendingWillMessages pendingWillMessages = mock();
-
     private ClientSessionCleanUpTask task;
-
     @Before
     public void setUp() throws Exception {
         task = new ClientSessionCleanUpTask(localPersistence, clientSessionPersistence, pendingWillMessages);

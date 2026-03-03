@@ -31,7 +31,6 @@ public class BucketTest {
 
     private final @NotNull Environment environment = mock();
     private final @NotNull Store store = mock();
-
     @Test
     public void close() throws Exception {
         final Bucket bucket = new Bucket(environment, store);

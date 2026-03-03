@@ -31,5 +31,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Inherited
 public @interface ExecuteInEventloop {
+
     String value() default "";
 }

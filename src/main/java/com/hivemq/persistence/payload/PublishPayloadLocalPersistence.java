@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.persistence.payload;
 
 import com.google.common.collect.ImmutableList;
@@ -24,7 +23,6 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 public interface PublishPayloadLocalPersistence {
 
     String PERSISTENCE_NAME = "publish_payload_store";
-
     /**
      * initialize the publish payload local persistence to set the next payload id.
      */
@@ -41,8 +39,8 @@ public interface PublishPayloadLocalPersistence {
     /**
      * Get a payload for a specific id.
      *
-     * @param id The payload id.
-     * @return the payload for the id.
+     * @param  id The payload id.
+     * @return    the payload for the id.
      */
     byte @Nullable [] get(long id);
 
@@ -57,7 +55,8 @@ public interface PublishPayloadLocalPersistence {
      * @return all payload ids as a readonly list.
      */
     @ReadOnly
-    @NotNull ImmutableList<Long> getAllIds();
+    @NotNull
+    ImmutableList<Long> getAllIds();
 
     /**
      * close the persistence with all buckets.
@@ -70,7 +69,6 @@ public interface PublishPayloadLocalPersistence {
      * @param callback the callback called at every iteration.
      */
     void iterate(final @NotNull Callback callback);
-
     @FunctionalInterface
     interface Callback {
 

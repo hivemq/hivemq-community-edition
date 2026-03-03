@@ -18,9 +18,8 @@ package util;
 import io.netty.channel.ChannelHandlerAdapter;
 
 /**
- * This handler does nothing and is only needed for Embedded Channel tests if no
- * explicit handler is needed for the test. We unfortunately need such a dummy
- * handler because otherwise we can't use EmbeddedChannels
+ * This handler does nothing and is only needed for Embedded Channel tests if no explicit handler is needed for the
+ * test. We unfortunately need such a dummy handler because otherwise we can't use EmbeddedChannels
  *
  * @author Dominik Obermaier
  */

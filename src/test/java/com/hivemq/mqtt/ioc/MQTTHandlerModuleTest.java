@@ -35,20 +35,20 @@ import static org.mockito.Mockito.when;
 public class MQTTHandlerModuleTest {
 
     private final Injector injector = Guice.createInjector(new AbstractModule() {
+
         @Override
         protected void configure() {
             final Injector persistenceInjector = mock();
-            when(persistenceInjector.getInstance(MessageDroppedService.class)).thenReturn(mock(MessageDroppedServiceImpl.class));
+            when(persistenceInjector.getInstance(MessageDroppedService.class))
+                    .thenReturn(mock(MessageDroppedServiceImpl.class));
             install(new MQTTHandlerModule(persistenceInjector));
             bindScope(LazySingleton.class, LazySingletonScope.get());
         }
     });
-
     @Test
     public void test_message_dropped_service_is_singleton() {
         final MessageDroppedService instance1 = injector.getInstance(MessageDroppedService.class);
         final MessageDroppedService instance2 = injector.getInstance(MessageDroppedService.class);
-
         assertSame(instance1, instance2);
         assertTrue(instance1 instanceof MessageDroppedServiceImpl);
     }

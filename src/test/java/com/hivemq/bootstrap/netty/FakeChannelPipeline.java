@@ -36,7 +36,6 @@ import java.util.Map;
 public class FakeChannelPipeline implements ChannelPipeline {
 
     private final List<String> names = Lists.newArrayList();
-
     @Override
     public ChannelPipeline addFirst(final String name, final ChannelHandler handler) {
         names.addFirst(name);

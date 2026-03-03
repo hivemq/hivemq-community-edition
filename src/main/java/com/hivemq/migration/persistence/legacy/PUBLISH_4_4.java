@@ -23,13 +23,12 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
 /**
  * @author Florian Limpöck
  * @author Lukas Brandl
- * @since 4.5.0
+ * @since  4.5.0
  */
 public class PUBLISH_4_4 extends MessageWithID {
 
     private final long payloadID;
     private final @NotNull PUBLISH publish;
-
     public PUBLISH_4_4(@NotNull final PUBLISH publish, final long payloadID) {
         this.publish = publish;
         this.payloadID = payloadID;

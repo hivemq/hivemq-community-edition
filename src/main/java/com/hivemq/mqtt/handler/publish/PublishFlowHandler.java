@@ -60,22 +60,17 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     @NotNull
     private static final Logger log = LoggerFactory.getLogger(PublishFlowHandler.class);
-
-    //must be static as a new instance of qos receiver handler is in every channel
+    // must be static as a new instance of qos receiver handler is in every channel
     private static final @NotNull AtomicLong UNACKNOWLEDGED_PUBLISHES_COUNTER = new AtomicLong();
-
     private final @NotNull IncomingMessageFlowPersistence persistence;
     private final @NotNull OrderedTopicService orderedTopicService;
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull IncomingPublishHandler incomingPublishHandler;
     private final @NotNull DropOutgoingPublishesHandler dropOutgoingPublishesHandler;
-
     private final @NotNull Map<Integer, Boolean> qos1AlreadySentMap;
-
     @VisibleForTesting
     @Inject
-    public PublishFlowHandler(
-            final @NotNull PublishPollService publishPollService,
+    public PublishFlowHandler(final @NotNull PublishPollService publishPollService,
             final @NotNull IncomingMessageFlowPersistence persistence,
             final @NotNull OrderedTopicService orderedTopicService,
             final @NotNull IncomingPublishHandler incomingPublishHandler,
@@ -107,14 +102,13 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
-            throws Exception {
-
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) throws Exception {
         if (!(msg instanceof PUBLISH || msg instanceof PUBACK || msg instanceof PUBREL)) {
             super.write(ctx, msg, promise);
             return;
         }
-
         if (msg instanceof PUBACK) {
             final PUBACK puback = (PUBACK) msg;
             final int messageId = puback.getPacketIdentifier();
@@ -122,19 +116,18 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
                 if (future.isSuccess()) {
                     qos1AlreadySentMap.remove(messageId);
                     if (log.isTraceEnabled()) {
-                        log.trace("Client '{}' completed a PUBLISH flow with QoS 1 for packet identifier '{}'",
+                        log.trace(
+                                "Client '{}' completed a PUBLISH flow with QoS 1 for packet identifier '{}'",
                                 ctx,
                                 messageId);
                     }
                 }
             });
         }
-
         final boolean flowComplete = orderedTopicService.handlePublish(ctx.channel(), msg, promise);
         if (flowComplete) {
             return;
         }
-
         if (DROP_MESSAGES_QOS_0_ENABLED) {
             final boolean messageDropped = dropOutgoingPublishesHandler.checkChannelNotWritable(ctx, msg, promise);
             if (messageDropped) {
@@ -163,35 +156,31 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelInactive(final ChannelHandlerContext ctx) throws Exception {
-
         orderedTopicService.handleInactive();
-
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         final Long sessionExpiryInterval = clientConnectionContext.getClientSessionExpiryInterval();
-
-        //remove incoming message flow for not persisted client
+        // remove incoming message flow for not persisted client
         if (sessionExpiryInterval != null && sessionExpiryInterval == SESSION_EXPIRE_ON_DISCONNECT) {
             final String clientId = clientConnectionContext.getClientId();
-            if (clientId !=
-                    null) {   //Just to be save. The client id should never be null, if the persistent session is not null.
+            if (clientId != null) { // Just to be save. The client id should never be null, if the persistent session is
+                                    // not null.
                 persistence.delete(clientId);
             }
         }
         super.channelInactive(ctx);
     }
 
-    private void handlePublish(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish) throws Exception {
-
+    private void handlePublish(final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish)
+            throws Exception {
         final String clientId = ClientConnection.of(ctx.channel()).getClientId();
-
         if (publish.getQoS() == QoS.AT_MOST_ONCE) {// do nothing
             incomingPublishHandler.interceptOrDelegate(ctx, publish, clientId);
             // QoS 1 delivery handling
         } else if (publish.getQoS() == QoS.AT_LEAST_ONCE) {
             UNACKNOWLEDGED_PUBLISHES_COUNTER.incrementAndGet();
             if (publish.isDuplicateDelivery() && qos1AlreadySentMap.get(publish.getPacketIdentifier()) != null) {
-                log.debug("Client {} sent a duplicate publish message with id {}. This message is ignored",
+                log.debug(
+                        "Client {} sent a duplicate publish message with id {}. This message is ignored",
                         clientId,
                         publish.getPacketIdentifier());
             } else {
@@ -223,75 +212,54 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
                 messageId);
     }
 
-
     private void handlePuback(final @NotNull ChannelHandlerContext ctx, final PUBACK msg) {
-
         final String clientId = ClientConnection.of(ctx.channel()).getClientId();
-
         log.trace("Client {}: Received PUBACK", clientId);
         final int messageId = msg.getPacketIdentifier();
         orderedTopicService.messageFlowComplete(ctx, messageId);
-
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBACK remove message id:[{}] ", clientId, messageId);
         }
     }
 
     private void handlePubrec(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBREC msg) {
-
         final String clientId = ClientConnection.of(ctx.channel()).getClientId();
-
         log.trace("Client {}: Received pubrec", clientId);
-
-        if (msg.getReasonCode() != Mqtt5PubRecReasonCode.SUCCESS &&
-                msg.getReasonCode() != Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS) {
+        if (msg.getReasonCode() != Mqtt5PubRecReasonCode.SUCCESS
+                && msg.getReasonCode() != Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS) {
             orderedTopicService.messageFlowComplete(ctx, ((MessageWithID) msg).getPacketIdentifier());
         }
-
         final ListenableFuture<Void> future = publishPollService.putPubrelInQueue(clientId, msg.getPacketIdentifier());
         FutureUtils.addExceptionLogger(future);
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBREC remove message id:[{}]", clientId, msg.getPacketIdentifier());
         }
-        //We send it with channel instead of context because otherwise we can't intercept the write in this handler
+        // We send it with channel instead of context because otherwise we can't intercept the write in this handler
         ctx.channel().writeAndFlush(new PUBREL(msg.getPacketIdentifier()));
     }
 
     private void handlePubrel(final ChannelHandlerContext ctx, final PUBREL pubrel) {
-
         final String client = ClientConnection.of(ctx.channel()).getClientId();
-
         final int messageId = pubrel.getPacketIdentifier();
-
         persistence.addOrReplace(client, messageId, pubrel);
-        ctx.writeAndFlush(new PUBCOMP(messageId))
-                .addListener(new PubcompSentListener(messageId, client, persistence));
+        ctx.writeAndFlush(new PUBCOMP(messageId)).addListener(new PubcompSentListener(messageId, client, persistence));
     }
 
     private void handlePubcomp(final @NotNull ChannelHandlerContext ctx, @NotNull final PUBCOMP msg) {
-
         final String clientId = ClientConnection.of(ctx.channel()).getClientId();
-
         log.trace("Client {}: Received PUBCOMP", clientId);
-
         orderedTopicService.messageFlowComplete(ctx, msg.getPacketIdentifier());
-
         if (log.isTraceEnabled()) {
             log.trace("Client {}: Received PUBCOMP remove message id:[{}]", clientId, msg.getPacketIdentifier());
         }
-
     }
-
     @Immutable
     private static class PubcompSentListener implements ChannelFutureListener {
 
         private final int messageId;
         private final @NotNull String client;
         private final @NotNull IncomingMessageFlowPersistence persistence;
-
-        PubcompSentListener(
-                final int messageId,
-                final @NotNull String client,
+        PubcompSentListener(final int messageId, final @NotNull String client,
                 final @NotNull IncomingMessageFlowPersistence persistence) {
             this.messageId = messageId;
             this.client = client;
@@ -299,11 +267,12 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         }
 
         @Override
-        public void operationComplete(final ChannelFuture future)  {
+        public void operationComplete(final ChannelFuture future) {
             if (future.isSuccess()) {
                 UNACKNOWLEDGED_PUBLISHES_COUNTER.decrementAndGet();
                 persistence.remove(client, messageId);
-                log.trace("Client '{}' completed a PUBLISH flow with QoS 2 for packet identifier '{}'",
+                log.trace(
+                        "Client '{}' completed a PUBLISH flow with QoS 2 for packet identifier '{}'",
                         client,
                         messageId);
             }

@@ -28,23 +28,19 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubCompReasonCode;
  *
  * @author Dominik Obermaier
  * @author Waldemar Ruck
- * @since 1.4
+ * @since  1.4
  */
 public class PUBCOMP extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<Mqtt5PubCompReasonCode>
         implements Mqtt3PUBCOMP, Mqtt5PUBCOMP {
 
-    //MQTT 3
+    // MQTT 3
     public PUBCOMP(final int packetIdentifier) {
         super(packetIdentifier, Mqtt5PubCompReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
-    //MQTT 5
-    public PUBCOMP(
-            final int packetIdentifier,
-            final @NotNull Mqtt5PubCompReasonCode reasonCode,
-            final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties) {
-
+    // MQTT 5
+    public PUBCOMP(final int packetIdentifier, final @NotNull Mqtt5PubCompReasonCode reasonCode,
+            final @Nullable String reasonString, final @NotNull Mqtt5UserProperties userProperties) {
         super(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 
@@ -54,8 +50,7 @@ public class PUBCOMP extends MqttMessageWithUserProperties.MqttMessageWithIdAndR
     }
 
     public static @NotNull PUBCOMP from(final @NotNull PubcompPacketImpl packet) {
-        return new PUBCOMP(packet.getPacketIdentifier(),
-                Mqtt5PubCompReasonCode.from(packet.getReasonCode()),
+        return new PUBCOMP(packet.getPacketIdentifier(), Mqtt5PubCompReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }

@@ -34,49 +34,42 @@ public class HiveMQExceptionHandlerBootstrapTest {
 
     private final AtomicBoolean shutdownCalled = new AtomicBoolean(false);
     private final Runnable shutdownAction = () -> shutdownCalled.set(true);
-
     @Test
     public void test_creationException() {
-        final CreationException creationException = new CreationException(Collections.singletonList(new Message("test",
-                new UnrecoverableException(false))));
-
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
-                creationException,
-                shutdownAction);
+        final CreationException creationException = new CreationException(
+                Collections.singletonList(new Message("test", new UnrecoverableException(false))));
+        HiveMQExceptionHandlerBootstrap
+                .handleUncaughtException(Thread.currentThread(), creationException, shutdownAction);
         assertTrue(shutdownCalled.get());
     }
 
     @Test
     public void test_provisionException() {
-        final ProvisionException provisionException = new ProvisionException(Collections.singletonList(new Message(
-                "test",
-                new UnrecoverableException(false))));
-
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
-                provisionException,
-                shutdownAction);
+        final ProvisionException provisionException = new ProvisionException(
+                Collections.singletonList(new Message("test", new UnrecoverableException(false))));
+        HiveMQExceptionHandlerBootstrap
+                .handleUncaughtException(Thread.currentThread(), provisionException, shutdownAction);
         assertTrue(shutdownCalled.get());
     }
 
     @Test
     public void test_unrecoverableException_false() {
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
-                new UnrecoverableException(false),
-                shutdownAction);
+        HiveMQExceptionHandlerBootstrap
+                .handleUncaughtException(Thread.currentThread(), new UnrecoverableException(false), shutdownAction);
         assertTrue(shutdownCalled.get());
     }
 
     @Test
     public void test_unrecoverableException_true() {
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
-                new UnrecoverableException(true),
-                shutdownAction);
+        HiveMQExceptionHandlerBootstrap
+                .handleUncaughtException(Thread.currentThread(), new UnrecoverableException(true), shutdownAction);
         assertTrue(shutdownCalled.get());
     }
 
     @Test
     public void test_unrecoverableException_wrapped() {
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
+        HiveMQExceptionHandlerBootstrap.handleUncaughtException(
+                Thread.currentThread(),
                 new RuntimeException("test", new UnrecoverableException(true)),
                 shutdownAction);
         assertFalse(shutdownCalled.get());

@@ -37,14 +37,9 @@ public class NettyModule extends SingletonModule {
 
     @Override
     protected void configure() {
-
         bind(ChannelGroup.class).toInstance(new DefaultChannelGroup(GlobalEventExecutor.INSTANCE));
-
-        //bind server event loops
-
+        // bind server event loops
         bind(NettyConfiguration.class).toProvider(NettyConfigurationProvider.class).in(Singleton.class);
-
         bind(ChannelInitializerFactory.class).to(ChannelInitializerFactoryImpl.class);
     }
-
 }

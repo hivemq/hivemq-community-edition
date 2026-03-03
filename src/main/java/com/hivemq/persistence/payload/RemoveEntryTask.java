@@ -26,9 +26,7 @@ class RemoveEntryTask implements Runnable {
     private final @NotNull BucketLock bucketLock;
     private final @NotNull RemovablePayloads @NotNull [] responsibleBuckets;
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
-
-    RemoveEntryTask(
-            final @NotNull BucketLock bucketLock,
+    RemoveEntryTask(final @NotNull BucketLock bucketLock,
             final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry,
             final @NotNull PublishPayloadLocalPersistence localPersistence,
             final @NotNull RemovablePayloads @NotNull [] responsibleBuckets) {
@@ -43,12 +41,11 @@ class RemoveEntryTask implements Runnable {
         try {
             // Cleanup our buckets for which we are responsible.
             for (final RemovablePayloads responsibleBucket : responsibleBuckets) {
-
                 if (responsibleBucket.getQueue().isEmpty()) {
                     continue;
                 }
-
-                bucketLock.accessBucket(responsibleBucket.getBucketIndex(),
+                bucketLock.accessBucket(
+                        responsibleBucket.getBucketIndex(),
                         (index) -> cleanupQueueCompletely(responsibleBucket));
             }
         } catch (final Throwable t) {
@@ -62,12 +59,9 @@ class RemoveEntryTask implements Runnable {
      * @param removablePayloads The queue to drain the publishes from.
      */
     private void cleanupQueueCompletely(final @NotNull RemovablePayloads removablePayloads) {
-
         final Queue<Long> removablePayloadQueue = removablePayloads.getQueue();
-
         Long payloadId;
         while ((payloadId = removablePayloadQueue.poll()) != null) {
-
             final int referenceCount = payloadReferenceCounterRegistry.get(payloadId);
             // The reference count can be UNKNOWN_PAYLOAD, if it was marked as removable twice.
             // This is possible if a payload is marked as removable, and we receive the same payload again

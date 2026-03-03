@@ -59,7 +59,6 @@ public class Statistic {
     private long diskSize;
     private String cloudPlatform;
     private String container;
-
     public String getStatisticType() {
         return statisticType;
     }

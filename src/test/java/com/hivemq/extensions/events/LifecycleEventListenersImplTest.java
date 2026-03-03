@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.events;
 
 import com.hivemq.bootstrap.ClientConnection;
@@ -51,84 +50,67 @@ public class LifecycleEventListenersImplTest {
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
     private final @NotNull HiveMQExtension extension1 = mock(HiveMQExtension.class);
     private final @NotNull HiveMQExtension extension2 = mock(HiveMQExtension.class);
     private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
-
     private @NotNull LifecycleEventListenersImpl lifecycleEventListeners;
     private @NotNull ConnectionPersistence connectionPersistence;
-
     @Before
     public void setUp() throws Exception {
         connectionPersistence = new ConnectionPersistenceImpl();
         lifecycleEventListeners = new LifecycleEventListenersImpl(hiveMQExtensions);
-
         when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
         when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
     }
 
     @Test
     public void test_add_success() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
-                .toPath(), new Class[]{TestClientLifecycleEventListenerProviderOne.class})) {
-            final ClientLifecycleEventListenerProvider clientInitializer =
-                    IsolatedExtensionClassloaderUtil.loadInstance(cl,
-                            TestClientLifecycleEventListenerProviderOne.class);
+        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
+                temporaryFolder.getRoot().toPath(),
+                new Class[]{TestClientLifecycleEventListenerProviderOne.class})) {
+            final ClientLifecycleEventListenerProvider clientInitializer = IsolatedExtensionClassloaderUtil
+                    .loadInstance(cl, TestClientLifecycleEventListenerProviderOne.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(extension1);
             when(extension1.getId()).thenReturn("extension1");
-
             final Channel channelMock = mock(Channel.class);
             final ChannelPipeline pipelineMock = mock(ChannelPipeline.class);
             final ClientConnection clientConnection = new DummyClientConnection(channelMock, publishFlushHandler);
             clientConnection.setClientId("client");
-
             when(channelMock.pipeline()).thenReturn(pipelineMock);
-
             connectionPersistence.persistIfAbsent(clientConnection);
-
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializer);
-
-            assertEquals(clientInitializer,
+            assertEquals(
+                    clientInitializer,
                     lifecycleEventListeners.getClientLifecycleEventListenerProviderMap().get("extension1"));
         }
     }
 
     @Test
     public void test_add_two_different_priorities() throws Exception {
-        final Class<?>[] classes = {
-                TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class};
-
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
-                .toPath(), classes);
-             final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
-                     .toPath(), classes)) {
-            final ClientLifecycleEventListenerProvider clientInitializerOne =
-                    IsolatedExtensionClassloaderUtil.loadInstance(cl1,
-                            TestClientLifecycleEventListenerProviderOne.class);
-            final ClientLifecycleEventListenerProvider clientInitializerTwo =
-                    IsolatedExtensionClassloaderUtil.loadInstance(cl2,
-                            TestClientLifecycleEventListenerProviderTwo.class);
-
+        final Class<?>[] classes = {TestClientLifecycleEventListenerProviderOne.class,
+                TestClientLifecycleEventListenerProviderTwo.class};
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil
+                .buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
+                final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil
+                        .buildClassLoader(temporaryFolder.getRoot().toPath(), classes)) {
+            final ClientLifecycleEventListenerProvider clientInitializerOne = IsolatedExtensionClassloaderUtil
+                    .loadInstance(cl1, TestClientLifecycleEventListenerProviderOne.class);
+            final ClientLifecycleEventListenerProvider clientInitializerTwo = IsolatedExtensionClassloaderUtil
+                    .loadInstance(cl2, TestClientLifecycleEventListenerProviderTwo.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
             when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
             when(extension1.getId()).thenReturn("extension1");
             when(extension2.getId()).thenReturn("extension2");
-
             when(extension1.getPriority()).thenReturn(100);
             when(extension2.getPriority()).thenReturn(101);
-
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerOne);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerTwo);
-
-            final Map<String, ClientLifecycleEventListenerProvider> initializerMap =
-                    lifecycleEventListeners.getClientLifecycleEventListenerProviderMap();
-
+            final Map<String, ClientLifecycleEventListenerProvider> initializerMap = lifecycleEventListeners
+                    .getClientLifecycleEventListenerProviderMap();
             assertEquals(2, initializerMap.size());
-
-            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator =
-                    initializerMap.entrySet().iterator();
+            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator = initializerMap.entrySet()
+                    .iterator();
             assertEquals(clientInitializerTwo, iterator.next().getValue());
             assertEquals(clientInitializerOne, iterator.next().getValue());
         }
@@ -136,45 +118,34 @@ public class LifecycleEventListenersImplTest {
 
     @Test
     public void test_add_two_equal_priorities() throws Exception {
-        final Class<?>[] classes = {
-                TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class};
-
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
-                .toPath(), classes);
-             final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot()
-                     .toPath(), classes)) {
-            final ClientLifecycleEventListenerProvider clientInitializerOne =
-                    IsolatedExtensionClassloaderUtil.loadInstance(cl1,
-                            TestClientLifecycleEventListenerProviderOne.class);
-            final ClientLifecycleEventListenerProvider clientInitializerTwo =
-                    IsolatedExtensionClassloaderUtil.loadInstance(cl2,
-                            TestClientLifecycleEventListenerProviderTwo.class);
-
+        final Class<?>[] classes = {TestClientLifecycleEventListenerProviderOne.class,
+                TestClientLifecycleEventListenerProviderTwo.class};
+        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil
+                .buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
+                final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil
+                        .buildClassLoader(temporaryFolder.getRoot().toPath(), classes)) {
+            final ClientLifecycleEventListenerProvider clientInitializerOne = IsolatedExtensionClassloaderUtil
+                    .loadInstance(cl1, TestClientLifecycleEventListenerProviderOne.class);
+            final ClientLifecycleEventListenerProvider clientInitializerTwo = IsolatedExtensionClassloaderUtil
+                    .loadInstance(cl2, TestClientLifecycleEventListenerProviderTwo.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
             when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
             when(extension1.getId()).thenReturn("extension1");
             when(extension2.getId()).thenReturn("extension2");
-
             when(extension1.getPriority()).thenReturn(100);
             when(extension2.getPriority()).thenReturn(100);
-
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerOne);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerTwo);
-
-            final Map<String, ClientLifecycleEventListenerProvider> initializerMap =
-                    lifecycleEventListeners.getClientLifecycleEventListenerProviderMap();
-
+            final Map<String, ClientLifecycleEventListenerProvider> initializerMap = lifecycleEventListeners
+                    .getClientLifecycleEventListenerProviderMap();
             assertEquals(2, initializerMap.size());
-
-            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator =
-                    initializerMap.entrySet().iterator();
-
+            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator = initializerMap.entrySet()
+                    .iterator();
             // the first one added is the first one shown
             assertEquals(clientInitializerOne, iterator.next().getValue());
             assertEquals(clientInitializerTwo, iterator.next().getValue());
         }
     }
-
     public static class TestClientLifecycleEventListenerProviderOne implements ClientLifecycleEventListenerProvider {
 
         @Override

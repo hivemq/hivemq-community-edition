@@ -29,7 +29,6 @@ import static org.junit.Assert.assertFalse;
 public class EnvironmentUtilTest {
 
     private EnvironmentUtil environmentUtil;
-
     @Before
     public void setUp() throws Exception {
         environmentUtil = new EnvironmentUtil();
@@ -42,9 +41,7 @@ public class EnvironmentUtilTest {
 
     @Test
     public void test_create_environment_config() throws Exception {
-
         final EnvironmentConfig envConfig = environmentUtil.createEnvironmentConfig("name");
-
         assertFalse(envConfig.isManagementEnabled());
         assertFalse(envConfig.getGcRenameFiles());
         assertEquals(60000, envConfig.getGcFilesDeletionDelay());
@@ -56,5 +53,4 @@ public class EnvironmentUtilTest {
         assertEquals(25, envConfig.getMemoryUsagePercentage());
         assertEquals(InternalConfigurations.XODUS_LOG_CACHE_USE_NIO, envConfig.getLogCacheUseNio());
     }
-
 }

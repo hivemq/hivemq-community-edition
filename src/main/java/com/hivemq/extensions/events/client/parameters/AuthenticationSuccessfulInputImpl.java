@@ -28,14 +28,13 @@ import java.util.function.Supplier;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class AuthenticationSuccessfulInputImpl
         implements AuthenticationSuccessfulInput, PluginTaskInput, Supplier<AuthenticationSuccessfulInputImpl> {
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-
     public AuthenticationSuccessfulInputImpl(@NotNull final String clientId, @NotNull final Channel channel) {
         Preconditions.checkNotNull(clientId, "client id must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");

@@ -33,26 +33,21 @@ public class LazySingletonModuleTest {
 
     @Test
     public void test_lazy_singleton_lazy_inition() throws Exception {
-        Guice.createInjector(Stage.PRODUCTION, new LazySingletonModule(),
+        Guice.createInjector(Stage.PRODUCTION, new LazySingletonModule(), new AbstractModule() {
 
-                new AbstractModule() {
-                    @Override
-                    protected void configure() {
-                        bind(LazySingletonClass.class);
-                        bind(StandardSingleton.class);
-                    }
-                });
-
+            @Override
+            protected void configure() {
+                bind(LazySingletonClass.class);
+                bind(StandardSingleton.class);
+            }
+        });
         assertTrue(StandardSingleton.executed.get());
         assertFalse(LazySingletonClass.executed.get());
     }
-
-
     @LazySingleton
     private static class LazySingletonClass {
 
         private static final AtomicBoolean executed = new AtomicBoolean(false);
-
         public LazySingletonClass() {
             executed.set(true);
         }
@@ -62,7 +57,6 @@ public class LazySingletonModuleTest {
     private static class StandardSingleton {
 
         private static final AtomicBoolean executed = new AtomicBoolean(false);
-
         public StandardSingleton() {
             executed.set(true);
         }

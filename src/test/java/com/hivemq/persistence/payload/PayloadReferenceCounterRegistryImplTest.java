@@ -25,10 +25,10 @@ import static org.junit.Assert.assertEquals;
 public class PayloadReferenceCounterRegistryImplTest {
 
     private @NotNull PayloadReferenceCounterRegistryImpl payloadReferenceCounterRegistry;
-
     @Before
     public void setUp() throws Exception {
-        @NotNull final BucketLock bucketLock = new BucketLock(10);
+        @NotNull
+        final BucketLock bucketLock = new BucketLock(10);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
     }
 
@@ -119,7 +119,6 @@ public class PayloadReferenceCounterRegistryImplTest {
         payloadReferenceCounterRegistry.getAndIncrement(1L);
         payloadReferenceCounterRegistry.getAndIncrement(1L);
         payloadReferenceCounterRegistry.getAndIncrement(1L);
-
         final int decrement = payloadReferenceCounterRegistry.decrementAndGet(1L);
         assertEquals(2, decrement);
         final int referenceCounter = payloadReferenceCounterRegistry.get(1L);
@@ -129,14 +128,11 @@ public class PayloadReferenceCounterRegistryImplTest {
     @Test
     public void test_size_whenMultipleNodesArePresent_thenSizeCoversAll() {
         payloadReferenceCounterRegistry.getAndIncrement(1L);
-
         payloadReferenceCounterRegistry.getAndIncrement(2L);
         payloadReferenceCounterRegistry.getAndIncrement(3L);
-
         payloadReferenceCounterRegistry.getAndIncrement(4L);
         payloadReferenceCounterRegistry.getAndIncrement(5L);
         payloadReferenceCounterRegistry.getAndIncrement(6L);
-
         final int size = payloadReferenceCounterRegistry.size();
         assertEquals(6, size);
     }

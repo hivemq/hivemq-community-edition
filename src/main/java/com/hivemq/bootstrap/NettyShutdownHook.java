@@ -30,18 +30,13 @@ import java.util.concurrent.TimeoutException;
 public class NettyShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(NettyShutdownHook.class);
-
     private final @NotNull EventLoopGroup workerGroup;
     private final @NotNull EventLoopGroup bossGroup;
     private final int eventLoopsShutdownTimeout;
     private final int connectionPersistenceShutdownTimeout;
     private final @NotNull ConnectionPersistence connectionPersistence;
-
-    public NettyShutdownHook(
-            final @NotNull EventLoopGroup workerGroup,
-            final @NotNull EventLoopGroup bossGroup,
-            final int eventLoopsShutdownTimeout,
-            final int connectionPersistenceShutdownTimeout,
+    public NettyShutdownHook(final @NotNull EventLoopGroup workerGroup, final @NotNull EventLoopGroup bossGroup,
+            final int eventLoopsShutdownTimeout, final int connectionPersistenceShutdownTimeout,
             final @NotNull ConnectionPersistence connectionPersistence) {
         this.workerGroup = workerGroup;
         this.bossGroup = bossGroup;
@@ -64,7 +59,7 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
     public void run() {
         log.debug("Shutting down listeners and clients");
         try {
-            //we need to block the shutdown of the clients before we shutdown their executors.
+            // we need to block the shutdown of the clients before we shutdown their executors.
             connectionPersistence.shutDown().get(connectionPersistenceShutdownTimeout, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException e) {
             log.warn("Client shutdown failed exceptionally: {}", e.getMessage());
@@ -79,13 +74,12 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
         } finally {
             connectionPersistence.interruptShutdown();
         }
-
         log.debug("Shutting down worker and boss threads");
-        final Future<?> workerFinished = workerGroup.shutdownGracefully(2,
-                eventLoopsShutdownTimeout,
-                TimeUnit.SECONDS); //TimeUnit effects both parameters!
+        final Future<?> workerFinished = workerGroup.shutdownGracefully(2, eventLoopsShutdownTimeout, TimeUnit.SECONDS); // TimeUnit
+                                                                                                                         // effects
+                                                                                                                         // both
+                                                                                                                         // parameters!
         final Future<?> bossFinished = bossGroup.shutdownGracefully(2, eventLoopsShutdownTimeout, TimeUnit.SECONDS);
-
         log.trace("Waiting for Worker threads to finish");
         workerFinished.syncUninterruptibly();
         log.trace("Waiting for Boss threads to finish");

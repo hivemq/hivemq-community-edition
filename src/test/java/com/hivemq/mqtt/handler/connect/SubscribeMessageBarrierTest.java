@@ -39,7 +39,6 @@ public class SubscribeMessageBarrierTest {
 
     private final SubscribeMessageBarrier subscribeMessageBarrier = new SubscribeMessageBarrier();
     private final EmbeddedChannel channel = new EmbeddedChannel();
-
     @Before
     public void before() {
         channel.pipeline().addFirst(MQTT_SUBSCRIBE_MESSAGE_BARRIER, subscribeMessageBarrier);
@@ -63,7 +62,6 @@ public class SubscribeMessageBarrierTest {
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new PUBACK(0));
         channel.writeInbound(new DISCONNECT());
-
         assertFalse(channel.config().isAutoRead());
         assertEquals(4, subscribeMessageBarrier.getQueue().size());
     }
@@ -73,19 +71,17 @@ public class SubscribeMessageBarrierTest {
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         assertEquals(2, subscribeMessageBarrier.getQueue().size());
-
         final AtomicInteger counter = new AtomicInteger(0);
-        channel.pipeline()
-                .addAfter(MQTT_SUBSCRIBE_MESSAGE_BARRIER,
-                        "inbound_handler",
-                        new SimpleChannelInboundHandler<PUBLISH>() {
+        channel.pipeline().addAfter(
+                MQTT_SUBSCRIBE_MESSAGE_BARRIER,
+                "inbound_handler",
+                new SimpleChannelInboundHandler<PUBLISH>() {
 
-                            @Override
-                            protected void channelRead0(final ChannelHandlerContext ctx, final PUBLISH msg) {
-                                counter.incrementAndGet();
-                            }
-                        });
-
+                    @Override
+                    protected void channelRead0(final ChannelHandlerContext ctx, final PUBLISH msg) {
+                        counter.incrementAndGet();
+                    }
+                });
         channel.writeOutbound(new SUBACK(1, fromCode(1)));
         assertEquals(2, counter.get());
     }
@@ -94,29 +90,24 @@ public class SubscribeMessageBarrierTest {
     public void test_messages_sent_publishes_and_subscribe() {
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
-
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 2));
-
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         assertEquals(5, subscribeMessageBarrier.getQueue().size());
-
         final AtomicInteger counter = new AtomicInteger(0);
-        channel.pipeline()
-                .addAfter(MQTT_SUBSCRIBE_MESSAGE_BARRIER,
-                        "inbound_handler",
-                        new SimpleChannelInboundHandler<PUBLISH>() {
+        channel.pipeline().addAfter(
+                MQTT_SUBSCRIBE_MESSAGE_BARRIER,
+                "inbound_handler",
+                new SimpleChannelInboundHandler<PUBLISH>() {
 
-                            @Override
-                            protected void channelRead0(final ChannelHandlerContext ctx, final PUBLISH msg) {
-                                counter.incrementAndGet();
-                            }
-                        });
-
+                    @Override
+                    protected void channelRead0(final ChannelHandlerContext ctx, final PUBLISH msg) {
+                        counter.incrementAndGet();
+                    }
+                });
         channel.writeOutbound(new SUBACK(1, fromCode(1)));
         assertEquals(2, subscribeMessageBarrier.getQueue().size());
         assertEquals(2, counter.get());
-
         channel.writeOutbound(new SUBACK(2, fromCode(1)));
         assertEquals(4, counter.get());
         assertEquals(0, subscribeMessageBarrier.getQueue().size());

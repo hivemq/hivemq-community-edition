@@ -41,21 +41,19 @@ import java.util.Set;
 
 @LazySingleton
 public class SslFactory {
+
     private static final @NotNull Logger log = LoggerFactory.getLogger(SslFactory.class);
-
     private final @NotNull SslContextStore sslContextStore;
-
     @Inject
     public SslFactory(final @NotNull SslContextStore sslContextStore) {
         this.sslContextStore = sslContextStore;
     }
 
     public @NotNull SslHandler getSslHandler(
-            final @NotNull Channel ch, final @NotNull Tls tls, final @NotNull SslContext sslContext)
-            throws SslException {
-
+            final @NotNull Channel ch,
+            final @NotNull Tls tls,
+            final @NotNull SslContext sslContext) throws SslException {
         final SSLEngine sslEngine = sslContext.newEngine(ch.alloc());
-
         // if prefer server suites is null -> use default of the engine
         final Boolean preferServerCipherSuites = tls.isPreferServerCipherSuites();
         if (preferServerCipherSuites != null) {
@@ -63,7 +61,6 @@ public class SslFactory {
             params.setUseCipherSuitesOrder(preferServerCipherSuites);
             sslEngine.setSSLParameters(params);
         }
-
         final SslHandler sslHandler = new SslHandler(sslEngine);
         sslHandler.setHandshakeTimeoutMillis(tls.getHandshakeTimeout());
         return sslHandler;
@@ -77,22 +74,22 @@ public class SslFactory {
         try {
             sslContextStore.createAndInitIfAbsent(tls, sslContext -> {
                 final SSLEngine sslEngine = sslContext.newEngine(new PooledByteBufAllocator());
-                log.info("Enabled protocols for {} at address {} and port {}: {}",
+                log.info(
+                        "Enabled protocols for {} at address {} and port {}: {}",
                         listener.readableName(),
                         listener.getBindAddress(),
                         listener.getPort(),
                         Arrays.toString(sslEngine.getEnabledProtocols()));
                 final String[] enabledCipherSuites = sslEngine.getEnabledCipherSuites();
-                log.info("Enabled cipher suites for {} at address {} and port {}: {}",
+                log.info(
+                        "Enabled cipher suites for {} at address {} and port {}: {}",
                         listener.readableName(),
                         listener.getBindAddress(),
                         listener.getPort(),
                         Arrays.toString(enabledCipherSuites));
-
                 final List<String> cipherSuites = tls.getCipherSuites();
                 if (!cipherSuites.isEmpty()) {
                     final Set<String> unknownCipherSuitesSet;
-
                     if (sslContext instanceof OpenSslServerContext) {
                         // the prefixes TLS_ and SSL_ are ignored by OpenSSL
                         final Set<String> enabledCipherSuitesSet = new HashSet<>();
@@ -101,22 +98,21 @@ public class SslFactory {
                         }
                         unknownCipherSuitesSet = new HashSet<>();
                         for (final String cipherSuite : cipherSuites) {
-
                             if (cipherSuite == null) {
                                 continue;
                             }
-
                             if (!enabledCipherSuitesSet.contains(cipherSuite.substring(4))) {
                                 unknownCipherSuitesSet.add(cipherSuite);
                             }
                         }
                     } else {
-                        unknownCipherSuitesSet = Sets.difference(ImmutableSet.copyOf(cipherSuites),
+                        unknownCipherSuitesSet = Sets.difference(
+                                ImmutableSet.copyOf(cipherSuites),
                                 ImmutableSet.copyOf(enabledCipherSuites));
                     }
-
                     if (!unknownCipherSuitesSet.isEmpty()) {
-                        log.warn("Unknown cipher suites for {} at address {} and port {}: {}",
+                        log.warn(
+                                "Unknown cipher suites for {} at address {} and port {}: {}",
                                 listener.readableName(),
                                 listener.getBindAddress(),
                                 listener.getPort(),

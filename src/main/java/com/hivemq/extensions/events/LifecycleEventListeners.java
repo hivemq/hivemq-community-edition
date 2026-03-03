@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface LifecycleEventListeners {
 
@@ -36,6 +36,6 @@ public interface LifecycleEventListeners {
     /**
      * @return a map of extension ids and ClientLifecycleEventListenerProvider, sorted descending by extension priority.
      */
-    @NotNull Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> getClientLifecycleEventListenerProviderMap();
-
+    @NotNull
+    Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> getClientLifecycleEventListenerProviderMap();
 }

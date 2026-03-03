@@ -43,7 +43,6 @@ import java.util.List;
 public class ConfigFileReader {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigFileReader.class);
-
     private final @NotNull ConfigurationFile configurationFile;
     private final @NotNull EnvVarUtil envVarUtil;
     private final @NotNull ListenerConfigurator listenerConfigurator;
@@ -52,17 +51,12 @@ public class ConfigFileReader {
     private final @NotNull SecurityConfigurator securityConfigurator;
     private final @NotNull UsageStatisticsConfigurator usageStatisticsConfigurator;
     private final @NotNull PersistenceConfigurator persistenceConfigurator;
-
-    public ConfigFileReader(
-            @NotNull final ConfigurationFile configurationFile,
+    public ConfigFileReader(@NotNull final ConfigurationFile configurationFile,
             @NotNull final RestrictionConfigurator restrictionConfigurator,
-            @NotNull final SecurityConfigurator securityConfigurator,
-            @NotNull final EnvVarUtil envVarUtil,
+            @NotNull final SecurityConfigurator securityConfigurator, @NotNull final EnvVarUtil envVarUtil,
             @NotNull final UsageStatisticsConfigurator usageStatisticsConfigurator,
-            @NotNull final MqttConfigurator mqttConfigurator,
-            @NotNull final ListenerConfigurator listenerConfigurator,
+            @NotNull final MqttConfigurator mqttConfigurator, @NotNull final ListenerConfigurator listenerConfigurator,
             @NotNull final PersistenceConfigurator persistenceConfigurator) {
-
         this.configurationFile = configurationFile;
         this.envVarUtil = envVarUtil;
         this.listenerConfigurator = listenerConfigurator;
@@ -77,15 +71,18 @@ public class ConfigFileReader {
         setConfigFromXML();
     }
 
-    @NotNull HiveMQConfigEntity getDefaultConfig() {
+    @NotNull
+    HiveMQConfigEntity getDefaultConfig() {
         return new HiveMQConfigEntity();
     }
 
-    @NotNull Class<? extends HiveMQConfigEntity> getConfigEntityClass() {
+    @NotNull
+    Class<? extends HiveMQConfigEntity> getConfigEntityClass() {
         return HiveMQConfigEntity.class;
     }
 
-    @NotNull List<Class<?>> getInheritedEntityClasses() {
+    @NotNull
+    List<Class<?>> getInheritedEntityClasses() {
         return ImmutableList.of(
                 /* ListenerEntity */
                 TCPListenerEntity.class,
@@ -98,26 +95,18 @@ public class ConfigFileReader {
         if (configurationFile.file().isPresent()) {
             final File configFile = configurationFile.file().get();
             log.debug("Reading configuration file {}", configFile);
-
             try {
-                final Class<?>[] classes = ImmutableList.<Class<?>>builder()
-                        .add(getConfigEntityClass())
-                        .addAll(getInheritedEntityClasses())
-                        .build()
-                        .toArray(new Class<?>[0]);
-
+                final Class<?>[] classes = ImmutableList.<Class<?>>builder().add(getConfigEntityClass())
+                        .addAll(getInheritedEntityClasses()).build().toArray(new Class<?>[0]);
                 final JAXBContext context = JAXBContext.newInstance(classes);
                 final Unmarshaller unmarshaller = context.createUnmarshaller();
-
-                //replace environment variable placeholders
+                // replace environment variable placeholders
                 String configFileContent = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
                 configFileContent = envVarUtil.replaceEnvironmentVariablePlaceholders(configFileContent);
-                final ByteArrayInputStream is =
-                        new ByteArrayInputStream(configFileContent.getBytes(StandardCharsets.UTF_8));
+                final ByteArrayInputStream is = new ByteArrayInputStream(
+                        configFileContent.getBytes(StandardCharsets.UTF_8));
                 final StreamSource streamSource = new StreamSource(is);
-
                 setConfiguration(unmarshaller.unmarshal(streamSource, getConfigEntityClass()).getValue());
-
             } catch (final Exception e) {
                 if (e.getCause() instanceof UnrecoverableException) {
                     if (((UnrecoverableException) e.getCause()).isShowException()) {
@@ -126,7 +115,8 @@ public class ConfigFileReader {
                     }
                     System.exit(1);
                 }
-                log.error("Could not read the configuration file {}. Using default config",
+                log.error(
+                        "Could not read the configuration file {}. Using default config",
                         configFile.getAbsolutePath());
                 log.debug("Original error message:", e);
                 setConfiguration(getDefaultConfig());
@@ -144,5 +134,4 @@ public class ConfigFileReader {
         usageStatisticsConfigurator.setUsageStatisticsConfig(config.getUsageStatisticsConfig());
         persistenceConfigurator.setPersistenceConfig(config.getPersistenceConfig());
     }
-
 }

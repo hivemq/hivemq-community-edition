@@ -43,43 +43,28 @@ public class MqttConfigEntity {
 
     @XmlElementRef(required = false)
     private @NotNull QueuedMessagesConfigEntity queuedMessagesConfigEntity = new QueuedMessagesConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull RetainedMessagesConfigEntity retainedMessagesConfigEntity = new RetainedMessagesConfigEntity();
-
     @XmlElementRef(required = false)
-    private @NotNull WildcardSubscriptionsConfigEntity wildcardSubscriptionsConfigEntity =
-            new WildcardSubscriptionsConfigEntity();
-
+    private @NotNull WildcardSubscriptionsConfigEntity wildcardSubscriptionsConfigEntity = new WildcardSubscriptionsConfigEntity();
     @XmlElementRef(required = false)
     private @NotNull QoSConfigEntity qoSConfigEntity = new QoSConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull TopicAliasConfigEntity topicAliasConfigEntity = new TopicAliasConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull MessageExpiryConfigEntity messageExpiryConfigEntity = new MessageExpiryConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull SessionExpiryConfigEntity sessionExpiryConfigEntity = new SessionExpiryConfigEntity();
-
     @XmlElementRef(required = false)
-    private @NotNull SubscriptionIdentifierConfigEntity subscriptionIdentifierConfigEntity =
-            new SubscriptionIdentifierConfigEntity();
-
+    private @NotNull SubscriptionIdentifierConfigEntity subscriptionIdentifierConfigEntity = new SubscriptionIdentifierConfigEntity();
     @XmlElementRef(required = false)
-    private @NotNull SharedSubscriptionsConfigEntity sharedSubscriptionsConfigEntity =
-            new SharedSubscriptionsConfigEntity();
-
+    private @NotNull SharedSubscriptionsConfigEntity sharedSubscriptionsConfigEntity = new SharedSubscriptionsConfigEntity();
     @XmlElementRef(required = false)
     private @NotNull KeepAliveConfigEntity keepAliveConfigEntity = new KeepAliveConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull PacketsConfigEntity packetsConfigEntity = new PacketsConfigEntity();
-
     @XmlElementRef(required = false)
     private @NotNull ReceiveMaximumConfigEntity receiveMaximumConfigEntity = new ReceiveMaximumConfigEntity();
-
     public @NotNull KeepAliveConfigEntity getKeepAliveConfigEntity() {
         return keepAliveConfigEntity;
     }

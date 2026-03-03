@@ -27,11 +27,9 @@ import java.util.Set;
  */
 public class ChunkCursor {
 
-
-    //Map consisting of: persistence bucketId -> last already fetched key from the persistence
+    // Map consisting of: persistence bucketId -> last already fetched key from the persistence
     private final @NotNull Map<Integer, String> lastKeys;
     private final @NotNull Set<Integer> finishedBuckets;
-
     public ChunkCursor() {
         lastKeys = ImmutableMap.of();
         finishedBuckets = ImmutableSet.of();

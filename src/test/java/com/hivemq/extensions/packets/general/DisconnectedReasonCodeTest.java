@@ -26,10 +26,9 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class DisconnectedReasonCodeTest {
-
 
     @Test
     public void test_all_disconnect_codes_exist() {

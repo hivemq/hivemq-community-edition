@@ -35,13 +35,8 @@ public class AuthInput extends ClientBasedInputImpl implements EnhancedAuthInput
     private final @NotNull AUTH auth;
     private final boolean isReAuth;
     private @Nullable AuthPacketImpl authPacket;
-
-    public AuthInput(
-            final @NotNull String clientId,
-            final @NotNull Channel channel,
-            final @NotNull AUTH auth,
+    public AuthInput(final @NotNull String clientId, final @NotNull Channel channel, final @NotNull AUTH auth,
             final boolean isReAuth) {
-
         super(clientId, channel);
         this.auth = auth;
         this.isReAuth = isReAuth;

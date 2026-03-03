@@ -35,12 +35,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermissions {
 
     private @NotNull ImmutableList<TopicPermission> topicPermissions = ImmutableList.of();
-
-    private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour =
-            new AtomicReference<>(DefaultAuthorizationBehaviour.ALLOW);
-
+    private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour = new AtomicReference<>(
+            DefaultAuthorizationBehaviour.ALLOW);
     private final AtomicBoolean defaultAuthorizationBehaviourOverridden = new AtomicBoolean(false);
-
     @Override
     public @NotNull List<TopicPermission> asList() {
         return topicPermissions;
@@ -55,27 +52,23 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
         if (!defaultAuthorizationBehaviourOverridden.get()) {
             defaultAuthorizationBehaviour.set(DefaultAuthorizationBehaviour.DENY);
         }
-
         topicPermissions = ImmutableList.<TopicPermission>builder().addAll(topicPermissions).add(permission).build();
     }
 
     @Override
     public void addAll(@NotNull final Collection<? extends TopicPermission> permissions) {
         Preconditions.checkNotNull(permissions, "Permissions cannot be null");
-
         for (final TopicPermission permission : permissions) {
             Preconditions.checkNotNull(permission, "Permission in the list cannot be null");
             if (!(permission instanceof TopicPermissionImpl)) {
                 throw new DoNotImplementException("Topic permission must be created with Builders.topicPermission()");
             }
         }
-
         if (!defaultAuthorizationBehaviourOverridden.get()) {
             defaultAuthorizationBehaviour.set(DefaultAuthorizationBehaviour.DENY);
         }
-
-        topicPermissions =
-                ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions).build();
+        topicPermissions = ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions)
+                .build();
     }
 
     @Override

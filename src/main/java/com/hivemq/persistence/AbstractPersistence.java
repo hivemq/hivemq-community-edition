@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractPersistence.class);
-
     @NotNull
     protected ListenableFuture<Void> closeDB(
-            final @NotNull LocalPersistence localPersistence, final @NotNull ProducerQueues singleWriter) {
+            final @NotNull LocalPersistence localPersistence,
+            final @NotNull ProducerQueues singleWriter) {
         return singleWriter.shutdown((bucketIndex) -> {
             try {
                 localPersistence.closeDB(bucketIndex);

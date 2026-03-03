@@ -31,13 +31,12 @@ import java.time.Duration;
 public interface PluginOutPutAsyncer {
 
     /**
-     * @param output  the original {@link PluginTaskOutput} implementation.
-     * @param timeout the timeout after which the {@code outputTimeoutTransformation} should be
-     *                applied to the {@code <T>} instead of the real {@link
-     *                com.hivemq.extensions.executor.task.PluginTask}
-     * @param <T>     an implementation of {@link com.hivemq.extensions.executor.task.PluginTaskOutput}
-     * @return an {@link Async} of {@code <T>}
+     * @param  output  the original {@link PluginTaskOutput} implementation.
+     * @param  timeout the timeout after which the {@code outputTimeoutTransformation} should be applied to the
+     *                 {@code <T>} instead of the real {@link com.hivemq.extensions.executor.task.PluginTask}
+     * @param  <T>     an implementation of {@link com.hivemq.extensions.executor.task.PluginTaskOutput}
+     * @return         an {@link Async} of {@code <T>}
      */
-    @NotNull <T extends PluginTaskOutput> Async<T> asyncify(
-            @NotNull final T output, @NotNull final Duration timeout);
+    @NotNull
+    <T extends PluginTaskOutput> Async<T> asyncify(@NotNull final T output, @NotNull final Duration timeout);
 }

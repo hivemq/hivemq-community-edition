@@ -36,9 +36,9 @@ public class MqttUserProperty implements UserProperty {
     /**
      * Creates an User Property of the given name and value.
      *
-     * @param name  the name of the User Property.
-     * @param value the value of the User Property.
-     * @return the created User Property.
+     * @param  name  the name of the User Property.
+     * @param  value the value of the User Property.
+     * @return       the created User Property.
      */
     public static MqttUserProperty of(final @NotNull String name, final @NotNull String value) {
         return new MqttUserProperty(name, value);
@@ -47,9 +47,10 @@ public class MqttUserProperty implements UserProperty {
     /**
      * Validates and decodes a User Property from the given byte buffer at the current reader index.
      *
-     * @param in           the byte buffer to decode from.
-     * @param validateUTF8 true if should not characters must be validated
-     * @return the decoded User Property or null if the name and/or value are not valid UTF-8 encoded Strings.
+     * @param  in           the byte buffer to decode from.
+     * @param  validateUTF8 true if should not characters must be validated
+     * @return              the decoded User Property or null if the name and/or value are not valid UTF-8 encoded
+     *                      Strings.
      */
     public static @Nullable MqttUserProperty decode(final @NotNull ByteBuf in, final boolean validateUTF8) {
         final String name = MqttBinaryData.decodeString(in, validateUTF8);
@@ -62,18 +63,15 @@ public class MqttUserProperty implements UserProperty {
         }
         return new MqttUserProperty(name, value);
     }
-
     private final @NotNull String name;
     private final @NotNull String value;
-
     public MqttUserProperty(final @NotNull String name, final @NotNull String value) {
-
-        Preconditions.checkArgument(name.getBytes(StandardCharsets.UTF_8).length <=
-                UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "A user property name must never exceed 65535 bytes");
-
-        Preconditions.checkArgument(value.getBytes(StandardCharsets.UTF_8).length <=
-                UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "A user property value must never exceed 65535 bytes");
-
+        Preconditions.checkArgument(
+                name.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+                "A user property name must never exceed 65535 bytes");
+        Preconditions.checkArgument(
+                value.getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+                "A user property value must never exceed 65535 bytes");
         this.name = name;
         this.value = value;
     }

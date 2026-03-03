@@ -19,14 +19,13 @@ import com.hivemq.mqtt.message.Message;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface Mqtt3CONNACK extends Message {
 
     /**
-     * Returns <code>true</code> if there is already a session present on the
-     * MQTT Broker for a client. Returns <code>false</code> if the client
-     * has a clean session
+     * Returns <code>true</code> if there is already a session present on the MQTT Broker for a client. Returns
+     * <code>false</code> if the client has a clean session
      *
      * @return if there is a session present on the MQTT broker
      */
@@ -36,5 +35,4 @@ public interface Mqtt3CONNACK extends Message {
      * @return the {@link Mqtt3ConnAckReturnCode} of the CONNACK message
      */
     Mqtt3ConnAckReturnCode getReturnCode();
-
 }

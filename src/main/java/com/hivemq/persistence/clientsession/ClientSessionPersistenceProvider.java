@@ -27,7 +27,6 @@ import javax.inject.Provider;
 public class ClientSessionPersistenceProvider implements Provider<ClientSessionPersistence> {
 
     private final Provider<ClientSessionPersistenceImpl> provider;
-
     @Inject
     public ClientSessionPersistenceProvider(final Provider<ClientSessionPersistenceImpl> provider) {
         this.provider = provider;

@@ -38,14 +38,13 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 @LazySingleton
 public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
     @Inject
-    public Mqtt5PubackDecoder(
-            final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt5PubackDecoder(final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -55,80 +54,68 @@ public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte header) {
-
         if (!validateHeader(header)) {
             disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBACK);
             return null;
         }
-
         if (buf.readableBytes() < 2) {
             disconnectByRemainingLengthToShort(clientConnectionContext, MessageType.PUBACK);
             return null;
         }
-
         final int packetIdentifier = decodePacketIdentifier(clientConnectionContext, buf, MessageType.PUBACK);
         if (packetIdentifier == 0) {
             return null;
         }
-
-        //nothing more to read
+        // nothing more to read
         if (!buf.isReadable()) {
-            return new PUBACK(packetIdentifier,
-                    Mqtt5PUBACK.DEFAULT_REASON_CODE,
-                    null,
+            return new PUBACK(packetIdentifier, Mqtt5PUBACK.DEFAULT_REASON_CODE, null,
                     Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
-
         final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.fromCode(buf.readUnsignedByte());
         if (reasonCode == null) {
             disconnectByInvalidReasonCode(clientConnectionContext, MessageType.PUBACK);
             return null;
         }
-
         if (!buf.isReadable()) {
             return new PUBACK(packetIdentifier, reasonCode, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
-
         final int propertiesLength = decodePropertiesLengthNoPayload(clientConnectionContext, buf, MessageType.PUBACK);
         if (propertiesLength == DISCONNECTED) {
             return null;
         }
-
         String reasonString = null;
         ImmutableList.Builder<MqttUserProperty> userPropertiesBuilder = null;
-
         while (buf.isReadable()) {
             final int propertyIdentifier = buf.readByte();
-
             switch (propertyIdentifier) {
-                case REASON_STRING:
+                case REASON_STRING :
                     reasonString = decodeReasonString(clientConnectionContext, buf, reasonString, MessageType.PUBACK);
                     if (reasonString == null) {
                         return null;
                     }
                     break;
-
-                case USER_PROPERTY:
-                    userPropertiesBuilder =
-                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBACK);
+                case USER_PROPERTY :
+                    userPropertiesBuilder = readUserProperty(
+                            clientConnectionContext,
+                            buf,
+                            userPropertiesBuilder,
+                            MessageType.PUBACK);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
-
-                default:
-                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
+                default :
+                    disconnectByInvalidPropertyIdentifier(
+                            clientConnectionContext,
                             propertyIdentifier,
                             MessageType.PUBACK);
                     return null;
             }
         }
-
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.build(userPropertiesBuilder);
         if (invalidUserPropertiesLength(clientConnectionContext, MessageType.PUBACK, userProperties)) {
             return null;
         }
-
         return new PUBACK(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 }

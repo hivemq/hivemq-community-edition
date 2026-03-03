@@ -31,7 +31,6 @@ public class XodusFileDataWriterLogLevelModifier implements LogLevelModifier {
 
     private final @NotNull AtomicBoolean first = new AtomicBoolean(true);
     private final @NotNull Logger fileDataWriterLogger;
-
     public XodusFileDataWriterLogLevelModifier() {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         fileDataWriterLogger = context.getLogger(FileDataWriter.class);
@@ -45,7 +44,6 @@ public class XodusFileDataWriterLogLevelModifier implements LogLevelModifier {
             final @NotNull String format,
             final @Nullable Object @Nullable [] params,
             final @Nullable Throwable t) {
-
         if (level.isGreaterOrEqual(Level.WARN)) {
             if (logger.equals(fileDataWriterLogger)) {
                 if (format.startsWith("Can't open directory channel. Log directory fsync won't be performed.")) {

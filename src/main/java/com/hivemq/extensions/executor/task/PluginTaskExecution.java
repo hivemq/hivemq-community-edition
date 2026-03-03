@@ -36,23 +36,16 @@ public class PluginTaskExecution<I extends PluginTaskInput, O extends PluginTask
     private final Supplier<O> pluginOutputSupplier;
     @NotNull
     private final PluginTask pluginTask;
-
     @Nullable
     private O output;
-
     @Nullable
     private I input;
-
     @NotNull
     private final AtomicBoolean async = new AtomicBoolean(false);
-
     @NotNull
     private final AtomicBoolean done = new AtomicBoolean(false);
-
-    public PluginTaskExecution(
-            @NotNull final PluginTaskContext pluginInOutContext,
-            @Nullable final Supplier<I> pluginInputSupplier,
-            @Nullable final Supplier<O> pluginOutputSupplier,
+    public PluginTaskExecution(@NotNull final PluginTaskContext pluginInOutContext,
+            @Nullable final Supplier<I> pluginInputSupplier, @Nullable final Supplier<O> pluginOutputSupplier,
             @NotNull final PluginTask pluginTask) {
         this.pluginInOutContext = pluginInOutContext;
         this.pluginInputSupplier = pluginInputSupplier;

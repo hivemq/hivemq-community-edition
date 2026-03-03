@@ -24,18 +24,14 @@ import java.util.Objects;
  * @author Georg Held
  */
 public class HiveMQExtensionEvent {
+
     private final Change change;
     private final String extensionId;
     private final int priority;
     private final Path extensionFolder;
     private final boolean embedded;
-
-    public HiveMQExtensionEvent(
-            @NotNull final Change change,
-            @NotNull final String extensionId,
-            final int priority,
-            @NotNull final Path extensionFolder,
-            final boolean embedded) {
+    public HiveMQExtensionEvent(@NotNull final Change change, @NotNull final String extensionId, final int priority,
+            @NotNull final Path extensionFolder, final boolean embedded) {
         this.change = change;
         this.extensionId = extensionId;
         this.priority = priority;
@@ -65,25 +61,13 @@ public class HiveMQExtensionEvent {
     public boolean isEmbedded() {
         return embedded;
     }
-
     public enum Change {
-        ENABLE,
-        DISABLE
+        ENABLE, DISABLE
     }
-
     @Override
     public String toString() {
-        return "HiveMQExtensionEvent{" +
-                "change=" +
-                change +
-                ", extensionId='" +
-                extensionId +
-                '\'' +
-                ", priority=" +
-                priority +
-                ", extensionFolder=" +
-                extensionFolder +
-                '}';
+        return "HiveMQExtensionEvent{" + "change=" + change + ", extensionId='" + extensionId + '\'' + ", priority="
+                + priority + ", extensionFolder=" + extensionFolder + '}';
     }
 
     @Override
@@ -95,10 +79,8 @@ public class HiveMQExtensionEvent {
             return false;
         }
         HiveMQExtensionEvent that = (HiveMQExtensionEvent) o;
-        return priority == that.priority &&
-                change == that.change &&
-                Objects.equals(extensionId, that.extensionId) &&
-                Objects.equals(extensionFolder, that.extensionFolder);
+        return priority == that.priority && change == that.change && Objects.equals(extensionId, that.extensionId)
+                && Objects.equals(extensionFolder, that.extensionFolder);
     }
 
     @Override

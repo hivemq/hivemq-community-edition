@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler;
 
 import com.google.common.collect.ImmutableList;
@@ -73,23 +72,18 @@ import static org.mockito.Mockito.when;
 public class SubackOutboundInterceptorHandlerTest {
 
     public static final @NotNull AtomicBoolean isTriggered = new AtomicBoolean();
-
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
     private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
     private final @NotNull ClientContextImpl clientContext = mock(ClientContextImpl.class);
-
     private @NotNull PluginTaskExecutor executor;
     private @NotNull EmbeddedChannel channel;
-
     @Before
     public void setup() {
         isTriggered.set(false);
         executor = new PluginTaskExecutor(new AtomicLong());
         executor.postConstruct();
-
         channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
                 .set(new DummyClientConnection(channel, mock(PublishFlushHandler.class)));
@@ -97,18 +91,15 @@ public class SubackOutboundInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
-
-        final FullConfigurationService configurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
+        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
+                .getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService =
-                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
-
+        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
+                mock(ShutdownHooks.class));
         final SubackOutboundInterceptorHandler handler = new SubackOutboundInterceptorHandler(configurationService,
-                asyncer,
-                hiveMQExtensions,
-                pluginTaskExecutorService);
+                asyncer, hiveMQExtensions, pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
+
             @Override
             public void write(
                     final @NotNull ChannelHandlerContext ctx,
@@ -127,18 +118,15 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_intercept_simple_subAck() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        SimpleSubackTestInterceptor.class);
+        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
+                new ModifiableDefaultPermissionsImpl());
+        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), SimpleSubackTestInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
-
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
-
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class)))
+                .thenReturn(extension);
         channel.writeOutbound(testSubAck());
         SUBACK subAck = channel.readOutbound();
         while (subAck == null) {
@@ -152,18 +140,15 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_modify_subAck() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestModifySubackInterceptor.class);
+        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
+                new ModifiableDefaultPermissionsImpl());
+        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestModifySubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
-
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
-
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class)))
+                .thenReturn(extension);
         channel.writeOutbound(testSubAck());
         SUBACK subAck = channel.readOutbound();
         while (subAck == null) {
@@ -178,18 +163,15 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_outbound_exception() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestExceptionSubackInterceptor.class);
+        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
+                new ModifiableDefaultPermissionsImpl());
+        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestExceptionSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
-
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
-
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class)))
+                .thenReturn(extension);
         channel.writeOutbound(testSubAck());
         SUBACK subAck = channel.readOutbound();
         while (subAck == null) {
@@ -202,18 +184,15 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_set_too_many_reasonCodes() throws Exception {
-        final ClientContextImpl clientContext =
-                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
-        final SubackOutboundInterceptor interceptor =
-                IsolatedExtensionClassloaderUtil.loadInstance(temporaryFolder.getRoot().toPath(),
-                        TestIndexOutOfBoundsSubackInterceptor.class);
+        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
+                new ModifiableDefaultPermissionsImpl());
+        final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
+                .loadInstance(temporaryFolder.getRoot().toPath(), TestIndexOutOfBoundsSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
-
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
-
-        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class))).thenReturn(extension);
-
+        when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class)))
+                .thenReturn(extension);
         channel.writeOutbound(testSubAck());
         final int sizeBefore = testSubAck().getReasonCodes().size();
         SUBACK subAck = channel.readOutbound();
@@ -228,12 +207,9 @@ public class SubackOutboundInterceptorHandlerTest {
     }
 
     private @NotNull SUBACK testSubAck() {
-        return new SUBACK(1,
-                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
-                "reason",
+        return new SUBACK(1, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
-
     public static class SimpleSubackTestInterceptor implements SubackOutboundInterceptor {
 
         @Override

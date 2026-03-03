@@ -32,17 +32,14 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
 
     @NotNull
     private Mqtt5UserProperties userProperties;
-
     public MqttMessageWithUserProperties(@NotNull final Mqtt5UserProperties userProperties) {
         Preconditions.checkNotNull(userProperties, "User properties may never be null");
         this.userProperties = userProperties;
     }
-
     protected int bufferSize = -1;
     protected int remainingLength = -1;
     protected int propertyLength = -1;
     protected int omittedProperties = -1;
-
     @NotNull
     public Mqtt5UserProperties getUserProperties() {
         return userProperties;
@@ -51,7 +48,6 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
     public void setUserProperties(final @NotNull Mqtt5UserProperties userProperties) {
         this.userProperties = userProperties;
     }
-
 
     @Override
     public void setEncodedLength(final int bufferSize) {
@@ -92,21 +88,20 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
     public void setOmittedProperties(final int omittedProperties) {
         this.omittedProperties = omittedProperties;
     }
-
     /**
      * Base class for MQTT messages with an optional Reason String and optional User Properties.
      */
     public abstract static class MqttMessageWithReasonString extends MqttMessageWithUserProperties {
 
         private final String reasonString;
-
-        protected MqttMessageWithReasonString(
-                @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
+        protected MqttMessageWithReasonString(@Nullable final String reasonString,
+                @NotNull final Mqtt5UserProperties userProperties) {
             super(userProperties);
             if (reasonString != null) {
-                Preconditions.checkArgument(reasonString.getBytes(StandardCharsets.UTF_8).length <=
-                        UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE, "A reason string must never exceed 65535 bytes");
-
+                Preconditions.checkArgument(
+                        reasonString
+                                .getBytes(StandardCharsets.UTF_8).length <= UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE,
+                        "A reason string must never exceed 65535 bytes");
             }
             this.reasonString = reasonString;
         }
@@ -117,22 +112,18 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
         }
     }
 
-
     /**
      * Base class for MQTT messages with a Reason Code, an optional Reason String and optional User Properties.
      *
      * @param <R> the type of the Reason Code.
      */
     public abstract static class MqttMessageWithReasonCode<R extends Mqtt5ReasonCode>
-            extends MqttMessageWithReasonString {
+            extends
+                MqttMessageWithReasonString {
 
         private final @NotNull R reasonCode;
-
-        protected MqttMessageWithReasonCode(
-                @NotNull final R reasonCode,
-                @Nullable final String reasonString,
+        protected MqttMessageWithReasonCode(@NotNull final R reasonCode, @Nullable final String reasonString,
                 @NotNull final Mqtt5UserProperties userProperties) {
-
             super(reasonString, userProperties);
             Preconditions.checkNotNull(reasonCode, "A reason code may never be null");
             this.reasonCode = reasonCode;
@@ -142,7 +133,6 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
         public R getReasonCode() {
             return reasonCode;
         }
-
     }
 
     /**
@@ -152,15 +142,11 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
      * @param <R> the type of the Reason Code.
      */
     public abstract static class MqttMessageWithIdAndReasonCode<R extends Mqtt5ReasonCode>
-            extends MqttMessageWithReasonCode<R> {
+            extends
+                MqttMessageWithReasonCode<R> {
 
-
-        protected MqttMessageWithIdAndReasonCode(
-                final int packetIdentifier,
-                @NotNull final R reasonCode,
-                @Nullable final String reasonString,
-                @NotNull final Mqtt5UserProperties userProperties) {
-
+        protected MqttMessageWithIdAndReasonCode(final int packetIdentifier, @NotNull final R reasonCode,
+                @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
             super(reasonCode, reasonString, userProperties);
             super.packetIdentifier = packetIdentifier;
         }
@@ -168,9 +154,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
         public int getPacketIdentifier() {
             return packetIdentifier;
         }
-
     }
-
 
     /**
      * Base class for MQTT messages with a Packet Identifier, Reason Codes, an optional Reason String and optional User
@@ -179,16 +163,13 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
      * @param <R> the type of the Reason Codes.
      */
     public abstract static class MqttMessageWithIdAndReasonCodes<R extends Mqtt5ReasonCode>
-            extends MqttMessageWithReasonString {
+            extends
+                MqttMessageWithReasonString {
 
         private final ImmutableList<R> reasonCodes;
-
-        protected MqttMessageWithIdAndReasonCodes(
-                final int packetIdentifier,
-                @NotNull final ImmutableList<R> reasonCodes,
-                @Nullable final String reasonString,
+        protected MqttMessageWithIdAndReasonCodes(final int packetIdentifier,
+                @NotNull final ImmutableList<R> reasonCodes, @Nullable final String reasonString,
                 @NotNull final Mqtt5UserProperties userProperties) {
-
             super(reasonString, userProperties);
             super.packetIdentifier = packetIdentifier;
             this.reasonCodes = reasonCodes;
@@ -202,7 +183,5 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
         public ImmutableList<R> getReasonCodes() {
             return reasonCodes;
         }
-
     }
-
 }

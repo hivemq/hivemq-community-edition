@@ -22,22 +22,17 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class WrappedRunnable implements Runnable {
 
     @NotNull
     private final Runnable runnable;
-
     @NotNull
     private final ClassLoader classLoader;
-
     @Nullable
     private final CompletableFuture<?> future;
-
-    WrappedRunnable(
-            @NotNull final Runnable runnable,
-            @NotNull final ClassLoader classLoader,
+    WrappedRunnable(@NotNull final Runnable runnable, @NotNull final ClassLoader classLoader,
             @Nullable final CompletableFuture<?> future) {
         this.runnable = runnable;
         this.classLoader = classLoader;
@@ -46,9 +41,7 @@ public class WrappedRunnable implements Runnable {
 
     @Override
     public void run() {
-
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
-
         try {
             Thread.currentThread().setContextClassLoader(classLoader);
             runnable.run();

@@ -25,8 +25,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 /**
- * The provider which is responsible for creating and providing the
- * local ClientSession Subscription Store.
+ * The provider which is responsible for creating and providing the local ClientSession Subscription Store.
  *
  * @author Dominik Obermaier
  */
@@ -34,11 +33,10 @@ import javax.inject.Singleton;
 public class ClientSessionSubscriptionLocalProvider implements Provider<ClientSessionSubscriptionLocalPersistence> {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSessionSubscriptionLocalProvider.class);
-
     private final Provider<ClientSessionSubscriptionXodusLocalPersistence> localFilePersistence;
-
     @Inject
-    ClientSessionSubscriptionLocalProvider(final Provider<ClientSessionSubscriptionXodusLocalPersistence> localFilePersistence) {
+    ClientSessionSubscriptionLocalProvider(
+            final Provider<ClientSessionSubscriptionXodusLocalPersistence> localFilePersistence) {
         this.localFilePersistence = localFilePersistence;
     }
 

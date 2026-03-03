@@ -34,7 +34,6 @@ import static org.junit.Assert.assertFalse;
 public class MqttPingrespEncoderTest {
 
     private EmbeddedChannel channel;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
@@ -45,12 +44,9 @@ public class MqttPingrespEncoderTest {
     @Test
     public void test_pingresp_sent() {
         channel.writeOutbound(new PINGRESP());
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b1101_0000, buf.readByte());
         assertEquals((byte) 0b0000_0000, buf.readByte());
-
         assertFalse(buf.isReadable());
     }
 }

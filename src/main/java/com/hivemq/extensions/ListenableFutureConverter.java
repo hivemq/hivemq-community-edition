@@ -26,14 +26,13 @@ import java.util.function.Function;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ListenableFutureConverter {
 
     /**
-     * This method converts a ListenableFuture to a CompletableFuture
-     * with different object types,
-     * or the objects needs to be changed.
+     * This method converts a ListenableFuture to a CompletableFuture with different object types, or the objects needs
+     * to be changed.
      * <p>
      * objects may be null or not
      */
@@ -47,9 +46,8 @@ public class ListenableFutureConverter {
     }
 
     /**
-     * This method converts a ListenableFuture to a CompletableFuture
-     * with different object types,
-     * or the objects needs to be changed.
+     * This method converts a ListenableFuture to a CompletableFuture with different object types, or the objects needs
+     * to be changed.
      * <p>
      * objects may be null
      */
@@ -59,29 +57,28 @@ public class ListenableFutureConverter {
             @NotNull final Function<T, U> converter,
             final @NotNull Executor executor) {
         return createCompletable(listenableFuture, converter, true, executor);
-
     }
 
     /**
-     * This method converts a ListenableFuture to a CompletableFuture
-     * with equal object types,
-     * and the object does not need to be changed.
+     * This method converts a ListenableFuture to a CompletableFuture with equal object types, and the object does not
+     * need to be changed.
      * <p>
      * objects may be null
      */
     @NotNull
     public static <T> CompletableFuture<T> toCompletable(
-            @NotNull final ListenableFuture<T> listenableFuture, final @NotNull Executor executor) {
+            @NotNull final ListenableFuture<T> listenableFuture,
+            final @NotNull Executor executor) {
         return createCompletable(listenableFuture, Function.identity(), true, executor);
     }
-
 
     /**
      * This method converts any ListenableFuture to a CompletableFuture<Void>
      */
     @NotNull
     public static <T> CompletableFuture<Void> toVoidCompletable(
-            @NotNull final ListenableFuture<T> listenableFuture, final @NotNull Executor executor) {
+            @NotNull final ListenableFuture<T> listenableFuture,
+            final @NotNull Executor executor) {
         return createCompletable(listenableFuture, result -> null, true, executor);
     }
 
@@ -91,9 +88,9 @@ public class ListenableFutureConverter {
             @NotNull final Function<T, U> converter,
             final boolean nullableResult,
             final @NotNull Executor executor) {
-
         final ClassLoader callingThreadClassLoader = Thread.currentThread().getContextClassLoader();
         final CompletableFuture<U> completableFuture = new CompletableFuture<>() {
+
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 final boolean cancelled = listenableFuture.cancel(mayInterruptIfRunning);
@@ -107,8 +104,8 @@ public class ListenableFutureConverter {
                 }
             }
         };
-
         Futures.addCallback(listenableFuture, new FutureCallback<>() {
+
             @Override
             public void onSuccess(final T result) {
                 final ClassLoader current = Thread.currentThread().getContextClassLoader();
@@ -117,9 +114,9 @@ public class ListenableFutureConverter {
                         Thread.currentThread().setContextClassLoader(callingThreadClassLoader);
                         completableFuture.complete(null);
                     } else {
-                        //apply in current class loader
+                        // apply in current class loader
                         final U convertedResult = converter.apply(result);
-                        //complete in previous
+                        // complete in previous
                         Thread.currentThread().setContextClassLoader(callingThreadClassLoader);
                         completableFuture.complete(convertedResult);
                     }
@@ -144,5 +141,4 @@ public class ListenableFutureConverter {
         }, executor);
         return completableFuture;
     }
-
 }

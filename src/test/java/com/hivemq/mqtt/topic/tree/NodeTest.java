@@ -24,7 +24,6 @@ import static org.junit.Assert.assertNotNull;
 public class NodeTest {
 
     private TopicTreeNode node;
-
     @Before
     public void setUp() {
         node = new TopicTreeNode("node");

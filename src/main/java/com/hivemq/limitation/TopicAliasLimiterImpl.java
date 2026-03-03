@@ -23,17 +23,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Singleton
 public class TopicAliasLimiterImpl implements TopicAliasLimiter {
 
     private final @NotNull AtomicLong memoryUsage;
     private final @NotNull AtomicLong topicAliasesTotal;
-
     private final int memorySoftLimit;
     private final int memoryHardLimit;
-
     public TopicAliasLimiterImpl() {
         this.memoryUsage = new AtomicLong(0);
         this.topicAliasesTotal = new AtomicLong(0);
@@ -53,7 +51,7 @@ public class TopicAliasLimiterImpl implements TopicAliasLimiter {
 
     @Override
     public void initUsage(final int size) {
-        //4 bytes per topic as index
+        // 4 bytes per topic as index
         this.memoryUsage.addAndGet(size * 4);
     }
 
@@ -75,20 +73,18 @@ public class TopicAliasLimiterImpl implements TopicAliasLimiter {
 
     @Override
     public void finishUsage(@NotNull final String... topics) {
-        //4 bytes per topic as index
+        // 4 bytes per topic as index
         this.memoryUsage.addAndGet(topics.length * -4);
         this.removeUsage(topics);
     }
 
     /**
-     * 38 = estimated String overhead
-     * 2  = per character of a topic
+     * 38 = estimated String overhead 2 = per character of a topic
      *
-     * @param topic to estimate size
-     * @return the size in memory of a topic
+     * @param  topic to estimate size
+     * @return       the size in memory of a topic
      */
     private int getEstimatedSize(final @NotNull String topic) {
         return 38 + (topic.length() * 2);
     }
-
 }

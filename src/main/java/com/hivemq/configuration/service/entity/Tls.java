@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dominik Obermaier
  * @author Christoph Schäbel
- * @since 3.0
+ * @since  3.0
  */
 @Immutable
 public class Tls {
@@ -45,7 +45,6 @@ public class Tls {
     private final @NotNull List<String> protocols;
     private final @NotNull List<String> cipherSuites;
     private final @Nullable Boolean preferServerCipherSuites;
-
     /**
      * Creates a new TLS configuration
      *
@@ -63,22 +62,14 @@ public class Tls {
      * @param cipherSuites             the supported cipher suites. <code>null</code> means that all enabled cipher
      *                                 suites by the JVM are enabled
      * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher suites
-     * @since 3.3
+     * @since                          3.3
      */
-    protected Tls(
-            final @NotNull String keystorePath,
-            final @NotNull String keystorePassword,
-            final @NotNull String keystoreType,
-            final @NotNull String privateKeyPassword,
-            final @Nullable String truststorePath,
-            final @Nullable String truststorePassword,
-            final @Nullable String truststoreType,
-            final int handshakeTimeout,
-            final @NotNull ClientAuthMode clientAuthMode,
-            final @NotNull List<String> protocols,
-            final @NotNull List<String> cipherSuites,
-            final @Nullable Boolean preferServerCipherSuites) {
-
+    protected Tls(final @NotNull String keystorePath, final @NotNull String keystorePassword,
+            final @NotNull String keystoreType, final @NotNull String privateKeyPassword,
+            final @Nullable String truststorePath, final @Nullable String truststorePassword,
+            final @Nullable String truststoreType, final int handshakeTimeout,
+            final @NotNull ClientAuthMode clientAuthMode, final @NotNull List<String> protocols,
+            final @NotNull List<String> cipherSuites, final @Nullable Boolean preferServerCipherSuites) {
         checkNotNull(clientAuthMode, "clientAuthMode must not be null");
         checkNotNull(protocols, "protocols must not be null");
         checkNotNull(cipherSuites, "cipher suites must not be null");
@@ -188,9 +179,7 @@ public class Tls {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final Tls tls = (Tls) o;
-
         if (!keystorePath.equals(tls.keystorePath)) {
             return false;
         }
@@ -206,9 +195,9 @@ public class Tls {
         if (truststorePath != null ? !truststorePath.equals(tls.truststorePath) : tls.truststorePath != null) {
             return false;
         }
-        if (truststorePassword != null ?
-                !truststorePassword.equals(tls.truststorePassword) :
-                tls.truststorePassword != null) {
+        if (truststorePassword != null
+                ? !truststorePassword.equals(tls.truststorePassword)
+                : tls.truststorePassword != null) {
             return false;
         }
         if (truststoreType != null ? !truststoreType.equals(tls.truststoreType) : tls.truststoreType != null) {
@@ -223,9 +212,9 @@ public class Tls {
         if (!protocols.equals(tls.protocols)) {
             return false;
         }
-        if (preferServerCipherSuites != null ?
-                !preferServerCipherSuites.equals(tls.preferServerCipherSuites) :
-                tls.preferServerCipherSuites != null) {
+        if (preferServerCipherSuites != null
+                ? !preferServerCipherSuites.equals(tls.preferServerCipherSuites)
+                : tls.preferServerCipherSuites != null) {
             return false;
         }
         return cipherSuites.equals(tls.cipherSuites);
@@ -247,11 +236,11 @@ public class Tls {
         result = 31 * result + (preferServerCipherSuites != null ? preferServerCipherSuites.hashCode() : 0);
         return result;
     }
-
     /**
      * The X509 client certificate authentication mode.
      */
     public enum ClientAuthMode {
+
         /**
          * Clients are not allowed to send X509 client certificates
          */
@@ -264,9 +253,7 @@ public class Tls {
          * Clients must send X509 client certificates
          */
         REQUIRED("required");
-
         private final @NotNull String clientAuthMode;
-
         ClientAuthMode(final @NotNull String clientAuthMode) {
             this.clientAuthMode = clientAuthMode;
         }
@@ -294,7 +281,6 @@ public class Tls {
         private @Nullable List<String> protocols;
         private @Nullable List<String> cipherSuites;
         private @Nullable Boolean preferServerCipherSuites;
-
         public @NotNull Builder withKeystorePath(final @NotNull String keystorePath) {
             this.keystorePath = keystorePath;
             return this;
@@ -363,18 +349,8 @@ public class Tls {
             checkNotNull(clientAuthMode, "clientAuthMode must not be null");
             checkNotNull(protocols, "protocols must not be null");
             checkNotNull(cipherSuites, "cipher suites must not be null");
-
-            return new Tls(keystorePath,
-                    keystorePassword,
-                    keystoreType,
-                    privateKeyPassword,
-                    truststorePath,
-                    truststorePassword,
-                    truststoreType,
-                    handshakeTimeout,
-                    clientAuthMode,
-                    protocols,
-                    cipherSuites,
+            return new Tls(keystorePath, keystorePassword, keystoreType, privateKeyPassword, truststorePath,
+                    truststorePassword, truststoreType, handshakeTimeout, clientAuthMode, protocols, cipherSuites,
                     preferServerCipherSuites) {
             };
         }

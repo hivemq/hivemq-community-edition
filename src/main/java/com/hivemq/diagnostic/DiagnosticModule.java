@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 public class DiagnosticModule extends AbstractModule {
 
     private static final Logger log = LoggerFactory.getLogger(DiagnosticModule.class);
-
     @Override
     protected void configure() {
         final boolean diagnosticMode = Boolean.parseBoolean(System.getProperty(SystemProperties.DIAGNOSTIC_MODE));

@@ -27,10 +27,10 @@ public class AuthPacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(AuthPacketImpl.class)
-                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
-                .withNonnullFields("reasonCode", "method", "userProperties")
-                .suppress(Warning.STRICT_INHERITANCE)
+        EqualsVerifier.forClass(AuthPacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                                                                                            // @NotNull Optional is
+                                                                                            // @NotNull
+                .withNonnullFields("reasonCode", "method", "userProperties").suppress(Warning.STRICT_INHERITANCE)
                 .verify();
     }
 }

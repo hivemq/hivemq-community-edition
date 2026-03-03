@@ -36,7 +36,6 @@ public class PersistenceExecutorProvider implements Provider<ListeningExecutorSe
 
     @Nullable
     private ListeningExecutorService executorService;
-
     @NotNull
     @Override
     @Persistence

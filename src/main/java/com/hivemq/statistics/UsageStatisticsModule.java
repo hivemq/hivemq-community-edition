@@ -28,9 +28,7 @@ public class UsageStatisticsModule extends SingletonModule {
 
     @Override
     protected void configure() {
-
         bind(UsageStatisticsCollector.class).to(UsageStatisticsCollectorImpl.class);
         bind(UsageStatisticsSender.class).to(UsageStatisticsSenderImpl.class);
-
     }
 }

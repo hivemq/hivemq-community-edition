@@ -19,7 +19,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public enum PublishReturnCode {
 
@@ -27,21 +27,16 @@ public enum PublishReturnCode {
      * the publish was delivered.
      */
     DELIVERED(0),
-
     /**
      * the publish has no matching subscribers.
      */
     NO_MATCHING_SUBSCRIBERS(1),
-
     /**
      * the publish deliveration failed
      */
     FAILED(2);
-
     private static final @NotNull PublishReturnCode @NotNull [] VALUES = values();
-
     private final int id;
-
     PublishReturnCode(final int id) {
         this.id = id;
     }

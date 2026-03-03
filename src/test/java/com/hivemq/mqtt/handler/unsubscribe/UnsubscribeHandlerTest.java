@@ -51,85 +51,65 @@ public class UnsubscribeHandlerTest {
 
     private final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock();
     private final @NotNull SharedSubscriptionService sharedSubscriptionService = mock();
-
     private @NotNull EmbeddedChannel channel;
     private @NotNull ClientConnection clientConnection;
-
     @Before
     public void setUp() throws Exception {
-        @NotNull final UnsubscribeHandler unsubscribeHandler =
-                new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
+        @NotNull
+        final UnsubscribeHandler unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence,
+                sharedSubscriptionService);
         clientConnection = new DummyClientConnection(channel, null);
         channel = new EmbeddedChannel(unsubscribeHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addFirst(ChannelHandlerNames.MQTT_MESSAGE_ENCODER, new DummyHandler());
         ClientConnection.of(channel).setClientId("myTestClient");
-        when(clientSessionSubscriptionPersistence.remove(anyString(),
-                any(String.class))).thenReturn(Futures.immediateFuture(null));
-        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(
-                Futures.<Void>immediateFuture(null));
+        when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class)))
+                .thenReturn(Futures.immediateFuture(null));
+        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class)))
+                .thenReturn(Futures.<Void>immediateFuture(null));
     }
 
     @Test
     public void writeInbound_forASingleTopicAndTheDefaultProtocolVersion_removesTheSubscriptionFromThePersistenceAndAcknowledgesWithSuccess() {
         final String topic = "myTopic";
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList(topic), 10);
-
         channel.writeInbound(unsubscribe);
-
         final Queue<Object> objects = channel.outboundMessages();
-
         assertEquals(1, objects.size());
-
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
-
         verify(clientSessionSubscriptionPersistence).remove("myTestClient", topic);
     }
 
     @Test
     public void writeInbound_forASingleTopicAndMqtt5_removesTheSubscriptionFromThePersistenceAndAcknowledgesWithSuccess() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         final String topic = "myTopic";
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList(topic), 10);
-
         channel.writeInbound(unsubscribe);
-
         final Queue<Object> objects = channel.outboundMessages();
-
         assertEquals(1, objects.size());
-
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
         assertEquals(1, response.getReasonCodes().size());
         assertEquals(Mqtt5UnsubAckReasonCode.SUCCESS, response.getReasonCodes().getFirst());
-
         verify(clientSessionSubscriptionPersistence).remove("myTestClient", topic);
     }
 
     @Test
     public void writeInbound_whenTheSubscriptionRemovalFailsForASingleTopicAndMqtt5_thenAcknowledgeWithAnUnspecifiedError() {
-        when(clientSessionSubscriptionPersistence.remove(anyString(),
-                any(String.class))).thenReturn(Futures.immediateFailedFuture(new NullPointerException(
-                "something is missing")));
-
+        when(clientSessionSubscriptionPersistence.remove(anyString(), any(String.class)))
+                .thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         final String topic = "myTopic";
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(Lists.newArrayList(topic), 10);
-
         channel.writeInbound(unsubscribe);
-
         final Queue<Object> objects = channel.outboundMessages();
-
         assertEquals(1, objects.size());
-
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
         assertEquals(1, response.getReasonCodes().size());
         assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().getFirst());
-
         verify(clientSessionSubscriptionPersistence).remove("myTestClient", topic);
     }
 
@@ -142,25 +122,18 @@ public class UnsubscribeHandlerTest {
         aList.add(topic1);
         aList.add(topic2);
         aList.add(topic3);
-
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(aList, 10);
-
         channel.writeInbound(unsubscribe);
-
         final Queue<Object> objects = channel.outboundMessages();
-
         assertEquals(1, objects.size());
-
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
-
         verify(clientSessionSubscriptionPersistence).removeSubscriptions(eq("myTestClient"), any(ImmutableSet.class));
     }
 
     @Test
     public void writeInbound_forMultipleTopicsAndMqtt5_removesTheSubscriptionsFromThePersistenceAndAcknowledgesWithSuccess() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         final String topic1 = "myTopic1";
         final String topic2 = "myTopic2";
         final String topic3 = "myTopic3";
@@ -168,32 +141,24 @@ public class UnsubscribeHandlerTest {
         aList.add(topic1);
         aList.add(topic2);
         aList.add(topic3);
-
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(aList, 10);
-
         channel.writeInbound(unsubscribe);
-
         final Queue<Object> objects = channel.outboundMessages();
-
         assertEquals(1, objects.size());
-
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
         assertEquals(3, response.getReasonCodes().size());
         assertEquals(Mqtt5UnsubAckReasonCode.SUCCESS, response.getReasonCodes().get(0));
         assertEquals(Mqtt5UnsubAckReasonCode.SUCCESS, response.getReasonCodes().get(1));
         assertEquals(Mqtt5UnsubAckReasonCode.SUCCESS, response.getReasonCodes().get(2));
-
         verify(clientSessionSubscriptionPersistence).removeSubscriptions(eq("myTestClient"), any(ImmutableSet.class));
     }
 
     @Test
     public void writeInbound_whenTheSubscriptionRemovalFailsForMultipleTopicsAndMqtt5_thenAcknowledgeWithAnUnspecifiedError() {
-        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class))).thenReturn(
-                Futures.immediateFailedFuture(new NullPointerException("something is missing")));
-
+        when(clientSessionSubscriptionPersistence.removeSubscriptions(anyString(), any(ImmutableSet.class)))
+                .thenReturn(Futures.immediateFailedFuture(new NullPointerException("something is missing")));
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         final String topic1 = "myTopic1";
         final String topic2 = "myTopic2";
         final String topic3 = "myTopic3";
@@ -201,22 +166,16 @@ public class UnsubscribeHandlerTest {
         aList.add(topic1);
         aList.add(topic2);
         aList.add(topic3);
-
         final UNSUBSCRIBE unsubscribe = new UNSUBSCRIBE(aList, 10);
-
         channel.writeInbound(unsubscribe);
-
         final Queue<Object> objects = channel.outboundMessages();
-
         assertEquals(1, objects.size());
-
         final UNSUBACK response = (UNSUBACK) objects.element();
         assertEquals(10, response.getPacketIdentifier());
         assertEquals(3, response.getReasonCodes().size());
         assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().get(0));
         assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().get(1));
         assertEquals(Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR, response.getReasonCodes().get(2));
-
         verify(clientSessionSubscriptionPersistence).removeSubscriptions(eq("myTestClient"), any(ImmutableSet.class));
     }
 }

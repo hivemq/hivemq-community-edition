@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Bytes {
 
     private Bytes() {
-        //This is a utility class, don't instantiate it!
+        // This is a utility class, don't instantiate it!
     }
 
     /**
@@ -78,18 +78,17 @@ public class Bytes {
     }
 
     /**
-     * Returns the value of a prefixed byte array from a {@link io.netty.buffer.ByteBuf}
-     * according to the MQTT spec. The byte array is prefixed with a 16-bit value which
-     * indicates the actual size of the byte array.
+     * Returns the value of a prefixed byte array from a {@link io.netty.buffer.ByteBuf} according to the MQTT spec. The
+     * byte array is prefixed with a 16-bit value which indicates the actual size of the byte array.
      * <p>
      * <p>
-     * <b>This method will read from the {@link io.netty.buffer.ByteBuf} and will change the reader
-     * index!</b>
+     * <b>This method will read from the {@link io.netty.buffer.ByteBuf} and will change the reader index!</b>
      *
-     * @param buf the {@link io.netty.buffer.ByteBuf} to read from
-     * @return The byte array or <code>null</code> if there aren't enough bytes to read. This can happen if this method
-     *         can not read the size of the byte array or if there are less bytes to read available than
-     *         indicated by the prefixed 16-bit length.
+     * @param  buf                            the {@link io.netty.buffer.ByteBuf} to read from
+     * @return                                The byte array or <code>null</code> if there aren't enough bytes to read.
+     *                                        This can happen if this method can not read the size of the byte array or
+     *                                        if there are less bytes to read available than indicated by the prefixed
+     *                                        16-bit length.
      * @throws java.lang.NullPointerException if the passed {@link io.netty.buffer.ByteBuf} is <code>null</code>
      */
     public static byte[] getPrefixedBytes(final ByteBuf buf) {
@@ -98,69 +97,62 @@ public class Bytes {
             return null;
         }
         final int byteLength = buf.readUnsignedShort();
-
         if (buf.readableBytes() < byteLength) {
             return null;
         }
-
         final byte[] rawBytes = new byte[byteLength];
         buf.readBytes(rawBytes);
-
         return rawBytes;
     }
-
 
     /**
      * Prefixes a byte array with the length of the bytes according to the MQTT specification.
      *
-     * @param bytes the byte array to prefix
-     * @return a {@link io.netty.buffer.ByteBuf} which is prefixed with the length of the given bytes
+     * @param  bytes                          the byte array to prefix
+     * @return                                a {@link io.netty.buffer.ByteBuf} which is prefixed with the length of the
+     *                                        given bytes
      * @throws java.lang.NullPointerException if the passed byte[] is <code>null</code>
      */
     public static ByteBuf prefixBytes(final byte[] bytes) {
         checkNotNull(bytes);
-
         final ByteBuf buf = Unpooled.buffer();
         buf.writeShort(bytes.length);
         buf.writeBytes(bytes);
-
         return buf;
     }
 
     /**
      * Prefixes a byte array with the length of the bytes according to the MQTT specification.
      *
-     * @param bytes  the byte array to prefix
-     * @param buffer the buffer that the bytes are written onto
-     * @return a {@link io.netty.buffer.ByteBuf} which is prefixed with the length of the given bytes
+     * @param  bytes                          the byte array to prefix
+     * @param  buffer                         the buffer that the bytes are written onto
+     * @return                                a {@link io.netty.buffer.ByteBuf} which is prefixed with the length of the
+     *                                        given bytes
      * @throws java.lang.NullPointerException if the passed byte[] is <code>null</code>
      */
     public static ByteBuf prefixBytes(final byte[] bytes, final ByteBuf buffer) {
         checkNotNull(bytes);
         checkNotNull(buffer);
-
         buffer.writeShort(bytes.length);
         buffer.writeBytes(bytes);
-
         return buffer;
     }
 
     /**
      * Read a serialized long value for a given byte array
      *
-     * @param buffer        A byte array that contains the serialized long value to read.
-     * @param startPosition The position of the first bit of the long value in the buffer
-     * @return The next 8 bits from startPosition as long
+     * @param  buffer                   A byte array that contains the serialized long value to read.
+     * @param  startPosition            The position of the first bit of the long value in the buffer
+     * @return                          The next 8 bits from startPosition as long
      * @throws IllegalArgumentException if the buffer is to small to read a long value from the start position
      */
     public static long readLong(final byte[] buffer, final int startPosition) {
         if (startPosition + Long.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" +
-                    buffer.length +
-                    "] is to small to read 8 bytes from start position " +
-                    startPosition);
+            throw new IllegalArgumentException("The provided array[" + buffer.length
+                    + "] is to small to read 8 bytes from start position " + startPosition);
         }
-        return Longs.fromBytes(buffer[startPosition],
+        return Longs.fromBytes(
+                buffer[startPosition],
                 buffer[startPosition + 1],
                 buffer[startPosition + 2],
                 buffer[startPosition + 3],
@@ -173,19 +165,18 @@ public class Bytes {
     /**
      * Read a serialized int value for a given byte array
      *
-     * @param buffer        A byte array that contains the serialized int value to read.
-     * @param startPosition The position of the first bit of the int value in the buffer
-     * @return The next 4 bits from startPosition as int
+     * @param  buffer                   A byte array that contains the serialized int value to read.
+     * @param  startPosition            The position of the first bit of the int value in the buffer
+     * @return                          The next 4 bits from startPosition as int
      * @throws IllegalArgumentException if the buffer is to small to read a int value from the start position
      */
     public static int readInt(final byte[] buffer, final int startPosition) {
         if (startPosition + Integer.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" +
-                    buffer.length +
-                    "] is to small to read 4 bytes from start position " +
-                    startPosition);
+            throw new IllegalArgumentException("The provided array[" + buffer.length
+                    + "] is to small to read 4 bytes from start position " + startPosition);
         }
-        return Ints.fromBytes(buffer[startPosition],
+        return Ints.fromBytes(
+                buffer[startPosition],
                 buffer[startPosition + 1],
                 buffer[startPosition + 2],
                 buffer[startPosition + 3]);
@@ -194,17 +185,15 @@ public class Bytes {
     /**
      * Read a serialized unsigned short for a given byte array
      *
-     * @param buffer        A byte array that contains the serialized unsigned short value to read.
-     * @param startPosition The position of the first bit of the unsigned short value in the buffer
-     * @return The next 2 bits from startPosition as int
+     * @param  buffer                   A byte array that contains the serialized unsigned short value to read.
+     * @param  startPosition            The position of the first bit of the unsigned short value in the buffer
+     * @return                          The next 2 bits from startPosition as int
      * @throws IllegalArgumentException if the buffer is to small to read a int value from the start position
      */
     public static int readUnsignedShort(final byte[] buffer, final int startPosition) {
         if (startPosition + Short.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" +
-                    buffer.length +
-                    "] is to small to read 2 bytes from start position " +
-                    startPosition);
+            throw new IllegalArgumentException("The provided array[" + buffer.length
+                    + "] is to small to read 2 bytes from start position " + startPosition);
         }
         return Ints.fromBytes((byte) 0, (byte) 0, buffer[startPosition], buffer[startPosition + 1]);
     }
@@ -220,7 +209,6 @@ public class Bytes {
         checkNotNull(bytes, "bytes must not be null");
         checkArgument(bytes.length >= prefix + Integer.BYTES, "bytes needs to be at least prefix + 4 in length");
         checkArgument(prefix >= 0, "prefix can't be less than 0");
-
         bytes[prefix] = (byte) (anInt >> 24);
         bytes[prefix + 1] = (byte) (anInt >> 16);
         bytes[prefix + 2] = (byte) (anInt >> 8);
@@ -238,7 +226,6 @@ public class Bytes {
         checkNotNull(bytes, "bytes must not be null");
         checkArgument(bytes.length >= prefix + Long.BYTES, "bytes needs to be at least prefix + 8 in length");
         checkArgument(prefix >= 0, "prefix can't be less than 0");
-
         bytes[prefix] = (byte) (aLong >> 56);
         bytes[prefix + 1] = (byte) (aLong >> 48);
         bytes[prefix + 2] = (byte) (aLong >> 40);
@@ -262,15 +249,14 @@ public class Bytes {
         checkArgument(prefix >= 0, "prefix can't be less than 0");
         checkArgument(unsignedShort <= 65535, "value must be less than 65535");
         checkArgument(unsignedShort >= 0, "value must be more than 0");
-
         bytes[prefix] = (byte) (unsignedShort >> 8);
         bytes[prefix + 1] = (byte) unsignedShort;
     }
 
     /**
-     * @param optional of a {@link ByteBuffer}
-     * @return the bytes of an {@link Optional} of a {@link ByteBuffer} as byte array or null if the optional is not
-     *         present
+     * @param  optional of a {@link ByteBuffer}
+     * @return          the bytes of an {@link Optional} of a {@link ByteBuffer} as byte array or null if the optional
+     *                  is not present
      */
     @Nullable
     public static byte[] getBytesFromReadOnlyBuffer(@NotNull final Optional<ByteBuffer> optional) {

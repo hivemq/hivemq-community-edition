@@ -39,7 +39,8 @@ public interface PublishDistributor {
      * @param publish         the message to send
      * @param executorService the executor service in which all callbacks are executed
      */
-    @NotNull ListenableFuture<Void> distributeToNonSharedSubscribers(
+    @NotNull
+    ListenableFuture<Void> distributeToNonSharedSubscribers(
             @NotNull Map<String, SubscriberWithIdentifiers> subscribers,
             @NotNull PUBLISH publish,
             @NotNull ExecutorService executorService);
@@ -52,7 +53,8 @@ public interface PublishDistributor {
      * @param publish             the message to send
      * @param executorService     the executor service in which all callbacks are executed
      */
-    @NotNull ListenableFuture<Void> distributeToSharedSubscribers(
+    @NotNull
+    ListenableFuture<Void> distributeToSharedSubscribers(
             @NotNull Set<String> sharedSubscriptions,
             @NotNull PUBLISH publish,
             @NotNull ExecutorService executorService);
@@ -60,19 +62,19 @@ public interface PublishDistributor {
     /**
      * Sends a message to a discrete subscriber
      *
-     * @param publish            the message to send
-     * @param clientId           client identifier to send to
-     * @param subscriptionQos    the QoS from the subscription
-     * @param sharedSubscription if the subscription is part of a shared subscription
-     * @param retainAsPublished  if the retain flag should be forwarded to the subscriber
-     * @return a future with the result for this publish
+     * @param  publish            the message to send
+     * @param  clientId           client identifier to send to
+     * @param  subscriptionQos    the QoS from the subscription
+     * @param  sharedSubscription if the subscription is part of a shared subscription
+     * @param  retainAsPublished  if the retain flag should be forwarded to the subscriber
+     * @return                    a future with the result for this publish
      */
-    @NotNull ListenableFuture<PublishStatus> sendMessageToSubscriber(
+    @NotNull
+    ListenableFuture<PublishStatus> sendMessageToSubscriber(
             @NotNull PUBLISH publish,
             @NotNull String clientId,
             final int subscriptionQos,
             boolean sharedSubscription,
             boolean retainAsPublished,
             @Nullable ImmutableIntArray subscriptionIdentifier);
-
 }

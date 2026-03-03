@@ -29,42 +29,34 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @SuppressWarnings("ALL")
 public class EventRegistryImplTest {
 
     private final @NotNull LifecycleEventListeners eventListeners = mock();
-
     private EventRegistry registry;
-
     @Before
     public void setUp() throws Exception {
         registry = new EventRegistryImpl(eventListeners);
-
     }
 
     @Test
     public void test_set() {
-
         final ClientLifecycleEventListenerProvider provider = new ClientLifecycleEventListenerProvider() {
+
             @Override
-            public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(@NotNull ClientLifecycleEventListenerProviderInput input) {
+            public @Nullable ClientLifecycleEventListener getClientLifecycleEventListener(
+                    @NotNull ClientLifecycleEventListenerProviderInput input) {
                 return null;
             }
         };
-
         registry.setClientLifecycleEventListener(provider);
-
         verify(eventListeners).addClientLifecycleEventListenerProvider(provider);
-
     }
 
     @Test(expected = NullPointerException.class)
     public void test_set_null() {
-
         registry.setClientLifecycleEventListener(null);
-
     }
-
 }

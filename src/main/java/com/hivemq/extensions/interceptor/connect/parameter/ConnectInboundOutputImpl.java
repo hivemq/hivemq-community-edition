@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Lukas Brandl
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 public class ConnectInboundOutputImpl extends AbstractAsyncOutput<ConnectInboundOutput>
         implements ConnectInboundOutput {
@@ -36,10 +36,8 @@ public class ConnectInboundOutputImpl extends AbstractAsyncOutput<ConnectInbound
     private final @NotNull AtomicBoolean prevent = new AtomicBoolean(false);
     private @Nullable String reasonString;
     private @Nullable String logMessage;
-
-    public ConnectInboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull ModifiableConnectPacketImpl connectPacket) {
-
+    public ConnectInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull ModifiableConnectPacketImpl connectPacket) {
         super(asyncer);
         this.connectPacket = connectPacket;
     }

@@ -26,7 +26,8 @@ public interface InternalTopicPermission extends TopicPermission {
     /**
      * @return the topic split by '/' as a String[]
      */
-    @NotNull String[] getSplitTopic();
+    @NotNull
+    String[] getSplitTopic();
 
     /**
      * @return true if '#' or '+' is in the topic string, else false

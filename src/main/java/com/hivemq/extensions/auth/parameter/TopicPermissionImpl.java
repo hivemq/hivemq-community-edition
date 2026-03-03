@@ -32,20 +32,13 @@ public class TopicPermissionImpl implements InternalTopicPermission {
     private final @NotNull Retain retain;
     private final @NotNull SharedSubscription sharedSubscription;
     private final @NotNull String sharedGroup;
-
     private final @NotNull String[] splitTopic;
     private final boolean containsWildcardCharacter;
     private final boolean isRootWildcard;
     private final boolean endsWithWildcard;
-
-    public TopicPermissionImpl(
-            @NotNull final String topic,
-            @NotNull final PermissionType type,
-            @NotNull final Qos qos,
-            @NotNull final MqttActivity activity,
-            @NotNull final Retain retain,
-            @NotNull final SharedSubscription sharedSubscription,
-            @NotNull final String sharedGroup) {
+    public TopicPermissionImpl(@NotNull final String topic, @NotNull final PermissionType type, @NotNull final Qos qos,
+            @NotNull final MqttActivity activity, @NotNull final Retain retain,
+            @NotNull final SharedSubscription sharedSubscription, @NotNull final String sharedGroup) {
         this.topic = topic;
         this.type = type;
         this.qos = qos;
@@ -53,8 +46,7 @@ public class TopicPermissionImpl implements InternalTopicPermission {
         this.retain = retain;
         this.sharedSubscription = sharedSubscription;
         this.sharedGroup = sharedGroup;
-
-        //these are used to speed up the evaluation of permissions
+        // these are used to speed up the evaluation of permissions
         final String strippedPermissionTopic = StringUtils.stripEnd(topic, "/");
         splitTopic = StringUtils.splitPreserveAllTokens(strippedPermissionTopic, "/");
         containsWildcardCharacter = !StringUtils.containsNone(strippedPermissionTopic, "#+");

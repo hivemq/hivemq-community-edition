@@ -55,18 +55,12 @@ import java.util.List;
  */
 public class TestMessageUtil {
 
-    public static final Mqtt5UserProperties TEST_USER_PROPERTIES =
-            Mqtt5UserProperties.of(new MqttUserProperty("user1", "property1"),
-                    new MqttUserProperty("user2", "property2"));
+    public static final Mqtt5UserProperties TEST_USER_PROPERTIES = Mqtt5UserProperties
+            .of(new MqttUserProperty("user1", "property1"), new MqttUserProperty("user2", "property2"));
     public static final List<String> topics = ImmutableList.of("topic1", "topic2", "topic3");
-
     public static PUBLISH createMqtt3Publish() {
-        return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withTopic("topic")
-                .withPayload("payload".getBytes())
-                .withPacketIdentifier(1)
-                .withHivemqId("hivemqId")
+        return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withTopic("topic").withPayload("payload".getBytes()).withPacketIdentifier(1).withHivemqId("hivemqId")
                 .build();
     }
 
@@ -76,23 +70,13 @@ public class TestMessageUtil {
             final QoS qoS,
             final byte[] payload,
             final boolean retain) {
-        return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
-                .withOnwardQos(qoS)
-                .withTopic(topic)
-                .withPayload(payload)
-                .withRetain(retain)
-                .withHivemqId(hivemqId)
-                .withPacketIdentifier(1)
-                .build();
+        return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS).withOnwardQos(qoS).withTopic(topic).withPayload(payload)
+                .withRetain(retain).withHivemqId(hivemqId).withPacketIdentifier(1).build();
     }
 
     public static PUBLISH createMqtt3Publish(final String topic, final byte[] payload, final QoS qoS) {
-        return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
-                .withOnwardQos(qoS)
-                .withTopic(topic)
-                .withPayload(payload)
-                .withHivemqId("hivemqId")
-                .build();
+        return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS).withOnwardQos(qoS).withTopic(topic).withPayload(payload)
+                .withHivemqId("hivemqId").build();
     }
 
     public static PUBLISH createMqtt3Publish(final String hivemqId, final PUBLISH publish) {
@@ -104,44 +88,25 @@ public class TestMessageUtil {
             final PUBLISH publish,
             final long timestamp,
             final long publishId) {
-        return new PUBLISHFactory.Mqtt3Builder().fromPublish(publish)
-                .withHivemqId(hivemqId)
-                .withTimestamp(timestamp)
-                .withPublishId(publishId)
-                .build();
+        return new PUBLISHFactory.Mqtt3Builder().fromPublish(publish).withHivemqId(hivemqId).withTimestamp(timestamp)
+                .withPublishId(publishId).build();
     }
 
     public static PUBLISH createMqtt3Publish(final String hivemqId, final long publishid) {
-        return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withTopic("topic")
-                .withPacketIdentifier(1)
-                .withPublishId(publishid)
-                .withHivemqId(hivemqId)
-                .withPayload(new byte[]{})
-                .build();
+        return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withTopic("topic").withPacketIdentifier(1).withPublishId(publishid).withHivemqId(hivemqId)
+                .withPayload(new byte[]{}).build();
     }
 
     public static PUBLISH createMqtt3Publish(final long timestamp) {
-        return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withTopic("topic")
-                .withTimestamp(timestamp)
-                .withHivemqId("hivemqId")
-                .withPayload(new byte[]{})
-                .build();
+        return new PUBLISHFactory.Mqtt3Builder().withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withTopic("topic").withTimestamp(timestamp).withHivemqId("hivemqId").withPayload(new byte[]{}).build();
     }
 
     public static PUBLISH createMqtt3Publish(final QoS qoS) {
-        return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS)
-                .withOnwardQos(qoS)
-                .withTopic("topic")
-                .withPayload("payload".getBytes())
-                .withHivemqId("hivemqId")
-                .withPacketIdentifier(1)
-                .withPublishId(1L)
+        return new PUBLISHFactory.Mqtt3Builder().withQoS(qoS).withOnwardQos(qoS).withTopic("topic")
+                .withPayload("payload".getBytes()).withHivemqId("hivemqId").withPacketIdentifier(1).withPublishId(1L)
                 .build();
-
     }
 
     public static PUBLISH createMqtt5Publish(final String topic) {
@@ -149,33 +114,20 @@ public class TestMessageUtil {
     }
 
     public static PUBLISH createMqtt5Publish(final String topic, final QoS qos) {
-        return new PUBLISHFactory.Mqtt5Builder().withQoS(qos)
-                .withOnwardQos(qos)
-                .withTopic(topic)
-                .withPayload("payload".getBytes())
-                .withPacketIdentifier(1)
-                .withHivemqId("hivemqId")
-                .build();
+        return new PUBLISHFactory.Mqtt5Builder().withQoS(qos).withOnwardQos(qos).withTopic(topic)
+                .withPayload("payload".getBytes()).withPacketIdentifier(1).withHivemqId("hivemqId").build();
     }
 
     public static PUBLISHFactory.Mqtt5Builder getDefaultPublishBuilder() {
-        return new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withTopic("topic")
-                .withPayload("payload".getBytes())
-                .withPacketIdentifier(1)
-                .withPublishId(1L)
+        return new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withTopic("topic").withPayload("payload".getBytes()).withPacketIdentifier(1).withPublishId(1L)
                 .withHivemqId("hivemqId");
     }
 
     public static PUBLISH createMqtt5Publish(final int packetId) {
-        return new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withTopic("topic")
-                .withPayload("payload".getBytes())
-                .withPacketIdentifier(packetId)
-                .withHivemqId("hivemqId")
-                .build();
+        return new PUBLISHFactory.Mqtt5Builder().withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withTopic("topic").withPayload("payload".getBytes()).withPacketIdentifier(packetId)
+                .withHivemqId("hivemqId").build();
     }
 
     public static PUBLISH createMqtt5Publish() {
@@ -199,36 +151,23 @@ public class TestMessageUtil {
             final boolean isDup,
             final boolean isNewTopicAlias,
             final @Nullable ImmutableList<Integer> subscriptionIdentifiers) {
-
         final ImmutableIntArray subscriptionIdentifierArray;
         if (subscriptionIdentifiers == null) {
             subscriptionIdentifierArray = ImmutableIntArray.of();
         } else {
             subscriptionIdentifierArray = ImmutableIntArray.copyOf(subscriptionIdentifiers);
         }
-
-        return new PUBLISHFactory.Mqtt5Builder().withHivemqId(hivemqId)
-                .withTopic(topic)
-                .withPayload(payload)
-                .withQoS(qos)
-                .withOnwardQos(qos)
-                .withRetain(isRetain)
-                .withMessageExpiryInterval(messageExpiryInterval)
-                .withPayloadFormatIndicator(payloadFormatIndicator)
-                .withContentType(contentType)
-                .withResponseTopic(responseTopic)
-                .withCorrelationData(correlationData)
-                .withUserProperties(userProperties)
-                .withPacketIdentifier(packetIdentifier)
-                .withDuplicateDelivery(isDup)
-                .withNewTopicAlias(isNewTopicAlias)
-                .withSubscriptionIdentifiers(subscriptionIdentifierArray)
-                .build();
+        return new PUBLISHFactory.Mqtt5Builder().withHivemqId(hivemqId).withTopic(topic).withPayload(payload)
+                .withQoS(qos).withOnwardQos(qos).withRetain(isRetain).withMessageExpiryInterval(messageExpiryInterval)
+                .withPayloadFormatIndicator(payloadFormatIndicator).withContentType(contentType)
+                .withResponseTopic(responseTopic).withCorrelationData(correlationData)
+                .withUserProperties(userProperties).withPacketIdentifier(packetIdentifier).withDuplicateDelivery(isDup)
+                .withNewTopicAlias(isNewTopicAlias).withSubscriptionIdentifiers(subscriptionIdentifierArray).build();
     }
 
     public static PUBLISH createFullMqtt5Publish() {
-
-        return createMqtt5Publish("hivemqId",
+        return createMqtt5Publish(
+                "hivemqId",
                 "topic",
                 "payload".getBytes(),
                 QoS.EXACTLY_ONCE,
@@ -247,59 +186,30 @@ public class TestMessageUtil {
     }
 
     public static CONNECT createFullMqtt5Connect() {
-
-        return new CONNECT.Mqtt5Builder().withUserProperties(TEST_USER_PROPERTIES)
-                .withClientIdentifier("clientid")
-                .withKeepAlive(60)
-                .withCleanStart(true)
-                .withSessionExpiryInterval(360)
-                .withResponseInformationRequested(true)
-                .withProblemInformationRequested(true)
-                .withReceiveMaximum(100)
-                .withTopicAliasMaximum(10)
-                .withMaximumPacketSize(200)
-                .withUsername("username")
-                .withPassword("password".getBytes())
-                .withAuthMethod("auth method")
-                .withAuthData("auth data".getBytes())
-                .withWillPublish(new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId1")
-                        .withTopic("topic")
-                        .withPayload("payload".getBytes())
-                        .withQos(QoS.EXACTLY_ONCE)
-                        .withRetain(true)
-                        .withMessageExpiryInterval(360)
-                        .withPayloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
-                        .withContentType("content type")
-                        .withResponseTopic("response topic")
-                        .withCorrelationData("correlation data".getBytes())
-                        .withUserProperties(TEST_USER_PROPERTIES)
-                        .withDelayInterval(60)
-                        .build())
+        return new CONNECT.Mqtt5Builder().withUserProperties(TEST_USER_PROPERTIES).withClientIdentifier("clientid")
+                .withKeepAlive(60).withCleanStart(true).withSessionExpiryInterval(360)
+                .withResponseInformationRequested(true).withProblemInformationRequested(true).withReceiveMaximum(100)
+                .withTopicAliasMaximum(10).withMaximumPacketSize(200).withUsername("username")
+                .withPassword("password".getBytes()).withAuthMethod("auth method").withAuthData("auth data".getBytes())
+                .withWillPublish(
+                        new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId1").withTopic("topic")
+                                .withPayload("payload".getBytes()).withQos(QoS.EXACTLY_ONCE).withRetain(true)
+                                .withMessageExpiryInterval(360)
+                                .withPayloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
+                                .withContentType("content type").withResponseTopic("response topic")
+                                .withCorrelationData("correlation data".getBytes())
+                                .withUserProperties(TEST_USER_PROPERTIES).withDelayInterval(60).build())
                 .build();
-
     }
 
     public static CONNACK createFullMqtt5Connack() {
-        return CONNACK.builder()
-                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
-                .withReasonString("success")
-                .withUserProperties(TEST_USER_PROPERTIES)
-                .withSessionPresent(true)
-                .withSessionExpiryInterval(720)
-                .withServerKeepAlive(120)
-                .withAssignedClientIdentifier("assigned")
-                .withAuthMethod("auth method")
-                .withAuthData("auth data".getBytes())
-                .withReceiveMaximum(100)
-                .withTopicAliasMaximum(5)
-                .withMaximumPacketSize(100)
-                .withMaximumQoS(QoS.AT_LEAST_ONCE)
-                .withRetainAvailable(true)
-                .withWildcardSubscriptionAvailable(true)
-                .withSubscriptionIdentifierAvailable(true)
-                .withSharedSubscriptionAvailable(true)
-                .withResponseInformation("response")
-                .withServerReference("server")
+        return CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).withReasonString("success")
+                .withUserProperties(TEST_USER_PROPERTIES).withSessionPresent(true).withSessionExpiryInterval(720)
+                .withServerKeepAlive(120).withAssignedClientIdentifier("assigned").withAuthMethod("auth method")
+                .withAuthData("auth data".getBytes()).withReceiveMaximum(100).withTopicAliasMaximum(5)
+                .withMaximumPacketSize(100).withMaximumQoS(QoS.AT_LEAST_ONCE).withRetainAvailable(true)
+                .withWildcardSubscriptionAvailable(true).withSubscriptionIdentifierAvailable(true)
+                .withSharedSubscriptionAvailable(true).withResponseInformation("response").withServerReference("server")
                 .build();
     }
 
@@ -307,23 +217,19 @@ public class TestMessageUtil {
         final ImmutableList.Builder<Topic> topicBuilder = new ImmutableList.Builder<>();
         topicBuilder.add(new Topic(topics.get(0), QoS.AT_MOST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
         topicBuilder.add(new Topic(topics.get(1), QoS.AT_LEAST_ONCE, false, false, Mqtt5RetainHandling.SEND, 1));
-        topicBuilder.add(new Topic(topics.get(2),
-                QoS.EXACTLY_ONCE,
-                true,
-                false,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
-                1));
+        topicBuilder.add(
+                new Topic(topics.get(2), QoS.EXACTLY_ONCE, true, false,
+                        Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1));
         return createFullMqtt5Subscribe(topicBuilder.build());
     }
 
     public static SUBSCRIBE createFullMqtt5Subscribe(final ImmutableList<Topic> topics) {
-
         return new SUBSCRIBE(TEST_USER_PROPERTIES, topics, 1, 1);
     }
 
     public static SUBACK createFullMqtt5Suback() {
-
-        final List<Mqtt5SubAckReasonCode> reasonCodes = ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0,
+        final List<Mqtt5SubAckReasonCode> reasonCodes = ImmutableList.of(
+                Mqtt5SubAckReasonCode.GRANTED_QOS_0,
                 Mqtt5SubAckReasonCode.GRANTED_QOS_1,
                 Mqtt5SubAckReasonCode.GRANTED_QOS_2,
                 Mqtt5SubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
@@ -334,60 +240,41 @@ public class TestMessageUtil {
                 Mqtt5SubAckReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED,
                 Mqtt5SubAckReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
                 Mqtt5SubAckReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
-
         return new SUBACK(1, reasonCodes, "reason", TEST_USER_PROPERTIES);
-
     }
 
     public static UNSUBSCRIBE createFullMqtt5Unsubscribe() {
-
         return new UNSUBSCRIBE(ImmutableList.copyOf(topics), 1, TEST_USER_PROPERTIES);
-
     }
 
     public static UNSUBACK createFullMqtt5Unsuback() {
-
-        final List<Mqtt5UnsubAckReasonCode> reasonCodes = ImmutableList.of(Mqtt5UnsubAckReasonCode.SUCCESS,
+        final List<Mqtt5UnsubAckReasonCode> reasonCodes = ImmutableList.of(
+                Mqtt5UnsubAckReasonCode.SUCCESS,
                 Mqtt5UnsubAckReasonCode.NO_SUBSCRIPTIONS_EXISTED,
                 Mqtt5UnsubAckReasonCode.UNSPECIFIED_ERROR,
                 Mqtt5UnsubAckReasonCode.IMPLEMENTATION_SPECIFIC_ERROR,
                 Mqtt5UnsubAckReasonCode.NOT_AUTHORIZED,
                 Mqtt5UnsubAckReasonCode.TOPIC_FILTER_INVALID,
                 Mqtt5UnsubAckReasonCode.PACKET_IDENTIFIER_IN_USE);
-
         return new UNSUBACK(1, reasonCodes, "reason", TEST_USER_PROPERTIES);
-
     }
 
     public static DISCONNECT createFullMqtt5Disconnect() {
-        return new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
-                "reason",
-                TEST_USER_PROPERTIES,
-                "server reference",
-                360);
+        return new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, "reason", TEST_USER_PROPERTIES,
+                "server reference", 360);
     }
 
     public static AUTH createFullMqtt5Auth() {
-        return new AUTH("auth method",
-                "auth data".getBytes(),
-                Mqtt5AuthReasonCode.SUCCESS,
-                TEST_USER_PROPERTIES,
+        return new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS, TEST_USER_PROPERTIES,
                 "reason");
     }
 
     @NotNull
     public static CONNECT createMqtt5ConnectWithWill() {
-
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                .withQos(QoS.EXACTLY_ONCE)
-                .withPayload(new byte[]{1, 2, 3})
-                .build();
-
-        return new CONNECT.Mqtt5Builder().withWillPublish(willPublish)
-                .withClientIdentifier("client")
-                .withCleanStart(false)
-                .withSessionExpiryInterval(100)
-                .build();
+                .withQos(QoS.EXACTLY_ONCE).withPayload(new byte[]{1, 2, 3}).build();
+        return new CONNECT.Mqtt5Builder().withWillPublish(willPublish).withClientIdentifier("client")
+                .withCleanStart(false).withSessionExpiryInterval(100).build();
     }
 
     public static PUBACK createSuccessMqtt5Puback() {

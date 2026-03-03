@@ -33,10 +33,7 @@ public class LocalPersistenceFileUtil {
 
     public static final String PERSISTENCE_SUBFOLDER_NAME = "persistence";
     private static final Logger log = LoggerFactory.getLogger(LocalPersistenceFileUtil.class);
-
-
     private final SystemInformation systemInformation;
-
     @Inject
     LocalPersistenceFileUtil(final SystemInformation systemInformation) {
         this.systemInformation = systemInformation;
@@ -44,7 +41,6 @@ public class LocalPersistenceFileUtil {
 
     public synchronized File getLocalPersistenceFolder() {
         final File dataFolder = systemInformation.getDataFolder();
-
         final File persistenceFolder = new File(dataFolder, PERSISTENCE_SUBFOLDER_NAME);
         if (!persistenceFolder.exists()) {
             log.debug("Folder {} does not exist, trying to create it", persistenceFolder.getAbsolutePath());

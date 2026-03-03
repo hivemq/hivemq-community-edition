@@ -23,8 +23,8 @@ public interface UsageStatisticsCollector {
     /**
      * Collect a statistic by a given statistic type as a JsonString.
      *
-     * @param statisticsType the statistic type.
-     * @return the statistic as a Json String.
+     * @param  statisticsType the statistic type.
+     * @return                the statistic as a Json String.
      */
     String getJson(String statisticsType) throws Exception;
 }

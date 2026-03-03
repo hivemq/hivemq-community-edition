@@ -28,9 +28,9 @@ public interface TopicMatcher {
      * Evaluates if a topic matches a specific topic which also can contain wildcards. All MQTT topic matching rules
      * apply
      *
-     * @param topicSubscription the subscription. May contain wildcards
-     * @param actualTopic       the actual topic. <b>Must not contain wildcards</b>
-     * @return {@code true} if a topic matches a specific subscription, {@code false} otherwise
+     * @param  topicSubscription     the subscription. May contain wildcards
+     * @param  actualTopic           the actual topic. <b>Must not contain wildcards</b>
+     * @return                       {@code true} if a topic matches a specific subscription, {@code false} otherwise
      * @throws InvalidTopicException if the topic was invalid
      */
     boolean matches(@NotNull String topicSubscription, @NotNull String actualTopic) throws InvalidTopicException;

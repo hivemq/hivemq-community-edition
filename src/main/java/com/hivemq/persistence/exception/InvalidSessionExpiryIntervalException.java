@@ -15,19 +15,17 @@
  */
 package com.hivemq.persistence.exception;
 
-
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * An exception which is thrown when the session expiry interval is less than '0'.
  *
  * @author Waldemar Ruck
- * @since 3.4
+ * @since  3.4
  */
 public class InvalidSessionExpiryIntervalException extends RuntimeException {
 
     public InvalidSessionExpiryIntervalException(final @NotNull String message) {
         super(message);
     }
-
 }

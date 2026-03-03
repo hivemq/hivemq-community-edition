@@ -56,13 +56,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 @Singleton
 public class ConnackOutboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConnackOutboundInterceptorHandler.class);
-
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
@@ -70,17 +69,11 @@ public class ConnackOutboundInterceptorHandler {
     private final @NotNull Interceptors interceptors;
     private final @NotNull ServerInformation serverInformation;
     private final @NotNull EventLog eventLog;
-
     @Inject
-    public ConnackOutboundInterceptorHandler(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginTaskExecutorService executorService,
-            final @NotNull Interceptors interceptors,
-            final @NotNull ServerInformation serverInformation,
-            final @NotNull EventLog eventLog) {
-
+    public ConnackOutboundInterceptorHandler(final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginTaskExecutorService executorService, final @NotNull Interceptors interceptors,
+            final @NotNull ServerInformation serverInformation, final @NotNull EventLog eventLog) {
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -94,7 +87,6 @@ public class ConnackOutboundInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull CONNACK connack,
             final @NotNull ChannelPromise promise) {
-
         final Channel channel = ctx.channel();
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         final String clientId = clientConnectionContext.getClientId();
@@ -102,47 +94,37 @@ public class ConnackOutboundInterceptorHandler {
             ctx.write(connack, promise);
             return;
         }
-
-        final ImmutableMap<String, ConnackOutboundInterceptorProvider> providers =
-                interceptors.connackOutboundInterceptorProviders();
+        final ImmutableMap<String, ConnackOutboundInterceptorProvider> providers = interceptors
+                .connackOutboundInterceptorProviders();
         if (providers.isEmpty()) {
             ctx.write(connack, promise);
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
         final boolean requestResponseInformation = clientConnectionContext.isRequestResponseInformation();
-
-        final ConnackOutboundProviderInputImpl providerInput =
-                new ConnackOutboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
-
+        final ConnackOutboundProviderInputImpl providerInput = new ConnackOutboundProviderInputImpl(serverInformation,
+                clientInfo, connectionInfo);
         final ConnackPacketImpl packet = new ConnackPacketImpl(connack);
         final ConnackOutboundInputImpl input = new ConnackOutboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<ConnackOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, requestResponseInformation);
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, requestResponseInformation);
         final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<ConnackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
-
-        final ConnackInterceptorContext context =
-                new ConnackInterceptorContext(clientId, providers.size(), ctx, promise, inputHolder, outputHolder);
-
+        final ConnackInterceptorContext context = new ConnackInterceptorContext(clientId, providers.size(), ctx,
+                promise, inputHolder, outputHolder);
         for (final Map.Entry<String, ConnackOutboundInterceptorProvider> entry : providers.entrySet()) {
             final ConnackOutboundInterceptorProvider provider = entry.getValue();
-
             final HiveMQExtension extension = hiveMQExtensions.getExtension(entry.getKey());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
             }
-
             final ConnackInterceptorTask task = new ConnackInterceptorTask(provider, providerInput, extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
-
     private class ConnackInterceptorContext extends PluginInOutTaskContext<ConnackOutboundOutputImpl>
             implements Runnable {
 
@@ -152,15 +134,10 @@ public class ConnackOutboundInterceptorHandler {
         private final @NotNull ChannelPromise promise;
         private final @NotNull ExtensionParameterHolder<ConnackOutboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<ConnackOutboundOutputImpl> outputHolder;
-
-        ConnackInterceptorContext(
-                final @NotNull String clientId,
-                final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ChannelPromise promise,
+        ConnackInterceptorContext(final @NotNull String clientId, final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx, final @NotNull ChannelPromise promise,
                 final @NotNull ExtensionParameterHolder<ConnackOutboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<ConnackOutboundOutputImpl> outputHolder) {
-
             super(clientId);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -200,8 +177,8 @@ public class ConnackOutboundInterceptorHandler {
             if (outputHolder.get().isPrevent()) {
                 final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
                 clientConnectionContext.proposeClientState(ClientState.DISCONNECTING);
-
-                eventLog.clientWasDisconnected(ctx.channel(),
+                eventLog.clientWasDisconnected(
+                        ctx.channel(),
                         "Connection prevented by extension in CONNACK outbound interceptor");
                 clientConnectionContext.proposeClientState(ClientState.DISCONNECTED_BY_SERVER);
                 ctx.channel().close();
@@ -217,12 +194,8 @@ public class ConnackOutboundInterceptorHandler {
         private final @NotNull ConnackOutboundInterceptorProvider provider;
         private final @NotNull ConnackOutboundProviderInputImpl providerInput;
         private final @NotNull String extensionId;
-
-        private ConnackInterceptorTask(
-                final @NotNull ConnackOutboundInterceptorProvider provider,
-                final @NotNull ConnackOutboundProviderInputImpl providerInput,
-                final @NotNull String extensionId) {
-
+        private ConnackInterceptorTask(final @NotNull ConnackOutboundInterceptorProvider provider,
+                final @NotNull ConnackOutboundProviderInputImpl providerInput, final @NotNull String extensionId) {
             this.provider = provider;
             this.providerInput = providerInput;
             this.extensionId = extensionId;
@@ -230,8 +203,8 @@ public class ConnackOutboundInterceptorHandler {
 
         @Override
         public @NotNull ConnackOutboundOutputImpl apply(
-                final @NotNull ConnackOutboundInputImpl input, final @NotNull ConnackOutboundOutputImpl output) {
-
+                final @NotNull ConnackOutboundInputImpl input,
+                final @NotNull ConnackOutboundOutputImpl output) {
             if (output.isPrevent()) {
                 // it's already prevented so no further interceptors must be called.
                 return output;
@@ -243,8 +216,8 @@ public class ConnackOutboundInterceptorHandler {
                 }
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound CONNACK interception. " +
-                                "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound CONNACK interception. "
+                                + "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 output.prevent();

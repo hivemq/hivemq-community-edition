@@ -32,15 +32,15 @@ import java.util.List;
  * It's also possible to add new listeners at runtime.
  *
  * @author Dominik Obermaier
- * @since 3.0
+ * @since  3.0
  */
 public interface ListenerConfigurationService {
 
     /**
      * Adds a new Listener at runtime.
      *
-     * @param listener the listener
-     * @param <T>      the concrete listener subclass
+     * @param  listener                         the listener
+     * @param  <T>                              the concrete listener subclass
      * @throws ConfigurationValidationException if the validation of the listener wasn't successful
      * @throws IllegalArgumentException         when the listener has not a known type.
      */
@@ -51,29 +51,34 @@ public interface ListenerConfigurationService {
      * @return a unmodifiable list of all active listeners
      */
     @ReadOnly
-    @NotNull List<Listener> getListeners();
+    @NotNull
+    List<Listener> getListeners();
 
     /**
      * @return a unmodifiable list of all active TCP listeners
      */
     @ReadOnly
-    @NotNull List<TcpListener> getTcpListeners();
+    @NotNull
+    List<TcpListener> getTcpListeners();
 
     /**
      * @return a unmodifiable list of all active TLS listeners
      */
     @ReadOnly
-    @NotNull List<TlsTcpListener> getTlsTcpListeners();
+    @NotNull
+    List<TlsTcpListener> getTlsTcpListeners();
 
     /**
      * @return a unmodifiable list of all active Websocket listeners
      */
     @ReadOnly
-    @NotNull List<WebsocketListener> getWebsocketListeners();
+    @NotNull
+    List<WebsocketListener> getWebsocketListeners();
 
     /**
      * @return a unmodifiable list of all active TLS Websocket listeners
      */
     @ReadOnly
-    @NotNull List<TlsWebsocketListener> getTlsWebsocketListeners();
+    @NotNull
+    List<TlsWebsocketListener> getTlsWebsocketListeners();
 }

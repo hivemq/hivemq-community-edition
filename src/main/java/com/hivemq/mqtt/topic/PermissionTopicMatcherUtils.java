@@ -32,11 +32,11 @@ public final class PermissionTopicMatcherUtils {
             final boolean rootWildCard,
             final @NotNull String actualTopic,
             final @NotNull String[] splitActualTopic) throws InvalidTopicException {
-
         if (nonWildCard) {
             return permissionTopic.equals(actualTopic);
         }
-        return matchesWildcards(permissionTopic,
+        return matchesWildcards(
+                permissionTopic,
                 splitPermissionTopic,
                 endsWithWildCard,
                 rootWildCard,
@@ -49,36 +49,33 @@ public final class PermissionTopicMatcherUtils {
             final boolean endsWithWildCard,
             final boolean rootWildCard,
             final @NotNull String @NotNull [] splitActualTopic) {
-
         if (rootWildCard) {
             if (!endsWithWildCard && permissionTopic.length() > 1) {
                 return false;
             }
         }
-
         final int smallest = min(splitPermissionTopic.length, splitActualTopic.length);
-
         for (int i = 0; i < smallest; i++) {
             final String sub = splitPermissionTopic[i];
             final String t = splitActualTopic[i];
-
             if (!sub.equals(t)) {
                 switch (sub) {
-                    case "#":
+                    case "#" :
                         return true;
-                    case "+":
-                        //Matches Topic Level wildcard, so we can just ignore
+                    case "+" :
+                        // Matches Topic Level wildcard, so we can just ignore
                         break;
-                    default:
-                        //Does not match a wildcard and is not equal to the topic token
+                    default :
+                        // Does not match a wildcard and is not equal to the topic token
                         return false;
                 }
             }
         }
-        //If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a wildcard,
-        //everything is alright.
-        return splitPermissionTopic.length == splitActualTopic.length ||
-                (splitPermissionTopic.length - splitActualTopic.length == 1 &&
-                        ("#".equals(splitPermissionTopic[splitPermissionTopic.length - 1])));
+        // If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a
+        // wildcard,
+        // everything is alright.
+        return splitPermissionTopic.length == splitActualTopic.length
+                || (splitPermissionTopic.length - splitActualTopic.length == 1
+                        && ("#".equals(splitPermissionTopic[splitPermissionTopic.length - 1])));
     }
 }

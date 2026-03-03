@@ -39,7 +39,6 @@ import static org.junit.Assert.assertTrue;
 public class ModifiableConnackPacketImplTest {
 
     private @NotNull FullConfigurationService configurationService;
-
     @Before
     public void setUp() {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -47,751 +46,296 @@ public class ModifiableConnackPacketImplTest {
 
     @Test
     public void setReasonString() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setReasonString("reasonString");
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.of("reasonString"), modifiablePacket.getReasonString());
     }
 
     @Test
     public void setReasonString_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                "reasonString",
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, "reasonString",
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setReasonString(null);
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.empty(), modifiablePacket.getReasonString());
     }
 
     @Test(expected = IllegalStateException.class)
     public void setReasonString_successCode() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS, true, 10, 60, null, null,
+                null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setReasonString("reasonString");
     }
 
     @Test
     public void setReasonString_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                "reasonString",
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, "reasonString",
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setReasonString("reasonString");
-
         assertFalse(modifiablePacket.isModified());
         assertEquals(Optional.of("reasonString"), modifiablePacket.getReasonString());
     }
 
     @Test
     public void setReasonCode_error() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setReasonCode(ConnackReasonCode.NOT_AUTHORIZED);
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(ConnackReasonCode.NOT_AUTHORIZED, modifiablePacket.getReasonCode());
     }
 
     @Test
     public void setReasonCode_sameError() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setReasonCode(ConnackReasonCode.UNSPECIFIED_ERROR);
-
         assertFalse(modifiablePacket.isModified());
         assertEquals(ConnackReasonCode.UNSPECIFIED_ERROR, modifiablePacket.getReasonCode());
     }
 
     @Test(expected = NullPointerException.class)
     public void setReasonCode_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setReasonCode(null);
     }
 
     @Test(expected = IllegalStateException.class)
     public void setReasonString_switchToError() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS, true, 10, 60, null, null,
+                null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setReasonCode(ConnackReasonCode.UNSPECIFIED_ERROR);
     }
 
     @Test(expected = IllegalStateException.class)
     public void setReasonString_switchFromError() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setReasonCode(ConnackReasonCode.SUCCESS);
     }
 
     @Test
     public void setResponseInformation() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setResponseInformation("responseInformation");
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.of("responseInformation"), modifiablePacket.getResponseInformation());
     }
 
     @Test
     public void setResponseInformation_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                "responseInformation",
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, "responseInformation", null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setResponseInformation(null);
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.empty(), modifiablePacket.getResponseInformation());
     }
 
     @Test
     public void setResponseInformation_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                "responseInformation",
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, "responseInformation", null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setResponseInformation("responseInformation");
-
         assertFalse(modifiablePacket.isModified());
         assertEquals(Optional.of("responseInformation"), modifiablePacket.getResponseInformation());
     }
 
     @Test(expected = IllegalStateException.class)
     public void setResponseInformation_notAllowed() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, false);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, false);
         modifiablePacket.setResponseInformation("responseInformation");
     }
 
     @Test
     public void setServerReference() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setServerReference("serverReference");
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.of("serverReference"), modifiablePacket.getServerReference());
     }
 
     @Test
     public void setServerReference_null() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                "serverReference",
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, "serverReference", null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setServerReference(null);
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.empty(), modifiablePacket.getServerReference());
     }
 
     @Test
     public void setServerReference_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                "serverReference",
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, "serverReference", null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setServerReference("serverReference");
-
         assertFalse(modifiablePacket.isModified());
         assertEquals(Optional.of("serverReference"), modifiablePacket.getServerReference());
     }
 
     @Test
     public void setAssignedClientIdentifier_same() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                "same",
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                "serverReference",
-                null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60,
+                "same", null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, "serverReference",
+                null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setAssignedClientIdentifier("same");
-
         assertFalse(modifiablePacket.isModified());
         assertEquals(Optional.of("same"), modifiablePacket.getAssignedClientIdentifier());
     }
 
     @Test
     public void setAssignedClientIdentifier_different() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                "same",
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                "serverReference",
-                null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60,
+                "same", null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, "serverReference",
+                null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setAssignedClientIdentifier("other");
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.of("other"), modifiablePacket.getAssignedClientIdentifier());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setAssignedClientIdentifier_invalid() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                "same",
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                "serverReference",
-                null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60,
+                "same", null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, "serverReference",
+                null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setAssignedClientIdentifier("\0");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setAssignedClientIdentifier_empty() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                "same",
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                "serverReference",
-                null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60,
+                "same", null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, "serverReference",
+                null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setAssignedClientIdentifier("");
     }
 
     @Test
     public void modifyUserProperties() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
-
         assertTrue(modifiablePacket.isModified());
         assertEquals(Optional.of("testValue"), modifiablePacket.getUserProperties().getFirst("testName"));
     }
 
     @Test
     public void copy_noChanges() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                "reason",
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.SUCCESS, true, 10, 60, null, null,
+                null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, "reason",
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         final ConnackPacketImpl copy = modifiablePacket.copy();
-
         assertEquals(packet, copy);
     }
 
     @Test
     public void copy_changes() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         modifiablePacket.setReasonCode(ConnackReasonCode.NOT_AUTHORIZED);
         modifiablePacket.setResponseInformation("responseInformation");
         modifiablePacket.setServerReference("serverReference");
         modifiablePacket.setReasonString("reason");
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final ConnackPacketImpl copy = modifiablePacket.copy();
-
-        final ConnackPacketImpl expectedPacket = new ConnackPacketImpl(ConnackReasonCode.NOT_AUTHORIZED,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                "responseInformation",
-                "serverReference",
-                "reason",
+        final ConnackPacketImpl expectedPacket = new ConnackPacketImpl(ConnackReasonCode.NOT_AUTHORIZED, true, 10, 60,
+                null, null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, "responseInformation",
+                "serverReference", "reason",
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }
 
     @Test
     public void setSessionPresent() {
-        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR,
-                true,
-                10,
-                60,
-                null,
-                null,
-                null,
-                3,
-                1000,
-                10,
-                Qos.AT_LEAST_ONCE,
-                true,
-                true,
-                true,
-                true,
-                null,
-                null,
-                null,
+        final ConnackPacketImpl packet = new ConnackPacketImpl(ConnackReasonCode.UNSPECIFIED_ERROR, true, 10, 60, null,
+                null, null, 3, 1000, 10, Qos.AT_LEAST_ONCE, true, true, true, true, null, null, null,
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableConnackPacketImpl modifiablePacket =
-                new ModifiableConnackPacketImpl(packet, configurationService, true);
-
+        final ModifiableConnackPacketImpl modifiablePacket = new ModifiableConnackPacketImpl(packet,
+                configurationService, true);
         assertFalse(modifiablePacket.isModified());
-
         modifiablePacket.setSessionPresent(false);
-
         assertTrue(modifiablePacket.isModified());
         assertFalse(modifiablePacket.getSessionPresent());
     }

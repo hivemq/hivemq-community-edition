@@ -27,31 +27,25 @@ import com.hivemq.mqtt.message.reason.Mqtt5DisconnectReasonCode;
 /**
  * @author Dominik Obermaier
  * @author Florian Limpöck
- * @since 1.4
+ * @since  1.4
  */
 @Immutable
 public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithReasonCode<Mqtt5DisconnectReasonCode>
         implements Mqtt3DISCONNECT, Mqtt5DISCONNECT {
 
     public static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
-
     private final @Nullable String serverReference;
     private final long sessionExpiryInterval;
-
-    //MQTT 3
+    // MQTT 3
     public DISCONNECT() {
         super(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         sessionExpiryInterval = SESSION_EXPIRY_NOT_SET;
         serverReference = null;
     }
 
-    public DISCONNECT(
-            final @NotNull Mqtt5DisconnectReasonCode reasonCode,
-            final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties,
-            final @Nullable String serverReference,
+    public DISCONNECT(final @NotNull Mqtt5DisconnectReasonCode reasonCode, final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties, final @Nullable String serverReference,
             final long sessionExpiryInterval) {
-
         super(reasonCode, reasonString, userProperties);
         this.serverReference = serverReference;
         this.sessionExpiryInterval = sessionExpiryInterval;

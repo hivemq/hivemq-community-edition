@@ -21,11 +21,9 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  * @author Florian Limpöck
  */
 public enum PersistenceType {
-    FILE,
-    FILE_NATIVE;
 
+    FILE, FILE_NATIVE;
     private static final @NotNull PersistenceType @NotNull [] VALUES = values();
-
     public static @NotNull PersistenceType forCode(final int code) {
         try {
             return VALUES[code];
@@ -33,5 +31,4 @@ public enum PersistenceType {
             throw new IllegalArgumentException("No persistence type found for code: " + code, e);
         }
     }
-
 }

@@ -33,7 +33,6 @@ public class Mqtt3DisconnectEncoderTest {
 
     private EmbeddedChannel channel;
     private ClientConnection clientConnection;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
@@ -44,17 +43,12 @@ public class Mqtt3DisconnectEncoderTest {
     @Test
     public void test_disconnect_sent() {
         channel.writeOutbound(new DISCONNECT());
-
         final ByteBuf buf = channel.readOutbound();
-
         final Mqtt3DisconnectEncoder mqtt3DisconnectEncoder = new Mqtt3DisconnectEncoder();
         assertEquals(mqtt3DisconnectEncoder.bufferSize(clientConnection, new DISCONNECT()), buf.readableBytes());
-
         assertEquals(Mqtt3DisconnectEncoder.ENCODED_DISCONNECT_SIZE, buf.readableBytes());
-
         assertEquals((byte) 0b1110_0000, buf.readByte());
         assertEquals((byte) 0b0000_0000, buf.readByte());
-
         assertFalse(buf.isReadable());
     }
 }

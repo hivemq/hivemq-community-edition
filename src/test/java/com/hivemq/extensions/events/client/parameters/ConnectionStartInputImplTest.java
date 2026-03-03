@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ConnectionStartInputImplTest {
 
@@ -43,8 +43,8 @@ public class ConnectionStartInputImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ConnectionStartInputImpl input =
-                new ConnectionStartInputImpl(TestMessageUtil.createFullMqtt5Connect(), channel);
+        final ConnectionStartInputImpl input = new ConnectionStartInputImpl(TestMessageUtil.createFullMqtt5Connect(),
+                channel);
         assertEquals(input, input.get());
         assertNotNull(input.getClientInformation());
         assertNotNull(input.getConnectionInformation());

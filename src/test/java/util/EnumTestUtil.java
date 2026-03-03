@@ -33,20 +33,17 @@ public final class EnumTestUtil {
             @NotNull final IntFunction<T> toEnumFunction) {
         int minValue = Integer.MAX_VALUE;
         int maxValue = Integer.MIN_VALUE;
-
         for (final T value : enumClass.getEnumConstants()) {
             assertSame(value, toEnumFunction.apply(toValueFunction.applyAsInt(value)));
             minValue = Math.min(minValue, toValueFunction.applyAsInt(value));
             maxValue = Math.max(maxValue, toValueFunction.applyAsInt(value));
         }
-
         try {
             toEnumFunction.apply(minValue - 1);
             fail("Value should not be allowed: " + (minValue - 1));
         } catch (final IllegalArgumentException ignored) {
             // Expected
         }
-
         try {
             toEnumFunction.apply(maxValue + 1);
             fail("Value should not be allowed" + (maxValue + 1));
@@ -62,13 +59,11 @@ public final class EnumTestUtil {
             @Nullable final T fallback) {
         int minValue = Integer.MAX_VALUE;
         int maxValue = Integer.MIN_VALUE;
-
         for (final T value : enumClass.getEnumConstants()) {
             assertSame(value, toEnumFunction.apply(toValueFunction.applyAsInt(value)));
             minValue = Math.min(minValue, toValueFunction.applyAsInt(value));
             maxValue = Math.max(maxValue, toValueFunction.applyAsInt(value));
         }
-
         assertEquals(fallback, toEnumFunction.apply(minValue - 1));
         assertEquals(fallback, toEnumFunction.apply(maxValue + 1));
     }

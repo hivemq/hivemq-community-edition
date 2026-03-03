@@ -37,7 +37,6 @@ public class ClientConnectionTest {
 
     private final @NotNull Channel channel = mock();
     private @NotNull ClientConnection clientConnection;
-
     @Before
     public void setUp() {
         final ChannelPipeline pipeline = mock();
@@ -49,14 +48,12 @@ public class ClientConnectionTest {
     @Test
     public void isMessagesInFlight_whenInFlightMessagesFlagIsSet_thenMessagesAreInFlight() {
         clientConnection.setInFlightMessagesSent(true);
-
         assertFalse(clientConnection.isMessagesInFlight());
     }
 
     @Test
     public void isMessagesInFlight_whenInFlightCountIsIncremented_thenMessagesAreInFlight() {
         clientConnection.setInFlightMessagesSent(true);
-
         clientConnection.incrementInFlightCount();
         assertTrue(clientConnection.isMessagesInFlight());
     }
@@ -64,19 +61,15 @@ public class ClientConnectionTest {
     @Test
     public void isMessagesInFlight_whenInFlightCountIsIncrementedAndDecrementedToZero_thenMessagesAreNotInFlight() {
         clientConnection.setInFlightMessagesSent(true);
-
         clientConnection.incrementInFlightCount();
         clientConnection.decrementInFlightCount();
-
         assertFalse(clientConnection.isMessagesInFlight());
     }
 
     @Test
     public void getChannelIP_whenChannelRemoteAddrIsSet_thenRemoteAddrIsReturned() {
         when(channel.remoteAddress()).thenReturn(new InetSocketAddress(0));
-
         final Optional<String> channelIP = clientConnection.getChannelIP();
-
         assertTrue(channelIP.isPresent());
         assertEquals("0.0.0.0", channelIP.get());
     }

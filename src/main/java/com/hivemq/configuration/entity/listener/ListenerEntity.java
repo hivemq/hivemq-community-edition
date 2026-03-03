@@ -27,13 +27,10 @@ public abstract class ListenerEntity {
 
     @XmlElement(name = "port", required = true)
     private int port;
-
     @XmlElement(name = "bind-address", required = true)
     private @NotNull String bindAddress = "0.0.0.0";
-
     @XmlElement(name = "name")
     private @Nullable String name;
-
     public int getPort() {
         return port;
     }

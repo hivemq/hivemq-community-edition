@@ -47,32 +47,21 @@ public class UsageStatisticsCollectorImplTest {
 
     private UsageStatisticsCollector collector;
     private MetricRegistry metricRegistry;
-
     @Before
     public void before() {
         final HiveMQExtensions extensions = mock(HiveMQExtensions.class);
         final HiveMQExtension customExtension = mock(HiveMQExtension.class);
         final HiveMQExtension officialExtensionDcSquare = mock(HiveMQExtension.class);
         final HiveMQExtension officialExtensionHivemq = mock(HiveMQExtension.class);
-
-        final FullConfigurationService configurationService =
-                new TestConfigurationBootstrap().getFullConfigurationService();
-
+        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
+                .getFullConfigurationService();
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         systemInformation.init();
         metricRegistry = new MetricRegistry();
-        collector = new UsageStatisticsCollectorImpl(systemInformation,
-                configurationService,
-                new MetricsHolder(metricRegistry),
-                new HivemqId(systemInformation),
-                extensions);
-        when(extensions.getEnabledHiveMQExtensions()).thenReturn(ImmutableMap.of("1",
-                customExtension,
-                "2",
-                officialExtensionDcSquare,
-                "3",
-                officialExtensionHivemq));
-
+        collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService,
+                new MetricsHolder(metricRegistry), new HivemqId(systemInformation), extensions);
+        when(extensions.getEnabledHiveMQExtensions()).thenReturn(
+                ImmutableMap.of("1", customExtension, "2", officialExtensionDcSquare, "3", officialExtensionHivemq));
         when(customExtension.getAuthor()).thenReturn("another company");
         when(officialExtensionDcSquare.getAuthor()).thenReturn("dc-square Gmbh");
         when(officialExtensionHivemq.getAuthor()).thenReturn("HiveMQ Gmbh");
@@ -80,13 +69,10 @@ public class UsageStatisticsCollectorImplTest {
 
     @Test
     public void test_system_statistics() throws Exception {
-
         final String json = collector.getJson("test");
         System.out.println(json);
         final ObjectMapper objectMapper = new ObjectMapper();
-
         final Statistic statistic = objectMapper.reader().forType(Statistic.class).readValue(json);
-
         assertFalse(statistic.getCpu().isEmpty());
         assertTrue(statistic.getCpuSockets() > 0);
         assertTrue(statistic.getCpuPhysicalCores() > 0);
@@ -102,13 +88,10 @@ public class UsageStatisticsCollectorImplTest {
 
     @Test
     public void test_jvm_statistics() throws Exception {
-
         final String json = collector.getJson("test");
         System.out.println(json);
         final ObjectMapper objectMapper = new ObjectMapper();
-
         final Statistic statistic = objectMapper.reader().forType(Statistic.class).readValue(json);
-
         assertFalse(statistic.getJavaVendor().isEmpty());
         assertFalse(statistic.getJavaVersion().isEmpty());
         assertFalse(statistic.getJavaVersionDate().isEmpty());
@@ -122,9 +105,7 @@ public class UsageStatisticsCollectorImplTest {
         final String json = collector.getJson("test");
         System.out.println(json);
         final ObjectMapper objectMapper = new ObjectMapper();
-
         final Statistic statistic = objectMapper.reader().forType(Statistic.class).readValue(json);
-
         assertEquals(36, statistic.getId().length());
         assertFalse(statistic.getHivemqVersion().isEmpty());
         assertTrue(statistic.getHivemqUptime() >= 0);
@@ -134,27 +115,20 @@ public class UsageStatisticsCollectorImplTest {
 
     @Test
     public void test_metric_statistics() throws Exception {
-
         metricRegistry.register(CONNECTIONS_OVERALL_CURRENT.name(), (Gauge<Number>) () -> 12);
-
         final String json = collector.getJson("test");
         System.out.println(json);
         final ObjectMapper objectMapper = new ObjectMapper();
-
         final Statistic statistic = objectMapper.reader().forType(Statistic.class).readValue(json);
-
         assertEquals(12, statistic.getConnectedClients());
     }
 
     @Test
     public void test_config_statistics() throws Exception {
-
         final String json = collector.getJson("test");
         System.out.println(json);
         final ObjectMapper objectMapper = new ObjectMapper();
-
         final Statistic statistic = objectMapper.reader().forType(Statistic.class).readValue(json);
-
         assertEquals(0, statistic.getTcpListeners());
         assertEquals(0, statistic.getTlsListeners());
         assertEquals(0, statistic.getWsListeners());

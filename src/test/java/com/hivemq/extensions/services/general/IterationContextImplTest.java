@@ -27,14 +27,9 @@ public class IterationContextImplTest {
 
     @Test
     public void test_abort() {
-
         final IterationContextImpl iterationContext = new IterationContextImpl();
-
         assertFalse(iterationContext.isAborted());
-
         iterationContext.abortIteration();
-
         assertTrue(iterationContext.isAborted());
     }
-
 }

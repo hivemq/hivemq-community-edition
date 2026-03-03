@@ -31,15 +31,13 @@ import java.nio.charset.StandardCharsets;
 public class CloudPlatform {
 
     private static final Logger log = LoggerFactory.getLogger(CloudPlatform.class);
-
     public String getCloudPlatform() {
         try {
             if (!Platform.isLinux()) {
                 return null;
             }
-
-            //can generate false positives, but seems to be the simplest and least intrusive solution
-            //see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/identify_ec2_instances.html
+            // can generate false positives, but seems to be the simplest and least intrusive solution
+            // see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/identify_ec2_instances.html
             final File uuidFile = getUuidFile();
             if (uuidFile.exists() && uuidFile.canRead()) {
                 final String content = FileUtils.readFileToString(uuidFile, StandardCharsets.UTF_8);
@@ -50,7 +48,6 @@ public class CloudPlatform {
         } catch (final Exception ex) {
             log.trace("not able to determine if running on cloud platform", ex);
         }
-
         return null;
     }
 

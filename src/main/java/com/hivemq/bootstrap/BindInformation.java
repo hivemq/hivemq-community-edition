@@ -29,10 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class BindInformation {
 
     private final Listener listener;
-
     private final ChannelFuture bindFuture;
-
-
     public BindInformation(@NotNull final Listener listener, @NotNull final ChannelFuture bindFuture) {
         checkNotNull(listener, "Listener must not be null");
         checkNotNull(bindFuture, "Future must not be null");

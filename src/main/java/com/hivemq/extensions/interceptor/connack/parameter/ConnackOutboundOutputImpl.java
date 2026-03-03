@@ -26,17 +26,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 public class ConnackOutboundOutputImpl extends AbstractAsyncOutput<ConnackOutboundOutput>
         implements ConnackOutboundOutput {
 
     private final @NotNull ModifiableConnackPacketImpl connackPacket;
     private final @NotNull AtomicBoolean prevent = new AtomicBoolean(false);
-
-    public ConnackOutboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull ModifiableConnackPacketImpl connackPacket) {
-
+    public ConnackOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull ModifiableConnackPacketImpl connackPacket) {
         super(asyncer);
         this.connackPacket = connackPacket;
     }

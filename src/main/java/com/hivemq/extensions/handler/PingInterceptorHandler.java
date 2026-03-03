@@ -55,22 +55,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PingInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PingInterceptorHandler.class);
-
     private final @NotNull PluginTaskExecutorService executorService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-
     @Inject
-    public PingInterceptorHandler(
-            final @NotNull PluginTaskExecutorService executorService,
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull HiveMQExtensions hiveMQExtensions) {
-
+    public PingInterceptorHandler(final @NotNull PluginTaskExecutorService executorService,
+            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions) {
         this.executorService = executorService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
     }
-
 
     public void handleInboundPingReq(final @NotNull ChannelHandlerContext ctx, final @NotNull PINGREQ pingreq) {
         final Channel channel = ctx.channel();
@@ -79,7 +73,6 @@ public class PingInterceptorHandler {
         if (clientId == null) {
             return;
         }
-
         final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.fireChannelRead(pingreq);
@@ -90,26 +83,21 @@ public class PingInterceptorHandler {
             ctx.fireChannelRead(pingreq);
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-
         final PingReqInboundInputImpl input = new PingReqInboundInputImpl(clientInfo, connectionInfo);
         final PingReqInboundOutputImpl output = new PingReqInboundOutputImpl(asyncer);
-        final PingReqInboundInterceptorContext context =
-                new PingReqInboundInterceptorContext(clientId, interceptors.size(), ctx);
-
+        final PingReqInboundInterceptorContext context = new PingReqInboundInterceptorContext(clientId,
+                interceptors.size(), ctx);
         for (final PingReqInboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions
+                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
             }
-
-            final PingReqInboundInterceptorTask task =
-                    new PingReqInboundInterceptorTask(interceptor, extension.getId());
+            final PingReqInboundInterceptorTask task = new PingReqInboundInterceptorTask(interceptor,
+                    extension.getId());
             executorService.handlePluginInOutTaskExecution(context, input, output, task);
         }
     }
@@ -118,14 +106,12 @@ public class PingInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull PINGRESP pingresp,
             final @NotNull ChannelPromise promise) {
-
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
         }
-
         final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(pingresp, promise);
@@ -136,52 +122,47 @@ public class PingInterceptorHandler {
             ctx.write(pingresp, promise);
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-
         final PingRespOutboundInputImpl input = new PingRespOutboundInputImpl(clientInfo, connectionInfo);
         final PingRespOutboundOutputImpl output = new PingRespOutboundOutputImpl(asyncer);
-        final PingRespOutboundInterceptorContext context =
-                new PingRespOutboundInterceptorContext(clientId, interceptors.size(), ctx, promise);
-
+        final PingRespOutboundInterceptorContext context = new PingRespOutboundInterceptorContext(clientId,
+                interceptors.size(), ctx, promise);
         for (final PingRespOutboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions
+                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
             }
-
-            final PingRespOutboundInterceptorTask task =
-                    new PingRespOutboundInterceptorTask(interceptor, extension.getId());
+            final PingRespOutboundInterceptorTask task = new PingRespOutboundInterceptorTask(interceptor,
+                    extension.getId());
             executorService.handlePluginInOutTaskExecution(context, input, output, task);
         }
     }
-
     private static class PingReqInboundInterceptorTask
             implements PluginInOutTask<PingReqInboundInputImpl, PingReqInboundOutputImpl> {
 
         private final @NotNull PingReqInboundInterceptor interceptor;
         private final @NotNull String extensionId;
-
-        PingReqInboundInterceptorTask(
-                final @NotNull PingReqInboundInterceptor interceptor, final @NotNull String extensionId) {
-
+        PingReqInboundInterceptorTask(final @NotNull PingReqInboundInterceptor interceptor,
+                final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull PingReqInboundOutputImpl apply(
-                final @NotNull PingReqInboundInputImpl input, final @NotNull PingReqInboundOutputImpl output) {
-
+                final @NotNull PingReqInboundInputImpl input,
+                final @NotNull PingReqInboundOutputImpl output) {
             try {
                 interceptor.onInboundPingReq(input, output);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound PINGREQ interception. " +
-                        "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PINGREQ interception. "
+                                + "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 Exceptions.rethrowError(e);
             }
             return output;
@@ -198,24 +179,22 @@ public class PingInterceptorHandler {
 
         private final @NotNull PingRespOutboundInterceptor interceptor;
         private final @NotNull String extensionId;
-
-        PingRespOutboundInterceptorTask(
-                final @NotNull PingRespOutboundInterceptor interceptor, final @NotNull String extensionId) {
-
+        PingRespOutboundInterceptorTask(final @NotNull PingRespOutboundInterceptor interceptor,
+                final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull PingRespOutboundOutputImpl apply(
-                final @NotNull PingRespOutboundInputImpl input, final @NotNull PingRespOutboundOutputImpl output) {
-
+                final @NotNull PingRespOutboundInputImpl input,
+                final @NotNull PingRespOutboundOutputImpl output) {
             try {
                 interceptor.onOutboundPingResp(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PINGRESP interception. " +
-                                "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PINGRESP interception. "
+                                + "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 Exceptions.rethrowError(e);
@@ -235,12 +214,8 @@ public class PingInterceptorHandler {
         private final int interceptorCount;
         private final @NotNull AtomicInteger counter;
         private final @NotNull ChannelHandlerContext ctx;
-
-        PingReqInboundInterceptorContext(
-                final @NotNull String identifier,
-                final int interceptorCount,
+        PingReqInboundInterceptorContext(final @NotNull String identifier, final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx) {
-
             super(identifier);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -271,13 +246,8 @@ public class PingInterceptorHandler {
         private final @NotNull AtomicInteger counter;
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ChannelPromise promise;
-
-        PingRespOutboundInterceptorContext(
-                final @NotNull String identifier,
-                final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ChannelPromise promise) {
-
+        PingRespOutboundInterceptorContext(final @NotNull String identifier, final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx, final @NotNull ChannelPromise promise) {
             super(identifier);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);

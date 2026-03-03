@@ -34,7 +34,6 @@ public class ListenerStartupInformationTest {
     public void test_successful_listener() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
         final ListenerStartupInformation info = ListenerStartupInformation.successfulListenerStartup(listener);
-
         assertTrue(info.isSuccessful());
         assertSame(listener, info.getListener());
         assertFalse(info.getException().isPresent());
@@ -49,7 +48,6 @@ public class ListenerStartupInformationTest {
     public void test_failed_listener_no_exception() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
         final ListenerStartupInformation info = ListenerStartupInformation.failedListenerStartup(listener, null);
-
         assertFalse(info.isSuccessful());
         assertSame(listener, info.getListener());
         assertFalse(info.getException().isPresent());
@@ -58,9 +56,8 @@ public class ListenerStartupInformationTest {
     @Test
     public void test_failed_listener_exception() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
-        final ListenerStartupInformation info =
-                ListenerStartupInformation.failedListenerStartup(listener, new IllegalArgumentException("illegal"));
-
+        final ListenerStartupInformation info = ListenerStartupInformation
+                .failedListenerStartup(listener, new IllegalArgumentException("illegal"));
         assertFalse(info.isSuccessful());
         assertSame(listener, info.getListener());
         assertTrue(info.getException().isPresent());

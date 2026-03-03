@@ -22,13 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Makes it simpler to run multiple actions on transaction commit
- * while preventing us from forgetting to define the commit hook accordingly.
+ * Makes it simpler to run multiple actions on transaction commit while preventing us from forgetting to define the
+ * commit hook accordingly.
  */
 public class TransactionCommitActions implements Runnable {
 
     private final @NotNull List<Runnable> actions;
-
     private TransactionCommitActions() {
         actions = new ArrayList<>();
     }

@@ -27,38 +27,28 @@ public class SubscriptionTypeItemFilterTest {
 
     @Test
     public void test_mode_all() {
-
         final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
         final byte individualFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
-
         final SubscriptionTypeItemFilter itemFilter = new SubscriptionTypeItemFilter(SubscriptionType.ALL);
-
         assertTrue(itemFilter.test(new SubscriberWithQoS("client", 0, individualFlag, 0)));
         assertTrue(itemFilter.test(new SubscriberWithQoS("client", 0, sharedFlag, 0)));
     }
 
     @Test
     public void test_mode_individual() {
-
         final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
         final byte individualFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
-
         final SubscriptionTypeItemFilter itemFilter = new SubscriptionTypeItemFilter(SubscriptionType.INDIVIDUAL);
-
         assertTrue(itemFilter.test(new SubscriberWithQoS("client", 0, individualFlag, 0)));
         assertFalse(itemFilter.test(new SubscriberWithQoS("client", 0, sharedFlag, 0)));
     }
 
     @Test
     public void test_mode_shared() {
-
         final byte sharedFlag = SubscriptionFlag.getDefaultFlags(true, false, false);
         final byte individualFlag = SubscriptionFlag.getDefaultFlags(false, false, false);
-
         final SubscriptionTypeItemFilter itemFilter = new SubscriptionTypeItemFilter(SubscriptionType.SHARED);
-
         assertFalse(itemFilter.test(new SubscriberWithQoS("client", 0, individualFlag, 0)));
         assertTrue(itemFilter.test(new SubscriberWithQoS("client", 0, sharedFlag, 0)));
     }
-
 }

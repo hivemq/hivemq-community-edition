@@ -30,7 +30,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class LogLevelModifierTurboFilter extends TurboFilter {
 
     private final @NotNull List<LogLevelModifier> logLevelModifiers = new CopyOnWriteArrayList<>();
-
     @Override
     public @NotNull FilterReply decide(
             final @Nullable Marker marker,
@@ -39,14 +38,11 @@ public class LogLevelModifierTurboFilter extends TurboFilter {
             final @Nullable String format,
             final @Nullable Object @Nullable [] params,
             final @Nullable Throwable t) {
-
         FilterReply filterReply = FilterReply.NEUTRAL;
-
         if (format == null || level == Level.OFF) {
             // format is the log message
             return filterReply;
         }
-
         for (final LogLevelModifier logLevelModifier : logLevelModifiers) {
             filterReply = logLevelModifier.decide(marker, logger, level, format, params, t);
             if (filterReply != FilterReply.NEUTRAL) {

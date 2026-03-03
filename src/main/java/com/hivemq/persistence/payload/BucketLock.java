@@ -24,7 +24,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BucketLock {
 
     private final Lock @NotNull [] locks;
-
     public BucketLock(final int bucketCount) {
         locks = new Lock[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
@@ -50,9 +49,9 @@ public class BucketLock {
             lock.unlock();
         }
     }
-
     @FunctionalInterface
     interface BucketAccessCallback {
+
         void call(int bucketIndex);
     }
 }

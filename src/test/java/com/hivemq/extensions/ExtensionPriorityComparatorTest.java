@@ -33,10 +33,7 @@ import static org.mockito.Mockito.when;
 public class ExtensionPriorityComparatorTest {
 
     private final @NotNull HiveMQExtensions hiveMQExtensions = mock();
-
     private ExtensionPriorityComparator comparator;
-
-
     @Before
     public void before() {
         comparator = new ExtensionPriorityComparator(hiveMQExtensions);
@@ -48,7 +45,6 @@ public class ExtensionPriorityComparatorTest {
         final HiveMQExtension extension2 = getHiveMQExtension(20);
         when(hiveMQExtensions.getExtension(eq("extension-1"))).thenReturn(extension1);
         when(hiveMQExtensions.getExtension(eq("extension-2"))).thenReturn(extension2);
-
         assertEquals(1, comparator.compare("extension-1", "extension-2"));
         assertEquals(-1, comparator.compare("extension-2", "extension-1"));
         assertEquals(0, comparator.compare("extension-2", "extension-2"));
@@ -66,28 +62,22 @@ public class ExtensionPriorityComparatorTest {
         when(hiveMQExtensions.getExtension(eq("extension-1"))).thenReturn(extension1);
         when(hiveMQExtensions.getExtension(eq("extension-2"))).thenReturn(extension2);
         when(hiveMQExtensions.getExtension(eq("extension-3"))).thenReturn(extension3);
-
         final TreeMap<String, String> treeMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
         treeMap.put("extension-1", "object1");
         treeMap.put("extension-2", "object2");
         treeMap.put("extension-3", "object3");
-
         assertEquals(3, treeMap.size());
-
         assertEquals("object1", treeMap.get("extension-1"));
         assertEquals("object2", treeMap.get("extension-2"));
         assertEquals("object3", treeMap.get("extension-3"));
-
         final StringBuilder builder = new StringBuilder();
         for (final String value : treeMap.values()) {
             builder.append(value);
         }
         assertEquals("object2object3object1", builder.toString());
-
         assertEquals("object1", treeMap.remove("extension-1"));
         assertEquals("object2", treeMap.remove("extension-2"));
         assertEquals("object3", treeMap.remove("extension-3"));
-
         assertEquals(0, treeMap.size());
     }
 
@@ -95,7 +85,6 @@ public class ExtensionPriorityComparatorTest {
     public void test_compare_null_extensions() {
         final HiveMQExtension extension1 = getHiveMQExtension(10);
         when(hiveMQExtensions.getExtension(eq("extension-1"))).thenReturn(extension1);
-
         assertEquals(0, comparator.compare("extension-3", "extension-4"));
         assertEquals(1, comparator.compare("extension-3", "extension-1"));
         assertEquals(-1, comparator.compare("extension-1", "extension-3"));

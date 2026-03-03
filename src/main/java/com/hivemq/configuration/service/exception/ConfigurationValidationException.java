@@ -23,12 +23,11 @@ import java.util.List;
  * This exception indicates that a configuration was no successful
  *
  * @author Dominik Obermaier
- * @since 3.0
+ * @since  3.0
  */
 public class ConfigurationValidationException extends RuntimeException {
 
     private final List<ValidationError> validationErrors;
-
     public ConfigurationValidationException(final List<ValidationError> validationErrors) {
         this.validationErrors = ImmutableList.copyOf(validationErrors);
     }

@@ -34,12 +34,8 @@ public class MessageDroppedServiceImplTest {
     private final String clientId = "clientId";
     private final String topic = "topic";
     private final int qos = 1;
-
     private final @NotNull EventLog eventLog = mock();
-
     private MessageDroppedService messageDroppedService;
-
-
     @Before
     public void setUp() throws Exception {
         messageDroppedService = new MessageDroppedServiceImpl(new MetricsHolder(new MetricRegistry()), eventLog);
@@ -55,26 +51,25 @@ public class MessageDroppedServiceImplTest {
     public void test_publish_inbound_intercepted() {
         messageDroppedService.extensionPrevented(clientId, topic, qos);
         verify(eventLog, times(1)).messageDropped(clientId, topic, qos, "Extension prevented onward delivery");
-
     }
 
     @Test
     public void test_qos0_memory_exceeded() {
         messageDroppedService.qos0MemoryExceeded(clientId, topic, qos, 1111, 1000);
-        verify(eventLog, times(1)).messageDropped(clientId,
+        verify(eventLog, times(1)).messageDropped(
+                clientId,
                 topic,
                 qos,
                 "The QoS 0 memory limit exceeded, size: 1,111 bytes, max: 1,000 bytes");
-
     }
 
     @Test
     public void test_qos0_memory_exceeded_shared() {
         messageDroppedService.qos0MemoryExceededShared(clientId, topic, qos, 1111, 1000);
-        verify(eventLog, times(1)).sharedSubscriptionMessageDropped(clientId,
+        verify(eventLog, times(1)).sharedSubscriptionMessageDropped(
+                clientId,
                 topic,
                 qos,
                 "The QoS 0 memory limit exceeded, size: 1,111 bytes, max: 1,000 bytes");
-
     }
 }

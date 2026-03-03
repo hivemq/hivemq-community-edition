@@ -39,7 +39,6 @@ public class PersistenceMigrationFileModule extends SingletonModule<Class<Persis
 
     private final @NotNull PersistenceType payloadPersistenceType;
     private final @NotNull PersistenceType retainedPersistenceType;
-
     public PersistenceMigrationFileModule() {
         super(PersistenceMigrationFileModule.class);
         this.payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
@@ -48,7 +47,6 @@ public class PersistenceMigrationFileModule extends SingletonModule<Class<Persis
 
     @Override
     protected void configure() {
-
         if (retainedPersistenceType == PersistenceType.FILE) {
             bind(RetainedMessageLocalPersistence.class).to(RetainedMessageXodusLocalPersistence.class)
                     .in(Singleton.class);
@@ -57,12 +55,10 @@ public class PersistenceMigrationFileModule extends SingletonModule<Class<Persis
             bind(PublishPayloadLocalPersistence.class).to(PublishPayloadXodusLocalPersistence.class)
                     .in(Singleton.class);
         }
-
-        if (retainedPersistenceType == PersistenceType.FILE_NATIVE ||
-                payloadPersistenceType == PersistenceType.FILE_NATIVE) {
+        if (retainedPersistenceType == PersistenceType.FILE_NATIVE
+                || payloadPersistenceType == PersistenceType.FILE_NATIVE) {
             install(new PersistenceMigrationRocksDBModule());
         }
-
         bind(ClientSessionLocalPersistence.class).toProvider(ClientSessionLocalProvider.class).in(Singleton.class);
         bind(ClientSessionSubscriptionLocalPersistence.class).toProvider(ClientSessionSubscriptionLocalProvider.class)
                 .in(Singleton.class);

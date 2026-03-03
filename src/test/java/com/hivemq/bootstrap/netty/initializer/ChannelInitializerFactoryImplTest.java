@@ -48,129 +48,101 @@ public class ChannelInitializerFactoryImplTest {
     private static final String TYPE_TLS_TCP = "TYPE_TLS_TCP";
     private static final String TYPE_WEBSOCKET = "TYPE_WEBSOCKET";
     private static final String TYPE_TLS_WEBSOCKET = "TYPE_TLS_WEBSOCKET";
-
     private final @NotNull ChannelDependencies channelDependencies = mock();
     private final @NotNull SslFactory sslFactory = mock();
     private final @NotNull Provider<NonSslHandler> nonSslHandlerProvider = mock();
     private final @NotNull EventLog eventLog = mock();
     private final @NotNull FullConfigurationService fullConfigurationService = mock();
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
-
     private ChannelInitializerFactoryImpl channelInitializerFactory;
-
     @Before
     public void before() {
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
-        channelInitializerFactory =
-                new TestChannelInitializerFactory(channelDependencies, sslFactory, nonSslHandlerProvider);
+        channelInitializerFactory = new TestChannelInitializerFactory(channelDependencies, sslFactory,
+                nonSslHandlerProvider);
     }
 
     @Test
     public void test_get_tcp_initializer() {
         final TcpListener tcpListener = new TcpListener(0, "0");
-
         final AbstractChannelInitializer initializer = channelInitializerFactory.getChannelInitializer(tcpListener);
-
         assertEquals(TYPE_TCP, ((FakeAbstractChannelInitializer) initializer).getType());
     }
 
     @Test
     public void test_get_tls_tcp_initializer() {
-
         final Tls tls = createDefaultTLS();
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(0, "0", tls);
-
         final AbstractChannelInitializer initializer = channelInitializerFactory.getChannelInitializer(tlsTcpListener);
-
         assertEquals(TYPE_TLS_TCP, ((FakeAbstractChannelInitializer) initializer).getType());
     }
 
     @Test
     public void test_get_websocket_initializer() {
-
         final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress("0").port(0).build();
-
-        final AbstractChannelInitializer initializer =
-                channelInitializerFactory.getChannelInitializer(websocketListener);
-
+        final AbstractChannelInitializer initializer = channelInitializerFactory
+                .getChannelInitializer(websocketListener);
         assertEquals(TYPE_WEBSOCKET, ((FakeAbstractChannelInitializer) initializer).getType());
-
     }
 
     @Test
     public void test_get_tls_websocket_initializer() {
-
         final Tls tls = createDefaultTLS();
-
-        final TlsWebsocketListener websocketListener =
-                new TlsWebsocketListener.Builder().bindAddress("0").port(0).tls(tls).build();
-
-        final AbstractChannelInitializer initializer =
-                channelInitializerFactory.getChannelInitializer(websocketListener);
-
+        final TlsWebsocketListener websocketListener = new TlsWebsocketListener.Builder().bindAddress("0").port(0)
+                .tls(tls).build();
+        final AbstractChannelInitializer initializer = channelInitializerFactory
+                .getChannelInitializer(websocketListener);
         assertEquals(TYPE_TLS_WEBSOCKET, ((FakeAbstractChannelInitializer) initializer).getType());
     }
 
     @Test
     public void test_create_tcp() {
-
-        channelInitializerFactory =
-                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
+        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
+                nonSslHandlerProvider, eventLog);
         final TcpListener tcpListener = new TcpListener(0, "0");
-        final AbstractChannelInitializer channelInitializer =
-                channelInitializerFactory.getChannelInitializer(tcpListener);
+        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
+                .getChannelInitializer(tcpListener);
         assertTrue(channelInitializer instanceof TcpChannelInitializer);
-
     }
 
     @Test
     public void test_create_tcp_tls() {
-
-        channelInitializerFactory =
-                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
+        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
+                nonSslHandlerProvider, eventLog);
         final Tls tls = createDefaultTLS();
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(0, "0", tls);
-        final AbstractChannelInitializer channelInitializer =
-                channelInitializerFactory.getChannelInitializer(tlsTcpListener);
+        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
+                .getChannelInitializer(tlsTcpListener);
         assertTrue(channelInitializer instanceof TlsTcpChannelInitializer);
-
     }
 
     @Test
     public void test_create_websocket() {
-
-        channelInitializerFactory =
-                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
+        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
+                nonSslHandlerProvider, eventLog);
         final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress("0").port(0).build();
-        final AbstractChannelInitializer channelInitializer =
-                channelInitializerFactory.getChannelInitializer(websocketListener);
+        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
+                .getChannelInitializer(websocketListener);
         assertTrue(channelInitializer instanceof WebsocketChannelInitializer);
-
     }
 
     @Test
     public void test_create_websocket_tls() {
-
-        channelInitializerFactory =
-                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
+        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
+                nonSslHandlerProvider, eventLog);
         final Tls tls = createDefaultTLS();
-
-        final TlsWebsocketListener websocketListener =
-                new TlsWebsocketListener.Builder().bindAddress("0").port(0).tls(tls).build();
-        final AbstractChannelInitializer channelInitializer =
-                channelInitializerFactory.getChannelInitializer(websocketListener);
+        final TlsWebsocketListener websocketListener = new TlsWebsocketListener.Builder().bindAddress("0").port(0)
+                .tls(tls).build();
+        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
+                .getChannelInitializer(websocketListener);
         assertTrue(channelInitializer instanceof TlsWebsocketChannelInitializer);
-
     }
-
     @SuppressWarnings("NullabilityAnnotations")
     private class TestChannelInitializerFactory extends ChannelInitializerFactoryImpl {
 
-        TestChannelInitializerFactory(
-                final ChannelDependencies channelDependencies,
-                final SslFactory sslFactory,
+        TestChannelInitializerFactory(final ChannelDependencies channelDependencies, final SslFactory sslFactory,
                 final Provider<NonSslHandler> nonSslHandlerProvider) {
             super(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         }
@@ -191,7 +163,8 @@ public class ChannelInitializerFactoryImplTest {
         }
 
         @NotNull
-        protected AbstractChannelInitializer createTlsWebsocketInitializer(@NotNull final TlsWebsocketListener listener) {
+        protected AbstractChannelInitializer createTlsWebsocketInitializer(
+                @NotNull final TlsWebsocketListener listener) {
             return new FakeAbstractChannelInitializer(channelDependencies, TYPE_TLS_WEBSOCKET);
         }
     }
@@ -199,7 +172,6 @@ public class ChannelInitializerFactoryImplTest {
     private static class FakeAbstractChannelInitializer extends AbstractChannelInitializer {
 
         private final String type;
-
         public FakeAbstractChannelInitializer(final ChannelDependencies channelDependencies, final String type) {
             super(channelDependencies, new FakeListener());
             this.type = type;
@@ -207,7 +179,7 @@ public class ChannelInitializerFactoryImplTest {
 
         @Override
         protected void addSpecialHandlers(@NotNull final Channel ch) {
-            //no-op
+            // no-op
         }
 
         public String getType() {
@@ -224,7 +196,6 @@ public class ChannelInitializerFactoryImplTest {
 
         @Override
         public void setPort(final int port) {
-
         }
 
         @Override

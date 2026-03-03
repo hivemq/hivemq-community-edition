@@ -38,13 +38,9 @@ public class SubackPacketImpl implements SubackPacket {
     final @Nullable String reasonString;
     final int packetIdentifier;
     final @NotNull UserPropertiesImpl userProperties;
-
-    public SubackPacketImpl(
-            final @NotNull ImmutableList<SubackReasonCode> reasonCodes,
-            final @Nullable String reasonString,
-            final int packetIdentifier,
+    public SubackPacketImpl(final @NotNull ImmutableList<SubackReasonCode> reasonCodes,
+            final @Nullable String reasonString, final int packetIdentifier,
             final @NotNull UserPropertiesImpl userProperties) {
-
         this.reasonCodes = reasonCodes;
         this.reasonString = reasonString;
         this.packetIdentifier = packetIdentifier;
@@ -89,10 +85,8 @@ public class SubackPacketImpl implements SubackPacket {
             return false;
         }
         final SubackPacketImpl that = (SubackPacketImpl) o;
-        return reasonCodes.equals(that.reasonCodes) &&
-                Objects.equals(reasonString, that.reasonString) &&
-                (packetIdentifier == that.packetIdentifier) &&
-                userProperties.equals(that.userProperties);
+        return reasonCodes.equals(that.reasonCodes) && Objects.equals(reasonString, that.reasonString)
+                && (packetIdentifier == that.packetIdentifier) && userProperties.equals(that.userProperties);
     }
 
     @Override

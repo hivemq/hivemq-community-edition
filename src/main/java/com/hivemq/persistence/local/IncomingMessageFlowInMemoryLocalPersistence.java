@@ -25,8 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This is an in-memory on-heap implementation of the
- * incoming message flow persistence.
+ * This is an in-memory on-heap implementation of the incoming message flow persistence.
  * <p>
  * Implementation note: No Locking is used since this implementation assumes the following:
  * <p>
@@ -37,10 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @LazySingleton
 public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMessageFlowLocalPersistence {
 
-
     private final ConcurrentHashMap<MessageFlowKey, MessageWithID> backingMap = new ConcurrentHashMap<>();
-
-
     @Override
     public void closeDB() {
     }
@@ -63,19 +59,20 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
 
     @Override
     public void delete(@NotNull final String client) {
-
-        /* dobermai: This is a dangerous operation since that delete is not atomic.
-        It shouldn't be a problem, though, since if delete is called, no adds / removes
-        are expected for the same client key at the same time due to other threads interfering.
-
-        Since the Netty layer gives us this guarantee,
-        this should work for us. In case this guarantee is removed in the future,
-        then we have a problem here and we need to lock the whole map while doing this expensive operation!
-
-        Another problem here is that the removal has a complexity of O(n), which isn't really good for large maps.
-        Fortunately we don't block and don't lock, so this shouldn't be much of a problem. However, the calling
-        thread will be blocked. In case we have very large maps, it may be a good idea to execute this in a
-        separate executor or we do parallel iteration.*/
+        /*
+         * dobermai: This is a dangerous operation since that delete is not atomic. It shouldn't be a problem, though,
+         * since if delete is called, no adds / removes are expected for the same client key at the same time due to
+         * other threads interfering.
+         * 
+         * Since the Netty layer gives us this guarantee, this should work for us. In case this guarantee is removed in
+         * the future, then we have a problem here and we need to lock the whole map while doing this expensive
+         * operation!
+         * 
+         * Another problem here is that the removal has a complexity of O(n), which isn't really good for large maps.
+         * Fortunately we don't block and don't lock, so this shouldn't be much of a problem. However, the calling
+         * thread will be blocked. In case we have very large maps, it may be a good idea to execute this in a separate
+         * executor or we do parallel iteration.
+         */
         final Set<MessageFlowKey> keys = backingMap.keySet();
         for (final MessageFlowKey messageFlowKey : keys) {
             if (messageFlowKey.getClientId().equals(client)) {
@@ -83,17 +80,13 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
             }
         }
     }
-
-
     @Immutable
     static class MessageFlowKey {
 
         private final String clientId;
-
-        //We only need the message ID for hashing, so we don't provide
-        //any access to it
+        // We only need the message ID for hashing, so we don't provide
+        // any access to it
         private final int messageId;
-
         public MessageFlowKey(@NotNull final String clientId, final int messageId) {
             this.clientId = clientId;
             this.messageId = messageId;
@@ -103,7 +96,6 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
             return clientId;
         }
 
-
         @Override
         public boolean equals(final Object o) {
             if (this == o) {
@@ -112,14 +104,11 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-
             final MessageFlowKey that = (MessageFlowKey) o;
-
             if (messageId != that.messageId) {
                 return false;
             }
             return clientId.equals(that.clientId);
-
         }
 
         @Override

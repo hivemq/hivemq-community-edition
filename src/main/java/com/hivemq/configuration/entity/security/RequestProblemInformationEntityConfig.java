@@ -22,7 +22,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 @XmlRootElement(name = "allow-request-problem-information")
 @XmlAccessorType(XmlAccessType.NONE)

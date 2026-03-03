@@ -28,14 +28,12 @@ import javax.inject.Singleton;
  */
 public class ThrottlingModule extends SingletonModule {
 
-
     public ThrottlingModule() {
         super(ThrottlingModule.class);
     }
 
     @Override
     protected void configure() {
-
         bind(GlobalTrafficShapingHandler.class).toProvider(GlobalTrafficShapingProvider.class).in(Singleton.class);
     }
 }

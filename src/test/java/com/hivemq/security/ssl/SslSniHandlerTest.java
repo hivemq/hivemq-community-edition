@@ -37,13 +37,10 @@ public class SslSniHandlerTest {
     public void test_replaceHandler() throws Exception {
         final SslHandler sslHandler = mock();
         final SslContext sslContext = mock();
-
         final SslSniHandler sslSniHandler = new SslSniHandler(sslHandler, sslContext);
         final Channel channel = new EmbeddedChannel(sslSniHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         sslSniHandler.replaceHandler(channel.pipeline().firstContext(), "abc.com", sslContext);
-
         assertEquals("abc.com", ClientConnection.of(channel).getAuthSniHostname());
         assertSame(sslHandler, channel.pipeline().get(SslHandler.class));
     }

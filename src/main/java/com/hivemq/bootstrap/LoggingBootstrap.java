@@ -40,65 +40,52 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This class is responsible for all logging bootstrapping. This is only
- * needed at the very beginning of HiveMQs lifecycle and before bootstrapping other
- * resources
+ * This class is responsible for all logging bootstrapping. This is only needed at the very beginning of HiveMQs
+ * lifecycle and before bootstrapping other resources
  */
 public class LoggingBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingBootstrap.class);
-
     private static final @NotNull ListAppender<ILoggingEvent> LIST_APPENDER = new ListAppender<>();
     private static final @NotNull List<Appender<ILoggingEvent>> DEFAULT_APPENDERS = new LinkedList<>();
-    private static final @NotNull LogLevelModifierTurboFilter LOG_LEVEL_MODIFIER_TURBO_FILTER =
-            new LogLevelModifierTurboFilter();
+    private static final @NotNull LogLevelModifierTurboFilter LOG_LEVEL_MODIFIER_TURBO_FILTER = new LogLevelModifierTurboFilter();
     private static final @NotNull LogbackChangeListener LOGBACK_CHANGE_LISTENER = new LogbackChangeListener();
-
     /**
      * Prepares the logging. This method must be called before any logging occurs
      */
     public static void prepareLogging() {
-
         final ch.qos.logback.classic.Logger logger = getRootLogger();
-
         final Iterator<Appender<ILoggingEvent>> iterator = logger.iteratorForAppenders();
         while (iterator.hasNext()) {
             final Appender<ILoggingEvent> next = iterator.next();
-            //We remove the appender for the moment
+            // We remove the appender for the moment
             logger.detachAppender(next);
             DEFAULT_APPENDERS.add(next);
         }
-
-        //This appender just adds entries to an Array List so we can queue the log statements for later
+        // This appender just adds entries to an Array List so we can queue the log statements for later
         LIST_APPENDER.start();
         logger.addAppender(LIST_APPENDER);
     }
 
     /**
-     * Initializes all Logging for HiveMQ. Call this method only once
-     * at the very beginning of the HiveMQ lifecycle
+     * Initializes all Logging for HiveMQ. Call this method only once at the very beginning of the HiveMQ lifecycle
      */
     public static void initLogging(final @NotNull File configFolder) {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
         context.addListener(LOGBACK_CHANGE_LISTENER);
-
         final boolean overridden = tryToOverrideLogbackXml(configFolder);
         if (!overridden) {
             reEnableDefaultAppenders();
             context.addTurboFilter(LOG_LEVEL_MODIFIER_TURBO_FILTER);
             logQueuedEntries();
         }
-
         redirectJULToSLF4J();
-
         reset();
         // must be added here, as addLoglevelModifiers() is much to late
         if (SystemUtils.IS_OS_WINDOWS) {
             LOG_LEVEL_MODIFIER_TURBO_FILTER.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
             log.trace("Added Xodus log level modifier for FileDataWriter.class");
         }
-
         LOG_LEVEL_MODIFIER_TURBO_FILTER.registerLogLevelModifier(new NettyLogLevelModifier());
         log.trace("Added Netty log level modifier");
     }
@@ -114,7 +101,6 @@ public class LoggingBootstrap {
      */
     private static void reEnableDefaultAppenders() {
         final ch.qos.logback.classic.Logger logger = getRootLogger();
-
         for (final Appender<ILoggingEvent> defaultAppender : DEFAULT_APPENDERS) {
             logger.addAppender(defaultAppender);
         }
@@ -125,9 +111,8 @@ public class LoggingBootstrap {
      */
     private static void logQueuedEntries() {
         final ch.qos.logback.classic.Logger logger = getRootLogger();
-
         LIST_APPENDER.stop();
-        //Now we need to detach the appender (if needed) so it isn't used anymore
+        // Now we need to detach the appender (if needed) so it isn't used anymore
         logger.detachAppender(LIST_APPENDER);
         for (final ILoggingEvent loggingEvent : LIST_APPENDER.list) {
             logger.callAppenders(loggingEvent);
@@ -151,8 +136,8 @@ public class LoggingBootstrap {
     }
 
     /**
-     * Attempts to override the standard Logging configuration delivered with HiveMQ with
-     * a logback.xml from the config folder.
+     * Attempts to override the standard Logging configuration delivered with HiveMQ with a logback.xml from the config
+     * folder.
      *
      * @return If the default configuration was overridden
      */
@@ -162,7 +147,6 @@ public class LoggingBootstrap {
             final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             try {
                 context.reset();
-
                 final JoranConfigurator configurator = new JoranConfigurator();
                 configurator.setContext(context);
                 configurator.doConfigure(file);
@@ -187,7 +171,6 @@ public class LoggingBootstrap {
                     "The logging configuration file {} cannot be read or does not exist. Using HiveMQ default logging configuration.",
                     file.getAbsolutePath());
         }
-
         return false;
     }
 
@@ -203,7 +186,6 @@ public class LoggingBootstrap {
         DEFAULT_APPENDERS.clear();
         LIST_APPENDER.list.clear();
     }
-
     private static final class LogbackChangeListener implements LoggerContextListener {
 
         @Override
@@ -213,7 +195,7 @@ public class LoggingBootstrap {
 
         @Override
         public void onStart(final @NotNull LoggerContext context) {
-            //noop
+            // noop
         }
 
         /**
@@ -231,12 +213,12 @@ public class LoggingBootstrap {
 
         @Override
         public void onStop(final @NotNull LoggerContext context) {
-            //noop
+            // noop
         }
 
         @Override
         public void onLevelChange(final @NotNull ch.qos.logback.classic.Logger logger, final @NotNull Level level) {
-            //noop
+            // noop
         }
     }
 }

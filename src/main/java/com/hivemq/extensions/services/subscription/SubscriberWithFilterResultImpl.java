@@ -25,7 +25,6 @@ public class SubscriberWithFilterResultImpl implements SubscriberWithFilterResul
 
     @NotNull
     private final String clientId;
-
     public SubscriberWithFilterResultImpl(@NotNull final String clientId) {
         this.clientId = clientId;
     }

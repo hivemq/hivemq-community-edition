@@ -30,19 +30,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class UserPropertiesImpl implements UserProperties {
 
     private static final UserPropertiesImpl NO_USER_PROPERTIES = new UserPropertiesImpl(ImmutableList.of());
-
     public static @NotNull UserPropertiesImpl of(final @NotNull ImmutableList<MqttUserProperty> list) {
         return list.isEmpty() ? NO_USER_PROPERTIES : new UserPropertiesImpl(list);
     }
-
     private final @NotNull ImmutableList<MqttUserProperty> list;
-
     private UserPropertiesImpl(final @NotNull ImmutableList<MqttUserProperty> list) {
         this.list = list;
     }
@@ -50,18 +47,14 @@ public class UserPropertiesImpl implements UserProperties {
     @Override
     public @NotNull Optional<String> getFirst(final @NotNull String name) {
         checkNotNull(name, "Name must never be null");
-        return list.stream()
-                .filter(userProperty -> userProperty.getName().equals(name))
-                .findFirst()
+        return list.stream().filter(userProperty -> userProperty.getName().equals(name)).findFirst()
                 .map(UserProperty::getValue);
     }
 
     @Override
     public @NotNull ImmutableList<String> getAllForName(final @NotNull String name) {
         checkNotNull(name, "Name must never be null");
-        return list.stream()
-                .filter(userProperty -> userProperty.getName().equals(name))
-                .map(UserProperty::getValue)
+        return list.stream().filter(userProperty -> userProperty.getName().equals(name)).map(UserProperty::getValue)
                 .collect(ImmutableList.toImmutableList());
     }
 

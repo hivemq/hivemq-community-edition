@@ -21,15 +21,13 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * This Shutdown Hook is responsible for shutting down the backing executor
- * for the Global Traffic Shaper.
+ * This Shutdown Hook is responsible for shutting down the backing executor for the Global Traffic Shaper.
  *
  * @author Florian Limpoeck
  */
 public class GlobalTrafficShaperExecutorShutdownHook implements HiveMQShutdownHook {
 
     private final @NotNull ScheduledExecutorService executor;
-
     public GlobalTrafficShaperExecutorShutdownHook(final @NotNull ScheduledExecutorService executor) {
         this.executor = executor;
     }

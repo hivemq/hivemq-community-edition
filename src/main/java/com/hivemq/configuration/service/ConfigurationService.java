@@ -21,9 +21,8 @@ import com.hivemq.configuration.service.impl.listener.ListenerConfigurationServi
  * The Configuration Service interface which allows to change HiveMQ configuration programmatically.
  *
  * @author Dominik Obermaier
- * @since 3.0
+ * @since  3.0
  */
-
 public interface ConfigurationService {
 
     /**
@@ -47,5 +46,3 @@ public interface ConfigurationService {
      */
     RestrictionsConfigurationService restrictionsConfiguration();
 }
-
-

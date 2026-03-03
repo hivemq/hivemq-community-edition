@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -28,13 +27,14 @@ public interface HiveMQExtensionFactory {
     /**
      * Creates a {@link HiveMQExtension} with the following information.
      *
-     * @param extensionMainInstance the instance of the extension's implementation of {@link ExtensionMain}
-     * @param extensionFolder       the extension's folder
-     * @param extensionConfig       the extension's configuration taken from the extension's hivemq-extension.xml
-     * @param enabled               if the extension is enabled
-     * @return a {@link HiveMQExtension}
+     * @param  extensionMainInstance the instance of the extension's implementation of {@link ExtensionMain}
+     * @param  extensionFolder       the extension's folder
+     * @param  extensionConfig       the extension's configuration taken from the extension's hivemq-extension.xml
+     * @param  enabled               if the extension is enabled
+     * @return                       a {@link HiveMQExtension}
      */
-    @NotNull HiveMQExtension createHiveMQExtension(
+    @NotNull
+    HiveMQExtension createHiveMQExtension(
             @NotNull ExtensionMain extensionMainInstance,
             @NotNull Path extensionFolder,
             @NotNull HiveMQExtensionEntity extensionConfig,

@@ -58,7 +58,6 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         implements ClientSessionSubscriptionPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(ClientSessionSubscriptionPersistenceImpl.class);
-
     private final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence;
     private final @NotNull LocalTopicTree topicTree;
     private final @NotNull SharedSubscriptionService sharedSubscriptionService;
@@ -68,19 +67,14 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     private final @NotNull PublishPollService publishPollService;
     private final @NotNull Chunker chunker;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
-
     @Inject
-    ClientSessionSubscriptionPersistenceImpl(
-            final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence,
-            final @NotNull LocalTopicTree topicTree,
-            final @NotNull SharedSubscriptionService sharedSubscriptionService,
+    ClientSessionSubscriptionPersistenceImpl(final @NotNull ClientSessionSubscriptionLocalPersistence localPersistence,
+            final @NotNull LocalTopicTree topicTree, final @NotNull SharedSubscriptionService sharedSubscriptionService,
             final @NotNull SingleWriterService singleWriterService,
             final @NotNull ConnectionPersistence connectionPersistence,
             final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
-            final @NotNull PublishPollService publishPollService,
-            final @NotNull Chunker chunker,
+            final @NotNull PublishPollService publishPollService, final @NotNull Chunker chunker,
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
-
         this.localPersistence = localPersistence;
         this.topicTree = topicTree;
         this.sharedSubscriptionService = sharedSubscriptionService;
@@ -102,28 +96,26 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     @NotNull
     @Override
     public ListenableFuture<SubscriptionResult> addSubscription(
-            @NotNull final String client, @NotNull final Topic topic) {
+            @NotNull final String client,
+            @NotNull final Topic topic) {
         try {
             checkNotNull(client, "Client id must not be null");
             checkNotNull(topic, "Topic must not be null");
-
             final long timestamp = System.currentTimeMillis();
-
             final ClientSession session = clientSessionLocalPersistence.getSession(client);
-
-            //It must not be possible to add subscriptions for an expired or not existing session
+            // It must not be possible to add subscriptions for an expired or not existing session
             if (session == null) {
                 return Futures.immediateFuture(null);
             }
-
             final boolean subscriberExisted;
-            //parse topic for shared flag
-            final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                    SharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+            // parse topic for shared flag
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
+                    .checkForSharedSubscription(topic.getTopic());
             final ListenableFuture<Void> persistFuture;
             if (sharedSubscription == null) {
-                //not a shared subscription
-                subscriberExisted = topicTree.addTopic(client,
+                // not a shared subscription
+                subscriberExisted = topicTree.addTopic(
+                        client,
                         topic,
                         SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()),
                         null);
@@ -140,37 +132,28 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 if (topic.getQoS() == QoS.EXACTLY_ONCE) {
                     topic.setQoS(QoS.AT_LEAST_ONCE);
                 }
-
-                final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(),
-                        topic.getQoS(),
-                        topic.isNoLocal(),
-                        topic.isRetainAsPublished(),
-                        topic.getRetainHandling(),
+                final Topic sharedTopic = new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(),
+                        topic.isNoLocal(), topic.isRetainAsPublished(), topic.getRetainHandling(),
                         topic.getSubscriptionIdentifier());
-
-                subscriberExisted = topicTree.addTopic(client,
+                subscriberExisted = topicTree.addTopic(
+                        client,
                         sharedTopic,
                         SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()),
                         sharedSubscription.getShareName());
-
                 final Subscription subscription = new Subscription(sharedTopic,
                         SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()),
                         sharedSubscription.getShareName());
-
                 persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                     localPersistence.addSubscription(client, topic, timestamp, bucketIndex);
                     invalidateSharedSubscriptionCacheAndPoll(client, ImmutableSet.of(subscription));
                     return null;
                 });
             }
-
-            //set future result when local persistence future and topic tree future return;
-            return Futures.whenAllComplete(persistFuture)
-                    .call(() -> new SubscriptionResult(topic,
-                                    subscriberExisted,
-                                    sharedSubscription == null ? null : sharedSubscription.getShareName()),
-                            MoreExecutors.directExecutor());
-
+            // set future result when local persistence future and topic tree future return;
+            return Futures.whenAllComplete(persistFuture).call(
+                    () -> new SubscriptionResult(topic, subscriberExisted,
+                            sharedSubscription == null ? null : sharedSubscription.getShareName()),
+                    MoreExecutors.directExecutor());
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
@@ -179,31 +162,29 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     @NotNull
     @Override
     public ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptions(
-            @NotNull final String client, @NotNull final ImmutableSet<Topic> topics) {
+            @NotNull final String client,
+            @NotNull final ImmutableSet<Topic> topics) {
         try {
             checkNotNull(client, "Client id must not be null");
             checkNotNull(topics, "Topics must not be null");
-
             return addBatchedTopics(client, topics);
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
-
     }
 
     @NotNull
     @Override
     public ListenableFuture<Void> removeSubscriptions(
-            @NotNull final String client, @NotNull final ImmutableSet<String> topics) {
+            @NotNull final String client,
+            @NotNull final ImmutableSet<String> topics) {
         try {
             checkNotNull(client, "Client id must not be null");
             checkNotNull(topics, "Topics must not be null");
-
             return removeBatchedTopics(client, topics);
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
-
     }
 
     @NotNull
@@ -212,32 +193,28 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         try {
             checkNotNull(client, "Client id must not be null");
             checkNotNull(topic, "Topic must not be null");
-
             final long timestamp = System.currentTimeMillis();
-
-            //parse topic for shared flag
-            final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                    SharedSubscriptionService.checkForSharedSubscription(topic);
+            // parse topic for shared flag
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
+                    .checkForSharedSubscription(topic);
             if (sharedSubscription == null) {
-                //not a shared subscription
+                // not a shared subscription
                 topicTree.removeSubscriber(client, topic, null);
             } else {
                 if (sharedSubscription.getTopicFilter().isEmpty()) {
                     disconnectSharedSubscriberWithEmptyTopic(client);
-
                     return Futures.immediateFuture(null);
                 }
-                topicTree.removeSubscriber(client,
+                topicTree.removeSubscriber(
+                        client,
                         sharedSubscription.getTopicFilter(),
                         sharedSubscription.getShareName());
             }
-
             final ListenableFuture<Void> persistFuture = singleWriter.submit(client, (bucketIndex) -> {
                 localPersistence.remove(client, topic, timestamp, bucketIndex);
                 return null;
             });
-
-            //set future result when local persistence future and topic tree future return;
+            // set future result when local persistence future and topic tree future return;
             return Futures.whenAllComplete(persistFuture)
                     .call(() -> persistFuture.get(), MoreExecutors.directExecutor());
         } catch (final Throwable throwable) {
@@ -250,26 +227,22 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     public ListenableFuture<Void> removeAll(@NotNull final String clientId) {
         try {
             checkNotNull(clientId, "Client id must not be null");
-
             final Set<Topic> topics = localPersistence.getSubscriptions(clientId);
             final Set<TopicFilter> subscriptions = new HashSet<>();
             for (final Topic topic : topics) {
-                final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                        SharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+                final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
+                        .checkForSharedSubscription(topic.getTopic());
                 if (sharedSubscription == null) {
                     subscriptions.add(new TopicFilter(topic.getTopic(), null));
                 } else {
-                    subscriptions.add(new TopicFilter(sharedSubscription.getTopicFilter(),
-                            sharedSubscription.getShareName()));
+                    subscriptions.add(
+                            new TopicFilter(sharedSubscription.getTopicFilter(), sharedSubscription.getShareName()));
                 }
             }
-
             for (final TopicFilter subscription : subscriptions) {
                 topicTree.removeSubscriber(clientId, subscription.getTopic(), subscription.getSharedName());
             }
-
             return removeAllLocally(clientId);
-
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
@@ -286,99 +259,83 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
 
     @NotNull
     private ListenableFuture<ImmutableList<SubscriptionResult>> addBatchedTopics(
-            @NotNull final String clientId, @NotNull final ImmutableSet<Topic> topics) {
-
+            @NotNull final String clientId,
+            @NotNull final ImmutableSet<Topic> topics) {
         final long timestamp = System.currentTimeMillis();
-
         final ClientSession session = clientSessionLocalPersistence.getSession(clientId);
-
-        //It must not be possible to add subscriptions for an expired or not existing session
+        // It must not be possible to add subscriptions for an expired or not existing session
         if (session == null) {
             return Futures.immediateFuture(null);
         }
-
         final ImmutableSet.Builder<Subscription> sharedSubs = new ImmutableSet.Builder<>();
         final Set<Subscription> subscriptions = new HashSet<>();
         for (final Topic topic : topics) {
-
-            //parse topic for shared flag
-            final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                    SharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
+            // parse topic for shared flag
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
+                    .checkForSharedSubscription(topic.getTopic());
             if (sharedSubscription == null) {
-                //not a shared subscription
-                subscriptions.add(new Subscription(topic,
-                        SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()),
-                        null));
+                // not a shared subscription
+                subscriptions.add(
+                        new Subscription(topic,
+                                SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()),
+                                null));
             } else {
                 if (sharedSubscription.getTopicFilter().isEmpty()) {
                     disconnectSharedSubscriberWithEmptyTopic(clientId);
-
                     return Futures.immediateFuture(null);
                 }
-
                 // QoS 2 is not supported for shared subscriptions
                 if (topic.getQoS() == QoS.EXACTLY_ONCE) {
                     topic.setQoS(QoS.AT_LEAST_ONCE);
                 }
-
-                final Subscription sharedSub = new Subscription(new Topic(sharedSubscription.getTopicFilter(),
-                        topic.getQoS(),
-                        topic.isNoLocal(),
-                        topic.isRetainAsPublished(),
-                        topic.getRetainHandling(),
-                        topic.getSubscriptionIdentifier()),
+                final Subscription sharedSub = new Subscription(
+                        new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(), topic.isNoLocal(),
+                                topic.isRetainAsPublished(), topic.getRetainHandling(),
+                                topic.getSubscriptionIdentifier()),
                         SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()),
                         sharedSubscription.getShareName());
-
                 sharedSubs.add(sharedSub);
                 subscriptions.add(sharedSub);
             }
         }
         final ImmutableList.Builder<SubscriptionResult> subscriptionResultBuilder = ImmutableList.builder();
         for (final Subscription subscription : subscriptions) {
-            final boolean subscriberExisted = topicTree.addTopic(clientId,
+            final boolean subscriberExisted = topicTree.addTopic(
+                    clientId,
                     subscription.getTopic(),
                     subscription.getFlags(),
                     subscription.getSharedGroup());
-            subscriptionResultBuilder.add(new SubscriptionResult(subscription.getTopic(),
-                    subscriberExisted,
-                    subscription.getSharedGroup()));
+            subscriptionResultBuilder.add(
+                    new SubscriptionResult(subscription.getTopic(), subscriberExisted, subscription.getSharedGroup()));
         }
-
         final ListenableFuture<Void> persistFuture = singleWriter.submit(clientId, (bucketIndex) -> {
             localPersistence.addSubscriptions(clientId, topics, timestamp, bucketIndex);
             return null;
         });
-
         invalidateSharedSubscriptionCacheAndPoll(clientId, sharedSubs.build());
-
-        //set future result when local persistence future and topic tree future return;
+        // set future result when local persistence future and topic tree future return;
         return Futures.whenAllComplete(persistFuture)
                 .call(() -> subscriptionResultBuilder.build(), MoreExecutors.directExecutor());
     }
 
     @Override
     public void invalidateSharedSubscriptionCacheAndPoll(
-            final @NotNull String clientId, final @NotNull ImmutableSet<Subscription> sharedSubs) {
-
+            final @NotNull String clientId,
+            final @NotNull ImmutableSet<Subscription> sharedSubs) {
         checkNotNull(clientId, "Client id must never be null");
         checkNotNull(sharedSubs, "Subscriptions must never be null");
-
         final ClientSession session = clientSessionLocalPersistence.getSession(clientId);
-
-        //not connected clients and empty subscription don't need invalidation of cache
+        // not connected clients and empty subscription don't need invalidation of cache
         if ((session != null && !session.isConnected()) || sharedSubs.isEmpty()) {
             return;
         }
-
         final ClientConnection clientConnection = connectionPersistence.get(clientId);
         if (clientConnection != null && clientConnection.getChannel().isActive()) {
             for (final Subscription sharedSub : sharedSubs) {
-
                 final Topic topic = sharedSub.getTopic();
-
                 final String sharedSubId = sharedSub.getSharedGroup() + "/" + topic.getTopic();
-                publishPollService.pollSharedPublishesForClient(clientId,
+                publishPollService.pollSharedPublishesForClient(
+                        clientId,
                         sharedSubId,
                         topic.getQoS().getQosNumber(),
                         topic.isRetainAsPublished(),
@@ -387,7 +344,8 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
                 sharedSubscriptionService.invalidateSharedSubscriptionCache(clientId);
                 sharedSubscriptionService.invalidateSharedSubscriberCache(sharedSubId);
                 clientConnection.setNoSharedSubscription(false);
-                log.trace("Invalidated cache and polled for shared subscription '{}' and client '{}'",
+                log.trace(
+                        "Invalidated cache and polled for shared subscription '{}' and client '{}'",
                         sharedSubId,
                         clientId);
             }
@@ -395,44 +353,42 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     }
 
     @NotNull
-    public ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> getAllLocalSubscribersChunk(@NotNull final ChunkCursor cursor) {
-        return chunker.getAllLocalChunk(cursor, InternalConfigurations.PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE,
+    public ListenableFuture<MultipleChunkResult<Map<String, ImmutableSet<Topic>>>> getAllLocalSubscribersChunk(
+            @NotNull final ChunkCursor cursor) {
+        return chunker.getAllLocalChunk(
+                cursor,
+                InternalConfigurations.PERSISTENCE_SUBSCRIPTIONS_MAX_CHUNK_SIZE,
                 // Chunker.SingleWriterCall interface
-                (bucket, lastKey, maxResults) -> singleWriter.submit(bucket,
+                (bucket, lastKey, maxResults) -> singleWriter.submit(
+                        bucket,
                         // actual single writer call
                         (bucketIndex) -> localPersistence.getAllSubscribersChunk(bucketIndex, lastKey, maxResults)));
     }
 
     @NotNull
     private ListenableFuture<Void> removeBatchedTopics(
-            @NotNull final String clientId, @NotNull final ImmutableSet<String> topics) {
-
+            @NotNull final String clientId,
+            @NotNull final ImmutableSet<String> topics) {
         final long timestamp = System.currentTimeMillis();
-
         final ImmutableSet.Builder<TopicFilter> topicsToRemoveBuilder = new ImmutableSet.Builder<>();
-
         for (final String topic : topics) {
-            final SharedSubscriptionService.SharedSubscription sharedSubscription =
-                    SharedSubscriptionService.checkForSharedSubscription(topic);
+            final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
+                    .checkForSharedSubscription(topic);
             if (sharedSubscription == null) {
                 topicsToRemoveBuilder.add(new TopicFilter(topic, null));
             } else {
-                topicsToRemoveBuilder.add(new TopicFilter(sharedSubscription.getTopicFilter(),
-                        sharedSubscription.getShareName()));
+                topicsToRemoveBuilder
+                        .add(new TopicFilter(sharedSubscription.getTopicFilter(), sharedSubscription.getShareName()));
             }
         }
-
         final ImmutableSet<TopicFilter> topicsToRemove = topicsToRemoveBuilder.build();
-
         for (final TopicFilter topicFilter : topicsToRemove) {
             topicTree.removeSubscriber(clientId, topicFilter.getTopic(), topicFilter.getSharedName());
         }
-
         final ListenableFuture<Void> persistFuture = singleWriter.submit(clientId, (bucketIndex) -> {
             localPersistence.removeSubscriptions(clientId, topics, timestamp, bucketIndex);
             return null;
         });
-
         return persistFuture;
     }
 
@@ -440,14 +396,15 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
         final ClientConnection clientConnection = connectionPersistence.get(clientId);
         if (clientConnection != null) {
             clientConnection.getChannel().eventLoop().execute(() -> {
-                mqttServerDisconnector.disconnect(clientConnection.getChannel(),
+                mqttServerDisconnector.disconnect(
+                        clientConnection.getChannel(),
                         "A client (IP: {}) sent a shared subscription with an empty topic. Disconnecting client.",
                         "Sent shared subscription with empty topic",
                         Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
                         ReasonStrings.DISCONNECT_TOPIC_NAME_INVALID_SHARED_EMPTY);
             });
         } else {
-            //at least log if that happens
+            // at least log if that happens
             log.debug("Client {} sent a shared subscription with empty topic.", clientId);
         }
     }
@@ -455,13 +412,12 @@ public class ClientSessionSubscriptionPersistenceImpl extends AbstractPersistenc
     @Override
     @NotNull
     public ImmutableSet<Topic> getSharedSubscriptions(@NotNull final String client) {
-
         checkNotNull(client, "Client id must not be null");
         final ImmutableSet<Topic> subscriptions = getSubscriptions(client);
         final ImmutableSet.Builder<Topic> sharedSubscriptions = ImmutableSet.builder();
         for (final Topic subscription : subscriptions) {
-            final boolean isSharedSubscription =
-                    SharedSubscriptionService.checkForSharedSubscription(subscription.getTopic()) != null;
+            final boolean isSharedSubscription = SharedSubscriptionService
+                    .checkForSharedSubscription(subscription.getTopic()) != null;
             if (isSharedSubscription) {
                 sharedSubscriptions.add(subscription);
             }

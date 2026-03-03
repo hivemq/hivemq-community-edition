@@ -52,22 +52,16 @@ import static com.hivemq.metrics.HiveMQMetrics.CONNECTIONS_OVERALL_CURRENT;
 public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
 
     private static final Logger log = LoggerFactory.getLogger(UsageStatisticsCollectorImpl.class);
-
-
     private final @NotNull SystemInformation systemInformation;
     private final @NotNull FullConfigurationService fullConfigurationService;
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull HivemqId hivemqId;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-
     @Inject
-    public UsageStatisticsCollectorImpl(
-            final @NotNull SystemInformation systemInformation,
+    public UsageStatisticsCollectorImpl(final @NotNull SystemInformation systemInformation,
             final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull MetricsHolder metricsHolder,
-            final @NotNull HivemqId hivemqId,
+            final @NotNull MetricsHolder metricsHolder, final @NotNull HivemqId hivemqId,
             final @NotNull HiveMQExtensions hiveMQExtensions) {
-
         this.systemInformation = systemInformation;
         this.fullConfigurationService = fullConfigurationService;
         this.metricsHolder = metricsHolder;
@@ -76,20 +70,15 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
     }
 
     public @NotNull String getJson(final @NotNull String statisticsType) throws Exception {
-
         final Statistic statistic = collectStatistics();
         statistic.setStatisticType(statisticsType);
-
         final ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.writer().writeValueAsString(statistic);
     }
 
     private @NotNull Statistic collectStatistics() {
-
         final Statistic statistic = new Statistic();
-
         collectHiveMQInformation(statistic);
-
         try {
             collectSystemStatistics(statistic);
         } catch (final Throwable t) {
@@ -100,7 +89,6 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
         collectMetricStatistics(statistic);
         collectJvmStatistics(statistic);
         collectEnvironmentStatistics(statistic);
-
         return statistic;
     }
 
@@ -110,16 +98,12 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
     }
 
     private void collectHiveMQInformation(final @NotNull Statistic statistic) {
-
         statistic.setId(hivemqId.getHivemqId());
         statistic.setHivemqVersion(systemInformation.getHiveMQVersion());
         statistic.setHivemqUptime((System.currentTimeMillis() - systemInformation.getRunningSince()) / 1000);
-
         int official = 0;
         int custom = 0;
-
         final Collection<HiveMQExtension> extensions = hiveMQExtensions.getEnabledHiveMQExtensions().values();
-
         for (final HiveMQExtension extension : extensions) {
             final String author = extension.getAuthor();
             if (author != null && (author.contains("dc-square") || author.contains("HiveMQ"))) {
@@ -128,13 +112,11 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
                 custom++;
             }
         }
-
         statistic.setOfficialExtensions(official);
         statistic.setCustomExtensions(custom);
     }
 
     private void collectJvmStatistics(final @NotNull Statistic statistic) {
-
         statistic.setJavaVendor(System.getProperty("java.vm.vendor"));
         statistic.setJavaVendorVersion(System.getProperty("java.vendor.version"));
         statistic.setJavaVersion(System.getProperty("java.version"));
@@ -145,24 +127,18 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
     }
 
     private void collectMetricStatistics(final @NotNull Statistic statistic) {
-
         final Number connectedClients = getGaugeValue(CONNECTIONS_OVERALL_CURRENT.name());
-
         statistic.setConnectedClients(connectedClients == null ? 0 : connectedClients.longValue());
     }
 
     private void collectConfigStatistics(final @NotNull Statistic statistic) {
-
         final ListenerConfigurationService listenerConfiguration = fullConfigurationService.listenerConfiguration();
-
         statistic.setTcpListeners(listenerConfiguration.getTcpListeners().size());
         statistic.setTlsListeners(listenerConfiguration.getTlsTcpListeners().size());
         statistic.setWsListeners(listenerConfiguration.getWebsocketListeners().size());
         statistic.setWssListeners(listenerConfiguration.getTlsWebsocketListeners().size());
-
         final MqttConfigurationService mqttConfigurationService = fullConfigurationService.mqttConfiguration();
         statistic.setMaxQueue(mqttConfigurationService.maxQueuedMessages());
-
         statistic.setMaxKeepalive(mqttConfigurationService.keepAliveMax());
         statistic.setSessionExpiry(mqttConfigurationService.maxSessionExpiryInterval());
         statistic.setMessageExpiry(mqttConfigurationService.maxMessageExpiryInterval());
@@ -172,15 +148,13 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
 
     private @Nullable <T> T getGaugeValue(final String metricName) {
         try {
-            final SortedMap<String, Gauge> gauges =
-                    metricsHolder.getMetricRegistry().getGauges((name, metric) -> metricName.equals(name));
+            final SortedMap<String, Gauge> gauges = metricsHolder.getMetricRegistry()
+                    .getGauges((name, metric) -> metricName.equals(name));
             if (gauges.isEmpty()) {
                 return null;
             }
-
-            //we expect a single result here
+            // we expect a single result here
             final Gauge gauge = gauges.values().iterator().next();
-
             final T value = (T) gauge.getValue();
             return value;
         } catch (final Exception e) {
@@ -189,11 +163,9 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
     }
 
     private void collectSystemStatistics(final @NotNull Statistic statistic) {
-
         if (!SYSTEM_METRICS_ENABLED) {
             return;
         }
-
         final OperatingSystem operatingSystem;
         final HardwareAbstractionLayer hardware;
         try {
@@ -205,26 +177,22 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
             log.trace("original exception", e);
             return;
         }
-
         statistic.setOsManufacturer(operatingSystem.getManufacturer());
         statistic.setOs(operatingSystem.getFamily());
         final OperatingSystem.OSVersionInfo version = operatingSystem.getVersionInfo();
         statistic.setOsVersion(version.getVersion());
         statistic.setOpenFileLimit(operatingSystem.getFileSystem().getMaxFileDescriptors());
-
-        //disk space in MB
+        // disk space in MB
         long totalDiskSpace = 0;
         for (final OSFileStore osFileStore : operatingSystem.getFileSystem().getFileStores()) {
             totalDiskSpace += (osFileStore.getTotalSpace() / 1024 / 1024);
         }
         statistic.setDiskSize(totalDiskSpace);
-
         final CentralProcessor processor = hardware.getProcessor();
         statistic.setCpu(processor.toString());
         statistic.setCpuSockets(processor.getPhysicalPackageCount());
         statistic.setCpuPhysicalCores(processor.getPhysicalProcessorCount());
         statistic.setCpuTotalCores(processor.getLogicalProcessorCount());
-
         statistic.setOsUptime(operatingSystem.getSystemUptime());
         statistic.setMemorySize(hardware.getMemory().getTotal() / 1024 / 1024);
     }

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 public class MetricRegistryLogger implements MetricRegistryListener {
 
     private static final Logger log = LoggerFactory.getLogger(MetricRegistryLogger.class);
-
     @Override
     public void onGaugeAdded(final String name, final Gauge<?> gauge) {
         log.trace("Metrics gauge [{}] added", name);

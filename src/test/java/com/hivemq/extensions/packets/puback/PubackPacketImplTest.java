@@ -28,10 +28,9 @@ public class PubackPacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(PubackPacketImpl.class)
-                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks @NotNull Optional is @NotNull
-                .withNonnullFields("reasonCode", "userProperties")
-                .suppress(Warning.STRICT_INHERITANCE)
-                .verify();
+        EqualsVerifier.forClass(PubackPacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                                                                                              // @NotNull Optional is
+                                                                                              // @NotNull
+                .withNonnullFields("reasonCode", "userProperties").suppress(Warning.STRICT_INHERITANCE).verify();
     }
 }

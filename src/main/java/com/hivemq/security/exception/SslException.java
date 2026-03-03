@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.hivemq.security.exception;
+
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
@@ -28,6 +29,4 @@ public class SslException extends RuntimeException {
     public SslException(final @NotNull String message, final @NotNull Throwable cause) {
         super(message, cause);
     }
-
 }
-

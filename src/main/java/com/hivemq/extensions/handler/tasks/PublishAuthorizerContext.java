@@ -35,14 +35,9 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
     private final int authorizerCount;
     private final @NotNull ChannelHandlerContext ctx;
     private final @NotNull AtomicInteger counter;
-
-    public PublishAuthorizerContext(
-            final @NotNull String identifier,
-            final @NotNull PublishAuthorizerOutputImpl output,
-            final @NotNull SettableFuture<PublishAuthorizerOutputImpl> authorizeFuture,
-            final int authorizerCount,
+    public PublishAuthorizerContext(final @NotNull String identifier, final @NotNull PublishAuthorizerOutputImpl output,
+            final @NotNull SettableFuture<PublishAuthorizerOutputImpl> authorizeFuture, final int authorizerCount,
             final @NotNull ChannelHandlerContext ctx) {
-
         super(identifier);
         this.output = output;
         this.authorizeFuture = authorizeFuture;
@@ -53,33 +48,27 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
 
     @Override
     public void pluginPost(final @NotNull PublishAuthorizerOutputImpl pluginOutput) {
-
-        if (pluginOutput.isAsync() &&
-                pluginOutput.isTimedOut() &&
-                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-            //Timeout fallback failure means publish delivery prevention
+        if (pluginOutput.isAsync() && pluginOutput.isTimedOut()
+                && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+            // Timeout fallback failure means publish delivery prevention
             pluginOutput.forceFailedAuthorization();
         }
-
-        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL ||
-                pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
+        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL
+                || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
             ClientConnectionContext.of(ctx.channel()).setIncomingPublishesSkipRest(true);
         }
-
-
-        //the publish is done if any authorizer sets the outcome
+        // the publish is done if any authorizer sets the outcome
         if (pluginOutput.isCompleted()) {
             authorizeFuture.set(pluginOutput);
             return;
         }
-
         if (counter.incrementAndGet() == authorizerCount) {
             authorizeFuture.set(pluginOutput);
         }
     }
 
     public void increment() {
-        //we must set the future when no more authorizers are registered
+        // we must set the future when no more authorizers are registered
         if (counter.incrementAndGet() == authorizerCount) {
             authorizeFuture.set(output);
         }

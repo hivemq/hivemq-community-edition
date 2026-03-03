@@ -28,7 +28,6 @@ import java.util.Optional;
 public class ExtensionInformationImpl implements ExtensionInformation {
 
     private final @NotNull HiveMQExtension hiveMQExtension;
-
     public ExtensionInformationImpl(final @NotNull HiveMQExtension hiveMQExtension) {
         this.hiveMQExtension = hiveMQExtension;
     }

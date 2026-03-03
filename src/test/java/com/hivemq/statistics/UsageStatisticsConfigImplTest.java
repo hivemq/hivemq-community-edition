@@ -27,15 +27,10 @@ public class UsageStatisticsConfigImplTest {
 
     @Test
     public void test_config() {
-
         final UsageStatisticsConfig config = new UsageStatisticsConfigImpl();
-
         config.setEnabled(false);
         assertFalse(config.isEnabled());
-
         config.setEnabled(true);
         assertTrue(config.isEnabled());
-
     }
-
 }

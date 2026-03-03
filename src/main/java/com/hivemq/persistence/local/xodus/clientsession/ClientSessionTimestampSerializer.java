@@ -22,33 +22,23 @@ class ClientSessionTimestampSerializer {
     /**
      * Reads a long value from the first six bytes of the given byte array
      *
-     * @param b a byte array with size of at least 6
-     * @return a timestamp long
+     * @param  b a byte array with size of at least 6
+     * @return   a timestamp long
      */
     public long byteArrayToTimestampLong(@NotNull final byte[] b) {
-        return ((((long) b[5] & 0xff) << 40) |
-                (((long) b[4] & 0xff) << 32) |
-                (((long) b[3] & 0xff) << 24) |
-                (((long) b[2] & 0xff) << 16) |
-                (((long) b[1] & 0xff) << 8) |
-                (((long) b[0] & 0xff)));
+        return ((((long) b[5] & 0xff) << 40) | (((long) b[4] & 0xff) << 32) | (((long) b[3] & 0xff) << 24)
+                | (((long) b[2] & 0xff) << 16) | (((long) b[1] & 0xff) << 8) | (((long) b[0] & 0xff)));
     }
 
     /**
-     * Reads a timestamp and converts it to a six byte long
-     * byte array.
+     * Reads a timestamp and converts it to a six byte long byte array.
      *
-     * @param timestamp the timestamp to convert
-     * @return a six byte long byte array
+     * @param  timestamp the timestamp to convert
+     * @return           a six byte long byte array
      */
     @NotNull
     public byte[] timestampLongToByteArray(final long timestamp) {
-        return new byte[]{
-                (byte) timestamp,
-                (byte) (timestamp >> 8),
-                (byte) (timestamp >> 16),
-                (byte) (timestamp >> 24),
-                (byte) (timestamp >> 32),
-                (byte) (timestamp >> 40)};
+        return new byte[]{(byte) timestamp, (byte) (timestamp >> 8), (byte) (timestamp >> 16), (byte) (timestamp >> 24),
+                (byte) (timestamp >> 32), (byte) (timestamp >> 40)};
     }
 }

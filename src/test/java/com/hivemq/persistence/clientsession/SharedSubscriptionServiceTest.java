@@ -48,14 +48,11 @@ public class SharedSubscriptionServiceTest {
 
     private final @NotNull LocalTopicTree topicTree = mock();
     private final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence = mock();
-
     private SharedSubscriptionService service;
-
     @Before
     public void setUp() throws Exception {
         InternalConfigurations.SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.set(1);
         InternalConfigurations.SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.set(1);
-
         service = new SharedSubscriptionService(topicTree);
     }
 
@@ -66,33 +63,20 @@ public class SharedSubscriptionServiceTest {
         final String group = "group";
         final String topic = "topic";
         final String subtopic = "/subtopic";
-
         SharedSubscriptionService.SharedSubscription sharedSubscription;
-
-        sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(share +
-                oldDelimiter +
-                group +
-                oldDelimiter +
-                topic +
-                subtopic);
+        sharedSubscription = SharedSubscriptionService
+                .checkForSharedSubscription(share + oldDelimiter + group + oldDelimiter + topic + subtopic);
         assertNotNull(sharedSubscription);
         assertEquals(group, sharedSubscription.getShareName());
         assertEquals(topic + subtopic, sharedSubscription.getTopicFilter());
-
         sharedSubscription = SharedSubscriptionService.checkForSharedSubscription(topic + subtopic);
         assertNull(sharedSubscription);
     }
 
     @Test
     public void test_createSubscription_shared() {
-
-        final Subscription subscription = service.createSubscription(new Topic("$share/group1/topic/1",
-                QoS.AT_LEAST_ONCE,
-                true,
-                true,
-                Mqtt5RetainHandling.DO_NOT_SEND,
-                1));
-
+        final Subscription subscription = service.createSubscription(
+                new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
         assertEquals("topic/1", subscription.getTopic().getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, subscription.getTopic().getQoS());
         assertTrue(subscription.getTopic().isNoLocal());
@@ -102,14 +86,8 @@ public class SharedSubscriptionServiceTest {
 
     @Test
     public void test_createSubscription_non_shared() {
-
-        final Subscription subscription = service.createSubscription(new Topic("share/group1/topic/2",
-                QoS.AT_LEAST_ONCE,
-                true,
-                true,
-                Mqtt5RetainHandling.DO_NOT_SEND,
-                1));
-
+        final Subscription subscription = service.createSubscription(
+                new Topic("share/group1/topic/2", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1));
         assertEquals("share/group1/topic/2", subscription.getTopic().getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, subscription.getTopic().getQoS());
         assertTrue(subscription.getTopic().isNoLocal());
@@ -122,11 +100,9 @@ public class SharedSubscriptionServiceTest {
         final SharedSubscriptionService.SharedSubscription sharedSubscription1 = splitTopicAndGroup("group/topic/a");
         assertEquals("group", sharedSubscription1.getShareName());
         assertEquals("topic/a", sharedSubscription1.getTopicFilter());
-
         final SharedSubscriptionService.SharedSubscription sharedSubscription2 = splitTopicAndGroup("group/");
         assertEquals("group", sharedSubscription2.getShareName());
         assertEquals("", sharedSubscription2.getTopicFilter());
-
         final SharedSubscriptionService.SharedSubscription sharedSubscription3 = splitTopicAndGroup("group//a");
         assertEquals("group", sharedSubscription3.getShareName());
         assertEquals("/a", sharedSubscription3.getTopicFilter());
@@ -139,31 +115,24 @@ public class SharedSubscriptionServiceTest {
         when(topicTree.getSharedSubscriber("group", "topic")).thenReturn(ImmutableSet.of());
         final ImmutableSet<SubscriberWithQoS> result2 = service.getSharedSubscriber("group/topic");
         final ImmutableSet<SubscriberWithQoS> result3 = service.getSharedSubscriber("group/topic");
-
         verify(topicTree, times(1)).getSharedSubscriber(anyString(), anyString());
-
         assertSame(result1, result2);
         assertSame(result1, result3);
-
         assertTrue(result3.isEmpty());
     }
 
     @Test
     public void test_get_shared_subscriptions() throws ExecutionException {
         service.postConstruct();
-
         final ImmutableSet<Topic> topics1 = ImmutableSet.of();
-
         when(subscriptionPersistence.getSharedSubscriptions("client")).thenReturn(topics1);
-        final ImmutableSet<Topic> topics2 = service.getSharedSubscriptions("client",
-                () -> subscriptionPersistence.getSharedSubscriptions("client"));
-        final ImmutableSet<Topic> topics3 = service.getSharedSubscriptions("client",
-                () -> subscriptionPersistence.getSharedSubscriptions("client"));
-
+        final ImmutableSet<Topic> topics2 = service
+                .getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
+        final ImmutableSet<Topic> topics3 = service
+                .getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
         verify(subscriptionPersistence, times(1)).getSharedSubscriptions("client");
         assertSame(topics1, topics2);
         assertSame(topics1, topics3);
-
         assertTrue(topics3.isEmpty());
     }
 

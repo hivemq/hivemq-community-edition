@@ -34,8 +34,8 @@ public interface AsyncIterator<V> {
     /**
      * @return a future that completes when the iteration is finished
      */
-    @NotNull CompletableFuture<Void> getFinishedFuture();
-
+    @NotNull
+    CompletableFuture<Void> getFinishedFuture();
     /**
      * Callback for every item that is iterated
      *
@@ -44,10 +44,11 @@ public interface AsyncIterator<V> {
     interface ItemCallback<V> {
 
         /**
-         * @param item the item for this step of the iteration
-         * @return a Future that completes when this step of the iteration is done and contains a {@link Boolean} if the
-         *         iteration should be continued
+         * @param  item the item for this step of the iteration
+         * @return      a Future that completes when this step of the iteration is done and contains a {@link Boolean}
+         *              if the iteration should be continued
          */
-        @NotNull ListenableFuture<Boolean> onItems(@NotNull Collection<V> item);
+        @NotNull
+        ListenableFuture<Boolean> onItems(@NotNull Collection<V> item);
     }
 }

@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.2.0
+ * @since  4.2.0
  */
 @SuppressWarnings("NullabilityAnnotations")
 public class AuthInputTest {
@@ -48,14 +48,12 @@ public class AuthInputTest {
     private final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("test", "1"));
     private final String reasonString = "testString";
     private AuthInput authInput;
-
     @Before
     public void setUp() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-
         final AUTH auth = new AUTH(method, authData, reasonCode, userProperties, reasonString);
         authInput = new AuthInput("client", channel, auth, false);
     }
@@ -68,7 +66,6 @@ public class AuthInputTest {
         assertEquals(AuthReasonCode.CONTINUE_AUTHENTICATION, authPacket.getReasonCode());
         assertEquals(reasonString, authPacket.getReasonString().get());
         assertEquals("1", authPacket.getUserProperties().getFirst("test").get());
-
         assertNotNull(authInput.getClientInformation());
         assertNotNull(authInput.getConnectionInformation());
         assertFalse(authInput.isReAuthentication());

@@ -30,24 +30,18 @@ import static com.hivemq.configuration.service.InternalConfigurations.EXTENSION_
 public class PluginServiceRateLimitService {
 
     public static final RateLimitExceededException RATE_LIMIT_EXCEEDED_EXCEPTION = new RateLimitExceededException();
-
     private final AtomicInteger counter = new AtomicInteger(0);
     private final AtomicInteger reserveCounter = new AtomicInteger(0);
     private final AtomicLong startTime = new AtomicLong(0);
     private final AtomicLong resetTime = new AtomicLong(0);
-
     private final int rateLimit;
-
     public PluginServiceRateLimitService() {
         rateLimit = EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC.get();
     }
-
     static {
         RATE_LIMIT_EXCEEDED_EXCEPTION.setStackTrace(new StackTraceElement[0]);
     }
-
     public boolean rateLimitExceeded() {
-
         if (rateLimit <= 0) {
             return false;
         }
@@ -57,25 +51,22 @@ public class PluginServiceRateLimitService {
             // If an other thread sets a new timestamp that's ok as well.
             if (startTime.compareAndSet(rateTimer, currentTime)) {
                 counter.set(1); // This call is the first
-
-                //reset reserve after 10 seconds
+                // reset reserve after 10 seconds
                 final long resetTime = this.resetTime.get();
                 if (currentTime - resetTime > 10000) {
-
                     // If an other thread sets a new timestamp that's ok as well.
                     if (startTime.compareAndSet(resetTime, currentTime)) {
                         reserveCounter.set(1);
                     }
                 }
-
-                //first call in this second window
+                // first call in this second window
                 return false;
             }
         }
-
         final boolean exceeded = counter.incrementAndGet() > rateLimit;
         if (exceeded) {
-            // if counter is exceeded try if there is still a reserve. This allows to handle short bursts even if the second limit is breached.
+            // if counter is exceeded try if there is still a reserve. This allows to handle short bursts even if the
+            // second limit is breached.
             return reserveCounter.incrementAndGet() > rateLimit;
         }
         return false;

@@ -25,5 +25,6 @@ public interface TlsListener extends Listener {
     /**
      * @return the TLS configuration
      */
-    @NotNull Tls getTls();
+    @NotNull
+    Tls getTls();
 }

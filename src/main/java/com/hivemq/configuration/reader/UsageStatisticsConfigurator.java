@@ -22,11 +22,9 @@ import com.hivemq.statistics.UsageStatisticsConfig;
 public class UsageStatisticsConfigurator {
 
     private final @NotNull UsageStatisticsConfig usageStatisticsConfig;
-
     public UsageStatisticsConfigurator(@NotNull final UsageStatisticsConfig usageStatisticsConfig) {
         this.usageStatisticsConfig = usageStatisticsConfig;
     }
-
 
     void setUsageStatisticsConfig(@NotNull final UsageStatisticsEntity config) {
         usageStatisticsConfig.setEnabled(config.isEnabled());

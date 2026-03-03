@@ -17,10 +17,9 @@ package com.hivemq.configuration.service;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface SecurityConfigurationService {
-
 
     /**
      * Default values
@@ -29,7 +28,6 @@ public interface SecurityConfigurationService {
     boolean VALIDATE_UTF_8_DEFAULT = true;
     boolean PAYLOAD_FORMAT_VALIDATION_DEFAULT = false;
     boolean ALLOW_REQUEST_PROBLEM_INFORMATION_DEFAULT = true;
-
     /**
      * @return true if server may assign a client id when clients connect with zero length client id else false.
      */

@@ -25,13 +25,11 @@ public class MqttPingrespEncoder implements MqttEncoder<PINGRESP> {
     private static final byte PINGRESP_FIXED_HEADER = (byte) 0b1101_0000;
     private static final byte PINGRESP_REMAINING_LENGTH = 0b0000_0000;
     public static final int ENCODED_PINGRESP_SIZE = 2;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull PINGRESP msg,
             final @NotNull ByteBuf out) {
-
         out.writeByte(PINGRESP_FIXED_HEADER);
         out.writeByte(PINGRESP_REMAINING_LENGTH);
     }

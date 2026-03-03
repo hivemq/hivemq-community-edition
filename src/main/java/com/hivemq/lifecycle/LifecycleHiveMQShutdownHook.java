@@ -31,9 +31,7 @@ import java.util.concurrent.TimeoutException;
 public class LifecycleHiveMQShutdownHook implements HiveMQShutdownHook {
 
     private static final Logger log = LoggerFactory.getLogger(LifecycleHiveMQShutdownHook.class);
-
     private final @NotNull LifecycleRegistry lifecycleRegistry;
-
     @Inject
     LifecycleHiveMQShutdownHook(final @NotNull LifecycleRegistry lifecycleRegistry) {
         this.lifecycleRegistry = lifecycleRegistry;

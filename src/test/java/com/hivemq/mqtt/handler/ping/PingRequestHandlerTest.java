@@ -35,19 +35,15 @@ import static org.mockito.Mockito.mock;
 public class PingRequestHandlerTest {
 
     private final @NotNull ChannelHandlerContext ctx = mock();
-
     @Before
     public void setUp() throws Exception {
     }
 
     @Test
     public void test_pingreq() throws Exception {
-
         final EmbeddedChannel channel = new EmbeddedChannel(new PingRequestHandler());
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         channel.writeInbound(new PINGREQ());
-
         final Object o = channel.readOutbound();
         assertTrue(o instanceof PINGRESP);
     }

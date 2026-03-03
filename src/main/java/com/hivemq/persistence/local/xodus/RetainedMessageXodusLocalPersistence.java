@@ -63,29 +63,19 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
         implements RetainedMessageLocalPersistence {
 
     private static final Logger log = LoggerFactory.getLogger(RetainedMessageXodusLocalPersistence.class);
-
     public static final String PERSISTENCE_VERSION = "040500";
-
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull AtomicLong retainMessageCounter = new AtomicLong(0);
-
     @VisibleForTesting
     final @NotNull ConcurrentHashMap<Integer, PublishTopicTree> topicTrees = new ConcurrentHashMap<>();
-
     @Inject
-    public RetainedMessageXodusLocalPersistence(
-            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull PublishPayloadPersistence payloadPersistence,
-            final @NotNull EnvironmentUtil environmentUtil,
+    public RetainedMessageXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PublishPayloadPersistence payloadPersistence, final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-
-        super(environmentUtil,
-                localPersistenceFileUtil,
-                persistenceStartup,
+        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
-                //check if enabled
+                // check if enabled
                 InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get().equals(PersistenceType.FILE));
-
         this.payloadPersistence = payloadPersistence;
         for (int i = 0; i < bucketCount; i++) {
             topicTrees.put(i, new PublishTopicTree());
@@ -121,16 +111,11 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
     public void init() {
         try {
             final DeltaCounter retainMessageDelta = DeltaCounter.finishWith(retainMessageCounter::addAndGet);
-
             for (int i = 0; i < buckets.length; i++) {
-
                 final Bucket bucket = buckets[i];
                 final PublishTopicTree publishTopicTree = topicTrees.get(i);
-
                 bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
-
                     try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-
                         while (cursor.getNext()) {
                             final RetainedMessage message = deserializeValue(byteIterableToBytes(cursor.getValue()));
                             payloadPersistence.incrementReferenceCounterOnBootstrap(message.getPublishId());
@@ -141,10 +126,8 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
                     }
                 });
             }
-
             // We can't attach the DeltaRunner as a commit hook because we do not flush here. Need to run it manually.
             retainMessageDelta.run();
-
         } catch (final ExodusException e) {
             log.error("An error occurred while preparing the Retained Message persistence.");
             log.debug("Original Exception:", e);
@@ -156,14 +139,10 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
     public void clear(final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         topicTrees.put(bucketIndex, new PublishTopicTree());
-
         final Bucket bucket = buckets[bucketIndex];
-
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
-
             final DeltaCounter retainMessageDelta = DeltaCounter.finishWith(retainMessageCounter::addAndGet);
             txn.setCommitHook(retainMessageDelta);
-
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 while (cursor.getNext()) {
                     final RetainedMessage message = deserializeValue(byteIterableToBytes(cursor.getValue()));
@@ -184,45 +163,35 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
     public void remove(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Bucket bucket = buckets[bucketIndex];
-
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
-
             final ByteIterable key = stringToByteIterable(topic);
             final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializeKey(topic)));
             if (byteIterable == null) {
                 log.trace("Removing retained message for topic {} (no message was stored previously)", topic);
                 return;
             }
-
             final RetainedMessage message = deserializeValue(byteIterableToBytes(byteIterable));
-
             log.trace("Removing retained message for topic {}", topic);
             bucket.getStore().delete(txn, key);
             topicTrees.get(bucketIndex).remove(topic);
             payloadPersistence.decrementReferenceCounter(message.getPublishId());
             retainMessageCounter.decrementAndGet();
         });
-
     }
 
     @Override
     public @Nullable RetainedMessage get(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Bucket bucket = buckets[bucketIndex];
-
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             final ByteIterable byteIterable = bucket.getStore().get(txn, bytesToByteIterable(serializeKey(topic)));
             if (byteIterable != null) {
-
                 final RetainedMessage message = deserializeValue(byteIterableToBytes(byteIterable));
                 if (message.hasExpired()) {
                     return null;
                 }
-
                 final byte[] payload = payloadPersistence.get(message.getPublishId());
                 if (payload == null) {
                     log.warn("No payload was found for the retained message on topic {}.", topic);
@@ -231,51 +200,48 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
                 message.setMessage(payload);
                 return message;
             }
-
-            //Not found :(
+            // Not found :(
             return null;
         });
     }
 
     @Override
     public void put(
-            final @NotNull RetainedMessage retainedMessage, final @NotNull String topic, final int bucketIndex) {
+            final @NotNull RetainedMessage retainedMessage,
+            final @NotNull String topic,
+            final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Bucket bucket = buckets[bucketIndex];
-
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 final ByteIterable byteIterable = cursor.getSearchKey(bytesToByteIterable(serializeKey(topic)));
                 if (byteIterable != null) {
-                    final RetainedMessage retainedMessageFromStore =
-                            deserializeValue(byteIterableToBytes(cursor.getValue()));
+                    final RetainedMessage retainedMessageFromStore = deserializeValue(
+                            byteIterableToBytes(cursor.getValue()));
                     log.trace("Replacing retained message for topic {}", topic);
-
                     txn.setCommitHook(() -> {
                         // The previous retained message is replaced, so we have to decrement the reference count.
                         payloadPersistence.decrementReferenceCounter(retainedMessageFromStore.getPublishId());
                         // And add the new payload
                         payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
                     });
-
-                    bucket.getStore()
-                            .put(txn,
-                                    bytesToByteIterable(serializeKey(topic)),
-                                    bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore().put(
+                            txn,
+                            bytesToByteIterable(serializeKey(topic)),
+                            bytesToByteIterable(serializeValue(retainedMessage)));
                 } else {
                     txn.setCommitHook(() -> {
-                        //persist needs increment.
+                        // persist needs increment.
                         retainMessageCounter.incrementAndGet();
                         topicTrees.get(bucketIndex).add(topic);
                         payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
                     });
-                    bucket.getStore()
-                            .put(txn,
-                                    bytesToByteIterable(serializeKey(topic)),
-                                    bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore().put(
+                            txn,
+                            bytesToByteIterable(serializeKey(topic)),
+                            bytesToByteIterable(serializeValue(retainedMessage)));
                     log.trace("Creating new retained message for topic {}", topic);
                 }
             }
@@ -286,7 +252,6 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
     public @NotNull Set<String> getAllTopics(final @NotNull String subscription, final int bucketId) {
         checkArgument(bucketId >= 0 && bucketId < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         return topicTrees.get(bucketId).get(subscription);
     }
 
@@ -294,11 +259,9 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
     public void cleanUp(final int bucketId) {
         checkArgument(bucketId >= 0 && bucketId < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         if (stopped.get()) {
             return;
         }
-
         final Bucket bucket = buckets[bucketId];
         bucket.getEnvironment().executeInExclusiveTransaction(txn -> {
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
@@ -317,49 +280,42 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
-            final int bucketIndex, final @Nullable String lastTopic, final int maxMemory) {
+            final int bucketIndex,
+            final @Nullable String lastTopic,
+            final int maxMemory) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         final Bucket bucket = buckets[bucketIndex];
-
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
             int usedMemory = 0;
             final ImmutableMap.Builder<String, RetainedMessage> retrievedMessages = ImmutableMap.builder();
             String lastFoundTopic = lastTopic;
             boolean hasNext = true;
-
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 if (lastTopic == null) {
                     hasNext = cursor.getNext();
                 } else {
                     final ByteIterable lastTopicKey = bytesToByteIterable(serializeKey(lastFoundTopic));
                     final ByteIterable foundKey = cursor.getSearchKeyRange(lastTopicKey);
-
                     if (foundKey == null) {
                         return new BucketChunkResult<>(retrievedMessages.build(), true, lastTopic, bucketIndex);
                     }
-
                     // we already have this one, lets look for the next
                     if (cursor.getKey().equals(lastTopicKey)) {
-                        //jump to the next key
+                        // jump to the next key
                         hasNext = cursor.getNext();
                     }
                 }
-
                 // we iterate either until the end of the persistence or until the maximum requested messages are found
                 while (hasNext && usedMemory < maxMemory) {
-
                     final String deserializedTopic = byteIterableToString(cursor.getKey());
-                    final RetainedMessage deserializedMessage =
-                            deserializeValue(byteIterableToBytes(cursor.getValue()));
-
+                    final RetainedMessage deserializedMessage = deserializeValue(
+                            byteIterableToBytes(cursor.getValue()));
                     // ignore messages with exceeded message expiry interval
                     if (deserializedMessage.hasExpired()) {
                         hasNext = cursor.getNext();
                         continue;
                     }
-
                     final byte[] payload = payloadPersistence.get(deserializedMessage.getPublishId());
-
                     // ignore messages with no payload and log a warning for the fact
                     if (payload == null) {
                         log.warn(
@@ -370,10 +326,8 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
                         continue;
                     }
                     deserializedMessage.setMessage(payload);
-
                     lastFoundTopic = deserializedTopic;
                     usedMemory += deserializedMessage.getEstimatedSizeInMemory();
-
                     retrievedMessages.put(lastFoundTopic, deserializedMessage);
                     hasNext = cursor.getNext();
                 }
@@ -385,9 +339,7 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
 
     @Override
     public void iterate(final @NotNull RetainedMessageLocalPersistence.ItemCallback callback) {
-
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         for (final Bucket bucket : buckets) {
             bucket.getEnvironment().executeInReadonlyTransaction(txn -> {
                 try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
@@ -400,5 +352,4 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
             });
         }
     }
-
 }

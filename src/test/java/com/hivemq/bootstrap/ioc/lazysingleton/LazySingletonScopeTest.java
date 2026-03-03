@@ -29,7 +29,6 @@ public class LazySingletonScopeTest {
     public void test_lazy_singleton_scope_is_singleton() throws Exception {
         final Scope scope1 = LazySingletonScope.get();
         final Scope scope2 = LazySingletonScope.get();
-
         assertSame(scope1, scope2);
     }
 }

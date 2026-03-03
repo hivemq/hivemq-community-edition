@@ -32,16 +32,14 @@ public class QueuedMessagesConfigEntity {
     @XmlEnum
     @XmlType(name = "strategy")
     public enum QueuedMessagesStrategy {
-        @XmlEnumValue("discard-oldest") DISCARD_OLDEST,
-        @XmlEnumValue("discard") DISCARD
+        @XmlEnumValue("discard-oldest")
+        DISCARD_OLDEST, @XmlEnumValue("discard")
+        DISCARD
     }
-
     @XmlElement(name = "max-queue-size", defaultValue = "1000")
     private long maxQueueSize = MqttConfigurationDefaults.MAX_QUEUED_MESSAGES_DEFAULT;
-
     @XmlElement(name = "strategy", defaultValue = "discard")
     private @NotNull QueuedMessagesStrategy queuedMessagesStrategy = QueuedMessagesStrategy.DISCARD;
-
     public long getMaxQueueSize() {
         return maxQueueSize;
     }
@@ -49,5 +47,4 @@ public class QueuedMessagesConfigEntity {
     public @NotNull QueuedMessagesStrategy getQueuedMessagesStrategy() {
         return queuedMessagesStrategy;
     }
-
 }

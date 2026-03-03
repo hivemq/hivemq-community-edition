@@ -26,16 +26,15 @@ import javax.inject.Singleton;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 @Singleton
-public class Mqtt5PubackEncoder extends
-        Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBACK, Mqtt5PubAckReasonCode> {
+public class Mqtt5PubackEncoder
+        extends
+            Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBACK, Mqtt5PubAckReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.PUBACK.ordinal() << 4;
-
-    public Mqtt5PubackEncoder(
-            final @NotNull MessageDroppedService messageDroppedService,
+    public Mqtt5PubackEncoder(final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
@@ -46,7 +45,8 @@ public class Mqtt5PubackEncoder extends
     }
 
     @Override
-    @NotNull Mqtt5PubAckReasonCode getDefaultReasonCode() {
+    @NotNull
+    Mqtt5PubAckReasonCode getDefaultReasonCode() {
         return Mqtt5PubAckReasonCode.SUCCESS;
     }
 }

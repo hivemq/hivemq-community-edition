@@ -31,3 +31,6 @@ jobs:
 
     - name: Check approved licenses
       run: ./gradlew checkApprovedLicenses
+
+    - name: Check code formatting
+      run: ./gradlew spotlessCheck

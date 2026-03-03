@@ -33,12 +33,8 @@ public class PubrecInboundInputImpl implements PubrecInboundInput, PluginTaskInp
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull PubrecPacketImpl pubrecPacket;
-
-    public PubrecInboundInputImpl(
-            final @NotNull ClientInformation clientInformation,
-            final @NotNull ConnectionInformation connectionInformation,
-            final @NotNull PubrecPacketImpl pubrecPacket) {
-
+    public PubrecInboundInputImpl(final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation, final @NotNull PubrecPacketImpl pubrecPacket) {
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.pubrecPacket = pubrecPacket;

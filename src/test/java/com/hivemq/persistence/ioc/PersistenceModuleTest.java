@@ -54,63 +54,56 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class PersistenceModuleTest {
 
     private final @NotNull Injector persistenceInjector = mock();
-
     @Before
     public void setUp() throws Exception {
-        when(persistenceInjector.getInstance(PublishPayloadPersistence.class)).thenReturn(Mockito.mock(
-                PublishPayloadPersistence.class));
-
-        when(persistenceInjector.getInstance(PublishPayloadPersistenceImpl.class)).thenReturn(Mockito.mock(
-                PublishPayloadPersistenceImpl.class));
-
-        when(persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class)).thenReturn(mock(
-                RetainedMessageRocksDBLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class)).thenReturn(mock(
-                PublishPayloadRocksDBLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(ClientQueueXodusLocalPersistence.class)).thenReturn(Mockito.mock(
-                ClientQueueXodusLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(Mockito.mock(PersistenceStartup.class));
-
+        when(persistenceInjector.getInstance(PublishPayloadPersistence.class))
+                .thenReturn(Mockito.mock(PublishPayloadPersistence.class));
+        when(persistenceInjector.getInstance(PublishPayloadPersistenceImpl.class))
+                .thenReturn(Mockito.mock(PublishPayloadPersistenceImpl.class));
+        when(persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class))
+                .thenReturn(mock(RetainedMessageRocksDBLocalPersistence.class));
+        when(persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class))
+                .thenReturn(mock(PublishPayloadRocksDBLocalPersistence.class));
+        when(persistenceInjector.getInstance(ClientQueueXodusLocalPersistence.class))
+                .thenReturn(Mockito.mock(ClientQueueXodusLocalPersistence.class));
+        when(persistenceInjector.getInstance(PersistenceStartup.class))
+                .thenReturn(Mockito.mock(PersistenceStartup.class));
         when(persistenceInjector.getInstance(ShutdownHooks.class)).thenReturn(Mockito.mock(ShutdownHooks.class));
     }
 
     @Test
     public void test_shutdown_singleton() throws ClassNotFoundException {
+        final Injector injector = Guice.createInjector(
+                new PersistenceModule(persistenceInjector,
+                        new TestConfigurationBootstrap().getPersistenceConfigurationService()),
+                new AbstractModule() {
 
-
-        final Injector injector = Guice.createInjector(new PersistenceModule(persistenceInjector,
-                new TestConfigurationBootstrap().getPersistenceConfigurationService()), new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(SystemInformation.class).toInstance(Mockito.mock(SystemInformation.class));
-                bind(MessageDroppedService.class).toInstance(Mockito.mock(MessageDroppedService.class));
-                bind(InternalPublishService.class).toInstance(Mockito.mock(InternalPublishService.class));
-                bind(PublishPollService.class).toInstance(Mockito.mock(PublishPollService.class));
-                bindScope(LazySingleton.class, LazySingletonScope.get());
-                bind(MqttConfigurationService.class).toInstance(mock(MqttConfigurationService.class));
-                bind(MetricsHolder.class).toInstance(mock(MetricsHolder.class));
-                bind(FullConfigurationService.class).toInstance(Mockito.mock(FullConfigurationService.class));
-                bind(TopicMatcher.class).toInstance(Mockito.mock(TopicMatcher.class));
-                bind(MetricRegistry.class).toInstance(new MetricRegistry());
-                bind(SingleWriterServiceImpl.class).toInstance(Mockito.mock(SingleWriterServiceImpl.class));
-                bind(EventLog.class).toInstance(Mockito.mock(EventLog.class));
-                bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());
-                bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
-            }
-        });
-
+                    @Override
+                    protected void configure() {
+                        bind(SystemInformation.class).toInstance(Mockito.mock(SystemInformation.class));
+                        bind(MessageDroppedService.class).toInstance(Mockito.mock(MessageDroppedService.class));
+                        bind(InternalPublishService.class).toInstance(Mockito.mock(InternalPublishService.class));
+                        bind(PublishPollService.class).toInstance(Mockito.mock(PublishPollService.class));
+                        bindScope(LazySingleton.class, LazySingletonScope.get());
+                        bind(MqttConfigurationService.class).toInstance(mock(MqttConfigurationService.class));
+                        bind(MetricsHolder.class).toInstance(mock(MetricsHolder.class));
+                        bind(FullConfigurationService.class).toInstance(Mockito.mock(FullConfigurationService.class));
+                        bind(TopicMatcher.class).toInstance(Mockito.mock(TopicMatcher.class));
+                        bind(MetricRegistry.class).toInstance(new MetricRegistry());
+                        bind(SingleWriterServiceImpl.class).toInstance(Mockito.mock(SingleWriterServiceImpl.class));
+                        bind(EventLog.class).toInstance(Mockito.mock(EventLog.class));
+                        bind(RestrictionsConfigurationService.class)
+                                .toInstance(new RestrictionsConfigurationServiceImpl());
+                        bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
+                    }
+                });
         final PersistenceShutdownHookInstaller instance1 = injector.getInstance(PersistenceShutdownHookInstaller.class);
         final PersistenceShutdownHookInstaller instance2 = injector.getInstance(PersistenceShutdownHookInstaller.class);
-
         assertSame(instance1, instance2);
     }
-
 }

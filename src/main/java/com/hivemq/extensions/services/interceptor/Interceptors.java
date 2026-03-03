@@ -22,13 +22,13 @@ import com.hivemq.extension.sdk.api.interceptor.connect.ConnectInboundIntercepto
 
 /**
  * @author Lukas Brandl
- * @since 4.2.0
+ * @since  4.2.0
  */
 public interface Interceptors {
 
     /**
-     * Add an connect interceptor provider to the connect interceptor provider map
-     * If there is already a provider present, it will be overwritten
+     * Add an connect interceptor provider to the connect interceptor provider map If there is already a provider
+     * present, it will be overwritten
      *
      * @param provider to be added
      */
@@ -40,7 +40,8 @@ public interface Interceptors {
      *
      * @return An immutable copy of the connect interceptor providers
      */
-    @NotNull ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders();
+    @NotNull
+    ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders();
 
     /**
      * Add an connack outbound interceptor provider to the connack outbound interceptor provider map
@@ -55,5 +56,6 @@ public interface Interceptors {
      *
      * @return An immutable copy of the connack outbound interceptor providers
      */
-    @NotNull ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders();
+    @NotNull
+    ImmutableMap<String, ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviders();
 }

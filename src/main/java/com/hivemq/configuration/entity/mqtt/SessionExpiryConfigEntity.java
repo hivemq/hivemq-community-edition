@@ -24,7 +24,7 @@ import static com.hivemq.mqtt.message.connect.Mqtt5CONNECT.SESSION_EXPIRY_MAX;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlRootElement(name = "session-expiry")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -34,7 +34,6 @@ public class SessionExpiryConfigEntity {
     @XmlElement(name = "max-interval", defaultValue = "4294967295")
     // => 136 Years = Unsigned Integer Max Value in seconds
     private long maxInterval = SESSION_EXPIRY_MAX;
-
     public long getMaxInterval() {
         return maxInterval;
     }

@@ -31,10 +31,8 @@ public class TruststoreEntity {
 
     @XmlElement(name = "path", required = true)
     private @NotNull String path = "";
-
     @XmlElement(name = "password", required = true)
     private @NotNull String password = "";
-
     public @NotNull String getPath() {
         return path;
     }
@@ -42,5 +40,4 @@ public class TruststoreEntity {
     public @NotNull String getPassword() {
         return password;
     }
-
 }

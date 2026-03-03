@@ -30,9 +30,7 @@ import static org.mockito.Mockito.when;
 public class SessionsGaugeTest {
 
     private final @NotNull ClientSessionLocalPersistence sessionPersistence = mock();
-
     private SessionsGauge sessionsGauge;
-
     @Before
     public void before() {
         sessionsGauge = new SessionsGauge(sessionPersistence);
@@ -40,7 +38,6 @@ public class SessionsGaugeTest {
 
     @Test
     public void test_getValue() throws Exception {
-
         when(sessionPersistence.getSessionsCount()).thenReturn(2);
         final Integer value = sessionsGauge.getValue();
         assertEquals(2, value.intValue());

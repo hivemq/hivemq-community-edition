@@ -23,7 +23,6 @@ public class DeltaCounter implements Runnable {
 
     private final @NotNull Consumer<Long> consumer;
     private long delta;
-
     private DeltaCounter(final @NotNull Consumer<Long> consumer) {
         this.consumer = consumer;
     }

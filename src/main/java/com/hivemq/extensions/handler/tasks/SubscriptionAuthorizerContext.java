@@ -32,13 +32,10 @@ public class SubscriptionAuthorizerContext extends PluginInOutTaskContext<Subscr
     private final @NotNull SettableFuture<SubscriptionAuthorizerOutputImpl> authorizeFuture;
     private final int authorizerCount;
     private final @NotNull AtomicInteger counter;
-
-    public SubscriptionAuthorizerContext(
-            final @NotNull String identifier,
+    public SubscriptionAuthorizerContext(final @NotNull String identifier,
             final @NotNull SubscriptionAuthorizerOutputImpl output,
             final @NotNull SettableFuture<SubscriptionAuthorizerOutputImpl> authorizeFuture,
             final int authorizerCount) {
-
         super(identifier);
         this.output = output;
         this.authorizeFuture = authorizeFuture;
@@ -48,27 +45,23 @@ public class SubscriptionAuthorizerContext extends PluginInOutTaskContext<Subscr
 
     @Override
     public void pluginPost(final @NotNull SubscriptionAuthorizerOutputImpl pluginOutput) {
-
-        if (pluginOutput.isAsync() &&
-                pluginOutput.isTimedOut() &&
-                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
-            //Timeout fallback failure means publish delivery prevention
+        if (pluginOutput.isAsync() && pluginOutput.isTimedOut()
+                && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+            // Timeout fallback failure means publish delivery prevention
             pluginOutput.forceFailedAuthorization();
         }
-
-        //the topic is done if any authorizer sets the outcome
+        // the topic is done if any authorizer sets the outcome
         if (pluginOutput.isCompleted()) {
             authorizeFuture.set(pluginOutput);
             return;
         }
-
         if (counter.incrementAndGet() == authorizerCount) {
             authorizeFuture.set(pluginOutput);
         }
     }
 
     public void increment() {
-        //we must set the future when no more interceptors are registered
+        // we must set the future when no more interceptors are registered
         if (counter.incrementAndGet() == authorizerCount) {
             authorizeFuture.set(output);
         }

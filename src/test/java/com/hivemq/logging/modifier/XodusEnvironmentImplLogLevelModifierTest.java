@@ -43,14 +43,10 @@ public class XodusEnvironmentImplLogLevelModifierTest {
     private ch.qos.logback.classic.Logger rootLogger;
     private LoggerContext context;
     private Level level;
-
     @Before
     public void setUp() throws Exception {
-
         context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
         rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-
         final LogLevelModifierTurboFilter logLevelModifierTurboFilter = new LogLevelModifierTurboFilter();
         logLevelModifierTurboFilter.registerLogLevelModifier(new XodusEnvironmentImplLogLevelModifier());
         level = rootLogger.getLevel();
@@ -74,41 +70,33 @@ public class XodusEnvironmentImplLogLevelModifierTest {
 
     @Test
     public void test_xodus_error_message_transactions_not_finished() throws Exception {
-        final String msg =
-                "Environment[/var/folders/fp/dfyv187j4h5g6cn6xs49qpqw0000gn/T/junit5059509984233082259/junit231924022829037059] is active: 1 transaction(s) not finished";
-
+        final String msg = "Environment[/var/folders/fp/dfyv187j4h5g6cn6xs49qpqw0000gn/T/junit5059509984233082259/junit231924022829037059] is active: 1 transaction(s) not finished";
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
-
         while (appenderIterator.hasNext()) {
-
             appenderIterator.next().addFilter(createFilter(countDownLatch, msg));
         }
         context.getLogger(EnvironmentImpl.class).error(msg);
-
         assertTrue(countDownLatch.await(3, TimeUnit.SECONDS));
     }
 
     @Test
     public void test_xodus_error_message_transaction_stack_traces_not_available() throws Exception {
         final String msg = "Transactions stack traces are not available, set 'exodus.env.monitorTxns.timeout > 0'";
-
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
         while (appenderIterator.hasNext()) {
-
             appenderIterator.next().addFilter(createFilter(countDownLatch, msg));
         }
         context.getLogger(EnvironmentImpl.class).error(msg);
-
         assertTrue(countDownLatch.await(3, TimeUnit.SECONDS));
     }
 
     private @NotNull Filter<ILoggingEvent> createFilter(
             final @NotNull CountDownLatch countDownLatch,
             final @NotNull String text) {
-
         return new Filter<>() {
+
             @Override
             public FilterReply decide(final ILoggingEvent event) {
                 if (event.getLevel().equals(Level.TRACE)) {

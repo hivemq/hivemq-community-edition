@@ -28,13 +28,11 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3PublishEncoder extends AbstractVariableHeaderLengthEncoder<Mqtt3PUBLISH> {
 
     private static final byte PUBLISH_FIXED_HEADER = 0b0011_0000;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull Mqtt3PUBLISH msg,
             final @NotNull ByteBuf out) {
-
         byte header = PUBLISH_FIXED_HEADER;
         final int qos = msg.getQoS().getQosNumber();
         if (msg.isDuplicateDelivery()) {
@@ -44,12 +42,9 @@ public class Mqtt3PublishEncoder extends AbstractVariableHeaderLengthEncoder<Mqt
             header |= 0b0000_0001;
         }
         header |= qos << 1;
-
         out.writeByte(header);
         createRemainingLength(msg.getRemainingLength(), out);
-
         Strings.createPrefixedBytesFromString(msg.getTopic(), out);
-
         if (qos > 0) {
             out.writeShort(msg.getPacketIdentifier());
         }

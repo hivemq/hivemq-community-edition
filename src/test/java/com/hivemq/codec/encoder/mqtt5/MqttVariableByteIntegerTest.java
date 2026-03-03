@@ -71,7 +71,6 @@ public class MqttVariableByteIntegerTest {
     @Test
     public void test_decodeVariableByteInteger_4_bytes() {
         final ByteBuf byteBuf = Unpooled.buffer();
-
         for (int i = 0; i < 127; i++) {
             if (i != 0 && i != 1 && i != 126) {
                 continue;
@@ -89,7 +88,8 @@ public class MqttVariableByteIntegerTest {
                             continue;
                         }
                         byteBuf.writeByte(128 + i).writeByte(128 + j).writeByte(128 + k).writeByte(l);
-                        assertEquals(i + j * 128 + k * 128 * 128 + l * 128 * 128 * 128,
+                        assertEquals(
+                                i + j * 128 + k * 128 * 128 + l * 128 * 128 * 128,
                                 MqttVariableByteInteger.decode(byteBuf));
                         byteBuf.clear();
                     }
@@ -131,7 +131,6 @@ public class MqttVariableByteIntegerTest {
             assertEquals(i, byteBuf.readUnsignedByte());
             assertFalse(byteBuf.isReadable());
             byteBuf.clear();
-
             final int[] encode = MqttVariableByteInteger.encode(i);
             assertEquals(i, encode[0]);
         }
@@ -148,7 +147,6 @@ public class MqttVariableByteIntegerTest {
                 assertEquals(j, byteBuf.readUnsignedByte());
                 assertFalse(byteBuf.isReadable());
                 byteBuf.clear();
-
                 final int[] encode = MqttVariableByteInteger.encode(i + j * 128);
                 assertEquals(128 + i, encode[0]);
                 assertEquals(j, encode[1]);

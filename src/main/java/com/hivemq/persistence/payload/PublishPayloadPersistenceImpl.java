@@ -38,25 +38,19 @@ import static com.hivemq.persistence.payload.PayloadReferenceCounterRegistryImpl
 public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishPayloadPersistenceImpl.class);
-
     private final @NotNull PublishPayloadLocalPersistence localPersistence;
     private final @NotNull ListeningScheduledExecutorService scheduledExecutorService;
     private final @NotNull BucketLock bucketLock;
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
     private final @NotNull RemovablePayloads[] removablePayloads;
-
     @Inject
-    PublishPayloadPersistenceImpl(
-            final @NotNull PublishPayloadLocalPersistence localPersistence,
+    PublishPayloadPersistenceImpl(final @NotNull PublishPayloadLocalPersistence localPersistence,
             final @NotNull @PayloadPersistence ListeningScheduledExecutorService scheduledExecutorService) {
-
         this.localPersistence = localPersistence;
         this.scheduledExecutorService = scheduledExecutorService;
-
         final int bucketCount = InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         bucketLock = new BucketLock(bucketCount);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
-
         removablePayloads = new RemovablePayloads[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
             removablePayloads[i] = new RemovablePayloads(i, new LinkedList<>());
@@ -68,19 +62,18 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public void init() {
         final int cleanupThreadCount = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
         final long removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
-
-        final RemovablePayloads[][] bucketResponsibilities =
-                partitionBucketResponsibilities(removablePayloads, cleanupThreadCount);
-
+        final RemovablePayloads[][] bucketResponsibilities = partitionBucketResponsibilities(
+                removablePayloads,
+                cleanupThreadCount);
         for (int i = 0; i < cleanupThreadCount; i++) {
-
             final RemovablePayloads[] responsibleBuckets = bucketResponsibilities[i];
-
             if (responsibleBuckets.length > 0 && !scheduledExecutorService.isShutdown()) {
-                scheduledExecutorService.scheduleWithFixedDelay(new RemoveEntryTask(bucketLock,
-                        payloadReferenceCounterRegistry,
-                        localPersistence,
-                        responsibleBuckets), removeSchedule, removeSchedule, TimeUnit.MILLISECONDS);
+                scheduledExecutorService.scheduleWithFixedDelay(
+                        new RemoveEntryTask(bucketLock, payloadReferenceCounterRegistry, localPersistence,
+                                responsibleBuckets),
+                        removeSchedule,
+                        removeSchedule,
+                        TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -112,19 +105,20 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             if (result == UNKNOWN_PAYLOAD || result == REF_COUNT_ALREADY_ZERO) {
                 if (InternalConfigurations.LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING) {
                     if (log.isWarnEnabled()) {
-                        log.warn("Tried to decrement a payload reference counter ({}) that was already zero.",
+                        log.warn(
+                                "Tried to decrement a payload reference counter ({}) that was already zero.",
                                 id,
                                 new Exception()); // We create here an exception to log the stacktrace.
                     }
                 } else {
                     log.warn("Tried to decrement a payload reference counter ({}) that was already zero.", id);
                     if (log.isDebugEnabled()) {
-                        log.debug("Original Exception:",
-                                new Exception()); // We create here an exception to log the stacktrace.
+                        log.debug("Original Exception:", new Exception()); // We create here an exception to log the
+                                                                           // stacktrace.
                     }
                 }
             } else if (result == 0) {
-                //Note: We'll remove the entry async in the cleanup job.
+                // Note: We'll remove the entry async in the cleanup job.
                 removablePayloads[bucketIndex].getQueue().add(id);
             }
         });
@@ -142,17 +136,14 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
 
     @VisibleForTesting
     static @NotNull RemovablePayloads @NotNull [] @NotNull [] partitionBucketResponsibilities(
-            final @NotNull RemovablePayloads[] removablePayloads, final int threads) {
-
+            final @NotNull RemovablePayloads[] removablePayloads,
+            final int threads) {
         final RemovablePayloads[][] responsibilities = new RemovablePayloads[threads][];
-
         final int buckets = removablePayloads.length;
         final int bucketsPerThread = buckets / threads;
         // There can be remaining buckets depending on the number of CPU cores available.
         final int remainingBuckets = buckets % threads;
-
         for (int i = 0; i < threads; i++) {
-
             if (i < remainingBuckets) {
                 responsibilities[i] = new RemovablePayloads[bucketsPerThread + 1];
                 // add one of the remaining buckets to the last index
@@ -160,9 +151,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             } else {
                 responsibilities[i] = new RemovablePayloads[bucketsPerThread];
             }
-
             final int startIndex = i * bucketsPerThread;
-
             System.arraycopy(removablePayloads, startIndex, responsibilities[i], 0, bucketsPerThread);
         }
         return responsibilities;

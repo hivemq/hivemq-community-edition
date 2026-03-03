@@ -38,20 +38,22 @@ import static com.hivemq.configuration.service.RestrictionsConfigurationService.
 public class RestrictionConfigurator {
 
     private static final Logger log = LoggerFactory.getLogger(RestrictionConfigurator.class);
-
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
-
     public RestrictionConfigurator(@NotNull final RestrictionsConfigurationService restrictionsConfigurationService) {
         this.restrictionsConfigurationService = restrictionsConfigurationService;
     }
 
-
     void setRestrictionsConfig(@NotNull final RestrictionsEntity restrictionsEntity) {
-        restrictionsConfigurationService.setMaxConnections(validateMaxConnections(restrictionsEntity.getMaxConnections()));
-        restrictionsConfigurationService.setMaxClientIdLength(validateMaxClientIdLength(restrictionsEntity.getMaxClientIdLength()));
-        restrictionsConfigurationService.setNoConnectIdleTimeout(validateNoConnectIdleTimeout(restrictionsEntity.getNoConnectIdleTimeout()));
-        restrictionsConfigurationService.setIncomingLimit(validateIncomingLimit(restrictionsEntity.getIncomingBandwidthThrottling()));
-        restrictionsConfigurationService.setMaxTopicLength(validateMaxTopicLength(restrictionsEntity.getMaxTopicLength()));
+        restrictionsConfigurationService
+                .setMaxConnections(validateMaxConnections(restrictionsEntity.getMaxConnections()));
+        restrictionsConfigurationService
+                .setMaxClientIdLength(validateMaxClientIdLength(restrictionsEntity.getMaxClientIdLength()));
+        restrictionsConfigurationService
+                .setNoConnectIdleTimeout(validateNoConnectIdleTimeout(restrictionsEntity.getNoConnectIdleTimeout()));
+        restrictionsConfigurationService
+                .setIncomingLimit(validateIncomingLimit(restrictionsEntity.getIncomingBandwidthThrottling()));
+        restrictionsConfigurationService
+                .setMaxTopicLength(validateMaxTopicLength(restrictionsEntity.getMaxTopicLength()));
     }
 
     private long validateMaxConnections(final long maxConnections) {
@@ -116,6 +118,4 @@ public class RestrictionConfigurator {
         }
         return incomingLimit;
     }
-
-
 }

@@ -27,11 +27,12 @@ public interface IncomingMessageFlowPersistence {
     /**
      * get a {@link MessageWithID} for specific client id and message id from the persistence.
      *
-     * @param client    The client which belongs this message.
-     * @param messageId The identifier of the message.
-     * @return the message with id.
+     * @param  client    The client which belongs this message.
+     * @param  messageId The identifier of the message.
+     * @return           the message with id.
      */
-    @Nullable MessageWithID get(final @NotNull String client, final int messageId);
+    @Nullable
+    MessageWithID get(final @NotNull String client, final int messageId);
 
     /**
      * Add or replace a {@link MessageWithID} for specific client id and message id.
@@ -41,7 +42,6 @@ public interface IncomingMessageFlowPersistence {
      * @param message   The message to add.
      */
     void addOrReplace(final @NotNull String client, final int messageId, final @NotNull MessageWithID message);
-
 
     /**
      * Remove a {@link MessageWithID} for specific client id and message id.
@@ -62,5 +62,4 @@ public interface IncomingMessageFlowPersistence {
      * close the persistence with all buckets.
      */
     void closeDB();
-
 }

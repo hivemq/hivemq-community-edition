@@ -32,7 +32,6 @@ import static org.junit.Assert.assertNotNull;
 public class SslUtilTest {
 
     private @NotNull TestKeyStoreGenerator testKeyStoreGenerator;
-
     @Before
     public void before() {
         testKeyStoreGenerator = new TestKeyStoreGenerator();

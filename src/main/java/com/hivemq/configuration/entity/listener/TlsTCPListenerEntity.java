@@ -31,7 +31,6 @@ public class TlsTCPListenerEntity extends ListenerEntity {
 
     @XmlElementRef
     private @NotNull TLSEntity tls = new TLSEntity();
-
     public @NotNull TLSEntity getTls() {
         return tls;
     }

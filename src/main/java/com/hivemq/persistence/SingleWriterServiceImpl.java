@@ -46,50 +46,39 @@ import static com.hivemq.configuration.service.InternalConfigurations.SINGLE_WRI
 public class SingleWriterServiceImpl implements SingleWriterService {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(SingleWriterServiceImpl.class);
-
     private static final int AMOUNT_OF_PRODUCERS = 5;
     private static final int RETAINED_MESSAGE_QUEUE_INDEX = 0;
     private static final int CLIENT_SESSION_QUEUE_INDEX = 1;
     private static final int SUBSCRIPTION_QUEUE_INDEX = 2;
     private static final int QUEUED_MESSAGES_QUEUE_INDEX = 3;
     private static final int ATTRIBUTE_STORE_QUEUE_INDEX = 4;
-
     private final int persistenceBucketCount;
     private final int threadPoolSize;
     private final int creditsPerExecution;
     private final long shutdownGracePeriod;
-
     private final @NotNull AtomicLong nonemptyQueueCounter = new AtomicLong(0);
     private final @NotNull AtomicInteger runningThreadsCount = new AtomicInteger(0);
     private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
-
     private final @NotNull ProducerQueuesImpl @NotNull [] producers = new ProducerQueuesImpl[AMOUNT_OF_PRODUCERS];
-
     @VisibleForTesting
-    @NotNull ExecutorService singleWriterExecutor;
-
+    @NotNull
+    ExecutorService singleWriterExecutor;
     @VisibleForTesting
     final @NotNull ScheduledExecutorService checkScheduler;
-
     @Inject
     public SingleWriterServiceImpl() {
-
         persistenceBucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
         threadPoolSize = InternalConfigurations.SINGLE_WRITER_THREAD_POOL_SIZE.get();
         creditsPerExecution = InternalConfigurations.SINGLE_WRITER_CREDITS_PER_EXECUTION.get();
         shutdownGracePeriod = InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.get();
-
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("single-writer-%d");
         singleWriterExecutor = Executors.newFixedThreadPool(threadPoolSize, threadFactory);
-
         final int amountOfQueues = validAmountOfQueues(threadPoolSize, persistenceBucketCount);
-
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new ProducerQueuesImpl(this, amountOfQueues);
         }
-
-        final ThreadFactory checkThreadFactory =
-                new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
+        final ThreadFactory checkThreadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("single-writer-scheduled-check-%d").build();
         checkScheduler = Executors.newSingleThreadScheduledExecutor(checkThreadFactory);
     }
 
@@ -97,20 +86,18 @@ public class SingleWriterServiceImpl implements SingleWriterService {
     public void postConstruct() {
         // Periodically check if there are pending tasks in the queues
         checkScheduler.scheduleAtFixedRate(() -> {
-                    try {
-
-                        if (runningThreadsCount.getAndIncrement() == 0 && !singleWriterExecutor.isShutdown()) {
-                            singleWriterExecutor.submit(new SingleWriterTask(nonemptyQueueCounter,
-                                    globalTaskCount,
-                                    runningThreadsCount,
+            try {
+                if (runningThreadsCount.getAndIncrement() == 0 && !singleWriterExecutor.isShutdown()) {
+                    singleWriterExecutor.submit(
+                            new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount,
                                     producers));
-                        } else {
-                            runningThreadsCount.decrementAndGet();
-                        }
-                    } catch (final Exception e) {
-                        log.error("Exception in single writer check task ", e);
-                    }
-                },
+                } else {
+                    runningThreadsCount.decrementAndGet();
+                }
+            } catch (final Exception e) {
+                log.error("Exception in single writer check task ", e);
+            }
+        },
                 SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(),
                 SINGLE_WRITER_INTERVAL_TO_CHECK_PENDING_TASKS_AND_SCHEDULE_MSEC.get(),
                 TimeUnit.MILLISECONDS);
@@ -128,12 +115,9 @@ public class SingleWriterServiceImpl implements SingleWriterService {
 
     void incrementNonemptyQueueCounter() {
         nonemptyQueueCounter.incrementAndGet();
-
         if (runningThreadsCount.getAndIncrement() < threadPoolSize) {
-            singleWriterExecutor.submit(new SingleWriterTask(nonemptyQueueCounter,
-                    globalTaskCount,
-                    runningThreadsCount,
-                    producers));
+            singleWriterExecutor.submit(
+                    new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount, producers));
         } else {
             runningThreadsCount.decrementAndGet();
         }
@@ -196,21 +180,18 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         if (log.isTraceEnabled()) {
             log.trace("Shutting down single writer");
         }
-
         singleWriterExecutor.shutdown();
-
         try {
             singleWriterExecutor.awaitTermination(shutdownGracePeriod, TimeUnit.SECONDS);
             if (log.isTraceEnabled()) {
                 log.trace("Finished single writer shutdown in {} ms", (System.currentTimeMillis() - start));
             }
         } catch (final InterruptedException e) {
-            //ignore
+            // ignore
         }
         singleWriterExecutor.shutdownNow();
         checkScheduler.shutdownNow();
     }
-
     private static class SingleWriterTask implements Runnable {
 
         private final @NotNull AtomicLong nonemptyQueueCounter;
@@ -218,17 +199,10 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         private final @NotNull AtomicInteger runningThreadsCount;
         private final ProducerQueuesImpl @NotNull [] producers;
         final int @NotNull [] probabilities;
-
         private static final int MIN_PROBABILITY_IN_PERCENT = 5;
-
         private static final @NotNull SplittableRandom RANDOM = new SplittableRandom();
-
-        SingleWriterTask(
-                final @NotNull AtomicLong nonemptyQueueCounter,
-                final @NotNull AtomicLong globalTaskCount,
-                final @NotNull AtomicInteger runningThreadsCount,
-                final ProducerQueuesImpl @NotNull [] producers) {
-
+        SingleWriterTask(final @NotNull AtomicLong nonemptyQueueCounter, final @NotNull AtomicLong globalTaskCount,
+                final @NotNull AtomicInteger runningThreadsCount, final ProducerQueuesImpl @NotNull [] producers) {
             this.nonemptyQueueCounter = nonemptyQueueCounter;
             this.globalTaskCount = globalTaskCount;
             this.runningThreadsCount = runningThreadsCount;
@@ -239,22 +213,18 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         public void run() {
             try {
                 final SplittableRandom random = RANDOM.split();
-
                 // It is possible that all tasks stop running while there are still non-empty queues.
                 // We have yet to determine if there is a lock free way to avoid this.
-                outerLoop:
-                while (nonemptyQueueCounter.get() >= runningThreadsCount.getAndDecrement()) {
+                outerLoop : while (nonemptyQueueCounter.get() >= runningThreadsCount.getAndDecrement()) {
                     runningThreadsCount.incrementAndGet();
                     final long countSnapShot = globalTaskCount.get();
                     if (countSnapShot == 0) {
                         continue;
                     }
-
                     // Calculate the percentage portion of total tasks per persistence.
                     for (int i = 0; i < producers.length; i++) {
                         probabilities[i] = (int) ((producers[i].getTaskCount().get() * 100) / countSnapShot);
                     }
-
                     int sumWithoutMins = 0;
                     // Set to min probability if necessary
                     for (int i = 0; i < probabilities.length; i++) {
@@ -264,26 +234,24 @@ public class SingleWriterServiceImpl implements SingleWriterService {
                             sumWithoutMins += probabilities[i];
                         }
                     }
-
                     int surplus = 0;
                     for (int i = 0; i < probabilities.length; i++) {
                         surplus += probabilities[i];
                     }
                     surplus -= 100;
-
                     if (surplus > 0) { // Normalize to a 100% sum
-                        // We reduce the probability of all persistences that are not at the minimum, be a portion of the overhead.
-                        // The portion is based on there portion of the sum of all probabilities, ignoring those with minimum probability.
+                        // We reduce the probability of all persistences that are not at the minimum, be a portion of
+                        // the overhead.
+                        // The portion is based on there portion of the sum of all probabilities, ignoring those with
+                        // minimum probability.
                         for (int i = 0; i < probabilities.length; i++) {
                             if (probabilities[i] > MIN_PROBABILITY_IN_PERCENT) {
                                 probabilities[i] -= surplus / (sumWithoutMins / probabilities[i]);
                             }
                         }
                     }
-
                     final int randomInt = random.nextInt(100);
                     int offset = 0;
-
                     for (int i = 0; i < probabilities.length; i++) {
                         if (randomInt <= probabilities[i] + offset) {
                             producers[i].execute(random);
@@ -292,11 +260,11 @@ public class SingleWriterServiceImpl implements SingleWriterService {
                         offset += probabilities[i];
                     }
                 }
-
             } catch (final Throwable t) {
                 // Exceptions in the executed tasks, are passed to there result future.
                 // So we only end up here if there is an exception in the probability calculation.
-                // We decrement the running thread count so that a new thread will start running, as soon as a new task is added to any queue.
+                // We decrement the running thread count so that a new thread will start running, as soon as a new task
+                // is added to any queue.
                 runningThreadsCount.decrementAndGet();
                 Exceptions.rethrowError("Exception in single writer executor. ", t);
             }

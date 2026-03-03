@@ -33,9 +33,7 @@ public class PubrelInboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiablePubrelPacketImpl modifiablePacket = mock(ModifiablePubrelPacketImpl.class);
-
         final PubrelInboundOutputImpl output = new PubrelInboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getPubrelPacket());
     }
 
@@ -43,17 +41,13 @@ public class PubrelInboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiablePubrelPacketImpl modifiablePacket = mock(ModifiablePubrelPacketImpl.class);
-
         final PubrelInboundOutputImpl output = new PubrelInboundOutputImpl(asyncer, modifiablePacket);
-
         final PubrelInboundInputImpl input = mock(PubrelInboundInputImpl.class);
         final PubrelPacketImpl packet = mock(PubrelPacketImpl.class);
         final ModifiablePubrelPacketImpl newModifiablePacket = mock(ModifiablePubrelPacketImpl.class);
         when(input.getPubrelPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final PubrelInboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getPubrelPacket());
     }
 }

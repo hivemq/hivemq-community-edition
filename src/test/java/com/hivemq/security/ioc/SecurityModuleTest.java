@@ -31,14 +31,14 @@ import static org.mockito.Mockito.mock;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class SecurityModuleTest {
 
     @Test
     public void test_ssl_factory_same() {
-
         final Injector injector = Guice.createInjector(Stage.PRODUCTION, new SecurityModule(), new AbstractModule() {
+
             @Override
             protected void configure() {
                 bind(EventExecutorGroup.class).toInstance(mock(EventExecutorGroup.class));
@@ -46,12 +46,8 @@ public class SecurityModuleTest {
                 bindScope(LazySingleton.class, LazySingletonScope.get());
             }
         });
-
         final SslFactory instance1 = injector.getInstance(SslFactory.class);
         final SslFactory instance2 = injector.getInstance(SslFactory.class);
-
         assertSame(instance1, instance2);
-
     }
-
 }

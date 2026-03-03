@@ -31,7 +31,6 @@ import static org.junit.Assert.assertFalse;
 public class Mqtt3PubrelEncoderTest {
 
     private EmbeddedChannel channel;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
@@ -42,13 +41,10 @@ public class Mqtt3PubrelEncoderTest {
     @Test
     public void test_pubrel_sent() {
         channel.writeOutbound(new PUBREL(10));
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0110_0010, buf.readByte());
         assertEquals((byte) 0b0000_0010, buf.readByte());
         assertEquals(10, buf.readUnsignedShort());
-
         assertFalse(buf.isReadable());
     }
 }

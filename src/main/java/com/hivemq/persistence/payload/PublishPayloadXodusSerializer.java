@@ -26,20 +26,15 @@ final class PublishPayloadXodusSerializer {
     }
 
     public static byte @NotNull [] serializeKey(final long id, final long chunkIndex) {
-
         final byte[] bytes = new byte[16];
-
         Bytes.copyLongToByteArray(id, bytes, 0);
         Bytes.copyLongToByteArray(chunkIndex, bytes, 8);
-
         return bytes;
     }
 
     public static @NotNull KeyPair deserializeKey(final byte @NotNull [] bytes) {
-
         final long id = Bytes.readLong(bytes, 0);
         final long chunkIndex = Bytes.readLong(bytes, 8);
-
         return new KeyPair(id, chunkIndex);
     }
 }

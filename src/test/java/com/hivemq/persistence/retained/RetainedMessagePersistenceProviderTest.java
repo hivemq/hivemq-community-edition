@@ -22,20 +22,16 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class RetainedMessagePersistenceProviderTest {
 
     @Test
     public void test_get() {
-
-        final RetainedMessagePersistenceImpl retainedMessagePersistence =
-                Mockito.mock(RetainedMessagePersistenceImpl.class);
-
-        final RetainedMessagePersistenceProvider provider =
-                new RetainedMessagePersistenceProvider(() -> retainedMessagePersistence);
-
+        final RetainedMessagePersistenceImpl retainedMessagePersistence = Mockito
+                .mock(RetainedMessagePersistenceImpl.class);
+        final RetainedMessagePersistenceProvider provider = new RetainedMessagePersistenceProvider(
+                () -> retainedMessagePersistence);
         assertEquals(retainedMessagePersistence, provider.get());
-
     }
 }

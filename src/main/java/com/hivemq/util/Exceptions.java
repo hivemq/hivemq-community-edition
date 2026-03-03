@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -30,10 +29,8 @@ import java.nio.channels.ClosedChannelException;
 public class Exceptions {
 
     private static final Logger log = LoggerFactory.getLogger(Exceptions.class);
-
     /**
-     * {@link Throwable} instances are rethrown if they are an {@link Error}.
-     * Otherwise, they will just be logged.
+     * {@link Throwable} instances are rethrown if they are an {@link Error}. Otherwise, they will just be logged.
      *
      * @param throwable the throwable to guard HiveMQ from
      */
@@ -46,8 +43,7 @@ public class Exceptions {
     }
 
     /**
-     * {@link Throwable} instances are rethrown if they are an {@link Error}.
-     * Otherwise, this is a noop.
+     * {@link Throwable} instances are rethrown if they are an {@link Error}. Otherwise, this is a noop.
      */
     public static void rethrowError(final @NotNull Throwable throwable) {
         if (throwable instanceof Error) {
@@ -58,8 +54,8 @@ public class Exceptions {
     /**
      * Checks if a throwable is an IOException.
      *
-     * @param throwable to check
-     * @return true if the exception is an IOException
+     * @param  throwable to check
+     * @return           true if the exception is an IOException
      */
     public static boolean isConnectionClosedException(final @NotNull Throwable throwable) {
         if (throwable instanceof IOException) {

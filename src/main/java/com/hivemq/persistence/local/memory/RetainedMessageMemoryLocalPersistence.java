@@ -48,18 +48,14 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
 
     @VisibleForTesting
     final @NotNull AtomicLong currentMemorySize = new AtomicLong();
-
     @VisibleForTesting
     final @NotNull PublishTopicTree @NotNull [] topicTrees;
-
     private final @NotNull Map<String, RetainedMessage>[] buckets;
     private final int bucketCount;
-
     @Inject
     public RetainedMessageMemoryLocalPersistence(final @NotNull MetricRegistry metricRegistry) {
         bucketCount = InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get();
-
-        //noinspection unchecked
+        // noinspection unchecked
         buckets = new HashMap[bucketCount];
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new HashMap<>();
@@ -68,8 +64,8 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         for (int i = 0; i < bucketCount; i++) {
             topicTrees[i] = new PublishTopicTree();
         }
-
-        metricRegistry.register(HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+        metricRegistry.register(
+                HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) currentMemorySize::get);
     }
 
@@ -87,7 +83,6 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     public void clear(final int bucketIndex) {
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         topicTrees[bucketIndex] = new PublishTopicTree();
-
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         for (final RetainedMessage retainedMessage : bucket.values()) {
             currentMemorySize.addAndGet(-retainedMessage.getEstimatedSizeInMemory());
@@ -100,7 +95,6 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     public void remove(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         topicTrees[bucketIndex].remove(topic);
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage retainedMessage = bucket.remove(topic);
@@ -114,7 +108,6 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     public @Nullable RetainedMessage get(final @NotNull String topic, final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage retainedMessage = bucket.get(topic);
         if (retainedMessage == null || retainedMessage.hasExpired()) {
@@ -126,11 +119,12 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     @ExecuteInSingleWriter
     @Override
     public void put(
-            final @NotNull RetainedMessage retainedMessage, final @NotNull String topic, final int bucketIndex) {
+            final @NotNull RetainedMessage retainedMessage,
+            final @NotNull String topic,
+            final int bucketIndex) {
         checkNotNull(topic, "Topic must not be null");
         checkNotNull(retainedMessage, "Retained message must not be null");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         final RetainedMessage previousMessage = bucket.put(topic, retainedMessage);
         if (previousMessage != null) {
@@ -145,7 +139,6 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     public @NotNull Set<String> getAllTopics(final @NotNull String subscription, final int bucketIndex) {
         checkArgument(bucketIndex >= 0 && bucketIndex < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         return topicTrees[bucketIndex].get(subscription);
     }
 
@@ -154,7 +147,6 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
     public void cleanUp(final int bucketIndex) {
         checkArgument(bucketIndex >= 0 && bucketIndex < bucketCount, "Bucket index out of range");
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
-
         final Map<String, RetainedMessage> bucket = buckets[bucketIndex];
         bucket.entrySet().removeIf(entry -> {
             if (entry == null) {
@@ -171,29 +163,24 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         });
     }
 
-    // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are ignored.
+    // in contrast to the file persistence method we already have everything in memory. The sizing and pagination are
+    // ignored.
     @Override
     public @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
-            final int bucketIndex, final @Nullable String ignored, final int alsoIgnored) {
-
-        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages =
-                buckets[bucketIndex].entrySet()
-                        .stream()
-                        .map(entry -> {
-                            final String topic = entry.getKey();
-                            final RetainedMessage retainedMessage = entry.getValue();
-
-                            // ignore messages with exceeded message expiry interval
-                            if (retainedMessage.hasExpired()) {
-                                return null;
-                            }
-
-                            return new AbstractMap.SimpleEntry<>(topic, retainedMessage);
-
-                        })
-                        .filter(entry -> !Objects.isNull(entry))
-                        .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
-
+            final int bucketIndex,
+            final @Nullable String ignored,
+            final int alsoIgnored) {
+        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages = buckets[bucketIndex].entrySet().stream()
+                .map(entry -> {
+                    final String topic = entry.getKey();
+                    final RetainedMessage retainedMessage = entry.getValue();
+                    // ignore messages with exceeded message expiry interval
+                    if (retainedMessage.hasExpired()) {
+                        return null;
+                    }
+                    return new AbstractMap.SimpleEntry<>(topic, retainedMessage);
+                }).filter(entry -> !Objects.isNull(entry))
+                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
         return new BucketChunkResult<>(collectedRetainedMessages, true, null, bucketIndex);
     }
 

@@ -40,8 +40,11 @@ public interface MqttServerDisconnector {
      * @param eventLogMessage the event log message
      */
     default void logAndClose(
-            final @NotNull Channel channel, final @Nullable String logMessage, final @Nullable String eventLogMessage) {
-        disconnect(channel,
+            final @NotNull Channel channel,
+            final @Nullable String logMessage,
+            final @Nullable String eventLogMessage) {
+        disconnect(
+                channel,
                 logMessage,
                 eventLogMessage,
                 null,
@@ -70,8 +73,8 @@ public interface MqttServerDisconnector {
             final @Nullable String eventLogMessage,
             final @Nullable Mqtt5DisconnectReasonCode reasonCode,
             final @Nullable String reasonString) {
-
-        disconnect(channel,
+        disconnect(
+                channel,
                 logMessage,
                 eventLogMessage,
                 reasonCode,

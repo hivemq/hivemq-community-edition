@@ -26,7 +26,7 @@ import com.hivemq.extensions.packets.connack.ConnackPacketImpl;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 @Immutable
 public class ConnackOutboundInputImpl implements ConnackOutboundInput, PluginTaskInput {
@@ -34,12 +34,9 @@ public class ConnackOutboundInputImpl implements ConnackOutboundInput, PluginTas
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ConnackPacketImpl connackPacket;
-
-    public ConnackOutboundInputImpl(
-            final @NotNull ClientInformation clientInformation,
+    public ConnackOutboundInputImpl(final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull ConnackPacketImpl connackPacket) {
-
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.connackPacket = connackPacket;

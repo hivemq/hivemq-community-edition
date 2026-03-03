@@ -27,7 +27,6 @@ import static org.junit.Assert.assertEquals;
 public class WebSocketBinaryFrameHandlerTest {
 
     private EmbeddedChannel channel;
-
     @Before
     public void setUp() throws Exception {
         final WebSocketBinaryFrameHandler webSocketBinaryFrameHandler = new WebSocketBinaryFrameHandler();
@@ -36,14 +35,11 @@ public class WebSocketBinaryFrameHandlerTest {
 
     @Test
     public void test_unwrap_byte_buffer() throws Exception {
-
         final ByteBuf expected = Unpooled.buffer();
         final BinaryWebSocketFrame frame = new BinaryWebSocketFrame(expected);
         channel.writeInbound(frame);
-
         final Object object = channel.readInbound();
         final ByteBuf result = (ByteBuf) object;
-
         assertEquals(expected, result);
         assertEquals(1, result.refCnt());
     }

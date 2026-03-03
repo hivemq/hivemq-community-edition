@@ -32,10 +32,9 @@ public class MetricsShutdownHook implements HiveMQShutdownHook {
 
     private final @NotNull ShutdownHooks shutdownHooks;
     private final @NotNull JmxReporterBootstrap jmxReporterBootstrap;
-
     @Inject
-    public MetricsShutdownHook(
-            final @NotNull ShutdownHooks shutdownHooks, final @NotNull JmxReporterBootstrap jmxReporterBootstrap) {
+    public MetricsShutdownHook(final @NotNull ShutdownHooks shutdownHooks,
+            final @NotNull JmxReporterBootstrap jmxReporterBootstrap) {
         this.shutdownHooks = shutdownHooks;
         this.jmxReporterBootstrap = jmxReporterBootstrap;
     }

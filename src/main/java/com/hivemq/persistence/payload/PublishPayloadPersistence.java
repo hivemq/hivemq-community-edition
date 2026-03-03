@@ -31,8 +31,8 @@ public interface PublishPayloadPersistence {
     void init();
 
     /**
-     * Add the payload to the persistence and counts the reference count up.
-     * If the payload is already existent in the persistence, the reference count is incremented.
+     * Add the payload to the persistence and counts the reference count up. If the payload is already existent in the
+     * persistence, the reference count is incremented.
      *
      * @param payload The payload that will be persisted.
      * @param id      The publish ID is used as the payload ID
@@ -42,16 +42,16 @@ public interface PublishPayloadPersistence {
     /**
      * Get the persisted payload for an id or null.
      *
-     * @param id The id associated with the payload.
-     * @return The payload that is persisted for the given id or null if the reference was deleted.
+     * @param  id The id associated with the payload.
+     * @return    The payload that is persisted for the given id or null if the reference was deleted.
      */
     byte @Nullable [] get(long id);
 
     /**
      * Increments the current reference count for an id.
      * <p>
-     * <b>Don't call this method after the persistence bootstrap is finished! </b>
-     * Otherwise us the reference count of the "add" method.
+     * <b>Don't call this method after the persistence bootstrap is finished! </b> Otherwise us the reference count of
+     * the "add" method.
      *
      * @param id The id associated with the payload.
      */

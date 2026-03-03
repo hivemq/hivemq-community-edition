@@ -36,14 +36,11 @@ abstract class AbstractMqtt5DecoderTest extends AbstractMqttDecoderTest {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);
-
         final Message message = channel.readInbound();
         assertNull(message);
-
         channel.runPendingTasks();
         assertFalse(channel.isOpen());
         assertFalse(channel.isActive());
-
         createChannel();
     }
 }

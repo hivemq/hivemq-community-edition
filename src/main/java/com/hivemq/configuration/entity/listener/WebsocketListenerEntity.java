@@ -35,14 +35,11 @@ public class WebsocketListenerEntity extends ListenerEntity {
 
     @XmlElement(name = "path", required = true)
     private @NotNull String path = "/mqtt";
-
     @XmlElementWrapper(name = "subprotocols")
     @XmlElement(name = "subprotocol")
     private @NotNull List<String> subprotocols = defaultProtocols();
-
     @XmlElement(name = "allow-extensions", defaultValue = "false")
     private @NotNull Boolean allowExtensions = false;
-
     public @NotNull String getPath() {
         return path;
     }
@@ -57,7 +54,6 @@ public class WebsocketListenerEntity extends ListenerEntity {
 
     private @NotNull List<String> defaultProtocols() {
         final List<String> protocols = new ArrayList<>();
-
         protocols.add("mqttv3.1");
         protocols.add("mqtt");
         return protocols;

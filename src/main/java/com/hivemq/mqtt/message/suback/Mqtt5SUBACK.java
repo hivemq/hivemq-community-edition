@@ -21,7 +21,7 @@ import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface Mqtt5SUBACK {
 

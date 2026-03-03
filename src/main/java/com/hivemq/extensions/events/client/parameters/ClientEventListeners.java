@@ -34,13 +34,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Wrapper class for all ClientLifecycleEventListeners added by extensions.
  *
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ClientEventListeners {
 
     private final @NotNull Map<String, ClientLifecycleEventListener> pluginEventListenersMap;
     private final @NotNull ReadWriteLock readWriteLock;
-
     public ClientEventListeners(final @NotNull HiveMQExtensions hiveMQExtensions) {
         this.pluginEventListenersMap = new TreeMap<>(new ExtensionPriorityComparator(hiveMQExtensions));
         this.readWriteLock = new ReentrantReadWriteLock();
@@ -72,7 +71,6 @@ public class ClientEventListeners {
         } finally {
             lock.unlock();
         }
-
     }
 
     public @NotNull Map<String, ClientLifecycleEventListener> getPluginEventListenersMap() {

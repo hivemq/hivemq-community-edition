@@ -15,7 +15,6 @@
  */
 package com.hivemq.persistence.local;
 
-
 import com.hivemq.persistence.qos.IncomingMessageFlowPersistence;
 
 /**

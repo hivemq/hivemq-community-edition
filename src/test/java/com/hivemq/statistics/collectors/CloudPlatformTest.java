@@ -36,12 +36,9 @@ public class CloudPlatformTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Test
     public void test_getCloudPlatform_file_not_present() {
-
         assumeTrue(Platform.isLinux());
-
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
             @NotNull
@@ -50,21 +47,15 @@ public class CloudPlatformTest {
                 return new File("/this/file/does/not/exist");
             }
         };
-
         assertNull(cloudPlatform.getCloudPlatform());
     }
 
     @Test
     public void test_getCloudPlatform_file_present_ec2() throws Exception {
-
         assumeTrue(Platform.isLinux());
-
         final File uuidFile = new File(temporaryFolder.getRoot(), "uuid");
-
         final String exampleContent = "ec2e1916-9099-7caf-fd21-012345abcdef";
-
         FileUtils.writeStringToFile(uuidFile, exampleContent, StandardCharsets.UTF_8);
-
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
             @NotNull
@@ -73,21 +64,15 @@ public class CloudPlatformTest {
                 return uuidFile;
             }
         };
-
         assertEquals("AWS EC2", cloudPlatform.getCloudPlatform());
     }
 
     @Test
     public void test_getCloudPlatform_file_present_ec2_upper() throws Exception {
-
         assumeTrue(Platform.isLinux());
-
         final File uuidFile = new File(temporaryFolder.getRoot(), "uuid");
-
         final String exampleContent = "EC2E1916-9099-7CAF-FD21-012345ABCDEF";
-
         FileUtils.writeStringToFile(uuidFile, exampleContent, StandardCharsets.UTF_8);
-
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
             @NotNull
@@ -96,22 +81,15 @@ public class CloudPlatformTest {
                 return uuidFile;
             }
         };
-
         assertEquals("AWS EC2", cloudPlatform.getCloudPlatform());
     }
 
-
     @Test
     public void test_getCloudPlatform_file_present_not_ec2() throws Exception {
-
         assumeTrue(Platform.isLinux());
-
         final File uuidFile = new File(temporaryFolder.getRoot(), "uuid");
-
         final String exampleContent = "AB2E1916-9099-7CAF-FD21-012345ABCDEF";
-
         FileUtils.writeStringToFile(uuidFile, exampleContent, StandardCharsets.UTF_8);
-
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
             @NotNull
@@ -120,8 +98,6 @@ public class CloudPlatformTest {
                 return uuidFile;
             }
         };
-
         assertNull(cloudPlatform.getCloudPlatform());
     }
-
 }

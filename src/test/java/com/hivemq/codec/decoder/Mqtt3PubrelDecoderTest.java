@@ -34,7 +34,6 @@ import static org.junit.Assert.assertTrue;
 public class Mqtt3PubrelDecoderTest {
 
     private final @NotNull EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create());
-
     @Test
     public void test_pubrel_received() {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
@@ -44,7 +43,6 @@ public class Mqtt3PubrelDecoderTest {
         buf.writeByte(0b0000_0010);
         buf.writeShort(55555);
         channel.writeInbound(buf);
-
         final PUBREL pubrel = channel.readInbound();
         assertEquals(55555, pubrel.getPacketIdentifier());
         assertTrue(channel.isActive());
@@ -59,14 +57,13 @@ public class Mqtt3PubrelDecoderTest {
         buf.writeByte(0b0000_0010);
         buf.writeShort(55555);
         channel.writeInbound(buf);
-
-        //The client needs to get disconnected
+        // The client needs to get disconnected
         assertFalse(channel.isActive());
     }
 
     @Test
     public void test_pubrel_invalid_header_mqtt_31() {
-        //In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
+        // In this test we check that additional headers are ignored in MQTT 3.1 if they're invalid
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv3_1);
         final ByteBuf buf = Unpooled.buffer();
@@ -74,7 +71,6 @@ public class Mqtt3PubrelDecoderTest {
         buf.writeByte(0b0000_0010);
         buf.writeShort(55555);
         channel.writeInbound(buf);
-
         final PUBREL pubrel = channel.readInbound();
         assertEquals(55555, pubrel.getPacketIdentifier());
         assertTrue(channel.isActive());

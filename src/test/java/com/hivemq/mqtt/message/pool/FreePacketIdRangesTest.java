@@ -33,28 +33,25 @@ public class FreePacketIdRangesTest {
     @Test
     public void takeNextId_whenTakingIdsSequentiallyAndReturning_thenSequentialIdsAreProvided()
             throws NoMessageIdAvailableException {
-
         final List<Integer> integers = new ArrayList<>();
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
-
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID; i++) {
             final int id = messageIDPool.takeNextId();
             integers.add(id);
         }
-
         for (final Integer id : integers) {
             messageIDPool.returnId(id);
         }
-
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID; i++) {
             final int id = messageIDPool.takeNextId();
             integers.add(id);
         }
-
-        assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID)
-                .get(0)));
-        assertTrue(areConsecutiveMessageIds(Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID)
-                .get(1)));
+        assertTrue(
+                areConsecutiveMessageIds(
+                        Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(0)));
+        assertTrue(
+                areConsecutiveMessageIds(
+                        Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(1)));
     }
 
     @Test
@@ -72,7 +69,6 @@ public class FreePacketIdRangesTest {
 
     @Test(expected = NoMessageIdAvailableException.class)
     public void takeNextId_whenNoMoreIdsAvailable_thenExceptionIsThrown() throws NoMessageIdAvailableException {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID; i++) {
             messageIDPool.takeNextId();
@@ -82,7 +78,6 @@ public class FreePacketIdRangesTest {
 
     @Test
     public void returnId_whenSingleIdIsReturned_thenOnlyThisIdIsAvailable() throws NoMessageIdAvailableException {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID; i++) {
             messageIDPool.takeNextId();
@@ -93,7 +88,6 @@ public class FreePacketIdRangesTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void returnId_whenInvalidIdReturned_thenExceptionIsThrown() {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         messageIDPool.returnId(FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID + 1);
     }
@@ -101,37 +95,33 @@ public class FreePacketIdRangesTest {
     @Test
     public void takeSpecificId_whenIdIsFree_thenIdWasTaken()
             throws NoMessageIdAvailableException, MessageIdUnavailableException {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         messageIDPool.takeSpecificId(42);
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID - 1; i++) {
             final int id = messageIDPool.takeNextId();
-            assertNotEquals(42, id);//since was taken directly
+            assertNotEquals(42, id);// since was taken directly
         }
     }
 
     @Test
     public void takeSpecificId_whenIdIsTakenTwice_thenItRemainsTaken()
             throws NoMessageIdAvailableException, MessageIdUnavailableException {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
-
         messageIDPool.takeSpecificId(42);
         try {
             messageIDPool.takeSpecificId(42);
         } catch (final MessageIdUnavailableException e) {
-            //ignore
+            // ignore
         }
         for (int i = 0; i < FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID - 1; i++) {
             final int id = messageIDPool.takeNextId();
-            assertNotEquals(42, id);//since was taken directly
+            assertNotEquals(42, id);// since was taken directly
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void takeSpecificId_whenTryingToTakeInvalidId_thenExceptionIsThrown()
             throws IllegalArgumentException, MessageIdUnavailableException {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         messageIDPool.takeSpecificId(FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID + 1);
     }
@@ -139,14 +129,12 @@ public class FreePacketIdRangesTest {
     @Test(expected = MessageIdUnavailableException.class)
     public void takeSpecificId_whenTryingToTakeTakenId_thenExceptionIsThrown()
             throws IllegalArgumentException, MessageIdUnavailableException {
-
         final FreePacketIdRanges messageIDPool = new FreePacketIdRanges();
         messageIDPool.takeSpecificId(42);
         messageIDPool.takeSpecificId(42);
     }
 
     private static boolean areConsecutiveMessageIds(final @NotNull List<Integer> integerList) {
-
         int last = 0;
         for (int i = 0; i < 65535; i++) {
             final Integer integer = integerList.get(i);

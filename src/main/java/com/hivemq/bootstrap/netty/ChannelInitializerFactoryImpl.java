@@ -42,21 +42,15 @@ public class ChannelInitializerFactoryImpl implements ChannelInitializerFactory 
 
     @NotNull
     private final ChannelDependencies channelDependencies;
-
     @NotNull
     private final SslFactory sslFactory;
-
     @NotNull
     private final Provider<NonSslHandler> nonSslHandlerProvider;
-
     @NotNull
     private final EventLog eventLog;
-
     @Inject
-    public ChannelInitializerFactoryImpl(
-            @NotNull final ChannelDependencies channelDependencies,
-            @NotNull final SslFactory sslFactory,
-            @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
+    public ChannelInitializerFactoryImpl(@NotNull final ChannelDependencies channelDependencies,
+            @NotNull final SslFactory sslFactory, @NotNull final Provider<NonSslHandler> nonSslHandlerProvider,
             @NotNull final EventLog eventLog) {
         this.channelDependencies = channelDependencies;
         this.sslFactory = sslFactory;
@@ -66,27 +60,21 @@ public class ChannelInitializerFactoryImpl implements ChannelInitializerFactory 
 
     @NotNull
     public AbstractChannelInitializer getChannelInitializer(@NotNull final Listener listener) {
-
         checkNotNull(listener, "Listener must not be null");
-
         if (listener instanceof TcpListener) {
-
             if (listener instanceof TlsTcpListener) {
                 return createTlsTcpInitializer((TlsTcpListener) listener);
             } else {
                 return createTcpInitializer((TcpListener) listener);
             }
         }
-
         if (listener instanceof WebsocketListener) {
-
             if (listener instanceof TlsWebsocketListener) {
                 return createTlsWebsocketInitializer((TlsWebsocketListener) listener);
             } else {
                 return createWebsocketInitializer((WebsocketListener) listener);
             }
         }
-
         throw new IllegalArgumentException("Unknown listener type");
     }
 
@@ -111,5 +99,4 @@ public class ChannelInitializerFactoryImpl implements ChannelInitializerFactory 
         sslFactory.verifySslAtBootstrap(listener, listener.getTls());
         return new TlsWebsocketChannelInitializer(channelDependencies, listener, sslFactory);
     }
-
 }

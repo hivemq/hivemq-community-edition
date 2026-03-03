@@ -49,55 +49,77 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     final @NotNull PublishFlushHandler publishFlushHandler;
     final @NotNull Listener connectedListener;
     volatile @NotNull ClientState clientState = ClientState.CONNECTING;
-
-    @Nullable ProtocolVersion protocolVersion;
-    @Nullable String clientId;
+    @Nullable
+    ProtocolVersion protocolVersion;
+    @Nullable
+    String clientId;
     boolean cleanStart;
-    @Nullable ModifiableDefaultPermissions authPermissions;
-    @Nullable MqttWillPublish willPublish;
-    @Nullable Integer clientReceiveMaximum;
-    @Nullable Integer connectKeepAlive;
-    @Nullable Long queueSizeMaximum;
-    @Nullable Long clientSessionExpiryInterval;
-    @Nullable Long connectReceivedTimestamp;
-    @NotNull String @Nullable [] topicAliasMapping;
+    @Nullable
+    ModifiableDefaultPermissions authPermissions;
+    @Nullable
+    MqttWillPublish willPublish;
+    @Nullable
+    Integer clientReceiveMaximum;
+    @Nullable
+    Integer connectKeepAlive;
+    @Nullable
+    Long queueSizeMaximum;
+    @Nullable
+    Long clientSessionExpiryInterval;
+    @Nullable
+    Long connectReceivedTimestamp;
+    @NotNull
+    String @Nullable [] topicAliasMapping;
     boolean clientIdAssigned;
     boolean incomingPublishesSkipRest;
     boolean requestResponseInformation;
-    @Nullable Boolean requestProblemInformation;
-    @Nullable SettableFuture<Void> disconnectFuture;
-
-    @Nullable ConnectionAttributes connectionAttributes;
-
+    @Nullable
+    Boolean requestProblemInformation;
+    @Nullable
+    SettableFuture<Void> disconnectFuture;
+    @Nullable
+    ConnectionAttributes connectionAttributes;
     boolean sendWill = true;
     boolean preventLwt;
-
-    @Nullable SslClientCertificate authCertificate;
-    @Nullable String authSniHostname;
-    @Nullable String authCipherSuite;
-    @Nullable String authProtocol;
-    @Nullable String authUsername;
+    @Nullable
+    SslClientCertificate authCertificate;
+    @Nullable
+    String authSniHostname;
+    @Nullable
+    String authCipherSuite;
+    @Nullable
+    String authProtocol;
+    @Nullable
+    String authUsername;
     byte @Nullable [] authPassword;
-    @Nullable CONNECT authConnect;
-    @Nullable String authMethod;
-    @Nullable ByteBuffer authData;
-    @Nullable Mqtt5UserProperties authUserProperties;
-    @Nullable ScheduledFuture<?> authFuture;
-    @Nullable Boolean clearPasswordAfterAuth;
-
-    @Nullable Long maxPacketSizeSend;
-
-    @Nullable ClientContextImpl extensionClientContext;
-    @Nullable ClientEventListeners extensionClientEventListeners;
-    @Nullable ClientAuthenticators extensionClientAuthenticators;
-    @Nullable ClientAuthorizers extensionClientAuthorizers;
-    @Nullable ClientInformation extensionClientInformation;
-    @Nullable ConnectionInformation extensionConnectionInformation;
-
-    public UndefinedClientConnection(
-            final @NotNull Channel channel,
-            final @NotNull PublishFlushHandler publishFlushHandler,
-            final @NotNull Listener connectedListener) {
+    @Nullable
+    CONNECT authConnect;
+    @Nullable
+    String authMethod;
+    @Nullable
+    ByteBuffer authData;
+    @Nullable
+    Mqtt5UserProperties authUserProperties;
+    @Nullable
+    ScheduledFuture<?> authFuture;
+    @Nullable
+    Boolean clearPasswordAfterAuth;
+    @Nullable
+    Long maxPacketSizeSend;
+    @Nullable
+    ClientContextImpl extensionClientContext;
+    @Nullable
+    ClientEventListeners extensionClientEventListeners;
+    @Nullable
+    ClientAuthenticators extensionClientAuthenticators;
+    @Nullable
+    ClientAuthorizers extensionClientAuthorizers;
+    @Nullable
+    ClientInformation extensionClientInformation;
+    @Nullable
+    ConnectionInformation extensionConnectionInformation;
+    public UndefinedClientConnection(final @NotNull Channel channel,
+            final @NotNull PublishFlushHandler publishFlushHandler, final @NotNull Listener connectedListener) {
         this.channel = channel;
         this.publishFlushHandler = publishFlushHandler;
         this.connectedListener = connectedListener;
@@ -294,7 +316,6 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     @Override
     public synchronized @NotNull ConnectionAttributes setConnectionAttributesIfAbsent(
             final @NotNull ConnectionAttributes connectionAttributes) {
-
         if (this.connectionAttributes == null) {
             this.connectionAttributes = connectionAttributes;
         }
@@ -492,7 +513,6 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     @Override
     public @NotNull Optional<String> getChannelIP() {
         final Optional<InetAddress> inetAddress = getChannelAddress();
-
         return inetAddress.map(InetAddress::getHostAddress);
     }
 
@@ -501,12 +521,11 @@ public class UndefinedClientConnection implements ClientConnectionContext {
         final Optional<SocketAddress> socketAddress = Optional.ofNullable(channel.remoteAddress());
         if (socketAddress.isPresent()) {
             final SocketAddress sockAddress = socketAddress.get();
-            //If this is not an InetAddress, we're treating this as if there's no address
+            // If this is not an InetAddress, we're treating this as if there's no address
             if (sockAddress instanceof InetSocketAddress) {
                 return Optional.ofNullable(((InetSocketAddress) sockAddress).getAddress());
             }
         }
-
         return Optional.empty();
     }
 
@@ -521,8 +540,8 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     }
 
     @Override
-    public void clearPassword(){
-        if(authPassword == null) {
+    public void clearPassword() {
+        if (authPassword == null) {
             return;
         }
         Arrays.fill(authPassword, (byte) 0);

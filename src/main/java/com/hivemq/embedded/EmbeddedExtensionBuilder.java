@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.embedded;
 
 import com.hivemq.embedded.internal.EmbeddedExtensionBuilderImpl;
@@ -24,14 +23,14 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 
 /**
  * @author Florian Limpöck
- * @since CE 2020.5
+ * @since  CE 2020.5
  */
 @DoNotImplement
 public interface EmbeddedExtensionBuilder {
 
     /**
      * @return a new EmbeddedExtensionBuilder.
-     * @since CE 2020.5
+     * @since  CE 2020.5
      */
     static @NotNull EmbeddedExtensionBuilder builder() {
         return new EmbeddedExtensionBuilderImpl();
@@ -42,77 +41,84 @@ public interface EmbeddedExtensionBuilder {
      * <p>
      * Required value.
      *
-     * @param id The unique ID of an extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  id The unique ID of an extension
+     * @return    the builder itself
+     * @since     CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withId(@NotNull String id);
+    @NotNull
+    EmbeddedExtensionBuilder withId(@NotNull String id);
 
     /**
      * Sets the human readable name of the extension.
      * <p>
      * Required value.
      *
-     * @param name The name of the extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  name The name of the extension
+     * @return      the builder itself
+     * @since       CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withName(@NotNull String name);
+    @NotNull
+    EmbeddedExtensionBuilder withName(@NotNull String name);
 
     /**
      * Sets the version of the extension.
      * <p>
      * Required value.
      *
-     * @param version The version of the extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  version The version of the extension
+     * @return         the builder itself
+     * @since          CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withVersion(@NotNull String version);
+    @NotNull
+    EmbeddedExtensionBuilder withVersion(@NotNull String version);
 
     /**
      * Sets the author of the extension.
      * <p>
      * Optional value, no default.
      *
-     * @param author The author of the extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  author The author of the extension
+     * @return        the builder itself
+     * @since         CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withAuthor(@Nullable String author);
+    @NotNull
+    EmbeddedExtensionBuilder withAuthor(@Nullable String author);
 
     /**
      * Sets the extension's priority, the extension with a higher priority is used first
      * <p>
      * Optional value, defaulting to '0'
      *
-     * @param priority The priority of the extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  priority The priority of the extension
+     * @return          the builder itself
+     * @since           CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withPriority(int priority);
+    @NotNull
+    EmbeddedExtensionBuilder withPriority(int priority);
 
     /**
      * Sets the extension's start priority, the extension with a higher priority starts first
      * <p>
      * Optional value, defaulting to '1000'
      *
-     * @param startPriority The start priority of the extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  startPriority The start priority of the extension
+     * @return               the builder itself
+     * @since                CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withStartPriority(int startPriority);
+    @NotNull
+    EmbeddedExtensionBuilder withStartPriority(int startPriority);
 
     /**
      * Sets the main class of the extension
      * <p>
      * Required value.
      *
-     * @param extensionMain The main class of the extension
-     * @return the builder itself
-     * @since CE 2020.5
+     * @param  extensionMain The main class of the extension
+     * @return               the builder itself
+     * @since                CE 2020.5
      */
-    @NotNull EmbeddedExtensionBuilder withExtensionMain(@NotNull ExtensionMain extensionMain);
+    @NotNull
+    EmbeddedExtensionBuilder withExtensionMain(@NotNull ExtensionMain extensionMain);
 
     /**
      * Creates an instance of an EmbeddedExtension.
@@ -125,10 +131,10 @@ public interface EmbeddedExtensionBuilder {
      * <li>extensionMain</li>
      * </ul>
      *
-     * @return an instance of an {@link EmbeddedExtension}
+     * @return                       an instance of an {@link EmbeddedExtension}
      * @throws IllegalStateException if any required parameter is missing.
-     * @since CE 2020.5
+     * @since                        CE 2020.5
      */
-    @NotNull EmbeddedExtension build();
-
+    @NotNull
+    EmbeddedExtension build();
 }

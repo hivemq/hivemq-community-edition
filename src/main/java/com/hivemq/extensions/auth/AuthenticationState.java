@@ -23,31 +23,27 @@ package com.hivemq.extensions.auth;
  * @author Silvio Giebl
  */
 enum AuthenticationState {
+
     /**
      * No extension has set any outcome.
      */
     UNDECIDED,
-
     /**
      * An extension has set the outcome to successful.
      */
     SUCCESS,
-
     /**
      * An extension has set the outcome to failed.
      */
     FAILED,
-
     /**
      * An extension has set the outcome to continue.
      */
     CONTINUE,
-
     /**
      * An extension has set the outcome to next extension or default.
      */
     NEXT_EXTENSION_OR_DEFAULT;
-
     boolean isFinal() {
         return (this != UNDECIDED) && (this != NEXT_EXTENSION_OR_DEFAULT);
     }

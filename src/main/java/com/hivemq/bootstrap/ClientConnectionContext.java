@@ -50,8 +50,7 @@ import java.util.concurrent.ScheduledFuture;
  * after establishing successfully an MQTT connection.
  * <p>
  * Initially every client starts early in their connection with {@link UndefinedClientConnection} which has loose
- * guarantees
- * like the client id being nullable as they may have not yet been initialized.
+ * guarantees like the client id being nullable as they may have not yet been initialized.
  * <p>
  * At some point during the transition of the client lifecycle between connecting and connected which currently happens
  * in the {@link com.hivemq.mqtt.handler.connect.ConnectHandler} we can change to the {@link ClientConnection}.
@@ -63,7 +62,6 @@ import java.util.concurrent.ScheduledFuture;
 public interface ClientConnectionContext {
 
     AttributeKey<ClientConnectionContext> CHANNEL_ATTRIBUTE_NAME = AttributeKey.valueOf("ClientConnectionContext");
-
     static @NotNull ClientConnectionContext of(final @NotNull Channel channel) {
         ClientConnectionContext context = channel.attr(CHANNEL_ATTRIBUTE_NAME).get();
         if (context != null) {
@@ -73,23 +71,29 @@ public interface ClientConnectionContext {
         throw new IllegalStateException("Channel has no ClientConnectionContext.");
     }
 
-    @NotNull Channel getChannel();
+    @NotNull
+    Channel getChannel();
 
-    @NotNull ChannelHandler getPublishFlushHandler();
+    @NotNull
+    ChannelHandler getPublishFlushHandler();
 
-    @NotNull ClientState getClientState();
+    @NotNull
+    ClientState getClientState();
 
     void proposeClientState(@NotNull ClientState authenticating);
 
-    @Nullable String getClientId();
+    @Nullable
+    String getClientId();
 
     void setClientId(@NotNull String clientId);
 
-    @Nullable ProtocolVersion getProtocolVersion();
+    @Nullable
+    ProtocolVersion getProtocolVersion();
 
     void setProtocolVersion(@NotNull ProtocolVersion protocolVersion);
 
-    @Nullable Long getConnectReceivedTimestamp();
+    @Nullable
+    Long getConnectReceivedTimestamp();
 
     void setConnectReceivedTimestamp(@NotNull Long currentTimeMillis);
 
@@ -103,27 +107,33 @@ public interface ClientConnectionContext {
 
     void setAuthPassword(byte @NotNull [] password);
 
-    @Nullable Long getClientSessionExpiryInterval();
+    @Nullable
+    Long getClientSessionExpiryInterval();
 
     void setClientSessionExpiryInterval(@NotNull Long sessionExpiryInterval);
 
     void setConnectKeepAlive(@NotNull Integer keepAlive);
 
-    @Nullable Long getMaxPacketSizeSend();
+    @Nullable
+    Long getMaxPacketSizeSend();
 
     void setMaxPacketSizeSend(@NotNull Long maximumPacketSize);
 
-    @NotNull Listener getConnectedListener();
+    @NotNull
+    Listener getConnectedListener();
 
-    @Nullable Integer getClientReceiveMaximum();
+    @Nullable
+    Integer getClientReceiveMaximum();
 
-    @Nullable Long getQueueSizeMaximum();
+    @Nullable
+    Long getQueueSizeMaximum();
 
     void setClientReceiveMaximum(@NotNull Integer clientReceiveMaximum);
 
     void setQueueSizeMaximum(@Nullable Long queueSizeMaximum);
 
-    @Nullable ScheduledFuture<?> getAuthFuture();
+    @Nullable
+    ScheduledFuture<?> getAuthFuture();
 
     void setAuthFuture(@Nullable ScheduledFuture<?> authFuture);
 
@@ -133,79 +143,97 @@ public interface ClientConnectionContext {
 
     void setRequestResponseInformation(boolean responseInformationRequested);
 
-    @Nullable Boolean getRequestProblemInformation();
+    @Nullable
+    Boolean getRequestProblemInformation();
 
     void setRequestProblemInformation(boolean problemInformationRequested);
 
     void setWillPublish(@Nullable MqttWillPublish willPublish);
 
-    @NotNull String @Nullable [] getTopicAliasMapping();
+    @NotNull
+    String @Nullable [] getTopicAliasMapping();
 
     void setTopicAliasMapping(@NotNull String @NotNull [] strings);
 
-    @Nullable String getAuthMethod();
+    @Nullable
+    String getAuthMethod();
 
     void setAuthMethod(@NotNull String authMethod);
 
-    @Nullable Mqtt5UserProperties getAuthUserProperties();
+    @Nullable
+    Mqtt5UserProperties getAuthUserProperties();
 
     void setAuthUserProperties(@Nullable Mqtt5UserProperties mqtt5UserProperties);
 
-    @Nullable ByteBuffer getAuthData();
+    @Nullable
+    ByteBuffer getAuthData();
 
     void setSendWill(boolean sendWill);
 
     void setPreventLwt(boolean preventLwt);
 
-    @Nullable SettableFuture<Void> getDisconnectFuture();
+    @Nullable
+    SettableFuture<Void> getDisconnectFuture();
 
-    @Nullable CONNECT getAuthConnect();
+    @Nullable
+    CONNECT getAuthConnect();
 
     void setAuthConnect(@Nullable CONNECT connect);
 
     void setAuthData(@Nullable ByteBuffer authenticationData);
 
-    @Nullable String getAuthCipherSuite();
+    @Nullable
+    String getAuthCipherSuite();
 
     void setAuthCipherSuite(@NotNull String cipherSuite);
 
-    @Nullable String getAuthProtocol();
+    @Nullable
+    String getAuthProtocol();
 
     void setAuthProtocol(@NotNull String protocol);
 
-    @Nullable SslClientCertificate getAuthCertificate();
+    @Nullable
+    SslClientCertificate getAuthCertificate();
 
     void setAuthCertificate(@NotNull SslClientCertificate sslClientCertificate);
 
-    @Nullable String getAuthSniHostname();
+    @Nullable
+    String getAuthSniHostname();
 
     void setAuthSniHostname(@NotNull String hostname);
 
-    @Nullable ClientContextImpl getExtensionClientContext();
+    @Nullable
+    ClientContextImpl getExtensionClientContext();
 
     void setExtensionClientContext(@NotNull ClientContextImpl clientContext);
 
-    @Nullable ClientAuthenticators getExtensionClientAuthenticators();
+    @Nullable
+    ClientAuthenticators getExtensionClientAuthenticators();
 
     void setExtensionClientAuthenticators(@NotNull ClientAuthenticators clientAuthenticators);
 
-    @Nullable ModifiableDefaultPermissions getAuthPermissions();
+    @Nullable
+    ModifiableDefaultPermissions getAuthPermissions();
 
     void setAuthPermissions(@NotNull ModifiableDefaultPermissions defaultPermissions);
 
-    @Nullable ClientInformation getExtensionClientInformation();
+    @Nullable
+    ClientInformation getExtensionClientInformation();
 
     void setExtensionClientInformation(@NotNull ClientInformation clientInformation);
 
-    @Nullable ConnectionInformation getExtensionConnectionInformation();
+    @Nullable
+    ConnectionInformation getExtensionConnectionInformation();
 
     void setExtensionConnectionInformation(@NotNull ConnectionInformation connectionInformation);
 
-    @Nullable ClientAuthorizers getExtensionClientAuthorizers();
+    @Nullable
+    ClientAuthorizers getExtensionClientAuthorizers();
 
     void setExtensionClientAuthorizers(@NotNull ClientAuthorizers clientAuthorizers);
 
-    @Nullable ClientEventListeners getExtensionClientEventListeners();
+    @Nullable
+    ClientEventListeners getExtensionClientEventListeners();
 
     void setExtensionClientEventListeners(@NotNull ClientEventListeners clientEventListeners);
 
@@ -213,17 +241,22 @@ public interface ClientConnectionContext {
 
     void setIncomingPublishesSkipRest(boolean incomingPublishesSkipRest);
 
-    @Nullable ConnectionAttributes getConnectionAttributes();
+    @Nullable
+    ConnectionAttributes getConnectionAttributes();
 
-    @NotNull ConnectionAttributes setConnectionAttributesIfAbsent(@NotNull ConnectionAttributes connectionAttributes);
+    @NotNull
+    ConnectionAttributes setConnectionAttributesIfAbsent(@NotNull ConnectionAttributes connectionAttributes);
 
-    @NotNull Optional<String> getChannelIP();
+    @NotNull
+    Optional<String> getChannelIP();
 
-    @NotNull Optional<InetAddress> getChannelAddress();
+    @NotNull
+    Optional<InetAddress> getChannelAddress();
 
     void setClearPasswordAfterAuth(@Nullable Boolean clearPasswordAfterAuth);
 
-    @NotNull Optional<Boolean> isClearPasswordAfterAuth();
+    @NotNull
+    Optional<Boolean> isClearPasswordAfterAuth();
 
     void clearPassword();
 }

@@ -46,66 +46,51 @@ public class ExceptionHandlerTest {
     private final @NotNull Channel channel = mock();
     private final @NotNull MqttServerDisconnector mqttServerDisconnector = mock();
     private final @NotNull ClientConnection clientConnection = mock();
-
     private ExceptionHandler handler;
-
     @Before
     public void before() {
         when(ctx.pipeline()).thenReturn(pipeline);
         when(channel.pipeline()).thenReturn(pipeline);
-        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)).thenReturn(new TestChannelAttribute<>(
-                clientConnection));
+        when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME))
+                .thenReturn(new TestChannelAttribute<>(clientConnection));
         when(clientConnection.getChannelIP()).thenReturn(Optional.of("0.0.0.0"));
         when(ctx.channel()).thenReturn(channel);
-
         handler = new ExceptionHandler(mqttServerDisconnector);
     }
 
     @Test
     public void test_SSLException() throws Exception {
-
         handler.exceptionCaught(ctx, new SSLException("test"));
-
         verify(mqttServerDisconnector, never()).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
     public void test_ClosedChannelException() throws Exception {
-
         handler.exceptionCaught(ctx, new ClosedChannelException());
-
         verify(mqttServerDisconnector, never()).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
     public void test_IOException() throws Exception {
-
         handler.exceptionCaught(ctx, new IOException());
-
         verify(mqttServerDisconnector, never()).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
     public void test_CorruptedFrameException() throws Exception {
-
         handler.exceptionCaught(ctx, new CorruptedFrameException());
-
         verify(mqttServerDisconnector).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
     public void test_IllegalArgumentException() throws Exception {
-
         handler.exceptionCaught(ctx, new IllegalArgumentException("test"));
-
         verify(mqttServerDisconnector).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 
     @Test
     public void test_OtherException() throws Exception {
-
         handler.exceptionCaught(ctx, new RuntimeException("test"));
-
         verify(mqttServerDisconnector).disconnect(any(Channel.class), any(), anyString(), any(), any());
     }
 }

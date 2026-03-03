@@ -23,7 +23,7 @@ import com.hivemq.extensions.ExtensionInformationUtil;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ListenerImpl implements Listener {
 
@@ -31,7 +31,6 @@ public class ListenerImpl implements Listener {
     private final @NotNull String bindAddress;
     private final @NotNull ListenerType listenerType;
     private final @NotNull String name;
-
     public ListenerImpl(final @NotNull com.hivemq.configuration.service.entity.Listener hiveMQListener) {
         Preconditions.checkNotNull(hiveMQListener, "listener must never be null");
         this.port = hiveMQListener.getPort();

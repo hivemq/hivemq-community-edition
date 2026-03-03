@@ -33,10 +33,8 @@ public class AdminServiceImpl implements AdminService {
 
     @NotNull
     private final ServerInformation serverInformation;
-
     @NotNull
     private LifecycleStage lifecycleStage = LifecycleStage.STARTING;
-
     @Inject
     public AdminServiceImpl(@NotNull final ServerInformation serverInformation) {
         this.serverInformation = serverInformation;
@@ -63,5 +61,4 @@ public class AdminServiceImpl implements AdminService {
     public LicenseInformation getLicenseInformation() {
         return new LicenseInformationImpl(LicenseEdition.COMMUNITY);
     }
-
 }

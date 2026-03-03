@@ -67,24 +67,24 @@ final class Mqtt5MessageEncoderUtil {
         return 1 + MqttVariableByteInteger.encodedLength(value);
     }
 
-    static void encodeProperty(
-            final int propertyIdentifier, final @NotNull String value, final @NotNull ByteBuf out) {
-
+    static void encodeProperty(final int propertyIdentifier, final @NotNull String value, final @NotNull ByteBuf out) {
         out.writeByte(propertyIdentifier);
         MqttBinaryData.encode(value.getBytes(Charsets.UTF_8), out);
     }
 
     static void encodeNullableProperty(
-            final int propertyIdentifier, final @Nullable String value, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final @Nullable String value,
+            final @NotNull ByteBuf out) {
         if (value != null) {
             encodeProperty(propertyIdentifier, value, out);
         }
     }
 
     static void encodeNullableProperty(
-            final int propertyIdentifier, final byte @Nullable [] binary, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final byte @Nullable [] binary,
+            final @NotNull ByteBuf out) {
         if (binary != null) {
             out.writeByte(propertyIdentifier);
             MqttBinaryData.encode(binary, out);
@@ -92,8 +92,9 @@ final class Mqtt5MessageEncoderUtil {
     }
 
     static void encodeNullableProperty(
-            final int propertyIdentifier, final @Nullable QoS qoS, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final @Nullable QoS qoS,
+            final @NotNull ByteBuf out) {
         if ((qoS != null) && (qoS.getQosNumber() < 2)) {
             out.writeByte(propertyIdentifier);
             out.writeByte(qoS.getQosNumber());
@@ -104,7 +105,6 @@ final class Mqtt5MessageEncoderUtil {
             final int propertyIdentifier,
             final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator,
             final @NotNull ByteBuf out) {
-
         if (payloadFormatIndicator != null) {
             out.writeByte(propertyIdentifier);
             out.writeByte(payloadFormatIndicator.getCode());
@@ -112,8 +112,10 @@ final class Mqtt5MessageEncoderUtil {
     }
 
     static void encodeBooleanProperty(
-            final int propertyIdentifier, final boolean value, final boolean defaultValue, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final boolean value,
+            final boolean defaultValue,
+            final @NotNull ByteBuf out) {
         if (value != defaultValue) {
             out.writeByte(propertyIdentifier);
             out.writeByte(value ? 1 : 0);
@@ -121,8 +123,10 @@ final class Mqtt5MessageEncoderUtil {
     }
 
     static void encodeShortProperty(
-            final int propertyIdentifier, final int value, final int defaultValue, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final int value,
+            final int defaultValue,
+            final @NotNull ByteBuf out) {
         if (value != defaultValue) {
             out.writeByte(propertyIdentifier);
             out.writeShort(value);
@@ -130,8 +134,10 @@ final class Mqtt5MessageEncoderUtil {
     }
 
     static void encodeIntProperty(
-            final int propertyIdentifier, final long value, final long defaultValue, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final long value,
+            final long defaultValue,
+            final @NotNull ByteBuf out) {
         if (value != defaultValue) {
             out.writeByte(propertyIdentifier);
             out.writeInt((int) value);
@@ -139,8 +145,9 @@ final class Mqtt5MessageEncoderUtil {
     }
 
     static void encodeVariableByteIntegerProperty(
-            final int propertyIdentifier, final int value, final @NotNull ByteBuf out) {
-
+            final int propertyIdentifier,
+            final int value,
+            final @NotNull ByteBuf out) {
         out.writeByte(propertyIdentifier);
         MqttVariableByteInteger.encode(value, out);
     }

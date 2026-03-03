@@ -30,12 +30,9 @@ import static org.junit.Assert.assertNull;
 public class StringsTest {
 
     private ByteBuf buffer;
-
     @Before
     public void setUp() throws Exception {
-
         buffer = Unpooled.buffer();
-
     }
 
     @Test
@@ -43,7 +40,6 @@ public class StringsTest {
         final byte[] bytes = "test".getBytes(UTF_8);
         buffer.writeShort(bytes.length);
         buffer.writeBytes(bytes);
-
         assertEquals("test", Strings.getPrefixedString(buffer));
     }
 
@@ -53,7 +49,6 @@ public class StringsTest {
         final byte[] bytes = randomString.getBytes(UTF_8);
         buffer.writeShort(bytes.length);
         buffer.writeBytes(bytes);
-
         assertEquals(randomString, Strings.getPrefixedString(buffer));
     }
 
@@ -61,39 +56,33 @@ public class StringsTest {
     public void test_get_prefixed_bytes_buffer_not_filled() throws Exception {
         buffer.writeShort(10);
         buffer.writeBytes(RandomUtils.nextBytes(9));
-
         assertNull(Strings.getPrefixedString(buffer));
     }
 
     @Test
     public void test_get_prefixed_string_empty() throws Exception {
-
         assertNull(Strings.getPrefixedString(buffer));
     }
 
     @Test
     public void test_get_prefixed_string_empty_byte_array() throws Exception {
         buffer.writeShort(0);
-
         assertEquals(0, Strings.getPrefixedString(buffer).length());
     }
 
     @Test
     public void test_get_prefixed_string() throws Exception {
-
         assertNull(Strings.getPrefixedString(buffer));
     }
 
     @Test(expected = NullPointerException.class)
     public void test_get_prefixed_bytes_null_passed() throws Exception {
-
         Strings.getPrefixedString(null);
     }
 
     @Test
     public void test_create_prefixed_bytes_empty() throws Exception {
         final ByteBuf buf = Strings.createPrefixedBytesFromString("", Unpooled.buffer());
-
         assertEquals(0, buf.readShort());
         assertFalse(buf.isReadable());
     }
@@ -102,7 +91,6 @@ public class StringsTest {
     public void test_create_prefixed_bytes() throws Exception {
         final String input = "thisisatést";
         final ByteBuf buf = Strings.createPrefixedBytesFromString(input, Unpooled.buffer());
-
         System.out.println(buf);
         assertEquals(12, buf.readShort());
         buf.readBytes(12);
@@ -113,7 +101,6 @@ public class StringsTest {
     public void test_create_prefixed_max_length() throws Exception {
         final String randomString = RandomStringUtils.randomAscii(Short.MAX_VALUE);
         final ByteBuf buf = Strings.createPrefixedBytesFromString(randomString, Unpooled.buffer());
-
         assertEquals(Short.MAX_VALUE, buf.readShort());
         buf.readBytes(Short.MAX_VALUE);
         assertFalse(buf.isReadable());

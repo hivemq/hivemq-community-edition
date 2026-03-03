@@ -29,9 +29,7 @@ public class IterablePersistenceEntry<T extends Collection<? extends Sizable>> i
 
     private final long timestamp;
     private final @NotNull T object;
-
     private int sizeInMemory = SIZE_NOT_CALCULATED;
-
     public IterablePersistenceEntry(@NotNull final T object, final long timestamp) {
         this.timestamp = timestamp;
         this.object = object;
@@ -62,17 +60,14 @@ public class IterablePersistenceEntry<T extends Collection<? extends Sizable>> i
 
     @Override
     public int getEstimatedSize() {
-
         if (sizeInMemory != SIZE_NOT_CALCULATED) {
             return sizeInMemory;
         }
-
         int size = getFixedSize();
         for (final Sizable item : object) {
             size += ObjectMemoryEstimation.objectRefSize();
             size += item.getEstimatedSize();
         }
-
         sizeInMemory = size;
         return sizeInMemory;
     }

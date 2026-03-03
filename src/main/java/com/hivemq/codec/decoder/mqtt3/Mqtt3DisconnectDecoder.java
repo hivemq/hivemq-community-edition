@@ -35,10 +35,8 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
     private static final DISCONNECT DISCONNECT = new DISCONNECT();
-
     @Inject
-    public Mqtt3DisconnectDecoder(
-            final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3DisconnectDecoder(final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -48,7 +46,6 @@ public class Mqtt3DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte header) {
-
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
                 disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.DISCONNECT);

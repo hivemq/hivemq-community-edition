@@ -31,7 +31,6 @@ public abstract class ClientBasedInputImpl implements ClientBasedInput, PluginTa
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-
     public ClientBasedInputImpl(final @NotNull String clientId, final @NotNull Channel channel) {
         clientInformation = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);

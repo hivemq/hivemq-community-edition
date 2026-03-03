@@ -18,7 +18,6 @@ package com.hivemq.mqtt.message;
 import org.junit.Test;
 import util.EnumTestUtil;
 
-
 public class MessageTypeTest {
 
     @Test

@@ -25,7 +25,6 @@ import io.netty.util.AttributeKey;
 public class TestChannelAttribute<T> implements Attribute<T> {
 
     private T value;
-
     public TestChannelAttribute(final T value) {
         this.value = value;
     }

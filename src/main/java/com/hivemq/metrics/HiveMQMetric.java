@@ -29,8 +29,6 @@ public class HiveMQMetric<T extends Metric> {
 
     private final String name;
     private final Class<? extends Metric> clazz;
-
-
     private HiveMQMetric(final String name, final Class<? extends Metric> clazz) {
         this.name = name;
         this.clazz = clazz;
@@ -38,13 +36,11 @@ public class HiveMQMetric<T extends Metric> {
 
     public static <T extends Metric> HiveMQMetric<T> valueOf(final String name, final Class<T> metricClass) {
         checkNotNull(name, "Name cannot be null");
-
         return new HiveMQMetric<>(name, metricClass);
     }
 
     public static HiveMQMetric<Gauge<Number>> gaugeValue(final String name) {
         checkNotNull(name, "Name cannot be null");
-
         return new HiveMQMetric<>(name, Gauge.class);
     }
 

@@ -25,16 +25,13 @@ public class ThreadPreConditions {
     public static final String SINGLE_WRITER_THREAD_PREFIX = "single-writer";
     public static final String NETTY_NATIVE_CHILD_EVENTLOOP = "hivemq-native-eventloop-child";
     public static final String NETTY_CHILD_EVENTLOOP = "hivemq-eventloop-child";
-
     private static boolean enabled = false;
-
     static {
         final String enableThreadPreconditionString = System.getProperty("TEST_ENABLE_THREAD_PRECONDITION");
         if (enableThreadPreconditionString != null) {
             enabled = Boolean.parseBoolean(enableThreadPreconditionString);
         }
     }
-
     public static boolean enabled() {
         return enabled;
     }
@@ -53,11 +50,8 @@ public class ThreadPreConditions {
         }
         final String name = Thread.currentThread().getName();
         if (!name.startsWith(prefix)) {
-            throw new ThreadPreConditionException("Thread name doesn't start with '" +
-                    prefix +
-                    "' as expected. Thread name: '" +
-                    name +
-                    "'.");
+            throw new ThreadPreConditionException(
+                    "Thread name doesn't start with '" + prefix + "' as expected. Thread name: '" + name + "'.");
         }
     }
 
@@ -67,14 +61,10 @@ public class ThreadPreConditions {
         }
         final String name = Thread.currentThread().getName();
         if (!name.startsWith(NETTY_NATIVE_CHILD_EVENTLOOP) && !name.startsWith(NETTY_CHILD_EVENTLOOP)) {
-            throw new ThreadPreConditionException("Thread name doesn't start with '" +
-                    NETTY_NATIVE_CHILD_EVENTLOOP +
-                    "' as expected. Thread name: '" +
-                    name +
-                    "'.");
+            throw new ThreadPreConditionException("Thread name doesn't start with '" + NETTY_NATIVE_CHILD_EVENTLOOP
+                    + "' as expected. Thread name: '" + name + "'.");
         }
     }
-
     public static class ThreadPreConditionException extends RuntimeException {
 
         public ThreadPreConditionException(final @NotNull String message) {

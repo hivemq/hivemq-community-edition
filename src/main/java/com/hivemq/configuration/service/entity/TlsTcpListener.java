@@ -26,13 +26,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dominik Obermaier
  * @author Christoph Schaebel
- * @since 3.0
+ * @since  3.0
  */
 @Immutable
 public class TlsTcpListener extends TcpListener implements TlsListener {
 
     private final @NotNull Tls tls;
-
     /**
      * Creates a new TLS Listener which listens to a specific port and bind address
      *
@@ -52,8 +51,8 @@ public class TlsTcpListener extends TcpListener implements TlsListener {
      * @param bindAddress the bind address
      * @param tls         the TLS configuration
      */
-    public TlsTcpListener(
-            final int port, final @NotNull String bindAddress, final @NotNull Tls tls, final @NotNull String name) {
+    public TlsTcpListener(final int port, final @NotNull String bindAddress, final @NotNull Tls tls,
+            final @NotNull String name) {
         super(port, bindAddress, name);
         checkNotNull(tls);
         this.tls = tls;
@@ -68,14 +67,12 @@ public class TlsTcpListener extends TcpListener implements TlsListener {
     public @NotNull String readableName() {
         return "TCP Listener with TLS";
     }
-
     public static class Builder {
 
         private @Nullable String name;
         private @Nullable Integer port;
         private @Nullable String bindAddress;
         private @Nullable Tls tls;
-
         public @NotNull Builder from(final @NotNull TlsTcpListener tlsTcpListener) {
             port = tlsTcpListener.getPort();
             bindAddress = tlsTcpListener.getBindAddress();

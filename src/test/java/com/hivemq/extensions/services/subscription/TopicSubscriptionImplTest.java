@@ -26,51 +26,34 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class TopicSubscriptionImplTest {
 
     @Test
     public void test_from_topic() {
-
-        final Topic topic = new Topic("topic",
-                QoS.AT_LEAST_ONCE,
-                true,
-                true,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
-                1);
-
+        final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE, true, true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1);
         final TopicSubscriptionImpl subscription = new TopicSubscriptionImpl(topic);
-
         assertEquals("topic", subscription.getTopicFilter());
         assertEquals(Qos.AT_LEAST_ONCE, subscription.getQos());
         assertTrue(subscription.getNoLocal());
         assertTrue(subscription.getRetainAsPublished());
         assertTrue(subscription.getSubscriptionIdentifier().isPresent());
         assertEquals(1, subscription.getSubscriptionIdentifier().get().intValue());
-
     }
 
     @Test
     public void test_convert_to_topic_do_not_send() {
-
-        final Topic topic = new Topic("topic",
-                QoS.AT_LEAST_ONCE,
-                true,
-                true,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
-                1);
-
+        final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE, true, true,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1);
         final TopicSubscriptionImpl subscription = new TopicSubscriptionImpl(topic);
-
         final Topic converted = TopicSubscriptionImpl.convertToTopic(subscription);
-
         assertEquals("topic", converted.getTopic());
         assertEquals(QoS.AT_LEAST_ONCE, converted.getQoS());
         assertEquals(Mqtt5RetainHandling.DO_NOT_SEND, converted.getRetainHandling());
         assertTrue(converted.isNoLocal());
         assertTrue(converted.isRetainAsPublished());
         assertEquals(1, converted.getSubscriptionIdentifier().intValue());
-
     }
 }

@@ -32,8 +32,8 @@ import static org.junit.Assert.assertTrue;
  * @author Lukas Brandl
  */
 public class MqttBinaryDataTest {
-    private final Random random = new Random();
 
+    private final Random random = new Random();
     @Test
     public void test_decodeBinaryData_zero_length() {
         final ByteBuf byteBuf = Unpooled.buffer();

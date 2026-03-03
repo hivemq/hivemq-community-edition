@@ -27,16 +27,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dominik Obermaier
  * @author Christoph Schaebel
  * @author Georg Held
- * @since 3.0
+ * @since  3.0
  */
 @Immutable
 public class TcpListener implements Listener {
 
     private int port;
-
     private final @NotNull String name;
     private final @NotNull String bindAddress;
-
     /**
      * Creates a new TCP listener which listens to a specific port and bind address
      *
@@ -56,10 +54,8 @@ public class TcpListener implements Listener {
      * @param name        the name of the listener
      */
     public TcpListener(final int port, final @NotNull String bindAddress, final @NotNull String name) {
-
         checkNotNull(bindAddress, "bindAddress must not be null");
         checkNotNull(name, "name must not be null");
-
         this.port = port;
         this.bindAddress = bindAddress;
         this.name = name;
@@ -89,13 +85,11 @@ public class TcpListener implements Listener {
     public @NotNull String getName() {
         return name;
     }
-
     public static class Builder {
 
         private @Nullable String name;
         private @Nullable Integer port;
         private @Nullable String bindAddress;
-
         public @NotNull Builder from(final @NotNull TcpListener tcpListener) {
             port = tcpListener.getPort();
             bindAddress = tcpListener.getBindAddress();

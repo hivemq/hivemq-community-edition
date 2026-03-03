@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.config;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -35,7 +34,6 @@ public class HiveMQExtensionXMLReaderTest {
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Test
     public void test_unmarschal_plugin_meta() throws Exception {
         final File extensionXML = temporaryFolder.newFile("hivemq-extension.xml");
@@ -46,8 +44,8 @@ public class HiveMQExtensionXMLReaderTest {
                 "<priority>1000</priority>" + //
                 "<author>Some Author</author>" + //
                 "</hivemq-extension>", Charset.defaultCharset());
-        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML =
-                HiveMQExtensionXMLReader.getExtensionEntityFromXML(extensionXML.toPath().getParent(), true);
+        final Optional<HiveMQExtensionEntity> optionalPluginEntityFromXML = HiveMQExtensionXMLReader
+                .getExtensionEntityFromXML(extensionXML.toPath().getParent(), true);
         assertTrue(optionalPluginEntityFromXML.isPresent());
         final HiveMQExtensionEntity hiveMQExtensionEntity = optionalPluginEntityFromXML.get();
         assertEquals("some-id", hiveMQExtensionEntity.getId());
@@ -65,8 +63,8 @@ public class HiveMQExtensionXMLReaderTest {
                 "<version>1.0.0</version>" + //
                 "<priority>1000</priority>" + //
                 "</hivemq-extension>", Charset.defaultCharset());
-        final Optional<HiveMQExtensionEntity> optionalExtensionEntityFromXML =
-                HiveMQExtensionXMLReader.getExtensionEntityFromXML(extensionXML.toPath().getParent(), true);
+        final Optional<HiveMQExtensionEntity> optionalExtensionEntityFromXML = HiveMQExtensionXMLReader
+                .getExtensionEntityFromXML(extensionXML.toPath().getParent(), true);
         assertFalse(optionalExtensionEntityFromXML.isPresent());
     }
 }

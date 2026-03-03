@@ -26,7 +26,7 @@ import com.hivemq.extensions.packets.subscribe.SubscribePacketImpl;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 @Immutable
 public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginTaskInput {
@@ -34,12 +34,9 @@ public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginT
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull SubscribePacketImpl subscribePacket;
-
-    public SubscribeInboundInputImpl(
-            final @NotNull ClientInformation clientInformation,
+    public SubscribeInboundInputImpl(final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull SubscribePacketImpl subscribePacket) {
-
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.subscribePacket = subscribePacket;
@@ -61,8 +58,7 @@ public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginT
     }
 
     public @NotNull SubscribeInboundInputImpl update(final @NotNull SubscribeInboundOutputImpl output) {
-        return new SubscribeInboundInputImpl(clientInformation,
-                connectionInformation,
+        return new SubscribeInboundInputImpl(clientInformation, connectionInformation,
                 output.getSubscribePacket().copy());
     }
 }

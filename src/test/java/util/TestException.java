@@ -17,12 +17,11 @@ package util;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class TestException extends Exception {
 
     public static final TestException INSTANCE = new TestException();
-
     private TestException() {
         super("FOR TESTS ONLY");
     }

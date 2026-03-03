@@ -35,20 +35,15 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
     final @NotNull ImmutableList<String> topicFilters;
     final @NotNull UserPropertiesImpl userProperties;
     final int packetIdentifier;
-
-    public UnsubscribePacketImpl(
-            final @NotNull ImmutableList<String> topicFilters,
-            final @NotNull UserPropertiesImpl userProperties,
-            final int packetIdentifier) {
-
+    public UnsubscribePacketImpl(final @NotNull ImmutableList<String> topicFilters,
+            final @NotNull UserPropertiesImpl userProperties, final int packetIdentifier) {
         this.topicFilters = topicFilters;
         this.userProperties = userProperties;
         this.packetIdentifier = packetIdentifier;
     }
 
     public UnsubscribePacketImpl(final @NotNull UNSUBSCRIBE unsubscribe) {
-        this(unsubscribe.getTopics(),
-                UserPropertiesImpl.of(unsubscribe.getUserProperties().asList()),
+        this(unsubscribe.getTopics(), UserPropertiesImpl.of(unsubscribe.getUserProperties().asList()),
                 unsubscribe.getPacketIdentifier());
     }
 
@@ -76,9 +71,8 @@ public class UnsubscribePacketImpl implements UnsubscribePacket {
             return false;
         }
         final UnsubscribePacketImpl that = (UnsubscribePacketImpl) o;
-        return topicFilters.equals(that.topicFilters) &&
-                userProperties.equals(that.userProperties) &&
-                (packetIdentifier == that.packetIdentifier);
+        return topicFilters.equals(that.topicFilters) && userProperties.equals(that.userProperties)
+                && (packetIdentifier == that.packetIdentifier);
     }
 
     @Override

@@ -32,7 +32,7 @@ import com.hivemq.util.Bytes;
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> implements Mqtt3CONNACK, Mqtt5CONNACK {
@@ -42,10 +42,8 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
     }
 
     public static @NotNull CONNACK from(final @NotNull ConnackPacketImpl packet) {
-
         final Qos extensionMaxQos = packet.getMaximumQoS().orElse(null);
         final QoS qoS = (extensionMaxQos != null) ? QoS.valueOf(extensionMaxQos.getQosNumber()) : null;
-
         return new CONNACKBuilder().withReasonCode(Mqtt5ConnAckReasonCode.from(packet.getReasonCode()))
                 .withSessionPresent(packet.getSessionPresent())
                 .withSessionExpiryInterval(packet.getSessionExpiryInterval().orElse(SESSION_EXPIRY_NOT_SET))
@@ -53,10 +51,8 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
                 .withAssignedClientIdentifier(packet.getAssignedClientIdentifier().orElse(null))
                 .withAuthMethod(packet.getAuthenticationMethod().orElse(null))
                 .withAuthData(Bytes.getBytesFromReadOnlyBuffer(packet.getAuthenticationData()))
-                .withReceiveMaximum(packet.getReceiveMaximum())
-                .withMaximumPacketSize(packet.getMaximumPacketSize())
-                .withTopicAliasMaximum(packet.getTopicAliasMaximum())
-                .withMaximumQoS(qoS)
+                .withReceiveMaximum(packet.getReceiveMaximum()).withMaximumPacketSize(packet.getMaximumPacketSize())
+                .withTopicAliasMaximum(packet.getTopicAliasMaximum()).withMaximumQoS(qoS)
                 .withRetainAvailable(packet.getRetainAvailable())
                 .withWildcardSubscriptionAvailable(packet.getWildCardSubscriptionAvailable())
                 .withSharedSubscriptionAvailable(packet.getSharedSubscriptionsAvailable())
@@ -64,25 +60,19 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
                 .withResponseInformation(packet.getResponseInformation().orElse(null))
                 .withServerReference(packet.getServerReference().orElse(null))
                 .withReasonString(packet.getReasonString().orElse(null))
-                .withUserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()))
-                .build();
+                .withUserProperties(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList())).build();
     }
-
     public static final long SESSION_EXPIRY_NOT_SET = Long.MAX_VALUE;
     public static final int KEEP_ALIVE_NOT_SET = -1;
-
     private final boolean sessionPresent;
-
-    //Mqtt 5
+    // Mqtt 5
     private final long sessionExpiryInterval;
     private final int serverKeepAlive;
     private final @Nullable String assignedClientIdentifier;
-
-    //Auth
+    // Auth
     private final @Nullable String authMethod;
     private final byte @Nullable [] authData;
-
-    //Restrictions from Server
+    // Restrictions from Server
     private final int receiveMaximum;
     private final int topicAliasMaximum;
     private final int maximumPacketSize;
@@ -91,33 +81,18 @@ public class CONNACK extends MqttMessageWithReasonCode<Mqtt5ConnAckReasonCode> i
     private final boolean isWildcardSubscriptionAvailable;
     private final boolean isSubscriptionIdentifierAvailable;
     private final boolean isSharedSubscriptionAvailable;
-
     private final @Nullable String responseInformation;
     private final @Nullable String serverReference;
-
-    CONNACK(
-            final @NotNull Mqtt5ConnAckReasonCode reasonCode,
-            final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties,
-            final boolean sessionPresent,
-            final long sessionExpiryInterval,
-            final int serverKeepAlive,
-            final @Nullable String assignedClientIdentifier,
-            final @Nullable String authMethod,
-            final byte @Nullable [] authData,
-            final int receiveMaximum,
-            final int topicAliasMaximum,
-            final int maximumPacketSize,
-            final @Nullable QoS maximumQoS,
-            final boolean isRetainAvailable,
-            final boolean isWildcardSubscriptionAvailable,
-            final boolean isSubscriptionIdentifierAvailable,
-            final boolean isSharedSubscriptionAvailable,
-            final @Nullable String responseInformation,
+    CONNACK(final @NotNull Mqtt5ConnAckReasonCode reasonCode, final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties, final boolean sessionPresent,
+            final long sessionExpiryInterval, final int serverKeepAlive,
+            final @Nullable String assignedClientIdentifier, final @Nullable String authMethod,
+            final byte @Nullable [] authData, final int receiveMaximum, final int topicAliasMaximum,
+            final int maximumPacketSize, final @Nullable QoS maximumQoS, final boolean isRetainAvailable,
+            final boolean isWildcardSubscriptionAvailable, final boolean isSubscriptionIdentifierAvailable,
+            final boolean isSharedSubscriptionAvailable, final @Nullable String responseInformation,
             final @Nullable String serverReference) {
-
         super(reasonCode, reasonString, userProperties);
-
         this.sessionPresent = sessionPresent;
         this.sessionExpiryInterval = sessionExpiryInterval;
         this.serverKeepAlive = serverKeepAlive;

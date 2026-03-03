@@ -42,10 +42,8 @@ public class ConnectionInformationImpl implements ConnectionInformation {
     private final @Nullable InetAddress inetAddress;
     private final @Nullable Listener listener;
     private final @Nullable ClientTlsInformation tlsInformation;
-
     public ConnectionInformationImpl(final @NotNull ClientConnectionContext clientConnectionContext) {
         Preconditions.checkNotNull(clientConnectionContext);
-
         final Channel channel = clientConnectionContext.getChannel();
         Preconditions.checkNotNull(channel);
         mqttVersion = ExtensionInformationUtil.mqttVersionFromChannel(channel);
@@ -53,7 +51,6 @@ public class ConnectionInformationImpl implements ConnectionInformation {
         listener = ExtensionInformationUtil.getListenerFromChannel(channel);
         tlsInformation = ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         connectionAttributeStore = new ConnectionAttributeStoreImpl(channel);
-
     }
 
     @Override
@@ -73,7 +70,7 @@ public class ConnectionInformationImpl implements ConnectionInformation {
 
     @Override
     public @NotNull Optional<ProxyInformation> getProxyInformation() {
-        //Noop since community edition has no proxy protocol...
+        // Noop since community edition has no proxy protocol...
         return Optional.empty();
     }
 
@@ -82,12 +79,10 @@ public class ConnectionInformationImpl implements ConnectionInformation {
         return connectionAttributeStore;
     }
 
-
     @Override
     public @NotNull Optional<TlsInformation> getTlsInformation() {
-        if (tlsInformation != null &&
-                tlsInformation.getClientCertificate().isPresent() &&
-                tlsInformation.getClientCertificateChain().isPresent()) {
+        if (tlsInformation != null && tlsInformation.getClientCertificate().isPresent()
+                && tlsInformation.getClientCertificateChain().isPresent()) {
             return Optional.of((TlsInformation) tlsInformation);
         }
         return Optional.empty();

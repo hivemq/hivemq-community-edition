@@ -36,13 +36,9 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
     private final @NotNull ChannelHandlerContext ctx;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull IncomingPublishService incomingPublishService;
-
-    public PublishAuthorizationProcessedTask(
-            final @NotNull PUBLISH publish,
-            final @NotNull ChannelHandlerContext ctx,
+    public PublishAuthorizationProcessedTask(final @NotNull PUBLISH publish, final @NotNull ChannelHandlerContext ctx,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull IncomingPublishService incomingPublishService) {
-
         this.publish = publish;
         this.ctx = ctx;
         this.mqttServerDisconnector = mqttServerDisconnector;
@@ -52,49 +48,46 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
     @Override
     public void onSuccess(@Nullable final PublishAuthorizerOutputImpl output) {
         if (output == null) {
-            //this does not happen
+            // this does not happen
             return;
         }
-
         AckReasonCode reasonCode = null;
         String reasonString = null;
-
         switch (output.getAuthorizationState()) {
-            case DISCONNECT:
+            case DISCONNECT :
                 disconnectClient(output);
                 return;
-            case FAIL:
-                reasonCode =
-                        output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
+            case FAIL :
+                reasonCode = output.getAckReasonCode() != null
+                        ? output.getAckReasonCode()
+                        : AckReasonCode.NOT_AUTHORIZED;
                 reasonString = output.getReasonString() != null ? output.getReasonString() : getReasonString(publish);
                 break;
-            case UNDECIDED:
+            case UNDECIDED :
                 if (!output.isAuthorizerPresent()) {
-                    //providers never returned an authorizer, same as continue
+                    // providers never returned an authorizer, same as continue
                     break;
                 }
                 reasonCode = AckReasonCode.NOT_AUTHORIZED;
                 reasonString = getReasonString(publish);
                 break;
-            case SUCCESS:
+            case SUCCESS :
                 reasonCode = AckReasonCode.SUCCESS;
                 break;
-            case CONTINUE:
+            case CONTINUE :
                 break;
-            default:
-                //no state left
+            default :
+                // no state left
                 throw new IllegalStateException("Unknown type");
         }
-
-        //call method in IncomingPublishService with additional info
+        // call method in IncomingPublishService with additional info
         final AckReasonCode finalReasonCode = reasonCode;
         final String finalReasonString = reasonString;
         ctx.executor().execute(() -> {
-            incomingPublishService.processPublish(ctx,
+            incomingPublishService.processPublish(
+                    ctx,
                     publish,
-                    new PublishAuthorizerResult(finalReasonCode,
-                            finalReasonString,
-                            output.isAuthorizerPresent(),
+                    new PublishAuthorizerResult(finalReasonCode, finalReasonString, output.isAuthorizerPresent(),
                             output.getDisconnectReasonCode()));
         });
     }
@@ -106,30 +99,24 @@ public class PublishAuthorizationProcessedTask implements FutureCallback<Publish
     }
 
     private void disconnectClient(@Nullable final PublishAuthorizerOutputImpl output) {
-        final String logMessage = "A client (IP: {}) sent a PUBLISH to an unauthorized topic '" +
-                publish.getTopic() +
-                "'. Disconnecting client from extension.";
-        final String eventLogMessage =
-                "Sent a PUBLISH to an unauthorized topic '" + publish.getTopic() + "', extension requested disconnect";
-
+        final String logMessage = "A client (IP: {}) sent a PUBLISH to an unauthorized topic '" + publish.getTopic()
+                + "'. Disconnecting client from extension.";
+        final String eventLogMessage = "Sent a PUBLISH to an unauthorized topic '" + publish.getTopic()
+                + "', extension requested disconnect";
         ctx.channel().eventLoop().execute(() -> {
-            mqttServerDisconnector.disconnect(ctx.channel(),
+            mqttServerDisconnector.disconnect(
+                    ctx.channel(),
                     logMessage,
                     eventLogMessage,
-                    output != null ?
-                            Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()) :
-                            Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
+                    output != null
+                            ? Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode())
+                            : Mqtt5DisconnectReasonCode.NOT_AUTHORIZED,
                     output != null ? output.getReasonString() : null);
         });
     }
 
     private String getReasonString(@NotNull final PUBLISH publish) {
-        return "Not authorized to publish on topic '" +
-                publish.getTopic() +
-                "' with QoS '" +
-                publish.getQoS().getQosNumber() +
-                "' and retain '" +
-                publish.isRetain() +
-                "'";
+        return "Not authorized to publish on topic '" + publish.getTopic() + "' with QoS '"
+                + publish.getQoS().getQosNumber() + "' and retain '" + publish.isRetain() + "'";
     }
 }

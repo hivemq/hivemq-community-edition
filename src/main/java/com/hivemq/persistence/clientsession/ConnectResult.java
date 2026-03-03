@@ -28,9 +28,7 @@ public class ConnectResult {
     private final Long previousTimestamp;
     @Nullable
     private final ClientSession previousClientSession;
-
-    public ConnectResult(
-            @Nullable final Long previousTimestamp, @Nullable final ClientSession previousClientSession) {
+    public ConnectResult(@Nullable final Long previousTimestamp, @Nullable final ClientSession previousClientSession) {
         this.previousTimestamp = previousTimestamp;
         this.previousClientSession = previousClientSession;
     }

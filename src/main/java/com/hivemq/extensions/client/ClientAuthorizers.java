@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface ClientAuthorizers {
 
@@ -47,10 +47,12 @@ public interface ClientAuthorizers {
     /**
      * @return a map of all subscription authorizers per extension id.
      */
-    @NotNull Map<String, SubscriptionAuthorizer> getSubscriptionAuthorizersMap();
+    @NotNull
+    Map<String, SubscriptionAuthorizer> getSubscriptionAuthorizersMap();
 
     /**
      * @return a map of all publish authorizers per extension id.
      */
-    @NotNull Map<String, PublishAuthorizer> getPublishAuthorizersMap();
+    @NotNull
+    Map<String, PublishAuthorizer> getPublishAuthorizersMap();
 }

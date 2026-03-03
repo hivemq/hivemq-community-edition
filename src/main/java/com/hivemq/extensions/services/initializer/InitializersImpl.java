@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.services.initializer;
 
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
@@ -48,13 +47,10 @@ public class InitializersImpl implements Initializers {
 
     @NotNull
     private final Map<@NotNull String, @NotNull ClientInitializer> clientInitializerMap;
-
     @NotNull
     private final ReadWriteLock readWriteLock;
-
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
-
     @Inject
     public InitializersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
@@ -64,22 +60,14 @@ public class InitializersImpl implements Initializers {
 
     @Override
     public void addClientInitializer(@NotNull final ClientInitializer initializer) {
-
         final Lock writeLock = readWriteLock.writeLock();
-
         writeLock.lock();
-
         try {
-
             final ClassLoader pluginClassloader = initializer.getClass().getClassLoader();
-
             final HiveMQExtension plugin = hiveMQExtensions.getExtensionForClassloader(pluginClassloader);
-
             if (plugin != null) {
-
                 clientInitializerMap.put(plugin.getId(), initializer);
             }
-
         } finally {
             writeLock.unlock();
         }
@@ -88,7 +76,6 @@ public class InitializersImpl implements Initializers {
     @Override
     @NotNull
     public Map<@NotNull String, @NotNull ClientInitializer> getClientInitializerMap() {
-
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {

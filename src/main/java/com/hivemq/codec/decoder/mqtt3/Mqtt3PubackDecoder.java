@@ -35,8 +35,7 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
     @Inject
-    public Mqtt3PubackDecoder(
-            final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3PubackDecoder(final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -46,7 +45,6 @@ public class Mqtt3PubackDecoder extends AbstractMqttDecoder<PUBACK> {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte header) {
-
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
                 disconnectByInvalidFixedHeader(clientConnectionContext, MessageType.PUBACK);
@@ -54,14 +52,12 @@ public class Mqtt3PubackDecoder extends AbstractMqttDecoder<PUBACK> {
                 return null;
             }
         }
-
         if (buf.readableBytes() < 2) {
             disconnectByNoMessageId(clientConnectionContext, MessageType.PUBACK);
             buf.clear();
             return null;
         }
         final int messageId = buf.readUnsignedShort();
-
         return new PUBACK(messageId);
     }
 }

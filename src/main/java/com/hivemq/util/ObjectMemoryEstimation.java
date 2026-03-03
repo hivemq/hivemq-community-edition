@@ -23,7 +23,7 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
  */
 public class ObjectMemoryEstimation {
 
-    public static final int OBJECT_SHELL_SIZE = 12; //Class Pointer (4), Flags (4), Locks (4)
+    public static final int OBJECT_SHELL_SIZE = 12; // Class Pointer (4), Flags (4), Locks (4)
     public static final int OBJECT_REF_SIZE = 4;
     public static final int ENUM_OVERHEAD = 4;
     public static final int STRING_OVERHEAD = 38;
@@ -36,7 +36,6 @@ public class ObjectMemoryEstimation {
     public static final int INT_SIZE = 4;
     public static final int CHAR_SIZE = 2;
     public static final int BOOLEAN_SIZE = 1;
-
     public static int enumSize() {
         return ENUM_OVERHEAD;
     }
@@ -45,7 +44,6 @@ public class ObjectMemoryEstimation {
         if (string == null) {
             return 0;
         }
-
         int size = STRING_OVERHEAD;
         size += string.length() * CHAR_SIZE;
         return size;
@@ -55,7 +53,6 @@ public class ObjectMemoryEstimation {
         if (array == null) {
             return 0;
         }
-
         int size = ARRAY_OVERHEAD;
         size += array.length;
         return size;
@@ -65,7 +62,6 @@ public class ObjectMemoryEstimation {
         if (array == null) {
             return 0;
         }
-
         int size = ARRAY_OVERHEAD;
         size += intSize(); // start;
         size += intSize(); // end;

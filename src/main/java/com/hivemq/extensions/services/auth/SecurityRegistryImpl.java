@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.services.auth;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -38,11 +37,8 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     private final @NotNull Authenticators authenticators;
     private final @NotNull Authorizers authorizers;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-
     @Inject
-    public SecurityRegistryImpl(
-            final @NotNull Authenticators authenticators,
-            final @NotNull Authorizers authorizers,
+    public SecurityRegistryImpl(final @NotNull Authenticators authenticators, final @NotNull Authorizers authorizers,
             final @NotNull HiveMQExtensions hiveMQExtensions) {
         this.authenticators = authenticators;
         this.authorizers = authorizers;
@@ -52,34 +48,27 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     @Override
     public void setAuthenticatorProvider(final @NotNull AuthenticatorProvider authenticatorProvider) {
         checkNotNull(authenticatorProvider, "authenticatorProvider must not be null");
-
-        final HiveMQExtension extension =
-                hiveMQExtensions.getExtensionForClassloader(authenticatorProvider.getClass().getClassLoader());
-
+        final HiveMQExtension extension = hiveMQExtensions
+                .getExtensionForClassloader(authenticatorProvider.getClass().getClassLoader());
         if (extension == null || extension.getExtensionClassloader() == null) {
             return;
         }
-
-        final WrappedAuthenticatorProvider wrapped =
-                new WrappedAuthenticatorProvider(authenticatorProvider, extension.getExtensionClassloader());
+        final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider(authenticatorProvider,
+                extension.getExtensionClassloader());
         authenticators.registerAuthenticatorProvider(wrapped);
     }
 
     @Override
     public void setEnhancedAuthenticatorProvider(
             final @NotNull EnhancedAuthenticatorProvider enhancedAuthenticatorProvider) {
-
         checkNotNull(enhancedAuthenticatorProvider, "enhancedAuthenticatorProvider must not be null");
-
-        final HiveMQExtension extension =
-                hiveMQExtensions.getExtensionForClassloader(enhancedAuthenticatorProvider.getClass().getClassLoader());
-
+        final HiveMQExtension extension = hiveMQExtensions
+                .getExtensionForClassloader(enhancedAuthenticatorProvider.getClass().getClassLoader());
         if (extension == null || extension.getExtensionClassloader() == null) {
             return;
         }
-
-        final WrappedAuthenticatorProvider wrapped =
-                new WrappedAuthenticatorProvider(enhancedAuthenticatorProvider, extension.getExtensionClassloader());
+        final WrappedAuthenticatorProvider wrapped = new WrappedAuthenticatorProvider(enhancedAuthenticatorProvider,
+                extension.getExtensionClassloader());
         authenticators.registerAuthenticatorProvider(wrapped);
     }
 

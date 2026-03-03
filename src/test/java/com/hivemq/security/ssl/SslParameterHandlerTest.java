@@ -37,16 +37,14 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class SslParameterHandlerTest {
 
     private EmbeddedChannel channel;
-
     private final @NotNull SslHandler sslHandler = mock();
     private final @NotNull SSLEngine sslEngine = mock();
     private final @NotNull SSLSession sslSession = mock();
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();

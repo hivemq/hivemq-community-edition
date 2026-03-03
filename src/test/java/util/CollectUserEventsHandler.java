@@ -29,9 +29,7 @@ import java.util.Queue;
 public class CollectUserEventsHandler<T> extends ChannelInboundHandlerAdapter {
 
     private final Class<T> classToCollect;
-
     private final Queue<T> objects = new ArrayDeque<>();
-
     public CollectUserEventsHandler(@NotNull final Class<T> classToCollect) {
         this.classToCollect = classToCollect;
     }

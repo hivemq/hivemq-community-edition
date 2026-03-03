@@ -64,19 +64,16 @@ import javax.inject.Singleton;
  * This factory is used to create encoders and encode messages.
  *
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 @Singleton
 public class EncoderFactory {
 
     private static final Logger log = LoggerFactory.getLogger(EncoderFactory.class);
-
     private final @NotNull Mqtt5EncoderFactory mqtt5Instance;
     private final @NotNull Mqtt3EncoderFactory mqtt3Instance;
-
     @Inject
-    public EncoderFactory(
-            final @NotNull MessageDroppedService messageDroppedService,
+    public EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService,
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         mqtt5Instance = new Mqtt5EncoderFactory(messageDroppedService, securityConfigurationService);
@@ -94,7 +91,6 @@ public class EncoderFactory {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull Message msg,
             final @NotNull ByteBuf out) {
-
         final MqttEncoder encoder = getEncoder(msg, clientConnectionContext);
         if (encoder != null) {
             encoder.encode(clientConnectionContext, msg, out);
@@ -106,13 +102,13 @@ public class EncoderFactory {
     /**
      * This method finds the Mqtt encoder depending on the message and the protocol version.
      *
-     * @param msg                     the {@link Message} is used to identify the encoder
-     * @param clientConnectionContext the {@link ClientConnectionContext} of the mqtt client
-     * @return {@link MqttEncoder} encoder depends on the message and protocol
+     * @param  msg                     the {@link Message} is used to identify the encoder
+     * @param  clientConnectionContext the {@link ClientConnectionContext} of the mqtt client
+     * @return                         {@link MqttEncoder} encoder depends on the message and protocol
      */
     protected @Nullable MqttEncoder getEncoder(
-            final @NotNull Message msg, final @NotNull ClientConnectionContext clientConnectionContext) {
-
+            final @NotNull Message msg,
+            final @NotNull ClientConnectionContext clientConnectionContext) {
         if (clientConnectionContext.getProtocolVersion() == ProtocolVersion.MQTTv5) {
             return mqtt5Instance.getEncoder(msg);
         } else {
@@ -124,7 +120,6 @@ public class EncoderFactory {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull Message msg,
             final boolean preferDirect) {
-
         final MqttEncoder encoder = getEncoder(msg, clientConnectionContext);
         if (encoder != null) {
             final int bufferSize = encoder.bufferSize(clientConnectionContext, msg);
@@ -134,14 +129,12 @@ public class EncoderFactory {
                 return clientConnectionContext.getChannel().alloc().heapBuffer(bufferSize);
             }
         }
-
         if (preferDirect) {
             return clientConnectionContext.getChannel().alloc().ioBuffer();
         } else {
             return clientConnectionContext.getChannel().alloc().heapBuffer();
         }
     }
-
     /**
      * Factory for Mqtt5 encoders.
      */
@@ -158,11 +151,8 @@ public class EncoderFactory {
         private final @NotNull Mqtt5AuthEncoder mqtt5AuthEncoder;
         private final @NotNull Mqtt5UnsubackEncoder mqtt5UnsubackEncoder;
         private final @NotNull MqttPingrespEncoder mqttPingrespEncoder;
-
-        Mqtt5EncoderFactory(
-                final @NotNull MessageDroppedService messageDroppedService,
+        Mqtt5EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
                 final @NotNull SecurityConfigurationService securityConfigurationService) {
-
             mqtt5PublishEncoder = new Mqtt5PublishEncoder(messageDroppedService, securityConfigurationService);
             mqtt5DisconnectEncoder = new Mqtt5DisconnectEncoder(messageDroppedService, securityConfigurationService);
             mqtt5SubackEncoder = new Mqtt5SubackEncoder(messageDroppedService, securityConfigurationService);
@@ -219,7 +209,6 @@ public class EncoderFactory {
         private final @NotNull Mqtt3PublishEncoder publishEncoder;
         private final @NotNull Mqtt3DisconnectEncoder disconnectEncoder;
         private final @NotNull MqttPingrespEncoder pingrespEncoder;
-
         Mqtt3EncoderFactory(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
             connackEncoder = new Mqtt3ConnackEncoder();
             pubackEncoder = new Mqtt3PubackEncoder();

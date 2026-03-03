@@ -40,25 +40,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class SendRetainedMessageListenerAndScheduleNext implements FutureCallback<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(SendRetainedMessageListenerAndScheduleNext.class);
-
     private final @NotNull Topic subscription;
     private final @NotNull Queue<String> topics;
     private final @NotNull Channel channel;
     private final @NotNull RetainedMessagesSender retainedMessagesSender;
     private final int batchSizeMax;
-
-    SendRetainedMessageListenerAndScheduleNext(
-            final @NotNull Topic subscription,
-            final @NotNull Queue<String> topics,
-            final @NotNull Channel channel,
-            final @NotNull RetainedMessagesSender retainedMessagesSender,
+    SendRetainedMessageListenerAndScheduleNext(final @NotNull Topic subscription, final @NotNull Queue<String> topics,
+            final @NotNull Channel channel, final @NotNull RetainedMessagesSender retainedMessagesSender,
             final int batchSizeMax) {
-
         checkNotNull(subscription, "Subscription must not be null");
         checkNotNull(topics, "Topics must not be null");
         checkNotNull(channel, "Channel must not be null");
         checkNotNull(retainedMessagesSender, "RetainedMessagesSender must not be null");
-
         this.subscription = subscription;
         this.topics = topics;
         this.channel = channel;
@@ -83,51 +76,41 @@ public class SendRetainedMessageListenerAndScheduleNext implements FutureCallbac
         final Topic[] topicBatch = new Topic[batchSize];
         for (int i = 0; i < batchSize; i++) {
             final String nextTopic = topics.poll();
-            topicBatch[i] = new Topic(nextTopic,
-                    subscription.getQoS(),
-                    subscription.isNoLocal(),
-                    subscription.isRetainAsPublished(),
-                    subscription.getRetainHandling(),
+            topicBatch[i] = new Topic(nextTopic, subscription.getQoS(), subscription.isNoLocal(),
+                    subscription.isRetainAsPublished(), subscription.getRetainHandling(),
                     subscription.getSubscriptionIdentifier());
         }
-
         final ListenableFuture<Void> sentFuture = retainedMessagesSender.writeRetainedMessages(channel, topicBatch);
-
-        Futures.addCallback(sentFuture,
-                new SendRetainedMessageListenerAndScheduleNext(subscription,
-                        topics,
-                        channel,
-                        retainedMessagesSender,
+        Futures.addCallback(
+                sentFuture,
+                new SendRetainedMessageListenerAndScheduleNext(subscription, topics, channel, retainedMessagesSender,
                         batchSizeMax),
                 channel.eventLoop());
     }
 
     @Override
     public void onFailure(final @NotNull Throwable throwable) {
-
         if (Exceptions.isConnectionClosedException(throwable)) {
             return;
         }
-
         if (throwable instanceof NoMessageIdAvailableException) {
             if (channel.isActive()) {
-                //We should just try again
+                // We should just try again
                 channel.eventLoop().schedule(() -> {
                     if (log.isTraceEnabled()) {
-                        log.trace("Retrying retained message for client '{}' on topic '{}'.",
+                        log.trace(
+                                "Retrying retained message for client '{}' on topic '{}'.",
                                 ClientConnection.of(channel).getClientId(),
                                 subscription.getTopic());
                     }
                     send();
                 }, 1, TimeUnit.SECONDS);
             }
-
         } else {
-            Exceptions.rethrowError("Unable to send retained message for subscription " +
-                    subscription.getTopic() +
-                    " to client " +
-                    ClientConnection.of(channel).getClientId() +
-                    ".", throwable);
+            Exceptions.rethrowError(
+                    "Unable to send retained message for subscription " + subscription.getTopic() + " to client "
+                            + ClientConnection.of(channel).getClientId() + ".",
+                    throwable);
             channel.disconnect();
         }
     }

@@ -33,9 +33,7 @@ public class ConnectInboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableConnectPacketImpl modifiablePacket = mock(ModifiableConnectPacketImpl.class);
-
         final ConnectInboundOutputImpl output = new ConnectInboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getConnectPacket());
     }
 
@@ -43,17 +41,13 @@ public class ConnectInboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableConnectPacketImpl modifiablePacket = mock(ModifiableConnectPacketImpl.class);
-
         final ConnectInboundOutputImpl output = new ConnectInboundOutputImpl(asyncer, modifiablePacket);
-
         final ConnectInboundInputImpl input = mock(ConnectInboundInputImpl.class);
         final ConnectPacketImpl packet = mock(ConnectPacketImpl.class);
         final ModifiableConnectPacketImpl newModifiablePacket = mock(ModifiableConnectPacketImpl.class);
         when(input.getConnectPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final ConnectInboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getConnectPacket());
     }
 }

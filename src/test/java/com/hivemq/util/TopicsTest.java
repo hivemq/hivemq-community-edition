@@ -29,20 +29,15 @@ import static org.junit.Assert.assertTrue;
  */
 public class TopicsTest {
 
-
     @Test
     public void test_not_valid_publish() throws Exception {
-
         assertFalse(isValidTopicToPublish(""));
         assertFalse(isValidTopicToPublish("#"));
         assertFalse(isValidTopicToPublish("topic/#"));
         assertFalse(isValidTopicToPublish("topic/#/topic"));
-
         assertFalse(isValidTopicToPublish("+"));
         assertFalse(isValidTopicToPublish("topic/+"));
         assertFalse(isValidTopicToPublish("topic/+/topic"));
-
-
         assertFalse(isValidTopicToPublish("\u0000"));
         assertFalse(isValidTopicToPublish("topic/\u0000"));
         assertFalse(isValidTopicToPublish("topic/utf\u0000"));
@@ -63,34 +58,27 @@ public class TopicsTest {
 
     @Test
     public void test_valid_publish() throws Exception {
-
-
         assertTrue(isValidTopicToPublish("the/topic"));
         assertTrue(isValidTopicToPublish("t"));
     }
 
     @Test
     public void test_not_valid_subscribe() throws Exception {
-
         assertFalse(isValidToSubscribe(""));
-
         assertFalse(isValidToSubscribe("topic/#/topic"));
         assertFalse(isValidToSubscribe("+/#/topic"));
         assertFalse(isValidToSubscribe("topic/wimbledon#"));
         assertFalse(isValidToSubscribe("#topic/wimbledon"));
         assertFalse(isValidToSubscribe("///#topic/wimbledon"));
-
         assertFalse(isValidToSubscribe("topic/++"));
         assertFalse(isValidToSubscribe("topic/+/++"));
         assertFalse(isValidToSubscribe("topic+"));
         assertFalse(isValidToSubscribe("topic/+topic"));
         assertFalse(isValidToSubscribe("////topic/+topic"));
         assertFalse(isValidToSubscribe("////topic////+topic"));
-
         assertFalse(isValidToSubscribe("+/+#"));
         assertFalse(isValidToSubscribe("+/#/+"));
         assertFalse(isValidToSubscribe("/#/+"));
-
         assertFalse(isValidToSubscribe("\u0000"));
         assertFalse(isValidToSubscribe("topic/\u0000"));
         assertFalse(isValidToSubscribe("topic/utf\u0000"));
@@ -103,8 +91,6 @@ public class TopicsTest {
         assertTrue(isValidToSubscribe("/////#"));
         assertTrue(isValidToSubscribe("topic/#"));
         assertTrue(isValidToSubscribe("topic/topic/#"));
-
-
         assertTrue(isValidToSubscribe("+"));
         assertTrue(isValidToSubscribe("topic/+"));
         assertTrue(isValidToSubscribe("topic/+/+"));
@@ -114,16 +100,12 @@ public class TopicsTest {
         assertTrue(isValidToSubscribe("/+/+"));
         assertTrue(isValidToSubscribe("////+/+"));
         assertTrue(isValidToSubscribe("////+////+/"));
-
-
         assertTrue(isValidToSubscribe("+/+/#"));
         assertTrue(isValidToSubscribe("///+/+///#"));
-
     }
 
     @Test
     public void test_valid_shared_sub() throws Exception {
-
         assertTrue(isValidToSubscribe("$share/group/+/topic"));
         assertTrue(isValidToSubscribe("$share/group/+/topic"));
         assertTrue(isValidToSubscribe("$share/group/topic/+/topic"));
@@ -132,14 +114,12 @@ public class TopicsTest {
 
     @Test
     public void test_invalid_shared_sub() throws Exception {
-
         assertFalse(isValidToSubscribe("$share/group/top+ic/topic"));
         assertFalse(isValidToSubscribe("$share/group/topic+/topic"));
         assertFalse(isValidToSubscribe("$share/group/topic/a+b/topic"));
         assertFalse(isValidToSubscribe("$share/group/+/topic/+topic"));
         assertFalse(isValidToSubscribe("$share/group/+/topic/:+/topic"));
         assertFalse(isValidToSubscribe("$share/#/to"));
-
         assertFalse(isValidToSubscribe("$share/group+/topic"));
         assertFalse(isValidToSubscribe("$share/group#/topic"));
         assertFalse(isValidToSubscribe("$share/+/topic"));
@@ -149,7 +129,6 @@ public class TopicsTest {
 
     @Test
     public void test_shared_sub_topic() {
-
         assertTrue(isSharedSubscriptionTopic("$share/a/b"));
         assertTrue(isSharedSubscriptionTopic("$share/a/#"));
         assertTrue(isSharedSubscriptionTopic("$share/a/+"));

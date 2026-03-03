@@ -31,9 +31,7 @@ public class ClientSessionWill implements Sizable {
 
     private final @NotNull MqttWillPublish mqttWillPublish;
     private final long publishId;
-
     private int inMemorySize = SIZE_NOT_CALCULATED;
-
     public ClientSessionWill(final @NotNull MqttWillPublish mqttWillPublish, final long publishId) {
         this.mqttWillPublish = mqttWillPublish;
         this.publishId = publishId;
@@ -114,14 +112,11 @@ public class ClientSessionWill implements Sizable {
         if (inMemorySize != SIZE_NOT_CALCULATED) {
             return inMemorySize;
         }
-
         int size = ObjectMemoryEstimation.objectShellSize(); // will himself
         size += ObjectMemoryEstimation.intSize(); // inMemorySize
-
-        size += ObjectMemoryEstimation.longWrapperSize(); //payload id
+        size += ObjectMemoryEstimation.longWrapperSize(); // payload id
         size += ObjectMemoryEstimation.objectRefSize(); // will publish reference
         size += mqttWillPublish.getEstimatedSize();
-
         inMemorySize = size;
         return inMemorySize;
     }

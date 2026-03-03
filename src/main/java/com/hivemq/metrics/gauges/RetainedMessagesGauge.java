@@ -24,7 +24,6 @@ import com.hivemq.persistence.retained.RetainedMessagePersistence;
 public class RetainedMessagesGauge implements Gauge<Long> {
 
     private final RetainedMessagePersistence retainedMessagePersistence;
-
     public RetainedMessagesGauge(final RetainedMessagePersistence retainedMessagePersistence) {
         this.retainedMessagePersistence = retainedMessagePersistence;
     }

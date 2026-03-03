@@ -35,13 +35,12 @@ public class PersistenceEntity {
     @XmlEnum
     @XmlType(name = "mode")
     public enum PersistenceMode {
-        @XmlEnumValue("file") FILE,
-        @XmlEnumValue("in-memory") IN_MEMORY
+        @XmlEnumValue("file")
+        FILE, @XmlEnumValue("in-memory")
+        IN_MEMORY
     }
-
     @XmlElement(name = "mode", defaultValue = "file")
     private @NotNull PersistenceEntity.PersistenceMode mode = PersistenceMode.FILE;
-
     @NotNull
     public PersistenceMode getMode() {
         return mode;

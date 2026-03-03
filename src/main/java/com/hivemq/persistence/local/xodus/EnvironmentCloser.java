@@ -35,33 +35,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class EnvironmentCloser {
 
     private static final Logger log = LoggerFactory.getLogger(EnvironmentCloser.class);
-
     private final @NotNull String name;
     private final @NotNull Environment environment;
     private final int maxTries;
     private final int retryInterval;
-
     private int tryNo;
-
     /**
-     * @param name          the name of the environment. Used for logging.
-     * @param environment   the environment to close
-     * @param maxTries      the maximum tries to close the environment
-     * @param retryInterval the retryInterval in milliseconds
+     * @param  name                     the name of the environment. Used for logging.
+     * @param  environment              the environment to close
+     * @param  maxTries                 the maximum tries to close the environment
+     * @param  retryInterval            the retryInterval in milliseconds
      * @throws NullPointerException     if the name or the environment is {@code null}
      * @throws IllegalArgumentException if the maxTries or retry interval is smaller than 1
      */
-    public EnvironmentCloser(
-            final @NotNull String name,
-            final @NotNull Environment environment,
-            final int maxTries,
+    public EnvironmentCloser(final @NotNull String name, final @NotNull Environment environment, final int maxTries,
             final int retryInterval) {
-
         checkNotNull(name, "Name must not be null");
         checkNotNull(environment, "Environment must not be null");
         checkArgument(maxTries > 0, "maxTries must be higher than 0. %s was provided", maxTries);
         checkArgument(retryInterval > 0, "retryInterval must be higher than 0. %s was provided", retryInterval);
-
         this.name = name;
         this.environment = environment;
         this.maxTries = maxTries;
@@ -100,7 +92,7 @@ public class EnvironmentCloser {
      */
     private boolean retry(final @NotNull ExodusException e) {
         if ("Finish all transactions before closing database environment".equals(e.getMessage())) {
-            //This exception means we still have pending transactions
+            // This exception means we still have pending transactions
             tryNo += 1;
             log.debug(
                     "Could not close {}, transactions still aren't finished yet. Retrying again in {}ms (Retry {} of {})",
@@ -110,7 +102,7 @@ public class EnvironmentCloser {
                     maxTries);
             try {
                 Thread.sleep(retryInterval);
-                //Let's call ourselves recursively!
+                // Let's call ourselves recursively!
                 return close();
             } catch (final InterruptedException interruptedException) {
                 log.debug("Interrupted Exception when trying to close {}", name, interruptedException);
@@ -118,7 +110,7 @@ public class EnvironmentCloser {
                 return false;
             }
         } else {
-            //Not the exception we wanted, rethrow
+            // Not the exception we wanted, rethrow
             throw e;
         }
     }

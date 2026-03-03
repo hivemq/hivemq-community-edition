@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.persistence.payload;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -50,29 +49,21 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @VisibleForTesting
     static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
     private final FlushOptions FLUSH_OPTIONS = new FlushOptions().setAllowWriteStall(true); // must not be gc´d
-
     public static final String PERSISTENCE_VERSION = "040500_R";
     private final long memTableSize;
     private final boolean forceFlush;
-
     private long @NotNull [] rocksdbToMemTableSize;
-
     @Inject
-    public PublishPayloadRocksDBLocalPersistence(
-            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+    public PublishPayloadRocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-
-        super(localPersistenceFileUtil,
-                persistenceStartup,
+        super(localPersistenceFileUtil, persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
-
-        this.memTableSize = physicalMemory() /
-                InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get() /
-                InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        this.memTableSize = physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get()
+                / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
         this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.get();
     }
@@ -95,15 +86,13 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @Override
     protected void configureOptions(final @NotNull Options options) {
         if (InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_ENABLED) {
-            options.setEnableBlobFiles(true)
-                    .setEnableBlobGarbageCollection(true)
+            options.setEnableBlobFiles(true).setEnableBlobGarbageCollection(true)
                     .setCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION_TYPE)
                     .setBlobCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE)
                     .setTargetFileSizeBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_FILE_SIZE_BASE_BYTES)
                     .setMaxBytesForLevelBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_MAX_SIZE_LEVEL_BASE_BYTES);
         }
     }
-
 
     @PostConstruct
     protected void postConstruct() {
@@ -127,7 +116,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 }
             }
             PUBLISH.PUBLISH_COUNTER.set(maxId + 1);
-
         } catch (final Exception e) {
             log.error("An error occurred while preparing the Publish Payload persistence.");
             log.debug("Original Exception:", e);
@@ -163,7 +151,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
 
     @Override
     public @NotNull ImmutableList<Long> getAllIds() {
-
         final ImmutableList.Builder<Long> builder = ImmutableList.builder();
         for (final RocksDB bucket : buckets) {
             try (final RocksIterator rocksIterator = bucket.newIterator()) {
@@ -175,7 +162,6 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
                 }
             }
         }
-
         return builder.build();
     }
 

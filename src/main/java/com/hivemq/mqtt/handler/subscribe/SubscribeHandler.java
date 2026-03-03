@@ -34,7 +34,6 @@ import javax.inject.Singleton;
 public class SubscribeHandler extends SimpleChannelInboundHandler<SUBSCRIBE> {
 
     private final @NotNull IncomingSubscribeHandler incomingSubscribeHandler;
-
     @Inject
     public SubscribeHandler(final @NotNull IncomingSubscribeHandler incomingSubscribeHandler) {
         this.incomingSubscribeHandler = incomingSubscribeHandler;

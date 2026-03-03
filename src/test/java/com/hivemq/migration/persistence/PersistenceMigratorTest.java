@@ -39,65 +39,58 @@ public class PersistenceMigratorTest {
     private final @NotNull RetainedMessageTypeMigration retainedMessageTypeMigration = mock();
     private final @NotNull ClientQueuePayloadIDMigration clientQueuePayloadIDMigration = mock();
     private final @NotNull RetainedMessagePayloadIDMigration retainedMessagePayloadIDMigration = mock();
-
     @Before
     public void setUp() throws Exception {
         persistenceMigrator = new PersistenceMigrator(() -> publishPayloadTypeMigration,
-                () -> retainedMessageTypeMigration,
-                () -> retainedMessagePayloadIDMigration,
+                () -> retainedMessageTypeMigration, () -> retainedMessagePayloadIDMigration,
                 () -> clientQueuePayloadIDMigration);
     }
 
     @Test
     public void test_migrate_all_to_native() {
-
-        persistenceMigrator.migratePersistenceTypes(ImmutableMap.of(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
-                PersistenceType.FILE_NATIVE,
-                MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
-                PersistenceType.FILE_NATIVE));
-
-
+        persistenceMigrator.migratePersistenceTypes(
+                ImmutableMap.of(
+                        MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
+                        PersistenceType.FILE_NATIVE,
+                        MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
+                        PersistenceType.FILE_NATIVE));
         verify(publishPayloadTypeMigration).migrateToType(PersistenceType.FILE_NATIVE);
         verify(retainedMessageTypeMigration).migrateToType(PersistenceType.FILE_NATIVE);
-
     }
 
     @Test
     public void test_migrate_all_to_file() {
-
-        persistenceMigrator.migratePersistenceTypes(ImmutableMap.of(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
-                PersistenceType.FILE,
-                MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
-                PersistenceType.FILE));
-
+        persistenceMigrator.migratePersistenceTypes(
+                ImmutableMap.of(
+                        MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
+                        PersistenceType.FILE,
+                        MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
+                        PersistenceType.FILE));
         verify(publishPayloadTypeMigration).migrateToType(PersistenceType.FILE);
         verify(retainedMessageTypeMigration).migrateToType(PersistenceType.FILE);
-
     }
 
     @Test
     public void test_migrate_publish_to_file_and_retained_to_native() {
-
-        persistenceMigrator.migratePersistenceTypes(ImmutableMap.of(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
-                PersistenceType.FILE,
-                MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
-                PersistenceType.FILE_NATIVE));
-
+        persistenceMigrator.migratePersistenceTypes(
+                ImmutableMap.of(
+                        MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
+                        PersistenceType.FILE,
+                        MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
+                        PersistenceType.FILE_NATIVE));
         verify(publishPayloadTypeMigration).migrateToType(PersistenceType.FILE);
         verify(retainedMessageTypeMigration).migrateToType(PersistenceType.FILE_NATIVE);
-
     }
 
     @Test
     public void test_migrate_publish_to_nativr_and_retained_to_file() {
-
-        persistenceMigrator.migratePersistenceTypes(ImmutableMap.of(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
-                PersistenceType.FILE_NATIVE,
-                MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
-                PersistenceType.FILE));
-
+        persistenceMigrator.migratePersistenceTypes(
+                ImmutableMap.of(
+                        MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD,
+                        PersistenceType.FILE_NATIVE,
+                        MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES,
+                        PersistenceType.FILE));
         verify(publishPayloadTypeMigration).migrateToType(PersistenceType.FILE_NATIVE);
         verify(retainedMessageTypeMigration).migrateToType(PersistenceType.FILE);
-
     }
 }

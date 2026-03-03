@@ -29,24 +29,19 @@ public interface Mqtt5CONNECT extends Message {
      * The default maximum amount of not acknowledged publishes with QoS 1 or 2 the client accepts concurrently.
      */
     int DEFAULT_RECEIVE_MAXIMUM = UnsignedDataTypes.UNSIGNED_SHORT_MAX_VALUE;
-
     /**
      * The default maximum amount of topic aliases the server accepts from the client.
      */
     int DEFAULT_TOPIC_ALIAS_MAXIMUM = 0;
-
     /**
-     * The default maximum packet size the client accepts from the server which indicates that the packet size is
-     * not limited beyond the restrictions of the encoding.
+     * The default maximum packet size the client accepts from the server which indicates that the packet size is not
+     * limited beyond the restrictions of the encoding.
      */
     int DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT = MqttVariableByteInteger.MAXIMUM_PACKET_SIZE_LIMIT;
-
     long SESSION_EXPIRE_ON_DISCONNECT = 0;
     long SESSION_EXPIRY_MAX = UnsignedDataTypes.UNSIGNED_INT_MAX_VALUE; // Unsigned Integer Max Value
-
     boolean DEFAULT_RESPONSE_INFORMATION_REQUESTED = false;
     boolean DEFAULT_PROBLEM_INFORMATION_REQUESTED = true;
-
     boolean isCleanStart();
 
     long getSessionExpiryInterval();
@@ -63,16 +58,20 @@ public interface Mqtt5CONNECT extends Message {
     boolean isProblemInformationRequested();
 
     // simple auth
-    @Nullable String getUsername();
+    @Nullable
+    String getUsername();
 
     byte @Nullable [] getPassword();
 
-    @Nullable String getPasswordAsUTF8String();
+    @Nullable
+    String getPasswordAsUTF8String();
 
     // enhanced auth
-    @Nullable String getAuthMethod();
+    @Nullable
+    String getAuthMethod();
 
     byte @Nullable [] getAuthData();
 
-    @Nullable MqttWillPublish getWillPublish();
+    @Nullable
+    MqttWillPublish getWillPublish();
 }

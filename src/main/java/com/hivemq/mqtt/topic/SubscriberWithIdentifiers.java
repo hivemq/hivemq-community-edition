@@ -34,12 +34,9 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
     private @NotNull ImmutableIntArray subscriptionIdentifiers;
     // The topic filter is only present for shared subscription
     private final @Nullable String topicFilter;
-
-    public SubscriberWithIdentifiers(
-            final @NotNull String subscriber, final int qos, final byte flags, final @Nullable String sharedName) {
-
+    public SubscriberWithIdentifiers(final @NotNull String subscriber, final int qos, final byte flags,
+            final @Nullable String sharedName) {
         checkNotNull(subscriber, "Subscriber must not be null");
-
         this.subscriber = subscriber;
         this.qos = qos;
         this.flags = flags;
@@ -48,16 +45,10 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
         topicFilter = null;
     }
 
-    public SubscriberWithIdentifiers(
-            final @NotNull String subscriber,
-            final int qos,
-            final byte flags,
-            final @Nullable String sharedName,
-            final @NotNull ImmutableList<Integer> subscriptionIdentifier,
+    public SubscriberWithIdentifiers(final @NotNull String subscriber, final int qos, final byte flags,
+            final @Nullable String sharedName, final @NotNull ImmutableList<Integer> subscriptionIdentifier,
             final @Nullable String topicFilter) {
-
         checkNotNull(subscriber, "Subscriber must not be null");
-
         this.subscriber = subscriber;
         this.qos = qos;
         this.flags = flags;
@@ -68,15 +59,14 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
 
     public SubscriberWithIdentifiers(final @NotNull SubscriberWithQoS subscriberWithQoS) {
         checkNotNull(subscriberWithQoS, "Subscriber must not be null");
-
         subscriber = subscriberWithQoS.getSubscriber();
         qos = subscriberWithQoS.getQos();
         flags = subscriberWithQoS.getFlags();
         sharedName = subscriberWithQoS.getSharedName();
         final Integer subscriptionIdentifiers = subscriberWithQoS.getSubscriptionIdentifier();
-        this.subscriptionIdentifiers = (subscriptionIdentifiers == null) ?
-                ImmutableIntArray.of() :
-                ImmutableIntArray.of(subscriptionIdentifiers);
+        this.subscriptionIdentifiers = (subscriptionIdentifiers == null)
+                ? ImmutableIntArray.of()
+                : ImmutableIntArray.of(subscriptionIdentifiers);
         topicFilter = subscriberWithQoS.getTopicFilter();
     }
 
@@ -142,12 +132,10 @@ public class SubscriberWithIdentifiers implements Comparable<SubscriberWithIdent
             return false;
         }
         final SubscriberWithIdentifiers that = (SubscriberWithIdentifiers) o;
-        return qos == that.qos &&
-                flags == that.flags &&
-                Objects.equals(subscriber, that.subscriber) &&
-                Objects.equals(sharedName, that.sharedName) &&
-                Objects.equals(subscriptionIdentifiers, that.subscriptionIdentifiers) &&
-                Objects.equals(topicFilter, that.topicFilter);
+        return qos == that.qos && flags == that.flags && Objects.equals(subscriber, that.subscriber)
+                && Objects.equals(sharedName, that.sharedName)
+                && Objects.equals(subscriptionIdentifiers, that.subscriptionIdentifiers)
+                && Objects.equals(topicFilter, that.topicFilter);
     }
 
     @Override

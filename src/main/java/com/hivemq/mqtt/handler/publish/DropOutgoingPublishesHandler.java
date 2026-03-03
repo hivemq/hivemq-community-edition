@@ -39,12 +39,10 @@ import static com.hivemq.configuration.service.InternalConfigurations.NOT_WRITAB
 public class DropOutgoingPublishesHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DropOutgoingPublishesHandler.class);
-
     private final @NotNull AtomicInteger notWritableMessages = new AtomicInteger();
     private final @NotNull DecrementCounterListener decrementCounterListener = new DecrementCounterListener();
     private final @NotNull MessageDroppedService messageDroppedService;
     private final int notWritableQueueSize;
-
     @Inject
     public DropOutgoingPublishesHandler(final @NotNull MessageDroppedService messageDroppedService) {
         this.messageDroppedService = messageDroppedService;
@@ -52,26 +50,26 @@ public class DropOutgoingPublishesHandler {
     }
 
     public boolean checkChannelNotWritable(
-            final ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise) {
-
+            final ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) {
         if (!ctx.channel().isWritable()) {
-
             if (msg instanceof PUBLISH) {
                 if (notWritableMessages.get() < notWritableQueueSize) {
                     notWritableMessages.incrementAndGet();
                     promise.addListeners(decrementCounterListener);
                     return false;
                 }
-
                 final PUBLISH publish = (PUBLISH) msg;
                 if ((publish).getQoS() == QoS.AT_MOST_ONCE) {
                     if (msg instanceof PublishWithFuture) {
                         final SettableFuture<PublishStatus> future = ((PublishWithFuture) msg).getFuture();
                         future.set(PublishStatus.CHANNEL_NOT_WRITABLE);
                     }
-                    //Drop message
+                    // Drop message
                     final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
-                    log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable",
+                    log.trace(
+                            "Dropped qos 0 message for client {} on topic {} because the channel was not writable",
                             clientId,
                             publish.getTopic());
                     messageDroppedService.notWritable(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
@@ -80,11 +78,8 @@ public class DropOutgoingPublishesHandler {
                 }
             }
         }
-
         return false;
     }
-
-
     private class DecrementCounterListener implements GenericFutureListener<Future<? super Void>> {
 
         @Override

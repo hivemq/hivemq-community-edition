@@ -20,17 +20,15 @@ import com.google.inject.Provider;
 import com.google.inject.Scope;
 import com.google.inject.Scopes;
 
-
 /**
- * The actual Implementation of the LazySingleton. Just delegates to the
- * standard Guice singleton scope
+ * The actual Implementation of the LazySingleton. Just delegates to the standard Guice singleton scope
  *
  * @author Dominik Obermaier
  */
 class LazySingletonScopeImpl implements Scope {
+
     @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> unscoped) {
         return Scopes.SINGLETON.scope(key, unscoped);
     }
-
 }

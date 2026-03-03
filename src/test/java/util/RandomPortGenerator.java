@@ -34,7 +34,7 @@ public class RandomPortGenerator {
                 serverSocket.close();
                 return port;
             } catch (final IOException ex) {
-                //continue
+                // continue
             }
         }
         throw new RuntimeException("Random port not found");

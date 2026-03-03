@@ -35,25 +35,15 @@ import static org.junit.Assert.assertNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class RetainedPublishImplTest {
 
     @Test
     public void test_convert_all_nullable_null() {
-
-        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_LEAST_ONCE,
-                "topic",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-
+        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_LEAST_ONCE, "topic", null, null,
+                null, null, null, null, UserPropertiesImpl.of(ImmutableList.of()));
         final RetainedMessage convert = RetainedPublishImpl.convert(retainedPublish);
-
         assertEquals(PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET, convert.getMessageExpiryInterval());
         assertNull(convert.getMessage());
         assertNull(convert.getContentType());
@@ -62,29 +52,19 @@ public class RetainedPublishImplTest {
         assertNull(convert.getResponseTopic());
         assertEquals(Mqtt5UserProperties.NO_USER_PROPERTIES, convert.getUserProperties());
         assertEquals(QoS.AT_LEAST_ONCE, convert.getQos());
-
     }
 
     @Test
     public void test_convert_all_set() {
-
-        final UserPropertiesImpl userProperties =
-                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"),
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(
+                ImmutableList.of(
+                        new MqttUserProperty("name", "value"),
                         new MqttUserProperty("name", "value2"),
                         new MqttUserProperty("name2", "val")));
-
-        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_MOST_ONCE,
-                "topic",
-                PayloadFormatIndicator.UTF_8,
-                12345L,
-                "response_topic",
-                ByteBuffer.wrap("correlation_data".getBytes()),
-                "content_type",
-                ByteBuffer.wrap("test3".getBytes()),
-                userProperties);
-
+        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_MOST_ONCE, "topic",
+                PayloadFormatIndicator.UTF_8, 12345L, "response_topic", ByteBuffer.wrap("correlation_data".getBytes()),
+                "content_type", ByteBuffer.wrap("test3".getBytes()), userProperties);
         final RetainedMessage convert = RetainedPublishImpl.convert(retainedPublish);
-
         assertEquals(12345L, convert.getMessageExpiryInterval());
         assertArrayEquals("test3".getBytes(), convert.getMessage());
         assertArrayEquals("correlation_data".getBytes(), convert.getCorrelationData());
@@ -93,6 +73,5 @@ public class RetainedPublishImplTest {
         assertEquals("response_topic", convert.getResponseTopic());
         assertEquals(3, convert.getUserProperties().asList().size());
         assertEquals(QoS.AT_MOST_ONCE, convert.getQos());
-
     }
 }

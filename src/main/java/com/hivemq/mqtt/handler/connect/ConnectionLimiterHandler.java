@@ -32,8 +32,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * A {@link ChannelHandler} which is responsible for limiting the concurrent connections
- * which is defined by the 'max-connections' parameter in the configuration.
+ * A {@link ChannelHandler} which is responsible for limiting the concurrent connections which is defined by the
+ * 'max-connections' parameter in the configuration.
  *
  * @author Yannick Weber
  */
@@ -42,16 +42,13 @@ import javax.inject.Singleton;
 public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
 
     private final static Logger log = LoggerFactory.getLogger(ConnectionLimiterHandler.class);
-
     private final @NotNull MqttConnacker mqttConnacker;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull OpenConnectionsGauge openConnectionsGauge;
     private volatile long maxConnections;
     private volatile long warnThreshold;
-
     @Inject
-    public ConnectionLimiterHandler(
-            final @NotNull MqttConnacker mqttConnacker,
+    public ConnectionLimiterHandler(final @NotNull MqttConnacker mqttConnacker,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
             final @NotNull OpenConnectionsGauge openConnectionsGauge) {
         this.mqttConnacker = mqttConnacker;
@@ -61,34 +58,31 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(final @NotNull ChannelHandlerContext ctx) throws Exception {
-
         final long configuredCount = restrictionsConfigurationService.maxConnections();
-
         if (configuredCount > RestrictionsConfigurationService.UNLIMITED_CONNECTIONS) {
-            // If we use the max connections configured in the config file, we set the Threshold to 90% of the maximum allowed connections.
+            // If we use the max connections configured in the config file, we set the Threshold to 90% of the maximum
+            // allowed connections.
             this.warnThreshold = 90 * configuredCount / 100;
             this.maxConnections = configuredCount;
         } else {
-            //This means we are dealing with unlimited connections so we can remove this handler from the pipeline
+            // This means we are dealing with unlimited connections so we can remove this handler from the pipeline
             ctx.pipeline().remove(this);
         }
-
         super.channelActive(ctx);
     }
 
     @Override
     public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) throws Exception {
         if (msg instanceof CONNECT) {
-
             final CONNECT connect = (CONNECT) msg;
-
             final long currentCount = openConnectionsGauge.getValue();
-
             if (currentCount > maxConnections) {
-                log.warn("The connection limit ({}) is reached. ClientID ({}) connection denied.",
+                log.warn(
+                        "The connection limit ({}) is reached. ClientID ({}) connection denied.",
                         maxConnections,
                         connect.getClientIdentifier());
-                mqttConnacker.connackError(ctx.channel(),
+                mqttConnacker.connackError(
+                        ctx.channel(),
                         null,
                         // logged on warn
                         "The configured maximum amount of connections is reached",
@@ -98,7 +92,6 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
             } else if (warnThreshold > 0 && currentCount >= warnThreshold) {
                 log.warn("The amount of connections ({}) is close to its limit ({}).", currentCount, maxConnections);
             }
-
             // We can remove the handler because it doesn't do anything after this point.
             ctx.pipeline().remove(this);
         }
@@ -115,4 +108,3 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
         return maxConnections;
     }
 }
-

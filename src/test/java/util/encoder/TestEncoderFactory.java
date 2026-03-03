@@ -38,18 +38,12 @@ public class TestEncoderFactory extends EncoderFactory {
     private final @NotNull Mqtt3SubscribeEncoder subscribeEncoder;
     private final @NotNull Mqtt3UnsubscribeEncoder unsubscribeEncoder;
     private final @NotNull PingreqEncoder pingreqEncoder;
-
-    public TestEncoderFactory(
-            final @NotNull MessageDroppedService messageDroppedService,
+    public TestEncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
-            final @NotNull Mqtt3ConnectEncoder connectEncoder,
-            final @NotNull Mqtt3SubscribeEncoder subscribeEncoder,
-            final @NotNull Mqtt3UnsubscribeEncoder unsubscribeEncoder,
-            final @NotNull PingreqEncoder pingreqEncoder) {
-
+            final @NotNull Mqtt3ConnectEncoder connectEncoder, final @NotNull Mqtt3SubscribeEncoder subscribeEncoder,
+            final @NotNull Mqtt3UnsubscribeEncoder unsubscribeEncoder, final @NotNull PingreqEncoder pingreqEncoder) {
         super(messageDroppedService, securityConfigurationService, mqttServerDisconnector);
-
         this.connectEncoder = connectEncoder;
         this.subscribeEncoder = subscribeEncoder;
         this.unsubscribeEncoder = unsubscribeEncoder;

@@ -53,13 +53,15 @@ public interface PluginTaskOutput {
     void resetAsyncStatus();
 
     /**
-     * @return a {@link SettableFuture} which is set to true if resume has been called on the
-     *         {@link AsyncOutput} and false if a timeout occurred
+     * @return a {@link SettableFuture} which is set to true if resume has been called on the {@link AsyncOutput} and
+     *         false if a timeout occurred
      */
-    @Nullable SettableFuture<Boolean> getAsyncFuture();
+    @Nullable
+    SettableFuture<Boolean> getAsyncFuture();
 
     /**
      * @return the timeout fallback to use if the async operation times out
      */
-    @NotNull TimeoutFallback getTimeoutFallback();
+    @NotNull
+    TimeoutFallback getTimeoutFallback();
 }

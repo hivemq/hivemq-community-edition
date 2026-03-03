@@ -19,7 +19,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface TopicAliasLimiter {
 
@@ -60,5 +60,4 @@ public interface TopicAliasLimiter {
      * @param topics the topics to remove memory usage for
      */
     void finishUsage(@NotNull final String... topics);
-
 }

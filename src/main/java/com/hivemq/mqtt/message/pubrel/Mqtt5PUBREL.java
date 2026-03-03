@@ -22,27 +22,28 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRelReasonCode;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 public interface Mqtt5PUBREL {
 
     Mqtt5PubRelReasonCode DEFAULT_REASON_CODE = Mqtt5PubRelReasonCode.SUCCESS;
-
-
     /**
      * @return the reason code of this PUBREL packet.
      */
-    @NotNull Mqtt5PubRelReasonCode getReasonCode();
+    @NotNull
+    Mqtt5PubRelReasonCode getReasonCode();
 
     /**
      * @return the optional reason string of this PUBREL packet.
      */
-    @NotNull String getReasonString();
+    @NotNull
+    String getReasonString();
 
     /**
      * @return the optional user properties of this PUBREL packet.
      */
-    @NotNull Mqtt5UserProperties getUserProperties();
+    @NotNull
+    Mqtt5UserProperties getUserProperties();
 
     MessageType getType();
 }

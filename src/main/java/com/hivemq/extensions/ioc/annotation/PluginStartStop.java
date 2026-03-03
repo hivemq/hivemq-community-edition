@@ -25,11 +25,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @BindingAnnotation
 @Target({PARAMETER})
 @Retention(RUNTIME)
 public @interface PluginStartStop {
-
 }

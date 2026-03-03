@@ -33,23 +33,18 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CONNECT> {
 
     private static final byte CONNECT_FIXED_HEADER = (byte) 0b0001_0000;
-
-    private static final byte[] PROTOCOL_NAME_V311 =             //'MQTT4'
+    private static final byte[] PROTOCOL_NAME_V311 = // 'MQTT4'
             new byte[]{0, 4, 0b0100_1101, 0b0101_0001, 0b0101_0100, 0b0101_0100, 4};
-
     private static final byte[] PROTOCOL_NAME_V31 =
-            //'MQIsdp3'
+            // 'MQIsdp3'
             new byte[]{0, 6, 0b0100_1101, 0b0101_0001, 0b0100_1001, 0b0111_0011, 0b0110_0100, 0b0111_0000, 3};
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull CONNECT msg,
             final @NotNull ByteBuf out) {
-
         out.writeByte(CONNECT_FIXED_HEADER);
         createRemainingLength(msg.getRemainingLength(), out);
-
         if (msg.getProtocolVersion() == ProtocolVersion.MQTTv3_1) {
             out.writeBytes(PROTOCOL_NAME_V31);
         } else if (msg.getProtocolVersion() == ProtocolVersion.MQTTv3_1_1) {
@@ -57,12 +52,9 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
         } else {
             throw new IllegalArgumentException("Protocol version must be set for a MQTT CONNECT packet");
         }
-
         out.writeByte(createConnectionFlag(msg));
         out.writeShort(msg.getKeepAlive());
-
         Strings.createPrefixedBytesFromString(msg.getClientIdentifier(), out);
-
         if (msg.getWillPublish() != null) {
             Strings.createPrefixedBytesFromString(msg.getWillPublish().getTopic(), out);
             Bytes.prefixBytes(msg.getWillPublish().getPayload(), out);
@@ -103,12 +95,11 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
     /**
      * Creates the correct connect flags according to the MQTT spec
      *
-     * @param message the {@link com.hivemq.mqtt.message.connect.CONNECT} message
-     * @return a byte which has the flags set accordingly for the given MQTT CONNECT message
+     * @param  message the {@link com.hivemq.mqtt.message.connect.CONNECT} message
+     * @return         a byte which has the flags set accordingly for the given MQTT CONNECT message
      */
     private byte createConnectionFlag(final CONNECT message) {
         byte connectFlag = 0b0000_0000;
-
         if (message.getUsername() != null) {
             connectFlag |= 0b1000_0000;
         }
@@ -116,16 +107,13 @@ public class Mqtt3ConnectEncoder extends AbstractVariableHeaderLengthEncoder<CON
             connectFlag |= 0b0100_0000;
         }
         if (message.getWillPublish() != null) {
-
             connectFlag |= 0b0000_0100;
-
             connectFlag |= message.getWillPublish().getQos().getQosNumber() << 3;
-
             if (message.getWillPublish().isRetain()) {
                 connectFlag |= 0b0010_0000;
             }
         }
-        //Mqtt 3 Clean Session = Mqtt 5 CleanStart + Expiry 0
+        // Mqtt 3 Clean Session = Mqtt 5 CleanStart + Expiry 0
         if (message.isCleanStart() && message.getSessionExpiryInterval() == 0) {
             connectFlag |= 0b0000_0010;
         }

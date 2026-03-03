@@ -47,14 +47,13 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @SuppressWarnings("NullabilityAnnotations")
 public class RetainedPublishBuilderImplTest {
 
     private RetainedPublishBuilder retainedPublishBuilder;
     private FullConfigurationService configurationService;
-
     @Before
     public void setUp() throws Exception {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -116,7 +115,6 @@ public class RetainedPublishBuilderImplTest {
     @Test(expected = DoNotImplementException.class)
     public void test_from_invalid_publish_implementation() {
         retainedPublishBuilder.fromPublish(new TestPublish()).build();
-
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -181,24 +179,15 @@ public class RetainedPublishBuilderImplTest {
 
     @Test
     public void test_from_retained_publish() {
-
-        final UserPropertiesImpl userProperties =
-                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"),
+        final UserPropertiesImpl userProperties = UserPropertiesImpl.of(
+                ImmutableList.of(
+                        new MqttUserProperty("name", "value"),
                         new MqttUserProperty("name", "value2"),
                         new MqttUserProperty("name2", "val")));
-
-        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_MOST_ONCE,
-                "topic",
-                PayloadFormatIndicator.UTF_8,
-                12345L,
-                "response_topic",
-                ByteBuffer.wrap("correlation_data".getBytes()),
-                "content_type",
-                ByteBuffer.wrap("test3".getBytes()),
-                userProperties);
-
+        final RetainedPublishImpl retainedPublish = new RetainedPublishImpl(Qos.AT_MOST_ONCE, "topic",
+                PayloadFormatIndicator.UTF_8, 12345L, "response_topic", ByteBuffer.wrap("correlation_data".getBytes()),
+                "content_type", ByteBuffer.wrap("test3".getBytes()), userProperties);
         final RetainedPublish built = retainedPublishBuilder.fromPublish(retainedPublish).build();
-
         assertEquals(retainedPublish.getQos(), built.getQos());
         assertEquals(retainedPublish.getRetain(), built.getRetain());
         assertEquals(retainedPublish.getTopic(), built.getTopic());
@@ -209,7 +198,6 @@ public class RetainedPublishBuilderImplTest {
         assertEquals(retainedPublish.getContentType(), built.getContentType());
         assertEquals(retainedPublish.getPayload(), built.getPayload());
         assertEquals(retainedPublish.getUserProperties().asList().size(), built.getUserProperties().asList().size());
-
         assertEquals(Qos.AT_MOST_ONCE, built.getQos());
         assertTrue(built.getRetain());
         assertEquals("topic", built.getTopic());
@@ -226,15 +214,12 @@ public class RetainedPublishBuilderImplTest {
         assertTrue(built.getPayload().isPresent());
         assertEquals(ByteBuffer.wrap("test3".getBytes()), built.getPayload().get());
         assertEquals(userProperties.asList().size(), built.getUserProperties().asList().size());
-
     }
 
     @Test
     public void test_from_publish_packet() {
-
         final PublishPacket publishPacket = new PublishPacketImpl(TestMessageUtil.createFullMqtt5Publish());
         final RetainedPublish built = retainedPublishBuilder.fromPublish(publishPacket).build();
-
         assertEquals(publishPacket.getQos(), built.getQos());
         assertEquals(publishPacket.getRetain(), built.getRetain());
         assertEquals(publishPacket.getTopic(), built.getTopic());
@@ -245,7 +230,6 @@ public class RetainedPublishBuilderImplTest {
         assertEquals(publishPacket.getContentType(), built.getContentType());
         assertEquals(publishPacket.getPayload(), built.getPayload());
         assertEquals(publishPacket.getUserProperties().asList().size(), built.getUserProperties().asList().size());
-
         assertEquals(Qos.EXACTLY_ONCE, built.getQos());
         assertTrue(built.getRetain());
         assertEquals("topic", built.getTopic());
@@ -262,15 +246,12 @@ public class RetainedPublishBuilderImplTest {
         assertTrue(built.getPayload().isPresent());
         assertEquals(ByteBuffer.wrap("payload".getBytes()), built.getPayload().get());
         assertEquals(2, built.getUserProperties().asList().size());
-
     }
 
     @Test(expected = DoNotImplementException.class)
     public void test_from_publish_packet_implemented() {
-
         final PublishPacket publishPacket = new TestPublishPacket();
         retainedPublishBuilder.fromPublish(publishPacket).build();
-
     }
 
     @Test(expected = NullPointerException.class)
@@ -280,22 +261,21 @@ public class RetainedPublishBuilderImplTest {
 
     @Test
     public void test_minimum() {
-        final RetainedPublish retainedPublish =
-                retainedPublishBuilder.topic("topic").payload(ByteBuffer.wrap("payload".getBytes())).build();
-
+        final RetainedPublish retainedPublish = retainedPublishBuilder.topic("topic")
+                .payload(ByteBuffer.wrap("payload".getBytes())).build();
         assertEquals(Qos.AT_MOST_ONCE, retainedPublish.getQos());
         assertEquals("topic", retainedPublish.getTopic());
         assertArrayEquals("payload".getBytes(), retainedPublish.getPayload().get().array());
         assertEquals(Optional.empty(), retainedPublish.getPayloadFormatIndicator());
         assertTrue(retainedPublish.getMessageExpiryInterval().isPresent());
-        assertEquals(configurationService.mqttConfiguration().maxMessageExpiryInterval(),
+        assertEquals(
+                configurationService.mqttConfiguration().maxMessageExpiryInterval(),
                 retainedPublish.getMessageExpiryInterval().get().longValue());
         assertEquals(Optional.empty(), retainedPublish.getResponseTopic());
         assertEquals(Optional.empty(), retainedPublish.getCorrelationData());
         assertEquals(Optional.empty(), retainedPublish.getContentType());
         assertEquals(0, retainedPublish.getUserProperties().asList().size());
     }
-
     static class TestPublishPacket implements PublishPacket {
 
         @Override
@@ -369,9 +349,11 @@ public class RetainedPublishBuilderImplTest {
         @NotNull
         @Override
         public UserProperties getUserProperties() {
-            return UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"),
-                    new MqttUserProperty("name", "value2"),
-                    new MqttUserProperty("name2", "val")));
+            return UserPropertiesImpl.of(
+                    ImmutableList.of(
+                            new MqttUserProperty("name", "value"),
+                            new MqttUserProperty("name", "value2"),
+                            new MqttUserProperty("name2", "val")));
         }
 
         @Override

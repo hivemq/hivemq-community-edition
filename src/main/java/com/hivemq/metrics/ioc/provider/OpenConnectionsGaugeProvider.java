@@ -32,7 +32,6 @@ public class OpenConnectionsGaugeProvider implements Provider<OpenConnectionsGau
 
     private final MetricRegistry metricRegistry;
     private final ChannelGroup allChannels;
-
     @Inject
     public OpenConnectionsGaugeProvider(final MetricRegistry metricRegistry, final ChannelGroup allChannels) {
         this.metricRegistry = metricRegistry;

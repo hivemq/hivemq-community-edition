@@ -53,29 +53,23 @@ public class ProducerQueuesImpl implements ProducerQueues {
     private final int amountOfQueues;
     @VisibleForTesting
     final int bucketsPerQueue;
-
     @VisibleForTesting
     final @NotNull ImmutableList<Queue<TaskWithFuture<?>>> queues;
-
     // Atomic booleans are more efficient than locks here, since we never actually wait for the lock.
     // Lock.tryLock() seams to park and unpark the thread each time :(
     private final @NotNull ImmutableList<AtomicBoolean> locks;
     private final @NotNull ImmutableList<AtomicLong> queueTaskCounter;
     private final @NotNull SingleWriterServiceImpl singleWriterServiceImpl;
-
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
-
     private @Nullable ListenableFuture<Void> closeFuture;
     private long shutdownStartTime = Long.MAX_VALUE;
-    // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the start time is net yet set.
-
+    // Initialized as long max value, to ensure the the grace period condition is not met, when shutdown is true but the
+    // start time is net yet set.
     public ProducerQueuesImpl(final SingleWriterServiceImpl singleWriterServiceImpl, final int amountOfQueues) {
         this.singleWriterServiceImpl = singleWriterServiceImpl;
-
         final int bucketCount = singleWriterServiceImpl.getPersistenceBucketCount();
         this.amountOfQueues = amountOfQueues;
         bucketsPerQueue = bucketCount / amountOfQueues;
-
         final ImmutableList.Builder<Queue<TaskWithFuture<?>>> queuesBuilder = ImmutableList.builder();
         for (int i = 0; i < amountOfQueues; i++) {
             queuesBuilder.add(new ConcurrentLinkedQueue<>());
@@ -83,7 +77,6 @@ public class ProducerQueuesImpl implements ProducerQueues {
         queues = queuesBuilder.build();
         final ImmutableList.Builder<AtomicBoolean> locksBuilder = ImmutableList.builder();
         final ImmutableList.Builder<AtomicLong> counterBuilder = ImmutableList.builder();
-
         for (int i = 0; i < amountOfQueues; i++) {
             locksBuilder.add(new AtomicBoolean());
             counterBuilder.add(new AtomicLong(0));
@@ -94,13 +87,13 @@ public class ProducerQueuesImpl implements ProducerQueues {
 
     @NotNull
     public <R> ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
-        //noinspection ConstantConditions (futuer is never null if the callbacks are null)
+        // noinspection ConstantConditions (futuer is never null if the callbacks are null)
         return submitInternal(getBucket(key), task, false);
     }
 
     @NotNull
     public <R> ListenableFuture<R> submit(final int bucketIndex, @NotNull final Task<R> task) {
-        //noinspection ConstantConditions (futuer is never null if the callbacks are null)
+        // noinspection ConstantConditions (futuer is never null if the callbacks are null)
         return submitInternal(bucketIndex, task, false);
     }
 
@@ -109,15 +102,13 @@ public class ProducerQueuesImpl implements ProducerQueues {
             final int bucketIndex,
             @NotNull final Task<R> task,
             final boolean ignoreShutdown) {
-        if (!ignoreShutdown &&
-                shutdown.get() &&
-                System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
+        if (!ignoreShutdown && shutdown.get()
+                && System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
         final int queueIndex = bucketIndex / bucketsPerQueue;
         final Queue<TaskWithFuture<?>> queue = queues.get(queueIndex);
         final SettableFuture<R> resultFuture = SettableFuture.create();
-
         queue.add(new TaskWithFuture<>(resultFuture, task, bucketIndex));
         taskCount.incrementAndGet();
         singleWriterServiceImpl.getGlobalTaskCount().incrementAndGet();
@@ -130,10 +121,10 @@ public class ProducerQueuesImpl implements ProducerQueues {
     /**
      * submits the task for all buckets either parallel or sequential
      *
-     * @param task     the task to submit
-     * @param <R>      the returned object
-     * @param parallel true for parallel, false for sequential
-     * @return a list of listenableFutures of type R
+     * @param  task     the task to submit
+     * @param  <R>      the returned object
+     * @param  parallel true for parallel, false for sequential
+     * @return          a list of listenableFutures of type R
      */
     public @NotNull <R> List<ListenableFuture<R>> submitToAllBuckets(
             final @NotNull Task<R> task,
@@ -148,9 +139,9 @@ public class ProducerQueuesImpl implements ProducerQueues {
     /**
      * submits the task for all buckets at once
      *
-     * @param task the task to submit
-     * @param <R>  the returned object
-     * @return a list of listenableFutures of type R
+     * @param  task the task to submit
+     * @param  <R>  the returned object
+     * @return      a list of listenableFutures of type R
      */
     public @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(final @NotNull Task<R> task) {
         return submitToAllBucketsParallel(task, false);
@@ -162,23 +153,21 @@ public class ProducerQueuesImpl implements ProducerQueues {
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
         final int bucketCount = singleWriterServiceImpl.getPersistenceBucketCount();
         for (int bucket = 0; bucket < bucketCount; bucket++) {
-            //noinspection ConstantConditions (futuer is never null if the callbacks are null)
+            // noinspection ConstantConditions (futuer is never null if the callbacks are null)
             builder.add(submitInternal(bucket, task, ignoreShutdown));
         }
         return builder.build();
     }
 
     public @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsSequential(final @NotNull Task<R> task) {
-
         final ImmutableList.Builder<ListenableFuture<R>> builder = ImmutableList.builder();
         final int bucketCount = singleWriterServiceImpl.getPersistenceBucketCount();
-
         ListenableFuture<R> previousFuture = Futures.immediateFuture(null);
         for (int bucket = 0; bucket < bucketCount; bucket++) {
             final int finalBucket = bucket;
             final SettableFuture<R> future = SettableFuture.create();
-            previousFuture.addListener(() -> future.setFuture(submit(finalBucket, task)),
-                    MoreExecutors.directExecutor());
+            previousFuture
+                    .addListener(() -> future.setFuture(submit(finalBucket, task)), MoreExecutors.directExecutor());
             previousFuture = future;
             builder.add(future);
         }
@@ -228,34 +217,35 @@ public class ProducerQueuesImpl implements ProducerQueues {
     @NotNull
     public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {
         if (shutdown.getAndSet(true)) {
-            //guard from being called twice
-            //needed for integration tests because shutdown hooks for every Embedded HiveMQ are added to the JVM
-            //if the persistence is stopped manually this would result in errors, because the shutdown hook might be called twice.
+            // guard from being called twice
+            // needed for integration tests because shutdown hooks for every Embedded HiveMQ are added to the JVM
+            // if the persistence is stopped manually this would result in errors, because the shutdown hook might be
+            // called twice.
             if (closeFuture != null) {
                 return closeFuture;
             }
             return Futures.immediateFuture(null);
         }
-
         shutdownStartTime = System.currentTimeMillis();
         // We create a temporary single thread executor when we shut down, so we don't waste a thread at runtime.
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("persistence-shutdown-%d");
-        final ListeningScheduledExecutorService executorService =
-                MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(threadFactory));
-
+        final ListeningScheduledExecutorService executorService = MoreExecutors
+                .listeningDecorator(Executors.newSingleThreadScheduledExecutor(threadFactory));
         closeFuture = executorService.schedule(() -> {
-                    // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by the shutdown grace period.
-                    if (finalTask != null) {
-                        Futures.allAsList(submitToAllBucketsParallel(finalTask, true)).get();
-                    } else {
-                        Futures.allAsList(submitToAllBucketsParallel((Task<Void>) (bucketIndex) -> null, true)).get();
-                    }
-                    return null;
-                },
-                singleWriterServiceImpl.getShutdownGracePeriod() + 50,
-                TimeUnit.MILLISECONDS); // We may have to delay the task for some milliseconds, because a task could just get enqueued.
-
+            // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by
+            // the shutdown grace period.
+            if (finalTask != null) {
+                Futures.allAsList(submitToAllBucketsParallel(finalTask, true)).get();
+            } else {
+                Futures.allAsList(submitToAllBucketsParallel((Task<Void>) (bucketIndex) -> null, true)).get();
+            }
+            return null;
+        }, singleWriterServiceImpl.getShutdownGracePeriod() + 50, TimeUnit.MILLISECONDS); // We may have to delay the
+                                                                                          // task for some milliseconds,
+                                                                                          // because a task could just
+                                                                                          // get enqueued.
         Futures.addCallback(closeFuture, new FutureCallback<>() {
+
             @Override
             public void onSuccess(@Nullable final Void aVoid) {
                 executorService.shutdown();
@@ -273,17 +263,13 @@ public class ProducerQueuesImpl implements ProducerQueues {
     public AtomicLong getTaskCount() {
         return taskCount;
     }
-
     @VisibleForTesting
     static class TaskWithFuture<T> {
 
         private final @NotNull SettableFuture<T> future;
         private final @NotNull Task task;
         private final int bucketIndex;
-
-        private TaskWithFuture(
-                final @NotNull SettableFuture<T> future,
-                final @NotNull Task task,
+        private TaskWithFuture(final @NotNull SettableFuture<T> future, final @NotNull Task task,
                 final int bucketIndex) {
             this.future = future;
             this.task = task;

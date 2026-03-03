@@ -25,14 +25,13 @@ import javax.inject.Singleton;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Singleton
 public class EventRegistryImpl implements EventRegistry {
 
     @NotNull
     private final LifecycleEventListeners lifecycleEventListeners;
-
     @Inject
     public EventRegistryImpl(final @NotNull LifecycleEventListeners lifecycleEventListeners) {
         this.lifecycleEventListeners = lifecycleEventListeners;

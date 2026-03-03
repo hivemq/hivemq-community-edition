@@ -28,9 +28,7 @@ import java.util.List;
 public class CheckUserEventTriggeredOnSuper extends ChannelInboundHandlerAdapter {
 
     private boolean triggered;
-
     final List<Object> objectList = Collections.synchronizedList(Lists.newArrayList());
-
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx, final Object evt) throws Exception {
         triggered = true;

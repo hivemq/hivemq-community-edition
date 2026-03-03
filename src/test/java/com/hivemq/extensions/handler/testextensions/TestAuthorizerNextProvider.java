@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler.testextensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -30,7 +29,6 @@ import java.util.concurrent.CountDownLatch;
 public final class TestAuthorizerNextProvider implements AuthorizerProvider {
 
     private final @NotNull CountDownLatch countDownLatch;
-
     public TestAuthorizerNextProvider(final @NotNull CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }

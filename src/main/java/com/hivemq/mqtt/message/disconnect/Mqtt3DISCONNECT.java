@@ -23,5 +23,4 @@ import com.hivemq.mqtt.message.MessageType;
 public interface Mqtt3DISCONNECT {
 
     MessageType getType();
-
 }

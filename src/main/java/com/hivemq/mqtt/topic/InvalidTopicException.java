@@ -20,8 +20,8 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 /**
  * Indicates that a provided topic is not compliant with the definition of a topic in the mqtt specification.
  * <p>
- * Please note that since HiveMQ 3.0 this is a {@link RuntimeException}. Prior to HiveMQ 3.0
- * this was a checked Exception.
+ * Please note that since HiveMQ 3.0 this is a {@link RuntimeException}. Prior to HiveMQ 3.0 this was a checked
+ * Exception.
  *
  * @since 1.4
  */

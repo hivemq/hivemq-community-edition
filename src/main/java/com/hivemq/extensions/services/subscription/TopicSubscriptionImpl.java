@@ -29,7 +29,7 @@ import java.util.Optional;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class TopicSubscriptionImpl implements TopicSubscription {
 
@@ -38,13 +38,8 @@ public class TopicSubscriptionImpl implements TopicSubscription {
     private final boolean retainAsPublished;
     private final boolean noLocal;
     private final @Nullable Integer subscriptionIdentifier;
-
-    public TopicSubscriptionImpl(
-            final @NotNull String topicFilter,
-            final @NotNull Qos qos,
-            final boolean retainAsPublished,
-            final boolean noLocal,
-            @Nullable final Integer subscriptionIdentifier) {
+    public TopicSubscriptionImpl(final @NotNull String topicFilter, final @NotNull Qos qos,
+            final boolean retainAsPublished, final boolean noLocal, @Nullable final Integer subscriptionIdentifier) {
         Preconditions.checkNotNull(topicFilter, "Topic filter must never be null");
         Preconditions.checkNotNull(qos, "QoS must never be null");
         this.topicFilter = topicFilter;
@@ -92,26 +87,15 @@ public class TopicSubscriptionImpl implements TopicSubscription {
         Preconditions.checkNotNull(topicSubscription, "TopicSubscription must never be null");
         return new Topic(topicSubscription.getTopicFilter(),
                 Objects.requireNonNull(QoS.valueOf(topicSubscription.getQos().getQosNumber())),
-                topicSubscription.getNoLocal(),
-                topicSubscription.getRetainAsPublished(),
+                topicSubscription.getNoLocal(), topicSubscription.getRetainAsPublished(),
                 Objects.requireNonNull(Mqtt5RetainHandling.DO_NOT_SEND),
                 topicSubscription.getSubscriptionIdentifier().orElse(null));
     }
 
     @Override
     public String toString() {
-        return "TopicSubscription{" +
-                "topicFilter='" +
-                topicFilter +
-                '\'' +
-                ", qos=" +
-                qos +
-                ", retainAsPublished=" +
-                retainAsPublished +
-                ", noLocal=" +
-                noLocal +
-                ", subscriptionIdentifier=" +
-                subscriptionIdentifier +
-                '}';
+        return "TopicSubscription{" + "topicFilter='" + topicFilter + '\'' + ", qos=" + qos + ", retainAsPublished="
+                + retainAsPublished + ", noLocal=" + noLocal + ", subscriptionIdentifier=" + subscriptionIdentifier
+                + '}';
     }
 }

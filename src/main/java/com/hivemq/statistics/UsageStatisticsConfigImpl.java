@@ -26,9 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class UsageStatisticsConfigImpl implements UsageStatisticsConfig {
 
     private static final Logger log = LoggerFactory.getLogger(UsageStatisticsConfigImpl.class);
-
     private final AtomicBoolean enabled = new AtomicBoolean(false);
-
     @Override
     public boolean isEnabled() {
         return this.enabled.get();

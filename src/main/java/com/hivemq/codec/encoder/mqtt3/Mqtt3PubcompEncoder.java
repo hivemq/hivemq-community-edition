@@ -29,21 +29,17 @@ public class Mqtt3PubcompEncoder implements MqttEncoder<PUBCOMP> {
     public static final int ENCODED_PUBCOMP_SIZE = 4;
     private static final byte PUBCOMP_FIXED_HEADER = 0b0111_0000;
     private static final byte PUBCOMP_REMAINING_LENGTH = 0b0000_0010;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull PUBCOMP msg,
             final @NotNull ByteBuf out) {
-
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
         }
-
         out.writeByte(PUBCOMP_FIXED_HEADER);
-        //The remaining length is always static for PUBCOMPs
+        // The remaining length is always static for PUBCOMPs
         out.writeByte(PUBCOMP_REMAINING_LENGTH);
-
         out.writeShort(msg.getPacketIdentifier());
     }
 

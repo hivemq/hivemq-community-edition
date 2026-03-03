@@ -45,12 +45,9 @@ public class MqttConnectDecoder {
     private final @NotNull Mqtt5ConnectDecoder mqtt5ConnectDecoder;
     private final @NotNull Mqtt311ConnectDecoder mqtt311ConnectDecoder;
     private final @NotNull Mqtt31ConnectDecoder mqtt31ConnectDecoder;
-
     @Inject
-    public MqttConnectDecoder(
-            final @NotNull MqttConnacker mqttConnacker,
-            final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull HivemqId hiveMQId,
+    public MqttConnectDecoder(final @NotNull MqttConnacker mqttConnacker,
+            final @NotNull FullConfigurationService fullConfigurationService, final @NotNull HivemqId hiveMQId,
             final @NotNull ClientIds clientIds) {
         this.mqttConnacker = mqttConnacker;
         mqtt5ConnectDecoder = new Mqtt5ConnectDecoder(mqttConnacker, hiveMQId, clientIds, fullConfigurationService);
@@ -58,36 +55,35 @@ public class MqttConnectDecoder {
         mqtt31ConnectDecoder = new Mqtt31ConnectDecoder(mqttConnacker, clientIds, fullConfigurationService, hiveMQId);
     }
 
-
     public @Nullable ProtocolVersion decodeProtocolVersion(
-            final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull ByteBuf buf) {
+            final @NotNull ClientConnectionContext clientConnectionContext,
+            final @NotNull ByteBuf buf) {
         /*
-         * It is sufficient to look at the second byte of the variable header (Length LSB) This byte
-         * indicates how long the following protocol name is going to be. In case of the
-         * MQTT 3.1 specification the name is 'MQIsdp' which is 6 bytes long.
+         * It is sufficient to look at the second byte of the variable header (Length LSB) This byte indicates how long
+         * the following protocol name is going to be. In case of the MQTT 3.1 specification the name is 'MQIsdp' which
+         * is 6 bytes long.
          *
          * The MQTT 3.1.1 spec has a defined protocol name of "MQTT" which is 4 bytes long.
          *
-         * For future protocol versions we definitely need to inspect the protocol version additionally
-         * decide since the protocol name is not going to change.
+         * For future protocol versions we definitely need to inspect the protocol version additionally decide since the
+         * protocol name is not going to change.
          */
-
-        //The reader index is now at the beginning of the variable MQTT header field. We're only
+        // The reader index is now at the beginning of the variable MQTT header field. We're only
         // interested in the Length LSB byte
         if (buf.readableBytes() < 2) {
-            mqttConnacker.connackError(clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(
+                    clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with a packet without protocol version.",
                     "Sent CONNECT without protocol version",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
                     ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
             return null;
         }
-
         final ByteBuf lengthLSBBuf = buf.slice(buf.readerIndex() + 1, 1);
         final int lengthLSB = lengthLSBBuf.readByte();
         final ProtocolVersion protocolVersion;
         switch (lengthLSB) {
-            case 4:
+            case 4 :
                 if (buf.readableBytes() < 7) {
                     connackInvalidProtocolVersion(clientConnectionContext);
                     return null;
@@ -103,17 +99,15 @@ public class MqttConnectDecoder {
                     return null;
                 }
                 break;
-            case 6:
+            case 6 :
                 protocolVersion = ProtocolVersion.MQTTv3_1;
                 break;
-            default:
+            default :
                 connackInvalidProtocolVersion(clientConnectionContext);
                 return null;
         }
-
         clientConnectionContext.setProtocolVersion(protocolVersion);
         clientConnectionContext.setConnectReceivedTimestamp(System.currentTimeMillis());
-
         return protocolVersion;
     }
 
@@ -121,7 +115,6 @@ public class MqttConnectDecoder {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte fixedHeader) {
-
         final ProtocolVersion protocolVersion = decodeProtocolVersion(clientConnectionContext, buf);
         if (protocolVersion == null) {
             return null;
@@ -136,7 +129,8 @@ public class MqttConnectDecoder {
     }
 
     private void connackInvalidProtocolVersion(final @NotNull ClientConnectionContext clientConnectionContext) {
-        mqttConnacker.connackError(clientConnectionContext.getChannel(),
+        mqttConnacker.connackError(
+                clientConnectionContext.getChannel(),
                 "A client (IP: {}) connected with an invalid protocol version.",
                 "Sent CONNECT with an invalid protocol version",
                 Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,

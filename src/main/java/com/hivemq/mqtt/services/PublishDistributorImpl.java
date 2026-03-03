@@ -54,10 +54,8 @@ public class PublishDistributorImpl implements PublishDistributor {
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final SingleWriterService singleWriterService;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
-
     @Inject
-    public PublishDistributorImpl(
-            final @NotNull ClientQueuePersistence clientQueuePersistence,
+    public PublishDistributorImpl(final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull SingleWriterService singleWriterService,
             final @NotNull MqttConfigurationService mqttConfigurationService) {
@@ -72,26 +70,23 @@ public class PublishDistributorImpl implements PublishDistributor {
             final @NotNull Map<String, SubscriberWithIdentifiers> subscribers,
             final @NotNull PUBLISH publish,
             final @NotNull ExecutorService executorService) {
-
         final ImmutableList.Builder<ListenableFuture<Void>> publishResultFutureBuilder = ImmutableList.builder();
-
         for (final Map.Entry<String, SubscriberWithIdentifiers> entry : subscribers.entrySet()) {
             final SubscriberWithIdentifiers subscriber = entry.getValue();
-
-            final ListenableFuture<PublishStatus> publishFuture = sendMessageToSubscriber(publish,
+            final ListenableFuture<PublishStatus> publishFuture = sendMessageToSubscriber(
+                    publish,
                     entry.getKey(),
                     subscriber.getQos(),
                     false,
                     subscriber.isRetainAsPublished(),
                     subscriber.getSubscriptionIdentifier());
-
             final SettableFuture<Void> publishFinishedFuture = SettableFuture.create();
             publishResultFutureBuilder.add(publishFinishedFuture);
-            Futures.addCallback(publishFuture,
+            Futures.addCallback(
+                    publishFuture,
                     new StandardPublishCallback(entry.getKey(), publish, publishFinishedFuture),
                     executorService);
         }
-
         return FutureUtils.voidFutureFromList(publishResultFutureBuilder.build());
     }
 
@@ -100,23 +95,22 @@ public class PublishDistributorImpl implements PublishDistributor {
             final @NotNull Set<String> sharedSubscribers,
             final @NotNull PUBLISH publish,
             final @NotNull ExecutorService executorService) {
-
         final ImmutableList.Builder<ListenableFuture<Void>> publishResultFutureBuilder = ImmutableList.builder();
-
         for (final String sharedSubscriber : sharedSubscribers) {
             final SettableFuture<Void> publishFinishedFuture = SettableFuture.create();
-            final ListenableFuture<PublishStatus> future = sendMessageToSubscriber(publish,
+            final ListenableFuture<PublishStatus> future = sendMessageToSubscriber(
+                    publish,
                     sharedSubscriber,
                     publish.getQoS().getQosNumber(),
                     true,
                     true,
                     null);
             publishResultFutureBuilder.add(publishFinishedFuture);
-            Futures.addCallback(future,
+            Futures.addCallback(
+                    future,
                     new StandardPublishCallback(sharedSubscriber, publish, publishFinishedFuture),
                     executorService);
         }
-
         return FutureUtils.voidFutureFromList(publishResultFutureBuilder.build());
     }
 
@@ -128,8 +122,8 @@ public class PublishDistributorImpl implements PublishDistributor {
             final boolean sharedSubscription,
             final boolean retainAsPublished,
             final @Nullable ImmutableIntArray subscriptionIdentifier) {
-
-        return handlePublish(publish,
+        return handlePublish(
+                publish,
                 clientId,
                 subscriptionQos,
                 sharedSubscription,
@@ -144,9 +138,9 @@ public class PublishDistributorImpl implements PublishDistributor {
             final boolean sharedSubscription,
             final boolean retainAsPublished,
             final @Nullable ImmutableIntArray subscriptionIdentifier) {
-
         if (sharedSubscription) {
-            return queuePublish(client,
+            return queuePublish(
+                    client,
                     publish,
                     subscriptionQos,
                     true,
@@ -154,21 +148,18 @@ public class PublishDistributorImpl implements PublishDistributor {
                     subscriptionIdentifier,
                     null);
         }
-
         final boolean qos0Message = Math.min(subscriptionQos, publish.getQoS().getQosNumber()) == 0;
         final ClientSession clientSession = clientSessionPersistence.getSession(client, false);
         final boolean clientConnected = clientSession != null && clientSession.isConnected();
-
         if ((qos0Message && !clientConnected)) {
             return Futures.immediateFuture(NOT_CONNECTED);
         }
-
-        //no session present or session already expired
+        // no session present or session already expired
         if (clientSession == null) {
             return Futures.immediateFuture(NOT_CONNECTED);
         }
-
-        return queuePublish(client,
+        return queuePublish(
+                client,
                 publish,
                 subscriptionQos,
                 false,
@@ -185,16 +176,15 @@ public class PublishDistributorImpl implements PublishDistributor {
             final boolean retainAsPublished,
             final @Nullable ImmutableIntArray subscriptionIdentifier,
             final @Nullable Long queueLimit) {
-
-        final ListenableFuture<Void> future = clientQueuePersistence.add(client,
+        final ListenableFuture<Void> future = clientQueuePersistence.add(
+                client,
                 shared,
                 createPublish(publish, subscriptionQos, retainAsPublished, subscriptionIdentifier),
                 false,
                 Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages));
-
         final SettableFuture<PublishStatus> statusFuture = SettableFuture.create();
-
         Futures.addCallback(future, new FutureCallback<>() {
+
             @Override
             public void onSuccess(final Void result) {
                 statusFuture.set(DELIVERED);
@@ -208,7 +198,7 @@ public class PublishDistributorImpl implements PublishDistributor {
         return statusFuture;
     }
 
-    private@NotNull  PUBLISH createPublish(
+    private @NotNull PUBLISH createPublish(
             final @NotNull PUBLISH publish,
             final int subscriptionQos,
             final boolean retainAsPublished,
@@ -219,18 +209,13 @@ public class PublishDistributorImpl implements PublishDistributor {
         } else {
             identifiers = subscriptionIdentifier;
         }
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder().fromPublish(publish)
-                .withRetain(publish.isRetain() && retainAsPublished)
-                .withSubscriptionIdentifiers(identifiers);
-
+                .withRetain(publish.isRetain() && retainAsPublished).withSubscriptionIdentifiers(identifiers);
         final int qos = Math.min(publish.getOnwardQoS().getQosNumber(), subscriptionQos);
         builder.withQoS(QoS.valueOf(qos));
-
         if (qos == 0) {
             builder.withPacketIdentifier(0);
         }
-
         return builder.build();
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -22,10 +21,10 @@ import com.hivemq.extensions.exception.ExtensionLoadingException;
 public interface ExtensionStaticInitializer {
 
     /**
-     * Initializes all the extension dependencies which are accessed via static context in the extension
-     * e.g. Services and Builders.
+     * Initializes all the extension dependencies which are accessed via static context in the extension e.g. Services
+     * and Builders.
      *
-     * @param classLoader the {@link ClassLoader} for this extension
+     * @param  classLoader               the {@link ClassLoader} for this extension
      * @throws ExtensionLoadingException if this extension's static context can not be initialized
      */
     void initialize(@NotNull String pluginId, @NotNull ClassLoader classLoader) throws ExtensionLoadingException;

@@ -23,8 +23,8 @@ import com.hivemq.mqtt.message.Message;
 import io.netty.buffer.ByteBuf;
 
 /**
- * An abstract encoder for MQTT messages which have a variable payload length and
- * need a remaining length header for that
+ * An abstract encoder for MQTT messages which have a variable payload length and need a remaining length header for
+ * that
  *
  * @author Dominik Obermaier
  */
@@ -32,7 +32,6 @@ public abstract class AbstractVariableHeaderLengthEncoder<T extends Message> imp
 
     protected static void createRemainingLength(final int messageLength, final @NotNull ByteBuf buffer) {
         int val = messageLength;
-
         do {
             byte b = (byte) (val % 128);
             val = val / 128;
@@ -45,13 +44,10 @@ public abstract class AbstractVariableHeaderLengthEncoder<T extends Message> imp
 
     @Override
     public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull T msg) {
-
         final int remainingLength = remainingLength(msg);
         final int encodedLengthWithHeader = MqttMessageEncoderUtil.encodedPacketLength(remainingLength);
-
         msg.setRemainingLength(remainingLength);
         msg.setEncodedLength(encodedLengthWithHeader);
-
         return encodedLengthWithHeader;
     }
 

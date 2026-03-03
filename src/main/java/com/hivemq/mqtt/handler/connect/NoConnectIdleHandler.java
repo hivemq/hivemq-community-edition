@@ -41,9 +41,7 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NEW_CONNECTION_IDLE
 public class NoConnectIdleHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(NoConnectIdleHandler.class);
-
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
-
     @Inject
     public NoConnectIdleHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         this.mqttServerDisconnector = mqttServerDisconnector;
@@ -56,7 +54,8 @@ public class NoConnectIdleHandler extends ChannelInboundHandlerAdapter {
                 ctx.pipeline().remove(NEW_CONNECTION_IDLE_HANDLER);
                 ctx.pipeline().remove(this);
             } catch (final NoSuchElementException ignored) {
-                //no problem, because if these handlers are not in the pipeline anyway, we still get the expected result here
+                // no problem, because if these handlers are not in the pipeline anyway, we still get the expected
+                // result here
                 log.trace("Not able to remove no connect idle handler.");
             }
         }
@@ -65,9 +64,9 @@ public class NoConnectIdleHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) {
-
         if (evt instanceof IdleStateEvent && ((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-            mqttServerDisconnector.logAndClose(ctx.channel(),
+            mqttServerDisconnector.logAndClose(
+                    ctx.channel(),
                     "Client with IP {} disconnected. The client was idle for too long without sending a MQTT CONNECT packet.",
                     "No CONNECT sent in time");
         }

@@ -23,5 +23,6 @@ import com.hivemq.persistence.RetainedMessage;
  */
 @FunctionalInterface
 public interface RetainedMessageItemCallback_4_4 {
+
     void onItem(@NotNull String topic, @NotNull RetainedMessage message);
 }

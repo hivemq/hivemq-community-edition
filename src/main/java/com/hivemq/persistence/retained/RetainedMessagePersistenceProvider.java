@@ -27,7 +27,6 @@ import javax.inject.Provider;
 public class RetainedMessagePersistenceProvider implements Provider<RetainedMessagePersistence> {
 
     private final Provider<RetainedMessagePersistenceImpl> provider;
-
     @Inject
     public RetainedMessagePersistenceProvider(final Provider<RetainedMessagePersistenceImpl> provider) {
         this.provider = provider;

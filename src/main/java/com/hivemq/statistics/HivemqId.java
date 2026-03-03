@@ -37,11 +37,8 @@ import java.util.UUID;
 public class HivemqId {
 
     private static final Logger log = LoggerFactory.getLogger(HivemqId.class);
-
     private final SystemInformation systemInformation;
-
     private String hivemqId;
-
     @Inject
     public HivemqId(final SystemInformation systemInformation) {
         this.systemInformation = systemInformation;
@@ -53,7 +50,6 @@ public class HivemqId {
     }
 
     private void readId() {
-
         final File file = new File(systemInformation.getDataFolder(), "meta.id");
         if (!file.exists()) {
             try {
@@ -64,23 +60,19 @@ public class HivemqId {
                 log.trace("original exception");
             }
         }
-
         if (file.canRead()) {
             try {
                 final String hivemqId = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-
-                //prevent manipulation
+                // prevent manipulation
                 if (hivemqId.length() != 36) {
                     return;
                 }
-
                 this.hivemqId = hivemqId;
             } catch (final IOException e) {
                 log.debug("Not able to read installation ID from file {}", file.getAbsolutePath());
                 log.trace("original exception");
             }
         }
-
     }
 
     public String getHivemqId() {

@@ -27,11 +27,11 @@ import io.netty.buffer.ByteBuf;
 public class Utf8Utils {
 
     /**
-     * This method checks if all the characters in a string can be encode with one byte in UTF-8.
-     * It is used check if a string can be written onto a buffer character by character, without actually encoding it.
+     * This method checks if all the characters in a string can be encode with one byte in UTF-8. It is used check if a
+     * string can be written onto a buffer character by character, without actually encoding it.
      *
-     * @param sequence The character sequence that should be checked
-     * @return true if each character in the sequence can be encoded with one byte in UTF-8
+     * @param  sequence The character sequence that should be checked
+     * @return          true if each character in the sequence can be encoded with one byte in UTF-8
      */
     public static boolean stringIsOneByteCharsOnly(final CharSequence sequence) {
         for (int i = 0, len = sequence.length(); i < len; i++) {
@@ -46,8 +46,8 @@ public class Utf8Utils {
     /**
      * Calculates the length in bytes, that a string would have when encoded in utf-8.
      *
-     * @param sequence The character sequence for which the length should be calculated
-     * @return the length in utf-8 bytes
+     * @param  sequence The character sequence for which the length should be calculated
+     * @return          the length in utf-8 bytes
      */
     public static int encodedLength(final CharSequence sequence) {
         int count = 0;
@@ -70,52 +70,41 @@ public class Utf8Utils {
     /**
      * Checks if a <byte[]> contains a control character or a non character.
      *
-     * @param bytes The bytes to test.
-     * @return true if the array contains a control character or a non character, else false.
+     * @param  bytes The bytes to test.
+     * @return       true if the array contains a control character or a non character, else false.
      */
     public static boolean hasControlOrNonCharacter(final byte @NotNull [] bytes) {
         Preconditions.checkNotNull(bytes);
-
         for (int i = 0; i < bytes.length; i++) {
-
             final byte byte1 = bytes[i];
-
-            //control byte1s
+            // control byte1s
             if (byte1 >= 1 && byte1 <= 31 || byte1 == (byte) 0x7F) {
                 return true;
             }
-
             if (byte1 > 31) {
                 continue;
             }
-
             if (byte1 < (byte) 0xE0) {
                 // Two-byte form
                 if (i == bytes.length - 1) {
                     return false;
                 }
-
                 if (byte1 == (byte) 0xC2 && bytes[i + 1] <= (byte) 0x9F) {
                     return true;
                 }
-
             } else if (byte1 < (byte) 0xF0) {
                 // Three-byte form.
                 if (i == bytes.length - 2) {
                     continue;
                 }
-
-//              '\uFDD0' - '\uFDEF'
-                if (byte1 == (byte) 0xEF &&
-                        bytes[i + 1] == (byte) 0xB7 &&
-                        (bytes[i + 2] >= (byte) 0x90 || bytes[i + 2] <= (byte) 0xAF)) {
+                // '\uFDD0' - '\uFDEF'
+                if (byte1 == (byte) 0xEF && bytes[i + 1] == (byte) 0xB7
+                        && (bytes[i + 2] >= (byte) 0x90 || bytes[i + 2] <= (byte) 0xAF)) {
                     return true;
                 }
-
-//              '\uFFFE' | '\uFFFF'
-                if (byte1 == (byte) 0xEF &&
-                        bytes[i + 1] == (byte) 0xBF &&
-                        (bytes[i + 2] == (byte) 0xBE || bytes[i + 2] == (byte) 0xBF)) {
+                // '\uFFFE' | '\uFFFF'
+                if (byte1 == (byte) 0xEF && bytes[i + 1] == (byte) 0xBF
+                        && (bytes[i + 2] == (byte) 0xBE || bytes[i + 2] == (byte) 0xBF)) {
                     return true;
                 }
             } else {
@@ -123,20 +112,16 @@ public class Utf8Utils {
                 if (i == bytes.length - 3) {
                     continue;
                 }
-
                 if (byte1 > (byte) 0xF4) {
                     continue;
                 }
-
                 final byte byte2 = bytes[i + 1];
                 final byte byte3 = bytes[i + 2];
                 final byte byte4 = bytes[i + 3];
-
                 if (!(byte3 == (byte) 0xBF && (byte4 == (byte) 0xBE || byte4 == (byte) 0xBF))) {
                     continue;
                 }
-
-//              U+1FFFE|F - U10FFFE|F
+                // U+1FFFE|F - U10FFFE|F
                 if (byte1 == (byte) 0xF0) {
                     if (byte2 == (byte) 0x9F || byte2 == (byte) 0xAF || byte2 == (byte) 0xBF) {
                         return true;
@@ -146,43 +131,33 @@ public class Utf8Utils {
                         return true;
                     }
                 }
-
             }
-
         }
-
         return false;
     }
 
     /**
      * Checks if a String contains a control character or a non character.
      *
-     * @param text The string to test
-     * @return true if the text contains a control character or a non character else false
+     * @param  text The string to test
+     * @return      true if the text contains a control character or a non character else false
      */
     public static boolean hasControlOrNonCharacter(final @NotNull String text) {
         Preconditions.checkNotNull(text);
-
         for (int i = 0; i < text.length(); i++) {
-
             final char character = text.charAt(i);
-
-            //control characters
+            // control characters
             if (character >= '\u0001' && character <= '\u001F' || character >= '\u007F' && character <= '\u009F') {
                 return true;
             }
-
-            //non characters
+            // non characters
             if (character >= '\uFDD0' && character <= '\uFDEF' || character == '\uFFFE' || character == '\uFFFF') {
                 return true;
             }
-
             if (i == text.length() - 1) {
                 return false;
             }
-
             final char next = text.charAt(i + 1);
-
             if (character == '\uD83F' && (next == '\uDFFE' || next == '\uDFFF')) {
                 return true;
             }
@@ -231,9 +206,7 @@ public class Utf8Utils {
             if (character == '\uDBFF' && (next == '\uDFFE' || next == '\uDFFF')) {
                 return true;
             }
-
         }
-
         return false;
     }
 
@@ -241,22 +214,16 @@ public class Utf8Utils {
      * ByteBuf implementation of guavas Utf8.isWellFormed(final byte[] bytes)
      */
     public static boolean isWellFormed(final @NotNull ByteBuf byteBuf, final int utf8StringLength) {
-
         Preconditions.checkNotNull(byteBuf);
-
         byteBuf.markReaderIndex();
-
-        final boolean wellFormed =
-                isSliceWellFormed(byteBuf.slice(byteBuf.readerIndex(), utf8StringLength), utf8StringLength);
-
+        final boolean wellFormed = isSliceWellFormed(
+                byteBuf.slice(byteBuf.readerIndex(), utf8StringLength),
+                utf8StringLength);
         byteBuf.resetReaderIndex();
-
         return wellFormed;
-
     }
 
     private static boolean isSliceWellFormed(final ByteBuf byteBuf, final int len) {
-
         Preconditions.checkPositionIndexes(0, len, byteBuf.readableBytes());
         for (int i = 0; i < len; ++i) {
             byteBuf.markReaderIndex();
@@ -265,13 +232,10 @@ public class Utf8Utils {
                 return isWellFormedSlowPath(byteBuf);
             }
         }
-
         return true;
-
     }
 
     private static boolean isWellFormedSlowPath(final ByteBuf byteBuf) {
-
         while (true) {
             byte byte1;
             do {
@@ -279,12 +243,10 @@ public class Utf8Utils {
                     return true;
                 }
             } while ((byte1 = byteBuf.readByte()) >= 0);
-
             if (byte1 < -32) {
                 if (byteBuf.readableBytes() == 0) {
                     return false;
                 }
-
                 if (byte1 < -62 || byteBuf.readByte() > -65) {
                     return false;
                 }
@@ -294,24 +256,18 @@ public class Utf8Utils {
                     if (byteBuf.readableBytes() < 2) {
                         return false;
                     }
-
                     byte2 = byteBuf.readByte();
-                    if (byte2 > -65 ||
-                            byte1 == -32 && byte2 < -96 ||
-                            byte1 == -19 && -96 <= byte2 ||
-                            byteBuf.readByte() > -65) {
+                    if (byte2 > -65 || byte1 == -32 && byte2 < -96 || byte1 == -19 && -96 <= byte2
+                            || byteBuf.readByte() > -65) {
                         return false;
                     }
                 } else {
                     if (byteBuf.readableBytes() < 3) {
                         return false;
                     }
-
                     byte2 = byteBuf.readByte();
-                    if (byte2 > -65 ||
-                            (byte1 << 28) + (byte2 - -112) >> 30 != 0 ||
-                            byteBuf.readByte() > -65 ||
-                            byteBuf.readByte() > -65) {
+                    if (byte2 > -65 || (byte1 << 28) + (byte2 - -112) >> 30 != 0 || byteBuf.readByte() > -65
+                            || byteBuf.readByte() > -65) {
                         return false;
                     }
                 }
@@ -325,8 +281,8 @@ public class Utf8Utils {
      * <p>
      * These characters are the null character U+0000 and UTF-16 surrogates.
      *
-     * @param binary the UTF-8 encoded byte array.
-     * @return whether the binary data contains characters a UTF-8 encoded String must not.
+     * @param  binary the UTF-8 encoded byte array.
+     * @return        whether the binary data contains characters a UTF-8 encoded String must not.
      */
     public static boolean containsMustNotCharacters(@NotNull final byte[] binary) {
         if (!Utf8.isWellFormed(binary)) {
@@ -346,8 +302,8 @@ public class Utf8Utils {
      * <p>
      * These characters are the null character U+0000 and UTF-16 surrogates.
      *
-     * @param string the UTF-16 encoded Java string
-     * @return whether the string contains characters a UTF-8 encoded String must not.
+     * @param  string the UTF-16 encoded Java string
+     * @return        whether the string contains characters a UTF-8 encoded String must not.
      */
     public static boolean containsMustNotCharacters(@NotNull final String string) {
         boolean highSurrogate = false;

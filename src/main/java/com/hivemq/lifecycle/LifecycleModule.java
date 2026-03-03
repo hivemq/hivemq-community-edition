@@ -34,11 +34,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * The Guice module which allows to use lifecycle annotations.
- * Lifecycle annotations which are supported at the moment are
- * <br>
- * * {@link javax.annotation.PostConstruct}
- * * {@link javax.annotation.PreDestroy}
+ * The Guice module which allows to use lifecycle annotations. Lifecycle annotations which are supported at the moment
+ * are <br>
+ * * {@link javax.annotation.PostConstruct} * {@link javax.annotation.PreDestroy}
  *
  * @author Dominik Obermaier
  * @author Silvio Giebl
@@ -46,26 +44,22 @@ import java.lang.reflect.Modifier;
 public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
 
     private static final Logger log = LoggerFactory.getLogger(LifecycleModule.class);
-
     private final @NotNull LifecycleRegistry lifecycleRegistry;
-
     /**
      * This class stores in the LifecycleRegistry for Singleton classes if their lifecycle methods are already invoked.
      * Therefore should only one LifecycleModule object exist for the lifetime of the Application.
      */
     public LifecycleModule() {
         super(LifecycleModule.class);
-
         lifecycleRegistry = new LifecycleRegistry();
     }
 
     @Override
     protected void configure() {
-
         bind(LifecycleRegistry.class).toInstance(lifecycleRegistry);
         bind(LifecycleShutdownRegistration.class).asEagerSingleton();
-
         bindListener(Matchers.any(), new TypeListener() {
+
             @Override
             public <I> void hear(final TypeLiteral<I> type, final TypeEncounter<I> encounter) {
                 executePostConstruct(encounter, type.getRawType());
@@ -74,21 +68,18 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
     }
 
     private <I> void executePostConstruct(
-            final @NotNull TypeEncounter<I> encounter, final @NotNull Class<? super I> rawType) {
-
-        //We're going recursive up to every superclass until we hit Object.class
+            final @NotNull TypeEncounter<I> encounter,
+            final @NotNull Class<? super I> rawType) {
+        // We're going recursive up to every superclass until we hit Object.class
         if (rawType.getSuperclass() != null) {
             executePostConstruct(encounter, rawType.getSuperclass());
         }
-
         final boolean singleton = isSingleton(rawType);
         final Method postConstructFound = findPostConstruct(rawType);
         final Method preDestroy = findPreDestroy(rawType);
-
         if (singleton) {
             lifecycleRegistry.addSingletonClass(rawType);
         }
-
         if (postConstructFound != null) {
             if (lifecycleRegistry.canInvokePostConstruct(rawType)) {
                 invokePostConstruct(encounter, postConstructFound);
@@ -100,9 +91,9 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
     }
 
     private static <I> boolean isSingleton(final @NotNull Class<? super I> rawType) {
-        return rawType.isAnnotationPresent(javax.inject.Singleton.class) ||
-                rawType.isAnnotationPresent(com.google.inject.Singleton.class) ||
-                rawType.isAnnotationPresent(com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton.class);
+        return rawType.isAnnotationPresent(javax.inject.Singleton.class)
+                || rawType.isAnnotationPresent(com.google.inject.Singleton.class)
+                || rawType.isAnnotationPresent(com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton.class);
     }
 
     private static <I> Method findPostConstruct(final @NotNull Class<? super I> rawType) {
@@ -145,8 +136,8 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
     }
 
     private static <I> void invokePostConstruct(
-            final @NotNull TypeEncounter<I> encounter, final @NotNull Method postConstruct) {
-
+            final @NotNull TypeEncounter<I> encounter,
+            final @NotNull Method postConstruct) {
         encounter.register((InjectionListener<I>) injectee -> {
             try {
                 postConstruct.setAccessible(true);
@@ -167,7 +158,8 @@ public class LifecycleModule extends SingletonModule<Class<LifecycleModule>> {
             final @NotNull TypeEncounter<I> encounter,
             final @NotNull Method preDestroy,
             final @NotNull LifecycleRegistry lifecycleRegistry) {
-        encounter.register((InjectionListener<I>) injectionListener -> lifecycleRegistry.addPreDestroyMethod(preDestroy,
-                injectionListener));
+        encounter.register(
+                (InjectionListener<I>) injectionListener -> lifecycleRegistry
+                        .addPreDestroyMethod(preDestroy, injectionListener));
     }
 }

@@ -32,12 +32,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsyncOutput<T> {
 
     protected final @NotNull PluginOutPutAsyncer asyncer;
-
     private final @NotNull AtomicBoolean async = new AtomicBoolean(false);
     private final @NotNull AtomicBoolean called = new AtomicBoolean(false);
     private final @NotNull AtomicBoolean timedOut = new AtomicBoolean(false);
     private final @NotNull SettableFuture<Boolean> asyncFuture = SettableFuture.create();
-
     public AbstractSimpleAsyncOutput(final @NotNull PluginOutPutAsyncer asyncer) {
         this.asyncer = asyncer;
     }
@@ -46,7 +44,7 @@ public class AbstractSimpleAsyncOutput<T> implements PluginTaskOutput, SimpleAsy
     public @NotNull Async<T> async(final @NotNull Duration timeout) {
         Preconditions.checkNotNull(timeout, "Timeout duration must never be null");
         checkCalled();
-        //noinspection unchecked: this cast is safe since this implements AsyncOutput and PluginTaskOutput
+        // noinspection unchecked: this cast is safe since this implements AsyncOutput and PluginTaskOutput
         return (Async<T>) asyncer.asyncify(this, timeout);
     }
 

@@ -32,9 +32,7 @@ public class PingReqInboundInputImplTest {
     public void constructor_and_getter() {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
-
         final PingReqInboundInputImpl input = new PingReqInboundInputImpl(clientInformation, connectionInformation);
-
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
     }

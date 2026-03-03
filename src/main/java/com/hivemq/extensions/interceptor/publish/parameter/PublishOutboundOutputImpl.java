@@ -26,17 +26,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Lukas Brandl
  * @author Silvio Giebl
- * @since 4.2.0
+ * @since  4.2.0
  */
 public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutboundOutput>
         implements PublishOutboundOutput {
 
     private final @NotNull ModifiableOutboundPublishImpl publishPacket;
     private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
-
-    public PublishOutboundOutputImpl(
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull ModifiableOutboundPublishImpl publishPacket) {
-
+    public PublishOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull ModifiableOutboundPublishImpl publishPacket) {
         super(asyncer);
         this.publishPacket = publishPacket;
     }

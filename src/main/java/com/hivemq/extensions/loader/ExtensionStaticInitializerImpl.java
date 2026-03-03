@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableMap;
@@ -34,16 +33,12 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
 
     private static final String SERVICES_CLASS = Services.class.getCanonicalName();
     private static final String BUILDERS_CLASS = Builders.class.getCanonicalName();
-
     @NotNull
     private final ExtensionServicesDependencies servicesDependencies;
-
     @NotNull
     private final ExtensionBuilderDependencies builderDependencies;
-
     @Inject
-    public ExtensionStaticInitializerImpl(
-            final @NotNull ExtensionServicesDependencies servicesDependencies,
+    public ExtensionStaticInitializerImpl(final @NotNull ExtensionServicesDependencies servicesDependencies,
             final @NotNull ExtensionBuilderDependencies builderDependencies) {
         this.servicesDependencies = servicesDependencies;
         this.builderDependencies = builderDependencies;
@@ -53,27 +48,25 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
             throws ExtensionLoadingException {
         checkNotNull(pluginId, "extension id must not be null");
         checkNotNull(classLoader, "classLoader must not be null");
-
         initializeServices(pluginId, classLoader);
         initializeBuilders(pluginId, classLoader);
     }
 
-    private void initializeServices(
-            final @NotNull String pluginId, final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
+    private void initializeServices(final @NotNull String pluginId, final @NotNull ClassLoader classLoader)
+            throws ExtensionLoadingException {
         try {
             final Class<?> servicesClass = classLoader.loadClass(SERVICES_CLASS);
             final Field servicesField = servicesClass.getDeclaredField("services");
             servicesField.setAccessible(true);
             final ImmutableMap<String, Object> dependencies = servicesDependencies.getDependenciesMap(classLoader);
             servicesField.set(null, dependencies);
-
         } catch (final Exception e) {
             throw new ExtensionLoadingException("Not able to initialize Services for extension with id " + pluginId, e);
         }
     }
 
-    private void initializeBuilders(
-            final @NotNull String pluginId, final @NotNull ClassLoader classLoader) throws ExtensionLoadingException {
+    private void initializeBuilders(final @NotNull String pluginId, final @NotNull ClassLoader classLoader)
+            throws ExtensionLoadingException {
         try {
             final Class<?> buildersClass = classLoader.loadClass(BUILDERS_CLASS);
             final Field buildersField = buildersClass.getDeclaredField("builders");

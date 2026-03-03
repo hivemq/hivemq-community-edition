@@ -46,21 +46,17 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class FlowControlHandlerTest {
 
     private FlowControlHandler flowControlHandler;
-
     private final @NotNull EventLog eventLog = mock();
-
     @Before
     public void setUp() throws Exception {
         final MqttConfigurationServiceImpl mqttConfigurationService = new MqttConfigurationServiceImpl();
         mqttConfigurationService.setServerReceiveMaximum(10);
-
         final MqttServerDisconnector serverDisconnector = new MqttServerDisconnectorImpl(eventLog);
-
         flowControlHandler = new FlowControlHandler(mqttConfigurationService, serverDisconnector);
     }
 
@@ -69,13 +65,9 @@ public class FlowControlHandlerTest {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 11; i++) {
             channel.writeInbound(builder.build());
@@ -89,15 +81,10 @@ public class FlowControlHandlerTest {
     public void test_sending_publish_after_disconnect() {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 12; i++) {
             channel.writeInbound(builder.build());
@@ -108,15 +95,10 @@ public class FlowControlHandlerTest {
     public void test_no_disconnect_after_receiving_to_9_publishes_than_sending_9_pubacks() {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -136,15 +118,10 @@ public class FlowControlHandlerTest {
     public void test_quota_not_exceeding_max_value() {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.AT_LEAST_ONCE).withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -162,15 +139,10 @@ public class FlowControlHandlerTest {
     public void test_no_disconnect_after_receiving_to_10_publishes_than_sending_10_pubcomps() {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.EXACTLY_ONCE)
-                .withOnwardQos(QoS.EXACTLY_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -190,24 +162,17 @@ public class FlowControlHandlerTest {
     public void test_no_disconnect_after_receiving_to_10_publishes_than_sending_10_pubrecs_with_failure_code() {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.EXACTLY_ONCE)
-                .withOnwardQos(QoS.EXACTLY_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
         }
         for (int i = 0; i < 10; i++) {
-            channel.writeOutbound(new PUBREC(i,
-                    Mqtt5PubRecReasonCode.QUOTA_EXCEEDED,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES));
+            channel.writeOutbound(
+                    new PUBREC(i, Mqtt5PubRecReasonCode.QUOTA_EXCEEDED, null, Mqtt5UserProperties.NO_USER_PROPERTIES));
         }
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
@@ -221,24 +186,17 @@ public class FlowControlHandlerTest {
     public void test_disconnect_after_receiving_to_10_publishes_than_sending_10_pubrecs_with_success_pub() {
         final EmbeddedChannel channel = new EmbeddedChannel(TestMqttDecoder.create(), flowControlHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-
         final PUBLISHFactory.Mqtt5Builder builder = new PUBLISHFactory.Mqtt5Builder();
-        builder.withTopic("topic")
-                .withQoS(QoS.EXACTLY_ONCE)
-                .withOnwardQos(QoS.EXACTLY_ONCE)
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayload(new byte[0])
+        builder.withTopic("topic").withQoS(QoS.EXACTLY_ONCE).withOnwardQos(QoS.EXACTLY_ONCE)
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload(new byte[0])
                 .withHivemqId("hivemqId1");
-
         ClientConnection.of(channel).setClientReceiveMaximum(10);
         for (int i = 0; i < 10; i++) {
             channel.writeInbound(builder.build());
         }
         for (int i = 0; i < 10; i++) {
-            channel.writeOutbound(new PUBREC(i,
-                    Mqtt5PubRecReasonCode.SUCCESS,
-                    null,
-                    Mqtt5UserProperties.NO_USER_PROPERTIES));
+            channel.writeOutbound(
+                    new PUBREC(i, Mqtt5PubRecReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES));
         }
         channel.writeInbound(builder.build());
         verify(eventLog).clientWasDisconnected(channel, "Sent too many concurrent PUBLISH messages");

@@ -15,7 +15,6 @@
  */
 package com.hivemq.extensions.services;
 
-
 import com.hivemq.configuration.service.InternalConfigurations;
 import org.junit.Test;
 
@@ -37,12 +36,11 @@ public class PluginServiceRateLimitServiceTest {
     public void test_limit() {
         InternalConfigurations.EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC.set(10);
         final PluginServiceRateLimitService pluginServiceRateLimitService = new PluginServiceRateLimitService();
-
-        //use up the current second
+        // use up the current second
         for (int i = 0; i < 10; i++) {
             assertFalse(pluginServiceRateLimitService.rateLimitExceeded());
         }
-        //use up the 10s reserve
+        // use up the 10s reserve
         for (int i = 0; i < 10; i++) {
             assertFalse(pluginServiceRateLimitService.rateLimitExceeded());
         }
@@ -53,11 +51,9 @@ public class PluginServiceRateLimitServiceTest {
     public void test_limit_not_exceeded() {
         InternalConfigurations.EXTENSION_SERVICE_CALL_RATE_LIMIT_PER_SEC.set(2);
         final PluginServiceRateLimitService pluginServiceRateLimitService = new PluginServiceRateLimitService();
-
-        //use up the first second
+        // use up the first second
         assertFalse(pluginServiceRateLimitService.rateLimitExceeded());
-
-        //use up the reserve
+        // use up the reserve
         assertFalse(pluginServiceRateLimitService.rateLimitExceeded());
     }
 }

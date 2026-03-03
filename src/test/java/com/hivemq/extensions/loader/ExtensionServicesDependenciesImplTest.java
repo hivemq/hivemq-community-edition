@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.codahale.metrics.MetricRegistry;
@@ -43,130 +42,102 @@ import static org.mockito.Mockito.mock;
 public class ExtensionServicesDependenciesImplTest {
 
     private @NotNull ExtensionServicesDependenciesImpl extensionServicesDependencies;
-
     @Before
     public void before() {
         extensionServicesDependencies = new ExtensionServicesDependenciesImpl(new MetricRegistry(),
-                mock(InitializerRegistry.class),
-                mock(RetainedMessageStore.class),
-                mock(ClientService.class),
-                mock(SubscriptionStore.class),
-                mock(GlobalManagedExtensionExecutorService.class),
-                mock(PublishService.class),
-                mock(HiveMQExtensions.class),
-                mock(SecurityRegistry.class),
-                mock(EventRegistry.class),
-                mock(ClusterService.class),
-                mock(GlobalInterceptorRegistry.class),
+                mock(InitializerRegistry.class), mock(RetainedMessageStore.class), mock(ClientService.class),
+                mock(SubscriptionStore.class), mock(GlobalManagedExtensionExecutorService.class),
+                mock(PublishService.class), mock(HiveMQExtensions.class), mock(SecurityRegistry.class),
+                mock(EventRegistry.class), mock(ClusterService.class), mock(GlobalInterceptorRegistry.class),
                 mock(AdminService.class));
     }
 
     @Test
     public void test_map_contains_metric_registry() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(MetricRegistry.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof MetricRegistry);
     }
 
     @Test
     public void test_map_contains_initializer_registry() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(InitializerRegistry.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof InitializerRegistry);
     }
 
     @Test(timeout = 5000)
     public void test_map_contains_security_registry() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(SecurityRegistry.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof SecurityRegistry);
     }
 
     @Test
     public void test_map_contains_retained_message_store() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(RetainedMessageStore.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof RetainedMessageStore);
     }
 
     @Test
     public void test_map_contains_client_service() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(ClientService.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof ClientService);
     }
 
     @Test
     public void test_map_contains_subscription_store() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(SubscriptionStore.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof SubscriptionStore);
     }
 
     @Test
     public void test_map_contains_extension_executor_service() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(ManagedExtensionExecutorService.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof ManagedExtensionExecutorService);
     }
 
     @Test
     public void test_map_contains_publish_service() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(PublishService.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof PublishService);
     }
 
     @Test
     public void test_map_contains_event_registry() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(EventRegistry.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof EventRegistry);
     }
 
     @Test
     public void test_map_contains_cluster_service() {
-        final ImmutableMap<String, Object> dependenciesMap =
-                extensionServicesDependencies.getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
-
+        final ImmutableMap<String, Object> dependenciesMap = extensionServicesDependencies
+                .getDependenciesMap(IsolatedExtensionClassloaderUtil.buildClassLoader());
         final Object o = dependenciesMap.get(ClusterService.class.getCanonicalName());
-
         assertNotNull(o);
         assertTrue(o instanceof ClusterService);
     }

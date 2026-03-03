@@ -35,56 +35,27 @@ import java.util.Objects;
 public class RetainedMessage {
 
     private static final int SIZE_NOT_CALCULATED = -1;
-
     private @Nullable byte[] message;
-
     private final @NotNull QoS qos;
-
     private long publishId;
-
     protected final long messageExpiryInterval;
-
     private final @NotNull Mqtt5UserProperties userProperties;
-
     private final @Nullable String responseTopic;
-
     private final @Nullable String contentType;
-
     private final @Nullable byte[] correlationData;
-
     private final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator;
-
     private final long timestamp;
-
     private int sizeInMemory = SIZE_NOT_CALCULATED;
-
-    public RetainedMessage(
-            @Nullable final byte[] message,
-            @NotNull final QoS qos,
-            final long publishId,
+    public RetainedMessage(@Nullable final byte[] message, @NotNull final QoS qos, final long publishId,
             final long messageExpiryInterval) {
-        this(message,
-                qos,
-                publishId,
-                messageExpiryInterval,
-                Mqtt5UserProperties.NO_USER_PROPERTIES,
-                null,
-                null,
-                null,
-                null,
-                System.currentTimeMillis());
+        this(message, qos, publishId, messageExpiryInterval, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null,
+                null, System.currentTimeMillis());
     }
 
-    public RetainedMessage(
-            @Nullable final byte[] message,
-            @NotNull final QoS qos,
-            final long publishId,
-            final long messageExpiryInterval,
-            @NotNull final Mqtt5UserProperties userProperties,
-            @Nullable final String responseTopic,
-            @Nullable final String contentType,
-            @Nullable final byte[] correlationData,
-            @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
+    public RetainedMessage(@Nullable final byte[] message, @NotNull final QoS qos, final long publishId,
+            final long messageExpiryInterval, @NotNull final Mqtt5UserProperties userProperties,
+            @Nullable final String responseTopic, @Nullable final String contentType,
+            @Nullable final byte[] correlationData, @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
             final long timestamp) {
         Preconditions.checkNotNull(qos, "QoS must not be null");
         this.message = message;
@@ -99,8 +70,7 @@ public class RetainedMessage {
         this.timestamp = timestamp;
     }
 
-    public RetainedMessage(
-            @NotNull final PUBLISH publish, final long messageExpiryInterval) {
+    public RetainedMessage(@NotNull final PUBLISH publish, final long messageExpiryInterval) {
         this.message = publish.getPayload();
         this.qos = publish.getQoS();
         this.publishId = publish.getPublishId();
@@ -114,20 +84,11 @@ public class RetainedMessage {
     }
 
     public RetainedMessage copyWithoutPayload() {
-        return new RetainedMessage(null,
-                qos,
-                publishId,
-                messageExpiryInterval,
-                userProperties,
-                responseTopic,
-                contentType,
-                correlationData,
-                payloadFormatIndicator,
-                timestamp);
+        return new RetainedMessage(null, qos, publishId, messageExpiryInterval, userProperties, responseTopic,
+                contentType, correlationData, payloadFormatIndicator, timestamp);
     }
 
     public int getEstimatedSizeInMemory() {
-
         if (sizeInMemory != SIZE_NOT_CALCULATED) {
             return sizeInMemory;
         }
@@ -136,22 +97,18 @@ public class RetainedMessage {
         size += ObjectMemoryEstimation.enumSize(); // QoS
         size += ObjectMemoryEstimation.longWrapperSize(); // Payload ID
         size += ObjectMemoryEstimation.longSize(); // expiry interval
-
-        size += 24; //User Properties Overhead
+        size += 24; // User Properties Overhead
         for (final MqttUserProperty userProperty : getUserProperties().asList()) {
-            size += 24; //UserProperty Object Overhead
+            size += 24; // UserProperty Object Overhead
             size += ObjectMemoryEstimation.stringSize(userProperty.getName());
             size += ObjectMemoryEstimation.stringSize(userProperty.getValue());
         }
-
         size += ObjectMemoryEstimation.stringSize(responseTopic);
         size += ObjectMemoryEstimation.stringSize(contentType);
         size += ObjectMemoryEstimation.byteArraySize(correlationData);
-
         size += ObjectMemoryEstimation.enumSize(); // Payload format indicator
         size += ObjectMemoryEstimation.longSize(); // timestamp
         size += ObjectMemoryEstimation.intSize(); // size
-
         sizeInMemory = size;
         return sizeInMemory;
     }
@@ -212,9 +169,7 @@ public class RetainedMessage {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         final RetainedMessage that = (RetainedMessage) o;
-
         if (messageExpiryInterval != that.messageExpiryInterval) {
             return false;
         }
@@ -226,7 +181,6 @@ public class RetainedMessage {
 
     @Override
     public int hashCode() {
-
         int result = Objects.hash(qos, publishId, messageExpiryInterval, userProperties);
         result = 31 * result + Arrays.hashCode(message);
         return result;
@@ -241,8 +195,8 @@ public class RetainedMessage {
     }
 
     public boolean isExpiryDisabled() {
-        return (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED) ||
-                (messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET);
+        return (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED)
+                || (messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET);
     }
 
     public boolean hasExpired() {

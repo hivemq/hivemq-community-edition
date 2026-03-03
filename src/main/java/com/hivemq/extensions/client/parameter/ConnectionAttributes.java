@@ -42,38 +42,33 @@ public class ConnectionAttributes {
     @Nullable
     private Map<String, ByteBuffer> data;
     private final int maxValueSizeBytes;
-
     /**
      * Retrieves the {@link ConnectionAttributes} associated with the given channel.
      *
-     * @param channel the channel which the {@link ConnectionAttributes} are associated to
-     * @return the {@link ConnectionAttributes} associated to the given channel if present.
+     * @param  channel the channel which the {@link ConnectionAttributes} are associated to
+     * @return         the {@link ConnectionAttributes} associated to the given channel if present.
      */
     @Nullable
     static ConnectionAttributes getInstanceIfPresent(@NotNull final Channel channel) {
         Preconditions.checkNotNull(channel, "Channel for connection attributes must not be null.");
-
         return ClientConnectionContext.of(channel).getConnectionAttributes();
     }
 
     /**
-     * Retrieves the {@link ConnectionAttributes} associated with the given channel.
-     * If no {@link ConnectionAttributes} are associated yet, a new object will be associated.
+     * Retrieves the {@link ConnectionAttributes} associated with the given channel. If no {@link ConnectionAttributes}
+     * are associated yet, a new object will be associated.
      *
-     * @param channel the channel which the {@link ConnectionAttributes} are associated to
-     * @return the {@link ConnectionAttributes} associated to the given channel.
+     * @param  channel the channel which the {@link ConnectionAttributes} are associated to
+     * @return         the {@link ConnectionAttributes} associated to the given channel.
      */
     @NotNull
     public static ConnectionAttributes getInstance(@NotNull final Channel channel) {
         Preconditions.checkNotNull(channel, "Channel for connection attributes must not be null.");
-
         final ConnectionAttributes connectionAttributes = getInstanceIfPresent(channel);
         if (connectionAttributes != null) {
             return connectionAttributes;
         }
-
         final int maxValueSizeBytes = InternalConfigurations.CONNECTION_ATTRIBUTE_STORE_MAX_VALUE_SIZE_BYTES;
-
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
         return clientConnectionContext.setConnectionAttributesIfAbsent(new ConnectionAttributes(maxValueSizeBytes));
     }
@@ -86,24 +81,18 @@ public class ConnectionAttributes {
     /**
      * Sets the given connection attribute for the connected client.
      *
-     * @param key   the key the connection attribute
-     * @param value the value of the connection attribute
+     * @param  key                    the key the connection attribute
+     * @param  value                  the value of the connection attribute
      * @throws LimitExceededException when the size of the passed value exceeds the maximum allowed size in bytes
      */
     public synchronized void put(@NotNull final String key, @NotNull final ByteBuffer value) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         Preconditions.checkNotNull(value, "Value of connection attribute must not be null.");
-
         if (value.remaining() > maxValueSizeBytes) {
-            throw new LimitExceededException("value with a size of " +
-                    value.remaining() +
-                    " bytes for key '" +
-                    key +
-                    "' in connection attribute store is larger than the allowed limit of " +
-                    maxValueSizeBytes +
-                    " bytes");
+            throw new LimitExceededException("value with a size of " + value.remaining() + " bytes for key '" + key
+                    + "' in connection attribute store is larger than the allowed limit of " + maxValueSizeBytes
+                    + " bytes");
         }
-
         if (data == null) {
             data = new HashMap<>(4);
         }
@@ -113,13 +102,12 @@ public class ConnectionAttributes {
     /**
      * Retrieves the value of the connection attribute with the given key for the connected client.
      *
-     * @param key the key the connection attribute
-     * @return the value of the connection attribute with the given key if present, otherwise null
+     * @param  key the key the connection attribute
+     * @return     the value of the connection attribute with the given key if present, otherwise null
      */
     @NotNull
     public synchronized Optional<ByteBuffer> get(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
-
         if (data == null) {
             return Optional.empty();
         }
@@ -150,13 +138,12 @@ public class ConnectionAttributes {
     /**
      * Removes the connection attribute with the given key for the connected client.
      *
-     * @param key the key the connection attribute
-     * @return the value of the removed connection attribute if it was present, otherwise null
+     * @param  key the key the connection attribute
+     * @return     the value of the removed connection attribute if it was present, otherwise null
      */
     @NotNull
     public synchronized Optional<ByteBuffer> remove(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
-
         if (data == null) {
             return Optional.empty();
         }
@@ -173,5 +160,4 @@ public class ConnectionAttributes {
     public synchronized void clear() {
         data = null;
     }
-
 }

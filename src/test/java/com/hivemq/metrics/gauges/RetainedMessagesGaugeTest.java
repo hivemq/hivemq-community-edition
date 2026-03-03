@@ -30,9 +30,7 @@ import static org.mockito.Mockito.when;
 public class RetainedMessagesGaugeTest {
 
     private final @NotNull RetainedMessagePersistence retainedMessagePersistence = mock();
-
     private RetainedMessagesGauge retainedMessagesGauge;
-
     @Before
     public void before() {
         retainedMessagesGauge = new RetainedMessagesGauge(retainedMessagePersistence);
@@ -41,7 +39,6 @@ public class RetainedMessagesGaugeTest {
     @Test
     public void test_getValue() {
         when(retainedMessagePersistence.size()).thenReturn(452L);
-
         final Long value = retainedMessagesGauge.getValue();
         assertEquals(452L, value.longValue());
     }

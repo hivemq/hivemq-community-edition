@@ -49,10 +49,8 @@ import static org.mockito.Mockito.mock;
 public class MQTTMessageEncoderTest {
 
     private @NotNull EmbeddedChannel channel;
-
     private final @NotNull MessageDroppedService messageDroppedService = mock();
     private final @NotNull SecurityConfigurationService securityConfigurationService = mock();
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder(messageDroppedService, securityConfigurationService));
@@ -118,7 +116,8 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_publish_encoded() {
-        final PUBLISH publish = TestMessageUtil.createMqtt3Publish("clusterid",
+        final PUBLISH publish = TestMessageUtil.createMqtt3Publish(
+                "clusterid",
                 "topic",
                 QoS.EXACTLY_ONCE,
                 "payload".getBytes(StandardCharsets.UTF_8),

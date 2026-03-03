@@ -30,7 +30,6 @@ import java.time.Duration;
 public class AbstractAsyncOutput<T> extends AbstractSimpleAsyncOutput<T> implements AsyncOutput<T> {
 
     protected @NotNull TimeoutFallback timeoutFallback = TimeoutFallback.FAILURE;
-
     public AbstractAsyncOutput(final @NotNull PluginOutPutAsyncer asyncer) {
         super(asyncer);
     }

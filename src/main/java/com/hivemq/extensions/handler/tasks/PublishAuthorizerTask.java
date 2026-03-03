@@ -39,18 +39,13 @@ import java.util.Map;
 public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerInputImpl, PublishAuthorizerOutputImpl> {
 
     private static final Logger log = LoggerFactory.getLogger(PublishAuthorizerTask.class);
-
     private final @NotNull AuthorizerProvider authorizerProvider;
     private final @NotNull AuthorizerProviderInput authorizerProviderInput;
     private final @NotNull String pluginId;
     private final @NotNull ClientAuthorizers clientAuthorizers;
     private final @NotNull ChannelHandlerContext channelHandlerContext;
-
-    public PublishAuthorizerTask(
-            final @NotNull AuthorizerProvider authorizerProvider,
-            final @NotNull String pluginId,
-            final @NotNull AuthorizerProviderInput input,
-            final @NotNull ClientAuthorizers clientAuthorizers,
+    public PublishAuthorizerTask(final @NotNull AuthorizerProvider authorizerProvider, final @NotNull String pluginId,
+            final @NotNull AuthorizerProviderInput input, final @NotNull ClientAuthorizers clientAuthorizers,
             final @NotNull ChannelHandlerContext channelHandlerContext) {
         this.authorizerProvider = authorizerProvider;
         this.pluginId = pluginId;
@@ -61,20 +56,18 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
 
     @Override
     public @NotNull PublishAuthorizerOutputImpl apply(
-            final @NotNull PublishAuthorizerInputImpl input, final @NotNull PublishAuthorizerOutputImpl output) {
-
+            final @NotNull PublishAuthorizerInputImpl input,
+            final @NotNull PublishAuthorizerOutputImpl output) {
         if (output.isCompleted()) {
             return output;
         }
-
         final PublishAuthorizer authorizer = updateAndGetAuthorizer();
         if (authorizer == null) {
             return output;
         }
-
         output.authorizerPresent();
         if (ClientConnectionContext.of(channelHandlerContext.channel()).isIncomingPublishesSkipRest()) {
-            //client already disconnected by authorizer, no more processing of any messages allowed.
+            // client already disconnected by authorizer, no more processing of any messages allowed.
             output.forceFailedAuthorization();
         } else {
             try {
@@ -87,19 +80,17 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
                 Exceptions.rethrowError(e);
             }
         }
-
         return output;
     }
 
     private @Nullable PublishAuthorizer updateAndGetAuthorizer() {
-
         PublishAuthorizer authorizer = null;
         for (final Map.Entry<String, PublishAuthorizer> authorizerEntry : clientAuthorizers.getPublishAuthorizersMap()
                 .entrySet()) {
             final String pluginId = authorizerEntry.getKey();
             final PublishAuthorizer publishAuthorizer = authorizerEntry.getValue();
-            if (publishAuthorizer.getClass().getClassLoader().equals(authorizerProvider.getClass().getClassLoader()) &&
-                    pluginId.equals(this.pluginId)) {
+            if (publishAuthorizer.getClass().getClassLoader().equals(authorizerProvider.getClass().getClassLoader())
+                    && pluginId.equals(this.pluginId)) {
                 authorizer = publishAuthorizer;
             }
         }
@@ -111,14 +102,16 @@ public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerI
                     clientAuthorizers.put(pluginId, authorizer);
                 }
             } catch (final Throwable t) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" in authorizer provider. " +
-                        "Extensions are responsible on their own to handle exceptions.", pluginId, t);
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" in authorizer provider. "
+                                + "Extensions are responsible on their own to handle exceptions.",
+                        pluginId,
+                        t);
                 Exceptions.rethrowError(t);
             }
         }
         return authorizer;
     }
-
 
     @Override
     public @NotNull ClassLoader getPluginClassLoader() {

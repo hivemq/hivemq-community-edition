@@ -31,16 +31,11 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractAuthTask<I extends PluginTaskInput, O extends AuthOutput<?>> implements PluginInOutTask<I, O> {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractAuthTask.class);
-
     final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider;
     final @NotNull AuthenticatorProviderInput authenticatorProviderInput;
     final @NotNull String extensionId;
-
-    AbstractAuthTask(
-            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
-            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
-            final @NotNull String extensionId) {
-
+    AbstractAuthTask(final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput, final @NotNull String extensionId) {
         this.wrappedAuthenticatorProvider = wrappedAuthenticatorProvider;
         this.authenticatorProviderInput = authenticatorProviderInput;
         this.extensionId = extensionId;
@@ -56,8 +51,11 @@ abstract class AbstractAuthTask<I extends PluginTaskInput, O extends AuthOutput<
         } catch (final Throwable throwable) {
             output.failByThrowable(throwable);
             Exceptions.rethrowError(throwable);
-            log.warn("Uncaught exception was thrown from extension with id \"{}\" in authenticator. " +
-                    "Extensions are responsible for their own exception handling.", extensionId, throwable);
+            log.warn(
+                    "Uncaught exception was thrown from extension with id \"{}\" in authenticator. "
+                            + "Extensions are responsible for their own exception handling.",
+                    extensionId,
+                    throwable);
         }
         return output;
     }

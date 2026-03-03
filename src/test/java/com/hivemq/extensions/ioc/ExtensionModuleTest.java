@@ -83,19 +83,19 @@ import static org.mockito.Mockito.when;
 public class ExtensionModuleTest {
 
     private Injector injector;
-
     @Before
     public void setUp() throws Exception {
         injector = Guice.createInjector(new AbstractModule() {
+
             @Override
             protected void configure() {
-
                 final MetricsHolder metricsHolder = mock(MetricsHolder.class);
                 when(metricsHolder.getMetricRegistry()).thenReturn(new MetricRegistry());
                 install(new ExtensionModule());
                 bind(SystemInformation.class).toInstance(new SystemInformationImpl());
                 bind(ConnectionPersistence.class).toInstance(mock(ConnectionPersistence.class));
-                bind(FullConfigurationService.class).toInstance(new TestConfigurationBootstrap().getFullConfigurationService());
+                bind(FullConfigurationService.class)
+                        .toInstance(new TestConfigurationBootstrap().getFullConfigurationService());
                 bind(MqttConfigurationService.class).toInstance(mock(MqttConfigurationService.class));
                 bind(RestrictionsConfigurationService.class).toInstance(mock(RestrictionsConfigurationService.class));
                 bind(SecurityConfigurationService.class).toInstance(mock(SecurityConfigurationService.class));
@@ -117,7 +117,8 @@ public class ExtensionModuleTest {
                 bind(ListeningExecutorService.class).annotatedWith(Persistence.class)
                         .toInstance(mock(ListeningExecutorService.class));
                 bind(InternalPublishService.class).toInstance(mock(InternalPublishService.class));
-                bind(ClientSessionSubscriptionPersistence.class).toInstance(mock(ClientSessionSubscriptionPersistence.class));
+                bind(ClientSessionSubscriptionPersistence.class)
+                        .toInstance(mock(ClientSessionSubscriptionPersistence.class));
                 bind(ListenerConfigurationService.class).toInstance(mock(ListenerConfigurationService.class));
                 bind(OpenConnectionsGauge.class).toInstance(mock(OpenConnectionsGauge.class));
                 bindScope(LazySingleton.class, LazySingletonScope.get());
@@ -131,7 +132,6 @@ public class ExtensionModuleTest {
     public void test_hivemqplugins_is_singleton() {
         final HiveMQExtensions instance1 = injector.getInstance(HiveMQExtensions.class);
         final HiveMQExtensions instance2 = injector.getInstance(HiveMQExtensions.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -140,7 +140,6 @@ public class ExtensionModuleTest {
     public void test_bootstrap_is_singleton() {
         final ExtensionBootstrap instance1 = injector.getInstance(ExtensionBootstrap.class);
         final ExtensionBootstrap instance2 = injector.getInstance(ExtensionBootstrap.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -149,7 +148,6 @@ public class ExtensionModuleTest {
     public void test_initializer_is_singleton() {
         final ExtensionStaticInitializer instance1 = injector.getInstance(ExtensionStaticInitializer.class);
         final ExtensionStaticInitializer instance2 = injector.getInstance(ExtensionStaticInitializer.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -158,7 +156,6 @@ public class ExtensionModuleTest {
     public void test_plugin_factory_is_singleton() {
         final HiveMQExtensionFactory instance1 = injector.getInstance(HiveMQExtensionFactory.class);
         final HiveMQExtensionFactory instance2 = injector.getInstance(HiveMQExtensionFactory.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -167,7 +164,6 @@ public class ExtensionModuleTest {
     public void test_loader_is_singleton() {
         final ExtensionLoader instance1 = injector.getInstance(ExtensionLoader.class);
         final ExtensionLoader instance2 = injector.getInstance(ExtensionLoader.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -176,7 +172,6 @@ public class ExtensionModuleTest {
     public void test_service_dependencies_is_singleton() {
         final ExtensionServicesDependencies instance1 = injector.getInstance(ExtensionServicesDependencies.class);
         final ExtensionServicesDependencies instance2 = injector.getInstance(ExtensionServicesDependencies.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -185,7 +180,6 @@ public class ExtensionModuleTest {
     public void test_builder_dependencies_is_singleton() {
         final ExtensionBuilderDependencies instance1 = injector.getInstance(ExtensionBuilderDependencies.class);
         final ExtensionBuilderDependencies instance2 = injector.getInstance(ExtensionBuilderDependencies.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -194,7 +188,6 @@ public class ExtensionModuleTest {
     public void test_retained_publish_builder_is_not_singleton() {
         final RetainedPublishBuilder instance1 = injector.getInstance(RetainedPublishBuilder.class);
         final RetainedPublishBuilder instance2 = injector.getInstance(RetainedPublishBuilder.class);
-
         assertNotNull(instance1);
         assertNotSame(instance1, instance2);
     }
@@ -203,7 +196,6 @@ public class ExtensionModuleTest {
     public void test_retained_message_store_is_singleton() {
         final RetainedMessageStore instance1 = injector.getInstance(RetainedMessageStore.class);
         final RetainedMessageStore instance2 = injector.getInstance(RetainedMessageStore.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -212,7 +204,6 @@ public class ExtensionModuleTest {
     public void test_topic_subscription_builder_is_not_singleton() {
         final TopicSubscriptionBuilder instance1 = injector.getInstance(TopicSubscriptionBuilder.class);
         final TopicSubscriptionBuilder instance2 = injector.getInstance(TopicSubscriptionBuilder.class);
-
         assertNotNull(instance1);
         assertNotSame(instance1, instance2);
     }
@@ -221,7 +212,6 @@ public class ExtensionModuleTest {
     public void test_subscription_store_is_singleton() {
         final SubscriptionStore instance1 = injector.getInstance(SubscriptionStore.class);
         final SubscriptionStore instance2 = injector.getInstance(SubscriptionStore.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -230,7 +220,6 @@ public class ExtensionModuleTest {
     public void test_lifecycle_handler_is_singleton() {
         final ExtensionLifecycleHandler instance1 = injector.getInstance(ExtensionLifecycleHandler.class);
         final ExtensionLifecycleHandler instance2 = injector.getInstance(ExtensionLifecycleHandler.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -239,7 +228,6 @@ public class ExtensionModuleTest {
     public void test_authenticators_is_singleton() {
         final Authenticators instance1 = injector.getInstance(Authenticators.class);
         final Authenticators instance2 = injector.getInstance(Authenticators.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -248,7 +236,6 @@ public class ExtensionModuleTest {
     public void test_security_registry_is_singleton() {
         final SecurityRegistry instance1 = injector.getInstance(SecurityRegistry.class);
         final SecurityRegistry instance2 = injector.getInstance(SecurityRegistry.class);
-
         assertNotNull(instance1);
         assertSame(instance1, instance2);
     }
@@ -257,7 +244,6 @@ public class ExtensionModuleTest {
     public void test_annotated_plugin_start_stop_executor_service_is_singleton() {
         final ExecutorService instance1 = injector.getInstance(Key.get(ExecutorService.class, PluginStartStop.class));
         final ExecutorService instance2 = injector.getInstance(Key.get(ExecutorService.class, PluginStartStop.class));
-
         assertSame(instance1, instance2);
     }
 }

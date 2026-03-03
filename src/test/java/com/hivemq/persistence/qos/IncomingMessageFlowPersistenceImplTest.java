@@ -32,9 +32,7 @@ import static org.mockito.Mockito.verify;
 public class IncomingMessageFlowPersistenceImplTest {
 
     private IncomingMessageFlowPersistenceImpl incomingMessageFlowPersistence;
-
     private final @NotNull IncomingMessageFlowLocalPersistence incomingMessageFlowLocalPersistence = mock();
-
     @Before
     public void setUp() throws Exception {
         incomingMessageFlowPersistence = new IncomingMessageFlowPersistenceImpl(incomingMessageFlowLocalPersistence);

@@ -38,7 +38,6 @@ public class RetainedMessageLocalPersistenceProvider implements Provider<Retaine
     private final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBProvider;
     private final @NotNull Provider<RetainedMessageXodusLocalPersistence> xodusProvider;
     private final @NotNull PersistenceType persistenceType;
-
     @Inject
     public RetainedMessageLocalPersistenceProvider(
             final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> rocksDBProvider,
@@ -57,5 +56,4 @@ public class RetainedMessageLocalPersistenceProvider implements Provider<Retaine
             return xodusProvider.get();
         }
     }
-
 }

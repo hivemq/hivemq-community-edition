@@ -45,42 +45,30 @@ import static org.mockito.Mockito.mock;
 public class ReAuthOutputTest {
 
     private final @NotNull PluginOutPutAsyncer asyncer = mock();
-
     private ReAuthOutput authTaskOutput;
-
     @Before
     public void setUp() {
-        authTaskOutput = new ReAuthOutput(asyncer,
-                true,
-                new ModifiableDefaultPermissionsImpl(),
-                new ModifiableClientSettingsImpl(10, null),
-                30);
+        authTaskOutput = new ReAuthOutput(asyncer, true, new ModifiableDefaultPermissionsImpl(),
+                new ModifiableClientSettingsImpl(10, null), 30);
     }
 
     @Test(timeout = 5000)
     public void test_user_properties_of_connect_are_not_present() {
         final List<String> one = authTaskOutput.getOutboundUserProperties().getAllForName("one");
         final List<String> two = authTaskOutput.getOutboundUserProperties().getAllForName("two");
-
         assertEquals(0, one.size());
         assertEquals(0, two.size());
     }
 
     @Test(timeout = 5000)
     public void test_copy_constructor_receives_user_properties() {
-
         authTaskOutput.getOutboundUserProperties().addUserProperty("testA", "valueA");
-
         authTaskOutput = new ReAuthOutput(authTaskOutput);
         authTaskOutput.getOutboundUserProperties().addUserProperty("testB", "valueB");
-
         authTaskOutput = new ReAuthOutput(authTaskOutput);
         authTaskOutput.getOutboundUserProperties().addUserProperty("testC", "valueC");
-
         authTaskOutput = new ReAuthOutput(authTaskOutput);
-
         assertEquals(3, authTaskOutput.getOutboundUserProperties().asList().size());
-
     }
 
     @Test(timeout = 5000)
@@ -160,79 +148,59 @@ public class ReAuthOutputTest {
 
     @Test(timeout = 5000)
     public void test_async_duration() {
-
         authTaskOutput.async(Duration.ofSeconds(10));
         authTaskOutput.failByTimeout();
-
         assertEquals(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED, authTaskOutput.getReasonCode());
         assertEquals(ReasonStrings.RE_AUTH_FAILED_EXTENSION_TIMEOUT, authTaskOutput.getReasonString());
-
     }
 
     @Test(timeout = 5000, expected = NullPointerException.class)
     public void test_async_null() {
-
         authTaskOutput.async(null);
-
     }
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback() {
-
         authTaskOutput.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS);
         authTaskOutput.failByTimeout();
-
         assertEquals(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED, authTaskOutput.getReasonCode());
         assertEquals(ReasonStrings.RE_AUTH_FAILED_EXTENSION_TIMEOUT, authTaskOutput.getReasonString());
-
     }
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback_code() {
-
-        authTaskOutput.async(Duration.ofSeconds(10),
+        authTaskOutput.async(
+                Duration.ofSeconds(10),
                 TimeoutFallback.FAILURE,
                 DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD);
         authTaskOutput.failByTimeout();
-
         assertEquals(Mqtt5DisconnectReasonCode.BAD_AUTHENTICATION_METHOD, authTaskOutput.getReasonCode());
         assertEquals(ReasonStrings.RE_AUTH_FAILED_EXTENSION_TIMEOUT, authTaskOutput.getReasonString());
-
     }
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback_string() {
-
         authTaskOutput.async(Duration.ofSeconds(10), TimeoutFallback.FAILURE, "Failed by me");
         authTaskOutput.failByTimeout();
-
         assertEquals(Mqtt5DisconnectReasonCode.NOT_AUTHORIZED, authTaskOutput.getReasonCode());
         assertEquals("Failed by me", authTaskOutput.getReasonString());
-
     }
 
     @Test(timeout = 5000, expected = IllegalArgumentException.class)
     public void test_async_success_reason_code() {
-
-        authTaskOutput.async(Duration.ofSeconds(10),
-                TimeoutFallback.SUCCESS,
-                DisconnectedReasonCode.SUCCESS,
-                "Failed by me");
-
+        authTaskOutput
+                .async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS, DisconnectedReasonCode.SUCCESS, "Failed by me");
     }
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback_code_string() {
-
-        authTaskOutput.async(Duration.ofSeconds(10),
+        authTaskOutput.async(
+                Duration.ofSeconds(10),
                 TimeoutFallback.FAILURE,
                 DisconnectedReasonCode.SERVER_BUSY,
                 "Failed by me");
         authTaskOutput.failByTimeout();
-
         assertEquals(Mqtt5DisconnectReasonCode.SERVER_BUSY, authTaskOutput.getReasonCode());
         assertEquals("Failed by me", authTaskOutput.getReasonString());
-
     }
-
 }

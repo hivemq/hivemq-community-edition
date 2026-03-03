@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.throttling.ioc;
 
 import com.hivemq.common.shutdown.HiveMQShutdownHook;
@@ -36,13 +35,10 @@ import static org.mockito.Mockito.when;
 public class GlobalTrafficShapingProviderTest {
 
     private final @NotNull RestrictionsConfigurationService configurationService = mock();
-
     private ShutdownHooks shutdownHooks;
-
     @Before
     public void setUp() throws Exception {
         when(configurationService.incomingLimit()).thenReturn(20L);
-
         shutdownHooks = new ShutdownHooks();
     }
 
@@ -55,18 +51,11 @@ public class GlobalTrafficShapingProviderTest {
 
     @Test
     public void test_shutdown_hook_added() {
-
-        final GlobalTrafficShapingProvider globalTrafficShapingProvider =
-                new GlobalTrafficShapingProvider(shutdownHooks, configurationService);
-
+        final GlobalTrafficShapingProvider globalTrafficShapingProvider = new GlobalTrafficShapingProvider(
+                shutdownHooks, configurationService);
         globalTrafficShapingProvider.get();
-
-        final Collection<HiveMQShutdownHook> hooks = shutdownHooks.getShutdownHooks()
-                .values()
-                .stream()
-                .filter(x -> x instanceof GlobalTrafficShaperExecutorShutdownHook)
-                .collect(Collectors.toList());
-
+        final Collection<HiveMQShutdownHook> hooks = shutdownHooks.getShutdownHooks().values().stream()
+                .filter(x -> x instanceof GlobalTrafficShaperExecutorShutdownHook).collect(Collectors.toList());
         assertNotNull(hooks);
         assertEquals(1, hooks.size());
     }

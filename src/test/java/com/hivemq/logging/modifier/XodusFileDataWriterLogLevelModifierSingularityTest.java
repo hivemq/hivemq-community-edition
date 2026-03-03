@@ -42,14 +42,10 @@ public class XodusFileDataWriterLogLevelModifierSingularityTest {
     private ch.qos.logback.classic.Logger rootLogger;
     private Level level;
     private LoggerContext context;
-
     @Before
     public void setUp() throws Exception {
-
         context = (LoggerContext) LoggerFactory.getILoggerFactory();
-
         rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-
         final LogLevelModifierTurboFilter logLevelModifierTurboFilter = new LogLevelModifierTurboFilter();
         logLevelModifierTurboFilter.registerLogLevelModifier(new XodusFileDataWriterLogLevelModifier());
         level = rootLogger.getLevel();
@@ -74,28 +70,24 @@ public class XodusFileDataWriterLogLevelModifierSingularityTest {
     @Test
     public void test_get_only_logged_once() {
         final String msg = "Can't open directory channel. Log directory fsync won't be performed.";
-
         final AtomicInteger loggedCounter = new AtomicInteger();
         final Iterator<Appender<ILoggingEvent>> appenderIterator = rootLogger.iteratorForAppenders();
-
         final Appender<ILoggingEvent> next = appenderIterator.next();
         next.addFilter(createFilter(loggedCounter, msg));
-
         final ch.qos.logback.classic.Logger logger = context.getLogger(FileDataWriter.class);
         logger.warn(msg);
         logger.warn(msg);
         logger.warn(msg);
         logger.warn(msg);
         logger.warn(msg);
-
         assertEquals(1, loggedCounter.get());
     }
 
     private @NotNull Filter<ILoggingEvent> createFilter(
             final @NotNull AtomicInteger loggedCounter,
             final @NotNull String text) {
-
         return new Filter<>() {
+
             @Override
             public FilterReply decide(final ILoggingEvent event) {
                 if (event.getLevel().equals(Level.DEBUG)) {

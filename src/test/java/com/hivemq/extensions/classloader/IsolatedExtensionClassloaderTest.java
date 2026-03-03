@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.classloader;
 
 import com.google.common.collect.ImmutableMap;
@@ -45,46 +44,34 @@ public class IsolatedExtensionClassloaderTest {
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private @NotNull File folder;
-
     @Before
     public void setUp() throws Exception {
         folder = temporaryFolder.newFolder();
     }
 
     /**
-     * This test contains pure magic. It does the following:
-     * 1. Finds out the Java source file
-     * 2. Copy the Java source file
-     * 3. Modify the Java source file
-     * 4. Compile the Java source file
-     * 5. Load the just compiled Java source file
+     * This test contains pure magic. It does the following: 1. Finds out the Java source file 2. Copy the Java source
+     * file 3. Modify the Java source file 4. Compile the Java source file 5. Load the just compiled Java source file
      */
     @Test
     public void test_modified_class_loaded() throws Exception {
         final File javaSrcFile = getJavaSrcFileForClassFile(ClassLoadedClass.class);
         final File file = temporaryFolder.newFile(ClassLoadedClass.class.getSimpleName() + ".java");
         FileUtils.copyFile(javaSrcFile, file);
-
         replaceFileContent(file, "original", "modified");
-
         // actually compile the file
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
-
         final Class<?> aClass;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             aClass = loader.loadClass(ClassLoadedClass.class.getCanonicalName());
         }
-
         // we can't cast to ClassLoadedClass because the parent classloader already has the "original" class loaded
         // casting would result in a ClassCastException!
         final Object classLoadedClass = aClass.getDeclaredConstructor().newInstance();
         final String output = (String) aClass.getDeclaredMethod("get").invoke(classLoadedClass);
-
         assertEquals("modified", output);
-
         // now let's check that the original class is not affected.
         // we're loading from the parent classloader
         final ClassLoadedClass originalClassloadedClass = new ClassLoadedClass();
@@ -95,11 +82,8 @@ public class IsolatedExtensionClassloaderTest {
     @SuppressWarnings("ConstantConditions")
     public void test_original_class_loaded_delegate() throws Exception {
         final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(getClass().getClassLoader(), null);
-
         final Class<?> aClass = loader.loadClass(ClassLoadedClass.class.getCanonicalName());
-
         final String output = (String) aClass.getDeclaredMethod("get").invoke(new ClassLoadedClass());
-
         assertEquals("original", output);
         loader.close();
     }
@@ -109,25 +93,19 @@ public class IsolatedExtensionClassloaderTest {
         final File javaSrcFile = getJavaSrcFileForClassFile(ClassLoaderTestClass.class);
         final File file = temporaryFolder.newFile(ClassLoaderTestClass.class.getSimpleName() + ".java");
         FileUtils.copyFile(javaSrcFile, file);
-
         replaceFileContent(file, "original", "modified");
-
         // actually compile the file
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
-
         final Class<?> aClass;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             aClass = loader.loadClass(ClassLoaderTestClass.class.getCanonicalName());
         }
-
         // we can't cast to ClassLoadedClass because the parent classloader already has the "original" class loaded
         // (casting would result in a ClassCastException)
         final Object classLoadedClass = aClass.getDeclaredConstructor().newInstance();
         final String output = (String) aClass.getDeclaredMethod("get").invoke(classLoadedClass);
-
         assertEquals("original", output);
-
         // now let's check that the original class is not affected (we're loading from the parent classloader)
         final ClassLoaderTestClass originalClassloadedClass = new ClassLoaderTestClass();
         assertEquals("original", originalClassloadedClass.get());
@@ -138,74 +116,64 @@ public class IsolatedExtensionClassloaderTest {
         final File javaSrcFile = getJavaSrcFileForClassFile(ClassLoadedClass.class);
         final File file = temporaryFolder.newFile(ClassLoadedClass.class.getSimpleName() + ".java");
         FileUtils.copyFile(javaSrcFile, file);
-
-        replaceFileContent(file,
+        replaceFileContent(
+                file,
                 "package com.hivemq.extensions.classloader;",
                 "package com.hivemq.extensions.api.test;");
         replaceFileContent(file, "original", "modified");
-
         // actually compile the file
         OnTheFlyCompilationUtil.compileJavaFile(file, folder);
-
         final Class<?> aClass;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             aClass = loader.loadClass("com.hivemq.extensions.api.test.ClassLoadedClass");
         }
-
         // the parent classloader should not know this class
         try {
             getClass().getClassLoader().loadClass("com.hivemq.extensions.api.test.ClassLoadedClass");
             fail();
         } catch (final ClassNotFoundException e) {
-            //expected, no-op
+            // expected, no-op
         }
-
         // invoke the get() method
         final Object classLoadedClass = aClass.getDeclaredConstructor().newInstance();
         final String output = (String) aClass.getDeclaredMethod("get").invoke(classLoadedClass);
-
         assertEquals("modified", output);
     }
 
     @Test
     public void test_static_context_is_always_loaded_from_child() throws Exception {
         final Class<?> servicesClassParent = getClass().getClassLoader().loadClass(Services.class.getCanonicalName());
-
         final Field servicesFieldParent = servicesClassParent.getDeclaredField("services");
         servicesFieldParent.setAccessible(true);
         final ImmutableMap<String, Object> dependenciesParent = ImmutableMap.of("key", "original");
         servicesFieldParent.set(null, dependenciesParent);
-
         final URL serviceUrl = Services.class.getResource("Services.class");
         assertNotNull(serviceUrl);
         final String path = serviceUrl.toExternalForm();
-        final URL folder =
-                new URL(path.replace(Services.class.getCanonicalName().replace(".", File.separator) + ".class", ""));
-
+        final URL folder = new URL(
+                path.replace(Services.class.getCanonicalName().replace(".", File.separator) + ".class", ""));
         final Class<?> servicesClassIsolated;
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             servicesClassIsolated = loader.loadClass(Services.class.getCanonicalName());
         }
-
         final Field servicesFieldIsolated = servicesClassIsolated.getDeclaredField("services");
         servicesFieldIsolated.setAccessible(true);
         final ImmutableMap<String, Object> dependencies = ImmutableMap.of("key", "modified");
         servicesFieldIsolated.set(null, dependencies);
-
         // now let's check that the original class is not affected
         // (we're loading from the parent classloader and from the isolated classloader)
-        //noinspection unchecked
+        // noinspection unchecked
         assertEquals("original", ((Map<String, Object>) servicesFieldParent.get(null)).get("key"));
-        //noinspection unchecked
+        // noinspection unchecked
         assertEquals("modified", ((Map<String, Object>) servicesFieldIsolated.get(null)).get("key"));
     }
 
     @Test
     public void test_get_resource() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             final URL resource = loader.getResource("logback-test.xml");
             assertNotNull(resource);
         }
@@ -223,8 +191,8 @@ public class IsolatedExtensionClassloaderTest {
 
     @Test
     public void test_get_resources() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             final Enumeration<URL> resource = loader.getResources("logback-test.xml");
             assertNotNull(resource);
             assertTrue(resource.hasMoreElements());
@@ -246,8 +214,8 @@ public class IsolatedExtensionClassloaderTest {
 
     @Test
     public void test_get_resources_as_stream() throws Exception {
-        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(new URL[]{folder.toURI().toURL()},
-                getClass().getClassLoader())) {
+        try (final IsolatedExtensionClassloader loader = new IsolatedExtensionClassloader(
+                new URL[]{folder.toURI().toURL()}, getClass().getClassLoader())) {
             final InputStream resource = loader.getResourceAsStream("logback-test.xml");
             assertNotNull(resource);
         }
@@ -275,8 +243,8 @@ public class IsolatedExtensionClassloaderTest {
     private File getJavaSrcFileForClassFile(final Class<?> clazz) {
         final File f = new File(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());
         File gradleHivemqParentFolder = f.getParentFile();
-        while (!gradleHivemqParentFolder.getAbsolutePath().equals("/") &&
-                !gradleHivemqParentFolder.getAbsolutePath().endsWith("out")) {
+        while (!gradleHivemqParentFolder.getAbsolutePath().equals("/")
+                && !gradleHivemqParentFolder.getAbsolutePath().endsWith("out")) {
             gradleHivemqParentFolder = gradleHivemqParentFolder.getParentFile();
         }
         gradleHivemqParentFolder = gradleHivemqParentFolder.getParentFile();
@@ -286,18 +254,15 @@ public class IsolatedExtensionClassloaderTest {
             gradleTestFolder = new File(gradleSrcFolder, "core/test");
         }
         final File gradleJavaFolder = new File(gradleTestFolder, "java");
-
-        final File gradleFile =
-                new File(gradleJavaFolder, clazz.getCanonicalName().replace(".", File.separator) + ".java");
+        final File gradleFile = new File(gradleJavaFolder,
+                clazz.getCanonicalName().replace(".", File.separator) + ".java");
         if (gradleFile.exists()) {
             return gradleFile;
         }
-
         final File hivemqParentFolder = f.getParentFile().getParentFile().getParentFile();
         final File srcFolder = new File(hivemqParentFolder, "src");
         final File testFolder = new File(srcFolder, "test");
         final File javaFolder = new File(testFolder, "java");
-
         return new File(javaFolder, clazz.getCanonicalName().replace(".", File.separator) + ".java");
     }
 }

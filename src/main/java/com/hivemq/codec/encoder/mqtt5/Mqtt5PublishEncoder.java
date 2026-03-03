@@ -49,9 +49,7 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SUBSCRIPTION_IDENT
 public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<PUBLISH> {
 
     private static final int FIXED_HEADER = MessageType.PUBLISH.ordinal() << 4;
-
-    public Mqtt5PublishEncoder(
-            final @NotNull MessageDroppedService messageDroppedService,
+    public Mqtt5PublishEncoder(final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
@@ -65,33 +63,24 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
 
     @Override
     int calculateRemainingLengthWithoutProperties(final @NotNull PUBLISH publish) {
-
         int remainingLength = 0;
-
         remainingLength += MqttBinaryData.encodedLength(publish.getTopic());
-
-        //packetIdentifier
+        // packetIdentifier
         if (publish.getQoS() != QoS.AT_MOST_ONCE) {
             remainingLength += 2;
         }
-
         final byte[] payload = publish.getPayload();
         if (payload != null) {
             remainingLength += payload.length;
         }
-
         return remainingLength;
     }
 
     @Override
     int calculatePropertyLength(final @NotNull PUBLISH publish) {
-
         int propertyLength = 0;
-
         propertyLength += fixedPropertyLength(publish);
-
         propertyLength += publish.getUserProperties().encodedLength();
-
         final ImmutableIntArray subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         if (subscriptionIdentifiers != null) {
             for (int i = 0; i < subscriptionIdentifiers.length(); i++) {
@@ -102,24 +91,22 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
     }
 
     @Override
-    @NotNull Mqtt5UserProperties getUserProperties(final @NotNull PUBLISH publish) {
+    @NotNull
+    Mqtt5UserProperties getUserProperties(final @NotNull PUBLISH publish) {
         return publish.getUserProperties();
     }
 
     private static int fixedPropertyLength(final @NotNull PUBLISH publish) {
         int propertyLength = 0;
-
         propertyLength += intPropertyEncodedLength(publish.getMessageExpiryInterval(), MAX_EXPIRY_INTERVAL_DEFAULT);
         propertyLength += nullablePropertyEncodedLength(publish.getPayloadFormatIndicator());
         propertyLength += nullablePropertyEncodedLength(publish.getContentType());
         propertyLength += nullablePropertyEncodedLength(publish.getResponseTopic());
         propertyLength += nullablePropertyEncodedLength(publish.getCorrelationData());
-
         return propertyLength;
     }
 
     private static void encodeFixedHeader(final @NotNull PUBLISH publish, final @NotNull ByteBuf out) {
-
         int flags = 0;
         if (publish.isDuplicateDelivery()) {
             flags |= 0b1000;
@@ -128,29 +115,22 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
         if (publish.isRetain()) {
             flags |= 0b0001;
         }
-
         out.writeByte(FIXED_HEADER | flags);
-
         MqttVariableByteInteger.encode(publish.getRemainingLength(), out);
     }
 
     private void encodeVariableHeader(final @NotNull PUBLISH publish, final @NotNull ByteBuf out) {
-
         MqttBinaryData.encode(publish.getTopic(), out);
-
         if (publish.getQoS() != QoS.AT_MOST_ONCE) {
             out.writeShort(publish.getPacketIdentifier());
         }
-
         encodeProperties(publish, out);
     }
 
     private void encodeProperties(final @NotNull PUBLISH publish, final @NotNull ByteBuf out) {
-
         MqttVariableByteInteger.encode(publish.getPropertyLength(), out);
         encodeFixedProperties(publish, out);
         encodeOmissibleProperties(publish, out);
-
         final ImmutableIntArray subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         if (subscriptionIdentifiers != null) {
             for (int i = 0; i < subscriptionIdentifiers.length(); i++) {
@@ -160,7 +140,8 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
     }
 
     private static void encodeFixedProperties(final @NotNull PUBLISH publish, final @NotNull ByteBuf out) {
-        encodeIntProperty(MESSAGE_EXPIRY_INTERVAL,
+        encodeIntProperty(
+                MESSAGE_EXPIRY_INTERVAL,
                 publish.getMessageExpiryInterval(),
                 MAX_EXPIRY_INTERVAL_DEFAULT,
                 out);

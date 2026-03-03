@@ -35,13 +35,12 @@ import static org.mockito.Mockito.mock;
 public class ThrottlingModuleTest {
 
     private AutoCloseable closeableMock;
-
     private Injector injector;
-
     @Before
     public void setUp() throws Exception {
         closeableMock = MockitoAnnotations.openMocks(this);
         injector = Guice.createInjector(new AbstractModule() {
+
             @Override
             protected void configure() {
                 install(new ThrottlingModule());
@@ -60,11 +59,8 @@ public class ThrottlingModuleTest {
 
     @Test
     public void test_traffic_shaping_handler_is_singleton() throws Exception {
-
         final GlobalTrafficShapingHandler instance = injector.getInstance(GlobalTrafficShapingHandler.class);
         final GlobalTrafficShapingHandler instance2 = injector.getInstance(GlobalTrafficShapingHandler.class);
-
         assertSame(instance, instance2);
     }
-
 }

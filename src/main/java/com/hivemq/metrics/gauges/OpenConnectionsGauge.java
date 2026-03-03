@@ -24,7 +24,6 @@ import io.netty.channel.group.ChannelGroup;
 public class OpenConnectionsGauge implements Gauge<Integer> {
 
     private final ChannelGroup allChannels;
-
     public OpenConnectionsGauge(final ChannelGroup allChannels) {
         this.allChannels = allChannels;
     }

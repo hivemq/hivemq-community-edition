@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
@@ -43,7 +42,6 @@ public class SubscriptionAuthorizerContextTest {
     private @NotNull SubscriptionAuthorizerContext context;
     private @NotNull SettableFuture<SubscriptionAuthorizerOutputImpl> resultFuture;
     private @NotNull SubscriptionAuthorizerOutputImpl output;
-
     @Before
     public void before() {
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
@@ -56,9 +54,7 @@ public class SubscriptionAuthorizerContextTest {
     public void test_async_timeout_fail() throws Exception {
         output.markAsAsync();
         output.markAsTimedOut();
-
         context.pluginPost(output);
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertEquals(SubackReasonCode.NOT_AUTHORIZED, result.getSubackReasonCode());
@@ -70,9 +66,7 @@ public class SubscriptionAuthorizerContextTest {
         output.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS);
         output.markAsAsync();
         output.markAsTimedOut();
-
         context.pluginPost(output);
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
         assertFalse(result.isCompleted());
@@ -81,9 +75,7 @@ public class SubscriptionAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_success() throws Exception {
         output.authorizeSuccessfully();
-
         context.pluginPost(output);
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(SUCCESS, result.getAuthorizationState());
         assertTrue(result.isCompleted());
@@ -92,9 +84,7 @@ public class SubscriptionAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_fail() throws Exception {
         output.failAuthorization();
-
         context.pluginPost(output);
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertTrue(result.isCompleted());
@@ -103,9 +93,7 @@ public class SubscriptionAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_disconnect() throws Exception {
         output.disconnectClient();
-
         context.pluginPost(output);
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(DISCONNECT, result.getAuthorizationState());
         assertTrue(result.isCompleted());
@@ -114,7 +102,6 @@ public class SubscriptionAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_undecided() throws Exception {
         context.pluginPost(output);
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
         assertFalse(result.isCompleted());
@@ -123,7 +110,6 @@ public class SubscriptionAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_increment_future_returns() throws Exception {
         context.increment();
-
         final SubscriptionAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
         assertFalse(result.isCompleted());

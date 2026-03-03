@@ -36,11 +36,11 @@ public class ContainerEnvironmentTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Test
     public void test_getContainerEnvironment_file_not_present() {
         assumeTrue(Platform.isLinux());
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
+
             @NotNull
             @Override
             File getCgroupFile() {
@@ -63,8 +63,8 @@ public class ContainerEnvironmentTest {
                 3:cpu:/docker/234a23a4e23a4e234243e2a4e23a4e23a42ea42e34a2e3a423bb
                 2:cpuset:/""";
         FileUtils.writeStringToFile(cgroupFile, exampleContent, StandardCharsets.UTF_8);
-
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
+
             @NotNull
             @Override
             File getCgroupFile() {
@@ -87,8 +87,8 @@ public class ContainerEnvironmentTest {
                 3:cpu:/other/234a23a4e23a4e234243e2a4e23a4e23a42ea42e34a2e3a423bb
                 2:cpuset:/""";
         FileUtils.writeStringToFile(cgroupFile, exampleContent, StandardCharsets.UTF_8);
-
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
+
             @NotNull
             @Override
             File getCgroupFile() {

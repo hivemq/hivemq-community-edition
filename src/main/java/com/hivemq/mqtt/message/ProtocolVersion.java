@@ -19,7 +19,6 @@ package com.hivemq.mqtt.message;
  * @author Dominik Obermaier
  */
 public enum ProtocolVersion {
-
     /**
      * The protocol version which indicates a MQTT 3.1 connection
      */

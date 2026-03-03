@@ -27,14 +27,9 @@ public final class TlsTestUtil {
     }
 
     public static @NotNull Tls.Builder createDefaultTLSBuilder() {
-        return new Tls.Builder().withKeystorePath("")
-                .withKeystorePassword("")
-                .withKeystoreType("JKS")
-                .withPrivateKeyPassword("")
-                .withHandshakeTimeout(10)
-                .withClientAuthMode(Tls.ClientAuthMode.NONE)
-                .withCipherSuites(new ArrayList<>())
-                .withProtocols(new ArrayList<>());
+        return new Tls.Builder().withKeystorePath("").withKeystorePassword("").withKeystoreType("JKS")
+                .withPrivateKeyPassword("").withHandshakeTimeout(10).withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>()).withProtocols(new ArrayList<>());
     }
 
     private TlsTestUtil() {

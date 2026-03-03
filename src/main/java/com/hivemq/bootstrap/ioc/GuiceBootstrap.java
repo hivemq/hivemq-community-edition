@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
 public class GuiceBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(GuiceBootstrap.class);
-
     @Nullable
     public static Injector bootstrapInjector(
             final @NotNull SystemInformation systemInformation,
@@ -61,15 +60,13 @@ public class GuiceBootstrap {
             final @NotNull FullConfigurationService fullConfigurationService,
             final @NotNull Injector persistenceInjector,
             final @NotNull LifecycleModule lifecycleModule) {
-
         if (!Boolean.parseBoolean(System.getProperty(SystemProperties.DIAGNOSTIC_MODE))) {
             log.trace("Turning Guice stack traces off");
             System.setProperty("guice_include_stack_traces", "OFF");
         }
-
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();
-
-        modules.add(new SystemInformationModule(systemInformation),
+        modules.add(
+                new SystemInformationModule(systemInformation),
                 /* For supporting lazy singletons */
                 new LazySingletonModule(),
                 /* Adds lifecycle methods like @PostConstruct */
@@ -77,7 +74,8 @@ public class GuiceBootstrap {
                 /* Binds the configuration service */
                 new ConfigurationModule(fullConfigurationService, hiveMQId),
                 /* Binds netty specific classes */
-                new NettyModule(), new HiveMQMainModule(),
+                new NettyModule(),
+                new HiveMQMainModule(),
                 /* Binds MQTT handler specific classes */
                 new MQTTHandlerModule(persistenceInjector),
                 /* Binds the persistence */
@@ -90,13 +88,12 @@ public class GuiceBootstrap {
                 new MQTTServiceModule(),
                 /* Binds Diagnostics */
                 new DiagnosticModule(),
-                /* Binds SSL functionality*/
+                /* Binds SSL functionality */
                 new SecurityModule(),
                 /* Bind Statistics specific classes */
                 new UsageStatisticsModule(),
                 /* Binds the Extension System */
                 new ExtensionModule());
-
         try {
             return Guice.createInjector(Stage.PRODUCTION, modules.build());
         } catch (final Exception e) {
@@ -114,15 +111,13 @@ public class GuiceBootstrap {
             final @NotNull HivemqId hiveMQId,
             final @NotNull FullConfigurationService configService,
             final @NotNull LifecycleModule lifecycleModule) {
-
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();
-
-        modules.add(new SystemInformationModule(systemInformation),
+        modules.add(
+                new SystemInformationModule(systemInformation),
                 new ConfigurationModule(configService, hiveMQId),
                 new LazySingletonModule(),
                 lifecycleModule,
                 new PersistenceMigrationModule(metricRegistry, configService.persistenceConfigurationService()));
-
         return Guice.createInjector(Stage.PRODUCTION, modules.build());
     }
 }

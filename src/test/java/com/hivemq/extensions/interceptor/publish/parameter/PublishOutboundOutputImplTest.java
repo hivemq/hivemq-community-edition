@@ -34,9 +34,7 @@ public class PublishOutboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
-
         final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getPublishPacket());
     }
 
@@ -44,17 +42,13 @@ public class PublishOutboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
-
         final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
-
         final PublishOutboundInputImpl input = mock(PublishOutboundInputImpl.class);
         final PublishPacketImpl packet = mock(PublishPacketImpl.class);
         final ModifiableOutboundPublishImpl newModifiablePacket = mock(ModifiableOutboundPublishImpl.class);
         when(input.getPublishPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final PublishOutboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getPublishPacket());
     }
 
@@ -62,9 +56,7 @@ public class PublishOutboundOutputImplTest {
     public void test_prevent_twice() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableOutboundPublishImpl modifiablePacket = mock(ModifiableOutboundPublishImpl.class);
-
         final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
-
         output.preventPublishDelivery();
         output.preventPublishDelivery();
     }

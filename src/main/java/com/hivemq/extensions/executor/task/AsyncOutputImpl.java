@@ -29,19 +29,13 @@ public class AsyncOutputImpl<T extends PluginTaskOutput> implements Async<T> {
 
     @NotNull
     private final T output;
-
     @NotNull
     private final SettableFuture<Boolean> asyncFuture;
-
     @NotNull
     private final ScheduledFuture<?> timeoutTaskFuture;
-
     @NotNull
     private Status status;
-
-    public AsyncOutputImpl(
-            @NotNull final T output,
-            @NotNull final SettableFuture<Boolean> asyncFuture,
+    public AsyncOutputImpl(@NotNull final T output, @NotNull final SettableFuture<Boolean> asyncFuture,
             @NotNull final ScheduledFuture<?> timeoutTaskFuture) {
         this.output = output;
         this.asyncFuture = asyncFuture;
@@ -67,7 +61,7 @@ public class AsyncOutputImpl<T extends PluginTaskOutput> implements Async<T> {
     public Status getStatus() {
         if (asyncFuture.isDone()) {
             try {
-                //timeout is not needed here, because the future is already done, but better safe than sorry
+                // timeout is not needed here, because the future is already done, but better safe than sorry
                 return asyncFuture.get(1, TimeUnit.SECONDS) ? Status.DONE : Status.CANCELED;
             } catch (final Exception e) {
                 return Status.CANCELED;

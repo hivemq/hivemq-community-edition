@@ -24,7 +24,6 @@ import com.hivemq.persistence.local.ClientSessionLocalPersistence;
 public class SessionsGauge implements Gauge<Integer> {
 
     private final ClientSessionLocalPersistence clientSessionPersistence;
-
     public SessionsGauge(final ClientSessionLocalPersistence clientSessionPersistence) {
         this.clientSessionPersistence = clientSessionPersistence;
     }
@@ -33,5 +32,4 @@ public class SessionsGauge implements Gauge<Integer> {
     public Integer getValue() {
         return clientSessionPersistence.getSessionsCount();
     }
-
 }

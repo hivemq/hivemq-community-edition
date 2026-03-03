@@ -25,17 +25,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class NettyLogLevelModifierTest {
-    private NettyLogLevelModifier nettyLogLevelModifier;
 
+    private NettyLogLevelModifier nettyLogLevelModifier;
     private final String format = "Test-String";
     private Logger rootLogger;
-
     @Before
     public void setUp() throws Exception {
-
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-
         nettyLogLevelModifier = new NettyLogLevelModifier();
     }
 
@@ -65,77 +62,46 @@ public class NettyLogLevelModifierTest {
 
     @Test
     public void test_level_info_format_denied_throwable() {
-
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.util.internal.PlatformDependent0");
-
-        final FilterReply decide = nettyLogLevelModifier.decide(null,
-                rootLogger,
-                Level.DEBUG,
-                format,
-                null,
-                new UnsupportedOperationException());
-
+        final FilterReply decide = nettyLogLevelModifier
+                .decide(null, rootLogger, Level.DEBUG, format, null, new UnsupportedOperationException());
         assertEquals(FilterReply.DENY, decide);
     }
 
     @Test
     public void test_level_info_format_neutral_throwable() {
-
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.channel.nio.NioEventLoop");
-
-        final FilterReply decide =
-                nettyLogLevelModifier.decide(null, rootLogger, Level.TRACE, format, null, new RuntimeException());
-
+        final FilterReply decide = nettyLogLevelModifier
+                .decide(null, rootLogger, Level.TRACE, format, null, new RuntimeException());
         assertEquals(FilterReply.NEUTRAL, decide);
     }
 
     @Test
     public void test_level_trace_format_denied_throwable() {
-
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.channel.nio.NioEventLoop");
-
-        final FilterReply decide = nettyLogLevelModifier.decide(null,
-                rootLogger,
-                Level.TRACE,
-                format,
-                null,
-                new UnsupportedOperationException());
-
+        final FilterReply decide = nettyLogLevelModifier
+                .decide(null, rootLogger, Level.TRACE, format, null, new UnsupportedOperationException());
         assertEquals(FilterReply.DENY, decide);
     }
 
     @Test
     public void test_level_info_format_denied_parameter() {
-
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.util.internal.PlatformDependent0");
-
-        final FilterReply decide = nettyLogLevelModifier.decide(null,
-                rootLogger,
-                Level.DEBUG,
-                format,
-                new Object[]{new UnsupportedOperationException()},
-                null);
-
+        final FilterReply decide = nettyLogLevelModifier
+                .decide(null, rootLogger, Level.DEBUG, format, new Object[]{new UnsupportedOperationException()}, null);
         assertEquals(FilterReply.DENY, decide);
     }
 
     @Test
     public void test_level_debug_native_denied_parameter() {
-
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.util.internal.NativeLibraryLoader");
-
-        final FilterReply decide = nettyLogLevelModifier.decide(null,
-                rootLogger,
-                Level.DEBUG,
-                format,
-                new Object[]{new UnsupportedOperationException()},
-                null);
-
+        final FilterReply decide = nettyLogLevelModifier
+                .decide(null, rootLogger, Level.DEBUG, format, new Object[]{new UnsupportedOperationException()}, null);
         assertEquals(FilterReply.DENY, decide);
     }
 }

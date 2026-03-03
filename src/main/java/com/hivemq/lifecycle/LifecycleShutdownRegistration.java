@@ -29,8 +29,6 @@ public class LifecycleShutdownRegistration {
 
     private final ShutdownHooks shutdownHooks;
     private final LifecycleHiveMQShutdownHook shutdownHook;
-
-
     @Inject
     LifecycleShutdownRegistration(final ShutdownHooks shutdownHooks, final LifecycleHiveMQShutdownHook shutdownHook) {
         this.shutdownHooks = shutdownHooks;
@@ -41,5 +39,4 @@ public class LifecycleShutdownRegistration {
     public void postConstruct() {
         shutdownHooks.add(shutdownHook);
     }
-
 }

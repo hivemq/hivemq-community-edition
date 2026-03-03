@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.hivemq.extension.sdk.api.ExtensionMain;
@@ -29,13 +28,11 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 public class TestClassInitThrowsErrorExtensionMain implements ExtensionMain {
 
     private static final boolean BOOLEAN = true;
-
     static {
         if (BOOLEAN) {
             throw new NoClassDefFoundError("com.example.Dummy");
         }
     }
-
     public TestClassInitThrowsErrorExtensionMain() {
     }
 

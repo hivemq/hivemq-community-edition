@@ -61,26 +61,21 @@ public class PublishPayloadTypeMigrationTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull SystemInformation systemInformation = mock();
-
     private File dataFolder;
     private FullConfigurationService configurationService;
-
     @Before
     public void before() throws IOException {
         dataFolder = temporaryFolder.newFolder();
         when(systemInformation.getDataFolder()).thenReturn(dataFolder);
         when(systemInformation.getConfigFolder()).thenReturn(temporaryFolder.newFolder());
         when(systemInformation.getHiveMQVersion()).thenReturn("2019.2");
-
         InternalConfigurations.PERSISTENCE_BUCKET_COUNT.set(4);
         InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.set(4);
         final File file = new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
         file.mkdirs();
         new File(file, RetainedMessageLocalPersistence.PERSISTENCE_NAME).mkdir();
         new File(file, PublishPayloadLocalPersistence.PERSISTENCE_NAME).mkdir();
-
         configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
     }
 
@@ -95,144 +90,116 @@ public class PublishPayloadTypeMigrationTest {
 
     @Test
     public void test_payload_migration_xodus_to_rocks() throws Exception {
-
-
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
-
         assertEquals(2, migrations.size());
         assertEquals(PersistenceType.FILE_NATIVE, migrations.get(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
-
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(
+                systemInformation,
                 new MetricRegistry(),
                 new HivemqId(),
                 configurationService,
                 new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
-
-        final PublishPayloadXodusLocalPersistence xodus =
-                persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
+        final PublishPayloadXodusLocalPersistence xodus = persistenceInjector
+                .getInstance(PublishPayloadXodusLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             xodus.put(i, ("message" + i).getBytes());
         }
-
         Migrations.migrate(persistenceInjector, migrations, ImmutableSet.of());
-
-        final PublishPayloadRocksDBLocalPersistence rocks =
-                persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class);
+        final PublishPayloadRocksDBLocalPersistence rocks = persistenceInjector
+                .getInstance(PublishPayloadRocksDBLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             assertEquals("message" + i, new String(rocks.get(i)));
         }
-
         Migrations.afterMigration(systemInformation);
-
         persistenceStartup.run();
-
-        //check meta after migration
+        // check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
         assertEquals(PersistenceType.FILE_NATIVE, metaInformation.getPublishPayloadPersistenceType());
     }
 
     @Test
     public void test_payload_migration_rocks_to_xodus() throws Exception {
-
-
         MetaFileService.writeMetaFile(systemInformation, getMetaInformation());
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
-
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
-
         assertEquals(1, migrations.size());
         assertEquals(PersistenceType.FILE, migrations.get(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
-
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(
+                systemInformation,
                 new MetricRegistry(),
                 new HivemqId(),
                 configurationService,
                 new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
-
-        final PublishPayloadRocksDBLocalPersistence rocks =
-                persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class);
+        final PublishPayloadRocksDBLocalPersistence rocks = persistenceInjector
+                .getInstance(PublishPayloadRocksDBLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             rocks.put(i, ("message" + i).getBytes());
         }
-
         Migrations.migrate(persistenceInjector, migrations, ImmutableSet.of());
-
-        final PublishPayloadXodusLocalPersistence xodus =
-                persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
+        final PublishPayloadXodusLocalPersistence xodus = persistenceInjector
+                .getInstance(PublishPayloadXodusLocalPersistence.class);
         for (int i = 0; i < 1000; i++) {
             assertEquals("message" + i, new String(xodus.get(i)));
         }
-
         Migrations.afterMigration(systemInformation);
-
         persistenceStartup.run();
-
-        //check meta after migration
+        // check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getPublishPayloadPersistenceType());
-
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
     }
 
     @Test
     public void test_payload_migration_stays_xodus() throws Exception {
-
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
-
         final Map<MigrationUnit, PersistenceType> migrations = Migrations.checkForTypeMigration(systemInformation);
-
         assertEquals(1, migrations.size());
         assertFalse(migrations.containsKey(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD));
-
-        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(systemInformation,
+        final Injector persistenceInjector = GuiceBootstrap.persistenceInjector(
+                systemInformation,
                 new MetricRegistry(),
                 new HivemqId(),
                 configurationService,
                 new LifecycleModule());
         final PersistenceStartup persistenceStartup = persistenceInjector.getInstance(PersistenceStartup.class);
         persistenceStartup.finish();
-
-        final PublishPayloadXodusLocalPersistence persistence_4_2_x =
-                persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class);
+        final PublishPayloadXodusLocalPersistence persistence_4_2_x = persistenceInjector
+                .getInstance(PublishPayloadXodusLocalPersistence.class);
         for (int i = 0; i < 10; i++) {
             persistence_4_2_x.put(i, ("message" + i).getBytes());
         }
-
         Migrations.migrate(persistenceInjector, migrations, ImmutableSet.of());
         Migrations.afterMigration(systemInformation);
-
-        //closing persistences
+        // closing persistences
         persistenceStartup.run();
-
-        //check meta after migration
+        // check meta after migration
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getPublishPayloadPersistenceType());
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
-
     }
 
     @NotNull
     private MetaInformation getMetaInformation() {
         final MetaInformation metaInformation = new MetaInformation();
-
         metaInformation.setHivemqVersion("2019.1");
         metaInformation.setPublishPayloadPersistenceType(PersistenceType.FILE_NATIVE);
         metaInformation.setRetainedMessagesPersistenceType(PersistenceType.FILE_NATIVE);
         metaInformation.setDataFolderPresent(true);
         metaInformation.setMetaFilePresent(true);
         metaInformation.setPersistenceFolderPresent(true);
-
         return metaInformation;
     }
-
 }

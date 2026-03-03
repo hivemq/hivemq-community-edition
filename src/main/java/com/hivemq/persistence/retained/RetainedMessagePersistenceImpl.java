@@ -47,13 +47,9 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     private final @NotNull RetainedMessageLocalPersistence localPersistence;
     private final @NotNull ProducerQueues singleWriter;
     private final @NotNull Chunker chunker;
-
     @Inject
-    RetainedMessagePersistenceImpl(
-            final @NotNull RetainedMessageLocalPersistence localPersistence,
-            final @NotNull SingleWriterService singleWriterService,
-            final @NotNull Chunker chunker) {
-
+    RetainedMessagePersistenceImpl(final @NotNull RetainedMessageLocalPersistence localPersistence,
+            final @NotNull SingleWriterService singleWriterService, final @NotNull Chunker chunker) {
         this.localPersistence = localPersistence;
         singleWriter = singleWriterService.getRetainedMessageQueue();
         this.chunker = chunker;
@@ -70,7 +66,6 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
-
         return singleWriter.submit(topic, (bucketIndex) -> localPersistence.get(topic, bucketIndex));
     }
 
@@ -83,7 +78,6 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     public @NotNull ListenableFuture<Void> remove(final @NotNull String topic) {
         try {
             checkNotNull(topic, "Topic must not be null");
-
             return singleWriter.submit(topic, (bucketIndex) -> {
                 localPersistence.remove(topic, bucketIndex);
                 return null;
@@ -95,16 +89,15 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
 
     @Override
     public @NotNull ListenableFuture<Void> persist(
-            final @NotNull String topic, final @NotNull RetainedMessage retainedMessage) {
+            final @NotNull String topic,
+            final @NotNull RetainedMessage retainedMessage) {
         try {
             checkNotNull(topic, "Topic must not be null");
             checkNotNull(retainedMessage, "Retained message must not be null");
-
             return singleWriter.submit(topic, (bucketIndex) -> {
                 localPersistence.put(retainedMessage, topic, bucketIndex);
                 return null;
             });
-
         } catch (final Throwable throwable) {
             return Futures.immediateFailedFuture(throwable);
         }
@@ -118,12 +111,10 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
                 throw new IllegalArgumentException(
                         "Topic does not contain wildcard characters. Call get method instead.");
             }
-
-            final List<ListenableFuture<Set<String>>> futures =
-                    singleWriter.submitToAllBucketsParallel((bucketIndex) -> new HashSet<>(localPersistence.getAllTopics(
-                            subscription,
-                            bucketIndex)));
-            return Futures.transform(Futures.allAsList(futures),
+            final List<ListenableFuture<Set<String>>> futures = singleWriter.submitToAllBucketsParallel(
+                    (bucketIndex) -> new HashSet<>(localPersistence.getAllTopics(subscription, bucketIndex)));
+            return Futures.transform(
+                    Futures.allAsList(futures),
                     listOfSets -> listOfSets.stream().flatMap(Set::stream).collect(Collectors.toSet()),
                     MoreExecutors.directExecutor());
         } catch (final Throwable throwable) {
@@ -156,14 +147,15 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     @Override
     public @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
             @NotNull ChunkCursor cursor) {
-        return chunker.getAllLocalChunk(cursor,
+        return chunker.getAllLocalChunk(
+                cursor,
                 InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY_BYTES,
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) ->
-                        // actual single writer call
-                        singleWriter.submit(bucket,
-                                (bucketIndex) -> localPersistence.getAllRetainedMessagesChunk(bucketIndex,
-                                        lastKey,
-                                        maxResults)));
+                // actual single writer call
+                singleWriter.submit(
+                        bucket,
+                        (bucketIndex) -> localPersistence
+                                .getAllRetainedMessagesChunk(bucketIndex, lastKey, maxResults)));
     }
 }

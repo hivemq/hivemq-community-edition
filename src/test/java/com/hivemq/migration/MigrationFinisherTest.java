@@ -40,69 +40,65 @@ import static org.junit.Assert.assertEquals;
 public class MigrationFinisherTest {
 
     private MigrationFinisher migrationFinisher;
-
     @Test
     public void test_finish() {
-
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
         migrationFinisher = new MigrationFinisher(systemInformation);
-
         migrationFinisher.finishMigration();
-
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-
         assertEquals("2019.1", metaInformation.getHivemqVersion());
-        assertEquals(PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
-        assertEquals(RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getRetainedMessagesPersistenceVersion());
-        assertEquals(ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getClientSessionPersistenceVersion());
-        assertEquals(ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getQueuedMessagesPersistenceVersion());
-        assertEquals(ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getSubscriptionPersistenceVersion());
         assertEquals(PersistenceType.FILE_NATIVE, metaInformation.getPublishPayloadPersistenceType());
         assertEquals(PersistenceType.FILE_NATIVE, metaInformation.getRetainedMessagesPersistenceType());
-
     }
 
     @Test
     public void test_finish_xodus() {
-
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         systemInformation.init();
         systemInformation.setHivemqVersion("2019.1");
         new File(systemInformation.getDataFolder(), LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME).mkdir();
-
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE);
-
         migrationFinisher = new MigrationFinisher(systemInformation);
-
         migrationFinisher.finishMigration();
-
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
-
         assertEquals("2019.1", metaInformation.getHivemqVersion());
-        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
-        assertEquals(RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getRetainedMessagesPersistenceVersion());
-        assertEquals(ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getClientSessionPersistenceVersion());
-        assertEquals(ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getQueuedMessagesPersistenceVersion());
-        assertEquals(ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(
+                ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getSubscriptionPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getPublishPayloadPersistenceType());
         assertEquals(PersistenceType.FILE, metaInformation.getRetainedMessagesPersistenceType());
-
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
-
     }
 }

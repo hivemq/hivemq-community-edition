@@ -36,7 +36,6 @@ import static org.junit.Assert.assertFalse;
 public class Mqtt3PublishEncoderTest {
 
     private EmbeddedChannel channel;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
@@ -53,19 +52,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0000, buf.readByte());
         assertEquals(14, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
-        //There is no message ID!
+        // There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -77,19 +71,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withOnwardQos(QoS.AT_MOST_ONCE);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0000, buf.readByte());
         assertEquals(15, buf.readByte());
         assertEquals("topié", Strings.getPrefixedString(buf));
-        //There is no message ID!
+        // There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -102,19 +91,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withDuplicateDelivery(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_1000, buf.readByte());
         assertEquals(14, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
-        //There is no message ID!
+        // There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -127,19 +111,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0001, buf.readByte());
         assertEquals(14, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
-        //There is no message ID!
+        // There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -153,19 +132,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
         builder.withDuplicateDelivery(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_1001, buf.readByte());
         assertEquals(14, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
-        //There is no message ID!
+        // There is no message ID!
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -178,19 +152,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0010, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -204,19 +173,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withDuplicateDelivery(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_1010, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -230,19 +194,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0011, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -257,19 +216,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
         builder.withDuplicateDelivery(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_1011, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -282,19 +236,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPacketIdentifier(55555);
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0100, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -308,19 +257,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withDuplicateDelivery(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_1100, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -334,19 +278,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withPayload("payload".getBytes(UTF_8));
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_0101, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 
@@ -361,19 +300,14 @@ public class Mqtt3PublishEncoderTest {
         builder.withHivemqId("hivemqId");
         builder.withRetain(true);
         builder.withDuplicateDelivery(true);
-
         final PUBLISH publish = builder.build();
-
         channel.writeOutbound(publish);
-
         final ByteBuf buf = channel.readOutbound();
-
         assertEquals((byte) 0b0011_1101, buf.readByte());
         assertEquals(16, buf.readByte());
         assertEquals("topic", Strings.getPrefixedString(buf));
         assertEquals(55555, buf.readUnsignedShort());
         assertEquals("payload", new String(buf.readBytes(buf.readableBytes()).array(), UTF_8));
-
         assertFalse(buf.isReadable());
     }
 }

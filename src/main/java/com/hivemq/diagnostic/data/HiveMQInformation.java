@@ -25,7 +25,6 @@ import javax.inject.Inject;
 class HiveMQInformation extends AbstractInformation {
 
     private final SystemInformation systemInformation;
-
     @Inject
     public HiveMQInformation(final SystemInformation systemInformation) {
         this.systemInformation = systemInformation;

@@ -36,19 +36,18 @@ import static com.hivemq.configuration.entity.mqtt.MqttConfigurationDefaults.MAX
 /**
  * @author Florian Limpöck
  * @author Lukas Brandl
- * @since 4.0.2
+ * @since  4.0.2
  */
 @Singleton
 @ChannelHandler.Sharable
 public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
 
     static final Logger log = LoggerFactory.getLogger(MessageExpiryHandler.class);
-
     @Override
     public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
-            throws Exception {
-
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) throws Exception {
         if (msg instanceof PUBLISH) {
             final PUBLISH publish = (PUBLISH) msg;
             checkAndSetPublishExpiry(publish);
@@ -63,15 +62,13 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
             final PUBREL pubrel = (PUBREL) msg;
             checkAndSetPubrelExpiry(pubrel);
             final boolean expireInflight = InternalConfigurations.EXPIRE_INFLIGHT_PUBRELS_ENABLED;
-            final boolean drop = (pubrel.getMessageExpiryInterval() != null) &&
-                    (pubrel.getMessageExpiryInterval() == 0) &&
-                    expireInflight;
+            final boolean drop = (pubrel.getMessageExpiryInterval() != null) && (pubrel.getMessageExpiryInterval() == 0)
+                    && expireInflight;
             if (drop) {
                 ctx.fireUserEventTriggered(new PubrelDroppedEvent(pubrel));
                 return;
             }
         }
-
         super.write(ctx, msg, promise);
     }
 
@@ -93,5 +90,4 @@ public class MessageExpiryHandler extends ChannelOutboundHandlerAdapter {
             message.setMessageExpiryInterval(remainingInterval);
         }
     }
-
 }

@@ -23,19 +23,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class SecurityConfigurationServiceImpl implements SecurityConfigurationService {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfigurationServiceImpl.class);
-
-    private final AtomicBoolean allowServerAssignedClientId =
-            new AtomicBoolean(ALLOW_SERVER_ASSIGNED_CLIENT_ID_DEFAULT);
+    private final AtomicBoolean allowServerAssignedClientId = new AtomicBoolean(
+            ALLOW_SERVER_ASSIGNED_CLIENT_ID_DEFAULT);
     private final AtomicBoolean validateUTF8 = new AtomicBoolean(VALIDATE_UTF_8_DEFAULT);
     private final AtomicBoolean payloadFormatValidation = new AtomicBoolean(PAYLOAD_FORMAT_VALIDATION_DEFAULT);
-    private final AtomicBoolean allowRequestProblemInformation =
-            new AtomicBoolean(ALLOW_REQUEST_PROBLEM_INFORMATION_DEFAULT);
-
+    private final AtomicBoolean allowRequestProblemInformation = new AtomicBoolean(
+            ALLOW_REQUEST_PROBLEM_INFORMATION_DEFAULT);
     @Override
     public boolean allowServerAssignedClientId() {
         return allowServerAssignedClientId.get();

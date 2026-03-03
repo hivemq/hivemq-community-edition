@@ -36,5 +36,4 @@ public class ConfigFileReaderExceptionTest extends AbstractConfigurationTest {
         }).when(envVarUtil).replaceEnvironmentVariablePlaceholders(any(String.class));
         reader.applyConfig();
     }
-
 }

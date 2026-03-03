@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.util;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -33,14 +32,11 @@ public class ThreadFactoryUtil {
      */
     public static @NotNull ThreadFactory create(final @NotNull String nameFormat) {
         return new ThreadFactoryBuilder().setNameFormat(nameFormat)
-                .setUncaughtExceptionHandler(new UncaughtExceptionHandler())
-                .build();
+                .setUncaughtExceptionHandler(new UncaughtExceptionHandler()).build();
     }
-
     private static class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
         private static final Logger log = LoggerFactory.getLogger(UncaughtExceptionHandler.class);
-
         @Override
         public void uncaughtException(final @NotNull Thread thread, final @NotNull Throwable throwable) {
             log.error("Uncaught exception in thread '{}'.", thread.getName(), throwable);

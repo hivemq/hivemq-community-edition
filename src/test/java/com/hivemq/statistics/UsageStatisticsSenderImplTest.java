@@ -41,13 +41,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 public class UsageStatisticsSenderImplTest {
 
     private final int port = RandomPortGenerator.get();
-
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(port);
-
     private UsageStatisticsSender sender;
-
-
     @Before
     public void before() {
         sender = new UsageStatisticsSenderImpl() {
@@ -62,32 +58,22 @@ public class UsageStatisticsSenderImplTest {
 
     @Test
     public void test_send_success() {
-
         stubFor(post(urlEqualTo("/api/test")).willReturn(aResponse().withStatus(200).withBody("OK")));
-
         sender.sendStatistics("payload");
-
-        final String digest =
-                BaseEncoding.base64().encode(Hashing.sha256().hashString("payload", StandardCharsets.UTF_8).asBytes());
-
-        verify(postRequestedFor(urlMatching("/api/test")).withRequestBody(matching("payload"))
-                .withHeader("Content-Type", matching("application/json"))
-                .withHeader("hmq-digest", matching(digest)));
-
+        final String digest = BaseEncoding.base64()
+                .encode(Hashing.sha256().hashString("payload", StandardCharsets.UTF_8).asBytes());
+        verify(
+                postRequestedFor(urlMatching("/api/test")).withRequestBody(matching("payload"))
+                        .withHeader("Content-Type", matching("application/json"))
+                        .withHeader("hmq-digest", matching(digest)));
     }
 
     @Test
     public void test_send_fail() {
-
         stubFor(post(urlEqualTo("/api/test")).willReturn(aResponse().withStatus(403).withBody("NOT OK")));
-
         sender.sendStatistics("payload");
-
-        final String digest =
-                BaseEncoding.base64().encode(Hashing.sha256().hashString("payload", StandardCharsets.UTF_8).asBytes());
-
-        //we don't expect any exceptions
+        final String digest = BaseEncoding.base64()
+                .encode(Hashing.sha256().hashString("payload", StandardCharsets.UTF_8).asBytes());
+        // we don't expect any exceptions
     }
-
-
 }

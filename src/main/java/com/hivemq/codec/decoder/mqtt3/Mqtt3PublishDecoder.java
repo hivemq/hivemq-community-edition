@@ -39,11 +39,8 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH> {
 
     private final @NotNull HivemqId hivemqId;
-
     @Inject
-    public Mqtt3PublishDecoder(
-            final @NotNull HivemqId hivemqId,
-            final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3PublishDecoder(final @NotNull HivemqId hivemqId, final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
         this.hivemqId = hivemqId;
@@ -54,29 +51,23 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final byte header) {
-
         final int qos = decodeQoS(clientConnectionContext, header);
         if (qos == DISCONNECTED) {
             return null;
         }
-
         final Boolean dup = decodeDup(clientConnectionContext, header, qos);
         if (dup == null) {
             return null;
         }
-
         final Boolean retain = decodeRetain(clientConnectionContext, header);
         if (retain == null) {
             return null;
         }
-
         final int utf8StringLength = decodeUTF8StringLength(clientConnectionContext, buf, "topic", MessageType.PUBLISH);
         if (utf8StringLength == DISCONNECTED) {
             return null;
         }
-
         final String topicName;
-
         if (validateUTF8) {
             topicName = decodeUTF8Topic(clientConnectionContext, buf, utf8StringLength, "topic", MessageType.PUBLISH);
             if (topicName == null) {
@@ -85,11 +76,9 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
         } else {
             topicName = Strings.getPrefixedString(buf, utf8StringLength);
         }
-
         if (topicInvalid(clientConnectionContext, "topic", topicName)) {
             return null;
         }
-
         final int packetIdentifier;
         if (qos > 0) {
             packetIdentifier = decodePacketIdentifier(clientConnectionContext, buf);
@@ -99,19 +88,11 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
         } else {
             packetIdentifier = 0;
         }
-
         final byte[] payload = new byte[buf.readableBytes()];
         buf.readBytes(payload);
-
         return new PUBLISHFactory.Mqtt3Builder().withHivemqId(hivemqId.get())
-                .withMessageExpiryInterval(maxMessageExpiryInterval)
-                .withQoS(QoS.valueOf(qos))
-                .withOnwardQos(QoS.valueOf(qos))
-                .withTopic(topicName)
-                .withDuplicateDelivery(dup)
-                .withPacketIdentifier(packetIdentifier)
-                .withRetain(retain)
-                .withPayload(payload)
-                .build();
+                .withMessageExpiryInterval(maxMessageExpiryInterval).withQoS(QoS.valueOf(qos))
+                .withOnwardQos(QoS.valueOf(qos)).withTopic(topicName).withDuplicateDelivery(dup)
+                .withPacketIdentifier(packetIdentifier).withRetain(retain).withPayload(payload).build();
     }
 }

@@ -33,7 +33,6 @@ public class QoSTest {
     @Test
     public void getMinQoS_whenBothQosEqual_thenResultIsEitherOfInputs() {
         final QoS result = QoS.getMinQoS(AT_LEAST_ONCE, AT_LEAST_ONCE);
-
         assertEquals(AT_LEAST_ONCE, result);
     }
 
@@ -41,10 +40,8 @@ public class QoSTest {
     public void getMinQoS_whenTheSecondQosIsSmaller_thenTheSecondQosIsReturned() {
         final QoS result = QoS.getMinQoS(AT_LEAST_ONCE, AT_MOST_ONCE);
         assertEquals(AT_MOST_ONCE, result);
-
         final QoS result2 = QoS.getMinQoS(EXACTLY_ONCE, AT_LEAST_ONCE);
         assertEquals(AT_LEAST_ONCE, result2);
-
         final QoS result3 = QoS.getMinQoS(EXACTLY_ONCE, AT_MOST_ONCE);
         assertEquals(AT_MOST_ONCE, result3);
     }
@@ -53,10 +50,8 @@ public class QoSTest {
     public void getMinQoS_whenTheFirstQosIsSmaller_thenTheFirstQosIsReturned() {
         final QoS result = QoS.getMinQoS(AT_MOST_ONCE, AT_LEAST_ONCE);
         assertEquals(AT_MOST_ONCE, result);
-
         final QoS result2 = QoS.getMinQoS(AT_LEAST_ONCE, EXACTLY_ONCE);
         assertEquals(AT_LEAST_ONCE, result2);
-
         final QoS result3 = QoS.getMinQoS(AT_MOST_ONCE, EXACTLY_ONCE);
         assertEquals(AT_MOST_ONCE, result3);
     }

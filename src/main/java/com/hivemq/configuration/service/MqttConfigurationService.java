@@ -19,31 +19,27 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.message.QoS;
 
 /**
- * A Configuration service which allows to get information about the current MQTT configuration
- * and allows to change the global MQTT configuration of HiveMQ at runtime.
+ * A Configuration service which allows to get information about the current MQTT configuration and allows to change the
+ * global MQTT configuration of HiveMQ at runtime.
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- * @since 3.0
+ * @since  3.0
  */
 public interface MqttConfigurationService {
 
     enum QueuedMessagesStrategy {
+
         /**
-         * This strategy discards the oldest element in the queue if
-         * the queue is full.
+         * This strategy discards the oldest element in the queue if the queue is full.
          */
         DISCARD_OLDEST(0),
         /**
-         * This strategy discards the current element to queue in case
-         * the queue is full.
+         * This strategy discards the current element to queue in case the queue is full.
          */
         DISCARD(1);
-
         private static final @NotNull QueuedMessagesStrategy @NotNull [] VALUES = values();
-
         private final int index;
-
         QueuedMessagesStrategy(final int index) {
             this.index = index;
         }
@@ -60,7 +56,6 @@ public interface MqttConfigurationService {
             return index;
         }
     }
-
     /**
      * @return the global maximum offline queued messages per client
      */
@@ -135,7 +130,6 @@ public interface MqttConfigurationService {
      * @return the maximum keep alive a client may have. Default 65535
      */
     int keepAliveMax();
-
 
     void setQueuedMessagesStrategy(@NotNull QueuedMessagesStrategy strategy);
 

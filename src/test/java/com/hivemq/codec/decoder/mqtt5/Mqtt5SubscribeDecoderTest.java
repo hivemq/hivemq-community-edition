@@ -40,7 +40,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
@@ -52,7 +52,6 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Test
     public void test_decode_all_properties() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -76,34 +75,27 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
                 0b0001_1101};
-
         final SUBSCRIBE subscribe = decode(encoded);
-
         final Topic topic1 = subscribe.getTopics().get(0);
         final Topic topic2 = subscribe.getTopics().get(1);
-
         assertEquals(1, subscribe.getPacketIdentifier());
         assertEquals(123, subscribe.getSubscriptionIdentifier());
         assertEquals("user", subscribe.getUserProperties().asList().getFirst().getName());
         assertEquals("property", subscribe.getUserProperties().asList().getFirst().getValue());
-
         assertEquals("topic/#", topic1.getTopic());
         assertTrue(topic1.isNoLocal());
         assertTrue(topic1.isRetainAsPublished());
         assertEquals(Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, topic1.getRetainHandling());
         assertEquals(1, topic1.getQoS().getQosNumber());
-
         assertEquals("topid/#", topic2.getTopic());
         assertTrue(topic2.isNoLocal());
         assertTrue(topic2.isRetainAsPublished());
         assertEquals(Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, topic2.getRetainHandling());
         assertEquals(1, topic2.getQoS().getQosNumber());
-
     }
 
     @Test
     public void test_decode_all_multiple_user_properties() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -111,125 +103,50 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // remaining length
                 76,
                 // packet identifier
-                0,
-                1,
+                0, 1,
                 // variable header
                 // properties length
                 53,
                 // subscription identifier
-                0x0B,
-                123,
+                0x0B, 123,
                 // user properties
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                '1',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                '1',
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                '2',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                '2',
-                0x26,
-                0,
-                4,
-                'u',
-                's',
-                'e',
-                '3',
-                0,
-                8,
-                'p',
-                'r',
-                'o',
-                'p',
-                'e',
-                'r',
-                't',
-                '3',
+                0x26, 0, 4, 'u', 's', 'e', '1', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', '1', 0x26, 0, 4, 'u', 's', 'e',
+                '2', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', '2', 0x26, 0, 4, 'u', 's', 'e', '3', 0, 8, 'p', 'r', 'o',
+                'p', 'e', 'r', 't', '3',
                 // payload topic filter
-                0,
-                7,
-                't',
-                'o',
-                'p',
-                'i',
-                'c',
-                '/',
-                '#',
+                0, 7, 't', 'o', 'p', 'i', 'c', '/', '#',
                 // subscription options
                 0b0001_1101,
                 // payload topic filter
-                0,
-                7,
-                't',
-                'o',
-                'p',
-                'i',
-                'd',
-                '/',
-                '#',
+                0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
                 0b0001_1101};
-
         final SUBSCRIBE subscribe = decode(encoded);
-
         final Topic topic1 = subscribe.getTopics().get(0);
         final Topic topic2 = subscribe.getTopics().get(1);
-
         assertEquals(1, subscribe.getPacketIdentifier());
         assertEquals(123, subscribe.getSubscriptionIdentifier());
-
         assertEquals(3, subscribe.getUserProperties().asList().size());
-
         assertEquals("use1", subscribe.getUserProperties().asList().get(0).getName());
         assertEquals("propert1", subscribe.getUserProperties().asList().get(0).getValue());
         assertEquals("use2", subscribe.getUserProperties().asList().get(1).getName());
         assertEquals("propert2", subscribe.getUserProperties().asList().get(1).getValue());
         assertEquals("use3", subscribe.getUserProperties().asList().get(2).getName());
         assertEquals("propert3", subscribe.getUserProperties().asList().get(2).getValue());
-
         assertEquals("topic/#", topic1.getTopic());
         assertTrue(topic1.isNoLocal());
         assertTrue(topic1.isRetainAsPublished());
         assertEquals(Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, topic1.getRetainHandling());
         assertEquals(1, topic1.getQoS().getQosNumber());
-
         assertEquals("topid/#", topic2.getTopic());
         assertTrue(topic2.isNoLocal());
         assertTrue(topic2.isRetainAsPublished());
         assertEquals(Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, topic2.getRetainHandling());
         assertEquals(1, topic2.getQoS().getQosNumber());
-
     }
 
     @Test
     public void test_decode_invalid_fixed_header() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -245,14 +162,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
                 0b0001_1101};
-
         decodeNullExpected(encoded);
-
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-
         final byte[] encoded1 = {
                 // fixed header
                 // type, reserved
@@ -268,14 +182,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
                 0b0001_1101};
-
         decodeNullExpected(encoded1);
-
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-
         final byte[] encoded2 = {
                 // fixed header
                 // type, reserved
@@ -291,14 +202,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
                 0b0001_1101};
-
         decodeNullExpected(encoded2);
-
         channel = new EmbeddedChannel(TestMqttDecoder.create());
         clientConnection = new DummyClientConnection(channel, null);
         clientConnection.setProtocolVersion(protocolVersion);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-
         final byte[] encoded3 = {
                 // fixed header
                 // type, reserved
@@ -314,14 +222,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 0, 7, 't', 'o', 'p', 'i', 'd', '/', '#',
                 // subscription options
                 0b0001_1101};
-
         decodeNullExpected(encoded3);
-
     }
 
     @Test
     public void test_decode_remaining_too_short() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -330,14 +235,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 1,
                 // packet identifier
                 0};
-
         decodeNullExpected(encoded);
-
     }
 
     @Test
     public void test_decode_id_zero() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -346,16 +248,13 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 3,
                 // packet identifier
                 0, 0,
-                //property length
+                // property length
                 0};
-
         decodeNullExpected(encoded);
-
     }
 
     @Test
     public void test_decode_property_length_missing() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -364,14 +263,11 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 2,
                 // packet identifier
                 0, 1,};
-
         decodeNullExpected(encoded);
-
     }
 
     @Test
     public void test_decode_property_length_negative() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -380,18 +276,13 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 3,
                 // packet identifier
                 0, 1,
-                //property length
-                -1
-
-        };
-
+                // property length
+                -1};
         decodeNullExpected(encoded);
-
     }
 
     @Test
     public void test_decode_property_length_tooShort() {
-
         final byte[] encoded = {
                 // fixed header
                 // type, reserved
@@ -400,21 +291,16 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 3,
                 // packet identifier
                 0, 1,
-                //property length
-                5
-
-        };
-
+                // property length
+                5};
         decodeNullExpected(encoded);
-
     }
 
     @Test
     public void test_decode_failed_subscription_identifier_moreThanOnce() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 7,
@@ -424,19 +310,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 4,
                 // subscription identifier
-                0x0B, 123, 0x0B, 123,
-
-                };
-
+                0x0B, 123, 0x0B, 123,};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_subscription_identifier_zero() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 5,
@@ -446,19 +328,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 2,
                 // subscription identifier
-                0x0B, 0,
-
-                };
-
+                0x0B, 0,};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_invalid_identifier() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 5,
@@ -468,19 +346,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 2,
                 // invalid identifier
-                (byte) 0xBB, 0,
-
-                };
-
+                (byte) 0xBB, 0,};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_properties_length_to_short() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 5,
@@ -490,19 +364,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 1,
                 // subscription identifier
-                0x0B, 1,
-
-                };
-
+                0x0B, 1,};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_no_subscriptions() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 5,
@@ -512,19 +382,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 2,
                 // subscription identifier
-                0x0B, 1,
-
-                };
-
+                0x0B, 1,};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_topic_utf_8_malformed() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 6,
@@ -534,19 +400,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // topic filter
-                0, 1, 0x7F
-
-        };
-
+                0, 1, 0x7F};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_topic_tooShort() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 6,
@@ -556,19 +418,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // topic filter
-                0, 2, 't'
-
-        };
-
+                0, 2, 't'};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_topic_tooLong() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 7,
@@ -578,19 +436,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // topic filter
-                0, 1, 't', 'o'
-
-        };
-
+                0, 1, 't', 'o'};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_no_options() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 6,
@@ -600,19 +454,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 0,
                 // topic filter
-                0, 1, 't'
-
-        };
-
+                0, 1, 't'};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_qos_3() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 7,
@@ -624,19 +474,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 1, 't',
                 // options
-                0b0000_0011
-
-        };
-
+                0b0000_0011};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_shared_no_local() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
@@ -648,19 +494,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 10, '$', 's', 'h', 'a', 'r', 'e', '/', 'g', '/', '#',
                 // options
-                0b0000_0101
-
-        };
-
+                0b0000_0101};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_retained_handling_3() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
@@ -672,19 +514,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 10, '$', 's', 'h', 'a', 'r', 'e', '/', 'g', '/', '#',
                 // options
-                0b0011_0001
-
-        };
-
+                0b0011_0001};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_bit_6_set() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
@@ -696,19 +534,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 10, '$', 's', 'h', 'a', 'r', 'e', '/', 'g', '/', '#',
                 // options
-                0b0110_0001
-
-        };
-
+                0b0110_0001};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_bit_7_set() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
@@ -720,19 +554,15 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 10, '$', 's', 'h', 'a', 'r', 'e', '/', 'g', '/', '#',
                 // options
-                (byte) 0b1010_0001
-
-        };
-
+                (byte) 0b1010_0001};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_bit_6_and_7_set() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
@@ -744,85 +574,69 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // topic filter
                 0, 10, '$', 's', 'h', 'a', 'r', 'e', '/', 'g', '/', '#',
                 // options
-                (byte) 0b1110_0001
-
-        };
-
+                (byte) 0b1110_0001};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_value_too_short() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
                 // packet identifier
                 0, 1,
                 // variable header
-                //   properties
+                // properties
                 13,
-                //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',
-
-                };
-
+                // user property
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u',};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_key_too_short() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 16,
                 // packet identifier
                 0, 1,
                 // variable header
-                //   properties
+                // properties
                 13,
-                //   user property
-                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'
-
-        };
-
+                // user property
+                0x26, 0, 4, 't', 'e', 's', 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_to_short() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 5,
                 // packet identifier
                 0, 1,
                 // variable header
-                //   properties
+                // properties
                 2,
-                //   user property
-                0x26, 0,
-
-                };
-
+                // user property
+                0x26, 0,};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_key_contains_must_not() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 17,
@@ -831,20 +645,16 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // variable header
                 // properties length
                 14,
-                //   user property
-                0x26, 0, 4, 't', 'e', 's', (byte) 0xFF, 0, 5, 'v', 'a', 'l', 'u', 'e'
-
-        };
-
+                // user property
+                0x26, 0, 4, 't', 'e', 's', (byte) 0xFF, 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_key_contains_should_not() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 17,
@@ -853,42 +663,34 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // variable header
                 // properties length
                 14,
-                //   user property
-                0x26, 0, 4, 't', 'e', 's', 0x7F, 0, 5, 'v', 'a', 'l', 'u', 'e'
-
-        };
-
+                // user property
+                0x26, 0, 4, 't', 'e', 's', 0x7F, 0, 5, 'v', 'a', 'l', 'u', 'e'};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_value_contains_must_not() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 17,
                 // packet identifier
                 0, 1,
                 // variable header
-                //   properties
+                // properties
                 14,
-                //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', (byte) 0xFF
-
-        };
-
+                // user property
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', (byte) 0xFF};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void decode_subscribe_failed_by_property_user_property_value_contains_should_not() {
-
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 17,
@@ -897,23 +699,19 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // variable header
                 // properties length
                 14,
-                //   user property
-                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 0x7F
-
-        };
-
+                // user property
+                0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 0x7F};
         decodeNullExpected(encoded);
     }
 
     @Test
     public void test_decode_failed_subscription_identifier_disabled() {
-
         final FullConfigurationService fullConfig = new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfig.mqttConfiguration().setSubscriptionIdentifierEnabled(false);
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfig));
         final byte[] encoded = {
                 // fixed header
-                //   type, reserved
+                // type, reserved
                 (byte) 0b1000_0010,
                 // remaining length
                 5,
@@ -923,16 +721,12 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
                 // properties length
                 1,
                 // subscription identifier
-                0x0B, 1,
-
-                };
+                0x0B, 1,};
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setProtocolVersion(protocolVersion);
-
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);
-
         final Message message = channel.readInbound();
         assertNull(message);
         assertFalse(channel.isOpen());
@@ -944,11 +738,8 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);
-
         final SUBSCRIBE subscribe = channel.readInbound();
         assertNotNull(subscribe);
-
         return subscribe;
     }
-
 }

@@ -54,19 +54,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class UnsubackOutboundInterceptorHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UnsubackOutboundInterceptorHandler.class);
-
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull PluginTaskExecutorService executorService;
-
     @Inject
-    public UnsubackOutboundInterceptorHandler(
-            final @NotNull FullConfigurationService configurationService,
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull HiveMQExtensions hiveMQExtensions,
+    public UnsubackOutboundInterceptorHandler(final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull PluginTaskExecutorService executorService) {
-
         this.configurationService = configurationService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -77,14 +72,12 @@ public class UnsubackOutboundInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull UNSUBACK unsuback,
             final @NotNull ChannelPromise promise) {
-
         final Channel channel = ctx.channel();
         final ClientConnection clientConnection = ClientConnection.of(channel);
         final String clientId = clientConnection.getClientId();
         if (clientId == null) {
             return;
         }
-
         final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
         if (clientContext == null) {
             ctx.write(unsuback, promise);
@@ -95,42 +88,30 @@ public class UnsubackOutboundInterceptorHandler {
             ctx.write(unsuback, promise);
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-
         final UnsubackPacketImpl packet = new UnsubackPacketImpl(unsuback);
         final UnsubackOutboundInputImpl input = new UnsubackOutboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<UnsubackOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-
-        final ModifiableUnsubackPacketImpl modifiablePacket =
-                new ModifiableUnsubackPacketImpl(packet, configurationService);
+        final ModifiableUnsubackPacketImpl modifiablePacket = new ModifiableUnsubackPacketImpl(packet,
+                configurationService);
         final UnsubackOutboundOutputImpl output = new UnsubackOutboundOutputImpl(asyncer, modifiablePacket);
-        final ExtensionParameterHolder<UnsubackOutboundOutputImpl> outputHolder =
-                new ExtensionParameterHolder<>(output);
-
+        final ExtensionParameterHolder<UnsubackOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(
+                output);
         final UnsubackOutboundInterceptorContext context = new UnsubackOutboundInterceptorContext(clientId,
-                interceptors.size(),
-                ctx,
-                promise,
-                inputHolder,
-                outputHolder);
-
+                interceptors.size(), ctx, promise, inputHolder, outputHolder);
         for (final UnsubackOutboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions
+                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) {
                 context.finishInterceptor();
                 continue;
             }
-
-            final UnsubackOutboundInterceptorTask task =
-                    new UnsubackOutboundInterceptorTask(interceptor, extension.getId());
+            final UnsubackOutboundInterceptorTask task = new UnsubackOutboundInterceptorTask(interceptor,
+                    extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
-
     private static class UnsubackOutboundInterceptorContext extends PluginInOutTaskContext<UnsubackOutboundOutputImpl>
             implements Runnable {
 
@@ -140,15 +121,10 @@ public class UnsubackOutboundInterceptorHandler {
         private final @NotNull ChannelPromise promise;
         final @NotNull ExtensionParameterHolder<UnsubackOutboundInputImpl> inputHolder;
         final @NotNull ExtensionParameterHolder<UnsubackOutboundOutputImpl> outputHolder;
-
-        UnsubackOutboundInterceptorContext(
-                final @NotNull String identifier,
-                final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull ChannelPromise promise,
+        UnsubackOutboundInterceptorContext(final @NotNull String identifier, final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx, final @NotNull ChannelPromise promise,
                 final @NotNull ExtensionParameterHolder<UnsubackOutboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<UnsubackOutboundOutputImpl> outputHolder) {
-
             super(identifier);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -161,7 +137,8 @@ public class UnsubackOutboundInterceptorHandler {
         @Override
         public void pluginPost(final @NotNull UnsubackOutboundOutputImpl output) {
             if (output.isTimedOut()) {
-                log.debug("Async timeout on outbound UNSUBACK interception. Discarding changes made by the interceptor.");
+                log.debug(
+                        "Async timeout on outbound UNSUBACK interception. Discarding changes made by the interceptor.");
             } else if (output.isFailed()) {
                 log.debug("Exception on outbound UNSUBACK interception. Discarding changes made by the interceptor.");
             } else if (output.getUnsubackPacket().isModified()) {
@@ -191,24 +168,22 @@ public class UnsubackOutboundInterceptorHandler {
 
         private final @NotNull UnsubackOutboundInterceptor interceptor;
         private final @NotNull String extensionId;
-
-        UnsubackOutboundInterceptorTask(
-                final @NotNull UnsubackOutboundInterceptor interceptor, final @NotNull String extensionId) {
-
+        UnsubackOutboundInterceptorTask(final @NotNull UnsubackOutboundInterceptor interceptor,
+                final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull UnsubackOutboundOutputImpl apply(
-                final @NotNull UnsubackOutboundInputImpl input, final @NotNull UnsubackOutboundOutputImpl output) {
-
+                final @NotNull UnsubackOutboundInputImpl input,
+                final @NotNull UnsubackOutboundOutputImpl output) {
             try {
                 interceptor.onOutboundUnsuback(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound UNSUBACK interception. " +
-                                "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound UNSUBACK interception. "
+                                + "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 output.markAsFailed();

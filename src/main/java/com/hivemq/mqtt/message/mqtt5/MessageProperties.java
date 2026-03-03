@@ -19,6 +19,7 @@ package com.hivemq.mqtt.message.mqtt5;
  * @author Lukas Brandl
  */
 public class MessageProperties {
+
     public static final int PAYLOAD_FORMAT_INDICATOR = 0x01;
     public static final int MESSAGE_EXPIRY_INTERVAL = 0x02;
     public static final int CONTENT_TYPE = 0x03;

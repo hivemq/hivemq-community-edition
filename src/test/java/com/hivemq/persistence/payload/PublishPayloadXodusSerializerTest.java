@@ -24,11 +24,8 @@ public class PublishPayloadXodusSerializerTest {
     @Test
     public void test_serialize_key() {
         final byte[] bytes = PublishPayloadXodusSerializer.serializeKey(1234L, 5L);
-
         assertEquals(16, bytes.length);
-
         final PublishPayloadXodusLocalPersistence.KeyPair keyPair = PublishPayloadXodusSerializer.deserializeKey(bytes);
-
         assertEquals(1234L, keyPair.getId());
         assertEquals(5L, keyPair.getChunkIndex());
     }

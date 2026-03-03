@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.codahale.metrics.MetricRegistry;
@@ -48,26 +47,19 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
     private final @NotNull GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService;
     private final @NotNull PublishService publishService;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-
     private final @NotNull SecurityRegistry securityRegistry;
     private final @NotNull EventRegistry eventRegistry;
-
     private final @NotNull ClusterService clusterService;
     private final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry;
     private final @NotNull AdminService adminService;
-
     @Inject
-    public ExtensionServicesDependenciesImpl(
-            final @NotNull MetricRegistry metricRegistry,
+    public ExtensionServicesDependenciesImpl(final @NotNull MetricRegistry metricRegistry,
             final @NotNull InitializerRegistry initializerRegistry,
-            final @NotNull RetainedMessageStore retainedMessageStore,
-            final @NotNull ClientService clientService,
+            final @NotNull RetainedMessageStore retainedMessageStore, final @NotNull ClientService clientService,
             final @NotNull SubscriptionStore subscriptionStore,
             final @NotNull GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService,
-            final @NotNull PublishService publishService,
-            final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull SecurityRegistry securityRegistry,
-            final @NotNull EventRegistry eventRegistry,
+            final @NotNull PublishService publishService, final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull SecurityRegistry securityRegistry, final @NotNull EventRegistry eventRegistry,
             final @NotNull ClusterService clusterService,
             final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry,
             final @NotNull AdminService adminService) {
@@ -90,7 +82,6 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
     public ImmutableMap<String, Object> getDependenciesMap(final @NotNull ClassLoader classLoader) {
         // classLoader is unused but prepared here for future use
         final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-
         builder.put(MetricRegistry.class.getCanonicalName(), metricRegistry);
         builder.put(SecurityRegistry.class.getCanonicalName(), securityRegistry);
         builder.put(InitializerRegistry.class.getCanonicalName(), initializerRegistry);
@@ -103,15 +94,12 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
         builder.put(ClusterService.class.getCanonicalName(), clusterService);
         builder.put(GlobalInterceptorRegistry.class.getCanonicalName(), globalInterceptorRegistry);
         builder.put(AdminService.class.getCanonicalName(), adminService);
-
         return builder.build();
     }
 
     @NotNull
-    private ManagedExecutorServicePerExtension getManagedExecutorService(
-            final @NotNull ClassLoader classLoader) {
-        return new ManagedExecutorServicePerExtension(globalManagedExtensionExecutorService,
-                classLoader,
+    private ManagedExecutorServicePerExtension getManagedExecutorService(final @NotNull ClassLoader classLoader) {
+        return new ManagedExecutorServicePerExtension(globalManagedExtensionExecutorService, classLoader,
                 hiveMQExtensions);
     }
 }

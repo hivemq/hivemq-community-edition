@@ -62,8 +62,8 @@ public class NettyModuleTest {
 
     @Test
     public void test_netty_configuration_is_singleton() {
-
         final Injector injector = Guice.createInjector(new AbstractModule() {
+
             @Override
             protected void configure() {
                 install(new NettyModule());
@@ -85,7 +85,8 @@ public class NettyModuleTest {
                 bind(MetricsHolder.class).toInstance(mock(MetricsHolder.class));
                 bind(IncomingMessageFlowPersistence.class).toInstance(mock(IncomingMessageFlowPersistence.class));
                 bind(FullConfigurationService.class).toInstance(mock(FullConfigurationService.class));
-                bind(ClientSessionSubscriptionPersistence.class).toInstance(mock(ClientSessionSubscriptionPersistence.class));
+                bind(ClientSessionSubscriptionPersistence.class)
+                        .toInstance(mock(ClientSessionSubscriptionPersistence.class));
                 bind(Authenticators.class).toInstance(mock(Authenticators.class));
                 bind(SecurityConfigurationService.class).toInstance(mock(SecurityConfigurationService.class));
                 bind(Initializers.class).toInstance(mock(Initializers.class));
@@ -100,10 +101,8 @@ public class NettyModuleTest {
                 bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
             }
         });
-
         final NettyConfiguration instance = injector.getInstance(NettyConfiguration.class);
         final NettyConfiguration instance2 = injector.getInstance(NettyConfiguration.class);
-
         assertSame(instance, instance2);
     }
 }

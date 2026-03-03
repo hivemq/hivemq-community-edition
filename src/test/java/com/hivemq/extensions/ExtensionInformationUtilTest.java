@@ -43,13 +43,12 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ExtensionInformationUtilTest {
 
     private @NotNull EmbeddedChannel channel;
     private ClientConnection clientConnection;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel();
@@ -60,56 +59,40 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_fails_no_cipher() {
-
         clientConnection.setAuthProtocol("1.3");
-
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
-
         clientConnection.setAuthCertificate(clientCertificate);
-
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
         chain[1] = new TestCert();
         chain[2] = new TestCert();
-
         final TestCert testCert = new TestCert();
-
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
-
         assertNull(ExtensionInformationUtil.getTlsInformationFromChannel(channel));
-
     }
 
     @Test
     public void test_get_tls_fails_no_protocol() {
         clientConnection.setAuthCipherSuite("cipher");
-
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
-
         clientConnection.setAuthCertificate(clientCertificate);
-
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
         chain[1] = new TestCert();
         chain[2] = new TestCert();
-
         final TestCert testCert = new TestCert();
-
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
-
         assertNull(ExtensionInformationUtil.getTlsInformationFromChannel(channel));
-
     }
 
     @Test
     public void test_get_tls_no_cert() {
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
-
-        final ClientTlsInformation clientTlsInformation =
-                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
+                .getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -119,26 +102,19 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_with_cert() {
-
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
-
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
-
         clientConnection.setAuthCertificate(clientCertificate);
-
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
         chain[1] = new TestCert();
         chain[2] = new TestCert();
-
         final TestCert testCert = new TestCert();
-
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
-
-        final ClientTlsInformation clientTlsInformation =
-                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
+                .getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -150,13 +126,11 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_with_sni() {
-
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
         clientConnection.setAuthSniHostname("test.hostname.domain");
-
-        final ClientTlsInformation clientTlsInformation =
-                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
+                .getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -168,27 +142,20 @@ public class ExtensionInformationUtilTest {
 
     @Test
     public void test_get_tls_with_everything() {
-
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
         clientConnection.setAuthSniHostname("test.hostname.domain");
-
         final SslClientCertificate clientCertificate = Mockito.mock(SslClientCertificate.class);
-
         clientConnection.setAuthCertificate(clientCertificate);
-
         final X509Certificate[] chain = new X509Certificate[3];
         chain[0] = new TestCert();
         chain[1] = new TestCert();
         chain[2] = new TestCert();
-
         final TestCert testCert = new TestCert();
-
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
-
-        final ClientTlsInformation clientTlsInformation =
-                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
+                .getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -198,18 +165,14 @@ public class ExtensionInformationUtilTest {
         assertNotNull(((TlsInformation) clientTlsInformation).getCertificate());
         assertNotNull(((TlsInformation) clientTlsInformation).getCertificateChain());
     }
-
-
     private static class TestCert extends X509Certificate {
 
         @Override
         public void checkValidity() {
-
         }
 
         @Override
         public void checkValidity(final Date date) {
-
         }
 
         @Override
@@ -294,12 +257,10 @@ public class ExtensionInformationUtilTest {
 
         @Override
         public void verify(final PublicKey key) {
-
         }
 
         @Override
         public void verify(final PublicKey key, final String sigProvider) {
-
         }
 
         @Override
@@ -332,5 +293,4 @@ public class ExtensionInformationUtilTest {
             return new byte[0];
         }
     }
-
 }

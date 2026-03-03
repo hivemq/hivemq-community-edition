@@ -37,30 +37,24 @@ public class MetaFileService {
     public static final MetaInformationSerializer serializer = new MetaInformationSerializer();
     private static final Logger log = LoggerFactory.getLogger(MetaFileService.class);
     private static final Logger migrationlog = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
-
     @NotNull
     public static MetaInformation readMetaFile(final @NotNull SystemInformation systemInformation) {
-
         final File dataFolder = systemInformation.getDataFolder();
         final MetaInformation metaInformation = new MetaInformation();
-
         if (!dataFolder.exists()) {
             return metaInformation;
         }
         metaInformation.setDataFolderPresent(true);
-
         final File persistenceFolder = new File(dataFolder, LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME);
         if (!persistenceFolder.exists()) {
             return metaInformation;
         }
         metaInformation.setPersistenceFolderPresent(true);
-
         final File metaFile = getMetaFile(systemInformation);
         if (!metaFile.exists()) {
             return metaInformation;
         }
         metaInformation.setMetaFilePresent(true);
-
         try {
             final byte[] bytes = FileUtils.readFileToByteArray(metaFile);
             final MetaInformation metaInfo = serializer.deserialize(bytes);
@@ -75,8 +69,8 @@ public class MetaFileService {
     }
 
     public static void writeMetaFile(
-            final @NotNull SystemInformation systemInformation, final @NotNull MetaInformation metaInformation) {
-
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull MetaInformation metaInformation) {
         final File metaFile = getMetaFile(systemInformation);
         try {
             FileUtils.writeByteArrayToFile(metaFile, serializer.serialize(metaInformation), false);
@@ -92,5 +86,4 @@ public class MetaFileService {
     private static File getMetaFile(final SystemInformation systemInformation) {
         return new File(systemInformation.getDataFolder(), META_FOLDER_NAME + File.separator + META_FILE_NAME);
     }
-
 }

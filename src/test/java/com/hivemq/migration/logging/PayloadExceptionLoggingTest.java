@@ -34,13 +34,12 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Florian Limpöck
- * @since 4.2.0
+ * @since  4.2.0
  */
 public class PayloadExceptionLoggingTest {
 
     private PayloadExceptionLogging payloadExceptionLogging;
     private LogbackCapturingAppender capturingAppender;
-
     @Before
     public void setUp() throws Exception {
         payloadExceptionLogging = new PayloadExceptionLogging();
@@ -67,9 +66,7 @@ public class PayloadExceptionLoggingTest {
         payloadExceptionLogging.addLogging(2, true, "topic2");
         payloadExceptionLogging.addLogging(3, true, "topic3");
         payloadExceptionLogging.addLogging(4, true, "topic4");
-
         final Map<Long, PayloadExceptionLogging.MissingMessageInformation> map = payloadExceptionLogging.getMap();
-
         assertEquals(4, map.size());
         for (long i = 1; i < 5; i++) {
             final PayloadExceptionLogging.MissingMessageInformation information = map.get(i);
@@ -78,22 +75,17 @@ public class PayloadExceptionLoggingTest {
             assertTrue(information.isRetained());
             assertEquals("topic" + i, information.getTopic());
         }
-
         payloadExceptionLogging.logAndClear();
     }
 
     @Test(timeout = 5000)
     public void test_message_logging_gets_cleared() {
         payloadExceptionLogging.addLogging(1, null, "topic");
-
         final Map<Long, PayloadExceptionLogging.MissingMessageInformation> map1 = payloadExceptionLogging.getMap();
         assertFalse(map1.isEmpty());
-
         payloadExceptionLogging.logAndClear();
-
         final Map<Long, PayloadExceptionLogging.MissingMessageInformation> map2 = payloadExceptionLogging.getMap();
         assertTrue(map2.isEmpty());
-
         assertTrue(capturingAppender.isLogCaptured());
         final ILoggingEvent lastCapturedLog = capturingAppender.getLastCapturedLog();
         assertEquals(Level.WARN, lastCapturedLog.getLevel());

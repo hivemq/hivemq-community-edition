@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.util;
 
 import com.google.common.collect.ImmutableList;
@@ -36,23 +35,21 @@ public class ExceptionsTest {
     public void test_is_connection_closed_exception() {
         assertTrue(Exceptions.isConnectionClosedException(new ClosedChannelException()));
         assertTrue(Exceptions.isConnectionClosedException(new SSLException("abc")));
-        //native Io Exception cannot be instantiated without native transport
-        //assertTrue(Exceptions.isConnectionClosedException(mock(Errors.NativeIoException.class)));
+        // native Io Exception cannot be instantiated without native transport
+        // assertTrue(Exceptions.isConnectionClosedException(mock(Errors.NativeIoException.class)));
         assertTrue(Exceptions.isConnectionClosedException(new IOException("Broken pipe")));
         assertTrue(Exceptions.isConnectionClosedException(new IOException("Protocol wrong type for socket")));
         assertTrue(Exceptions.isConnectionClosedException(new IOException()));
-
         assertFalse(Exceptions.isConnectionClosedException(new RuntimeException()));
     }
 
     @Test
     public void test_is_connection_closed_exception_batched() {
-        final BatchedException batchedException1 =
-                new BatchedException(ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
+        final BatchedException batchedException1 = new BatchedException(
+                ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
         assertTrue(Exceptions.isConnectionClosedException(batchedException1));
-        final BatchedException batchedException2 =
-                new BatchedException(ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
+        final BatchedException batchedException2 = new BatchedException(
+                ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
         assertFalse(Exceptions.isConnectionClosedException(batchedException2));
-
     }
 }

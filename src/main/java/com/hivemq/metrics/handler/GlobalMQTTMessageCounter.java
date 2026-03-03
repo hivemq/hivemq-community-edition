@@ -39,16 +39,13 @@ import static com.hivemq.metrics.HiveMQMetrics.BYTES_WRITE_TOTAL;
 public class GlobalMQTTMessageCounter {
 
     private final @NotNull MetricsHolder metricsHolder;
-
     private final @NotNull LongAdder bytesReadTotal;
     private final @NotNull LongAdder bytesWrittenTotal;
-
     @Inject
     public GlobalMQTTMessageCounter(final @NotNull MetricsHolder metricsHolder) {
         this.metricsHolder = metricsHolder;
         this.bytesReadTotal = new LongAdder();
         this.bytesWrittenTotal = new LongAdder();
-
         metricsHolder.getMetricRegistry().register(BYTES_READ_TOTAL.name(), (Gauge<Long>) bytesReadTotal::longValue);
         metricsHolder.getMetricRegistry()
                 .register(BYTES_WRITE_TOTAL.name(), (Gauge<Long>) bytesWrittenTotal::longValue);
@@ -78,6 +75,4 @@ public class GlobalMQTTMessageCounter {
     public void countOutboundTraffic(final int bytes) {
         bytesWrittenTotal.add(bytes);
     }
-
-
 }

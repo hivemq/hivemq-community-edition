@@ -55,18 +55,13 @@ public class SslClientCertificateImplTest {
 
     private Certificate certificate;
     private SslClientCertificate clientCertificate;
-
     @Before
     public void before() throws Exception {
-
         certificate = generateCert();
-
         final Certificate[] certificates = new Certificate[1];
         certificates[0] = certificate;
-
         clientCertificate = new SslClientCertificateImpl(certificates);
     }
-
 
     @Test
     public void test_certificate() {
@@ -139,14 +134,10 @@ public class SslClientCertificateImplTest {
 
     @Test
     public void test_cert_with_extensions() throws Exception {
-
         certificate = generateCertWithExtension();
-
         final Certificate[] certificates = new Certificate[1];
         certificates[0] = certificate;
-
         clientCertificate = new SslClientCertificateImpl(certificates);
-
         assertEquals("Test commonName", clientCertificate.commonName());
         assertEquals("Test organization", clientCertificate.organization());
         assertEquals("Test Unit", clientCertificate.organizationalUnit());
@@ -155,107 +146,73 @@ public class SslClientCertificateImplTest {
         assertEquals("DE", clientCertificate.country());
         assertEquals("Test locality", clientCertificate.locality());
         assertEquals("Test state", clientCertificate.state());
-
     }
 
     private void createBadCert() throws Exception {
         certificate = generateBadCert();
-
         final Certificate[] certificates = new Certificate[1];
         certificates[0] = certificate;
-
         clientCertificate = new SslClientCertificateImpl(certificates);
     }
 
     private Certificate generateBadCert() throws Exception {
         final KeyPair keyPair = createKeyPair();
-
         final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name("CN="),
-                BigInteger.valueOf(0),
-                new Date(System.currentTimeMillis() - 10000),
-                new Date(System.currentTimeMillis() + 10000),
-                new X500Name("CN="),
-                keyPair.getPublic());
-
+                BigInteger.valueOf(0), new Date(System.currentTimeMillis() - 10000),
+                new Date(System.currentTimeMillis() + 10000), new X500Name("CN="), keyPair.getPublic());
         return getCertificate(keyPair, certificateBuilder);
     }
 
     private Certificate generateCert() throws Exception {
         final KeyPair keyPair = createKeyPair();
-
         final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name(
                 "CN=Test commonName, C=DE, O=Test organization, OU=Test Unit, T=Test Title, L=Test locality, ST=Test state"),
-                BigInteger.valueOf(123456789),
-                new Date(System.currentTimeMillis() - 10000),
+                BigInteger.valueOf(123456789), new Date(System.currentTimeMillis() - 10000),
                 new Date(System.currentTimeMillis() + 10000),
                 new X500Name(
                         "CN=Test commonName, C=DE, O=Test organization, OU=Test Unit, T=Test Title, L=Test locality, ST=Test state"),
                 keyPair.getPublic());
-
         return getCertificate(keyPair, certificateBuilder);
     }
 
     private Certificate generateCertWithExtension() throws Exception {
         final KeyPair keyPair = createKeyPair();
-
-        final JcaX509v3CertificateBuilder certificateBuilder =
-                new JcaX509v3CertificateBuilder(new X500Name("CN=Test commonName"),
-                        BigInteger.valueOf(123456789),
-                        new Date(System.currentTimeMillis() - 10000),
-                        new Date(System.currentTimeMillis() + 10000),
-                        new X500Name("CN=Test commonName"),
-                        keyPair.getPublic());
-
+        final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
+                new X500Name("CN=Test commonName"), BigInteger.valueOf(123456789),
+                new Date(System.currentTimeMillis() - 10000), new Date(System.currentTimeMillis() + 10000),
+                new X500Name("CN=Test commonName"), keyPair.getPublic());
         certificateBuilder.addExtension(BCStyle.C, false, new DERUTF8String("DE"));
         certificateBuilder.addExtension(BCStyle.O, false, new DERUTF8String("Test organization"));
         certificateBuilder.addExtension(BCStyle.OU, false, new DERUTF8String("Test Unit"));
         certificateBuilder.addExtension(BCStyle.T, false, new DERUTF8String("Test Title"));
         certificateBuilder.addExtension(BCStyle.L, false, new DERUTF8String("Test locality"));
         certificateBuilder.addExtension(BCStyle.ST, false, new DERUTF8String("Test state"));
-
         return getCertificate(keyPair, certificateBuilder);
     }
 
     private Certificate getCertificate(final KeyPair keyPair, final JcaX509v3CertificateBuilder certificateBuilder)
             throws OperatorCreationException, CertificateException {
-
         Security.addProvider(new BouncyCastleProvider());
-
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
         signerBuilder = signerBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-
         final ContentSigner contentSigner = signerBuilder.build(keyPair.getPrivate());
-
         JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
         converter = converter.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-
         return converter.getCertificate(certificateBuilder.build(contentSigner));
     }
 
     private KeyPair createKeyPair() throws InvalidKeySpecException, NoSuchAlgorithmException {
-
         final RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
-
         gen.init(new RSAKeyGenerationParameters(BigInteger.valueOf(3), new SecureRandom(), 1024, 80));
         final AsymmetricCipherKeyPair keypair = gen.generateKeyPair();
-
         final RSAKeyParameters publicKey = (RSAKeyParameters) keypair.getPublic();
         final RSAPrivateCrtKeyParameters privateKey = (RSAPrivateCrtKeyParameters) keypair.getPrivate();
-
         final PublicKey pubKey = KeyFactory.getInstance("RSA")
                 .generatePublic(new RSAPublicKeySpec(publicKey.getModulus(), publicKey.getExponent()));
-
-        final PrivateKey privKey = KeyFactory.getInstance("RSA")
-                .generatePrivate(new RSAPrivateCrtKeySpec(publicKey.getModulus(),
-                        publicKey.getExponent(),
-                        privateKey.getExponent(),
-                        privateKey.getP(),
-                        privateKey.getQ(),
-                        privateKey.getDP(),
-                        privateKey.getDQ(),
+        final PrivateKey privKey = KeyFactory.getInstance("RSA").generatePrivate(
+                new RSAPrivateCrtKeySpec(publicKey.getModulus(), publicKey.getExponent(), privateKey.getExponent(),
+                        privateKey.getP(), privateKey.getQ(), privateKey.getDP(), privateKey.getDQ(),
                         privateKey.getQInv()));
-
         return new KeyPair(pubKey, privKey);
     }
-
 }

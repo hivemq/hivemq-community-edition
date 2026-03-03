@@ -27,26 +27,20 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author Florian Limpöck
- * @since 4.1.0
+ * @since  4.1.0
  */
 public class MQTTWebsocketEncoderTest {
 
     @Test
     public void test_encode() throws Exception {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final MQTTWebsocketEncoder mqttWebsocketEncoder = new MQTTWebsocketEncoder();
         channel.pipeline().addLast(mqttWebsocketEncoder);
         final ChannelHandlerContext channelHandlerContext = channel.pipeline().context(mqttWebsocketEncoder);
-
         final ByteBuf buffer = Unpooled.buffer();
         buffer.writeBytes(new byte[]{1, 2, 3, 4, 5});
-
         final ArrayList<Object> out = new ArrayList<>();
         mqttWebsocketEncoder.encode(channelHandlerContext, buffer, out);
-
         assertEquals(1, out.size());
-
-
     }
 }

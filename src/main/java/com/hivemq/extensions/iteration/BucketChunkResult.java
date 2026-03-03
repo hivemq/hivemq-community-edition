@@ -23,14 +23,12 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
  */
 public class BucketChunkResult<V> {
 
-
     private final @NotNull V value;
     private final boolean finished;
     private final @Nullable String lastKey;
     private final int bucketIndex;
-
-    public BucketChunkResult(
-            @NotNull final V value, final boolean finished, @Nullable final String lastKey, final int bucketIndex) {
+    public BucketChunkResult(@NotNull final V value, final boolean finished, @Nullable final String lastKey,
+            final int bucketIndex) {
         this.value = value;
         this.finished = finished;
         this.lastKey = lastKey;
@@ -56,16 +54,7 @@ public class BucketChunkResult<V> {
 
     @Override
     public String toString() {
-        return "BucketChunkResult{" +
-                "value=" +
-                value +
-                ", finished=" +
-                finished +
-                ", lastKey='" +
-                lastKey +
-                '\'' +
-                ", bucketIndex=" +
-                bucketIndex +
-                '}';
+        return "BucketChunkResult{" + "value=" + value + ", finished=" + finished + ", lastKey='" + lastKey + '\''
+                + ", bucketIndex=" + bucketIndex + '}';
     }
 }

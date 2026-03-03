@@ -34,12 +34,8 @@ public class PubackOutboundInputImpl implements PubackOutboundInput, PluginTaskI
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull PubackPacketImpl pubackPacket;
-
-    public PubackOutboundInputImpl(
-            final @NotNull ClientInformation clientInformation,
-            final @NotNull ConnectionInformation connectionInformation,
-            final @NotNull PubackPacketImpl pubackPacket) {
-
+    public PubackOutboundInputImpl(final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation, final @NotNull PubackPacketImpl pubackPacket) {
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.pubackPacket = pubackPacket;

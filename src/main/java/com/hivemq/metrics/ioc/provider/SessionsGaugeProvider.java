@@ -32,22 +32,18 @@ public class SessionsGaugeProvider implements Provider<SessionsGauge> {
 
     private final MetricRegistry metricRegistry;
     private final ClientSessionLocalPersistence clientSessionPersistence;
-
     @Inject
-    public SessionsGaugeProvider(
-            final MetricRegistry metricRegistry, final ClientSessionLocalPersistence clientSessionPersistence) {
+    public SessionsGaugeProvider(final MetricRegistry metricRegistry,
+            final ClientSessionLocalPersistence clientSessionPersistence) {
         this.metricRegistry = metricRegistry;
         this.clientSessionPersistence = clientSessionPersistence;
     }
-
 
     @Override
     @Singleton
     public SessionsGauge get() {
         final SessionsGauge sessionsGauge = new SessionsGauge(clientSessionPersistence);
-
         metricRegistry.register(HiveMQMetrics.CLIENT_SESSIONS_CURRENT.name(), sessionsGauge);
-
         return sessionsGauge;
     }
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -40,9 +39,11 @@ abstract public class AbstractExtensionTest {
 
     protected @NotNull ExtensionStartInput getTestExtensionStartInput() {
         return new ExtensionStartInput() {
+
             @Override
             public @NotNull ExtensionInformation getExtensionInformation() {
                 return new ExtensionInformation() {
+
                     @Override
                     public @NotNull String getId() {
                         return "id";

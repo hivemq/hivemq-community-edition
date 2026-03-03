@@ -29,7 +29,6 @@ import javax.inject.Singleton;
 public class MetricsHolderProvider implements Provider<MetricsHolder> {
 
     private final MetricRegistry metricRegistry;
-
     @Inject
     public MetricsHolderProvider(final MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
@@ -40,5 +39,4 @@ public class MetricsHolderProvider implements Provider<MetricsHolder> {
     public MetricsHolder get() {
         return new MetricsHolder(metricRegistry);
     }
-
 }

@@ -33,7 +33,6 @@ public class Mqtt3PubackEncoderTest {
 
     private EmbeddedChannel channel;
     private ClientConnection clientConnection;
-
     @Before
     public void setUp() throws Exception {
         channel = new EmbeddedChannel(new TestMessageEncoder());
@@ -44,16 +43,12 @@ public class Mqtt3PubackEncoderTest {
     @Test
     public void test_puback_sent() {
         channel.writeOutbound(new PUBACK(10));
-
         final ByteBuf buf = channel.readOutbound();
-
         final Mqtt3PubackEncoder encoder = new Mqtt3PubackEncoder();
         assertEquals(encoder.bufferSize(clientConnection, new PUBACK(10)), buf.readableBytes());
-
         assertEquals((byte) 0b0100_0000, buf.readByte());
         assertEquals((byte) 0b0000_0010, buf.readByte());
         assertEquals(10, buf.readUnsignedShort());
-
         assertFalse(buf.isReadable());
     }
 }

@@ -32,8 +32,6 @@ public class PublishPayloadLocalPersistenceProvider implements Provider<PublishP
     private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> rocksDBProvider;
     private final @NotNull Provider<PublishPayloadXodusLocalPersistence> xodusProvider;
     private final @NotNull PersistenceType persistenceType;
-
-
     @Inject
     public PublishPayloadLocalPersistenceProvider(
             final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> rocksDBProvider,

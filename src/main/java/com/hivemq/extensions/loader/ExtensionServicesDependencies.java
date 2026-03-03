@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.loader;
 
 import com.google.common.collect.ImmutableMap;
@@ -26,8 +25,9 @@ import com.hivemq.extension.sdk.api.services.Services;
 public interface ExtensionServicesDependencies {
 
     /**
-     * @return a {@link ImmutableMap} which contains all dependencies which are accessible
-     *         via {@link Services} in an extension
+     * @return a {@link ImmutableMap} which contains all dependencies which are accessible via {@link Services} in an
+     *         extension
      */
-    @NotNull ImmutableMap<String, Object> getDependenciesMap(@NotNull ClassLoader classLoader);
+    @NotNull
+    ImmutableMap<String, Object> getDependenciesMap(@NotNull ClassLoader classLoader);
 }

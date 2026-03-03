@@ -34,32 +34,28 @@ public class LifecycleRegistryTest {
         final Injector injector = Guice.createInjector();
         final LifecycleRegistry instance = injector.getInstance(LifecycleRegistry.class);
         final LifecycleRegistry instance2 = injector.getInstance(LifecycleRegistry.class);
-
         assertSame(instance, instance2);
     }
 
     @Test
     public void preDestroyIsExecutedWhenAdded() throws Exception {
         final LifecycleRegistry registry = new LifecycleRegistry();
-
         final CountDownLatch latch = new CountDownLatch(1);
         class PredestroyClass {
+
             @PreDestroy
             public void preDestroy() {
                 latch.countDown();
             }
         }
-
         registry.addPreDestroyMethod(PredestroyClass.class.getMethod("preDestroy"), new PredestroyClass());
         registry.executePreDestroy();
-
         assertTrue(latch.await(1, TimeUnit.SECONDS));
     }
 
     @Test
     public void lifecycleMethodsWhenNotSingletonClassThenCanBeCalledMultipleTimes() {
         final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry();
-
         final Class<Object> objectClass = Object.class;
         assertTrue(lifecycleRegistry.canInvokePostConstruct(objectClass));
         assertTrue(lifecycleRegistry.canInvokePostConstruct(objectClass));
@@ -70,10 +66,8 @@ public class LifecycleRegistryTest {
     @Test
     public void lifecycleMethodsWhenSingletonClassThenCanOnlyBeCalledOnce() {
         final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry();
-
         final Class<Object> objectClass = Object.class;
         lifecycleRegistry.addSingletonClass(objectClass);
-
         assertTrue(lifecycleRegistry.canInvokePostConstruct(objectClass));
         assertFalse(lifecycleRegistry.canInvokePostConstruct(objectClass));
         assertTrue(lifecycleRegistry.canInvokePreDestroy(objectClass));
@@ -83,17 +77,13 @@ public class LifecycleRegistryTest {
     @Test
     public void lifecycleMethodsWhenSingletonClassAddedAgainThenCanStillBeCalledOnce() {
         final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry();
-
         final Class<Object> objectClass = Object.class;
         lifecycleRegistry.addSingletonClass(objectClass);
-
         assertTrue(lifecycleRegistry.canInvokePostConstruct(objectClass));
         assertFalse(lifecycleRegistry.canInvokePostConstruct(objectClass));
         assertTrue(lifecycleRegistry.canInvokePreDestroy(objectClass));
         assertFalse(lifecycleRegistry.canInvokePreDestroy(objectClass));
-
         lifecycleRegistry.addSingletonClass(objectClass);
-
         assertFalse(lifecycleRegistry.canInvokePostConstruct(objectClass));
         assertFalse(lifecycleRegistry.canInvokePreDestroy(objectClass));
     }

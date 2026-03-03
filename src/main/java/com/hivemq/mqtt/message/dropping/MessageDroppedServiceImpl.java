@@ -28,10 +28,8 @@ import java.util.Locale;
 public class MessageDroppedServiceImpl implements MessageDroppedService {
 
     private static final NumberFormat FORMAT = NumberFormat.getInstance(Locale.US);
-
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull EventLog eventLog;
-
     MessageDroppedServiceImpl(final @NotNull MetricsHolder metricsHolder, final @NotNull EventLog eventLog) {
         this.metricsHolder = metricsHolder;
         this.eventLog = eventLog;
@@ -52,7 +50,8 @@ public class MessageDroppedServiceImpl implements MessageDroppedService {
     @Override
     public void queueFullShared(final @NotNull String sharedSubscription, final @NotNull String topic, final int qos) {
         metricsHolder.getDroppedMessageCounter().inc();
-        eventLog.sharedSubscriptionMessageDropped(sharedSubscription,
+        eventLog.sharedSubscriptionMessageDropped(
+                sharedSubscription,
                 topic,
                 qos,
                 "The shared subscription message queue is full");
@@ -69,13 +68,8 @@ public class MessageDroppedServiceImpl implements MessageDroppedService {
             final long currentMemory,
             final long maxMemory) {
         metricsHolder.getDroppedMessageCounter().inc();
-
-        final String reason = "The QoS 0 memory limit exceeded, size: " +
-                FORMAT.format(currentMemory) +
-                " bytes, max: " +
-                FORMAT.format(maxMemory) +
-                " bytes";
-
+        final String reason = "The QoS 0 memory limit exceeded, size: " + FORMAT.format(currentMemory) + " bytes, max: "
+                + FORMAT.format(maxMemory) + " bytes";
         eventLog.messageDropped(clientId, topic, qos, reason);
     }
 
@@ -120,13 +114,8 @@ public class MessageDroppedServiceImpl implements MessageDroppedService {
             final long currentMemory,
             final long maxMemory) {
         metricsHolder.getDroppedMessageCounter().inc();
-
-        final String reason = "The QoS 0 memory limit exceeded, size: " +
-                FORMAT.format(currentMemory) +
-                " bytes, max: " +
-                FORMAT.format(maxMemory) +
-                " bytes";
-
+        final String reason = "The QoS 0 memory limit exceeded, size: " + FORMAT.format(currentMemory) + " bytes, max: "
+                + FORMAT.format(maxMemory) + " bytes";
         eventLog.sharedSubscriptionMessageDropped(group, topic, qos, reason);
     }
 
@@ -138,13 +127,8 @@ public class MessageDroppedServiceImpl implements MessageDroppedService {
             final long maximumPacketSize,
             final long packetSize) {
         metricsHolder.getDroppedMessageCounter().inc();
-
-        final String reason = "Maximum packet size exceeded, size: " +
-                FORMAT.format(packetSize) +
-                " bytes, max: " +
-                FORMAT.format(maximumPacketSize) +
-                " bytes";
-
+        final String reason = "Maximum packet size exceeded, size: " + FORMAT.format(packetSize) + " bytes, max: "
+                + FORMAT.format(maximumPacketSize) + " bytes";
         eventLog.messageDropped(clientId, topic, qos, reason);
     }
 
@@ -154,13 +138,8 @@ public class MessageDroppedServiceImpl implements MessageDroppedService {
             final @NotNull String messageType,
             final long maximumPacketSize,
             final long packetSize) {
-        final String reason = "Maximum packet size exceeded, size: " +
-                FORMAT.format(packetSize) +
-                " bytes, max: " +
-                FORMAT.format(maximumPacketSize) +
-                " bytes";
-
+        final String reason = "Maximum packet size exceeded, size: " + FORMAT.format(packetSize) + " bytes, max: "
+                + FORMAT.format(maximumPacketSize) + " bytes";
         eventLog.mqttMessageDropped(clientId, messageType, reason);
     }
-
 }

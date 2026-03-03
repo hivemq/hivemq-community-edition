@@ -36,8 +36,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * After a subscribe message arrived, we have to queue all messages until the subscribe was handled.
- * Otherwise the subscription would be ignored for publishes that are sent shortly after the subscribe message.
+ * After a subscribe message arrived, we have to queue all messages until the subscribe was handled. Otherwise the
+ * subscription would be ignored for publishes that are sent shortly after the subscribe message.
  *
  * @author Lukas Brandl
  * @author Florian Limpöck
@@ -45,14 +45,13 @@ import java.util.Queue;
 public class SubscribeMessageBarrier extends ChannelDuplexHandler {
 
     private final @NotNull Queue<Message> messageQueue = new LinkedList<>();
-
     public static void addToPipeline(@NotNull ChannelHandlerContext ctx) {
         if (!ctx.pipeline().names().contains(ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER)) {
             final SubscribeMessageBarrier subscribeMessageBarrier = new SubscribeMessageBarrier();
-            ctx.pipeline()
-                    .addAfter(ChannelHandlerNames.MQTT_MESSAGE_ENCODER,
-                            ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER,
-                            subscribeMessageBarrier);
+            ctx.pipeline().addAfter(
+                    ChannelHandlerNames.MQTT_MESSAGE_ENCODER,
+                    ChannelHandlerNames.MQTT_SUBSCRIBE_MESSAGE_BARRIER,
+                    subscribeMessageBarrier);
         }
     }
 
@@ -67,17 +66,17 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
             messageQueue.add((Message) msg);
             return;
         }
-
         super.channelRead(ctx, msg);
     }
 
     @Override
     public void write(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg, final @NotNull ChannelPromise promise)
-            throws Exception {
-
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull Object msg,
+            final @NotNull ChannelPromise promise) throws Exception {
         if (msg instanceof SUBACK || msg instanceof UNSUBACK) {
             promise.addListener(new ChannelFutureListener() {
+
                 @Override
                 public void operationComplete(final @NotNull ChannelFuture future) {
                     if (future.isSuccess()) {
@@ -101,13 +100,12 @@ public class SubscribeMessageBarrier extends ChannelDuplexHandler {
                 }
             });
         }
-
         super.write(ctx, msg, promise);
     }
 
     @VisibleForTesting
-    @NotNull Collection<Message> getQueue() {
+    @NotNull
+    Collection<Message> getQueue() {
         return Collections.unmodifiableCollection(messageQueue);
     }
-
 }

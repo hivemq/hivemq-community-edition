@@ -36,9 +36,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("NullabilityAnnotations")
 public class ModifiableDefaultPermissionsImplTest {
 
-
     private ModifiableDefaultPermissions modifiableDefaultPermissions;
-
     @Before
     public void before() {
         modifiableDefaultPermissions = new ModifiableDefaultPermissionsImpl();
@@ -81,107 +79,74 @@ public class ModifiableDefaultPermissionsImplTest {
 
     @Test(expected = DoNotImplementException.class)
     public void test_addAll_illegal_class() {
-        modifiableDefaultPermissions.addAll(Lists.newArrayList(new TestTopicPermissionsUtil.TestTopicPermission(),
-                new TestTopicPermissionsUtil.TestTopicPermission()));
+        modifiableDefaultPermissions.addAll(
+                Lists.newArrayList(
+                        new TestTopicPermissionsUtil.TestTopicPermission(),
+                        new TestTopicPermissionsUtil.TestTopicPermission()));
     }
-
 
     @Test
     public void test_add_default_changes_to_deny() {
-
         assertEquals(DefaultAuthorizationBehaviour.ALLOW, modifiableDefaultPermissions.getDefaultBehaviour());
-
         modifiableDefaultPermissions.add(TestTopicPermissionsUtil.getTopicPermission());
-
         assertEquals(DefaultAuthorizationBehaviour.DENY, modifiableDefaultPermissions.getDefaultBehaviour());
     }
 
     @Test
     public void test_add_default_not_changes_to_deny_overridden() {
-
         assertEquals(DefaultAuthorizationBehaviour.ALLOW, modifiableDefaultPermissions.getDefaultBehaviour());
-
         modifiableDefaultPermissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.ALLOW);
-
         assertEquals(DefaultAuthorizationBehaviour.ALLOW, modifiableDefaultPermissions.getDefaultBehaviour());
-
         modifiableDefaultPermissions.add(TestTopicPermissionsUtil.getTopicPermission());
-
         assertEquals(DefaultAuthorizationBehaviour.ALLOW, modifiableDefaultPermissions.getDefaultBehaviour());
     }
 
     @Test
     public void test_set_default_deny() {
-
         modifiableDefaultPermissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
-
         assertEquals(DefaultAuthorizationBehaviour.DENY, modifiableDefaultPermissions.getDefaultBehaviour());
-
         modifiableDefaultPermissions.add(TestTopicPermissionsUtil.getTopicPermission());
-
         assertEquals(DefaultAuthorizationBehaviour.DENY, modifiableDefaultPermissions.getDefaultBehaviour());
     }
 
     @Test
     public void test_add_remove_asList() {
-
-        final TopicPermission a =
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
-                        "a").build();
-        final TopicPermission b =
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
-                        "b").build();
-
+        final TopicPermission a = new TopicPermissionBuilderImpl(
+                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("a").build();
+        final TopicPermission b = new TopicPermissionBuilderImpl(
+                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("b").build();
         modifiableDefaultPermissions.add(a);
-
         assertEquals(1, modifiableDefaultPermissions.asList().size());
         modifiableDefaultPermissions.add(b);
-
         assertEquals(2, modifiableDefaultPermissions.asList().size());
-
         assertTrue(modifiableDefaultPermissions.asList().contains(a));
         assertTrue(modifiableDefaultPermissions.asList().contains(b));
-
         modifiableDefaultPermissions.remove(a);
-
         assertFalse(modifiableDefaultPermissions.asList().contains(a));
         assertTrue(modifiableDefaultPermissions.asList().contains(b));
     }
 
     @Test
     public void test_addAll() {
-
-        final TopicPermission a =
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
-                        "a").build();
-        final TopicPermission b =
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
-                        "b").build();
-
+        final TopicPermission a = new TopicPermissionBuilderImpl(
+                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("a").build();
+        final TopicPermission b = new TopicPermissionBuilderImpl(
+                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("b").build();
         modifiableDefaultPermissions.addAll(Lists.newArrayList(a, b));
-
         assertEquals(2, modifiableDefaultPermissions.asList().size());
-
         assertTrue(modifiableDefaultPermissions.asList().contains(a));
         assertTrue(modifiableDefaultPermissions.asList().contains(b));
     }
 
     @Test
     public void test_clear() {
-
-        final TopicPermission a =
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
-                        "a").build();
-        final TopicPermission b =
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter(
-                        "b").build();
-
+        final TopicPermission a = new TopicPermissionBuilderImpl(
+                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("a").build();
+        final TopicPermission b = new TopicPermissionBuilderImpl(
+                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("b").build();
         modifiableDefaultPermissions.addAll(Lists.newArrayList(a, b));
-
         assertEquals(2, modifiableDefaultPermissions.asList().size());
-
         modifiableDefaultPermissions.clear();
-
         assertEquals(0, modifiableDefaultPermissions.asList().size());
     }
 }

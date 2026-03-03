@@ -40,23 +40,19 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
     private final @NotNull AtomicBoolean decided = new AtomicBoolean(false);
     private boolean authenticatorPresent = false;
     private @NotNull AuthenticationState authenticationState = AuthenticationState.UNDECIDED;
-
     private @Nullable ByteBuffer authenticationData;
-    @Nullable String reasonString;
-    @Nullable String timeoutReasonString;
+    @Nullable
+    String reasonString;
+    @Nullable
+    String timeoutReasonString;
     private final boolean validateUTF8;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final @NotNull ModifiableDefaultPermissions defaultPermissions;
     private final @NotNull ModifiableClientSettingsImpl clientSettings;
     private int timeout;
-
-    AuthOutput(
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final boolean validateUTF8,
+    AuthOutput(final @NotNull PluginOutPutAsyncer asyncer, final boolean validateUTF8,
             final @NotNull ModifiableDefaultPermissions defaultPermissions,
-            final @NotNull ModifiableClientSettingsImpl clientSettings,
-            final int timeout) {
-
+            final @NotNull ModifiableClientSettingsImpl clientSettings, final int timeout) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
         this.userProperties = new ModifiableUserPropertiesImpl(ImmutableList.of(), validateUTF8);
@@ -130,7 +126,6 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
             final @NotNull Duration timeout,
             final @NotNull TimeoutFallback fallback,
             final @Nullable String reasonString) {
-
         final Async<T> async = async(timeout, fallback);
         timeoutReasonString = reasonString;
         return async;
@@ -157,11 +152,13 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         authenticationState = AuthenticationState.FAILED;
     }
 
-    @Nullable ByteBuffer getAuthenticationData() {
+    @Nullable
+    ByteBuffer getAuthenticationData() {
         return authenticationData;
     }
 
-    @Nullable String getReasonString() {
+    @Nullable
+    String getReasonString() {
         return reasonString;
     }
 
@@ -193,7 +190,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         return authenticatorPresent;
     }
 
-    @NotNull AuthenticationState getAuthenticationState() {
+    @NotNull
+    AuthenticationState getAuthenticationState() {
         return authenticationState;
     }
 
@@ -202,9 +200,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
             if (isTimedOut()) {
                 throw new UnsupportedOperationException(method + " has no effect as the async operation timed out.");
             }
-            throw new UnsupportedOperationException(method +
-                    " must not be called if authenticateSuccessfully, " +
-                    "failAuthentication, continueAuthentication or nextExtensionOrDefault has already been called.");
+            throw new UnsupportedOperationException(method + " must not be called if authenticateSuccessfully, "
+                    + "failAuthentication, continueAuthentication or nextExtensionOrDefault has already been called.");
         }
     }
 }

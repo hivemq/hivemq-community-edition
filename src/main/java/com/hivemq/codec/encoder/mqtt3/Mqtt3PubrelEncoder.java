@@ -29,20 +29,17 @@ public class Mqtt3PubrelEncoder implements MqttEncoder<PUBREL> {
     public static final int ENCODED_PUBREL_SIZE = 4;
     private static final byte PUBREL_FIXED_HEADER = 0b0110_0010;
     private static final byte PUBREL_REMAINING_LENGTH = 0b0000_0010;
-
     @Override
     public void encode(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull PUBREL msg,
             final @NotNull ByteBuf out) {
-
         if (msg.getPacketIdentifier() == 0) {
             throw new IllegalArgumentException("Message ID must not be null");
         }
         out.writeByte(PUBREL_FIXED_HEADER);
-        //The remaining length is always static for PUBRELs
+        // The remaining length is always static for PUBRELs
         out.writeByte(PUBREL_REMAINING_LENGTH);
-
         out.writeShort(msg.getPacketIdentifier());
     }
 

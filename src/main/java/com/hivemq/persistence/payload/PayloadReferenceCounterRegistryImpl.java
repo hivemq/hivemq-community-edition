@@ -26,16 +26,15 @@ import oshi.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller.
- * The reason is that the caller (primarily PublishPayloadPersistence) calls often multiple methods and the lock
- * must cover all sequential calls to methods.
+ * Most methods are NOT thread-safe and the exclusive access on the bucket must be secured by the caller. The reason is
+ * that the caller (primarily PublishPayloadPersistence) calls often multiple methods and the lock must cover all
+ * sequential calls to methods.
  */
 @NotThreadSafe
 public class PayloadReferenceCounterRegistryImpl implements PayloadReferenceCounterRegistry {
 
     private final @NotNull BucketLock bucketLock;
     private final @NotNull LongIntHashMap @NotNull [] buckets;
-
     PayloadReferenceCounterRegistryImpl(final @NotNull BucketLock bucketLock) {
         this.bucketLock = bucketLock;
         this.buckets = new LongIntHashMap[bucketLock.getBucketCount()];

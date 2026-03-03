@@ -42,9 +42,7 @@ public class EnvironmentCloserTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil = mock();
-
     @Before
     public void setUp() throws Exception {
         when(localPersistenceFileUtil.getLocalPersistenceFolder()).thenReturn(temporaryFolder.newFolder());
@@ -53,98 +51,79 @@ public class EnvironmentCloserTest {
     @Test(timeout = 10000)
     public void test_xodus_closer_retries_until_transaction_finished() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
-
         final Environment environment = Environments.newInstance(localPersistenceFileUtil.getLocalPersistenceFolder());
-
-        //Execute a transaction for 500ms so the closer has to retry a few times
+        // Execute a transaction for 500ms so the closer has to retry a few times
         Executors.newSingleThreadExecutor().submit(new Runnable() {
+
             @Override
             public void run() {
                 try {
                     final Transaction transaction = environment.beginReadonlyTransaction();
                     latch.countDown();
                     try {
-                        //Just sleep
+                        // Just sleep
                         Thread.sleep(500);
                     } catch (final InterruptedException e) {
                         System.err.println(e);
                         throw new RuntimeException(e);
                     }
-                    //cant commit a readonly transaction
+                    // cant commit a readonly transaction
                     transaction.abort();
                 } catch (final Exception ex) {
                     ex.printStackTrace();
                 }
-
             }
         });
         latch.await();
         final EnvironmentCloser closer = new EnvironmentCloser("name", environment, 10, 100);
         assertTrue(closer.close());
         assertTrue(closer.getTryNo() > 0);
-
     }
 
     @Test
     public void test_xodus_closer_retries_not_successfully() throws Exception {
-
         final Environment environment = Environments.newInstance(localPersistenceFileUtil.getLocalPersistenceFolder());
-
-        //Start a transaction which never finishes
+        // Start a transaction which never finishes
         final Transaction transaction = environment.beginReadonlyTransaction();
-
         final EnvironmentCloser closer = new EnvironmentCloser("name", environment, 3, 100);
         assertFalse(closer.close());
         assertEquals(3, closer.getTryNo());
-
     }
 
     @Test
     public void test_xodus_closer_close_already_closed_environment() throws Exception {
-
         final Environment environment = Environments.newInstance(localPersistenceFileUtil.getLocalPersistenceFolder());
-
         environment.close();
-
         final EnvironmentCloser closer = new EnvironmentCloser("name", environment, 3, 100);
         assertFalse(closer.close());
         assertEquals(0, closer.getTryNo());
     }
 
-
     @Test(expected = ExodusException.class)
     public void test_xodus_throws_exception_when_transaction_is_active_and_transaction_open() throws Exception {
-
         final Environment environment = Environments.newInstance(localPersistenceFileUtil.getLocalPersistenceFolder());
-
-        //Start a transaction which never finishes
+        // Start a transaction which never finishes
         final Transaction transaction = environment.beginReadonlyTransaction();
         environment.close();
-
     }
 
     @Test(expected = NullPointerException.class)
     public void test_environment_closer_name_null() throws Exception {
-
         new EnvironmentCloser(null, mock(Environment.class), 1, 1);
     }
 
     @Test(expected = NullPointerException.class)
     public void test_environment_closer_environment_null() throws Exception {
-
         new EnvironmentCloser("name", null, 1, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_environment_closer_maxRetries_invalid() throws Exception {
-
         new EnvironmentCloser("name", mock(Environment.class), 0, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_environment_closer_retryInterval_invalid() throws Exception {
-
         new EnvironmentCloser("name", mock(Environment.class), 1, 0);
     }
-
 }

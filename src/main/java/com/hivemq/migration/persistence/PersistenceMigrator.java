@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.migration.persistence;
 
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
@@ -44,15 +43,12 @@ public class PersistenceMigrator {
 
     private static final Logger log = LoggerFactory.getLogger(PersistenceMigrator.class);
     private static final Logger migrationlog = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
-
     private final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider;
     private final @NotNull Provider<RetainedMessageTypeMigration> retainedMessageMigrationProvider;
     private final @NotNull Provider<RetainedMessagePayloadIDMigration> retainedMessagePayloadIDMigrationProvider;
     private final @NotNull Provider<ClientQueuePayloadIDMigration> clientQueuePayloadIDMigrationProvider;
-
     @Inject
-    public PersistenceMigrator(
-            final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider,
+    public PersistenceMigrator(final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider,
             final @NotNull Provider<RetainedMessageTypeMigration> retainedMessageMigrationProvider,
             final @NotNull Provider<RetainedMessagePayloadIDMigration> retainedMessagePayloadIDMigrationProvider,
             final @NotNull Provider<ClientQueuePayloadIDMigration> clientQueuePayloadIDMigrationProvider) {
@@ -63,48 +59,40 @@ public class PersistenceMigrator {
     }
 
     public void migratePersistenceTypes(final Map<MigrationUnit, PersistenceType> migrations) {
-
         final long start = System.currentTimeMillis();
         migrationlog.info("Start File Persistence migration.");
         log.info("Migrating File Persistences (this can take a few minutes).");
-
         for (final Map.Entry<MigrationUnit, PersistenceType> migration : migrations.entrySet()) {
-
             final TypeMigration migrator;
-
             final MigrationUnit migrationUnit = migration.getKey();
             final PersistenceType persistenceType = migration.getValue();
-
             switch (migrationUnit) {
-                case FILE_PERSISTENCE_PUBLISH_PAYLOAD:
+                case FILE_PERSISTENCE_PUBLISH_PAYLOAD :
                     migrator = publishPayloadMigrationProvider.get();
                     break;
-                case FILE_PERSISTENCE_RETAINED_MESSAGES:
+                case FILE_PERSISTENCE_RETAINED_MESSAGES :
                     migrator = retainedMessageMigrationProvider.get();
                     break;
-                default:
+                default :
                     continue;
             }
-
             final long startOne = System.currentTimeMillis();
             migrationlog.info("Migrating {} to type {}.", migrationUnit, persistenceType);
             log.debug("Migrating {} to type {}.", migrationUnit, persistenceType);
-
             migrator.migrateToType(persistenceType);
-
-            migrationlog.info("Migrated {} to type {} successfully in {} ms",
+            migrationlog.info(
+                    "Migrated {} to type {} successfully in {} ms",
                     migrationUnit,
                     persistenceType,
                     (System.currentTimeMillis() - startOne));
-            log.debug("Migrated {} to type {} successfully in {} ms",
+            log.debug(
+                    "Migrated {} to type {} successfully in {} ms",
                     migrationUnit,
                     persistenceType,
                     (System.currentTimeMillis() - startOne));
         }
-
         log.info("File Persistences successfully migrated in " + (System.currentTimeMillis() - start) + " ms");
         migrationlog.info("File Persistences successfully migrated in " + (System.currentTimeMillis() - start) + " ms");
-
     }
 
     public void closeAllLegacyPersistences() {
@@ -113,31 +101,25 @@ public class PersistenceMigrator {
     }
 
     public void migratePersistenceValues(final @NotNull Set<MigrationUnit> valueMigrations) {
-
         for (final MigrationUnit migrationUnit : valueMigrations) {
             final ValueMigration migrator;
             switch (migrationUnit) {
-                case PAYLOAD_ID_RETAINED_MESSAGES:
+                case PAYLOAD_ID_RETAINED_MESSAGES :
                     migrator = retainedMessagePayloadIDMigrationProvider.get();
                     break;
-                case PAYLOAD_ID_CLIENT_QUEUE:
+                case PAYLOAD_ID_CLIENT_QUEUE :
                     migrator = clientQueuePayloadIDMigrationProvider.get();
                     break;
-                default:
+                default :
                     continue;
             }
             final long startOne = System.currentTimeMillis();
             migrationlog.info("Migrating {}.", migrationUnit);
             log.debug("Migrating {}.", migrationUnit);
-
             migrator.migrateToValue();
-
-            migrationlog.info("Migrated {} successfully in {} ms",
-                    migrationUnit,
-                    (System.currentTimeMillis() - startOne));
+            migrationlog
+                    .info("Migrated {} successfully in {} ms", migrationUnit, (System.currentTimeMillis() - startOne));
             log.debug("Migrated {} successfully in {} ms", migrationUnit, (System.currentTimeMillis() - startOne));
         }
-
     }
-
 }

@@ -33,37 +33,37 @@ import java.util.Set;
 public class PublishTopicTree {
 
     private final Node root = new Node();
-
     public void add(@NotNull final String topic) {
-        final ArrayList<String> subTopics =
-                new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
+        final ArrayList<String> subTopics = new ArrayList<>(
+                Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         root.add(subTopics);
     }
 
     @NotNull
     public Set<String> get(@NotNull final String topic) {
-        final ArrayList<String> subTopics =
-                new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
+        final ArrayList<String> subTopics = new ArrayList<>(
+                Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         return root.get(subTopics, null, false);
     }
 
     public void remove(@NotNull final String topic) {
-        final ArrayList<String> subTopics =
-                new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
+        final ArrayList<String> subTopics = new ArrayList<>(
+                Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         root.remove(subTopics);
     }
-
     private static class Node {
+
         // child and childSubTopic are only used if there is no more than one child node.
-        @Nullable Node child = null;
-        @Nullable String childSubTopic = null;
-
-        @Nullable Map<String, Node> childNodes = null;
+        @Nullable
+        Node child = null;
+        @Nullable
+        String childSubTopic = null;
+        @Nullable
+        Map<String, Node> childNodes = null;
         /*
-        The boolean "directMatch" is true if a topic that ends at this node is stored in the tree.
-        This is important if for example the topics "a/b/c" and "a/b" are both stored in the tree.
-        */ boolean directMatch = false;
-
+         * The boolean "directMatch" is true if a topic that ends at this node is stored in the tree. This is important
+         * if for example the topics "a/b/c" and "a/b" are both stored in the tree.
+         */ boolean directMatch = false;
         public void add(@NotNull final ArrayList<String> subTopics) {
             final String currentSubTopic = subTopics.get(0);
             if (child != null && !currentSubTopic.equals(childSubTopic)) {
@@ -72,24 +72,22 @@ public class PublishTopicTree {
                 child = null;
                 childSubTopic = null;
             }
-
             Node nextChild;
             if (childNodes != null) {
-                //This is NOT the first child node that is added
+                // This is NOT the first child node that is added
                 nextChild = childNodes.get(currentSubTopic);
                 if (nextChild == null) {
                     nextChild = new Node();
                     childNodes.put(currentSubTopic, nextChild);
                 }
             } else if (child == null) {
-                //This is the first child node that is added
+                // This is the first child node that is added
                 child = new Node();
                 childSubTopic = currentSubTopic;
                 nextChild = child;
             } else {
                 nextChild = child;
             }
-
             subTopics.remove(0);
             if (!subTopics.isEmpty()) {
                 nextChild.add(subTopics);
@@ -115,7 +113,6 @@ public class PublishTopicTree {
                 return false;
             }
             final String currentSubTopic = subTopics.get(0);
-
             if (child != null) {
                 if (childSubTopic.equals(currentSubTopic)) {
                     final ArrayList<String> nextSubTopics = new ArrayList<>(subTopics);
@@ -146,14 +143,17 @@ public class PublishTopicTree {
                         childNodes = null;
                     }
                 }
-                // Never remove here because if this would have been the only child node, the childNodes map would have been null
+                // Never remove here because if this would have been the only child node, the childNodes map would have
+                // been null
                 return false;
             }
         }
 
         @NotNull
         public Set<String> get(
-                @NotNull final ArrayList<String> subTopics, @Nullable final String currentTopic, final boolean getAll) {
+                @NotNull final ArrayList<String> subTopics,
+                @Nullable final String currentTopic,
+                final boolean getAll) {
             if (childNodes == null && child == null) {
                 if (currentTopic == null) {
                     return ImmutableSet.of();
@@ -169,7 +169,6 @@ public class PublishTopicTree {
                 return ImmutableSet.of();
             }
             final Set<String> result = new HashSet<>();
-
             if (subTopics.isEmpty()) {
                 if (directMatch) {
                     result.add(currentTopic);
@@ -181,7 +180,6 @@ public class PublishTopicTree {
                 // x/y/z matches x/y/z/#
                 result.add(currentTopic);
             }
-
             if (currentSubTopic.equals("+") || currentSubTopic.equals("#")) {
                 final ArrayList<String> nextSubTopics = new ArrayList<>(subTopics);
                 if (!currentSubTopic.equals("#")) {
@@ -190,11 +188,12 @@ public class PublishTopicTree {
                 if (childNodes != null) {
                     for (final Map.Entry<String, Node> entry : childNodes.entrySet()) {
                         if (currentTopic == null) {
-                            result.addAll(entry.getValue()
-                                    .get(nextSubTopics, entry.getKey(), currentSubTopic.equals("#")));
+                            result.addAll(
+                                    entry.getValue().get(nextSubTopics, entry.getKey(), currentSubTopic.equals("#")));
                         } else {
-                            result.addAll(entry.getValue()
-                                    .get(nextSubTopics,
+                            result.addAll(
+                                    entry.getValue().get(
+                                            nextSubTopics,
                                             currentTopic + "/" + entry.getKey(),
                                             currentSubTopic.equals("#")));
                         }
@@ -203,15 +202,16 @@ public class PublishTopicTree {
                     if (currentTopic == null) {
                         result.addAll(child.get(nextSubTopics, childSubTopic, currentSubTopic.equals("#")));
                     } else {
-                        result.addAll(child.get(nextSubTopics,
-                                currentTopic + "/" + childSubTopic,
-                                currentSubTopic.equals("#")));
+                        result.addAll(
+                                child.get(
+                                        nextSubTopics,
+                                        currentTopic + "/" + childSubTopic,
+                                        currentSubTopic.equals("#")));
                     }
                 }
             } else {
                 final ArrayList<String> nextSubTopics = new ArrayList<>(subTopics);
                 nextSubTopics.remove(0);
-
                 final Node nextChild;
                 if (childNodes != null) {
                     nextChild = childNodes.get(currentSubTopic);

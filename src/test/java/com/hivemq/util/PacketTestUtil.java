@@ -19,12 +19,11 @@ import com.hivemq.mqtt.message.reason.Mqtt5PubRecReasonCode;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 public class PacketTestUtil {
 
     private static PacketTestUtil instance;
-
     private PacketTestUtil() {
     }
 
@@ -37,226 +36,219 @@ public class PacketTestUtil {
 
     public byte[] getInvalidPubrel() {
         return new byte[]{
-
-                //fixed header
-                //  type, flags
+                // fixed header
+                // type, flags
                 (byte) 0b0110_0010,
-                //  remaining length
+                // remaining length
                 3,
-                //   packet identifier
+                // packet identifier
                 0, 5,
-                //  reason code
-                0x50
-
-        };
+                // reason code
+                0x50};
     }
 
     public byte[] getInvalidPubrec() {
         return new byte[]{
                 // fixed header
-                //   type, flags
+                // type, flags
                 (byte) 0b0101_0000,
-                //   remaining length
+                // remaining length
                 14,
-                //   packet identifier
+                // packet identifier
                 0, 5,
-                //   reason code (continue)
+                // reason code (continue)
                 (byte) Mqtt5PubRecReasonCode.SUCCESS.getCode(),
-                //   properties
+                // properties
                 8,
-                //     reason string
+                // reason string
                 0x1F, 0, 7, 's', 'u', 'c', 'c', 'e', 's', 's',
-                //     user properties
+                // user properties
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e'};
     }
 
     public byte[] getInvalidPuback() {
         return new byte[]{
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0100_0000,
-                //   remaining length
+                // remaining length
                 4,
                 // variable header
-                //   packet identifier
+                // packet identifier
                 0, 5,
-                //   reason code (success)
+                // reason code (success)
                 (byte) 1234,
-                //   properties
+                // properties
                 0};
     }
 
     public byte[] getInvalidPublish() {
-
         return new byte[]{
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0011,
-                //   remaining length
+                // remaining length
                 70,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   packet identifier
+                // packet identifier
                 0, (byte) 1,
-                //   properties length
+                // properties length
                 50,};
     }
 
     public byte[] getPublish(final int id) {
-
         return new byte[]{
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0011_0011,
-                //   remaining length
+                // remaining length
                 70,
                 // variable header
-                //   topic name
+                // topic name
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   packet identifier
+                // packet identifier
                 0, (byte) id,
-                //   properties length
+                // properties length
                 50,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 0,
-                //     message expiry interval
+                // message expiry interval
                 0x02, 0, 0, 0, 10,
-                //     topic alias
+                // topic alias
                 0x23, 0, 3,
-                //     response topic
+                // response topic
                 0x08, 0, 8, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e',
-                //     correlation data
+                // correlation data
                 0x09, 0, 5, 5, 4, 3, 2, 1,
-                //     user properties
+                // user properties
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e',
-                //     content type
+                // content type
                 0x03, 0, 4, 't', 'e', 'x', 't',
                 // payload
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     }
 
     public byte[] getConnectWithOut(final boolean requestProblemInformation) {
-
         return new byte[]{
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0001_0000,
                 // remaining length (223)
                 (byte) (128 + 76), 1,
                 // variable header
-                //   protocol name
+                // protocol name
                 0, 4, 'M', 'Q', 'T', 'T',
-                //   protocol version
+                // protocol version
                 5,
-                //   connect flags
+                // connect flags
                 (byte) 0b1110_1110,
-                //   keep alive
+                // keep alive
                 0, 60,
-                //   properties
+                // properties
                 88,
-                //     session expiry interval
+                // session expiry interval
                 0x11, 0, 0, 0, 10,
-                //     request response information
+                // request response information
                 0x19, 1,
-                //     request problem information
+                // request problem information
                 0x17, requestProblemInformation ? (byte) 1 : (byte) 0,
-                //     auth method
+                // auth method
                 0x15, 0, 8, 'G', 'S', '2', '-', 'K', 'R', 'B', '5',
-                //     auth data
+                // auth data
                 0x16, 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                //     receive maximum
+                // receive maximum
                 0x21, 0, 5,
-                //     topic alias maximum
+                // topic alias maximum
                 0x22, 0, 10,
-                //     maximum packet size
+                // maximum packet size
                 0x27, 0, 0, 0, 100,
-                //     user properties
+                // user properties
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 6, 'v', 'a', 'l', 'u', 'e', '2', //
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 // payload
-                //   client identifier
+                // client identifier
                 0, 4, 't', 'e', 's', 't',
-                //   will properties
+                // will properties
                 63,
-                //     message expiry interval
+                // message expiry interval
                 0x02, 0, 0, 0, 10,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1,
-                //     content type
+                // content type
                 0x03, 0, 4, 't', 'e', 'x', 't',
-                //     user property
+                // user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 6, 'v', 'a', 'l', 'u', 'e', '2', //
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e',
-                //     will delay interval
+                // will delay interval
                 0x18, 0, 0, 0, 5,
-                //   will topic
+                // will topic
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   will payload
+                // will payload
                 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                //   username
+                // username
                 0, 8, 'u', 's', 'e', 'r', 'n', 'a', 'm', 'e',
-                //   password
+                // password
                 0, 4, 'p', 'a', 's', 's'};
     }
 
     public byte[] getConnect(final boolean requestProblemInformation) {
-
         return new byte[]{
                 // fixed header
-                //   type, flags
+                // type, flags
                 0b0001_0000,
                 // remaining length (183)
                 (byte) (128 + 36), 1,
                 // variable header
-                //   protocol name
+                // protocol name
                 0, 4, 'M', 'Q', 'T', 'T',
-                //   protocol version
+                // protocol version
                 5,
-                //   connect flags
+                // connect flags
                 (byte) 0b0010_1110,
-                //   keep alive
+                // keep alive
                 0, 60,
-                //   properties
+                // properties
                 64,
-                //     session expiry interval
+                // session expiry interval
                 0x11, 0, 0, 0, 10,
-                //     request response information
+                // request response information
                 0x19, 1,
-                //     request problem information
+                // request problem information
                 0x17, requestProblemInformation ? (byte) 1 : (byte) 0,
-                //     receive maximum
+                // receive maximum
                 0x21, 0, 5,
-                //     topic alias maximum
+                // topic alias maximum
                 0x22, 0, 10,
-                //     maximum packet size
+                // maximum packet size
                 0x27, 0, 0, 0, 100,
-                //     user properties
+                // user properties
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 6, 'v', 'a', 'l', 'u', 'e', '2', //
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e',
                 // payload
-                //   client identifier
+                // client identifier
                 0, 4, 't', 'e', 's', 't',
-                //   will properties
+                // will properties
                 63,
-                //     message expiry interval
+                // message expiry interval
                 0x02, 0, 0, 0, 10,
-                //     payload format indicator
+                // payload format indicator
                 0x01, 1,
-                //     content type
+                // content type
                 0x03, 0, 4, 't', 'e', 'x', 't',
-                //     user property
+                // user property
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 5, 'v', 'a', 'l', 'u', 'e', //
                 0x26, 0, 4, 't', 'e', 's', 't', 0, 6, 'v', 'a', 'l', 'u', 'e', '2', //
                 0x26, 0, 5, 't', 'e', 's', 't', '2', 0, 5, 'v', 'a', 'l', 'u', 'e',
-                //     will delay interval
+                // will delay interval
                 0x18, 0, 0, 0, 5,
-                //   will topic
+                // will topic
                 0, 5, 't', 'o', 'p', 'i', 'c',
-                //   will payload
+                // will payload
                 0, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,};
     }
 }

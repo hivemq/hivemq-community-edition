@@ -36,7 +36,6 @@ import static org.junit.Assert.assertTrue;
 public class ModifiableSubscriptionImplTest {
 
     private @NotNull FullConfigurationService configurationService;
-
     @Before
     public void setUp() {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
@@ -44,271 +43,229 @@ public class ModifiableSubscriptionImplTest {
 
     @Test
     public void setTopicFilter() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setTopicFilter("test");
-
         assertTrue(modifiableSubscription.isModified());
         assertEquals("test", modifiableSubscription.getTopicFilter());
     }
 
     @Test
     public void setTopicFilter_same() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setTopicFilter("topic");
-
         assertFalse(modifiableSubscription.isModified());
     }
 
     @Test(expected = NullPointerException.class)
     public void setTopicFilter_null() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_toLong() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter(RandomStringUtils.randomAlphanumeric(70000));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_empty() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter("");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_sharedAndNoLocal() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, true);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, true);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter("$share/group/topic");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_sharedDisabled() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         configurationService.mqttConfiguration().setSharedSubscriptionsEnabled(false);
         modifiableSubscription.setTopicFilter("$share/group/topic");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_sharedEmpty() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter("$share/group/");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_invalid() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter("topic/\u0000");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setTopicFilter_malformed() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setTopicFilter("topic/\uDC00");
     }
 
     @Test
     public void setQos() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setQos(Qos.EXACTLY_ONCE);
-
         assertTrue(modifiableSubscription.isModified());
         assertEquals(Qos.EXACTLY_ONCE, modifiableSubscription.getQos());
     }
 
     @Test
     public void setQos_same() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setQos(Qos.AT_LEAST_ONCE);
-
         assertFalse(modifiableSubscription.isModified());
         assertEquals(Qos.AT_LEAST_ONCE, modifiableSubscription.getQos());
     }
 
     @Test(expected = NullPointerException.class)
     public void setQos_null() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setQos(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setQos_tooHigh() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         configurationService.mqttConfiguration().setMaximumQos(QoS.AT_LEAST_ONCE);
         modifiableSubscription.setQos(Qos.EXACTLY_ONCE);
     }
 
     @Test
     public void setRetainHandling() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setRetainHandling(RetainHandling.DO_NOT_SEND);
-
         assertTrue(modifiableSubscription.isModified());
         assertEquals(RetainHandling.DO_NOT_SEND, modifiableSubscription.getRetainHandling());
     }
 
     @Test
     public void setRetainHandling_same() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setRetainHandling(RetainHandling.SEND);
-
         assertFalse(modifiableSubscription.isModified());
         assertEquals(RetainHandling.SEND, modifiableSubscription.getRetainHandling());
     }
 
     @Test(expected = NullPointerException.class)
     public void setRetainHandling_null() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setRetainHandling(null);
     }
 
     @Test
     public void setNoLocal() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setNoLocal(true);
-
         assertTrue(modifiableSubscription.isModified());
         assertTrue(modifiableSubscription.getNoLocal());
     }
 
     @Test
     public void setNoLocal_same() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setNoLocal(false);
-
         assertFalse(modifiableSubscription.isModified());
         assertFalse(modifiableSubscription.getNoLocal());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setNoLocal_shared() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("$share/group/topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("$share/group/topic", Qos.AT_LEAST_ONCE,
+                RetainHandling.SEND, false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         modifiableSubscription.setNoLocal(true);
     }
 
     @Test
     public void setRetainAsPublished() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setRetainAsPublished(true);
-
         assertTrue(modifiableSubscription.isModified());
         assertTrue(modifiableSubscription.getRetainAsPublished());
     }
 
     @Test
     public void setRetainAsPublished_same() {
-        final SubscriptionImpl subscription =
-                new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND, false, false);
-        final ModifiableSubscriptionImpl modifiableSubscription =
-                new ModifiableSubscriptionImpl(subscription, configurationService);
-
+        final SubscriptionImpl subscription = new SubscriptionImpl("topic", Qos.AT_LEAST_ONCE, RetainHandling.SEND,
+                false, false);
+        final ModifiableSubscriptionImpl modifiableSubscription = new ModifiableSubscriptionImpl(subscription,
+                configurationService);
         assertFalse(modifiableSubscription.isModified());
-
         modifiableSubscription.setRetainAsPublished(false);
-
         assertFalse(modifiableSubscription.isModified());
         assertFalse(modifiableSubscription.getRetainAsPublished());
     }

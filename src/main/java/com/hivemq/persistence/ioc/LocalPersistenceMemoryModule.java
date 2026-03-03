@@ -36,7 +36,6 @@ import javax.inject.Singleton;
 class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenceMemoryModule>> {
 
     private final @Nullable Injector injector;
-
     public LocalPersistenceMemoryModule(@Nullable final Injector injector) {
         super(LocalPersistenceMemoryModule.class);
         this.injector = injector;
@@ -44,22 +43,17 @@ class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenc
 
     @Override
     protected void configure() {
-
-
         bindLocalPersistence(RetainedMessageLocalPersistence.class, RetainedMessageMemoryLocalPersistence.class);
-
-        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
+        bindLocalPersistence(
+                ClientSessionSubscriptionLocalPersistence.class,
                 ClientSessionSubscriptionMemoryLocalPersistence.class);
-
         bindLocalPersistence(ClientSessionLocalPersistence.class, ClientSessionMemoryLocalPersistence.class);
-
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueMemoryLocalPersistence.class);
-
     }
 
     private void bindLocalPersistence(
-            final @NotNull Class localPersistenceClass, final @NotNull Class localPersistenceImplClass) {
-
+            final @NotNull Class localPersistenceClass,
+            final @NotNull Class localPersistenceImplClass) {
         final Object instance = injector == null ? null : injector.getInstance(localPersistenceImplClass);
         if (instance != null) {
             bind(localPersistenceImplClass).toInstance(instance);

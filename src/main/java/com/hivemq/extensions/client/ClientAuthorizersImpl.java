@@ -34,16 +34,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public class ClientAuthorizersImpl implements ClientAuthorizers {
 
     private final @NotNull ReadWriteLock authorizerLock;
-
     @GuardedBy("authorizerLock")
     private final @NotNull Map<String, SubscriptionAuthorizer> subscriptionAuthorizerMap;
     private final @NotNull Map<String, PublishAuthorizer> publishAuthorizerMap;
-
     public ClientAuthorizersImpl(final @NotNull ExtensionPriorityComparator extensionPriorityComparator) {
         this.subscriptionAuthorizerMap = new TreeMap<>(extensionPriorityComparator);
         this.publishAuthorizerMap = new TreeMap<>(extensionPriorityComparator);
@@ -80,7 +78,6 @@ public class ClientAuthorizersImpl implements ClientAuthorizers {
             for (final String key : keysToRemove) {
                 subscriptionAuthorizerMap.remove(key);
             }
-
             keysToRemove.clear();
             for (final Map.Entry<String, PublishAuthorizer> entry : publishAuthorizerMap.entrySet()) {
                 if (entry.getValue().getClass().getClassLoader().equals(pluginClassLoader)) {
@@ -116,5 +113,4 @@ public class ClientAuthorizersImpl implements ClientAuthorizers {
             lock.unlock();
         }
     }
-
 }

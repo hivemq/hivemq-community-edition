@@ -34,16 +34,13 @@ import static org.mockito.Mockito.when;
 public class ProducerQueuesImplTest {
 
     private final @NotNull SingleWriterServiceImpl singleWriterServiceImpl = mock();
-
     @NotNull
     ProducerQueuesImpl producerQueues;
-
     @Before
     public void setUp() throws Exception {
         when(singleWriterServiceImpl.getPersistenceBucketCount()).thenReturn(64);
         when(singleWriterServiceImpl.getThreadPoolSize()).thenReturn(4);
         when(singleWriterServiceImpl.getGlobalTaskCount()).thenReturn(new AtomicLong());
-
         producerQueues = new ProducerQueuesImpl(singleWriterServiceImpl, 4);
     }
 

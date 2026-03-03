@@ -25,21 +25,17 @@ import java.util.Comparator;
 public class ExtensionPriorityComparator implements Comparator<String> {
 
     private final @NotNull HiveMQExtensions hiveMQExtensions;
-
     public ExtensionPriorityComparator(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
     }
 
     @Override
     public int compare(@NotNull final String o1, @NotNull final String o2) {
-
         if (o1.equals(o2)) {
             return 0;
         }
-
         final HiveMQExtension extension1 = hiveMQExtensions.getExtension(o1);
         final HiveMQExtension extension2 = hiveMQExtensions.getExtension(o2);
-
         if (extension1 == null && extension2 == null) {
             return 0;
         }
@@ -49,7 +45,6 @@ public class ExtensionPriorityComparator implements Comparator<String> {
         if (extension2 == null) {
             return -1;
         }
-
         if (extension1.getPriority() > extension2.getPriority()) {
             return -1;
         } else if (extension1.getPriority() < extension2.getPriority()) {

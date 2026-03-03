@@ -24,7 +24,7 @@ import static com.hivemq.mqtt.message.connack.Mqtt5CONNACK.DEFAULT_MAXIMUM_PACKE
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @XmlRootElement(name = "packets")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -33,7 +33,6 @@ public class PacketsConfigEntity {
 
     @XmlElement(name = "max-packet-size", defaultValue = "268435460")
     private int maxPacketSize = DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT;
-
     public int getMaxPacketSize() {
         return maxPacketSize;
     }

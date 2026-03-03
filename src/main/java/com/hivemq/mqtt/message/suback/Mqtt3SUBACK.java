@@ -15,13 +15,12 @@
  */
 package com.hivemq.mqtt.message.suback;
 
-
 import com.google.common.collect.ImmutableList;
 import com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode;
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 public interface Mqtt3SUBACK {
 

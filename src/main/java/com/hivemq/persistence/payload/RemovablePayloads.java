@@ -23,9 +23,7 @@ public class RemovablePayloads {
 
     private final int bucketIndex;
     private final @NotNull Queue<Long> queue;
-
-    public RemovablePayloads(
-            final int bucketIndex, final @NotNull Queue<Long> queue) {
+    public RemovablePayloads(final int bucketIndex, final @NotNull Queue<Long> queue) {
         this.bucketIndex = bucketIndex;
         this.queue = queue;
     }

@@ -25,11 +25,10 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author Georg Held
  */
 public class BatchedException extends Exception {
-    final Collection<Throwable> throwables;
 
+    final Collection<Throwable> throwables;
     public BatchedException(final Collection<Throwable> throwables) {
         super();
-
         checkArgument(throwables.size() > 1, "throwables.size() must be greater than 1");
         this.throwables = throwables;
     }
@@ -72,7 +71,6 @@ public class BatchedException extends Exception {
         }
         final StackTraceElement[] stackTraceElements = new StackTraceElement[size];
         int i = 0;
-
         for (final Throwable throwable : throwables) {
             for (final StackTraceElement stackTraceElement : throwable.getStackTrace()) {
                 stackTraceElements[i] = stackTraceElement;

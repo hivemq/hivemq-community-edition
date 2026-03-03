@@ -21,21 +21,27 @@ import java.util.concurrent.Executor;
 
 public interface SingleWriterService {
 
-    @NotNull ProducerQueues getRetainedMessageQueue();
+    @NotNull
+    ProducerQueues getRetainedMessageQueue();
 
-    @NotNull ProducerQueues getClientSessionQueue();
+    @NotNull
+    ProducerQueues getClientSessionQueue();
 
-    @NotNull ProducerQueues getSubscriptionQueue();
+    @NotNull
+    ProducerQueues getSubscriptionQueue();
 
-    @NotNull ProducerQueues getQueuedMessagesQueue();
+    @NotNull
+    ProducerQueues getQueuedMessagesQueue();
 
-    @NotNull ProducerQueues getAttributeStoreQueue();
+    @NotNull
+    ProducerQueues getAttributeStoreQueue();
 
     int getPersistenceBucketCount();
 
     void stop();
-
     interface Task<R> {
-        @NotNull R doTask(int bucketIndex);
+
+        @NotNull
+        R doTask(int bucketIndex);
     }
 }

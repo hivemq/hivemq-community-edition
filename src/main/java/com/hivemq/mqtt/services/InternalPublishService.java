@@ -35,9 +35,9 @@ public interface InternalPublishService {
      * @param executorService the executor service in which all callbacks are executed
      * @param sender          client identifier of the client which sent the message
      */
-    @NotNull ListenableFuture<PublishReturnCode> publish(
+    @NotNull
+    ListenableFuture<PublishReturnCode> publish(
             @NotNull final PUBLISH publish,
             @NotNull final ExecutorService executorService,
             @Nullable final String sender);
-
 }

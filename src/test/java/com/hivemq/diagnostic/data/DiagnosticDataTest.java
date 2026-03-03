@@ -23,36 +23,24 @@ import static org.junit.Assert.assertTrue;
 
 public class DiagnosticDataTest {
 
-
     SystemPropertyInformation systemPropertyInformation;
-
     HiveMQInformation hiveMQInformation;
-
     HiveMQSystemInformation systemInformation;
-
     NetworkInterfaceInformation networkInterfaceInformation;
-
     private DiagnosticData data;
-
     @Before
     public void setUp() throws Exception {
-
         systemPropertyInformation = new SystemPropertyInformation();
         hiveMQInformation = new HiveMQInformation(new SystemInformationImpl());
         systemInformation = new HiveMQSystemInformation();
         networkInterfaceInformation = new NetworkInterfaceInformation();
-
-        data = new DiagnosticData(systemPropertyInformation,
-                hiveMQInformation,
-                systemInformation,
+        data = new DiagnosticData(systemPropertyInformation, hiveMQInformation, systemInformation,
                 networkInterfaceInformation);
-
     }
 
     @Test
     public void test_hivemq_diagnostics_all_headlines_available() throws Exception {
         final String diagnosticData = data.get();
-
         assertTrue(diagnosticData.contains("Generated at"));
         assertTrue(diagnosticData.contains("HiveMQ Information"));
         assertTrue(diagnosticData.contains("Java System Properties"));
@@ -62,14 +50,11 @@ public class DiagnosticDataTest {
 
     @Test
     public void test_hivemq_diagnostics_data_available() throws Exception {
-
         final String diagnosticData = data.get();
         System.out.println(diagnosticData);
-
         assertTrue(diagnosticData.contains("HiveMQ Version"));
         assertTrue(diagnosticData.contains("os.name"));
         assertTrue(diagnosticData.contains("Available Processors"));
         assertTrue(diagnosticData.contains("MAC Address"));
     }
-
 }

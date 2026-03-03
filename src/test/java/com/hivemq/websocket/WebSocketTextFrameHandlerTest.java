@@ -30,7 +30,6 @@ import static org.mockito.Mockito.mock;
 public class WebSocketTextFrameHandlerTest {
 
     private EmbeddedChannel channel;
-
     @Before
     public void setUp() throws Exception {
         final WebSocketTextFrameHandler webSocketTextFrameHandler = new WebSocketTextFrameHandler();

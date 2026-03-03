@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PublishStatusFutureCallback implements FutureCallback<PublishStatus> {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishStatusFutureCallback.class);
-
     private final @NotNull PublishPollService publishPollService;
     private final boolean sharedSubscription;
     private final @NotNull String queueId;
@@ -42,14 +41,9 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
     private final int packetIdentifier;
     private final @NotNull Channel channel;
     private final @NotNull String client;
-
-    public PublishStatusFutureCallback(
-            final @NotNull PublishPollService publishPollService,
-            final boolean sharedSubscription,
-            final @NotNull String queueId,
-            final @NotNull PUBLISH publish,
-            final @NotNull FreePacketIdRanges messageIDPool,
-            final @NotNull Channel channel,
+    public PublishStatusFutureCallback(final @NotNull PublishPollService publishPollService,
+            final boolean sharedSubscription, final @NotNull String queueId, final @NotNull PUBLISH publish,
+            final @NotNull FreePacketIdRanges messageIDPool, final @NotNull Channel channel,
             final @NotNull String client) {
         this.publishPollService = publishPollService;
         this.sharedSubscription = sharedSubscription;
@@ -72,19 +66,18 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
             if (publish.getQoS().getQosNumber() > 0) {
                 if (sharedSubscription) {
                     if (status == PublishStatus.DELIVERED) {
-                        final ListenableFuture<Void> future =
-                                publishPollService.removeMessageFromSharedQueue(queueId, publish.getUniqueId());
+                        final ListenableFuture<Void> future = publishPollService
+                                .removeMessageFromSharedQueue(queueId, publish.getUniqueId());
                         FutureUtils.addExceptionLogger(future);
-
                     } else if (status == PublishStatus.NOT_CONNECTED || status == PublishStatus.FAILED) {
-                        final ListenableFuture<Void> future =
-                                publishPollService.removeInflightMarker(queueId, publish.getUniqueId());
+                        final ListenableFuture<Void> future = publishPollService
+                                .removeInflightMarker(queueId, publish.getUniqueId());
                         FutureUtils.addExceptionLogger(future);
                     }
                 } else {
                     if (status == PublishStatus.DELIVERED) {
-                        final ListenableFuture<Void> future =
-                                publishPollService.removeMessageFromQueue(queueId, packetIdentifier);
+                        final ListenableFuture<Void> future = publishPollService
+                                .removeMessageFromQueue(queueId, packetIdentifier);
                         FutureUtils.addExceptionLogger(future);
                     }
                 }
@@ -92,11 +85,9 @@ public class PublishStatusFutureCallback implements FutureCallback<PublishStatus
         } catch (final Exception e) {
             log.error("Exceptions in publish status callback handling, queue ID = {}", queueId, e);
         }
-
         if (packetIdentifier != 0) {
             messageIDPool.returnId(packetIdentifier);
         }
-
         if (status != PublishStatus.NOT_CONNECTED) {
             final AtomicInteger inFlightMessages = ClientConnection.of(channel).getInFlightMessageCount();
             if (inFlightMessages == null || inFlightMessages.decrementAndGet() <= 0) {

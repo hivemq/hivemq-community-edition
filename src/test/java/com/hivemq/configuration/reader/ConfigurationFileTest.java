@@ -29,11 +29,9 @@ public class ConfigurationFileTest {
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
     @Test
     public void test_null_configuration_file() throws Exception {
         final ConfigurationFile configurationFile = new ConfigurationFile(null);
-
         assertFalse(configurationFile.file().isPresent());
     }
 
@@ -41,7 +39,6 @@ public class ConfigurationFileTest {
     public void test_configuration_file_exists() throws Exception {
         final File file = temporaryFolder.newFile();
         final ConfigurationFile configurationFile = new ConfigurationFile(file);
-
         assertTrue(configurationFile.file().isPresent());
         assertEquals(file, configurationFile.file().get());
     }

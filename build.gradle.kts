@@ -12,12 +12,12 @@ plugins {
     alias(libs.plugins.oci)
     alias(libs.plugins.javadocLinks)
     alias(libs.plugins.githubRelease)
-    alias(libs.plugins.license)
     alias(libs.plugins.versions)
 
     /* Code Quality Plugins */
     jacoco
     alias(libs.plugins.forbiddenApis)
+    alias(libs.plugins.spotless)
 
     /* Compliance */
     alias(libs.plugins.hivemq.license)
@@ -324,12 +324,14 @@ tasks.forbiddenApisMain {
 
 tasks.forbiddenApisTest { enabled = false }
 
-/* ******************** compliance ******************** */
-
-license {
-    header = file("HEADER")
-    mapping("java", "SLASHSTAR_STYLE")
+spotless {
+    java {
+        licenseHeaderFile("HEADER")
+        eclipse().configFile("eclipse-formatter.xml")
+    }
 }
+
+/* ******************** compliance ******************** */
 
 hivemqLicense {
     projectName.set("HiveMQ")

@@ -71,46 +71,34 @@ public class TlsWebsocketChannelInitializerTest {
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
     private final @NotNull TlsWebsocketListener mockListener = mock();
     private final @NotNull Tls tls = mock();
-
     private ChannelPipeline pipeline;
-
     @Before
     public void before() {
         pipeline = new FakeChannelPipeline();
-
         when(socketChannel.pipeline()).thenReturn(pipeline);
         when(socketChannel.attr(any(AttributeKey.class))).thenReturn(attribute);
         when(socketChannel.isActive()).thenReturn(true);
         when(sslHandler.handshakeFuture()).thenReturn(future);
         when(sslFactory.getSslContext(any(Tls.class))).thenReturn(sslContext);
-        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class))).thenReturn(
-                sslHandler);
+        when(sslFactory.getSslHandler(any(SocketChannel.class), any(Tls.class), any(SslContext.class)))
+                .thenReturn(sslHandler);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(fullConfigurationService.mqttConfiguration()).thenReturn(new MqttConfigurationServiceImpl());
         when(mockListener.getTls()).thenReturn(tls);
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
-
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
-
         when(channelDependencies.getMqttServerDisconnector()).thenReturn(mqttServerDisconnector);
     }
 
     @Test
     public void test_add_special_handlers() {
-
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("")
-                .port(0)
-                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(0).build())
-                .build();
-
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer =
-                new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
-
-
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("").port(0)
+                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(0).build()).build();
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(
+                channelDependencies, tlsWebsocketListener, sslFactory);
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
-
         assertEquals(10, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
@@ -126,18 +114,11 @@ public class TlsWebsocketChannelInitializerTest {
 
     @Test
     public void test_add_special_handlers_with_timeout() {
-
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("")
-                .port(0)
-                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(10).build())
-                .build();
-
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer =
-                new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
-
-
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("").port(0)
+                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(10).build()).build();
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(
+                channelDependencies, tlsWebsocketListener, sslFactory);
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
-
         assertEquals(12, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
         assertEquals(SSL_EXCEPTION_HANDLER, pipeline.names().get(1));
@@ -152,5 +133,4 @@ public class TlsWebsocketChannelInitializerTest {
         assertEquals(NEW_CONNECTION_IDLE_HANDLER, pipeline.names().get(pipeline.names().size() - 2));
         assertEquals(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, pipeline.names().getLast());
     }
-
 }

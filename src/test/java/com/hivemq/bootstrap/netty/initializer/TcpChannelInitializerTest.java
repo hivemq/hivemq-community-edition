@@ -44,30 +44,21 @@ public class TcpChannelInitializerTest {
     private final @NotNull MqttServerDisconnectorImpl mqttServerDisconnector = mock();
     private final @NotNull FullConfigurationService fullConfigurationService = mock();
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock();
-
-
     private ChannelPipeline pipeline;
-
     private TcpChannelInitializer tcpChannelInitializer;
-
     @Before
     public void before() {
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
-
         pipeline = new FakeChannelPipeline();
-
         tcpChannelInitializer = new TcpChannelInitializer(channelDependencies, tcpListener, nonSslHandlerProvider);
-
         when(nonSslHandlerProvider.get()).thenReturn(new NonSslHandler(mqttServerDisconnector));
         when(socketChannel.pipeline()).thenReturn(pipeline);
-
     }
 
     @Test
     public void test_add_special_handlers() throws Exception {
-
         tcpChannelInitializer.addSpecialHandlers(socketChannel);
         assertEquals(NON_SSL_HANDLER, pipeline.names().getFirst());
     }

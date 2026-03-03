@@ -40,66 +40,56 @@ import java.util.Optional;
 public class ExceptionHandler extends ChannelHandlerAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
-
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
-
     @Inject
     public ExceptionHandler(final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         this.mqttServerDisconnector = mqttServerDisconnector;
     }
-
-    /* java.io.IOException: Connection reset by peer
-     * java.io.IOException: Broken pipe
-     * java.nio.channels.ClosedChannelException: null
-     * javax.net.ssl.SSLException: not an SSL/TLS record (Use http://... URL to connect to HTTPS server)
-     * java.lang.IllegalArgumentException: empty text (Use https://... URL to connect to HTTP server)
+    /*
+     * java.io.IOException: Connection reset by peer java.io.IOException: Broken pipe
+     * java.nio.channels.ClosedChannelException: null javax.net.ssl.SSLException: not an SSL/TLS record (Use http://...
+     * URL to connect to HTTPS server) java.lang.IllegalArgumentException: empty text (Use https://... URL to connect to
+     * HTTP server)
      */
 
     @Override
     public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) throws Exception {
-
         final Channel channel = ctx.channel();
-
         if (cause instanceof SSLException) {
-            //We can ignore SSL Exceptions, since the channel gets closed anyway.
+            // We can ignore SSL Exceptions, since the channel gets closed anyway.
             return;
-
         } else if (cause instanceof ClosedChannelException) {
-            //We can ignore this because the channel is already closed
+            // We can ignore this because the channel is already closed
             return;
-
         } else if (cause instanceof IOException) {
-
-            //We can ignore this because the channel is already closed because of an IO problem
+            // We can ignore this because the channel is already closed because of an IO problem
             return;
-
         } else if (cause instanceof CorruptedFrameException) {
-
-            //We can ignore this because the channel is already closed because of an IO problem
-            mqttServerDisconnector.disconnect(channel,
+            // We can ignore this because the channel is already closed because of an IO problem
+            mqttServerDisconnector.disconnect(
+                    channel,
                     "A client (IP: {}) sent illegal websocket data. Disconnecting client.",
                     "Illegal websocket data sent by client: " + cause.getMessage(),
                     Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
                     null);
             return;
-
-
         } else if (cause instanceof IllegalArgumentException) {
-
-            //do not log IllegalArgumentException as error
-
+            // do not log IllegalArgumentException as error
         } else {
             final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
-
-            log.error("An unexpected error occurred for client with IP {}: {}",
+            log.error(
+                    "An unexpected error occurred for client with IP {}: {}",
                     channelIP.orElse("UNKNOWN"),
                     ExceptionUtils.getStackTrace(cause));
         }
-
         if (channel != null) {
-            mqttServerDisconnector.disconnect(channel, null, // already logged
-                    "Channel exception: " + cause.getMessage(), Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR, null);
+            mqttServerDisconnector.disconnect(
+                    channel,
+                    null, // already logged
+                    "Channel exception: " + cause.getMessage(),
+                    Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
+                    null);
         }
     }
 }

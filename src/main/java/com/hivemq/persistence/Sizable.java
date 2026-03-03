@@ -25,7 +25,6 @@ import com.hivemq.extension.sdk.api.annotations.ThreadSafe;
 public interface Sizable {
 
     int SIZE_NOT_CALCULATED = -1;
-
     @ThreadSafe
     int getEstimatedSize();
 }

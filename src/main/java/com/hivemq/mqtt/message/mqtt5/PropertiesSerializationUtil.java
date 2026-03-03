@@ -50,18 +50,15 @@ public class PropertiesSerializationUtil {
         final int size = Bytes.readInt(bytes, offset);
         offset += Integer.BYTES;
         final ImmutableList.Builder<MqttUserProperty> builder = ImmutableList.builderWithExpectedSize(size);
-
         for (int i = 0; i < size; i++) {
             final int nameLength = Bytes.readUnsignedShort(bytes, offset);
             offset += Short.BYTES;
             final String name = new String(bytes, offset, nameLength, Charsets.UTF_8);
             offset += nameLength;
-
             final int valueLength = Bytes.readUnsignedShort(bytes, offset);
             offset += Short.BYTES;
             final String value = new String(bytes, offset, valueLength, Charsets.UTF_8);
             offset += valueLength;
-
             builder.add(new MqttUserProperty(name, value));
         }
         return Mqtt5UserProperties.of(builder.build());

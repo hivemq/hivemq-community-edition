@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.persistence.util;
 
 import com.google.common.collect.ImmutableList;
@@ -36,7 +35,6 @@ import java.util.concurrent.Callable;
 public class FutureUtils {
 
     private static final Logger log = LoggerFactory.getLogger(FutureUtils.class);
-
     public static ListenableFuture<Void> voidFutureFromList(final ImmutableList<ListenableFuture<Void>> futures) {
         final SettableFuture<Void> result = SettableFuture.create();
         Futures.whenAllComplete(futures).call((Callable<Void>) () -> {
@@ -44,9 +42,9 @@ public class FutureUtils {
             for (final ListenableFuture<Void> future : futures) {
                 // The callback is executed immediately because the future is already completed.
                 Futures.addCallback(future, new FutureCallback<>() {
+
                     @Override
                     public void onSuccess(final Void entry) {
-
                     }
 
                     @Override
@@ -69,9 +67,10 @@ public class FutureUtils {
 
     public static void addExceptionLogger(final ListenableFuture<?> listenableFuture) {
         Futures.addCallback(listenableFuture, new FutureCallback<Object>() {
+
             @Override
             public void onSuccess(@Nullable final Object o) {
-                //no op
+                // no op
             }
 
             @Override

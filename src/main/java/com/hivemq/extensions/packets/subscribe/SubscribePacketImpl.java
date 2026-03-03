@@ -31,7 +31,7 @@ import java.util.Optional;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class SubscribePacketImpl implements SubscribePacket {
@@ -40,13 +40,9 @@ public class SubscribePacketImpl implements SubscribePacket {
     final @NotNull UserPropertiesImpl userProperties;
     final int subscriptionIdentifier;
     final int packetIdentifier;
-
-    public SubscribePacketImpl(
-            final @NotNull ImmutableList<SubscriptionImpl> subscriptions,
-            final @NotNull UserPropertiesImpl userProperties,
-            final int subscriptionIdentifier,
+    public SubscribePacketImpl(final @NotNull ImmutableList<SubscriptionImpl> subscriptions,
+            final @NotNull UserPropertiesImpl userProperties, final int subscriptionIdentifier,
             final int packetIdentifier) {
-
         this.subscriptions = subscriptions;
         this.userProperties = userProperties;
         this.subscriptionIdentifier = subscriptionIdentifier;
@@ -95,10 +91,9 @@ public class SubscribePacketImpl implements SubscribePacket {
             return false;
         }
         final SubscribePacketImpl that = (SubscribePacketImpl) o;
-        return subscriptions.equals(that.subscriptions) &&
-                userProperties.equals(that.userProperties) &&
-                (subscriptionIdentifier == that.subscriptionIdentifier) &&
-                (packetIdentifier == that.packetIdentifier);
+        return subscriptions.equals(that.subscriptions) && userProperties.equals(that.userProperties)
+                && (subscriptionIdentifier == that.subscriptionIdentifier)
+                && (packetIdentifier == that.packetIdentifier);
     }
 
     @Override

@@ -20,8 +20,7 @@ import com.google.inject.Scope;
 /**
  * A lazy Singleton Scope for objects which should <b>not</b> be created eagerly on application startup.
  * <p>
- * For true lazy behaviour, make sure to use a {@link javax.inject.Provider} for these lazy singleton
- * objects
+ * For true lazy behaviour, make sure to use a {@link javax.inject.Provider} for these lazy singleton objects
  *
  * @author Dominik Obermaier
  */
@@ -29,7 +28,6 @@ public class LazySingletonScope {
 
     /* Singleton, we don't need more instances of it */
     private static final Scope instance = new LazySingletonScopeImpl();
-
     /**
      * Returns the LazySingletonScope
      *
@@ -40,6 +38,6 @@ public class LazySingletonScope {
     }
 
     private LazySingletonScope() {
-        //Don't instantiate, this is a singleton
+        // Don't instantiate, this is a singleton
     }
 }

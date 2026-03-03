@@ -43,18 +43,15 @@ import static com.hivemq.configuration.service.InternalConfigurations.MANAGED_EX
 
 /**
  * @author Florian Limpöck
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Singleton
 public class GlobalManagedExtensionExecutorService implements ScheduledExecutorService {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalManagedExtensionExecutorService.class);
-
     private final @NotNull ShutdownHooks shutdownHooks;
-
     private @Nullable ScheduledExecutorService scheduledExecutorService;
     private @Nullable ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-
     @Inject
     public GlobalManagedExtensionExecutorService(final @NotNull ShutdownHooks shutdownHooks) {
         this.shutdownHooks = shutdownHooks;
@@ -62,25 +59,18 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
 
     @PostConstruct
     public void postConstruct() {
-
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("managed-extension-executor-%d");
-
         final int corePoolSize = InternalConfigurations.MANAGED_EXTENSION_THREAD_POOL_THREADS_COUNT.get();
         final int keepAlive = InternalConfigurations.MANAGED_EXTENSION_THREAD_POOL_KEEP_ALIVE_SEC.get();
-
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
         log.debug("Set extension executor thread pool size to {}", corePoolSize);
-
         scheduledThreadPoolExecutor.setKeepAliveTime(keepAlive, TimeUnit.SECONDS);
         log.debug("Set extension executor thread pool keep-alive to {} seconds", keepAlive);
-
         scheduledThreadPoolExecutor.allowCoreThreadTimeOut(true);
-
-        //for instrumentation (metrics)
+        // for instrumentation (metrics)
         scheduledExecutorService = scheduledThreadPoolExecutor;
-
-        shutdownHooks.add(new ManagedPluginExecutorShutdownHook(this,
-                MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC.get()));
+        shutdownHooks.add(
+                new ManagedPluginExecutorShutdownHook(this, MANAGED_EXTENSION_EXECUTOR_SHUTDOWN_TIMEOUT_SEC.get()));
     }
 
     public int getCorePoolSize() {
@@ -101,26 +91,36 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
 
     @NotNull
     public ScheduledFuture<?> schedule(
-            @NotNull final Runnable command, final long delay, @NotNull final TimeUnit unit) {
+            @NotNull final Runnable command,
+            final long delay,
+            @NotNull final TimeUnit unit) {
         return Objects.requireNonNull(scheduledExecutorService).schedule(command, delay, unit);
     }
 
     @NotNull
     public <V> ScheduledFuture<V> schedule(
-            @NotNull final Callable<V> callable, final long delay, @NotNull final TimeUnit unit) {
+            @NotNull final Callable<V> callable,
+            final long delay,
+            @NotNull final TimeUnit unit) {
         return Objects.requireNonNull(scheduledExecutorService).schedule(callable, delay, unit);
     }
 
     @NotNull
     public ScheduledFuture<?> scheduleAtFixedRate(
-            @NotNull final Runnable command, final long initialDelay, final long period, @NotNull final TimeUnit unit) {
+            @NotNull final Runnable command,
+            final long initialDelay,
+            final long period,
+            @NotNull final TimeUnit unit) {
         return Objects.requireNonNull(scheduledExecutorService)
                 .scheduleAtFixedRate(command, initialDelay, period, unit);
     }
 
     @NotNull
     public ScheduledFuture<?> scheduleWithFixedDelay(
-            @NotNull final Runnable command, final long initialDelay, final long delay, @NotNull final TimeUnit unit) {
+            @NotNull final Runnable command,
+            final long initialDelay,
+            final long delay,
+            @NotNull final TimeUnit unit) {
         return Objects.requireNonNull(scheduledExecutorService)
                 .scheduleWithFixedDelay(command, initialDelay, delay, unit);
     }
@@ -170,8 +170,9 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
 
     @NotNull
     public <T> List<Future<T>> invokeAll(
-            @NotNull final Collection<? extends Callable<T>> tasks, final long timeout, @NotNull final TimeUnit unit)
-            throws InterruptedException {
+            @NotNull final Collection<? extends Callable<T>> tasks,
+            final long timeout,
+            @NotNull final TimeUnit unit) throws InterruptedException {
         return Objects.requireNonNull(scheduledExecutorService).invokeAll(tasks, timeout, unit);
     }
 
@@ -183,8 +184,9 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
 
     @NotNull
     public <T> T invokeAny(
-            @NotNull final Collection<? extends Callable<T>> tasks, final long timeout, @NotNull final TimeUnit unit)
-            throws InterruptedException, ExecutionException, TimeoutException {
+            @NotNull final Collection<? extends Callable<T>> tasks,
+            final long timeout,
+            @NotNull final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return Objects.requireNonNull(scheduledExecutorService).invokeAny(tasks, timeout, unit);
     }
 

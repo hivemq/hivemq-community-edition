@@ -45,9 +45,7 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
 
     private final @NotNull Injector persistenceInjector;
     private final @NotNull PersistenceConfigurationService persistenceConfigurationService;
-
-    public LocalPersistenceModule(
-            @NotNull final Injector persistenceInjector,
+    public LocalPersistenceModule(@NotNull final Injector persistenceInjector,
             @NotNull final PersistenceConfigurationService persistenceConfigurationService) {
         super(LocalPersistenceModule.class);
         this.persistenceInjector = persistenceInjector;
@@ -56,46 +54,38 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
 
     @Override
     protected void configure() {
-
         /* Local */
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.FILE) {
             install(new LocalPersistenceFileModule(persistenceInjector));
         } else {
             install(new LocalPersistenceMemoryModule(persistenceInjector));
         }
-
         /* Retained Message */
         bind(RetainedMessagePersistence.class).toProvider(RetainedMessagePersistenceProvider.class)
                 .in(LazySingleton.class);
-
         /* Connection */
         bind(ConnectionPersistence.class).to(ConnectionPersistenceImpl.class).in(Singleton.class);
-
         /* Client Session */
         bind(ClientSessionPersistence.class).toProvider(ClientSessionPersistenceProvider.class).in(LazySingleton.class);
-
         /* Client Session Sub */
         bind(ClientSessionSubscriptionPersistence.class).toProvider(ClientSessionSubscriptionPersistenceProvider.class)
                 .in(LazySingleton.class);
-
         /* QoS Handling */
         bind(IncomingMessageFlowPersistence.class).to(IncomingMessageFlowPersistenceImpl.class);
         bind(IncomingMessageFlowLocalPersistence.class).toProvider(IncomingMessageFlowPersistenceLocalProvider.class)
                 .in(LazySingleton.class);
-
         /* Client Queue */
         bind(ClientQueuePersistence.class).to(ClientQueuePersistenceImpl.class).in(LazySingleton.class);
-
         /* Payload Persistence */
         if (persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY) {
-            bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(
-                    PublishPayloadNoopPersistenceImpl.class));
+            bind(PublishPayloadPersistence.class)
+                    .toInstance(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class));
         } else {
-            bind(PublishPayloadPersistence.class).toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
-            bind(PublishPayloadPersistenceImpl.class).toInstance(persistenceInjector.getInstance(
-                    PublishPayloadPersistenceImpl.class));
+            bind(PublishPayloadPersistence.class)
+                    .toInstance(persistenceInjector.getInstance(PublishPayloadPersistence.class));
+            bind(PublishPayloadPersistenceImpl.class)
+                    .toInstance(persistenceInjector.getInstance(PublishPayloadPersistenceImpl.class));
         }
-
         /* Startup */
         bind(PersistenceStartup.class).toInstance(persistenceInjector.getInstance(PersistenceStartup.class));
     }

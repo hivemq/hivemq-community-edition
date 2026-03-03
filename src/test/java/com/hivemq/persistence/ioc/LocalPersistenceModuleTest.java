@@ -85,84 +85,80 @@ public class LocalPersistenceModuleTest {
     private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
     private final @NotNull PersistenceConfigurationService persistenceConfigurationService = mock();
     private final @NotNull Injector persistenceInjector = mock();
-
     @Before
     public void setUp() throws Exception {
         when(metricsHolder.getMetricRegistry()).thenReturn(new MetricRegistry());
-
-        when(persistenceInjector.getInstance(PublishPayloadPersistence.class)).thenReturn(Mockito.mock(
-                PublishPayloadPersistence.class));
-
-        when(persistenceInjector.getInstance(PublishPayloadPersistenceImpl.class)).thenReturn(Mockito.mock(
-                PublishPayloadPersistenceImpl.class));
-
-        when(persistenceInjector.getInstance(ClientQueueXodusLocalPersistence.class)).thenReturn(Mockito.mock(
-                ClientQueueXodusLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class)).thenReturn(mock(
-                RetainedMessageRocksDBLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class)).thenReturn(mock(
-                PublishPayloadRocksDBLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class)).thenReturn(mock(
-                RetainedMessageXodusLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class)).thenReturn(mock(
-                PublishPayloadXodusLocalPersistence.class));
-
-        when(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class)).thenReturn(new PublishPayloadNoopPersistenceImpl());
-
-        when(persistenceInjector.getInstance(PersistenceStartup.class)).thenReturn(Mockito.mock(PersistenceStartup.class));
-        when(persistenceInjector.getInstance(PersistenceConfigurationService.class)).thenReturn(
-                persistenceConfigurationService);
+        when(persistenceInjector.getInstance(PublishPayloadPersistence.class))
+                .thenReturn(Mockito.mock(PublishPayloadPersistence.class));
+        when(persistenceInjector.getInstance(PublishPayloadPersistenceImpl.class))
+                .thenReturn(Mockito.mock(PublishPayloadPersistenceImpl.class));
+        when(persistenceInjector.getInstance(ClientQueueXodusLocalPersistence.class))
+                .thenReturn(Mockito.mock(ClientQueueXodusLocalPersistence.class));
+        when(persistenceInjector.getInstance(RetainedMessageRocksDBLocalPersistence.class))
+                .thenReturn(mock(RetainedMessageRocksDBLocalPersistence.class));
+        when(persistenceInjector.getInstance(PublishPayloadRocksDBLocalPersistence.class))
+                .thenReturn(mock(PublishPayloadRocksDBLocalPersistence.class));
+        when(persistenceInjector.getInstance(RetainedMessageXodusLocalPersistence.class))
+                .thenReturn(mock(RetainedMessageXodusLocalPersistence.class));
+        when(persistenceInjector.getInstance(PublishPayloadXodusLocalPersistence.class))
+                .thenReturn(mock(PublishPayloadXodusLocalPersistence.class));
+        when(persistenceInjector.getInstance(PublishPayloadNoopPersistenceImpl.class))
+                .thenReturn(new PublishPayloadNoopPersistenceImpl());
+        when(persistenceInjector.getInstance(PersistenceStartup.class))
+                .thenReturn(Mockito.mock(PersistenceStartup.class));
+        when(persistenceInjector.getInstance(PersistenceConfigurationService.class))
+                .thenReturn(persistenceConfigurationService);
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceMode.FILE);
-
     }
 
     @Test
     public void test_singletons() throws Exception {
-
-        final Injector injector =
-                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-
-        assertSame(injector.getInstance(RetainedMessageLocalPersistence.class),
+        final Injector injector = createInjector(
+                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertSame(
+                injector.getInstance(RetainedMessageLocalPersistence.class),
                 injector.getInstance(RetainedMessageLocalPersistence.class));
-        assertSame(injector.getInstance(ClientSessionLocalPersistence.class),
+        assertSame(
+                injector.getInstance(ClientSessionLocalPersistence.class),
                 injector.getInstance(ClientSessionLocalPersistence.class));
-        assertSame(injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
+        assertSame(
+                injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
                 injector.getInstance(ClientSessionSubscriptionLocalPersistence.class));
-        assertSame(injector.getInstance(ClientQueueLocalPersistence.class),
+        assertSame(
+                injector.getInstance(ClientQueueLocalPersistence.class),
                 injector.getInstance(ClientQueueLocalPersistence.class));
-        assertSame(injector.getInstance(PublishPayloadPersistence.class),
+        assertSame(
+                injector.getInstance(PublishPayloadPersistence.class),
                 injector.getInstance(PublishPayloadPersistence.class));
-        assertSame(injector.getInstance(PublishPayloadPersistenceImpl.class),
+        assertSame(
+                injector.getInstance(PublishPayloadPersistenceImpl.class),
                 injector.getInstance(PublishPayloadPersistenceImpl.class));
     }
 
     @Test
     public void test_rocks_db_local_persistences() throws Exception {
-
-
-        final Injector injector =
-                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-
-        assertTrue(injector.getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadRocksDBLocalPersistence);
-        assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageRocksDBLocalPersistence);
+        final Injector injector = createInjector(
+                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertTrue(
+                injector.getInstance(
+                        PublishPayloadLocalPersistence.class) instanceof PublishPayloadRocksDBLocalPersistence);
+        assertTrue(
+                injector.getInstance(
+                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageRocksDBLocalPersistence);
     }
 
     @Test
     public void test_xodus_local_persistences() throws Exception {
-
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(FILE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(FILE);
-
-        final Injector injector =
-                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-
-        assertTrue(injector.getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadXodusLocalPersistence);
-        assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageXodusLocalPersistence);
-
+        final Injector injector = createInjector(
+                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertTrue(
+                injector.getInstance(
+                        PublishPayloadLocalPersistence.class) instanceof PublishPayloadXodusLocalPersistence);
+        assertTrue(
+                injector.getInstance(
+                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageXodusLocalPersistence);
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(FILE_NATIVE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(FILE_NATIVE);
     }
@@ -170,19 +166,21 @@ public class LocalPersistenceModuleTest {
     @Test
     public void test_memory_persistence() {
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceMode.IN_MEMORY);
-
-        final Injector injector =
-                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-
-        assertTrue(injector.getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
+        final Injector injector = createInjector(
+                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertTrue(
+                injector.getInstance(
+                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
     }
 
     private Injector createInjector(final LocalPersistenceModule localPersistenceModule) {
-        return Guice.createInjector(localPersistenceModule,
+        return Guice.createInjector(
+                localPersistenceModule,
                 new LazySingletonModule(),
                 new ThrottlingModule(),
                 new MQTTServiceModule(),
                 new AbstractModule() {
+
                     @Override
                     protected void configure() {
                         bind(FullConfigurationService.class).toInstance(configurationService);
@@ -199,7 +197,8 @@ public class LocalPersistenceModuleTest {
                         bind(SingleWriterService.class).toInstance(singleWriterServiceImpl);
                         bind(EventLog.class).toInstance(eventLog);
                         bind(MessageDroppedService.class).toInstance(messageDroppedService);
-                        bind(RestrictionsConfigurationService.class).toInstance(new RestrictionsConfigurationServiceImpl());
+                        bind(RestrictionsConfigurationService.class)
+                                .toInstance(new RestrictionsConfigurationServiceImpl());
                         bind(MqttConfigurationService.class).toInstance(mqttConfigurationService);
                         bind(MqttServerDisconnector.class).toInstance(mock(MqttServerDisconnector.class));
                     }

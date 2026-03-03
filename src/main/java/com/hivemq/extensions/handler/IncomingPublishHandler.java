@@ -58,8 +58,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This handler intercepts every inbound PUBLISH message and delegates it to all registered {@link
- * PublishInboundInterceptor}s for a specific client.
+ * This handler intercepts every inbound PUBLISH message and delegates it to all registered
+ * {@link PublishInboundInterceptor}s for a specific client.
  * <p>
  * When delivery of the PUBLISH is prevented, the message will be dropped.
  * <p>
@@ -76,13 +76,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Singleton
 public class IncomingPublishHandler {
 
     private static final Logger log = LoggerFactory.getLogger(IncomingPublishHandler.class);
-
     private final @NotNull PluginTaskExecutorService executorService;
     private final @NotNull PluginOutPutAsyncer asyncer;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
@@ -90,17 +89,13 @@ public class IncomingPublishHandler {
     private final @NotNull PluginAuthorizerService authorizerService;
     private final @NotNull MqttServerDisconnector mqttDisconnector;
     private final @NotNull FullConfigurationService configurationService;
-
     @Inject
-    public IncomingPublishHandler(
-            final @NotNull PluginTaskExecutorService executorService,
-            final @NotNull PluginOutPutAsyncer asyncer,
-            final @NotNull HiveMQExtensions hiveMQExtensions,
+    public IncomingPublishHandler(final @NotNull PluginTaskExecutorService executorService,
+            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull PluginAuthorizerService authorizerService,
             final @NotNull MqttServerDisconnector mqttDisconnector,
             final @NotNull FullConfigurationService configurationService) {
-
         this.executorService = executorService;
         this.asyncer = asyncer;
         this.hiveMQExtensions = hiveMQExtensions;
@@ -118,9 +113,10 @@ public class IncomingPublishHandler {
      * @param publish the publish to process
      */
     public void interceptOrDelegate(
-            final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish, final @NotNull String clientId) {
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull PUBLISH publish,
+            final @NotNull String clientId) {
         final Channel channel = ctx.channel();
-
         final ClientContextImpl clientContext = ClientConnection.of(channel).getExtensionClientContext();
         if (clientContext == null) {
             ctx.executor().execute(() -> authorizerService.authorizePublish(ctx, publish));
@@ -131,41 +127,29 @@ public class IncomingPublishHandler {
             ctx.executor().execute(() -> authorizerService.authorizePublish(ctx, publish));
             return;
         }
-
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-
         final PublishPacketImpl packet = new PublishPacketImpl(publish);
         final PublishInboundInputImpl input = new PublishInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<PublishInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-
-        final ModifiablePublishPacketImpl modifiablePacket =
-                new ModifiablePublishPacketImpl(packet, configurationService);
+        final ModifiablePublishPacketImpl modifiablePacket = new ModifiablePublishPacketImpl(packet,
+                configurationService);
         final PublishInboundOutputImpl output = new PublishInboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PublishInboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
-
         final PublishInboundInterceptorContext context = new PublishInboundInterceptorContext(clientId,
-                interceptors.size(),
-                ctx,
-                publish,
-                inputHolder,
-                outputHolder);
-
+                interceptors.size(), ctx, publish, inputHolder, outputHolder);
         for (final PublishInboundInterceptor interceptor : interceptors) {
-
-            final HiveMQExtension extension =
-                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension = hiveMQExtensions
+                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
             }
-
-            final PublishInboundInterceptorTask task =
-                    new PublishInboundInterceptorTask(interceptor, extension.getId());
+            final PublishInboundInterceptorTask task = new PublishInboundInterceptorTask(interceptor,
+                    extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
-
     private class PublishInboundInterceptorContext extends PluginInOutTaskContext<PublishInboundOutputImpl>
             implements Runnable {
 
@@ -175,15 +159,10 @@ public class IncomingPublishHandler {
         private final @NotNull PUBLISH publish;
         private final @NotNull ExtensionParameterHolder<PublishInboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<PublishInboundOutputImpl> outputHolder;
-
-        PublishInboundInterceptorContext(
-                final @NotNull String clientId,
-                final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx,
-                final @NotNull PUBLISH publish,
+        PublishInboundInterceptorContext(final @NotNull String clientId, final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx, final @NotNull PUBLISH publish,
                 final @NotNull ExtensionParameterHolder<PublishInboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<PublishInboundOutputImpl> outputHolder) {
-
             super(clientId);
             this.interceptorCount = interceptorCount;
             this.counter = new AtomicInteger(0);
@@ -232,57 +211,50 @@ public class IncomingPublishHandler {
         private void dropMessage(final @NotNull PublishInboundOutputImpl output) {
             final Channel channel = ctx.channel();
             final String clientId = getIdentifier();
-
             final ProtocolVersion protocolVersion = ClientConnection.of(channel).getProtocolVersion();
-            //MQTT 3
+            // MQTT 3
             if (protocolVersion != ProtocolVersion.MQTTv5) {
                 if (output.getReasonCode() != AckReasonCode.SUCCESS) {
-                    mqttDisconnector.disconnect(channel,
-                            "Client '" +
-                                    clientId +
-                                    "' (IP: {}) sent a PUBLISH, but its onward delivery was prevented by a publish inbound interceptor. Disconnecting client.",
+                    mqttDisconnector.disconnect(
+                            channel,
+                            "Client '" + clientId
+                                    + "' (IP: {}) sent a PUBLISH, but its onward delivery was prevented by a publish inbound interceptor. Disconnecting client.",
                             "Sent PUBLISH, but its onward delivery was prevented by a publish inbound interceptor",
                             Mqtt5DisconnectReasonCode.ADMINISTRATIVE_ACTION,
                             null);
                 } else {
-
                     switch (publish.getQoS()) {
-                        case AT_MOST_ONCE:
-                            //no ack for qos 0
+                        case AT_MOST_ONCE :
+                            // no ack for qos 0
                             break;
-                        case AT_LEAST_ONCE:
+                        case AT_LEAST_ONCE :
                             ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier()));
                             break;
-                        case EXACTLY_ONCE:
+                        case EXACTLY_ONCE :
                             ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier()));
                             break;
                     }
-
                 }
-
-                //MQTT 5
+                // MQTT 5
             } else {
                 switch (publish.getQoS()) {
-                    case AT_MOST_ONCE:
-                        //no ack for qos 0
+                    case AT_MOST_ONCE :
+                        // no ack for qos 0
                         break;
-                    case AT_LEAST_ONCE:
+                    case AT_LEAST_ONCE :
                         final Mqtt5PubAckReasonCode ackReasonCode = Mqtt5PubAckReasonCode.from(output.getReasonCode());
-                        ctx.writeAndFlush(new PUBACK(publish.getPacketIdentifier(),
-                                ackReasonCode,
-                                output.getReasonString(),
-                                Mqtt5UserProperties.NO_USER_PROPERTIES));
+                        ctx.writeAndFlush(
+                                new PUBACK(publish.getPacketIdentifier(), ackReasonCode, output.getReasonString(),
+                                        Mqtt5UserProperties.NO_USER_PROPERTIES));
                         break;
-                    case EXACTLY_ONCE:
+                    case EXACTLY_ONCE :
                         final Mqtt5PubRecReasonCode recReasonCode = Mqtt5PubRecReasonCode.from(output.getReasonCode());
-                        ctx.writeAndFlush(new PUBREC(publish.getPacketIdentifier(),
-                                recReasonCode,
-                                output.getReasonString(),
-                                Mqtt5UserProperties.NO_USER_PROPERTIES));
+                        ctx.writeAndFlush(
+                                new PUBREC(publish.getPacketIdentifier(), recReasonCode, output.getReasonString(),
+                                        Mqtt5UserProperties.NO_USER_PROPERTIES));
                         break;
                 }
             }
-
             messageDroppedService.extensionPrevented(clientId, publish.getTopic(), publish.getQoS().getQosNumber());
         }
     }
@@ -292,18 +264,16 @@ public class IncomingPublishHandler {
 
         private final @NotNull PublishInboundInterceptor interceptor;
         private final @NotNull String extensionId;
-
-        private PublishInboundInterceptorTask(
-                final @NotNull PublishInboundInterceptor interceptor, final @NotNull String extensionId) {
-
+        private PublishInboundInterceptorTask(final @NotNull PublishInboundInterceptor interceptor,
+                final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
         }
 
         @Override
         public @NotNull PublishInboundOutputImpl apply(
-                final @NotNull PublishInboundInputImpl input, final @NotNull PublishInboundOutputImpl output) {
-
+                final @NotNull PublishInboundInputImpl input,
+                final @NotNull PublishInboundOutputImpl output) {
             if (output.isPreventDelivery()) {
                 // it's already prevented so no further interceptors must be called.
                 return output;
@@ -311,8 +281,11 @@ public class IncomingPublishHandler {
             try {
                 interceptor.onInboundPublish(input, output);
             } catch (final Throwable e) {
-                log.warn("Uncaught exception was thrown from extension with id \"{}\" on inbound PUBLISH interception. " +
-                        "Extensions are responsible for their own exception handling.", extensionId, e);
+                log.warn(
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBLISH interception. "
+                                + "Extensions are responsible for their own exception handling.",
+                        extensionId,
+                        e);
                 output.forciblyPreventPublishDelivery(output.getReasonCode(), output.getReasonString());
                 Exceptions.rethrowError(e);
             }

@@ -31,59 +31,32 @@ import java.util.Objects;
 /**
  * @author Florian Limpöck
  * @author Silvio Giebl
- * @since 4.0.0
+ * @since  4.0.0
  */
 @Immutable
 public class WillPublishPacketImpl extends PublishPacketImpl implements WillPublishPacket {
 
     final long willDelay;
-
-    public WillPublishPacketImpl(
-            final @NotNull String topic,
-            final @NotNull Qos qos,
-            final @Nullable ByteBuffer payload,
-            final boolean retain,
-            final long messageExpiryInterval,
-            final @Nullable PayloadFormatIndicator payloadFormatIndicator,
-            final @Nullable String contentType,
-            final @Nullable String responseTopic,
-            final @Nullable ByteBuffer correlationData,
-            final @NotNull UserPropertiesImpl userProperties,
-            final long willDelay,
-            final long timestamp) {
-
-        super(topic,
-                qos,
-                qos,
-                0,
-                false,
-                payload,
-                retain,
-                messageExpiryInterval,
-                payloadFormatIndicator,
-                contentType,
-                responseTopic,
-                correlationData,
-                ImmutableIntArray.of(),
-                userProperties,
-                timestamp);
+    public WillPublishPacketImpl(final @NotNull String topic, final @NotNull Qos qos,
+            final @Nullable ByteBuffer payload, final boolean retain, final long messageExpiryInterval,
+            final @Nullable PayloadFormatIndicator payloadFormatIndicator, final @Nullable String contentType,
+            final @Nullable String responseTopic, final @Nullable ByteBuffer correlationData,
+            final @NotNull UserPropertiesImpl userProperties, final long willDelay, final long timestamp) {
+        super(topic, qos, qos, 0, false, payload, retain, messageExpiryInterval, payloadFormatIndicator, contentType,
+                responseTopic, correlationData, ImmutableIntArray.of(), userProperties, timestamp);
         this.willDelay = willDelay;
     }
 
     public WillPublishPacketImpl(final @NotNull MqttWillPublish willPublish, final long timestamp) {
-        this(willPublish.getTopic(),
-                willPublish.getQos().toQos(),
+        this(willPublish.getTopic(), willPublish.getQos().toQos(),
                 (willPublish.getPayload() == null) ? null : ByteBuffer.wrap(willPublish.getPayload()),
-                willPublish.isRetain(),
-                willPublish.getMessageExpiryInterval(),
-                (willPublish.getPayloadFormatIndicator() == null) ?
-                        null :
-                        PayloadFormatIndicator.valueOf(willPublish.getPayloadFormatIndicator().name()),
-                willPublish.getContentType(),
-                willPublish.getResponseTopic(),
+                willPublish.isRetain(), willPublish.getMessageExpiryInterval(),
+                (willPublish.getPayloadFormatIndicator() == null)
+                        ? null
+                        : PayloadFormatIndicator.valueOf(willPublish.getPayloadFormatIndicator().name()),
+                willPublish.getContentType(), willPublish.getResponseTopic(),
                 willPublish.getCorrelationData() == null ? null : ByteBuffer.wrap(willPublish.getCorrelationData()),
-                UserPropertiesImpl.of(willPublish.getUserProperties().asList()),
-                willPublish.getDelayInterval(),
+                UserPropertiesImpl.of(willPublish.getUserProperties().asList()), willPublish.getDelayInterval(),
                 timestamp);
     }
 

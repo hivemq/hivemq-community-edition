@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler.testextensions;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -42,7 +41,6 @@ public final class TestProvider implements ClientLifecycleEventListenerProvider 
     private final @NotNull CountDownLatch onServerInitiatedDisconnectLatch;
     private final @NotNull CountDownLatch onAuthenticationSuccessfulLatch;
     private final @NotNull CountDownLatch onDisconnectLatch;
-
     public TestProvider(final @NotNull CountDownLatch countDownLatch) {
         this.onMqttConnectionStartLatch = countDownLatch;
         this.onAuthenticationFailedDisconnectLatch = countDownLatch;
@@ -54,8 +52,10 @@ public final class TestProvider implements ClientLifecycleEventListenerProvider 
     }
 
     @Override
-    public @NotNull ClientLifecycleEventListener getClientLifecycleEventListener(final @NotNull ClientLifecycleEventListenerProviderInput input) {
+    public @NotNull ClientLifecycleEventListener getClientLifecycleEventListener(
+            final @NotNull ClientLifecycleEventListenerProviderInput input) {
         return new ClientLifecycleEventListener() {
+
             @Override
             public void onMqttConnectionStart(final @NotNull ConnectionStartInput input) {
                 onMqttConnectionStartLatch.countDown();

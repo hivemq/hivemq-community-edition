@@ -40,19 +40,15 @@ public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
     private @Nullable String reasonString;
     private final int packetIdentifier;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
-
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
-
-    public ModifiableUnsubackPacketImpl(
-            final @NotNull UnsubackPacketImpl packet, final @NotNull FullConfigurationService configurationService) {
-
+    public ModifiableUnsubackPacketImpl(final @NotNull UnsubackPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService) {
         reasonCodes = packet.reasonCodes;
         reasonString = packet.reasonString;
         packetIdentifier = packet.packetIdentifier;
         userProperties = new ModifiableUserPropertiesImpl(packet.userProperties.asInternalList(),
                 configurationService.securityConfiguration().validateUTF8());
-
         this.configurationService = configurationService;
     }
 
@@ -71,7 +67,8 @@ public class ModifiableUnsubackPacketImpl implements ModifiableUnsubackPacket {
             Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null.", i);
             final Mqtt5UnsubAckReasonCode oldReasonCode = Mqtt5UnsubAckReasonCode.from(this.reasonCodes.get(i));
             final Mqtt5UnsubAckReasonCode newReasonCode = Mqtt5UnsubAckReasonCode.from(reasonCodes.get(i));
-            Preconditions.checkState(newReasonCode.isError() == oldReasonCode.isError(),
+            Preconditions.checkState(
+                    newReasonCode.isError() == oldReasonCode.isError(),
                     "Reason code (at index %s) must not switch from successful to unsuccessful or vice versa.",
                     i);
         }

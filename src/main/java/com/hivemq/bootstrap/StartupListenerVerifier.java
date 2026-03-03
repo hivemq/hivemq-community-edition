@@ -26,8 +26,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * This class verifies if the listener startup was successful and gives
- * feedback to the user by logging
+ * This class verifies if the listener startup was successful and gives feedback to the user by logging
  *
  * @author Dominik Obermaier
  */
@@ -35,16 +34,14 @@ public class StartupListenerVerifier {
 
     private static final Logger log = LoggerFactory.getLogger(StartupListenerVerifier.class);
     private final List<ListenerStartupInformation> startupInformation;
-
     public StartupListenerVerifier(@NotNull final List<ListenerStartupInformation> startupInformation) {
-
         checkNotNull(startupInformation);
         this.startupInformation = startupInformation;
     }
 
     /**
-     * Verifies that at least one listener was started successfully and prints out information
-     * to the user to the log file
+     * Verifies that at least one listener was started successfully and prints out information to the user to the log
+     * file
      *
      * @throws UnrecoverableException if no listener could be started successfully
      */
@@ -54,7 +51,6 @@ public class StartupListenerVerifier {
                     "No listener was configured. In order to operate properly, HiveMQ needs at least one listener. Shutting down HiveMQ");
             throw new UnrecoverableException(false);
         }
-
         int successfullyStarted = 0;
         for (final ListenerStartupInformation startupInfo : startupInformation) {
             if (startupInfo.isSuccessful()) {
@@ -67,7 +63,6 @@ public class StartupListenerVerifier {
                 }
             }
         }
-
         if (successfullyStarted < 1) {
             log.error("Could not bind any listener. Stopping HiveMQ.");
             throw new UnrecoverableException(false);
@@ -76,7 +71,8 @@ public class StartupListenerVerifier {
 
     private @NotNull String getSuccessfulStartedString(final @NotNull ListenerStartupInformation startupInfo) {
         final Listener listener = startupInfo.getListener();
-        return String.format("Started %s on address %s and on port %s.",
+        return String.format(
+                "Started %s on address %s and on port %s.",
                 listener.readableName(),
                 listener.getBindAddress(),
                 listener.getPort());
@@ -84,7 +80,8 @@ public class StartupListenerVerifier {
 
     private @NotNull String getNotSuccessfulStartedString(final @NotNull ListenerStartupInformation startupInfo) {
         final Listener listener = startupInfo.getListener();
-        return String.format("Could not start %s on port %s and address %s. Is it already in use?",
+        return String.format(
+                "Could not start %s on port %s and address %s. Is it already in use?",
                 listener.readableName(),
                 listener.getPort(),
                 listener.getBindAddress());

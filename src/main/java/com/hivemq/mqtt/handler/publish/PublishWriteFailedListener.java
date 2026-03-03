@@ -30,9 +30,7 @@ import org.slf4j.LoggerFactory;
 public class PublishWriteFailedListener implements GenericFutureListener<Future<? super Void>> {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(PublishWriteFailedListener.class);
-
     private final @NotNull SettableFuture<PublishStatus> statusFuture;
-
     public PublishWriteFailedListener(final @NotNull SettableFuture<PublishStatus> statusFuture) {
         this.statusFuture = statusFuture;
     }
@@ -44,7 +42,6 @@ public class PublishWriteFailedListener implements GenericFutureListener<Future<
             if (Exceptions.isConnectionClosedException(cause)) {
                 log.trace("Failed to write publish. Client not connected anymore");
                 statusFuture.set(PublishStatus.NOT_CONNECTED);
-
             } else if (cause instanceof EncoderException) {
                 Exceptions.rethrowError("Failed to write publish. Encoding Failure.", cause);
                 final Throwable rootCause = cause.getCause();

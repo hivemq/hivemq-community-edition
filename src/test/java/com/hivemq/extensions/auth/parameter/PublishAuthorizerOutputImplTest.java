@@ -39,9 +39,7 @@ import static org.mockito.Mockito.mock;
 public class PublishAuthorizerOutputImplTest {
 
     private final @NotNull PluginOutPutAsyncer asyncer = mock();
-
     private PublishAuthorizerOutputImpl output;
-
     @Before
     public void before() {
         output = new PublishAuthorizerOutputImpl(asyncer);
@@ -154,5 +152,4 @@ public class PublishAuthorizerOutputImplTest {
     public void test_fail_string_sucess_code() {
         output.failAuthorization(AckReasonCode.SUCCESS, "test-string");
     }
-
 }

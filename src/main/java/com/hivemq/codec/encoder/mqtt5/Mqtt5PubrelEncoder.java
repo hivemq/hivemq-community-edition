@@ -26,16 +26,15 @@ import javax.inject.Singleton;
 
 /**
  * @author Waldemar Ruck
- * @since 4.0
+ * @since  4.0
  */
 @Singleton
-public class Mqtt5PubrelEncoder extends
-        Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBREL, Mqtt5PubRelReasonCode> {
+public class Mqtt5PubrelEncoder
+        extends
+            Mqtt5MessageWithUserPropertiesEncoder.Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<PUBREL, Mqtt5PubRelReasonCode> {
 
     private static final int FIXED_HEADER = MessageType.PUBREL.ordinal() << 4 | 0b0010;
-
-    public Mqtt5PubrelEncoder(
-            final @NotNull MessageDroppedService messageDroppedService,
+    public Mqtt5PubrelEncoder(final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
@@ -46,7 +45,8 @@ public class Mqtt5PubrelEncoder extends
     }
 
     @Override
-    @NotNull Mqtt5PubRelReasonCode getDefaultReasonCode() {
+    @NotNull
+    Mqtt5PubRelReasonCode getDefaultReasonCode() {
         return Mqtt5PubRelReasonCode.SUCCESS;
     }
 }

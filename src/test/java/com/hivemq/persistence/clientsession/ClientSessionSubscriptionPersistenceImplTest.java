@@ -65,24 +65,15 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     private final @NotNull ConnectionPersistence connectionPersistence = mock();
     private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence = mock();
     private final @NotNull PublishPollService publishPollService = mock();
-
     private ClientSessionSubscriptionPersistenceImpl persistence;
-
     private SingleWriterService singleWriterService;
-
     @Before
     public void setUp() throws Exception {
         when(topicTree.addTopic(anyString(), any(Topic.class), anyByte(), anyString())).thenReturn(true);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence,
-                topicTree,
-                sharedSubscriptionService,
-                singleWriterService,
-                connectionPersistence,
-                clientSessionLocalPersistence,
-                publishPollService,
-                new Chunker(),
-                mock(MqttServerDisconnector.class));
+        persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence, topicTree,
+                sharedSubscriptionService, singleWriterService, connectionPersistence, clientSessionLocalPersistence,
+                publishPollService, new Chunker(), mock(MqttServerDisconnector.class));
     }
 
     @After
@@ -93,9 +84,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
     @Test(timeout = 60000)
     public void test_add_subscriptions() throws Exception {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 360));
-
         final Topic topic1 = new Topic("topic1", QoS.AT_MOST_ONCE);
         final Topic topic2 = new Topic("topic2", QoS.AT_MOST_ONCE);
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
@@ -106,7 +95,6 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     @Test(timeout = 60000)
     public void test_add_subscriptions_session_expired() throws Exception {
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(null);
-
         final Topic topic1 = new Topic("topic1", QoS.AT_MOST_ONCE);
         final Topic topic2 = new Topic("topic2", QoS.AT_MOST_ONCE);
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
@@ -117,81 +105,69 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     @Test(timeout = 60000)
     public void test_add_subscriptions_shared() throws Exception {
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 360));
-
         final Topic topic1 = new Topic("$share/name/topic1", QoS.AT_MOST_ONCE);
         final Topic topic2 = new Topic("$share/name/topic2", QoS.AT_MOST_ONCE);
         persistence.addSubscriptions("client", ImmutableSet.of(topic1, topic2)).get();
         verify(topicTree, times(2)).addTopic(eq("client"), any(Topic.class), anyByte(), anyString());
         verify(localPersistence).addSubscriptions(eq("client"), any(ImmutableSet.class), anyLong(), anyInt());
-
     }
 
     @Test
     public void test_invalidate_caches_channel_null() {
-
         when(connectionPersistence.get("client")).thenReturn(null);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
-
-        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(),
+        verify(publishPollService, never()).pollSharedPublishesForClient(
+                anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
                 anyInt(),
                 any(Channel.class));
-
     }
 
     @Test
     public void test_invalidate_caches_channel_closed() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.close();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
-
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
-
-        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(),
+        verify(publishPollService, never()).pollSharedPublishesForClient(
+                anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
                 anyInt(),
                 any(Channel.class));
-
     }
 
     @Test
     public void test_invalidate_caches_empty_subs() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
-
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
-
-        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(),
+        verify(publishPollService, never()).pollSharedPublishesForClient(
+                anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
                 anyInt(),
                 any(Channel.class));
-
         channel.close();
-
     }
 
     @Test
     public void test_invalidate_caches_success() {
-
         final EmbeddedChannel channel = new EmbeddedChannel();
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
-        persistence.invalidateSharedSubscriptionCacheAndPoll("client",
+        persistence.invalidateSharedSubscriptionCacheAndPoll(
+                "client",
                 ImmutableSet.of(new Subscription(new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 2, "group")));
-
-        verify(publishPollService).pollSharedPublishesForClient(anyString(),
+        verify(publishPollService).pollSharedPublishesForClient(
+                anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
@@ -199,25 +175,21 @@ public class ClientSessionSubscriptionPersistenceImplTest {
                 any(Channel.class));
         verify(sharedSubscriptionService).invalidateSharedSubscriberCache("group/topic");
         verify(sharedSubscriptionService).invalidateSharedSubscriptionCache("client");
-
         channel.close();
-
     }
 
     @Test(timeout = 60000)
     public void test_remove_subscriptions_responsible() throws ExecutionException, InterruptedException {
-
         persistence.removeSubscriptions("client", ImmutableSet.of("topic1", "topic2")).get();
         verify(topicTree, times(2)).removeSubscriber(eq("client"), anyString(), any());
     }
 
     @Test(timeout = 60000)
     public void test_remove_shared_subscriptions() throws ExecutionException, InterruptedException {
-
         persistence.removeSubscriptions("client", ImmutableSet.of("$share/group/topic1", "$share/group/topic2")).get();
-
         verify(topicTree, times(2)).removeSubscriber(eq("client"), anyString(), anyString());
-        verify(localPersistence).removeSubscriptions(eq("client"),
+        verify(localPersistence).removeSubscriptions(
+                eq("client"),
                 eq(ImmutableSet.of("$share/group/topic1", "$share/group/topic2")),
                 anyLong(),
                 anyInt());
@@ -225,80 +197,58 @@ public class ClientSessionSubscriptionPersistenceImplTest {
 
     @Test(timeout = 60000)
     public void test_addSubscription() throws Exception {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
-
         final Topic topic = new Topic("topic/1", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
         persistence.addSubscription("client", topic).get();
-
         verify(topicTree).addTopic(eq("client"), eq(topic), eq((byte) 12), eq(null));
         verify(localPersistence).addSubscription(eq("client"), eq(topic), anyLong(), anyInt());
     }
 
     @Test(timeout = 60000)
     public void test_getSubscriptions() throws Exception {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
-
         final Topic topic = new Topic("topic/1", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
-
         when(localPersistence.getSubscriptions("client")).thenReturn(ImmutableSet.of(topic));
-
         final ImmutableSet<Topic> subscriptions = persistence.getSubscriptions("client");
-
         assertEquals(1, subscriptions.size());
-
     }
 
     @Test(timeout = 60000)
     public void test_addSubscription_no_session_found() throws Exception {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(null);
-
         final Topic topic = new Topic("topic/1", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
         final SubscriptionResult subscriptionResult = persistence.addSubscription("client", topic).get();
         assertNull(subscriptionResult);
-
         verify(topicTree, never()).addTopic(eq("client"), eq(topic), eq((byte) 12), eq(null));
         verify(localPersistence, never()).addSubscription(eq("client"), eq(topic), anyLong(), anyInt());
     }
 
     @Test(timeout = 60000)
     public void test_addSubscription_shared() throws Exception {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
-
         final Topic topicShared = new Topic("topic/1", QoS.AT_LEAST_ONCE);
-
-        final Topic topic =
-                new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
+        final Topic topic = new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE, true, true,
+                Mqtt5RetainHandling.DO_NOT_SEND, 1);
         persistence.addSubscription("client", topic).get();
-
         verify(topicTree).addTopic(eq("client"), eq(topicShared), eq((byte) 14), eq("group1"));
         verify(localPersistence).addSubscription(eq("client"), eq(topic), anyLong(), anyInt());
     }
 
     @Test
     public void test_get_shared_subscription() throws ExecutionException, InterruptedException {
-
-        when(localPersistence.getSubscriptions("client")).thenReturn(ImmutableSet.of(new Topic("$share/group/topic",
-                QoS.AT_LEAST_ONCE)));
-
+        when(localPersistence.getSubscriptions("client"))
+                .thenReturn(ImmutableSet.of(new Topic("$share/group/topic", QoS.AT_LEAST_ONCE)));
         final ImmutableSet<Topic> subscriptions = persistence.getSharedSubscriptions("client");
         assertEquals(1, subscriptions.size());
-
     }
 
     @Test(timeout = 60000)
     public void test_addSubscription_shared_qos2() throws Exception {
-
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
-
         final Topic expectedTopicTree = new Topic("topic/1", QoS.AT_LEAST_ONCE);
         final Topic expectedLocal = new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE);
-
-        final Topic topic =
-                new Topic("$share/group1/topic/1", QoS.EXACTLY_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
+        final Topic topic = new Topic("$share/group1/topic/1", QoS.EXACTLY_ONCE, true, true,
+                Mqtt5RetainHandling.DO_NOT_SEND, 1);
         persistence.addSubscription("client", topic).get();
         verify(topicTree).addTopic(eq("client"), eq(expectedTopicTree), eq((byte) 14), eq("group1"));
         verify(localPersistence).addSubscription(eq("client"), eq(expectedLocal), anyLong(), anyInt());

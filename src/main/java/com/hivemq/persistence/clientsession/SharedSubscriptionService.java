@@ -48,27 +48,21 @@ public class SharedSubscriptionService {
 
     private static final String SHARED_SUBSCRIPTION_PREFIX = "$share/";
     private static final Pattern SHARED_SUBSCRIPTION_PATTERN = Pattern.compile("\\$share(/(.*?)/(.*))");
-
     private static final int GROUP_INDEX = 2;
     private static final int TOPIC_INDEX = 3;
-
     private final @NotNull LocalTopicTree topicTree;
-
     private @Nullable Cache<String, ImmutableSet<SubscriberWithQoS>> sharedSubscriberCache;
     private @Nullable Cache<String, ImmutableSet<Topic>> sharedSubscriptionCache;
-
     @Inject
-    public SharedSubscriptionService(
-            final @NotNull LocalTopicTree topicTree) {
-
+    public SharedSubscriptionService(final @NotNull LocalTopicTree topicTree) {
         this.topicTree = topicTree;
     }
 
     /**
      * Returns a {@link Matcher} for shared subscription topics
      *
-     * @param topic the topic to check
-     * @return Matcher for topic
+     * @param  topic the topic to check
+     * @return       Matcher for topic
      */
     private static Matcher getSharedSubscriptionMatcher(final @NotNull String topic) {
         return SHARED_SUBSCRIPTION_PATTERN.matcher(topic);
@@ -76,33 +70,24 @@ public class SharedSubscriptionService {
 
     @PostConstruct
     void postConstruct() {
-
         sharedSubscriberCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.get())
-                .maximumSize(SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS)
-                .recordStats()
-                .build();
-
+                .maximumSize(SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS).recordStats().build();
         sharedSubscriptionCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.get())
-                .maximumSize(SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS)
-                .recordStats()
-                .build();
+                .maximumSize(SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS).recordStats().build();
     }
 
     /**
-     * This check is only for the shared subscription service, the subscription topic validation happens for
-     * performance reasons in com.hivemq.util.Topics. Changes to the shared subscription syntax need to be reflected
-     * there as well.
+     * This check is only for the shared subscription service, the subscription topic validation happens for performance
+     * reasons in com.hivemq.util.Topics. Changes to the shared subscription syntax need to be reflected there as well.
      *
-     * @param topic a validated subscription topic string
-     * @return a SharedSubscription or null if $share keyword not present
+     * @param  topic a validated subscription topic string
+     * @return       a SharedSubscription or null if $share keyword not present
      */
-    public @Nullable
-    static SharedSubscription checkForSharedSubscription(final @NotNull String topic) {
-
+    public @Nullable static SharedSubscription checkForSharedSubscription(final @NotNull String topic) {
         final Matcher matcher = getSharedSubscriptionMatcher(topic);
         if (matcher.matches()) {
             final String shareGroup;
@@ -111,30 +96,24 @@ public class SharedSubscriptionService {
             subscriptionTopic = matcher.group(TOPIC_INDEX);
             return new SharedSubscription(subscriptionTopic, shareGroup);
         }
-
         return null;
     }
 
     /**
      * Create a {@link Subscription} from a specific {@link Topic}.
      *
-     * @param topic the topic to create a subscription for.
-     * @return The created subscription.
+     * @param  topic the topic to create a subscription for.
+     * @return       The created subscription.
      */
     public @NotNull Subscription createSubscription(final @NotNull Topic topic) {
-
         final SharedSubscription sharedSubscription = checkForSharedSubscription(topic.getTopic());
         if (sharedSubscription == null) {
             return new Subscription(topic,
-                    SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()),
-                    null);
+                    SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
         } else {
-            return new Subscription(new Topic(sharedSubscription.getTopicFilter(),
-                    topic.getQoS(),
-                    topic.isNoLocal(),
-                    topic.isRetainAsPublished(),
-                    topic.getRetainHandling(),
-                    topic.getSubscriptionIdentifier()),
+            return new Subscription(
+                    new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(), topic.isNoLocal(),
+                            topic.isRetainAsPublished(), topic.getRetainHandling(), topic.getSubscriptionIdentifier()),
                     SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()),
                     sharedSubscription.getShareName());
         }
@@ -143,11 +122,11 @@ public class SharedSubscriptionService {
     /**
      * Requests all shared subscribers for a given shared subscription.
      *
-     * @param sharedSubscription is the share name and the topic filter separated by a '/'
-     * @return a set of subscribers
+     * @param  sharedSubscription is the share name and the topic filter separated by a '/'
+     * @return                    a set of subscribers
      */
     public @NotNull ImmutableSet<SubscriberWithQoS> getSharedSubscriber(final @NotNull String sharedSubscription) {
-        //calling this method before post construct will return an empty set
+        // calling this method before post construct will return an empty set
         if (sharedSubscriberCache == null) {
             return ImmutableSet.of();
         }
@@ -164,12 +143,13 @@ public class SharedSubscriptionService {
     /**
      * Requests all shared subscriptions for a given client id.
      *
-     * @param client of which the subscriptions are requested.
-     * @return a set of subscriptions
+     * @param  client of which the subscriptions are requested.
+     * @return        a set of subscriptions
      */
     public @NotNull ImmutableSet<Topic> getSharedSubscriptions(
-            final @NotNull String client, final @NotNull Callable cacheUpdater) throws ExecutionException {
-        //calling this method before post construct will return an empty set
+            final @NotNull String client,
+            final @NotNull Callable cacheUpdater) throws ExecutionException {
+        // calling this method before post construct will return an empty set
         if (sharedSubscriptionCache == null) {
             return ImmutableSet.of();
         }
@@ -180,8 +160,8 @@ public class SharedSubscriptionService {
      * Converts a string of share name and topic filter separated by a '/' into a shared subscription object which
      * contains both separably.
      *
-     * @param sharedSubscription is the share name and the topic filter separated by a '/'
-     * @return a shared subscription object which shared name and topic filter
+     * @param  sharedSubscription is the share name and the topic filter separated by a '/'
+     * @return                    a shared subscription object which shared name and topic filter
      */
     public static @NotNull SharedSubscription splitTopicAndGroup(final @NotNull String sharedSubscription) {
         final int slashIndex = sharedSubscription.indexOf("/");
@@ -203,11 +183,11 @@ public class SharedSubscriptionService {
     }
 
     /**
-     * Removes the '$share/' from a given topic.
-     * The remaining string has the same pattern that is used for she shared subscription message queue.
+     * Removes the '$share/' from a given topic. The remaining string has the same pattern that is used for she shared
+     * subscription message queue.
      *
-     * @param topic from which the prefix will be removed
-     * @return the topic without the leading '$share/' or the original topic if it does't start with '$share/'
+     * @param  topic from which the prefix will be removed
+     * @return       the topic without the leading '$share/' or the original topic if it does't start with '$share/'
      */
     public static @NotNull String removePrefix(final @NotNull String topic) {
         if (topic.startsWith(SHARED_SUBSCRIPTION_PREFIX)) {
@@ -215,13 +195,10 @@ public class SharedSubscriptionService {
         }
         return topic;
     }
-
-
     public static class SharedSubscription {
 
         private final @NotNull String topicFilter;
         private final @NotNull String shareName;
-
         public SharedSubscription(final @NotNull String topic, final @NotNull String shareName) {
             this.topicFilter = topic;
             this.shareName = shareName;
@@ -237,5 +214,4 @@ public class SharedSubscriptionService {
             return shareName;
         }
     }
-
 }

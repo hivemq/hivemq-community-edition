@@ -26,13 +26,9 @@ import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
  */
 public enum Mqtt5PayloadFormatIndicator {
 
-    UNSPECIFIED,
-    UTF_8;
-
+    UNSPECIFIED, UTF_8;
     private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] VALUES = values();
-
     private final @NotNull PayloadFormatIndicator payloadFormatIndicator;
-
     Mqtt5PayloadFormatIndicator() {
         payloadFormatIndicator = PayloadFormatIndicator.valueOf(name());
     }
@@ -47,22 +43,19 @@ public enum Mqtt5PayloadFormatIndicator {
     public @NotNull PayloadFormatIndicator toPayloadFormatIndicator() {
         return payloadFormatIndicator;
     }
-
-    private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] LOOKUP =
-            new Mqtt5PayloadFormatIndicator[PayloadFormatIndicator.values().length];
-
+    private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] LOOKUP = new Mqtt5PayloadFormatIndicator[PayloadFormatIndicator
+            .values().length];
     static {
         for (final Mqtt5PayloadFormatIndicator payloadFormatIndicator : values()) {
             LOOKUP[payloadFormatIndicator.payloadFormatIndicator.ordinal()] = payloadFormatIndicator;
         }
     }
-
     /**
      * Returns the Payload Format Indicator belonging to the given byte code.
      *
-     * @param code the byte code.
-     * @return the Payload Format Indicator belonging to the byte code or null if the byte code is not a valid Payload
-     *         Format Indicator.
+     * @param  code the byte code.
+     * @return      the Payload Format Indicator belonging to the byte code or null if the byte code is not a valid
+     *              Payload Format Indicator.
      */
     public static @Nullable Mqtt5PayloadFormatIndicator fromCode(final int code) {
         return (code >= 0 && code < VALUES.length) ? VALUES[code] : null;
@@ -70,7 +63,6 @@ public enum Mqtt5PayloadFormatIndicator {
 
     public static @NotNull Mqtt5PayloadFormatIndicator from(
             final @NotNull PayloadFormatIndicator payloadFormatIndicator) {
-
         return LOOKUP[payloadFormatIndicator.ordinal()];
     }
 }

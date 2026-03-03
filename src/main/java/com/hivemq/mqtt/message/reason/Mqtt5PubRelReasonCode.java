@@ -26,12 +26,10 @@ import com.hivemq.extension.sdk.api.packets.pubrel.PubrelReasonCode;
  */
 public enum Mqtt5PubRelReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS),
-    PACKET_IDENTIFIER_NOT_FOUND(MqttCommonReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
-
+    SUCCESS(MqttCommonReasonCode.SUCCESS), PACKET_IDENTIFIER_NOT_FOUND(
+            MqttCommonReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
     private final int code;
     private final @NotNull PubrelReasonCode pubrelReasonCode;
-
     Mqtt5PubRelReasonCode(final int code) {
         this.code = code;
         pubrelReasonCode = PubrelReasonCode.valueOf(name());
@@ -49,22 +47,19 @@ public enum Mqtt5PubRelReasonCode implements Mqtt5ReasonCode {
     public @NotNull PubrelReasonCode toPubrelReasonCode() {
         return pubrelReasonCode;
     }
-
-    private static final @NotNull Mqtt5PubRelReasonCode @NotNull [] PUBREL_LOOKUP =
-            new Mqtt5PubRelReasonCode[PubrelReasonCode.values().length];
-
+    private static final @NotNull Mqtt5PubRelReasonCode @NotNull [] PUBREL_LOOKUP = new Mqtt5PubRelReasonCode[PubrelReasonCode
+            .values().length];
     static {
         for (final Mqtt5PubRelReasonCode reasonCode : values()) {
             PUBREL_LOOKUP[reasonCode.pubrelReasonCode.ordinal()] = reasonCode;
         }
     }
-
     /**
      * Returns the PUBREL Reason Code belonging to the given byte code.
      *
-     * @param code the byte code.
-     * @return the PUBREL Reason Code belonging to the given byte code or <code>null</code> if the byte code is not a
-     *         valid PUBREL Reason Code.
+     * @param  code the byte code.
+     * @return      the PUBREL Reason Code belonging to the given byte code or <code>null</code> if the byte code is not
+     *              a valid PUBREL Reason Code.
      */
     public static @Nullable Mqtt5PubRelReasonCode fromCode(final int code) {
         if (code == SUCCESS.code) {

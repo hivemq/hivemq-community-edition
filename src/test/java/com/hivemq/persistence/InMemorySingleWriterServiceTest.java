@@ -32,7 +32,6 @@ import static org.junit.Assert.assertNotSame;
 public class InMemorySingleWriterServiceTest {
 
     private @NotNull InMemorySingleWriter singleWriterServiceImpl;
-
     @Before
     public void setUp() throws Exception {
         InternalConfigurations.PERSISTENCE_SHUTDOWN_GRACE_PERIOD_MSEC.set(200);
@@ -58,7 +57,6 @@ public class InMemorySingleWriterServiceTest {
     @Test
     public void test_getQueues_queuesAreDifferentPerType() {
         final ArrayList<ProducerQueues> queues = new ArrayList<>();
-
         final ProducerQueues attributeStoreQueue = singleWriterServiceImpl.getAttributeStoreQueue();
         queues.add(attributeStoreQueue);
         final ProducerQueues clientSessionQueue = singleWriterServiceImpl.getClientSessionQueue();
@@ -69,7 +67,6 @@ public class InMemorySingleWriterServiceTest {
         queues.add(retainedMessageQueue);
         final ProducerQueues subscriptionQueue = singleWriterServiceImpl.getSubscriptionQueue();
         queues.add(subscriptionQueue);
-
         for (int i = 0; i < queues.size(); i++) {
             for (int j = 0; j < queues.size(); j++) {
                 if (i == j) {

@@ -34,9 +34,7 @@ public class ConnackOutboundOutputImplTest {
     public void constructor_and_getter() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableConnackPacketImpl modifiablePacket = mock(ModifiableConnackPacketImpl.class);
-
         final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(asyncer, modifiablePacket);
-
         assertSame(modifiablePacket, output.getConnackPacket());
     }
 
@@ -44,17 +42,13 @@ public class ConnackOutboundOutputImplTest {
     public void update() {
         final PluginOutPutAsyncer asyncer = mock(PluginOutPutAsyncer.class);
         final ModifiableConnackPacketImpl modifiablePacket = mock(ModifiableConnackPacketImpl.class);
-
         final ConnackOutboundOutputImpl output = new ConnackOutboundOutputImpl(asyncer, modifiablePacket);
-
         final ConnackOutboundInputImpl input = mock(ConnackOutboundInputImpl.class);
         final ConnackPacketImpl packet = mock(ConnackPacketImpl.class);
         final ModifiableConnackPacketImpl newModifiablePacket = mock(ModifiableConnackPacketImpl.class);
         when(input.getConnackPacket()).thenReturn(packet);
         when(modifiablePacket.update(packet)).thenReturn(newModifiablePacket);
-
         final ConnackOutboundOutputImpl updated = output.update(input);
-
         assertSame(newModifiablePacket, updated.getConnackPacket());
     }
 }

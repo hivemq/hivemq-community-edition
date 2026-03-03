@@ -25,7 +25,6 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class TestBucketUtil {
 
-
     public static String getId(final int desiredBucket, final int bucketSize) {
         checkArgument(0 <= desiredBucket && desiredBucket < bucketSize);
         String id = RandomStringUtils.randomAlphanumeric(15);

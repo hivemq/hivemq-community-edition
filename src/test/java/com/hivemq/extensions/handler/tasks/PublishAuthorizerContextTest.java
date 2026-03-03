@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.hivemq.extensions.handler.tasks;
 
 import com.google.common.util.concurrent.SettableFuture;
@@ -49,12 +48,10 @@ import static org.mockito.Mockito.when;
 public class PublishAuthorizerContextTest {
 
     private final @NotNull ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-
     private @NotNull Channel channel;
     private @NotNull SettableFuture<PublishAuthorizerOutputImpl> resultFuture;
     private @NotNull PublishAuthorizerOutputImpl output;
     private @NotNull PublishAuthorizerContext context;
-
     @Before
     public void before() {
         channel = new EmbeddedChannel();
@@ -71,9 +68,7 @@ public class PublishAuthorizerContextTest {
     public void test_async_timeout_fail() throws Exception {
         output.markAsAsync();
         output.markAsTimedOut();
-
         context.pluginPost(output);
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
@@ -85,9 +80,7 @@ public class PublishAuthorizerContextTest {
         output.async(Duration.ofSeconds(10), TimeoutFallback.SUCCESS);
         output.markAsAsync();
         output.markAsTimedOut();
-
         context.pluginPost(output);
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
         assertFalse(result.isCompleted());
@@ -96,9 +89,7 @@ public class PublishAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_success() throws Exception {
         output.authorizeSuccessfully();
-
         context.pluginPost(output);
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(SUCCESS, result.getAuthorizationState());
         assertTrue(result.isCompleted());
@@ -107,9 +98,7 @@ public class PublishAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_fail() throws Exception {
         output.failAuthorization();
-
         context.pluginPost(output);
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(FAIL, result.getAuthorizationState());
         assertTrue(result.isCompleted());
@@ -119,9 +108,7 @@ public class PublishAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_disconnect() throws Exception {
         output.disconnectClient();
-
         context.pluginPost(output);
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(DISCONNECT, result.getAuthorizationState());
         assertTrue(result.isCompleted());
@@ -131,7 +118,6 @@ public class PublishAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_undecided() throws Exception {
         context.pluginPost(output);
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
         assertFalse(result.isCompleted());
@@ -140,7 +126,6 @@ public class PublishAuthorizerContextTest {
     @Test(timeout = 5000)
     public void test_increment_future_returns() throws Exception {
         context.increment();
-
         final PublishAuthorizerOutputImpl result = resultFuture.get();
         assertEquals(UNDECIDED, result.getAuthorizationState());
         assertFalse(result.isCompleted());

@@ -33,10 +33,8 @@ class PersistenceMigrationRocksDBModule extends SingletonModule<Class<Persistenc
 
     private final @NotNull PersistenceType payloadPersistenceType;
     private final @NotNull PersistenceType retainedPersistenceType;
-
     PersistenceMigrationRocksDBModule() {
         super(PersistenceMigrationRocksDBModule.class);
-
         this.payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
         this.retainedPersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
     }
@@ -47,7 +45,6 @@ class PersistenceMigrationRocksDBModule extends SingletonModule<Class<Persistenc
             bind(RetainedMessageLocalPersistence.class).to(RetainedMessageRocksDBLocalPersistence.class)
                     .in(Singleton.class);
         }
-
         if (payloadPersistenceType == PersistenceType.FILE_NATIVE) {
             bind(PublishPayloadLocalPersistence.class).to(PublishPayloadRocksDBLocalPersistence.class)
                     .in(Singleton.class);

@@ -35,7 +35,6 @@ import static uk.org.webcompere.systemstubs.SystemStubs.withEnvironmentVariable;
 public class EnvVarUtilTest {
 
     private final @NotNull EnvVarUtil envVarUtil = mock();
-
     @Before
     public void before() {
         when(envVarUtil.replaceEnvironmentVariablePlaceholders(anyString())).thenCallRealMethod();
@@ -87,12 +86,8 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
-
-        final String testString =
-                "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
-        final String expected =
-                "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
-
+        final String testString = "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
+        final String expected = "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
         final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
         assertEquals(expected, result);
     }
@@ -102,12 +97,8 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
-
-        final String testString =
-                "<test1><test2 id=\"VALUE1\"><test3>${ENV:VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
-        final String expected =
-                "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
-
+        final String testString = "<test1><test2 id=\"VALUE1\"><test3>${ENV:VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
+        final String expected = "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
         final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
         assertEquals(expected, result);
     }
@@ -117,12 +108,8 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
-
-        final String testString =
-                "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${ENV:VALUE2}</test4><test5>${ENV:VALUE3}</test5></test2></test1>";
-        final String expected =
-                "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
-
+        final String testString = "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${ENV:VALUE2}</test4><test5>${ENV:VALUE3}</test5></test2></test1>";
+        final String expected = "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
         final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
         assertEquals(expected, result);
     }
@@ -130,7 +117,6 @@ public class EnvVarUtilTest {
     @Test(expected = UnrecoverableException.class)
     public void test_replaceEnvironmentVariablePlaceholders_unknown_varname() {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value1");
-
         final String testString = "<test1>${VALUE1}</test1><test2>${VALUE2}</test2>";
         envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
     }

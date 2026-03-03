@@ -35,7 +35,6 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
 
     @Test
     public void test_read_tls_listener() throws Exception {
-
         final String contents = """
                 <hivemq>
                     <listeners>
@@ -65,28 +64,21 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                         </tls-tcp-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
         final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().getFirst();
-
         assertEquals(8883, tlsTcpListener.getPort());
         assertEquals("0.0.0.0", tlsTcpListener.getBindAddress());
-
         assertEquals("password-keystore", tlsTcpListener.getTls().getKeystorePassword());
         assertEquals("/absolute/path.jks", tlsTcpListener.getTls().getKeystorePath());
         assertEquals("password-key", tlsTcpListener.getTls().getPrivateKeyPassword());
         assertEquals(1, tlsTcpListener.getTls().getProtocols().size());
         assertEquals(1, tlsTcpListener.getTls().getCipherSuites().size());
         assertEquals(Tls.ClientAuthMode.NONE, tlsTcpListener.getTls().getClientAuthMode());
-
-        //Check if the relative path was made absolute
+        // Check if the relative path was made absolute
         assertTrue(new File(tlsTcpListener.getTls().getTruststorePath()).isAbsolute());
         assertEquals("password-truststore", tlsTcpListener.getTls().getTruststorePassword());
         assertEquals("my-tls-tcp-listener", tlsTcpListener.getName());
-
         assertNull(tlsTcpListener.getTls().isPreferServerCipherSuites());
     }
 
@@ -113,23 +105,16 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                         </tls-tcp-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
         final TlsTcpListener tlsTcpListener = listenerConfigurationService.getTlsTcpListeners().getFirst();
-
         assertEquals(8883, tlsTcpListener.getPort());
         assertEquals("0.0.0.0", tlsTcpListener.getBindAddress());
-
         assertEquals("password-keystore", tlsTcpListener.getTls().getKeystorePassword());
         assertEquals("/absolute/path.jks", tlsTcpListener.getTls().getKeystorePath());
         assertEquals("password-key", tlsTcpListener.getTls().getPrivateKeyPassword());
-
-        //Check if the relative path was made absolute
+        // Check if the relative path was made absolute
         assertNull(tlsTcpListener.getTls().getTruststorePath());
-
         assertTrue(tlsTcpListener.getTls().isPreferServerCipherSuites());
     }
 
@@ -155,15 +140,11 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                        </tcp-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
         final TcpListener tcpListener1 = listenerConfigurationService.getTcpListeners().get(0);
         final TcpListener tcpListener2 = listenerConfigurationService.getTcpListeners().get(1);
         final TcpListener tcpListener3 = listenerConfigurationService.getTcpListeners().get(2);
-
         assertEquals("my-tcp-listener", tcpListener1.getName());
         assertEquals("my-tcp-listener-1", tcpListener2.getName());
         assertEquals("my-tcp-listener-2", tcpListener3.getName());
@@ -181,13 +162,9 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                        </tcp-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
         final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().getFirst();
-
         assertEquals(1883, tcpListener.getPort());
         assertEquals("0.0.0.0", tcpListener.getBindAddress());
         assertEquals("tcp-listener-1883", tcpListener.getName());
@@ -204,13 +181,9 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                        </tcp-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
         final TcpListener tcpListener = listenerConfigurationService.getTcpListeners().getFirst();
-
         assertEquals(1883, tcpListener.getPort());
         assertEquals("0.0.0.0", tcpListener.getBindAddress());
     }
@@ -231,11 +204,8 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                         </websocket-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
         final WebsocketListener websocketListener = listenerConfigurationService.getWebsocketListeners().getFirst();
         assertEquals(8000, websocketListener.getPort());
         assertEquals("0.0.0.0", websocketListener.getBindAddress());
@@ -273,25 +243,20 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                        </tls-websocket-listener>
                     </listeners>
                 </hivemq>""";
-
         Files.write(contents.getBytes(UTF_8), xmlFile);
-
         reader.applyConfig();
-
-        final TlsWebsocketListener websocketListener = listenerConfigurationService.getTlsWebsocketListeners().getFirst();
+        final TlsWebsocketListener websocketListener = listenerConfigurationService.getTlsWebsocketListeners()
+                .getFirst();
         assertEquals(8000, websocketListener.getPort());
         assertEquals("0.0.0.0", websocketListener.getBindAddress());
         assertEquals("/mqtt", websocketListener.getPath());
         assertEquals("mqttv3.1", websocketListener.getSubprotocols().getFirst());
         assertFalse(websocketListener.getAllowExtensions());
-
         assertEquals("/path/to/the/key/store.jks", websocketListener.getTls().getKeystorePath());
         assertEquals("password-keystore", websocketListener.getTls().getKeystorePassword());
         assertEquals("password-key", websocketListener.getTls().getPrivateKeyPassword());
-
         assertEquals("/path/to/the/trust/store.jks", websocketListener.getTls().getTruststorePath());
         assertEquals("password-truststore", websocketListener.getTls().getTruststorePassword());
-
         assertFalse(websocketListener.getTls().isPreferServerCipherSuites());
     }
 }

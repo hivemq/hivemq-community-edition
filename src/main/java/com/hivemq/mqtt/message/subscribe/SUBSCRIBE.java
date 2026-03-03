@@ -28,22 +28,18 @@ import com.hivemq.mqtt.message.mqtt5.MqttMessageWithUserProperties;
  *
  * @author Dominik Obermaier
  * @author Florian Limpöck
- * @since 1.4
+ * @since  1.4
  */
 @Immutable
 public class SUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3SUBSCRIBE, Mqtt5SUBSCRIBE {
 
     private final @NotNull ImmutableList<Topic> topics;
     private final int subscriptionIdentifier;
-
     /**
      * Creates a new MQTT 5 SUBSCRIBE message
      */
-    public SUBSCRIBE(
-            final @NotNull Mqtt5UserProperties userProperties,
-            final @NotNull ImmutableList<Topic> topics,
-            final int packetIdentifier,
-            final int subscriptionIdentifier) {
+    public SUBSCRIBE(final @NotNull Mqtt5UserProperties userProperties, final @NotNull ImmutableList<Topic> topics,
+            final int packetIdentifier, final int subscriptionIdentifier) {
         super(userProperties);
         this.topics = topics;
         this.subscriptionIdentifier = subscriptionIdentifier;
@@ -61,22 +57,18 @@ public class SUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3SUB
      * Creates a new MQTT 3 SUBSCRIBE message
      */
     public SUBSCRIBE(final int packetIdentifier, final Topic... topics) {
-        this(Mqtt5UserProperties.NO_USER_PROPERTIES,
-                ImmutableList.copyOf(topics),
-                packetIdentifier,
+        this(Mqtt5UserProperties.NO_USER_PROPERTIES, ImmutableList.copyOf(topics), packetIdentifier,
                 DEFAULT_NO_SUBSCRIPTION_IDENTIFIER);
     }
 
     @NotNull
     public static SUBSCRIBE from(final @NotNull SubscribePacketImpl packet) {
         final ImmutableList.Builder<Topic> subscriptionBuilder = ImmutableList.builder();
-        packet.getSubscriptions()
-                .forEach(subscription -> subscriptionBuilder.add(Topic.topicFromSubscription(subscription,
-                        packet.getSubscriptionIdentifier().orElse(null))));
-
+        packet.getSubscriptions().forEach(
+                subscription -> subscriptionBuilder.add(
+                        Topic.topicFromSubscription(subscription, packet.getSubscriptionIdentifier().orElse(null))));
         return new SUBSCRIBE(Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()),
-                subscriptionBuilder.build(),
-                packet.getPacketId(),
+                subscriptionBuilder.build(), packet.getPacketId(),
                 packet.getSubscriptionIdentifier().orElse(DEFAULT_NO_SUBSCRIPTION_IDENTIFIER));
     }
 

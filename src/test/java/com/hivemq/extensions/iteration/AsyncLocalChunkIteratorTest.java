@@ -49,7 +49,6 @@ public class AsyncLocalChunkIteratorTest {
     private TestFetchCallback fetchCallback;
     private TestItemCallback itemCallback;
     private ExecutorService executorService;
-
     @Before
     public void before() {
         executorService = Executors.newFixedThreadPool(2);
@@ -82,8 +81,8 @@ public class AsyncLocalChunkIteratorTest {
 
     @Test(timeout = 15_000, expected = NullPointerException.class)
     public void test_fetch_result_null() throws Throwable {
-        asyncIterator =
-                new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback, executorService);
+        asyncIterator = new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback,
+                executorService);
         asyncIterator.fetchAndIterate();
         try {
             asyncIterator.getFinishedFuture().get();
@@ -116,16 +115,14 @@ public class AsyncLocalChunkIteratorTest {
         itemCallback.setAbort(true);
         asyncIterator.fetchAndIterate();
         asyncIterator.getFinishedFuture().get();
-        assertTrue("Should only contain max 3 item, was " + itemCallback.getItems().size() + " items",
+        assertTrue(
+                "Should only contain max 3 item, was " + itemCallback.getItems().size() + " items",
                 itemCallback.getItems().size() <= 3);
     }
-
     private static class TestItemCallback implements AsyncIterator.ItemCallback<String> {
 
         final List<String> items = Collections.synchronizedList(new ArrayList<>());
-
         private boolean abort = false;
-
         @Override
         @NotNull
         public ListenableFuture<Boolean> onItems(@NotNull final Collection<String> items) {
@@ -148,9 +145,7 @@ public class AsyncLocalChunkIteratorTest {
         private final AtomicBoolean block = new AtomicBoolean(false);
         private final CountDownLatch blockingLatch = new CountDownLatch(2);
         private final ExecutorService executorService;
-
         private Exception exception = null;
-
         private TestFetchCallback(final ExecutorService executorService) {
             this.executorService = executorService;
         }
@@ -160,7 +155,6 @@ public class AsyncLocalChunkIteratorTest {
             if (exception != null) {
                 return Futures.immediateFailedFuture(exception);
             }
-
             final SettableFuture<ChunkResult<String>> resultFuture = SettableFuture.create();
             executorService.submit(() -> {
                 final Queue<Collection<String>> chunkQueue = chunks.get();

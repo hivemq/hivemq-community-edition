@@ -31,15 +31,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 class NetworkInterfaceInformation extends AbstractInformation {
 
     private static final int ADDRESS_LENGTH = 6;
-
     public String getNetworkInterfaceInformation() {
         try {
-
             final StringBuilder networkInterfaceBuilder = new StringBuilder();
-
             final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             for (final NetworkInterface netint : Collections.list(interfaces)) {
-
                 addInterfaceInformation(networkInterfaceBuilder, netint);
             }
             return networkInterfaceBuilder.toString();
@@ -49,7 +45,8 @@ class NetworkInterfaceInformation extends AbstractInformation {
     }
 
     private StringBuilder addInterfaceInformation(
-            final StringBuilder stringBuilder, final NetworkInterface networkInterface) throws SocketException {
+            final StringBuilder stringBuilder,
+            final NetworkInterface networkInterface) throws SocketException {
         stringBuilder.append(String.format("┌[%s]\n", networkInterface.getName()));
         addNetworkInformation(stringBuilder, "Display Name", networkInterface.getDisplayName());
         addNetworkInformation(stringBuilder, "MAC Address", getMacAddress(networkInterface));
@@ -59,16 +56,12 @@ class NetworkInterfaceInformation extends AbstractInformation {
         addNetworkInformation(stringBuilder, "Is Up?", getIsUp(networkInterface));
         addNetworkInformation(stringBuilder, "Is Virtual?", getIsVirtual(networkInterface));
         addNetworkInformation(stringBuilder, "Supports Multicast?", getSupportsMulticast(networkInterface));
-
         stringBuilder.append(String.format("└─[%s]\n", "Inet Addresses"));
-
         final Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
         for (final InetAddress inetAddress : Collections.list(inetAddresses)) {
             stringBuilder.append(String.format("\t├─[%s]\n", inetAddress));
         }
-
         stringBuilder.append("\n");
-
         return stringBuilder;
     }
 
@@ -152,20 +145,19 @@ class NetworkInterfaceInformation extends AbstractInformation {
      * <p>
      * So every MAC address consists of uppercase letters and dashes between each byte.
      *
-     * @param hardwareAddress the hardware address as byte array.
-     * @return the formatted MAC address
+     * @param  hardwareAddress          the hardware address as byte array.
+     * @return                          the formatted MAC address
      * @throws NullPointerException     if you pass <code>null</code>
      * @throws IllegalArgumentException if the byte array is not exactly 6 bytes long
      */
     @VisibleForTesting
     public static String formatMACAddress(final byte[] hardwareAddress) {
-
         checkNotNull(hardwareAddress);
-        checkArgument(hardwareAddress.length == ADDRESS_LENGTH,
+        checkArgument(
+                hardwareAddress.length == ADDRESS_LENGTH,
                 "Hardware address must be of length %s but was %s",
                 ADDRESS_LENGTH,
                 hardwareAddress.length);
-
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < hardwareAddress.length; i++) {
             sb.append(String.format("%02X%s", hardwareAddress[i], (i < hardwareAddress.length - 1) ? "-" : ""));
