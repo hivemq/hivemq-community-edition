@@ -26,4 +26,4 @@ jobs:
             11
             21
       - name: Check
-        run: ./gradlew test forbiddenApis javadoc hivemqZip
+        run: ./gradlew test javadoc hivemqZip
