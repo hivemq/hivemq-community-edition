@@ -273,6 +273,10 @@ oci {
                             from("src/oci/config.xml") { into("conf") }
                             from("src/main/resources/config.xsd") { into("conf") }
                             from(tasks.shadowJar) { into("bin").rename(".*", "hivemq.jar") }
+                            from(tasks.named("cyclonedxDirectBom")) {
+                                filter { include("bom.json", "bom.xml") }
+                                into("sbom")
+                            }
                         }
                     }
                 }
