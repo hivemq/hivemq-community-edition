@@ -1,9 +1,12 @@
 name: Validation
+
 on:
-  pull_request:
+  push:
+
 concurrency:
   group: validation-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   license-check:
     name: License check

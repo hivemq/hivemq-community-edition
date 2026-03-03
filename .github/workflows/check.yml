@@ -1,6 +1,7 @@
 name: CI Check
 
-on: [ push ]
+on:
+  push:
 
 concurrency:
   group: ${{ github.ref }}-check
