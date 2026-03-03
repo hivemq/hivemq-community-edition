@@ -19,7 +19,8 @@ plugins {
     jacoco
     alias(libs.plugins.forbiddenApis)
 
-    id("com.hivemq.third-party-license-generator")
+    /* Compliance */
+    alias(libs.plugins.hivemq.license)
 }
 
 group = "com.hivemq"
@@ -330,15 +331,10 @@ license {
     mapping("java", "SLASHSTAR_STYLE")
 }
 
-downloadLicenses {
-    dependencyConfiguration = "runtimeClasspath"
-}
-
-tasks.updateThirdPartyLicenses {
-    dependsOn(tasks.downloadLicenses)
-    projectName = "HiveMQ"
-    dependencyLicense = tasks.downloadLicenses.get().xmlDestination.resolve("dependency-license.xml")
-    outputDirectory = layout.projectDirectory.dir("src/distribution/third-party-licenses")
+hivemqLicense {
+    projectName.set("HiveMQ")
+    thirdPartyLicenseDirectory.set(layout.projectDirectory.dir("src/distribution/third-party-licenses"))
+    overriddenLicenses.put("javax.annotation:javax.annotation-api", "CDDL-1.1")
 }
 
 /* ******************** publishing ******************** */
