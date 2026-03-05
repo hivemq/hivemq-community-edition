@@ -148,9 +148,12 @@ public class ScheduledCleanUpService {
         private final int bucketIndex;
         private final int persistenceIndex;
         @VisibleForTesting
-        CleanUpTask(@NotNull final ScheduledCleanUpService scheduledCleanUpService,
+        CleanUpTask(
+                @NotNull final ScheduledCleanUpService scheduledCleanUpService,
                 final @NotNull ListeningScheduledExecutorService scheduledExecutorService,
-                final int cleanUpTaskTimeoutSec, final int bucketIndex, final int persistenceIndex) {
+                final int cleanUpTaskTimeoutSec,
+                final int bucketIndex,
+                final int persistenceIndex) {
             checkNotNull(scheduledCleanUpService, "Clean up service must not be null");
             checkNotNull(scheduledExecutorService, "Executor service must not be null");
             this.scheduledCleanUpService = scheduledCleanUpService;

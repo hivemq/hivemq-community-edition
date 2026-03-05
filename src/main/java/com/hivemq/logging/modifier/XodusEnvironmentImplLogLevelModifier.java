@@ -55,8 +55,7 @@ public class XodusEnvironmentImplLogLevelModifier implements LogLevelModifier {
             }
             if (level == Level.ERROR && t instanceof ExodusException) {
                 if (t.getMessage().contains("cleanFile") || t.getMessage().contains("There is no file by address")) {
-                    logger.trace(
-                            marker,
+                    logger.trace(marker,
                             "Xodus background job unable to cleanup stale data just now, trying again later");
                     return FilterReply.DENY;
                 }

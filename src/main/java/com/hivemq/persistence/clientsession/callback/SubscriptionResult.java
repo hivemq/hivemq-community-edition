@@ -29,7 +29,9 @@ public class SubscriptionResult {
     private final boolean subscriptionAlreadyExisted;
     @Nullable
     private final String shareName;
-    public SubscriptionResult(@NotNull final Topic topic, final boolean subscriptionAlreadyExisted,
+    public SubscriptionResult(
+            @NotNull final Topic topic,
+            final boolean subscriptionAlreadyExisted,
             @Nullable final String shareName) {
         Preconditions.checkNotNull(topic, "Topic cannot be null");
         this.topic = topic;

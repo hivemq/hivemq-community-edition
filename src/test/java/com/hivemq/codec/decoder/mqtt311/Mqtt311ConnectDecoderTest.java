@@ -73,8 +73,10 @@ public class Mqtt311ConnectDecoderTest {
         when(fullConfiguration.securityConfiguration()).thenReturn(securityConfigurationService);
         when(securityConfigurationService.validateUTF8()).thenReturn(true);
         hiveMQId = new HivemqId();
-        decoder = new Mqtt311ConnectDecoder(connacker, new ClientIds(hiveMQId),
-                new TestConfigurationBootstrap().getFullConfigurationService(), hiveMQId);
+        decoder = new Mqtt311ConnectDecoder(connacker,
+                new ClientIds(hiveMQId),
+                new TestConfigurationBootstrap().getFullConfigurationService(),
+                hiveMQId);
     }
 
     @Test
@@ -256,12 +258,8 @@ public class Mqtt311ConnectDecoderTest {
         buf.writeBytes("willPayload".getBytes(UTF_8));
         final CONNECT connectPacket = decoder.decode(clientConnection, buf, fixedHeader);
         assertNull(connectPacket);
-        verify(connacker).connackError(
-                any(Channel.class),
-                isNull(),
-                anyString(),
-                eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET),
-                anyString());
+        verify(connacker).connackError(any(
+                Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.MALFORMED_PACKET), anyString());
     }
 
     @Test

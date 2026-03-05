@@ -28,8 +28,12 @@ import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
  */
 public enum Mqtt3ConnAckReturnCode {
 
-    ACCEPTED(0), REFUSED_UNACCEPTABLE_PROTOCOL_VERSION(1), REFUSED_IDENTIFIER_REJECTED(2), REFUSED_SERVER_UNAVAILABLE(
-            3), REFUSED_BAD_USERNAME_OR_PASSWORD(4), REFUSED_NOT_AUTHORIZED(5);
+    ACCEPTED(0),
+    REFUSED_UNACCEPTABLE_PROTOCOL_VERSION(1),
+    REFUSED_IDENTIFIER_REJECTED(2),
+    REFUSED_SERVER_UNAVAILABLE(3),
+    REFUSED_BAD_USERNAME_OR_PASSWORD(4),
+    REFUSED_NOT_AUTHORIZED(5);
     private static final @NotNull Mqtt3ConnAckReturnCode @NotNull [] VALUES = values();
     private final int code;
     Mqtt3ConnAckReturnCode(final int code) {

@@ -49,11 +49,11 @@ public class ConnectionStartInputImpl
         Preconditions.checkNotNull(channel, "channel must never be null");
         this.connect = connect;
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        this.clientInformation = ExtensionInformationUtil
-                .getAndSetClientInformation(channel, connect.getClientIdentifier());
-        this.connectTimestamp = Objects.requireNonNullElse(
-                ClientConnectionContext.of(channel).getConnectReceivedTimestamp(),
-                System.currentTimeMillis());
+        this.clientInformation =
+                ExtensionInformationUtil.getAndSetClientInformation(channel, connect.getClientIdentifier());
+        this.connectTimestamp =
+                Objects.requireNonNullElse(ClientConnectionContext.of(channel).getConnectReceivedTimestamp(),
+                        System.currentTimeMillis());
     }
 
     @Override

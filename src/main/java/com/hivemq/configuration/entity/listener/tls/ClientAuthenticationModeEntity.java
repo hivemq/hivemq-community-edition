@@ -23,5 +23,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(name = "clientAuthenticationMode")
 public enum ClientAuthenticationModeEntity {
     @XmlEnumValue("OPTIONAL")
-    OPTIONAL, REQUIRED, NONE
+    OPTIONAL,
+    REQUIRED,
+    NONE
 }

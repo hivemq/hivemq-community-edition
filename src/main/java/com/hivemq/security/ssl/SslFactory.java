@@ -74,15 +74,13 @@ public class SslFactory {
         try {
             sslContextStore.createAndInitIfAbsent(tls, sslContext -> {
                 final SSLEngine sslEngine = sslContext.newEngine(new PooledByteBufAllocator());
-                log.info(
-                        "Enabled protocols for {} at address {} and port {}: {}",
+                log.info("Enabled protocols for {} at address {} and port {}: {}",
                         listener.readableName(),
                         listener.getBindAddress(),
                         listener.getPort(),
                         Arrays.toString(sslEngine.getEnabledProtocols()));
                 final String[] enabledCipherSuites = sslEngine.getEnabledCipherSuites();
-                log.info(
-                        "Enabled cipher suites for {} at address {} and port {}: {}",
+                log.info("Enabled cipher suites for {} at address {} and port {}: {}",
                         listener.readableName(),
                         listener.getBindAddress(),
                         listener.getPort(),
@@ -106,13 +104,11 @@ public class SslFactory {
                             }
                         }
                     } else {
-                        unknownCipherSuitesSet = Sets.difference(
-                                ImmutableSet.copyOf(cipherSuites),
+                        unknownCipherSuitesSet = Sets.difference(ImmutableSet.copyOf(cipherSuites),
                                 ImmutableSet.copyOf(enabledCipherSuites));
                     }
                     if (!unknownCipherSuitesSet.isEmpty()) {
-                        log.warn(
-                                "Unknown cipher suites for {} at address {} and port {}: {}",
+                        log.warn("Unknown cipher suites for {} at address {} and port {}: {}",
                                 listener.readableName(),
                                 listener.getBindAddress(),
                                 listener.getPort(),

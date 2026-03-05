@@ -85,11 +85,18 @@ public class SslContextStoreTest {
     @Test(expected = UnrecoverableException.class)
     public void test_create_at_start_throws_exception() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
-        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath() + "/bad").withKeystoreType("JKS")
-                .withKeystorePassword("pw").withPrivateKeyPassword("pkpw").withProtocols(new ArrayList<>())
-                .withTruststorePath(null).withTruststoreType("JKS").withTruststorePassword(null)
-                .withClientAuthMode(Tls.ClientAuthMode.NONE).withCipherSuites(new ArrayList<>())
-                .withHandshakeTimeout(10).build();
+        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath() + "/bad")
+                .withKeystoreType("JKS")
+                .withKeystorePassword("pw")
+                .withPrivateKeyPassword("pkpw")
+                .withProtocols(new ArrayList<>())
+                .withTruststorePath(null)
+                .withTruststoreType("JKS")
+                .withTruststorePassword(null)
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withHandshakeTimeout(10)
+                .build();
         sslContextStore.createAndInitIfAbsent(tls, SslContextStoreTest::emptyOnCreate);
     }
 
@@ -97,10 +104,18 @@ public class SslContextStoreTest {
     public void test_create_at_start() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath()).withKeystoreType("JKS").withKeystorePassword("pw")
-                .withPrivateKeyPassword("pkpw").withProtocols(new ArrayList<>()).withTruststorePath(null)
-                .withTruststoreType("JKS").withTruststorePassword(null).withClientAuthMode(Tls.ClientAuthMode.NONE)
-                .withCipherSuites(new ArrayList<>()).withHandshakeTimeout(0).build();
+                .withKeystorePath(keystore.getAbsolutePath())
+                .withKeystoreType("JKS")
+                .withKeystorePassword("pw")
+                .withPrivateKeyPassword("pkpw")
+                .withProtocols(new ArrayList<>())
+                .withTruststorePath(null)
+                .withTruststoreType("JKS")
+                .withTruststorePassword(null)
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withHandshakeTimeout(0)
+                .build();
         sslContextStore.createAndInitIfAbsent(tls, SslContextStoreTest::emptyOnCreate);
         verify(executorService).scheduleAtFixedRate(captor.capture(), eq(10L), eq(10L), eq(TimeUnit.SECONDS));
         assertTrue(captor.getValue() instanceof SslContextStore.SslContextScheduledRunnable);
@@ -117,16 +132,23 @@ public class SslContextStoreTest {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath()).withKeystoreType("JKS").withKeystorePassword("pw")
-                .withPrivateKeyPassword("pkpw").withProtocols(new ArrayList<>())
-                .withTruststorePath(trust.getAbsolutePath()).withTruststoreType("JKS").withTruststorePassword("pw")
-                .withClientAuthMode(Tls.ClientAuthMode.NONE).withCipherSuites(new ArrayList<>())
-                .withHandshakeTimeout(10).build();
+                .withKeystorePath(keystore.getAbsolutePath())
+                .withKeystoreType("JKS")
+                .withKeystorePassword("pw")
+                .withPrivateKeyPassword("pkpw")
+                .withProtocols(new ArrayList<>())
+                .withTruststorePath(trust.getAbsolutePath())
+                .withTruststoreType("JKS")
+                .withTruststorePassword("pw")
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withHandshakeTimeout(10)
+                .build();
         final HashCode firstHash = SslContextStore.hashKeystoreAndTruststore(tls);
         final HashCode secondHash = SslContextStore.hashKeystoreAndTruststore(tls);
         assertEquals(firstHash, secondHash);
-        try (final FileInputStream input = new FileInputStream(
-                keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
+        try (final FileInputStream input =
+                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
                 final FileOutputStream output = new FileOutputStream(trust, false)) {
             input.transferTo(output);
         }
@@ -139,11 +161,18 @@ public class SslContextStoreTest {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath()).withKeystoreType("JKS").withKeystorePassword("pw")
-                .withPrivateKeyPassword("pkpw").withProtocols(new ArrayList<>())
-                .withTruststorePath(trust.getAbsolutePath() + "/bad").withTruststoreType("JKS")
-                .withTruststorePassword("pw").withClientAuthMode(Tls.ClientAuthMode.NONE)
-                .withCipherSuites(new ArrayList<>()).withHandshakeTimeout(10).build();
+                .withKeystorePath(keystore.getAbsolutePath())
+                .withKeystoreType("JKS")
+                .withKeystorePassword("pw")
+                .withPrivateKeyPassword("pkpw")
+                .withProtocols(new ArrayList<>())
+                .withTruststorePath(trust.getAbsolutePath() + "/bad")
+                .withTruststoreType("JKS")
+                .withTruststorePassword("pw")
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withHandshakeTimeout(10)
+                .build();
         SslContextStore.hashKeystoreAndTruststore(tls);
     }
 
@@ -152,19 +181,26 @@ public class SslContextStoreTest {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath()).withKeystoreType("JKS").withKeystorePassword("pw")
-                .withPrivateKeyPassword("pkpw").withProtocols(new ArrayList<>())
-                .withTruststorePath(trust.getAbsolutePath()).withTruststoreType("JKS").withTruststorePassword("pw")
-                .withClientAuthMode(Tls.ClientAuthMode.NONE).withCipherSuites(new ArrayList<>())
-                .withHandshakeTimeout(10).build();
+                .withKeystorePath(keystore.getAbsolutePath())
+                .withKeystoreType("JKS")
+                .withKeystorePassword("pw")
+                .withPrivateKeyPassword("pkpw")
+                .withProtocols(new ArrayList<>())
+                .withTruststorePath(trust.getAbsolutePath())
+                .withTruststoreType("JKS")
+                .withTruststorePassword("pw")
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withHandshakeTimeout(10)
+                .build();
         sslContextStore.createAndInitIfAbsent(tls, SslContextStoreTest::emptyOnCreate);
         try (final OutputStream output = new BufferedOutputStream(new FileOutputStream(trust, false))) {
             for (int i = 0; i < 2043; i++) {
                 output.write(i);
             }
         }
-        try (final FileInputStream input = new FileInputStream(
-                keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
+        try (final FileInputStream input =
+                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
                 final FileOutputStream output = new FileOutputStream(trust, false)) {
             input.transferTo(output);
         }
@@ -178,20 +214,26 @@ public class SslContextStoreTest {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath()).withKeystoreType("JKS").withKeystorePassword("pw")
-                .withPrivateKeyPassword("pkpw").withProtocols(new ArrayList<>())
-                .withTruststorePath(trust.getAbsolutePath()).withTruststoreType("JKS").withTruststorePassword("pw")
-                .withClientAuthMode(Tls.ClientAuthMode.NONE).withCipherSuites(new ArrayList<>())
-                .withHandshakeTimeout(10).build();
-        sslContextStore.createAndInitIfAbsent(tls, context -> {
-        });
+                .withKeystorePath(keystore.getAbsolutePath())
+                .withKeystoreType("JKS")
+                .withKeystorePassword("pw")
+                .withPrivateKeyPassword("pkpw")
+                .withProtocols(new ArrayList<>())
+                .withTruststorePath(trust.getAbsolutePath())
+                .withTruststoreType("JKS")
+                .withTruststorePassword("pw")
+                .withClientAuthMode(Tls.ClientAuthMode.NONE)
+                .withCipherSuites(new ArrayList<>())
+                .withHandshakeTimeout(10)
+                .build();
+        sslContextStore.createAndInitIfAbsent(tls, context -> {});
         try (final OutputStream output = new BufferedOutputStream(new FileOutputStream(trust, false))) {
             for (int i = 0; i < 2043; i++) {
                 output.write(i);
             }
         }
-        try (final FileInputStream input = new FileInputStream(
-                keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
+        try (final FileInputStream input =
+                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
                 final FileOutputStream output = new FileOutputStream(trust, false)) {
             input.transferTo(output);
         }

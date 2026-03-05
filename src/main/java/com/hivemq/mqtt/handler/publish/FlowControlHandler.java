@@ -55,7 +55,8 @@ public class FlowControlHandler extends ChannelDuplexHandler {
     private final int serverReceiveMaximum;
     private final MqttServerDisconnector serverDisconnector;
     @Inject
-    public FlowControlHandler(final MqttConfigurationService mqttConfigurationService,
+    public FlowControlHandler(
+            final MqttConfigurationService mqttConfigurationService,
             final MqttServerDisconnector serverDisconnector) {
         this.serverReceiveMaximum = mqttConfigurationService.serverReceiveMaximum();
         this.serverDisconnector = serverDisconnector;
@@ -72,8 +73,7 @@ public class FlowControlHandler extends ChannelDuplexHandler {
             final PUBLISH publish = (PUBLISH) msg;
             // decrement sendQuota for qos > 0 publish messages and disconnect client when quota gets negative
             if (QoS.AT_MOST_ONCE != publish.getQoS() && serverSendQuota.getAndDecrement() == 0) {
-                serverDisconnector.disconnect(
-                        ctx.channel(),
+                serverDisconnector.disconnect(ctx.channel(),
                         "A client (IP: {}) sent too many concurrent PUBLISH messages. Disconnecting client.",
                         "Sent too many concurrent PUBLISH messages",
                         Mqtt5DisconnectReasonCode.RECEIVE_MAXIMUM_EXCEEDED,

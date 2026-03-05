@@ -68,8 +68,7 @@ public class HiveMQExceptionHandlerBootstrapTest {
 
     @Test
     public void test_unrecoverableException_wrapped() {
-        HiveMQExceptionHandlerBootstrap.handleUncaughtException(
-                Thread.currentThread(),
+        HiveMQExceptionHandlerBootstrap.handleUncaughtException(Thread.currentThread(),
                 new RuntimeException("test", new UnrecoverableException(true)),
                 shutdownAction);
         assertFalse(shutdownCalled.get());

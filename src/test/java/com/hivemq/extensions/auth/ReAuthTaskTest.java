@@ -66,13 +66,15 @@ public class ReAuthTaskTest {
         connect = new AtomicBoolean();
         auth = new AtomicBoolean();
         reAuth = new AtomicBoolean();
-        classloader = IsolatedExtensionClassloaderUtil
-                .buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{TestAuthenticator.class});
-        final EnhancedAuthenticator enhancedAuthenticator = IsolatedExtensionClassloaderUtil
-                .loadInstance(classloader, TestAuthenticator.class);
+        classloader = IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
+                new Class[]{TestAuthenticator.class});
+        final EnhancedAuthenticator enhancedAuthenticator =
+                IsolatedExtensionClassloaderUtil.loadInstance(classloader, TestAuthenticator.class);
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput))
                 .thenReturn(enhancedAuthenticator);
-        authTask = new ReAuthTask(wrappedAuthenticatorProvider, authenticatorProviderInput, "extension1",
+        authTask = new ReAuthTask(wrappedAuthenticatorProvider,
+                authenticatorProviderInput,
+                "extension1",
                 new ClientAuthenticatorsImpl(new ExtensionPriorityComparator(extensions)));
     }
 
@@ -90,9 +92,11 @@ public class ReAuthTaskTest {
         final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
         final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
-        when(input.getAuthPacket()).thenReturn(
-                new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
+        when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method",
+                "data".getBytes(),
+                Mqtt5AuthReasonCode.REAUTHENTICATE,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason")));
         authTask.apply(input, output);
         assertTrue(reAuth.get());
     }
@@ -102,9 +106,11 @@ public class ReAuthTaskTest {
         final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
         final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
-        when(input.getAuthPacket()).thenReturn(
-                new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
+        when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method",
+                "data".getBytes(),
+                Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason")));
         authTask.apply(input, output);
         assertTrue(auth.get());
     }
@@ -114,9 +120,11 @@ public class ReAuthTaskTest {
         final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
         final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.NEXT_EXTENSION_OR_DEFAULT);
-        when(input.getAuthPacket()).thenReturn(
-                new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
+        when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method",
+                "data".getBytes(),
+                Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason")));
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(null);
         authTask.apply(input, output);
         assertFalse(auth.get());
@@ -127,9 +135,11 @@ public class ReAuthTaskTest {
         final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
         final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.UNDECIDED);
-        when(input.getAuthPacket()).thenReturn(
-                new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
+        when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method",
+                "data".getBytes(),
+                Mqtt5AuthReasonCode.REAUTHENTICATE,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason")));
         authTask.apply(input, output);
         assertTrue(reAuth.get());
     }
@@ -139,9 +149,11 @@ public class ReAuthTaskTest {
         final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
         final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.UNDECIDED);
-        when(input.getAuthPacket()).thenReturn(
-                new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
+        when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method",
+                "data".getBytes(),
+                Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason")));
         authTask.apply(input, output);
         assertTrue(auth.get());
     }
@@ -151,9 +163,11 @@ public class ReAuthTaskTest {
         final ReAuthOutput output = Mockito.mock(ReAuthOutput.class);
         final AuthInput input = Mockito.mock(AuthInput.class);
         when(output.getAuthenticationState()).thenReturn(AuthenticationState.UNDECIDED);
-        when(input.getAuthPacket()).thenReturn(
-                new AuthPacketImpl(new AUTH("method", "data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason")));
+        when(input.getAuthPacket()).thenReturn(new AuthPacketImpl(new AUTH("method",
+                "data".getBytes(),
+                Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason")));
         when(wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput)).thenReturn(null);
         authTask.apply(input, output);
         assertFalse(auth.get());

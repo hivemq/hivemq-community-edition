@@ -64,12 +64,19 @@ public class Tls {
      * @param preferServerCipherSuites if the server cipher suites are preferred over the client cipher suites
      * @since                          3.3
      */
-    protected Tls(final @NotNull String keystorePath, final @NotNull String keystorePassword,
-            final @NotNull String keystoreType, final @NotNull String privateKeyPassword,
-            final @Nullable String truststorePath, final @Nullable String truststorePassword,
-            final @Nullable String truststoreType, final int handshakeTimeout,
-            final @NotNull ClientAuthMode clientAuthMode, final @NotNull List<String> protocols,
-            final @NotNull List<String> cipherSuites, final @Nullable Boolean preferServerCipherSuites) {
+    protected Tls(
+            final @NotNull String keystorePath,
+            final @NotNull String keystorePassword,
+            final @NotNull String keystoreType,
+            final @NotNull String privateKeyPassword,
+            final @Nullable String truststorePath,
+            final @Nullable String truststorePassword,
+            final @Nullable String truststoreType,
+            final int handshakeTimeout,
+            final @NotNull ClientAuthMode clientAuthMode,
+            final @NotNull List<String> protocols,
+            final @NotNull List<String> cipherSuites,
+            final @Nullable Boolean preferServerCipherSuites) {
         checkNotNull(clientAuthMode, "clientAuthMode must not be null");
         checkNotNull(protocols, "protocols must not be null");
         checkNotNull(cipherSuites, "cipher suites must not be null");
@@ -195,9 +202,8 @@ public class Tls {
         if (truststorePath != null ? !truststorePath.equals(tls.truststorePath) : tls.truststorePath != null) {
             return false;
         }
-        if (truststorePassword != null
-                ? !truststorePassword.equals(tls.truststorePassword)
-                : tls.truststorePassword != null) {
+        if (truststorePassword != null ? !truststorePassword.equals(tls.truststorePassword) :
+                tls.truststorePassword != null) {
             return false;
         }
         if (truststoreType != null ? !truststoreType.equals(tls.truststoreType) : tls.truststoreType != null) {
@@ -212,9 +218,8 @@ public class Tls {
         if (!protocols.equals(tls.protocols)) {
             return false;
         }
-        if (preferServerCipherSuites != null
-                ? !preferServerCipherSuites.equals(tls.preferServerCipherSuites)
-                : tls.preferServerCipherSuites != null) {
+        if (preferServerCipherSuites != null ? !preferServerCipherSuites.equals(tls.preferServerCipherSuites) :
+                tls.preferServerCipherSuites != null) {
             return false;
         }
         return cipherSuites.equals(tls.cipherSuites);
@@ -349,8 +354,17 @@ public class Tls {
             checkNotNull(clientAuthMode, "clientAuthMode must not be null");
             checkNotNull(protocols, "protocols must not be null");
             checkNotNull(cipherSuites, "cipher suites must not be null");
-            return new Tls(keystorePath, keystorePassword, keystoreType, privateKeyPassword, truststorePath,
-                    truststorePassword, truststoreType, handshakeTimeout, clientAuthMode, protocols, cipherSuites,
+            return new Tls(keystorePath,
+                    keystorePassword,
+                    keystoreType,
+                    privateKeyPassword,
+                    truststorePath,
+                    truststorePassword,
+                    truststoreType,
+                    handshakeTimeout,
+                    clientAuthMode,
+                    protocols,
+                    cipherSuites,
                     preferServerCipherSuites) {
             };
         }

@@ -56,8 +56,8 @@ public class ListenerStartupInformationTest {
     @Test
     public void test_failed_listener_exception() throws Exception {
         final TcpListener listener = new TcpListener(1883, "0.0.0.0");
-        final ListenerStartupInformation info = ListenerStartupInformation
-                .failedListenerStartup(listener, new IllegalArgumentException("illegal"));
+        final ListenerStartupInformation info =
+                ListenerStartupInformation.failedListenerStartup(listener, new IllegalArgumentException("illegal"));
         assertFalse(info.isSuccessful());
         assertSame(listener, info.getListener());
         assertTrue(info.getException().isPresent());

@@ -43,14 +43,18 @@ public class ConfigurationBootstrap {
 
     public static @NotNull FullConfigurationService bootstrapConfig(
             final @NotNull SystemInformation systemInformation) {
-        final ConfigurationServiceImpl configurationService = new ConfigurationServiceImpl(
-                new ListenerConfigurationServiceImpl(), new MqttConfigurationServiceImpl(),
-                new RestrictionsConfigurationServiceImpl(), new SecurityConfigurationServiceImpl(),
-                new UsageStatisticsConfigImpl(), new PersistenceConfigurationServiceImpl());
+        final ConfigurationServiceImpl configurationService =
+                new ConfigurationServiceImpl(new ListenerConfigurationServiceImpl(),
+                        new MqttConfigurationServiceImpl(),
+                        new RestrictionsConfigurationServiceImpl(),
+                        new SecurityConfigurationServiceImpl(),
+                        new UsageStatisticsConfigImpl(),
+                        new PersistenceConfigurationServiceImpl());
         final ConfigurationFile configurationFile = ConfigurationFileProvider.get(systemInformation);
         final ConfigFileReader configFileReader = new ConfigFileReader(configurationFile,
                 new RestrictionConfigurator(configurationService.restrictionsConfiguration()),
-                new SecurityConfigurator(configurationService.securityConfiguration()), new EnvVarUtil(),
+                new SecurityConfigurator(configurationService.securityConfiguration()),
+                new EnvVarUtil(),
                 new UsageStatisticsConfigurator(configurationService.usageStatisticsConfiguration()),
                 new MqttConfigurator(configurationService.mqttConfiguration()),
                 new ListenerConfigurator(configurationService.listenerConfiguration(), systemInformation),

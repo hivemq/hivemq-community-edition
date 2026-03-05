@@ -542,8 +542,8 @@ public class Mqtt5PublishDecoderTest extends AbstractMqtt5DecoderTest {
 
     @Test
     public void test_decode_PayloadUtf8NotWellFormed_returnsNull() {
-        final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService fullConfigurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         fullConfigurationService.securityConfiguration().setPayloadFormatValidation(true);
         channel = new EmbeddedChannel(TestMqttDecoder.create(fullConfigurationService));
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);

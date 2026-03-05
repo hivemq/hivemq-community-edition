@@ -41,7 +41,9 @@ public class KeepAliveDisconnectHandler extends ChannelInboundHandlerAdapter {
     private byte state = NOT_INITIATED;
     private boolean reading;
     private final @NotNull KeepAliveDisconnectService keepAliveDisconnectService;
-    public KeepAliveDisconnectHandler(final long readerIdleTime, final @NotNull TimeUnit unit,
+    public KeepAliveDisconnectHandler(
+            final long readerIdleTime,
+            final @NotNull TimeUnit unit,
             final @NotNull KeepAliveDisconnectService keepAliveDisconnectService) {
         this.keepAliveDisconnectService = keepAliveDisconnectService;
         if (readerIdleTime <= 0) {

@@ -84,8 +84,8 @@ public class DiagnosticModeTest {
     }
 
     private void captureShutdownHook() {
-        final ArgumentCaptor<HiveMQShutdownHook> stopShutdownHookCaptor = ArgumentCaptor
-                .forClass(HiveMQShutdownHook.class);
+        final ArgumentCaptor<HiveMQShutdownHook> stopShutdownHookCaptor =
+                ArgumentCaptor.forClass(HiveMQShutdownHook.class);
         verify(shutdownHooks).add(stopShutdownHookCaptor.capture());
         shutdownHook = stopShutdownHookCaptor.getValue();
     }

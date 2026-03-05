@@ -39,7 +39,8 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
     private final @NotNull ExecutorService pluginStartStopExecutor;
     @Inject
     @VisibleForTesting
-    public ExtensionLifecycleHandlerImpl(final @NotNull HiveMQExtensions hiveMQExtensions,
+    public ExtensionLifecycleHandlerImpl(
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull @PluginStartStop ExecutorService pluginStartStopExecutor) {
         this.hiveMQExtensions = hiveMQExtensions;
         this.pluginStartStopExecutor = pluginStartStopExecutor;
@@ -77,8 +78,7 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
 
     private @NotNull CompletableFuture<Boolean> startPlugin(final @NotNull HiveMQExtensionEvent pluginEvent) {
         final String pluginId = pluginEvent.getExtensionId();
-        log.debug(
-                "Starting {}extension with id \"{}\" at {}",
+        log.debug("Starting {}extension with id \"{}\" at {}",
                 pluginEvent.isEmbedded() ? "embedded " : "",
                 pluginId,
                 pluginEvent.getExtensionFolder());
@@ -87,15 +87,14 @@ public class ExtensionLifecycleHandlerImpl implements ExtensionLifecycleHandler 
 
     private @NotNull CompletableFuture<Boolean> stopPlugin(final @NotNull String pluginId, final boolean embedded) {
         log.debug("Stopping {}extension with id {}", embedded ? "embedded " : "", pluginId);
-        return CompletableFuture
-                .supplyAsync(() -> hiveMQExtensions.extensionStop(pluginId, false), pluginStartStopExecutor);
+        return CompletableFuture.supplyAsync(() -> hiveMQExtensions.extensionStop(pluginId, false),
+                pluginStartStopExecutor);
     }
 
     private @NotNull ImmutableList<HiveMQExtensionEvent> analyzePluginEvents(
             final ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents) {
         // here duplicate start priority logging can be added, once it is specified
-        return ImmutableList.sortedCopyOf(
-                Comparator.comparingInt(HiveMQExtensionEvent::getPriority).reversed(),
+        return ImmutableList.sortedCopyOf(Comparator.comparingInt(HiveMQExtensionEvent::getPriority).reversed(),
                 hiveMQExtensionEvents);
     }
 }

@@ -81,8 +81,8 @@ public class AsyncLocalChunkIteratorTest {
 
     @Test(timeout = 15_000, expected = NullPointerException.class)
     public void test_fetch_result_null() throws Throwable {
-        asyncIterator = new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback,
-                executorService);
+        asyncIterator =
+                new AsyncLocalChunkIterator<>((cursor) -> Futures.immediateFuture(null), itemCallback, executorService);
         asyncIterator.fetchAndIterate();
         try {
             asyncIterator.getFinishedFuture().get();
@@ -115,8 +115,7 @@ public class AsyncLocalChunkIteratorTest {
         itemCallback.setAbort(true);
         asyncIterator.fetchAndIterate();
         asyncIterator.getFinishedFuture().get();
-        assertTrue(
-                "Should only contain max 3 item, was " + itemCallback.getItems().size() + " items",
+        assertTrue("Should only contain max 3 item, was " + itemCallback.getItems().size() + " items",
                 itemCallback.getItems().size() <= 3);
     }
     private static class TestItemCallback implements AsyncIterator.ItemCallback<String> {

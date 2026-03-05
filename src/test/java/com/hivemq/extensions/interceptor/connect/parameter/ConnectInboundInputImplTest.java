@@ -36,8 +36,8 @@ public class ConnectInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final ConnectPacketImpl packet = mock(ConnectPacketImpl.class);
-        final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final ConnectInboundInputImpl input =
+                new ConnectInboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getConnectPacket());
@@ -48,8 +48,8 @@ public class ConnectInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final ConnectPacketImpl packet = mock(ConnectPacketImpl.class);
-        final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final ConnectInboundInputImpl input =
+                new ConnectInboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiableConnectPacketImpl modifiablePacket = mock(ModifiableConnectPacketImpl.class);
         final ConnectPacketImpl newPacket = mock(ConnectPacketImpl.class);
         final ConnectInboundOutputImpl output = mock(ConnectInboundOutputImpl.class);

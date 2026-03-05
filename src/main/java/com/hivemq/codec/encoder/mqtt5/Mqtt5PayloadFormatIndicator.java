@@ -26,7 +26,8 @@ import com.hivemq.extension.sdk.api.packets.publish.PayloadFormatIndicator;
  */
 public enum Mqtt5PayloadFormatIndicator {
 
-    UNSPECIFIED, UTF_8;
+    UNSPECIFIED,
+    UTF_8;
     private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] VALUES = values();
     private final @NotNull PayloadFormatIndicator payloadFormatIndicator;
     Mqtt5PayloadFormatIndicator() {
@@ -43,8 +44,8 @@ public enum Mqtt5PayloadFormatIndicator {
     public @NotNull PayloadFormatIndicator toPayloadFormatIndicator() {
         return payloadFormatIndicator;
     }
-    private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] LOOKUP = new Mqtt5PayloadFormatIndicator[PayloadFormatIndicator
-            .values().length];
+    private static final @NotNull Mqtt5PayloadFormatIndicator @NotNull [] LOOKUP =
+            new Mqtt5PayloadFormatIndicator[PayloadFormatIndicator.values().length];
     static {
         for (final Mqtt5PayloadFormatIndicator payloadFormatIndicator : values()) {
             LOOKUP[payloadFormatIndicator.payloadFormatIndicator.ordinal()] = payloadFormatIndicator;

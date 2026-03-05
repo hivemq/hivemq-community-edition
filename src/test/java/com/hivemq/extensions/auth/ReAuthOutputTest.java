@@ -48,8 +48,11 @@ public class ReAuthOutputTest {
     private ReAuthOutput authTaskOutput;
     @Before
     public void setUp() {
-        authTaskOutput = new ReAuthOutput(asyncer, true, new ModifiableDefaultPermissionsImpl(),
-                new ModifiableClientSettingsImpl(10, null), 30);
+        authTaskOutput = new ReAuthOutput(asyncer,
+                true,
+                new ModifiableDefaultPermissionsImpl(),
+                new ModifiableClientSettingsImpl(10, null),
+                30);
     }
 
     @Test(timeout = 5000)
@@ -169,8 +172,7 @@ public class ReAuthOutputTest {
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback_code() {
-        authTaskOutput.async(
-                Duration.ofSeconds(10),
+        authTaskOutput.async(Duration.ofSeconds(10),
                 TimeoutFallback.FAILURE,
                 DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD);
         authTaskOutput.failByTimeout();
@@ -194,8 +196,7 @@ public class ReAuthOutputTest {
 
     @Test(timeout = 5000)
     public void test_async_duration_fallback_code_string() {
-        authTaskOutput.async(
-                Duration.ofSeconds(10),
+        authTaskOutput.async(Duration.ofSeconds(10),
                 TimeoutFallback.FAILURE,
                 DisconnectedReasonCode.SERVER_BUSY,
                 "Failed by me");

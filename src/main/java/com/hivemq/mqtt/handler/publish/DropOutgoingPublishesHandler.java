@@ -68,8 +68,7 @@ public class DropOutgoingPublishesHandler {
                     }
                     // Drop message
                     final String clientId = ClientConnectionContext.of(ctx.channel()).getClientId();
-                    log.trace(
-                            "Dropped qos 0 message for client {} on topic {} because the channel was not writable",
+                    log.trace("Dropped qos 0 message for client {} on topic {} because the channel was not writable",
                             clientId,
                             publish.getTopic());
                     messageDroppedService.notWritable(clientId, publish.getTopic(), publish.getQoS().getQosNumber());

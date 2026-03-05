@@ -51,9 +51,10 @@ public class ShutdownHooks {
     public ShutdownHooks() {
         shuttingDown = new AtomicBoolean(false);
         synchronousHooks = MultimapBuilder.SortedSetMultimapBuilder.treeKeys(Ordering.natural().reverse()) // High
-                                                                                                           // priorities
-                                                                                                           // first
-                .arrayListValues().build();
+                // priorities
+                // first
+                .arrayListValues()
+                .build();
     }
 
     public boolean isShuttingDown() {
@@ -84,8 +85,7 @@ public class ShutdownHooks {
             return;
         }
         checkNotNull(hiveMQShutdownHook, "A shutdown hook must not be null");
-        log.trace(
-                "Removing shutdown hook {} with priority {}",
+        log.trace("Removing shutdown hook {} with priority {}",
                 hiveMQShutdownHook.name(),
                 hiveMQShutdownHook.priority());
         synchronousHooks.values().remove(hiveMQShutdownHook);
@@ -101,11 +101,10 @@ public class ShutdownHooks {
     public void runShutdownHooks() {
         shuttingDown.set(true);
         log.info("Shutting down HiveMQ. Please wait, this could take a while...");
-        final ScheduledExecutorService executorService = Executors
-                .newSingleThreadScheduledExecutor(ThreadFactoryUtil.create("shutdown-log-executor"));
-        executorService.scheduleAtFixedRate(
-                () -> log.info(
-                        "Still shutting down HiveMQ. Waiting for remaining tasks to be executed. Do not shutdown HiveMQ."),
+        final ScheduledExecutorService executorService =
+                Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create("shutdown-log-executor"));
+        executorService.scheduleAtFixedRate(() -> log.info(
+                "Still shutting down HiveMQ. Waiting for remaining tasks to be executed. Do not shutdown HiveMQ."),
                 10,
                 10,
                 TimeUnit.SECONDS);

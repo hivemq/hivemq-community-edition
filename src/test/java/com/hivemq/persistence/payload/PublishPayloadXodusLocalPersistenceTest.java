@@ -58,7 +58,8 @@ public class PublishPayloadXodusLocalPersistenceTest {
         when(localPersistenceFileUtil.getVersionedLocalPersistenceFolder(anyString(), anyString()))
                 .thenReturn(temporaryFolder.newFolder());
         persistenceStartup = new PersistenceStartup();
-        persistence = new PublishPayloadXodusLocalPersistence(localPersistenceFileUtil, new EnvironmentUtil(),
+        persistence = new PublishPayloadXodusLocalPersistence(localPersistenceFileUtil,
+                new EnvironmentUtil(),
                 persistenceStartup);
         persistence.start();
     }
@@ -136,8 +137,10 @@ public class PublishPayloadXodusLocalPersistenceTest {
         final int highestPayloadId = 123456789;
         persistence.put(highestPayloadId, new byte[]{1, 2, 3});
         persistence.stop();
-        final PublishPayloadXodusLocalPersistence newPersistence = new PublishPayloadXodusLocalPersistence(
-                localPersistenceFileUtil, new EnvironmentUtil(), persistenceStartup);
+        final PublishPayloadXodusLocalPersistence newPersistence =
+                new PublishPayloadXodusLocalPersistence(localPersistenceFileUtil,
+                        new EnvironmentUtil(),
+                        persistenceStartup);
         newPersistence.start();
         assertTrue(PUBLISH.PUBLISH_COUNTER.get() > highestPayloadId);
         newPersistence.stop();

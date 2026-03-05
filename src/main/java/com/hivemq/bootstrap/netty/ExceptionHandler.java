@@ -66,8 +66,7 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
             return;
         } else if (cause instanceof CorruptedFrameException) {
             // We can ignore this because the channel is already closed because of an IO problem
-            mqttServerDisconnector.disconnect(
-                    channel,
+            mqttServerDisconnector.disconnect(channel,
                     "A client (IP: {}) sent illegal websocket data. Disconnecting client.",
                     "Illegal websocket data sent by client: " + cause.getMessage(),
                     Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
@@ -78,14 +77,12 @@ public class ExceptionHandler extends ChannelHandlerAdapter {
         } else {
             final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
-            log.error(
-                    "An unexpected error occurred for client with IP {}: {}",
+            log.error("An unexpected error occurred for client with IP {}: {}",
                     channelIP.orElse("UNKNOWN"),
                     ExceptionUtils.getStackTrace(cause));
         }
         if (channel != null) {
-            mqttServerDisconnector.disconnect(
-                    channel,
+            mqttServerDisconnector.disconnect(channel,
                     null, // already logged
                     "Channel exception: " + cause.getMessage(),
                     Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,

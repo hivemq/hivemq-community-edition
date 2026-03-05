@@ -37,8 +37,11 @@ public class PubcompPacketImpl implements PubcompPacket {
     final @NotNull PubcompReasonCode reasonCode;
     final @Nullable String reasonString;
     final @NotNull UserPropertiesImpl userProperties;
-    public PubcompPacketImpl(final int packetIdentifier, final @NotNull PubcompReasonCode reasonCode,
-            final @Nullable String reasonString, final @NotNull UserPropertiesImpl userProperties) {
+    public PubcompPacketImpl(
+            final int packetIdentifier,
+            final @NotNull PubcompReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull UserPropertiesImpl userProperties) {
         this.packetIdentifier = packetIdentifier;
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
@@ -46,7 +49,9 @@ public class PubcompPacketImpl implements PubcompPacket {
     }
 
     public PubcompPacketImpl(final @NotNull PUBCOMP pubcomp) {
-        this(pubcomp.getPacketIdentifier(), pubcomp.getReasonCode().toPubcompReasonCode(), pubcomp.getReasonString(),
+        this(pubcomp.getPacketIdentifier(),
+                pubcomp.getReasonCode().toPubcompReasonCode(),
+                pubcomp.getReasonString(),
                 UserPropertiesImpl.of(pubcomp.getUserProperties().asList()));
     }
 
@@ -79,8 +84,8 @@ public class PubcompPacketImpl implements PubcompPacket {
             return false;
         }
         final PubcompPacketImpl that = (PubcompPacketImpl) o;
-        return (packetIdentifier == that.packetIdentifier) && (reasonCode == that.reasonCode)
-                && Objects.equals(reasonString, that.reasonString) && userProperties.equals(that.userProperties);
+        return (packetIdentifier == that.packetIdentifier) && (reasonCode == that.reasonCode) &&
+                Objects.equals(reasonString, that.reasonString) && userProperties.equals(that.userProperties);
     }
 
     @Override

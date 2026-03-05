@@ -336,11 +336,11 @@ public class ConnectionAttributeStoreImplTest {
 
     @Test
     public void test_getAll() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
-                "test.key1",
-                ByteBuffer.wrap("test.value1".getBytes()),
-                "test.key2",
-                ByteBuffer.wrap("test.value2".getBytes()));
+        final ImmutableMap<String,
+                ByteBuffer> values = ImmutableMap.of("test.key1",
+                        ByteBuffer.wrap("test.value1".getBytes()),
+                        "test.key2",
+                        ByteBuffer.wrap("test.value2".getBytes()));
         clientConnection.setConnectionAttributesIfAbsent(connectionAttributes);
         for (final Map.Entry<String, ByteBuffer> entry : values.entrySet()) {
             connectionAttributeStore.put(entry.getKey(), entry.getValue());
@@ -454,8 +454,8 @@ public class ConnectionAttributeStoreImplTest {
 
                 @Override
                 public void runCount() {
-                    connectionAttributeStore
-                            .putAsString("test.key" + random.nextInt(EXECUTIONS / 10), RandomStringUtils.random(10));
+                    connectionAttributeStore.putAsString("test.key" + random.nextInt(EXECUTIONS / 10),
+                            RandomStringUtils.random(10));
                 }
             };
             getRunnables[i] = new ExceptionCountRunnable(EXECUTIONS) {

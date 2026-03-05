@@ -82,12 +82,14 @@ public class DisconnectOutboundInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new DisconnectInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new DisconnectInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
@@ -187,8 +189,11 @@ public class DisconnectOutboundInterceptorHandlerTest {
     }
 
     private @NotNull DISCONNECT testDisconnect() {
-        return new DISCONNECT(Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR, "reason",
-                Mqtt5UserProperties.NO_USER_PROPERTIES, "serverReference", 1);
+        return new DISCONNECT(Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
+                "reason",
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "serverReference",
+                1);
     }
     public static class TestModifyOutboundInterceptor implements DisconnectOutboundInterceptor {
 

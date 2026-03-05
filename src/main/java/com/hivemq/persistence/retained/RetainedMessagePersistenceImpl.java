@@ -48,8 +48,10 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     private final @NotNull ProducerQueues singleWriter;
     private final @NotNull Chunker chunker;
     @Inject
-    RetainedMessagePersistenceImpl(final @NotNull RetainedMessageLocalPersistence localPersistence,
-            final @NotNull SingleWriterService singleWriterService, final @NotNull Chunker chunker) {
+    RetainedMessagePersistenceImpl(
+            final @NotNull RetainedMessageLocalPersistence localPersistence,
+            final @NotNull SingleWriterService singleWriterService,
+            final @NotNull Chunker chunker) {
         this.localPersistence = localPersistence;
         singleWriter = singleWriterService.getRetainedMessageQueue();
         this.chunker = chunker;
@@ -113,8 +115,7 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
             }
             final List<ListenableFuture<Set<String>>> futures = singleWriter.submitToAllBucketsParallel(
                     (bucketIndex) -> new HashSet<>(localPersistence.getAllTopics(subscription, bucketIndex)));
-            return Futures.transform(
-                    Futures.allAsList(futures),
+            return Futures.transform(Futures.allAsList(futures),
                     listOfSets -> listOfSets.stream().flatMap(Set::stream).collect(Collectors.toSet()),
                     MoreExecutors.directExecutor());
         } catch (final Throwable throwable) {
@@ -145,16 +146,15 @@ public class RetainedMessagePersistenceImpl extends AbstractPersistence implemen
     }
 
     @Override
-    public @NotNull ListenableFuture<MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
-            @NotNull ChunkCursor cursor) {
-        return chunker.getAllLocalChunk(
-                cursor,
+    public @NotNull ListenableFuture<
+            MultipleChunkResult<Map<String, @NotNull RetainedMessage>>> getAllLocalRetainedMessagesChunk(
+                    @NotNull ChunkCursor cursor) {
+        return chunker.getAllLocalChunk(cursor,
                 InternalConfigurations.PERSISTENCE_RETAINED_MESSAGES_MAX_CHUNK_MEMORY_BYTES,
                 // Chunker.SingleWriterCall interface
                 (bucket, lastKey, maxResults) ->
                 // actual single writer call
-                singleWriter.submit(
-                        bucket,
+                singleWriter.submit(bucket,
                         (bucketIndex) -> localPersistence
                                 .getAllRetainedMessagesChunk(bucketIndex, lastKey, maxResults)));
     }

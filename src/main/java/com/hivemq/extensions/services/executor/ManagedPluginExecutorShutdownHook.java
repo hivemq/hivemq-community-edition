@@ -32,7 +32,8 @@ public class ManagedPluginExecutorShutdownHook implements HiveMQShutdownHook {
     private final @NotNull GlobalManagedExtensionExecutorService scheduledExecutorService;
     private final int timeout;
     public ManagedPluginExecutorShutdownHook(
-            final @NotNull GlobalManagedExtensionExecutorService scheduledExecutorService, final int timeout) {
+            final @NotNull GlobalManagedExtensionExecutorService scheduledExecutorService,
+            final int timeout) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.timeout = timeout;
     }

@@ -63,8 +63,8 @@ public class AuthHandlerTest {
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
-        final AuthHandler authHandler = new AuthHandler(connacker, mqttAuthSender, disconnector,
-                pluginAuthenticatorService);
+        final AuthHandler authHandler =
+                new AuthHandler(connacker, mqttAuthSender, disconnector, pluginAuthenticatorService);
         channel.pipeline().addLast(authHandler);
     }
 
@@ -75,11 +75,12 @@ public class AuthHandlerTest {
 
     @Test
     public void test_read_connect_success() {
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
-        verify(connacker).connackError(
-                any(Channel.class),
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.SUCCESS,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
+        verify(connacker).connackError(any(Channel.class),
                 anyString(),
                 anyString(),
                 eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR),
@@ -91,11 +92,12 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_success() {
         clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.SUCCESS,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
-        verify(disconnector).disconnect(
-                channel,
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.SUCCESS,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
+        verify(disconnector).disconnect(channel,
                 SUCCESS_AUTH_RECEIVED_FROM_CLIENT,
                 "Success reason code set in AUTH",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -108,11 +110,12 @@ public class AuthHandlerTest {
     @Test
     public void test_read_reauth_reauth() {
         clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
-        verify(disconnector).disconnect(
-                channel,
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.REAUTHENTICATE,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
+        verify(disconnector).disconnect(channel,
                 REAUTHENTICATE_DURING_RE_AUTH,
                 "REAUTHENTICATE reason code set in AUTH during ongoing re-auth",
                 Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -126,11 +129,12 @@ public class AuthHandlerTest {
     @Test
     public void test_read_auth_reauth() {
         clientConnection.proposeClientState(ClientState.AUTHENTICATING);
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
-        verify(connacker).connackError(
-                any(Channel.class),
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.REAUTHENTICATE,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
+        verify(connacker).connackError(any(Channel.class),
                 eq(REAUTHENTICATE_DURING_AUTH),
                 eq("REAUTHENTICATE reason code set in AUTH during ongoing auth"),
                 eq(Mqtt5ConnAckReasonCode.PROTOCOL_ERROR),
@@ -142,26 +146,32 @@ public class AuthHandlerTest {
 
     @Test
     public void test_read_connect_continue() {
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
         verify(pluginAuthenticatorService).authenticateAuth(any(), eq(clientConnection), any());
     }
 
     @Test
     public void test_read_reauth_continue() {
         clientConnection.proposeClientState(ClientState.RE_AUTHENTICATING);
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
         verify(pluginAuthenticatorService).authenticateAuth(any(), eq(clientConnection), any());
     }
 
     @Test
     public void test_read_reauth() {
-        channel.writeInbound(
-                new AUTH("auth method", "auth data".getBytes(), Mqtt5AuthReasonCode.REAUTHENTICATE,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, "reason"));
+        channel.writeInbound(new AUTH("auth method",
+                "auth data".getBytes(),
+                Mqtt5AuthReasonCode.REAUTHENTICATE,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                "reason"));
         verify(pluginAuthenticatorService).authenticateAuth(any(), eq(clientConnection), any());
         assertEquals(ClientState.RE_AUTHENTICATING, clientConnection.getClientState());
     }

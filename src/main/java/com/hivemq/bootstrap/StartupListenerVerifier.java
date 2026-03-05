@@ -71,8 +71,7 @@ public class StartupListenerVerifier {
 
     private @NotNull String getSuccessfulStartedString(final @NotNull ListenerStartupInformation startupInfo) {
         final Listener listener = startupInfo.getListener();
-        return String.format(
-                "Started %s on address %s and on port %s.",
+        return String.format("Started %s on address %s and on port %s.",
                 listener.readableName(),
                 listener.getBindAddress(),
                 listener.getPort());
@@ -80,8 +79,7 @@ public class StartupListenerVerifier {
 
     private @NotNull String getNotSuccessfulStartedString(final @NotNull ListenerStartupInformation startupInfo) {
         final Listener listener = startupInfo.getListener();
-        return String.format(
-                "Could not start %s on port %s and address %s. Is it already in use?",
+        return String.format("Could not start %s on port %s and address %s. Is it already in use?",
                 listener.readableName(),
                 listener.getPort(),
                 listener.getBindAddress());

@@ -41,8 +41,11 @@ public class AuthPacketImpl implements AuthPacket {
     private final @Nullable byte[] data;
     private final @Nullable String reasonString;
     private final @NotNull UserPropertiesImpl userProperties;
-    public AuthPacketImpl(final @NotNull AuthReasonCode reasonCode, final @NotNull String method,
-            final @Nullable byte[] data, final @Nullable String reasonString,
+    public AuthPacketImpl(
+            final @NotNull AuthReasonCode reasonCode,
+            final @NotNull String method,
+            final @Nullable byte[] data,
+            final @Nullable String reasonString,
             final @NotNull UserPropertiesImpl userProperties) {
         this.reasonCode = reasonCode;
         this.method = method;
@@ -52,7 +55,10 @@ public class AuthPacketImpl implements AuthPacket {
     }
 
     public AuthPacketImpl(final @NotNull AUTH auth) {
-        this(auth.getReasonCode().toAuthReasonCode(), auth.getAuthMethod(), auth.getAuthData(), auth.getReasonString(),
+        this(auth.getReasonCode().toAuthReasonCode(),
+                auth.getAuthMethod(),
+                auth.getAuthData(),
+                auth.getReasonString(),
                 UserPropertiesImpl.of(auth.getUserProperties().asList()));
     }
 
@@ -101,8 +107,8 @@ public class AuthPacketImpl implements AuthPacket {
             return false;
         }
         final AuthPacketImpl that = (AuthPacketImpl) o;
-        return (reasonCode == that.reasonCode) && method.equals(that.method) && Arrays.equals(data, that.data)
-                && Objects.equals(reasonString, that.reasonString) && userProperties.equals(that.userProperties);
+        return (reasonCode == that.reasonCode) && method.equals(that.method) && Arrays.equals(data, that.data) &&
+                Objects.equals(reasonString, that.reasonString) && userProperties.equals(that.userProperties);
     }
 
     @Override

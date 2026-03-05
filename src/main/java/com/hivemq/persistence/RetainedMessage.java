@@ -46,16 +46,33 @@ public class RetainedMessage {
     private final @Nullable Mqtt5PayloadFormatIndicator payloadFormatIndicator;
     private final long timestamp;
     private int sizeInMemory = SIZE_NOT_CALCULATED;
-    public RetainedMessage(@Nullable final byte[] message, @NotNull final QoS qos, final long publishId,
+    public RetainedMessage(
+            @Nullable final byte[] message,
+            @NotNull final QoS qos,
+            final long publishId,
             final long messageExpiryInterval) {
-        this(message, qos, publishId, messageExpiryInterval, Mqtt5UserProperties.NO_USER_PROPERTIES, null, null, null,
-                null, System.currentTimeMillis());
+        this(message,
+                qos,
+                publishId,
+                messageExpiryInterval,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                null,
+                null,
+                null,
+                System.currentTimeMillis());
     }
 
-    public RetainedMessage(@Nullable final byte[] message, @NotNull final QoS qos, final long publishId,
-            final long messageExpiryInterval, @NotNull final Mqtt5UserProperties userProperties,
-            @Nullable final String responseTopic, @Nullable final String contentType,
-            @Nullable final byte[] correlationData, @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
+    public RetainedMessage(
+            @Nullable final byte[] message,
+            @NotNull final QoS qos,
+            final long publishId,
+            final long messageExpiryInterval,
+            @NotNull final Mqtt5UserProperties userProperties,
+            @Nullable final String responseTopic,
+            @Nullable final String contentType,
+            @Nullable final byte[] correlationData,
+            @Nullable final Mqtt5PayloadFormatIndicator payloadFormatIndicator,
             final long timestamp) {
         Preconditions.checkNotNull(qos, "QoS must not be null");
         this.message = message;
@@ -84,8 +101,16 @@ public class RetainedMessage {
     }
 
     public RetainedMessage copyWithoutPayload() {
-        return new RetainedMessage(null, qos, publishId, messageExpiryInterval, userProperties, responseTopic,
-                contentType, correlationData, payloadFormatIndicator, timestamp);
+        return new RetainedMessage(null,
+                qos,
+                publishId,
+                messageExpiryInterval,
+                userProperties,
+                responseTopic,
+                contentType,
+                correlationData,
+                payloadFormatIndicator,
+                timestamp);
     }
 
     public int getEstimatedSizeInMemory() {
@@ -195,8 +220,8 @@ public class RetainedMessage {
     }
 
     public boolean isExpiryDisabled() {
-        return (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED)
-                || (messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET);
+        return (messageExpiryInterval == MqttConfigurationDefaults.TTL_DISABLED) ||
+                (messageExpiryInterval == PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET);
     }
 
     public boolean hasExpired() {

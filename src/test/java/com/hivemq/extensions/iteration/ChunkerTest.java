@@ -66,8 +66,8 @@ public class ChunkerTest {
     public void callsAllBuckets() throws Exception {
         final int[] counter = {0};
         final Chunker chunker = new Chunker();
-        final MultipleChunkResult<Map<String, @NotNull String>> multi = chunker
-                .getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
+        final MultipleChunkResult<Map<String, @NotNull String>> multi =
+                chunker.getAllLocalChunk(new ChunkCursor(), 4, new Chunker.SingleWriterCall<String>() {
 
                     @Override
                     public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(
@@ -97,8 +97,8 @@ public class ChunkerTest {
         final int[] counter = {0};
         final Chunker chunker = new Chunker();
         final ChunkCursor cursor = new ChunkCursor(new HashMap<>(), ImmutableSet.of(1, 3));
-        final MultipleChunkResult<Map<String, @NotNull String>> multi = chunker
-                .getAllLocalChunk(cursor, 4, new Chunker.SingleWriterCall<String>() {
+        final MultipleChunkResult<Map<String, @NotNull String>> multi =
+                chunker.getAllLocalChunk(cursor, 4, new Chunker.SingleWriterCall<String>() {
 
                     @Override
                     public ListenableFuture<@NotNull BucketChunkResult<Map<String, String>>> call(

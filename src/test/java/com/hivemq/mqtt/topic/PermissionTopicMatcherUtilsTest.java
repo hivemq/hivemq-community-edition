@@ -99,8 +99,7 @@ public class PermissionTopicMatcherUtilsTest {
         final boolean endsWithWildCard = StringUtils.endsWith(stripedPermissionTopic, "/#");
         final String stripedActualTopic = StringUtils.stripEnd(actualTopic, "/");
         final String[] splitActualTopic = StringUtils.splitPreserveAllTokens(stripedActualTopic, "/");
-        return PermissionTopicMatcherUtils.matches(
-                stripedPermissionTopic,
+        return PermissionTopicMatcherUtils.matches(stripedPermissionTopic,
                 splitPermissionTopic,
                 nonWildCard,
                 endsWithWildCard,

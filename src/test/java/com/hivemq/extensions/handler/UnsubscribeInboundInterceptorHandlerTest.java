@@ -88,12 +88,14 @@ public class UnsubscribeInboundInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new UnsubscribeInboundInterceptorHandler(configurationService, asyncer, extensions,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new UnsubscribeInboundInterceptorHandler(configurationService,
+                asyncer,
+                extensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelInboundHandlerAdapter() {
 
@@ -120,8 +122,8 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
     @Test
     public void test_simple_intercept() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(extensions,
-                new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
         final UnsubscribeInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), SimpleUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);
@@ -142,8 +144,8 @@ public class UnsubscribeInboundInterceptorHandlerTest {
 
     @Test
     public void test_modifying_topics() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(extensions,
-                new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(extensions, new ModifiableDefaultPermissionsImpl());
         final UnsubscribeInboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), ModifyUnsubscribeTestInterceptor.class);
         clientContext.addUnsubscribeInboundInterceptor(interceptor);

@@ -44,7 +44,8 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
     @Inject
-    public Mqtt5PubrecDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt5PubrecDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -68,7 +69,9 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
         }
         // nothing more to read
         if (!buf.isReadable()) {
-            return new PUBREC(packetIdentifier, Mqtt5PUBREC.DEFAULT_REASON_CODE, null,
+            return new PUBREC(packetIdentifier,
+                    Mqtt5PUBREC.DEFAULT_REASON_CODE,
+                    null,
                     Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
         final Mqtt5PubRecReasonCode reasonCode = Mqtt5PubRecReasonCode.fromCode(buf.readUnsignedByte());
@@ -95,18 +98,14 @@ public class Mqtt5PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
                     }
                     break;
                 case USER_PROPERTY :
-                    userPropertiesBuilder = readUserProperty(
-                            clientConnectionContext,
-                            buf,
-                            userPropertiesBuilder,
-                            MessageType.PUBREC);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBREC);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
                 default :
-                    disconnectByInvalidPropertyIdentifier(
-                            clientConnectionContext,
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
                             propertyIdentifier,
                             MessageType.PUBREC);
                     return null;

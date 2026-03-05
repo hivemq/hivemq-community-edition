@@ -121,8 +121,8 @@ public class LoggingBootstrapTest {
             // this "resets" to the original logger
             LoggingBootstrap.initLogging(temporaryFolder.newFolder());
             assertTrue(testAppender.isLogCaptured());
-            final ImmutableList<Appender<ILoggingEvent>> appenders = ImmutableList
-                    .copyOf(logger.iteratorForAppenders());
+            final ImmutableList<Appender<ILoggingEvent>> appenders =
+                    ImmutableList.copyOf(logger.iteratorForAppenders());
             for (final Appender<ILoggingEvent> appender : appenders) {
                 if (appender instanceof ListAppender) {
                     fail();
@@ -158,12 +158,11 @@ public class LoggingBootstrapTest {
             final File configFolder = temporaryFolder.newFolder();
             Files.write(overriddenContents, new File(configFolder, "logback.xml"), StandardCharsets.UTF_8);
             LoggingBootstrap.initLogging(configFolder);
-            final ImmutableList<Appender<ILoggingEvent>> appenders = ImmutableList
-                    .copyOf(logger.iteratorForAppenders());
+            final ImmutableList<Appender<ILoggingEvent>> appenders =
+                    ImmutableList.copyOf(logger.iteratorForAppenders());
             // we expect only 2 Appenders: The Instrumented Appender and a Console Appender we created above
             for (final Appender<ILoggingEvent> appender : appenders) {
-                assertTrue(
-                        appender + " was not expected",
+                assertTrue(appender + " was not expected",
                         appender.getName().equals("com.hivemq.logging") || appender.getName().equals("APP"));
             }
         } finally {

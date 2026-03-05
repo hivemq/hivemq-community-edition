@@ -45,7 +45,8 @@ public class PublishPayloadTypeMigration implements TypeMigration {
     private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> persistenceRocksDBProvider;
     private final @NotNull Provider<PublishPayloadXodusLocalPersistence> persistenceXodusProvider;
     @Inject
-    public PublishPayloadTypeMigration(final @NotNull SystemInformation systemInformation,
+    public PublishPayloadTypeMigration(
+            final @NotNull SystemInformation systemInformation,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull Provider<PublishPayloadRocksDBLocalPersistence> persistenceRocksDBProvider,
             final @NotNull Provider<PublishPayloadXodusLocalPersistence> persistenceXodusProvider) {
@@ -117,9 +118,8 @@ public class PublishPayloadTypeMigration implements TypeMigration {
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
         metaFile.setPublishPayloadPersistenceType(persistenceType);
         metaFile.setPublishPayloadPersistenceVersion(
-                persistenceType == FILE_NATIVE
-                        ? PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION
-                        : PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
+                persistenceType == FILE_NATIVE ? PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION :
+                        PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
         MetaFileService.writeMetaFile(systemInformation, metaFile);
     }
 }

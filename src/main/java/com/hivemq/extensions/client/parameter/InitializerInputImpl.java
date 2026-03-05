@@ -37,7 +37,9 @@ public class InitializerInputImpl implements InitializerInput, PluginTaskInput {
     private final ConnectionInformation connectionInformation;
     @NotNull
     private final ClientInformation clientInformation;
-    public InitializerInputImpl(final @NotNull ServerInformation serverInformation, final @NotNull Channel channel,
+    public InitializerInputImpl(
+            final @NotNull ServerInformation serverInformation,
+            final @NotNull Channel channel,
             final @NotNull String clientId) {
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "client id must never be null");

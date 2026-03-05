@@ -100,8 +100,8 @@ public class Mqtt3SubackEncoderTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        final SUBACK suback = new SUBACK(10,
-                newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR));
+        final SUBACK suback =
+                new SUBACK(10, newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR));
         channel.writeOutbound(suback);
         final ByteBuf buf = channel.readOutbound();
         assertEquals((byte) 0b1001_0000, buf.readByte());
@@ -122,7 +122,8 @@ public class Mqtt3SubackEncoderTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         final SUBACK suback = new SUBACK(10,
-                newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR), "reason-string",
+                newArrayList(GRANTED_QOS_0, GRANTED_QOS_1, GRANTED_QOS_2, UNSPECIFIED_ERROR),
+                "reason-string",
                 Mqtt5UserProperties.of(MqttUserProperty.of("user", "prop")));
         channel.writeOutbound(suback);
         final ByteBuf buf = channel.readOutbound();

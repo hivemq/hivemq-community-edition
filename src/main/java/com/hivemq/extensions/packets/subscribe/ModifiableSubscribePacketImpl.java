@@ -40,7 +40,8 @@ public class ModifiableSubscribePacketImpl implements ModifiableSubscribePacket 
     private final int subscriptionIdentifier;
     private final int packetIdentifier;
     private final @NotNull FullConfigurationService configurationService;
-    public ModifiableSubscribePacketImpl(final @NotNull SubscribePacketImpl packet,
+    public ModifiableSubscribePacketImpl(
+            final @NotNull SubscribePacketImpl packet,
             final @NotNull FullConfigurationService configurationService) {
         final ImmutableList.Builder<ModifiableSubscriptionImpl> builder = ImmutableList.builder();
         packet.subscriptions.forEach(
@@ -89,7 +90,9 @@ public class ModifiableSubscribePacketImpl implements ModifiableSubscribePacket 
     public @NotNull SubscribePacketImpl copy() {
         final ImmutableList.Builder<SubscriptionImpl> builder = ImmutableList.builder();
         subscriptions.forEach(subscription -> builder.add(subscription.copy()));
-        return new SubscribePacketImpl(builder.build(), userProperties.copy(), subscriptionIdentifier,
+        return new SubscribePacketImpl(builder.build(),
+                userProperties.copy(),
+                subscriptionIdentifier,
                 packetIdentifier);
     }
 

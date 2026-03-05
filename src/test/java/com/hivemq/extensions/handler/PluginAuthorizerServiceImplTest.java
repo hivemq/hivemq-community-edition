@@ -120,10 +120,15 @@ public class PluginAuthorizerServiceImplTest {
         when(hiveMQExtensions.getExtension("extension2")).thenReturn(extension2);
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
         final MqttServerDisconnector mqttServerDisconnector = new MqttServerDisconnectorImpl(eventLog);
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        pluginAuthorizerService = new PluginAuthorizerServiceImpl(authorizers, asyncer, pluginTaskExecutorService,
-                serverInformation, hiveMQExtensions, mqttServerDisconnector, incomingPublishService,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        pluginAuthorizerService = new PluginAuthorizerServiceImpl(authorizers,
+                asyncer,
+                pluginTaskExecutorService,
+                serverInformation,
+                hiveMQExtensions,
+                mqttServerDisconnector,
+                incomingPublishService,
                 incomingSubscribeService);
         eventsHandler = new CollectUserEventsHandler<>(AuthorizeWillResultEvent.class);
         channel.pipeline().addLast(eventsHandler);
@@ -251,8 +256,8 @@ public class PluginAuthorizerServiceImplTest {
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
     }
@@ -271,8 +276,8 @@ public class PluginAuthorizerServiceImplTest {
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
         channel.runPendingTasks();
         channel.runScheduledPendingTasks();
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getPublishAuthorizersMap().size());
     }
@@ -289,8 +294,8 @@ public class PluginAuthorizerServiceImplTest {
         ClientConnection.of(channel).setIncomingPublishesSkipRest(true);
         pluginAuthorizerService.authorizePublish(channelHandlerContext, publish);
         await().pollInterval(Duration.ofMillis(100)).until(() -> {
-            final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                    .getExtensionClientAuthorizers();
+            final ClientAuthorizers extensionClientAuthorizers =
+                    ClientConnection.of(channel).getExtensionClientAuthorizers();
             assertNotNull(extensionClientAuthorizers);
             if (extensionClientAuthorizers.getPublishAuthorizersMap().size() != 1) {
                 channel.runPendingTasks();
@@ -301,8 +306,8 @@ public class PluginAuthorizerServiceImplTest {
         });
         assertFalse(authorizeLatch1.await(1, TimeUnit.SECONDS));
         assertFalse(authorizeLatch2.await(0, TimeUnit.SECONDS));
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getPublishAuthorizersMap().size());
     }
@@ -318,8 +323,8 @@ public class PluginAuthorizerServiceImplTest {
         final CONNECT connect = TestMessageUtil.createMqtt5ConnectWithWill();
         pluginAuthorizerService.authorizeWillPublish(channelHandlerContext, connect);
         await().pollInterval(Duration.ofMillis(100)).until(() -> {
-            final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                    .getExtensionClientAuthorizers();
+            final ClientAuthorizers extensionClientAuthorizers =
+                    ClientConnection.of(channel).getExtensionClientAuthorizers();
             assertNotNull(extensionClientAuthorizers);
             if (extensionClientAuthorizers.getPublishAuthorizersMap().size() != 2) {
                 channel.runPendingTasks();
@@ -328,8 +333,8 @@ public class PluginAuthorizerServiceImplTest {
             }
             return true;
         });
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getPublishAuthorizersMap().size());
     }
@@ -340,18 +345,16 @@ public class PluginAuthorizerServiceImplTest {
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
         final CountDownLatch authorizeLatch2 = new CountDownLatch(3);
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(
-                ImmutableMap.of(
-                        "extension1",
-                        getTestAuthorizerProvider(TestAuthorizerForgetProvider.class, authorizeLatch1),
-                        "extension2",
-                        getTestAuthorizerProvider(TestAuthorizerForgetProvider.class, authorizeLatch2)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("extension1",
+                getTestAuthorizerProvider(TestAuthorizerForgetProvider.class, authorizeLatch1),
+                "extension2",
+                getTestAuthorizerProvider(TestAuthorizerForgetProvider.class, authorizeLatch2)));
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
         assertTrue(authorizeLatch2.await(10, TimeUnit.SECONDS));
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(2, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
     }
@@ -361,15 +364,13 @@ public class PluginAuthorizerServiceImplTest {
         // three topics
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(
-                ImmutableMap.of(
-                        "extension1",
-                        getTestAuthorizerProvider(TestTimeoutAuthorizerProvider.class, authorizeLatch1)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("extension1",
+                getTestAuthorizerProvider(TestTimeoutAuthorizerProvider.class, authorizeLatch1)));
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
     }
@@ -379,16 +380,14 @@ public class PluginAuthorizerServiceImplTest {
         // three topics
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(
-                ImmutableMap.of(
-                        "extension1",
-                        getTestAuthorizerProvider(TestAuthorizerDisconnectProvider.class, authorizeLatch1)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("extension1",
+                getTestAuthorizerProvider(TestAuthorizerDisconnectProvider.class, authorizeLatch1)));
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
         await().pollInterval(Duration.ofMillis(25)).until(() -> {
@@ -405,16 +404,14 @@ public class PluginAuthorizerServiceImplTest {
         // three topics
         final CountDownLatch authorizeLatch1 = new CountDownLatch(3);
         when(authorizers.areAuthorizersAvailable()).thenReturn(true);
-        when(authorizers.getAuthorizerProviderMap()).thenReturn(
-                ImmutableMap.of(
-                        "extension1",
-                        getTestAuthorizerProvider(TestAuthorizerDisconnectProvider.class, authorizeLatch1)));
+        when(authorizers.getAuthorizerProviderMap()).thenReturn(ImmutableMap.of("extension1",
+                getTestAuthorizerProvider(TestAuthorizerDisconnectProvider.class, authorizeLatch1)));
         final SUBSCRIBE fullMqtt5Subscribe = TestMessageUtil.createFullMqtt5Subscribe();
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
         pluginAuthorizerService.authorizeSubscriptions(channelHandlerContext, fullMqtt5Subscribe);
         assertTrue(authorizeLatch1.await(10, TimeUnit.SECONDS));
-        final ClientAuthorizers extensionClientAuthorizers = ClientConnection.of(channel)
-                .getExtensionClientAuthorizers();
+        final ClientAuthorizers extensionClientAuthorizers =
+                ClientConnection.of(channel).getExtensionClientAuthorizers();
         assertNotNull(extensionClientAuthorizers);
         assertEquals(1, extensionClientAuthorizers.getSubscriptionAuthorizersMap().size());
         await().pollInterval(Duration.ofMillis(25)).until(() -> {
@@ -447,8 +444,8 @@ public class PluginAuthorizerServiceImplTest {
     private AuthorizerProvider getTestAuthorizerProvider(
             final @NotNull Class<?> clazz,
             final @NotNull CountDownLatch countDownLatch) throws Exception {
-        final Class<?> providerClass = IsolatedExtensionClassloaderUtil
-                .loadClass(temporaryFolder.getRoot().toPath(), clazz);
+        final Class<?> providerClass =
+                IsolatedExtensionClassloaderUtil.loadClass(temporaryFolder.getRoot().toPath(), clazz);
         return (AuthorizerProvider) providerClass.getDeclaredConstructor(CountDownLatch.class)
                 .newInstance(countDownLatch);
     }

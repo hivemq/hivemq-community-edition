@@ -38,7 +38,8 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
     @NotNull
     private final ExtensionBuilderDependencies builderDependencies;
     @Inject
-    public ExtensionStaticInitializerImpl(final @NotNull ExtensionServicesDependencies servicesDependencies,
+    public ExtensionStaticInitializerImpl(
+            final @NotNull ExtensionServicesDependencies servicesDependencies,
             final @NotNull ExtensionBuilderDependencies builderDependencies) {
         this.servicesDependencies = servicesDependencies;
         this.builderDependencies = builderDependencies;

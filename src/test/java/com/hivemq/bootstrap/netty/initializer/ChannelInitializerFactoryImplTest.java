@@ -60,8 +60,8 @@ public class ChannelInitializerFactoryImplTest {
         when(channelDependencies.getConfigurationService()).thenReturn(fullConfigurationService);
         when(channelDependencies.getRestrictionsConfigurationService()).thenReturn(restrictionsConfigurationService);
         when(restrictionsConfigurationService.incomingLimit()).thenReturn(0L);
-        channelInitializerFactory = new TestChannelInitializerFactory(channelDependencies, sslFactory,
-                nonSslHandlerProvider);
+        channelInitializerFactory =
+                new TestChannelInitializerFactory(channelDependencies, sslFactory, nonSslHandlerProvider);
     }
 
     @Test
@@ -82,67 +82,69 @@ public class ChannelInitializerFactoryImplTest {
     @Test
     public void test_get_websocket_initializer() {
         final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress("0").port(0).build();
-        final AbstractChannelInitializer initializer = channelInitializerFactory
-                .getChannelInitializer(websocketListener);
+        final AbstractChannelInitializer initializer =
+                channelInitializerFactory.getChannelInitializer(websocketListener);
         assertEquals(TYPE_WEBSOCKET, ((FakeAbstractChannelInitializer) initializer).getType());
     }
 
     @Test
     public void test_get_tls_websocket_initializer() {
         final Tls tls = createDefaultTLS();
-        final TlsWebsocketListener websocketListener = new TlsWebsocketListener.Builder().bindAddress("0").port(0)
-                .tls(tls).build();
-        final AbstractChannelInitializer initializer = channelInitializerFactory
-                .getChannelInitializer(websocketListener);
+        final TlsWebsocketListener websocketListener =
+                new TlsWebsocketListener.Builder().bindAddress("0").port(0).tls(tls).build();
+        final AbstractChannelInitializer initializer =
+                channelInitializerFactory.getChannelInitializer(websocketListener);
         assertEquals(TYPE_TLS_WEBSOCKET, ((FakeAbstractChannelInitializer) initializer).getType());
     }
 
     @Test
     public void test_create_tcp() {
-        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
-                nonSslHandlerProvider, eventLog);
+        channelInitializerFactory =
+                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         final TcpListener tcpListener = new TcpListener(0, "0");
-        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
-                .getChannelInitializer(tcpListener);
+        final AbstractChannelInitializer channelInitializer =
+                channelInitializerFactory.getChannelInitializer(tcpListener);
         assertTrue(channelInitializer instanceof TcpChannelInitializer);
     }
 
     @Test
     public void test_create_tcp_tls() {
-        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
-                nonSslHandlerProvider, eventLog);
+        channelInitializerFactory =
+                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         final Tls tls = createDefaultTLS();
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(0, "0", tls);
-        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
-                .getChannelInitializer(tlsTcpListener);
+        final AbstractChannelInitializer channelInitializer =
+                channelInitializerFactory.getChannelInitializer(tlsTcpListener);
         assertTrue(channelInitializer instanceof TlsTcpChannelInitializer);
     }
 
     @Test
     public void test_create_websocket() {
-        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
-                nonSslHandlerProvider, eventLog);
+        channelInitializerFactory =
+                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress("0").port(0).build();
-        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
-                .getChannelInitializer(websocketListener);
+        final AbstractChannelInitializer channelInitializer =
+                channelInitializerFactory.getChannelInitializer(websocketListener);
         assertTrue(channelInitializer instanceof WebsocketChannelInitializer);
     }
 
     @Test
     public void test_create_websocket_tls() {
-        channelInitializerFactory = new ChannelInitializerFactoryImpl(channelDependencies, sslFactory,
-                nonSslHandlerProvider, eventLog);
+        channelInitializerFactory =
+                new ChannelInitializerFactoryImpl(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         final Tls tls = createDefaultTLS();
-        final TlsWebsocketListener websocketListener = new TlsWebsocketListener.Builder().bindAddress("0").port(0)
-                .tls(tls).build();
-        final AbstractChannelInitializer channelInitializer = channelInitializerFactory
-                .getChannelInitializer(websocketListener);
+        final TlsWebsocketListener websocketListener =
+                new TlsWebsocketListener.Builder().bindAddress("0").port(0).tls(tls).build();
+        final AbstractChannelInitializer channelInitializer =
+                channelInitializerFactory.getChannelInitializer(websocketListener);
         assertTrue(channelInitializer instanceof TlsWebsocketChannelInitializer);
     }
     @SuppressWarnings("NullabilityAnnotations")
     private class TestChannelInitializerFactory extends ChannelInitializerFactoryImpl {
 
-        TestChannelInitializerFactory(final ChannelDependencies channelDependencies, final SslFactory sslFactory,
+        TestChannelInitializerFactory(
+                final ChannelDependencies channelDependencies,
+                final SslFactory sslFactory,
                 final Provider<NonSslHandler> nonSslHandlerProvider) {
             super(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         }

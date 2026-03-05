@@ -53,8 +53,7 @@ public abstract class MqttDecoder<T extends Message> {
             final @Nullable String topic) {
         if (topic == null || topic.isEmpty()) {
             if (log.isDebugEnabled()) {
-                log.debug(
-                        "A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.",
+                log.debug("A client (IP: {}) sent an empty topic. This is not allowed. Disconnecting client.",
                         clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
             }
             return true;
@@ -62,8 +61,8 @@ public abstract class MqttDecoder<T extends Message> {
         if (topic.contains("\u0000")) {
             if (log.isDebugEnabled()) {
                 log.debug(
-                        "A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). "
-                                + "This is not allowed. Disconnecting client.",
+                        "A client (IP: {}) sent a topic which contained the Unicode null character (U+0000). " +
+                                "This is not allowed. Disconnecting client.",
                         clientConnectionContext.getChannelIP().orElse("UNKNOWN"));
             }
             return true;

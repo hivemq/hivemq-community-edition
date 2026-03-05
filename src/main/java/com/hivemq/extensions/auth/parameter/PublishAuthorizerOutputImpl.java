@@ -41,7 +41,11 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
     private final @NotNull AtomicBoolean completed = new AtomicBoolean(false);
     private final @NotNull AtomicBoolean authorizerPresent = new AtomicBoolean(false);
     public enum AuthorizationState {
-        SUCCESS, CONTINUE, FAIL, DISCONNECT, UNDECIDED
+        SUCCESS,
+        CONTINUE,
+        FAIL,
+        DISCONNECT,
+        UNDECIDED
     }
     public PublishAuthorizerOutputImpl(@NotNull final PluginOutPutAsyncer asyncer) {
         super(asyncer);
@@ -119,8 +123,8 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
     public void nextExtensionOrDefault() {
         if (completed.get()) {
             throw new UnsupportedOperationException(
-                    "nextExtensionOrDefault must not be called if authorizeSuccessfully, "
-                            + "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
+                    "nextExtensionOrDefault must not be called if authorizeSuccessfully, " +
+                            "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
         }
         authorizationState = AuthorizationState.CONTINUE;
     }
@@ -139,8 +143,8 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
 
     private void checkCompleted(final @NotNull String method) {
         if (!completed.compareAndSet(false, true)) {
-            throw new UnsupportedOperationException(method + " must not be called if authorizeSuccessfully, "
-                    + "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
+            throw new UnsupportedOperationException(method + " must not be called if authorizeSuccessfully, " +
+                    "failAuthorization, disconnectClient or nextExtensionOrDefault has already been called");
         }
     }
 

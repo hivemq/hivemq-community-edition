@@ -85,8 +85,12 @@ public class IncomingSubscribeServiceTest {
     @Before
     public void setUp() throws Exception {
         incomingSubscribeService = new IncomingSubscribeService(clientSessionSubscriptionPersistence,
-                retainedMessagePersistence, sharedSubscriptionService, retainedMessagesSender, mqttConfigurationService,
-                restrictionsConfigurationService, new MqttServerDisconnectorImpl(eventLog));
+                retainedMessagePersistence,
+                sharedSubscriptionService,
+                retainedMessagesSender,
+                mqttConfigurationService,
+                restrictionsConfigurationService,
+                new MqttServerDisconnectorImpl(eventLog));
         channel = new EmbeddedChannel();
         clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
@@ -193,8 +197,9 @@ public class IncomingSubscribeServiceTest {
 
     @Test
     public void test_send_invalid_subscribe_message() throws Exception {
-        final SUBSCRIBE subscribe = new SUBSCRIBE(
-                ImmutableList.copyOf(Lists.newArrayList(new Topic("not/#/allowed", QoS.AT_LEAST_ONCE))), 1);
+        final SUBSCRIBE subscribe =
+                new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(new Topic("not/#/allowed", QoS.AT_LEAST_ONCE))),
+                        1);
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
         // We need to make sure we got disconnected
         assertEquals(false, channel.isActive());
@@ -284,9 +289,10 @@ public class IncomingSubscribeServiceTest {
         final Topic topic = new Topic("test", QoS.AT_LEAST_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("#").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("#")
+                .type(TopicPermission.PermissionType.ALLOW)
+                .build());
         ClientConnection.of(channel).setAuthPermissions(permissions);
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
         final SUBACK response = channel.readOutbound();
@@ -300,9 +306,10 @@ public class IncomingSubscribeServiceTest {
         final Topic topic = new Topic("test", QoS.AT_LEAST_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic)), 10);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("#").type(TopicPermission.PermissionType.DENY).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("#")
+                .type(TopicPermission.PermissionType.DENY)
+                .build());
         ClientConnection.of(channel).setAuthPermissions(permissions);
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
         final SUBACK response = channel.readOutbound();
@@ -318,9 +325,10 @@ public class IncomingSubscribeServiceTest {
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("#").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("#")
+                .type(TopicPermission.PermissionType.ALLOW)
+                .build());
         ClientConnection.of(channel).setAuthPermissions(permissions);
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
         final SUBACK response = channel.readOutbound();
@@ -339,9 +347,10 @@ public class IncomingSubscribeServiceTest {
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("#").type(TopicPermission.PermissionType.DENY).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("#")
+                .type(TopicPermission.PermissionType.DENY)
+                .build());
         ClientConnection.of(channel).setAuthPermissions(permissions);
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
         final SUBACK response = channel.readOutbound();
@@ -350,9 +359,9 @@ public class IncomingSubscribeServiceTest {
         assertEquals(Mqtt5SubAckReasonCode.NOT_AUTHORIZED, response.getReasonCodes().get(1));
         assertEquals(Mqtt5SubAckReasonCode.NOT_AUTHORIZED, response.getReasonCodes().get(2));
         assertEquals(
-                "Not authorized to subscribe to topic 'test1' with QoS '1'. "
-                        + "Not authorized to subscribe to topic 'test2' with QoS '0'. "
-                        + "Not authorized to subscribe to topic 'test3' with QoS '2'. ",
+                "Not authorized to subscribe to topic 'test1' with QoS '1'. " +
+                        "Not authorized to subscribe to topic 'test2' with QoS '0'. " +
+                        "Not authorized to subscribe to topic 'test3' with QoS '2'. ",
                 response.getReasonString());
         verify(clientSessionSubscriptionPersistence).addSubscriptions(eq("client"), captor.capture());
         assertEquals(0, captor.getValue().size());
@@ -365,15 +374,17 @@ public class IncomingSubscribeServiceTest {
         final Topic topic2 = new Topic("test2", QoS.AT_MOST_ONCE);
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final Topic topic4 = new Topic("test4", QoS.EXACTLY_ONCE);
-        final SUBSCRIBE subscribe = new SUBSCRIBE(
-                ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3, topic4)), 10);
+        final SUBSCRIBE subscribe =
+                new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3, topic4)), 10);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("test1").type(TopicPermission.PermissionType.ALLOW).build());
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("test4").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("test1")
+                .type(TopicPermission.PermissionType.ALLOW)
+                .build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("test4")
+                .type(TopicPermission.PermissionType.ALLOW)
+                .build());
         permissions.setDefaultBehaviour(DefaultAuthorizationBehaviour.DENY);
         ClientConnection.of(channel).setAuthPermissions(permissions);
         incomingSubscribeService.processSubscribe(ctx, subscribe, false);
@@ -384,8 +395,8 @@ public class IncomingSubscribeServiceTest {
         assertEquals(Mqtt5SubAckReasonCode.NOT_AUTHORIZED, response.getReasonCodes().get(2));
         assertEquals(Mqtt5SubAckReasonCode.GRANTED_QOS_2, response.getReasonCodes().get(3));
         assertEquals(
-                "Not authorized to subscribe to topic 'test2' with QoS '0'. "
-                        + "Not authorized to subscribe to topic 'test3' with QoS '2'. ",
+                "Not authorized to subscribe to topic 'test2' with QoS '0'. " +
+                        "Not authorized to subscribe to topic 'test3' with QoS '2'. ",
                 response.getReasonString());
         verify(clientSessionSubscriptionPersistence).addSubscriptions(eq("client"), captor.capture());
         assertEquals(2, captor.getValue().size());
@@ -413,8 +424,7 @@ public class IncomingSubscribeServiceTest {
         final Topic topic3 = new Topic("test3", QoS.EXACTLY_ONCE);
         final SUBSCRIBE subscribe = new SUBSCRIBE(ImmutableList.copyOf(Lists.newArrayList(topic1, topic2, topic3)), 10);
         ClientConnection.of(channel).setAuthPermissions(null);
-        incomingSubscribeService.processSubscribe(
-                ctx,
+        incomingSubscribeService.processSubscribe(ctx,
                 subscribe,
                 new Mqtt5SubAckReasonCode[]{Mqtt5SubAckReasonCode.GRANTED_QOS_1, null, null},
                 new String[3],

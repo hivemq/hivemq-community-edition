@@ -64,7 +64,8 @@ public class PublishOutboundInterceptorHandler {
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull MessageDroppedService messageDroppedService;
     @Inject
-    public PublishOutboundInterceptorHandler(final @NotNull PluginOutPutAsyncer asyncer,
+    public PublishOutboundInterceptorHandler(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull FullConfigurationService configurationService,
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
             final @NotNull HiveMQExtensions hiveMQExtensions,
@@ -101,21 +102,27 @@ public class PublishOutboundInterceptorHandler {
         final PublishPacketImpl packet = new PublishPacketImpl(publish);
         final PublishOutboundInputImpl input = new PublishOutboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<PublishOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-        final ModifiableOutboundPublishImpl modifiablePacket = new ModifiableOutboundPublishImpl(packet,
-                configurationService);
+        final ModifiableOutboundPublishImpl modifiablePacket =
+                new ModifiableOutboundPublishImpl(packet, configurationService);
         final PublishOutboundOutputImpl output = new PublishOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PublishOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
         final PublishOutboundInterceptorContext context = new PublishOutboundInterceptorContext(clientId,
-                interceptors.size(), ctx, promise, publish, inputHolder, outputHolder, messageDroppedService);
+                interceptors.size(),
+                ctx,
+                promise,
+                publish,
+                inputHolder,
+                outputHolder,
+                messageDroppedService);
         for (final PublishOutboundInterceptor interceptor : interceptors) {
-            final HiveMQExtension extension = hiveMQExtensions
-                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
             }
-            final PublishOutboundInterceptorTask task = new PublishOutboundInterceptorTask(interceptor,
-                    extension.getId());
+            final PublishOutboundInterceptorTask task =
+                    new PublishOutboundInterceptorTask(interceptor, extension.getId());
             pluginTaskExecutorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
@@ -130,8 +137,11 @@ public class PublishOutboundInterceptorHandler {
         private final @NotNull ExtensionParameterHolder<PublishOutboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<PublishOutboundOutputImpl> outputHolder;
         private final @NotNull MessageDroppedService messageDroppedService;
-        PublishOutboundInterceptorContext(final @NotNull String identifier, final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx, final @NotNull ChannelPromise promise,
+        PublishOutboundInterceptorContext(
+                final @NotNull String identifier,
+                final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ChannelPromise promise,
                 final @NotNull PUBLISH publish,
                 final @NotNull ExtensionParameterHolder<PublishOutboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<PublishOutboundOutputImpl> outputHolder,
@@ -191,7 +201,8 @@ public class PublishOutboundInterceptorHandler {
 
         private final @NotNull PublishOutboundInterceptor interceptor;
         private final @NotNull String extensionId;
-        private PublishOutboundInterceptorTask(final @NotNull PublishOutboundInterceptor interceptor,
+        private PublishOutboundInterceptorTask(
+                final @NotNull PublishOutboundInterceptor interceptor,
                 final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -209,8 +220,8 @@ public class PublishOutboundInterceptorHandler {
                 interceptor.onOutboundPublish(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. "
-                                + "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBLISH interception. " +
+                                "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 output.forciblyPreventPublishDelivery();

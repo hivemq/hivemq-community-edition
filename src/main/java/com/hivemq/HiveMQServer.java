@@ -72,9 +72,12 @@ public class HiveMQServer {
         this(new SystemInformationImpl(true), new MetricRegistry(), null, true, true);
     }
 
-    public HiveMQServer(final @NotNull SystemInformation systemInformation,
-            final @Nullable MetricRegistry metricRegistry, final @Nullable FullConfigurationService configService,
-            final boolean enableLoggingBootstrap, final boolean migrate) {
+    public HiveMQServer(
+            final @NotNull SystemInformation systemInformation,
+            final @Nullable MetricRegistry metricRegistry,
+            final @Nullable FullConfigurationService configService,
+            final boolean enableLoggingBootstrap,
+            final boolean migrate) {
         hivemqId = new HivemqId();
         lifecycleModule = new LifecycleModule();
         dataLock = new DataLock();
@@ -163,8 +166,7 @@ public class HiveMQServer {
             log.info("Starting with in-memory persistence mode.");
         }
         log.trace("Initializing Guice");
-        injector = GuiceBootstrap.bootstrapInjector(
-                systemInformation,
+        injector = GuiceBootstrap.bootstrapInjector(systemInformation,
                 metricRegistry,
                 hivemqId,
                 configService,

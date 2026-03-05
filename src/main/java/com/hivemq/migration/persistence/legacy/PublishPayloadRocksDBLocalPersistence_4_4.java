@@ -47,13 +47,16 @@ public class PublishPayloadRocksDBLocalPersistence_4_4 extends RocksDBLocalPersi
     private static final Logger log = LoggerFactory.getLogger(PublishPayloadRocksDBLocalPersistence.class);
     public static final String PERSISTENCE_VERSION = "040000_R";
     @Inject
-    public PublishPayloadRocksDBLocalPersistence_4_4(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+    public PublishPayloadRocksDBLocalPersistence_4_4(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(localPersistenceFileUtil, persistenceStartup,
+        super(localPersistenceFileUtil,
+                persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
-                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES, false);
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES,
+                false);
     }
 
     @NotNull

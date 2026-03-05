@@ -34,7 +34,8 @@ public class PublishOutboundInputImpl implements PublishOutboundInput, PluginTas
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull PublishPacketImpl publishPacket;
-    public PublishOutboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public PublishOutboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull PublishPacketImpl publishPacket) {
         this.clientInformation = clientInformation;

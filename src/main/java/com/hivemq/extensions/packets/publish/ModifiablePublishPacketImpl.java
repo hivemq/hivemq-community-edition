@@ -70,7 +70,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     final long timestamp;
     final @NotNull FullConfigurationService configurationService;
     boolean modified = false;
-    public ModifiablePublishPacketImpl(final @NotNull PublishPacketImpl packet,
+    public ModifiablePublishPacketImpl(
+            final @NotNull PublishPacketImpl packet,
             final @NotNull FullConfigurationService configurationService) {
         this.topic = packet.topic;
         this.qos = packet.qos;
@@ -99,11 +100,10 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     @Override
     public void setTopic(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
-        checkArgument(
-                topic.length() <= configurationService.restrictionsConfiguration().maxTopicLength(),
-                "Topic filter length must not exceed '"
-                        + configurationService.restrictionsConfiguration().maxTopicLength() + "' characters, but has '"
-                        + topic.length() + "' characters");
+        checkArgument(topic.length() <= configurationService.restrictionsConfiguration().maxTopicLength(),
+                "Topic filter length must not exceed '" +
+                        configurationService.restrictionsConfiguration().maxTopicLength() + "' characters, but has '" +
+                        topic.length() + "' characters");
         if (!Topics.isValidTopicToPublish(topic)) {
             throw new IllegalArgumentException("The topic (" + topic + ") is invalid for PUBLISH messages");
         }
@@ -189,8 +189,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public void setMessageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil.checkMessageExpiryInterval(
-                messageExpiryInterval,
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
                 configurationService.mqttConfiguration().maxMessageExpiryInterval());
         if (this.messageExpiryInterval == messageExpiryInterval) {
             return;
@@ -235,8 +234,8 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public void setResponseTopic(final @Nullable String responseTopic) {
-        PluginBuilderUtil
-                .checkResponseTopic(responseTopic, configurationService.securityConfiguration().validateUTF8());
+        PluginBuilderUtil.checkResponseTopic(responseTopic,
+                configurationService.securityConfiguration().validateUTF8());
         if (Objects.equals(this.responseTopic, responseTopic)) {
             return;
         }
@@ -278,9 +277,21 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
     }
 
     public @NotNull PublishPacketImpl copy() {
-        return new PublishPacketImpl(topic, qos, onwardQos, packetId, dupFlag, payload, retain, messageExpiryInterval,
-                payloadFormatIndicator, contentType, responseTopic, correlationData, subscriptionIdentifiers,
-                userProperties.copy(), timestamp);
+        return new PublishPacketImpl(topic,
+                qos,
+                onwardQos,
+                packetId,
+                dupFlag,
+                payload,
+                retain,
+                messageExpiryInterval,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                correlationData,
+                subscriptionIdentifiers,
+                userProperties.copy(),
+                timestamp);
     }
 
     public @NotNull ModifiablePublishPacketImpl update(final @NotNull PublishPacketImpl packet) {
@@ -296,14 +307,14 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
             return false;
         }
         final ModifiablePublishPacketImpl that = (ModifiablePublishPacketImpl) o;
-        return that.canEqual(this) && topic.equals(that.topic) && (qos == that.qos) && (onwardQos == that.onwardQos)
-                && (packetId == that.packetId) && (dupFlag == that.dupFlag) && Objects.equals(payload, that.payload)
-                && (retain == that.retain) && (messageExpiryInterval == that.messageExpiryInterval)
-                && (payloadFormatIndicator == that.payloadFormatIndicator)
-                && Objects.equals(contentType, that.contentType) && Objects.equals(responseTopic, that.responseTopic)
-                && Objects.equals(correlationData, that.correlationData)
-                && subscriptionIdentifiers.equals(that.subscriptionIdentifiers)
-                && userProperties.equals(that.userProperties) && timestamp == that.timestamp;
+        return that.canEqual(this) && topic.equals(that.topic) && (qos == that.qos) && (onwardQos == that.onwardQos) &&
+                (packetId == that.packetId) && (dupFlag == that.dupFlag) && Objects.equals(payload, that.payload) &&
+                (retain == that.retain) && (messageExpiryInterval == that.messageExpiryInterval) &&
+                (payloadFormatIndicator == that.payloadFormatIndicator) &&
+                Objects.equals(contentType, that.contentType) && Objects.equals(responseTopic, that.responseTopic) &&
+                Objects.equals(correlationData, that.correlationData) &&
+                subscriptionIdentifiers.equals(that.subscriptionIdentifiers) &&
+                userProperties.equals(that.userProperties) && timestamp == that.timestamp;
     }
 
     protected boolean canEqual(final @Nullable Object o) {
@@ -312,8 +323,7 @@ public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                topic,
+        return Objects.hash(topic,
                 qos,
                 onwardQos,
                 packetId,

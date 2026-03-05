@@ -26,15 +26,15 @@ import com.hivemq.extension.sdk.api.packets.publish.AckReasonCode;
  */
 public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS), NO_MATCHING_SUBSCRIBERS(
-            MqttCommonReasonCode.NO_MATCHING_SUBSCRIBERS), UNSPECIFIED_ERROR(
-                    MqttCommonReasonCode.UNSPECIFIED_ERROR), IMPLEMENTATION_SPECIFIC_ERROR(
-                            MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), NOT_AUTHORIZED(
-                                    MqttCommonReasonCode.NOT_AUTHORIZED), TOPIC_NAME_INVALID(
-                                            MqttCommonReasonCode.TOPIC_NAME_INVALID), PACKET_IDENTIFIER_IN_USE(
-                                                    MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE), QUOTA_EXCEEDED(
-                                                            MqttCommonReasonCode.QUOTA_EXCEEDED), PAYLOAD_FORMAT_INVALID(
-                                                                    MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID);
+    SUCCESS(MqttCommonReasonCode.SUCCESS),
+    NO_MATCHING_SUBSCRIBERS(MqttCommonReasonCode.NO_MATCHING_SUBSCRIBERS),
+    UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
+    IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+    NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
+    TOPIC_NAME_INVALID(MqttCommonReasonCode.TOPIC_NAME_INVALID),
+    PACKET_IDENTIFIER_IN_USE(MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE),
+    QUOTA_EXCEEDED(MqttCommonReasonCode.QUOTA_EXCEEDED),
+    PAYLOAD_FORMAT_INVALID(MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID);
     private static final @NotNull Mqtt5PubAckReasonCode[] VALUES = values();
     private final int code;
     private final @NotNull AckReasonCode ackReasonCode;
@@ -55,8 +55,8 @@ public enum Mqtt5PubAckReasonCode implements Mqtt5ReasonCode {
     public @NotNull AckReasonCode toAckReasonCode() {
         return ackReasonCode;
     }
-    private static final @NotNull Mqtt5PubAckReasonCode @NotNull [] ACK_LOOKUP = new Mqtt5PubAckReasonCode[AckReasonCode
-            .values().length];
+    private static final @NotNull Mqtt5PubAckReasonCode @NotNull [] ACK_LOOKUP =
+            new Mqtt5PubAckReasonCode[AckReasonCode.values().length];
     static {
         for (final Mqtt5PubAckReasonCode reasonCode : VALUES) {
             ACK_LOOKUP[reasonCode.ackReasonCode.ordinal()] = reasonCode;

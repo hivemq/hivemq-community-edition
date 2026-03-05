@@ -51,11 +51,14 @@ public class ConfigFileReader {
     private final @NotNull SecurityConfigurator securityConfigurator;
     private final @NotNull UsageStatisticsConfigurator usageStatisticsConfigurator;
     private final @NotNull PersistenceConfigurator persistenceConfigurator;
-    public ConfigFileReader(@NotNull final ConfigurationFile configurationFile,
+    public ConfigFileReader(
+            @NotNull final ConfigurationFile configurationFile,
             @NotNull final RestrictionConfigurator restrictionConfigurator,
-            @NotNull final SecurityConfigurator securityConfigurator, @NotNull final EnvVarUtil envVarUtil,
+            @NotNull final SecurityConfigurator securityConfigurator,
+            @NotNull final EnvVarUtil envVarUtil,
             @NotNull final UsageStatisticsConfigurator usageStatisticsConfigurator,
-            @NotNull final MqttConfigurator mqttConfigurator, @NotNull final ListenerConfigurator listenerConfigurator,
+            @NotNull final MqttConfigurator mqttConfigurator,
+            @NotNull final ListenerConfigurator listenerConfigurator,
             @NotNull final PersistenceConfigurator persistenceConfigurator) {
         this.configurationFile = configurationFile;
         this.envVarUtil = envVarUtil;
@@ -96,15 +99,18 @@ public class ConfigFileReader {
             final File configFile = configurationFile.file().get();
             log.debug("Reading configuration file {}", configFile);
             try {
-                final Class<?>[] classes = ImmutableList.<Class<?>>builder().add(getConfigEntityClass())
-                        .addAll(getInheritedEntityClasses()).build().toArray(new Class<?>[0]);
+                final Class<?>[] classes = ImmutableList.<Class<?>>builder()
+                        .add(getConfigEntityClass())
+                        .addAll(getInheritedEntityClasses())
+                        .build()
+                        .toArray(new Class<?>[0]);
                 final JAXBContext context = JAXBContext.newInstance(classes);
                 final Unmarshaller unmarshaller = context.createUnmarshaller();
                 // replace environment variable placeholders
                 String configFileContent = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
                 configFileContent = envVarUtil.replaceEnvironmentVariablePlaceholders(configFileContent);
-                final ByteArrayInputStream is = new ByteArrayInputStream(
-                        configFileContent.getBytes(StandardCharsets.UTF_8));
+                final ByteArrayInputStream is =
+                        new ByteArrayInputStream(configFileContent.getBytes(StandardCharsets.UTF_8));
                 final StreamSource streamSource = new StreamSource(is);
                 setConfiguration(unmarshaller.unmarshal(streamSource, getConfigEntityClass()).getValue());
             } catch (final Exception e) {
@@ -115,8 +121,7 @@ public class ConfigFileReader {
                     }
                     System.exit(1);
                 }
-                log.error(
-                        "Could not read the configuration file {}. Using default config",
+                log.error("Could not read the configuration file {}. Using default config",
                         configFile.getAbsolutePath());
                 log.debug("Original error message:", e);
                 setConfiguration(getDefaultConfig());

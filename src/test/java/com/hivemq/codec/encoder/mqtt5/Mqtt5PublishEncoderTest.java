@@ -94,8 +94,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
         identifiers.add(10);
         identifiers.add(20);
         identifiers.add(30);
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[]{1, 2, 3, 4, 5},
                 QoS.AT_MOST_ONCE,
@@ -131,8 +130,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0x01, 0,
                 // payload
                 1, 2, 3, 4, 5};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[]{1, 2, 3, 4, 5},
                 QoS.AT_MOST_ONCE,
@@ -166,8 +164,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0,
                 // payload
                 1};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "t",
                 new byte[]{1},
                 QoS.AT_MOST_ONCE,
@@ -201,8 +198,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // payload format indicator
                 0x01, 0};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_MOST_ONCE,
@@ -238,8 +234,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // payload format indicator
                 0x01, 0};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -275,8 +270,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // payload format indicator
                 0x01, 0};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -312,8 +306,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // payload format indicator
                 0x01, 0};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -349,8 +342,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // payload format indicator
                 0x01, 1};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -388,8 +380,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0x02, 0, 0, 0x3, (byte) 0xE8,
                 // payload format indicator
                 0x01, 1};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -427,8 +418,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0x01, 1,
                 // content type
                 0x03, 0, 13, 'm', 'y', 'C', 'o', 'n', 't', 'e', 'n', 't', 'T', 'y', 'p', 'e'};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -466,8 +456,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0x01, 1,
                 // response topic
                 0x08, 0, 13, 'r', 'e', 's', 'p', 'o', 'n', 's', 'e', 'T', 'o', 'p', 'i', 'c'};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -506,8 +495,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 // correlation data
                 0x09, 0, 5, 1, 2, 3, 4, 5};
         final byte[] correlationData = {1, 2, 3, 4, 5};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -541,8 +529,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0, 15,
                 // properties
                 0};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -576,8 +563,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 0, 2,
                 // properties
                 0};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -618,8 +604,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y'};
         final MqttUserProperty property = new MqttUserProperty("user", "property");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(property, property);
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -661,8 +646,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 'r', 0, 8, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y'};
         final MqttUserProperty property = new MqttUserProperty("user", "property");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(property, property);
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -699,8 +683,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // subscription identifier
                 0x0b, 3};
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -741,8 +724,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
         final TreeSet<Integer> identifiers = new TreeSet<>();
         identifiers.add(3);
         identifiers.add(4);
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -806,8 +788,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 2,
                 // payload format indicator
                 0x01, 0};
-        final PUBLISH publishQos0 = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publishQos0 = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_MOST_ONCE,
@@ -824,8 +805,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 true,
                 null);
         encodeTestBufferSize(expectedQos0, publishQos0);
-        final PUBLISH publishQos1 = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publishQos1 = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.AT_LEAST_ONCE,
@@ -842,8 +822,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
                 true,
                 null);
         encodeTestBufferSize(expectedQos1, publishQos1);
-        final PUBLISH publishQos2 = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publishQos2 = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[0],
                 QoS.EXACTLY_ONCE,
@@ -896,8 +875,7 @@ public class Mqtt5PublishEncoderTest extends AbstractMqtt5EncoderTest {
         expected.writeBytes(new byte[]{1, 2, 3, 4, 5});
         final byte[] correlationData = ByteBuffer.wrap(expected.array(), 21, correlationDataLength).array();
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user", "property"));
-        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(
-                hiveMQId.get(),
+        final PUBLISH publish = TestMessageUtil.createMqtt5Publish(hiveMQId.get(),
                 "topic",
                 new byte[]{1, 2, 3, 4, 5},
                 QoS.AT_MOST_ONCE,

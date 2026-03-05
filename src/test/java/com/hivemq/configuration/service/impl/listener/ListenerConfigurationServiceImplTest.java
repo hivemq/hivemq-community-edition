@@ -45,11 +45,11 @@ public class ListenerConfigurationServiceImplTest {
     @Test
     public void test_add_listeners() {
         final TcpListener tcpListener = new TcpListener(1883, "localhost");
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(1884).bindAddress("localhost")
-                .build();
+        final WebsocketListener websocketListener =
+                new WebsocketListener.Builder().port(1884).bindAddress("localhost").build();
         final TlsTcpListener tlsTcpListener = new TlsTcpListener(1885, "localhost", createDefaultTLS());
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().port(1886)
-                .bindAddress("localhost").tls(createDefaultTLS()).build();
+        final TlsWebsocketListener tlsWebsocketListener =
+                new TlsWebsocketListener.Builder().port(1886).bindAddress("localhost").tls(createDefaultTLS()).build();
         listenerConfigurationService.addListener(tcpListener);
         listenerConfigurationService.addListener(websocketListener);
         listenerConfigurationService.addListener(tlsTcpListener);

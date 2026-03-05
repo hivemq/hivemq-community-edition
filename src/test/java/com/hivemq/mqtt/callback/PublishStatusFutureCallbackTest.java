@@ -67,16 +67,28 @@ public class PublishStatusFutureCallbackTest {
                 .thenReturn(Futures.immediateFuture(null));
         when(publishPollService.removeMessageFromQueue(anyString(), anyInt()))
                 .thenReturn(Futures.immediateFuture(null));
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
     }
 
     @Test
     public void test_on_success_qos_0_new_messages_available() {
-        publish = TestMessageUtil.getDefaultPublishBuilder().withQoS(QoS.AT_MOST_ONCE).withOnwardQos(QoS.AT_MOST_ONCE)
+        publish = TestMessageUtil.getDefaultPublishBuilder()
+                .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .build();
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
         publishStatusFutureCallback.onSuccess(PublishStatus.DELIVERED);
         verify(publishPollService).pollMessages(client, channel);
     }
@@ -84,10 +96,17 @@ public class PublishStatusFutureCallbackTest {
     @Test
     public void test_on_success_qos_0_no_new_messages_available() {
         ClientConnection.of(channel).setInFlightMessageCount(new AtomicInteger(1000));
-        publish = TestMessageUtil.getDefaultPublishBuilder().withQoS(QoS.AT_MOST_ONCE).withOnwardQos(QoS.AT_MOST_ONCE)
+        publish = TestMessageUtil.getDefaultPublishBuilder()
+                .withQoS(QoS.AT_MOST_ONCE)
+                .withOnwardQos(QoS.AT_MOST_ONCE)
                 .build();
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
         publishStatusFutureCallback.onSuccess(PublishStatus.DELIVERED);
         verify(publishPollService, never()).pollMessages(client, channel);
     }
@@ -96,8 +115,13 @@ public class PublishStatusFutureCallbackTest {
     public void test_on_success_qos_1_shared_delivered() {
         publish = TestMessageUtil.getDefaultPublishBuilder().build();
         sharedSubscription = true;
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
         publishStatusFutureCallback.onSuccess(PublishStatus.DELIVERED);
         verify(publishPollService).removeMessageFromSharedQueue(queueId, publish.getUniqueId());
         verify(publishPollService).pollMessages(client, channel);
@@ -107,8 +131,13 @@ public class PublishStatusFutureCallbackTest {
     public void test_on_success_qos_1_not_shared_delivered() {
         publish = TestMessageUtil.getDefaultPublishBuilder().build();
         sharedSubscription = false;
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
         publishStatusFutureCallback.onSuccess(PublishStatus.DELIVERED);
         verify(publishPollService, never()).removeMessageFromSharedQueue(queueId, publish.getUniqueId());
         verify(publishPollService).removeMessageFromQueue(queueId, publish.getPacketIdentifier());
@@ -119,8 +148,13 @@ public class PublishStatusFutureCallbackTest {
     public void test_on_success_qos_1_shared_not_connected() {
         publish = TestMessageUtil.getDefaultPublishBuilder().build();
         sharedSubscription = true;
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
         publishStatusFutureCallback.onSuccess(PublishStatus.NOT_CONNECTED);
         verify(publishPollService).removeInflightMarker(queueId, publish.getUniqueId());
         verify(publishPollService, never()).pollMessages(client, channel);
@@ -130,8 +164,13 @@ public class PublishStatusFutureCallbackTest {
     public void test_on_success_qos_1_shared_failed() {
         publish = TestMessageUtil.getDefaultPublishBuilder().build();
         sharedSubscription = true;
-        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService, sharedSubscription, queueId,
-                publish, messageIDPool, channel, client);
+        publishStatusFutureCallback = new PublishStatusFutureCallback(publishPollService,
+                sharedSubscription,
+                queueId,
+                publish,
+                messageIDPool,
+                channel,
+                client);
         publishStatusFutureCallback.onSuccess(PublishStatus.FAILED);
         verify(publishPollService).removeInflightMarker(queueId, publish.getUniqueId());
         verify(publishPollService).pollMessages(client, channel);

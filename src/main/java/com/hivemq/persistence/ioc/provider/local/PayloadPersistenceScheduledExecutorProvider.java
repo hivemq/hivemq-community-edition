@@ -40,8 +40,8 @@ public class PayloadPersistenceScheduledExecutorProvider implements Provider<Lis
         if (executorService == null) {
             final ThreadFactory threadFactory = ThreadFactoryUtil.create("payload-persistence-cleanup-%d");
             final int coreSize = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
-            final ScheduledExecutorService scheduledExecutorService = Executors
-                    .newScheduledThreadPool(coreSize, threadFactory);
+            final ScheduledExecutorService scheduledExecutorService =
+                    Executors.newScheduledThreadPool(coreSize, threadFactory);
             executorService = MoreExecutors.listeningDecorator(scheduledExecutorService);
         }
         return executorService;

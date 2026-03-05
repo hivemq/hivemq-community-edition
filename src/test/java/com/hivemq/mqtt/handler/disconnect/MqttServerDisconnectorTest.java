@@ -104,8 +104,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.SERVER_BUSY,
@@ -130,8 +129,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.SERVER_BUSY,
@@ -160,8 +158,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.SERVER_BUSY,
@@ -187,8 +184,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.SERVER_BUSY,
@@ -211,8 +207,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -237,8 +232,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -261,8 +255,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -285,8 +278,7 @@ public class MqttServerDisconnectorTest {
         final CountDownLatch authLatch = new CountDownLatch(1);
         channel.pipeline().addLast(new TestDisconnectEventHandler(eventLatch, authLatch));
         assertTrue(channel.isActive());
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -304,8 +296,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 null,
@@ -321,8 +312,7 @@ public class MqttServerDisconnectorTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1);
-        mqttServerDisconnector.disconnect(
-                channel,
+        mqttServerDisconnector.disconnect(channel,
                 "log",
                 "eventlog",
                 null,

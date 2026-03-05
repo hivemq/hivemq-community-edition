@@ -26,12 +26,13 @@ import com.hivemq.extension.sdk.api.packets.unsuback.UnsubackReasonCode;
  */
 public enum Mqtt5UnsubAckReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS), NO_SUBSCRIPTIONS_EXISTED(0x11), UNSPECIFIED_ERROR(
-            MqttCommonReasonCode.UNSPECIFIED_ERROR), IMPLEMENTATION_SPECIFIC_ERROR(
-                    MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), NOT_AUTHORIZED(
-                            MqttCommonReasonCode.NOT_AUTHORIZED), TOPIC_FILTER_INVALID(
-                                    MqttCommonReasonCode.TOPIC_FILTER_INVALID), PACKET_IDENTIFIER_IN_USE(
-                                            MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE);
+    SUCCESS(MqttCommonReasonCode.SUCCESS),
+    NO_SUBSCRIPTIONS_EXISTED(0x11),
+    UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
+    IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+    NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
+    TOPIC_FILTER_INVALID(MqttCommonReasonCode.TOPIC_FILTER_INVALID),
+    PACKET_IDENTIFIER_IN_USE(MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE);
     private static final @NotNull Mqtt5UnsubAckReasonCode[] VALUES = values();
     private final int code;
     private final @NotNull UnsubackReasonCode unsubackReasonCode;
@@ -52,8 +53,8 @@ public enum Mqtt5UnsubAckReasonCode implements Mqtt5ReasonCode {
     public @NotNull UnsubackReasonCode toUnsubackReasonCode() {
         return unsubackReasonCode;
     }
-    private static final @NotNull Mqtt5UnsubAckReasonCode @NotNull [] UNSUBACK_LOOKUP = new Mqtt5UnsubAckReasonCode[UnsubackReasonCode
-            .values().length];
+    private static final @NotNull Mqtt5UnsubAckReasonCode @NotNull [] UNSUBACK_LOOKUP =
+            new Mqtt5UnsubAckReasonCode[UnsubackReasonCode.values().length];
     static {
         for (final Mqtt5UnsubAckReasonCode reasonCode : values()) {
             UNSUBACK_LOOKUP[reasonCode.unsubackReasonCode.ordinal()] = reasonCode;

@@ -33,7 +33,9 @@ public class OnAuthFailedEvent {
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @Nullable UserPropertiesImpl userProperties;
-    public OnAuthFailedEvent(final @Nullable DisconnectedReasonCode reasonCode, final @Nullable String reasonString,
+    public OnAuthFailedEvent(
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
             final @Nullable Mqtt5UserProperties userProperties) {
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;

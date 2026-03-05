@@ -93,8 +93,7 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
         if (!(publishPacket instanceof PublishPacketImpl)) {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
-        return fromComplete(
-                publishPacket.getQos(),
+        return fromComplete(publishPacket.getQos(),
                 publishPacket.getRetain(),
                 publishPacket.getTopic(),
                 publishPacket.getPayloadFormatIndicator(),
@@ -113,8 +112,7 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
         if (!(publish instanceof PublishImpl)) {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
-        return fromComplete(
-                publish.getQos(),
+        return fromComplete(publish.getQos(),
                 publish.getRetain(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
@@ -133,8 +131,7 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
         if (!(willPublish instanceof WillPublishPacketImpl)) {
             throw new DoNotImplementException(WillPublishPacket.class.getSimpleName());
         }
-        return fromComplete(
-                willPublish.getQos(),
+        return fromComplete(willPublish.getQos(),
                 willPublish.getRetain(),
                 willPublish.getTopic(),
                 willPublish.getPayloadFormatIndicator(),
@@ -195,10 +192,9 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
     @Override
     public @NotNull WillPublishBuilder topic(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
-        checkArgument(
-                topic.length() <= restrictionsConfig.maxTopicLength(),
-                "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength()
-                        + "' characters, but has '" + topic.length() + "' characters");
+        checkArgument(topic.length() <= restrictionsConfig.maxTopicLength(),
+                "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength() +
+                        "' characters, but has '" + topic.length() + "' characters");
         if (!Topics.isValidTopicToPublish(topic)) {
             throw new IllegalArgumentException("The topic (" + topic + ") is invalid for PUBLISH messages");
         }
@@ -218,8 +214,8 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
 
     @Override
     public @NotNull WillPublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil
-                .checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
+                mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -272,8 +268,17 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
         if (messageExpiryInterval == MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
-        return new WillPublishPacketImpl(topic, qos, payload, retain, messageExpiryInterval, payloadFormatIndicator,
-                contentType, responseTopic, correlationData, UserPropertiesImpl.of(userPropertyBuilder.build()),
-                willDelay, System.currentTimeMillis());
+        return new WillPublishPacketImpl(topic,
+                qos,
+                payload,
+                retain,
+                messageExpiryInterval,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                correlationData,
+                UserPropertiesImpl.of(userPropertyBuilder.build()),
+                willDelay,
+                System.currentTimeMillis());
     }
 }

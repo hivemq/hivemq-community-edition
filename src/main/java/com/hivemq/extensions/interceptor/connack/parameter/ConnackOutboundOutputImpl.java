@@ -33,7 +33,8 @@ public class ConnackOutboundOutputImpl extends AbstractAsyncOutput<ConnackOutbou
 
     private final @NotNull ModifiableConnackPacketImpl connackPacket;
     private final @NotNull AtomicBoolean prevent = new AtomicBoolean(false);
-    public ConnackOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public ConnackOutboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableConnackPacketImpl connackPacket) {
         super(asyncer);
         this.connackPacket = connackPacket;

@@ -116,8 +116,7 @@ public class MQTTMessageEncoderTest {
 
     @Test
     public void test_publish_encoded() {
-        final PUBLISH publish = TestMessageUtil.createMqtt3Publish(
-                "clusterid",
+        final PUBLISH publish = TestMessageUtil.createMqtt3Publish("clusterid",
                 "topic",
                 QoS.EXACTLY_ONCE,
                 "payload".getBytes(StandardCharsets.UTF_8),

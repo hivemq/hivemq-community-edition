@@ -80,10 +80,8 @@ class MatchingNodeSubscriptions {
             final @NotNull String topicFilter,
             final @NotNull SubscriptionCounters counters,
             final int subscriberMapCreationThreshold) {
-        final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus = storeSubscriberInStructures(
-                subscriberToAdd,
-                topicFilter,
-                subscriberMapCreationThreshold);
+        final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus =
+                storeSubscriberInStructures(subscriberToAdd, topicFilter, subscriberMapCreationThreshold);
         if (subscriptionInfoPresenceStatus == null) {
             counters.getSubscriptionCounter().inc();
         }
@@ -104,10 +102,8 @@ class MatchingNodeSubscriptions {
             final @Nullable String sharedName,
             final @Nullable String topicFilter,
             final @NotNull SubscriptionCounters counters) {
-        final SubscriptionInfoRemovalStatus subscriptionInfoRemovalStatus = removeSubscriberFromStructures(
-                subscriber,
-                sharedName,
-                topicFilter);
+        final SubscriptionInfoRemovalStatus subscriptionInfoRemovalStatus =
+                removeSubscriberFromStructures(subscriber, sharedName, topicFilter);
         if (subscriptionInfoRemovalStatus != null) {
             counters.getSubscriptionCounter().dec();
         }
@@ -141,15 +137,15 @@ class MatchingNodeSubscriptions {
 
     @ReadOnly
     public int getSubscriberCount() {
-        final int nonSharedSubscribersCount = nonSharedSubscribersMap != null
-                ? nonSharedSubscribersMap.size()
-                : countArraySize(nonSharedSubscribersArray);
+        final int nonSharedSubscribersCount = nonSharedSubscribersMap != null ? nonSharedSubscribersMap.size() :
+                countArraySize(nonSharedSubscribersArray);
         return nonSharedSubscribersCount + sharedSubscribersMap.size();
     }
 
     @ReadOnly
     public @NotNull Stream<SubscriberWithQoS> getSharedSubscriptionsStream() {
-        return sharedSubscribersMap.values().stream()
+        return sharedSubscribersMap.values()
+                .stream()
                 .flatMap(subscriptionGroup -> subscriptionGroup.getSubscriptionsInfos().stream());
     }
 
@@ -183,9 +179,9 @@ class MatchingNodeSubscriptions {
 
     @ReadOnly
     public boolean isEmpty() {
-        return (nonSharedSubscribersMap == null || nonSharedSubscribersMap.isEmpty())
-                && (nonSharedSubscribersArray == null || isEmptyArray(nonSharedSubscribersArray))
-                && sharedSubscribersMap.isEmpty();
+        return (nonSharedSubscribersMap == null || nonSharedSubscribersMap.isEmpty()) &&
+                (nonSharedSubscribersArray == null || isEmptyArray(nonSharedSubscribersArray)) &&
+                sharedSubscribersMap.isEmpty();
     }
 
     ///////////////////////////////////////////////////////////////////////
@@ -241,15 +237,16 @@ class MatchingNodeSubscriptions {
             if (sharedSubscribersMap.isEmpty()) {
                 sharedSubscribersMap = new HashMap<>(subscriberMapCreationThreshold);
             }
-            final SubscriberWithQoS prev = sharedSubscribersMap.computeIfAbsent(
-                    sharedSubscriptionKey(subscriberToAdd.getSharedName(), topicFilter),
-                    key -> new SubscriptionGroup()).put(subscriberToAdd);
+            final SubscriberWithQoS prev =
+                    sharedSubscribersMap
+                            .computeIfAbsent(sharedSubscriptionKey(subscriberToAdd.getSharedName(), topicFilter),
+                                    key -> new SubscriptionGroup())
+                            .put(subscriberToAdd);
             return prev == null ? null : new SubscriptionInfoPresenceStatus(prev.equals(subscriberToAdd));
         }
         // Possible initialization of map and moving the data
-        final int exactSubscribersCount = nonSharedSubscribersMap != null
-                ? nonSharedSubscribersMap.values().size()
-                : countArraySize(nonSharedSubscribersArray);
+        final int exactSubscribersCount = nonSharedSubscribersMap != null ? nonSharedSubscribersMap.values().size() :
+                countArraySize(nonSharedSubscribersArray);
         if (nonSharedSubscribersMap == null && exactSubscribersCount > subscriberMapCreationThreshold) {
             nonSharedSubscribersMap = new HashMap<>(subscriberMapCreationThreshold + 1);
             if (nonSharedSubscribersArray != null) {
@@ -263,8 +260,8 @@ class MatchingNodeSubscriptions {
             }
         }
         if (nonSharedSubscribersMap != null) {
-            final SubscriberWithQoS prev = nonSharedSubscribersMap
-                    .put(subscriberToAdd.getSubscriber(), subscriberToAdd);
+            final SubscriberWithQoS prev =
+                    nonSharedSubscribersMap.put(subscriberToAdd.getSubscriber(), subscriberToAdd);
             return prev == null ? null : new SubscriptionInfoPresenceStatus(prev.equals(subscriberToAdd));
         }
         if (nonSharedSubscribersArray == null) {
@@ -273,11 +270,11 @@ class MatchingNodeSubscriptions {
         }
         // Let's try to find an existing subscription first
         for (int i = 0; i < nonSharedSubscribersArray.length; i++) {
-            if (nonSharedSubscribersArray[i] != null
-                    && subscriberToAdd.getSubscriber().equals(nonSharedSubscribersArray[i].getSubscriber())) {
+            if (nonSharedSubscribersArray[i] != null &&
+                    subscriberToAdd.getSubscriber().equals(nonSharedSubscribersArray[i].getSubscriber())) {
                 // This entry is already present in the array, we can override and abort
-                final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus = new SubscriptionInfoPresenceStatus(
-                        this.nonSharedSubscribersArray[i].equals(subscriberToAdd));
+                final SubscriptionInfoPresenceStatus subscriptionInfoPresenceStatus =
+                        new SubscriptionInfoPresenceStatus(this.nonSharedSubscribersArray[i].equals(subscriberToAdd));
                 this.nonSharedSubscribersArray[i] = subscriberToAdd;
                 return subscriptionInfoPresenceStatus;
             }

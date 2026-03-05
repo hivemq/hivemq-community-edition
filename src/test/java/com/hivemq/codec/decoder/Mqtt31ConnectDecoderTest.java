@@ -65,8 +65,10 @@ public class Mqtt31ConnectDecoderTest {
         clientConnection.setClientId("clientId");
         when(channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME))
                 .thenReturn(new TestChannelAttribute<>(clientConnection));
-        decoder = new Mqtt31ConnectDecoder(connacker, new ClientIds(new HivemqId()),
-                new TestConfigurationBootstrap().getFullConfigurationService(), new HivemqId());
+        decoder = new Mqtt31ConnectDecoder(connacker,
+                new ClientIds(new HivemqId()),
+                new TestConfigurationBootstrap().getFullConfigurationService(),
+                new HivemqId());
     }
 
     @Test

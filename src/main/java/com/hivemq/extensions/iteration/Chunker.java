@@ -49,8 +49,8 @@ public class Chunker {
         try {
             checkNotNull(cursor, "Cursor must not be null");
             checkNotNull(singleWriterCall, "Single writer call must not be null");
-            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, T>>>> builder = ImmutableList
-                    .builder();
+            final ImmutableList.Builder<ListenableFuture<@NotNull BucketChunkResult<Map<String, T>>>> builder =
+                    ImmutableList.builder();
             final int maxResults = maxChunkSize / (bucketCount - cursor.getFinishedBuckets().size());
             for (int i = 0; i < bucketCount; i++) {
                 // skip already finished buckets
@@ -61,15 +61,16 @@ public class Chunker {
             }
             return Futures.transform(Futures.allAsList(builder.build()), allBucketsResult -> {
                 Preconditions.checkNotNull(allBucketsResult, "Iteration result from all buckets cannot be null");
-                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, T>>> resultBuilder = ImmutableMap
-                        .builder();
+                final ImmutableMap.Builder<Integer, BucketChunkResult<Map<String, T>>> resultBuilder =
+                        ImmutableMap.builder();
                 for (final BucketChunkResult<Map<String, T>> bucketResult : allBucketsResult) {
                     resultBuilder.put(bucketResult.getBucketIndex(), bucketResult);
                 }
                 for (final Integer finishedBucketId : cursor.getFinishedBuckets()) {
-                    resultBuilder.put(
-                            finishedBucketId,
-                            new BucketChunkResult<>(Map.of(), true, cursor.getLastKeys().get(finishedBucketId),
+                    resultBuilder.put(finishedBucketId,
+                            new BucketChunkResult<>(Map.of(),
+                                    true,
+                                    cursor.getLastKeys().get(finishedBucketId),
                                     finishedBucketId));
                 }
                 return new MultipleChunkResult<>(resultBuilder.build());

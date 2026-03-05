@@ -88,10 +88,8 @@ public interface ClientQueuePersistence {
      * @return              The read messages
      */
     @NotNull
-    ListenableFuture<ImmutableList<MessageWithID>> readInflight(
-            @NotNull String client,
-            long byteLimit,
-            int messageLimit);
+    ListenableFuture<
+            ImmutableList<MessageWithID>> readInflight(@NotNull String client, long byteLimit, int messageLimit);
 
     /**
      * Remove the entry for a given packet ID.
@@ -154,10 +152,8 @@ public interface ClientQueuePersistence {
      * @return                    The read publishes
      */
     @NotNull
-    ListenableFuture<ImmutableList<PUBLISH>> readShared(
-            @NotNull String sharedSubscription,
-            int messageLimit,
-            long byteLimit);
+    ListenableFuture<
+            ImmutableList<PUBLISH>> readShared(@NotNull String sharedSubscription, int messageLimit, long byteLimit);
 
     /**
      * Remove a PUBLISH which has the same unique ID as the one that is provided.

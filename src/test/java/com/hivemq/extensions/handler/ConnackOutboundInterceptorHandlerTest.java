@@ -91,13 +91,18 @@ public class ConnackOutboundInterceptorHandlerTest {
         ClientConnection.of(channel).setClientId("client");
         ClientConnection.of(channel).setRequestResponseInformation(true);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new ConnackOutboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
-                pluginTaskExecutorService, interceptors, serverInformation, eventLog);
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new ConnackOutboundInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
+                pluginTaskExecutorService,
+                interceptors,
+                serverInformation,
+                eventLog);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
             @Override

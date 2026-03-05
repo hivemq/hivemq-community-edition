@@ -44,9 +44,15 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     private final @NotNull AtomicBoolean enabled;
     private @Nullable String previousVersion;
     protected @Nullable ExtensionMain extensionMain;
-    public AbstractHiveMQExtension(final @NotNull String id, final @NotNull String version, final @NotNull String name,
-            final @Nullable String author, final int priority, final int startPriority,
-            final @NotNull ExtensionMain extensionMain, final boolean enabled,
+    public AbstractHiveMQExtension(
+            final @NotNull String id,
+            final @NotNull String version,
+            final @NotNull String name,
+            final @Nullable String author,
+            final int priority,
+            final int startPriority,
+            final @NotNull ExtensionMain extensionMain,
+            final boolean enabled,
             final @NotNull Path extensionFolderPath) {
         this.id = id;
         this.version = version;

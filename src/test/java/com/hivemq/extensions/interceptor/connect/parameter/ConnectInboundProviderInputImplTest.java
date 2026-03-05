@@ -33,8 +33,8 @@ public class ConnectInboundProviderInputImplTest {
         final ServerInformation serverInformation = mock(ServerInformation.class);
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
-        final ConnectInboundProviderInputImpl providerInput = new ConnectInboundProviderInputImpl(serverInformation,
-                clientInformation, connectionInformation);
+        final ConnectInboundProviderInputImpl providerInput =
+                new ConnectInboundProviderInputImpl(serverInformation, clientInformation, connectionInformation);
         assertSame(serverInformation, providerInput.getServerInformation());
         assertSame(clientInformation, providerInput.getClientInformation());
         assertSame(connectionInformation, providerInput.getConnectionInformation());

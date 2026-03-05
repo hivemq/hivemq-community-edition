@@ -86,14 +86,36 @@ public class ChannelDependenciesTest {
     private @NotNull ChannelDependencies channelDependencies;
     @Before
     public void setUp() throws Exception {
-        channelDependencies = new ChannelDependencies(noConnectIdleHandler, () -> connectHandler,
-                connectionLimiterHandler, disconnectHandler, () -> subscribeHandler, unsubscribeHandler, channelGroup,
-                fullConfigurationService, globalTrafficShapingHandler, metricsHolder, exceptionHandler,
-                pingRequestHandler, restrictionsConfigurationService, mqttConnectDecoder, mqttConnacker, eventLog,
-                sslParameterHandler, mqttDecoders, encoderFactory, () -> authHandler, authInProgressMessageHandler,
-                () -> pluginInitializerHandler, () -> clientLifecycleEventHandler, () -> incomingPublishHandler,
-                () -> incomingSubscribeHandler, () -> messageExpiryHandler, mqttServerDisconnector, interceptorHandler,
-                globalMQTTMessageCounter, shutdownHooks);
+        channelDependencies = new ChannelDependencies(noConnectIdleHandler,
+                () -> connectHandler,
+                connectionLimiterHandler,
+                disconnectHandler,
+                () -> subscribeHandler,
+                unsubscribeHandler,
+                channelGroup,
+                fullConfigurationService,
+                globalTrafficShapingHandler,
+                metricsHolder,
+                exceptionHandler,
+                pingRequestHandler,
+                restrictionsConfigurationService,
+                mqttConnectDecoder,
+                mqttConnacker,
+                eventLog,
+                sslParameterHandler,
+                mqttDecoders,
+                encoderFactory,
+                () -> authHandler,
+                authInProgressMessageHandler,
+                () -> pluginInitializerHandler,
+                () -> clientLifecycleEventHandler,
+                () -> incomingPublishHandler,
+                () -> incomingSubscribeHandler,
+                () -> messageExpiryHandler,
+                mqttServerDisconnector,
+                interceptorHandler,
+                globalMQTTMessageCounter,
+                shutdownHooks);
     }
 
     @Test

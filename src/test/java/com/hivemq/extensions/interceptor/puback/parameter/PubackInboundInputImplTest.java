@@ -37,8 +37,8 @@ public class PubackInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubackPacketImpl packet = mock(PubackPacketImpl.class);
-        final PubackInboundInputImpl input = new PubackInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PubackInboundInputImpl input =
+                new PubackInboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPubackPacket());
@@ -49,8 +49,8 @@ public class PubackInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubackPacketImpl packet = mock(PubackPacketImpl.class);
-        final PubackInboundInputImpl input = new PubackInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PubackInboundInputImpl input =
+                new PubackInboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiablePubackPacketImpl modifiablePacket = mock(ModifiablePubackPacketImpl.class);
         final PubackPacketImpl newPacket = mock(PubackPacketImpl.class);
         final PubackInboundOutputImpl output = mock(PubackInboundOutputImpl.class);

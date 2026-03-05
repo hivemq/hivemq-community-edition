@@ -74,10 +74,17 @@ public class InterceptorHandlerTest {
     private @NotNull InterceptorHandler interceptorHandler;
     @Before
     public void setUp() throws Exception {
-        interceptorHandler = new InterceptorHandler(connectInboundInterceptorHandler, connackOutboundInterceptorHandler,
-                publishOutboundInterceptorHandler, pubackInterceptorHandler, pubrecInterceptorHandler,
-                pubrelInterceptorHandler, pubcompInterceptorHandler, subackOutboundInterceptorHandler,
-                unsubscribeInboundInterceptorHandler, unsubackOutboundInterceptorHandler, pingInterceptorHandler,
+        interceptorHandler = new InterceptorHandler(connectInboundInterceptorHandler,
+                connackOutboundInterceptorHandler,
+                publishOutboundInterceptorHandler,
+                pubackInterceptorHandler,
+                pubrecInterceptorHandler,
+                pubrelInterceptorHandler,
+                pubcompInterceptorHandler,
+                subackOutboundInterceptorHandler,
+                unsubscribeInboundInterceptorHandler,
+                unsubackOutboundInterceptorHandler,
+                pingInterceptorHandler,
                 disconnectInterceptorHandler);
     }
 

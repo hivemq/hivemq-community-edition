@@ -91,8 +91,8 @@ public class ExtensionInformationUtilTest {
     public void test_get_tls_no_cert() {
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
-        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
-                .getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation =
+                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -113,8 +113,8 @@ public class ExtensionInformationUtilTest {
         final TestCert testCert = new TestCert();
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
-        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
-                .getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation =
+                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -129,8 +129,8 @@ public class ExtensionInformationUtilTest {
         clientConnection.setAuthCipherSuite("cipher");
         clientConnection.setAuthProtocol("TLSv1.2");
         clientConnection.setAuthSniHostname("test.hostname.domain");
-        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
-                .getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation =
+                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());
@@ -154,8 +154,8 @@ public class ExtensionInformationUtilTest {
         final TestCert testCert = new TestCert();
         when(clientCertificate.certificate()).thenReturn(testCert);
         when(clientCertificate.certificateChain()).thenReturn(chain);
-        final ClientTlsInformation clientTlsInformation = ExtensionInformationUtil
-                .getTlsInformationFromChannel(channel);
+        final ClientTlsInformation clientTlsInformation =
+                ExtensionInformationUtil.getTlsInformationFromChannel(channel);
         assertNotNull(clientTlsInformation);
         assertEquals("cipher", clientTlsInformation.getCipherSuite());
         assertEquals("TLSv1.2", clientTlsInformation.getProtocol());

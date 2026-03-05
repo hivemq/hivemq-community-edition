@@ -37,8 +37,8 @@ public class PubrecInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubrecPacketImpl packet = mock(PubrecPacketImpl.class);
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PubrecInboundInputImpl input =
+                new PubrecInboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPubrecPacket());
@@ -49,8 +49,8 @@ public class PubrecInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubrecPacketImpl packet = mock(PubrecPacketImpl.class);
-        final PubrecInboundInputImpl input = new PubrecInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PubrecInboundInputImpl input =
+                new PubrecInboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiablePubrecPacketImpl modifiablePacket = mock(ModifiablePubrecPacketImpl.class);
         final PubrecPacketImpl newPacket = mock(PubrecPacketImpl.class);
         final PubrecInboundOutputImpl output = mock(PubrecInboundOutputImpl.class);

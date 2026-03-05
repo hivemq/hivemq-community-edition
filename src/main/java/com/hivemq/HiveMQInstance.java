@@ -41,9 +41,11 @@ public class HiveMQInstance {
     private final @NotNull ExtensionBootstrap extensionBootstrap;
     private final @NotNull AdminService adminService;
     @Inject
-    HiveMQInstance(final @NotNull HiveMQNettyBootstrap nettyBootstrap,
+    HiveMQInstance(
+            final @NotNull HiveMQNettyBootstrap nettyBootstrap,
             final @NotNull PublishPayloadPersistence payloadPersistence,
-            final @NotNull ExtensionBootstrap extensionBootstrap, final @NotNull AdminService adminService) {
+            final @NotNull ExtensionBootstrap extensionBootstrap,
+            final @NotNull AdminService adminService) {
         this.nettyBootstrap = nettyBootstrap;
         this.payloadPersistence = payloadPersistence;
         this.extensionBootstrap = extensionBootstrap;

@@ -44,7 +44,8 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
     @Inject
-    public Mqtt5PubackDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt5PubackDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -68,7 +69,9 @@ public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
         }
         // nothing more to read
         if (!buf.isReadable()) {
-            return new PUBACK(packetIdentifier, Mqtt5PUBACK.DEFAULT_REASON_CODE, null,
+            return new PUBACK(packetIdentifier,
+                    Mqtt5PUBACK.DEFAULT_REASON_CODE,
+                    null,
                     Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
         final Mqtt5PubAckReasonCode reasonCode = Mqtt5PubAckReasonCode.fromCode(buf.readUnsignedByte());
@@ -95,18 +98,14 @@ public class Mqtt5PubackDecoder extends AbstractMqttDecoder<PUBACK> {
                     }
                     break;
                 case USER_PROPERTY :
-                    userPropertiesBuilder = readUserProperty(
-                            clientConnectionContext,
-                            buf,
-                            userPropertiesBuilder,
-                            MessageType.PUBACK);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.PUBACK);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
                 default :
-                    disconnectByInvalidPropertyIdentifier(
-                            clientConnectionContext,
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
                             propertyIdentifier,
                             MessageType.PUBACK);
                     return null;

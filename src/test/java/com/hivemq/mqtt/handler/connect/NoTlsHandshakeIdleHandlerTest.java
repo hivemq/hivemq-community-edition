@@ -63,8 +63,8 @@ public class NoTlsHandshakeIdleHandlerTest {
             }
         };
         channel = new EmbeddedChannel();
-        final ClientConnectionContext clientConnection = new UndefinedClientConnection(channel, null,
-                connectedListener);
+        final ClientConnectionContext clientConnection =
+                new UndefinedClientConnection(channel, null, connectedListener);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         channel.pipeline().addLast(handler);
         channel.pipeline().addLast(eventAdapter);

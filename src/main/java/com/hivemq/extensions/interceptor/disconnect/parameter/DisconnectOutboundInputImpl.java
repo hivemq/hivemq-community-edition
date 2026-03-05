@@ -33,7 +33,8 @@ public class DisconnectOutboundInputImpl implements DisconnectOutboundInput, Plu
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull DisconnectPacketImpl disconnectPacket;
-    public DisconnectOutboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public DisconnectOutboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull DisconnectPacketImpl disconnectPacket) {
         this.clientInformation = clientInformation;
@@ -57,7 +58,8 @@ public class DisconnectOutboundInputImpl implements DisconnectOutboundInput, Plu
     }
 
     public @NotNull DisconnectOutboundInputImpl update(final @NotNull DisconnectOutboundOutputImpl output) {
-        return new DisconnectOutboundInputImpl(clientInformation, connectionInformation,
+        return new DisconnectOutboundInputImpl(clientInformation,
+                connectionInformation,
                 output.getDisconnectPacket().copy());
     }
 }

@@ -151,12 +151,10 @@ public class ClientQueuePersistenceSerializer {
 
     @NotNull
     ByteIterable serializePubRel(final @NotNull PUBREL pubrel, final boolean retained) {
-        return XodusUtils.bytesToByteIterable(
-                createPubrelBytes(
-                        pubrel.getPacketIdentifier(),
-                        retained,
-                        pubrel.getMessageExpiryInterval(),
-                        pubrel.getPublishTimestamp()));
+        return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier(),
+                retained,
+                pubrel.getMessageExpiryInterval(),
+                pubrel.getPublishTimestamp()));
     }
 
     int deserializePacketId(final @NotNull ByteIterable serializedValue) {
@@ -217,19 +215,17 @@ public class ClientQueuePersistenceSerializer {
     private byte @NotNull [] createPublishBytes(final @NotNull PUBLISH message, final boolean retained) {
         final byte[] topic = message.getTopic().getBytes(UTF_8);
         final byte[] hivemqId = message.getHivemqId().getBytes(UTF_8);
-        final byte[] responseTopic = message.getResponseTopic() == null
-                ? null
-                : message.getResponseTopic().getBytes(UTF_8);
+        final byte[] responseTopic =
+                message.getResponseTopic() == null ? null : message.getResponseTopic().getBytes(UTF_8);
         final byte[] contentType = message.getContentType() == null ? null : message.getContentType().getBytes(UTF_8);
         final byte[] correlationData = message.getCorrelationData();
         final ImmutableIntArray subscriptionIdentifiers = message.getSubscriptionIdentifiers();
         final int subscriptionIdentifierLength = subscriptionIdentifiers == null ? 0 : subscriptionIdentifiers.length();
-        final int payloadFormatIndicator = message.getPayloadFormatIndicator() != null
-                ? message.getPayloadFormatIndicator().getCode()
-                : -1;
+        final int payloadFormatIndicator =
+                message.getPayloadFormatIndicator() != null ? message.getPayloadFormatIndicator().getCode() : -1;
         final Mqtt5UserProperties userProperties = message.getUserProperties();
         final byte[] result = new byte[Short.BYTES +
-        // packet id
+                // packet id
                 1 +
                 // PUBLISH_BIT, dup, retain, qos
                 1 +
@@ -329,15 +325,15 @@ public class ClientQueuePersistenceSerializer {
         builder.withDuplicateDelivery((serialized[cursor] & DUPLICATE_DELIVERY_BIT) == DUPLICATE_DELIVERY_BIT);
         builder.withRetain((serialized[cursor] & RETAINED_BIT) == RETAINED_BIT);
         cursor += 1;
-        final boolean responseTopicPresent = (serialized[cursor]
-                & RESPONSE_TOPIC_PRESENT_BIT) == RESPONSE_TOPIC_PRESENT_BIT;
+        final boolean responseTopicPresent =
+                (serialized[cursor] & RESPONSE_TOPIC_PRESENT_BIT) == RESPONSE_TOPIC_PRESENT_BIT;
         final boolean contentTypePresent = (serialized[cursor] & CONTENT_TYPE_PRESENT_BIT) == CONTENT_TYPE_PRESENT_BIT;
-        final boolean correlationDataPresent = (serialized[cursor]
-                & CORRELATION_DATA_PRESENT_BIT) == CORRELATION_DATA_PRESENT_BIT;
-        final boolean subscriptionIndetifiersPresent = (serialized[cursor]
-                & SUBSCRIPTION_IDENTIFIERS_PRESENT_BIT) == SUBSCRIPTION_IDENTIFIERS_PRESENT_BIT;
-        final boolean userPropertiesPresent = (serialized[cursor]
-                & USER_PROPERTIES_PRESENT_BIT) == USER_PROPERTIES_PRESENT_BIT;
+        final boolean correlationDataPresent =
+                (serialized[cursor] & CORRELATION_DATA_PRESENT_BIT) == CORRELATION_DATA_PRESENT_BIT;
+        final boolean subscriptionIndetifiersPresent =
+                (serialized[cursor] & SUBSCRIPTION_IDENTIFIERS_PRESENT_BIT) == SUBSCRIPTION_IDENTIFIERS_PRESENT_BIT;
+        final boolean userPropertiesPresent =
+                (serialized[cursor] & USER_PROPERTIES_PRESENT_BIT) == USER_PROPERTIES_PRESENT_BIT;
         cursor += 1;
         final int topicLength = Bytes.readUnsignedShort(serialized, cursor);
         cursor += Short.BYTES;

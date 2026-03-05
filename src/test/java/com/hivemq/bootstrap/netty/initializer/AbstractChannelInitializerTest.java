@@ -70,8 +70,8 @@ public class AbstractChannelInitializerTest {
     private final @NotNull FullConfigurationService configurationService = mock();
     private final @NotNull MqttConfigurationService mqttConfigurationService = mock();
     private final @NotNull ChannelPipeline pipeline = mock();
-    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService = mock(
-            RestrictionsConfigurationService.class);
+    private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService =
+            mock(RestrictionsConfigurationService.class);
     private final @NotNull EventLog eventLog = mock(EventLog.class);
     private final @NotNull Listener listener = mock(Listener.class);
     private @NotNull TestAbstractChannelInitializer abstractChannelInitializer;
@@ -139,8 +139,8 @@ public class AbstractChannelInitializerTest {
 
     @Test
     public void test_embedded_channel_closed_after_sslException_in_initializer() throws Exception {
-        final EmbeddedChannel channel = new EmbeddedChannel(
-                new ExceptionThrowingAbstractChannelInitializer(channelDependencies, listener));
+        final EmbeddedChannel channel =
+                new EmbeddedChannel(new ExceptionThrowingAbstractChannelInitializer(channelDependencies, listener));
         final CountDownLatch latch = new CountDownLatch(1);
         channel.closeFuture().addListener((ChannelFutureListener) future -> latch.countDown());
         assertTrue(latch.await(3, TimeUnit.SECONDS));
@@ -186,7 +186,8 @@ public class AbstractChannelInitializerTest {
     private static class ExceptionThrowingAbstractChannelInitializer extends AbstractChannelInitializer {
 
         private final @NotNull Listener listener;
-        public ExceptionThrowingAbstractChannelInitializer(final @NotNull ChannelDependencies channelDependencies,
+        public ExceptionThrowingAbstractChannelInitializer(
+                final @NotNull ChannelDependencies channelDependencies,
                 final @NotNull Listener listener) {
             super(channelDependencies, listener);
             this.listener = listener;

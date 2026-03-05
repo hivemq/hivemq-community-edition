@@ -30,39 +30,33 @@ public class HiveMQSystemInformation extends AbstractInformation {
         try {
             final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
             final StringBuilder systemInformationBuilder = new StringBuilder();
-            addInformation(
-                    systemInformationBuilder,
+            addInformation(systemInformationBuilder,
                     "Available Processors",
                     String.valueOf(operatingSystemMXBean.getAvailableProcessors()));
-            addInformation(
-                    systemInformationBuilder,
+            addInformation(systemInformationBuilder,
                     "System Load Average",
                     String.valueOf(operatingSystemMXBean.getSystemLoadAverage()));
             // We can gather more information if we have a concrete subclass
             if (operatingSystemMXBean instanceof com.sun.management.OperatingSystemMXBean) {
-                final com.sun.management.OperatingSystemMXBean systemMXBean = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
-                addInformation(
-                        systemInformationBuilder,
+                final com.sun.management.OperatingSystemMXBean systemMXBean =
+                        (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
+                addInformation(systemInformationBuilder,
                         "Total Swap Space Size",
                         String.valueOf(systemMXBean.getTotalSwapSpaceSize()));
-                addInformation(
-                        systemInformationBuilder,
+                addInformation(systemInformationBuilder,
                         "Committed Virtual Memory Size",
                         String.valueOf(systemMXBean.getCommittedVirtualMemorySize()));
-                addInformation(
-                        systemInformationBuilder,
+                addInformation(systemInformationBuilder,
                         "Total Physical Memory Size",
                         String.valueOf(systemMXBean.getCommittedVirtualMemorySize()));
             }
             // We get even more information if we're running on a Linux System
             if (operatingSystemMXBean instanceof UnixOperatingSystemMXBean) {
                 final UnixOperatingSystemMXBean systemMXBean = (UnixOperatingSystemMXBean) operatingSystemMXBean;
-                addInformation(
-                        systemInformationBuilder,
+                addInformation(systemInformationBuilder,
                         "Max File Descriptor Count",
                         String.valueOf(systemMXBean.getMaxFileDescriptorCount()));
-                addInformation(
-                        systemInformationBuilder,
+                addInformation(systemInformationBuilder,
                         "Open File Descriptor Count",
                         String.valueOf(systemMXBean.getOpenFileDescriptorCount()));
             }

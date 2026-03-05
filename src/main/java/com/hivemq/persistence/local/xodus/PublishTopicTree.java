@@ -34,21 +34,21 @@ public class PublishTopicTree {
 
     private final Node root = new Node();
     public void add(@NotNull final String topic) {
-        final ArrayList<String> subTopics = new ArrayList<>(
-                Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
+        final ArrayList<String> subTopics =
+                new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         root.add(subTopics);
     }
 
     @NotNull
     public Set<String> get(@NotNull final String topic) {
-        final ArrayList<String> subTopics = new ArrayList<>(
-                Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
+        final ArrayList<String> subTopics =
+                new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         return root.get(subTopics, null, false);
     }
 
     public void remove(@NotNull final String topic) {
-        final ArrayList<String> subTopics = new ArrayList<>(
-                Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
+        final ArrayList<String> subTopics =
+                new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         root.remove(subTopics);
     }
     private static class Node {
@@ -191,9 +191,8 @@ public class PublishTopicTree {
                             result.addAll(
                                     entry.getValue().get(nextSubTopics, entry.getKey(), currentSubTopic.equals("#")));
                         } else {
-                            result.addAll(
-                                    entry.getValue().get(
-                                            nextSubTopics,
+                            result.addAll(entry.getValue()
+                                    .get(nextSubTopics,
                                             currentTopic + "/" + entry.getKey(),
                                             currentSubTopic.equals("#")));
                         }
@@ -202,11 +201,8 @@ public class PublishTopicTree {
                     if (currentTopic == null) {
                         result.addAll(child.get(nextSubTopics, childSubTopic, currentSubTopic.equals("#")));
                     } else {
-                        result.addAll(
-                                child.get(
-                                        nextSubTopics,
-                                        currentTopic + "/" + childSubTopic,
-                                        currentSubTopic.equals("#")));
+                        result.addAll(child
+                                .get(nextSubTopics, currentTopic + "/" + childSubTopic, currentSubTopic.equals("#")));
                     }
                 }
             } else {

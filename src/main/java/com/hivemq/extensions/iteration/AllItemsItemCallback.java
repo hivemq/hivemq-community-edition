@@ -31,7 +31,8 @@ public class AllItemsItemCallback<T> implements AsyncIterator.ItemCallback<T> {
 
     private final @NotNull Executor callbackExecutor;
     private final @NotNull IterationCallback<T> callback;
-    public AllItemsItemCallback(final @NotNull Executor callbackExecutor,
+    public AllItemsItemCallback(
+            final @NotNull Executor callbackExecutor,
             final @NotNull IterationCallback<T> callback) {
         this.callbackExecutor = callbackExecutor;
         this.callback = callback;

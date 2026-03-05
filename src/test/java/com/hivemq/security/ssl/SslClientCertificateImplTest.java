@@ -158,8 +158,11 @@ public class SslClientCertificateImplTest {
     private Certificate generateBadCert() throws Exception {
         final KeyPair keyPair = createKeyPair();
         final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name("CN="),
-                BigInteger.valueOf(0), new Date(System.currentTimeMillis() - 10000),
-                new Date(System.currentTimeMillis() + 10000), new X500Name("CN="), keyPair.getPublic());
+                BigInteger.valueOf(0),
+                new Date(System.currentTimeMillis() - 10000),
+                new Date(System.currentTimeMillis() + 10000),
+                new X500Name("CN="),
+                keyPair.getPublic());
         return getCertificate(keyPair, certificateBuilder);
     }
 
@@ -167,7 +170,8 @@ public class SslClientCertificateImplTest {
         final KeyPair keyPair = createKeyPair();
         final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name(
                 "CN=Test commonName, C=DE, O=Test organization, OU=Test Unit, T=Test Title, L=Test locality, ST=Test state"),
-                BigInteger.valueOf(123456789), new Date(System.currentTimeMillis() - 10000),
+                BigInteger.valueOf(123456789),
+                new Date(System.currentTimeMillis() - 10000),
                 new Date(System.currentTimeMillis() + 10000),
                 new X500Name(
                         "CN=Test commonName, C=DE, O=Test organization, OU=Test Unit, T=Test Title, L=Test locality, ST=Test state"),
@@ -177,10 +181,13 @@ public class SslClientCertificateImplTest {
 
     private Certificate generateCertWithExtension() throws Exception {
         final KeyPair keyPair = createKeyPair();
-        final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(
-                new X500Name("CN=Test commonName"), BigInteger.valueOf(123456789),
-                new Date(System.currentTimeMillis() - 10000), new Date(System.currentTimeMillis() + 10000),
-                new X500Name("CN=Test commonName"), keyPair.getPublic());
+        final JcaX509v3CertificateBuilder certificateBuilder =
+                new JcaX509v3CertificateBuilder(new X500Name("CN=Test commonName"),
+                        BigInteger.valueOf(123456789),
+                        new Date(System.currentTimeMillis() - 10000),
+                        new Date(System.currentTimeMillis() + 10000),
+                        new X500Name("CN=Test commonName"),
+                        keyPair.getPublic());
         certificateBuilder.addExtension(BCStyle.C, false, new DERUTF8String("DE"));
         certificateBuilder.addExtension(BCStyle.O, false, new DERUTF8String("Test organization"));
         certificateBuilder.addExtension(BCStyle.OU, false, new DERUTF8String("Test Unit"));
@@ -209,9 +216,14 @@ public class SslClientCertificateImplTest {
         final RSAPrivateCrtKeyParameters privateKey = (RSAPrivateCrtKeyParameters) keypair.getPrivate();
         final PublicKey pubKey = KeyFactory.getInstance("RSA")
                 .generatePublic(new RSAPublicKeySpec(publicKey.getModulus(), publicKey.getExponent()));
-        final PrivateKey privKey = KeyFactory.getInstance("RSA").generatePrivate(
-                new RSAPrivateCrtKeySpec(publicKey.getModulus(), publicKey.getExponent(), privateKey.getExponent(),
-                        privateKey.getP(), privateKey.getQ(), privateKey.getDP(), privateKey.getDQ(),
+        final PrivateKey privKey = KeyFactory.getInstance("RSA")
+                .generatePrivate(new RSAPrivateCrtKeySpec(publicKey.getModulus(),
+                        publicKey.getExponent(),
+                        privateKey.getExponent(),
+                        privateKey.getP(),
+                        privateKey.getQ(),
+                        privateKey.getDP(),
+                        privateKey.getDQ(),
                         privateKey.getQInv()));
         return new KeyPair(pubKey, privKey);
     }

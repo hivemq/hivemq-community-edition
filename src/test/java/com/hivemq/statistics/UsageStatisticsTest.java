@@ -46,8 +46,8 @@ public class UsageStatisticsTest {
     @Before
     public void before() {
         configurationService = new TestConfigurationBootstrap().getFullConfigurationService();
-        usageStatistics = new UsageStatistics(collector, systemInformation, sender, configurationService,
-                shutdownHooks);
+        usageStatistics =
+                new UsageStatistics(collector, systemInformation, sender, configurationService, shutdownHooks);
     }
 
     @After

@@ -77,8 +77,10 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     private final @NotNull GlobalManagedExtensionExecutorService managedExtensionExecutorService;
     private final @NotNull AsyncIteratorFactory asyncIteratorFactory;
     @Inject
-    public SubscriptionStoreImpl(final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
-            final @NotNull PluginServiceRateLimitService rateLimitService, final @NotNull LocalTopicTree topicTree,
+    public SubscriptionStoreImpl(
+            final @NotNull ClientSessionSubscriptionPersistence subscriptionPersistence,
+            final @NotNull PluginServiceRateLimitService rateLimitService,
+            final @NotNull LocalTopicTree topicTree,
             final @NotNull GlobalManagedExtensionExecutorService managedExtensionExecutorService,
             final @NotNull AsyncIteratorFactory asyncIteratorFactory) {
         this.subscriptionPersistence = subscriptionPersistence;
@@ -101,8 +103,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         if (!(subscription instanceof TopicSubscriptionImpl)) {
             return CompletableFuture.failedFuture(new DoNotImplementException(TopicSubscription.class.getSimpleName()));
         }
-        final ListenableFuture<SubscriptionResult> addSubscriptionFuture = subscriptionPersistence
-                .addSubscription(clientID, TopicSubscriptionImpl.convertToTopic(subscription));
+        final ListenableFuture<SubscriptionResult> addSubscriptionFuture =
+                subscriptionPersistence.addSubscription(clientID, TopicSubscriptionImpl.convertToTopic(subscription));
         final SettableFuture<Void> settableFuture = SettableFuture.create();
         Futures.addCallback(addSubscriptionFuture, new FutureCallback<>() {
 
@@ -150,8 +152,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     private CompletableFuture<Void> processAddSubscriptions(
             final @NotNull String clientID,
             final @NotNull ImmutableSet<Topic> successTopics) {
-        final ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptionFuture = subscriptionPersistence
-                .addSubscriptions(clientID, successTopics);
+        final ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptionFuture =
+                subscriptionPersistence.addSubscriptions(clientID, successTopics);
         final SettableFuture<Void> settableFuture = SettableFuture.create();
         Futures.addCallback(addSubscriptionFuture, new FutureCallback<>() {
 
@@ -185,8 +187,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         if (!Topics.isValidToSubscribe(topicFilter)) {
             return CompletableFuture.failedFuture(new InvalidTopicException(topicFilter));
         }
-        return ListenableFutureConverter
-                .toCompletable(subscriptionPersistence.remove(clientID, topicFilter), managedExtensionExecutorService);
+        return ListenableFutureConverter.toCompletable(subscriptionPersistence.remove(clientID, topicFilter),
+                managedExtensionExecutorService);
     }
 
     @Override
@@ -223,9 +225,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         if (rateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        return CompletableFuture.completedFuture(
-                ClientSubscriptionsToTopicSubscriptions.INSTANCE
-                        .apply(subscriptionPersistence.getSubscriptions(clientID)));
+        return CompletableFuture.completedFuture(ClientSubscriptionsToTopicSubscriptions.INSTANCE
+                .apply(subscriptionPersistence.getSubscriptions(clientID)));
     }
 
     @Override
@@ -260,14 +261,13 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         Preconditions.checkNotNull(topic, "Topic cannot be null");
         Preconditions.checkNotNull(callback, "Callback cannot be null");
         Preconditions.checkNotNull(callbackExecutor, "Executor cannot be null");
-        Preconditions.checkArgument(
-                Topics.isValidTopicToPublish(topic),
+        Preconditions.checkArgument(Topics.isValidTopicToPublish(topic),
                 "Topic must be a valid topic and cannot contain wildcard characters, got '" + topic + "'");
         if (rateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        final ImmutableSet<String> subscribers = topicTree
-                .getSubscribersForTopic(topic, new SubscriptionTypeItemFilter(subscriptionType), false);
+        final ImmutableSet<String> subscribers =
+                topicTree.getSubscribersForTopic(topic, new SubscriptionTypeItemFilter(subscriptionType), false);
         final SettableFuture<Void> iterationFinishedFuture = SettableFuture.create();
         callbackExecutor.execute(() -> {
             final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
@@ -298,8 +298,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     public @NotNull CompletableFuture<Void> iterateAllSubscribersWithTopicFilter(
             final @NotNull String topicFilter,
             final @NotNull IterationCallback<SubscriberWithFilterResult> callback) {
-        return iterateAllSubscribersWithTopicFilter(
-                topicFilter,
+        return iterateAllSubscribersWithTopicFilter(topicFilter,
                 SubscriptionType.ALL,
                 callback,
                 managedExtensionExecutorService);
@@ -310,8 +309,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
             final @NotNull String topicFilter,
             final @NotNull SubscriptionType subscriptionType,
             final @NotNull IterationCallback<SubscriberWithFilterResult> callback) {
-        return iterateAllSubscribersWithTopicFilter(
-                topicFilter,
+        return iterateAllSubscribersWithTopicFilter(topicFilter,
                 subscriptionType,
                 callback,
                 managedExtensionExecutorService);
@@ -335,14 +333,13 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         Preconditions.checkNotNull(callback, "Callback cannot be null");
         Preconditions.checkNotNull(callbackExecutor, "Executor cannot be null");
         Preconditions.checkNotNull(subscriptionType, "SubscriptionType cannot be null");
-        Preconditions.checkArgument(
-                Topics.isValidToSubscribe(topicFilter),
+        Preconditions.checkArgument(Topics.isValidToSubscribe(topicFilter),
                 "Topic filter must be a valid MQTT topic filter, got '" + topicFilter + "'");
         if (rateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        final ImmutableSet<String> subscribers = topicTree
-                .getSubscribersWithFilter(topicFilter, new SubscriptionTypeItemFilter(subscriptionType));
+        final ImmutableSet<String> subscribers =
+                topicTree.getSubscribersWithFilter(topicFilter, new SubscriptionTypeItemFilter(subscriptionType));
         final SettableFuture<Void> iterationFinishedFuture = SettableFuture.create();
         callbackExecutor.execute(() -> {
             final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
@@ -384,8 +381,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         if (rateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        final FetchCallback<SubscriptionsForClientResult> fetchCallback = new AllSubscribersFetchCallback(
-                subscriptionPersistence);
+        final FetchCallback<SubscriptionsForClientResult> fetchCallback =
+                new AllSubscribersFetchCallback(subscriptionPersistence);
         final AsyncIterator<SubscriptionsForClientResult> asyncIterator = asyncIteratorFactory
                 .createIterator(fetchCallback, new AllItemsItemCallback<>(callbackExecutor, callback));
         asyncIterator.fetchAndIterate();
@@ -402,7 +399,8 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     private static class ClientSubscriptionsToTopicSubscriptions
             implements Function<ImmutableSet<Topic>, Set<TopicSubscription>> {
 
-        private static final ClientSubscriptionsToTopicSubscriptions INSTANCE = new ClientSubscriptionsToTopicSubscriptions();
+        private static final ClientSubscriptionsToTopicSubscriptions INSTANCE =
+                new ClientSubscriptionsToTopicSubscriptions();
         @Override
         public @NotNull Set<TopicSubscription> apply(final @NotNull ImmutableSet<Topic> clientSubscriptions) {
             return clientSubscriptions.stream().map(TopicSubscriptionImpl::new).collect(Collectors.toUnmodifiableSet());
@@ -410,8 +408,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     }
 
     static class AllSubscribersFetchCallback
-            extends
-                AllItemsFetchCallback<SubscriptionsForClientResult, Map<String, ImmutableSet<Topic>>> {
+            extends AllItemsFetchCallback<SubscriptionsForClientResult, Map<String, ImmutableSet<Topic>>> {
 
         @NotNull
         private final ClientSessionSubscriptionPersistence subscriptionPersistence;
@@ -428,8 +425,9 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         @Override
         protected @NotNull Collection<SubscriptionsForClientResult> transform(
                 final @NotNull Map<String, ImmutableSet<Topic>> stringSetMap) {
-            return stringSetMap.entrySet().stream().map(
-                    entry -> new SubscriptionsForClientResultImpl(entry.getKey(),
+            return stringSetMap.entrySet()
+                    .stream()
+                    .map(entry -> new SubscriptionsForClientResultImpl(entry.getKey(),
                             entry.getValue().stream().map(TopicSubscriptionImpl::new).collect(Collectors.toSet())))
                     .collect(Collectors.toUnmodifiableList());
         }

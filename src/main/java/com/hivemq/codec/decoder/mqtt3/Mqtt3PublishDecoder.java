@@ -40,7 +40,9 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
 
     private final @NotNull HivemqId hivemqId;
     @Inject
-    public Mqtt3PublishDecoder(final @NotNull HivemqId hivemqId, final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3PublishDecoder(
+            final @NotNull HivemqId hivemqId,
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
         this.hivemqId = hivemqId;
@@ -91,8 +93,14 @@ public class Mqtt3PublishDecoder extends AbstractMqttPublishDecoder<Mqtt3PUBLISH
         final byte[] payload = new byte[buf.readableBytes()];
         buf.readBytes(payload);
         return new PUBLISHFactory.Mqtt3Builder().withHivemqId(hivemqId.get())
-                .withMessageExpiryInterval(maxMessageExpiryInterval).withQoS(QoS.valueOf(qos))
-                .withOnwardQos(QoS.valueOf(qos)).withTopic(topicName).withDuplicateDelivery(dup)
-                .withPacketIdentifier(packetIdentifier).withRetain(retain).withPayload(payload).build();
+                .withMessageExpiryInterval(maxMessageExpiryInterval)
+                .withQoS(QoS.valueOf(qos))
+                .withOnwardQos(QoS.valueOf(qos))
+                .withTopic(topicName)
+                .withDuplicateDelivery(dup)
+                .withPacketIdentifier(packetIdentifier)
+                .withRetain(retain)
+                .withPayload(payload)
+                .build();
     }
 }

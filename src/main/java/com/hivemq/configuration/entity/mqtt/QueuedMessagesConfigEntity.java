@@ -33,7 +33,8 @@ public class QueuedMessagesConfigEntity {
     @XmlType(name = "strategy")
     public enum QueuedMessagesStrategy {
         @XmlEnumValue("discard-oldest")
-        DISCARD_OLDEST, @XmlEnumValue("discard")
+        DISCARD_OLDEST,
+        @XmlEnumValue("discard")
         DISCARD
     }
     @XmlElement(name = "max-queue-size", defaultValue = "1000")

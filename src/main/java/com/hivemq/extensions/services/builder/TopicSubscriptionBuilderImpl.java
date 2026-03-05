@@ -74,10 +74,9 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
     @Override
     public @NotNull TopicSubscriptionBuilder topicFilter(@NotNull final String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter must never be null");
-        Preconditions.checkArgument(
-                topicFilter.length() <= restrictionsConfig.maxTopicLength(),
-                "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength()
-                        + "' characters, but has '" + topicFilter.length() + "' characters");
+        Preconditions.checkArgument(topicFilter.length() <= restrictionsConfig.maxTopicLength(),
+                "Topic filter length must not exceed '" + restrictionsConfig.maxTopicLength() +
+                        "' characters, but has '" + topicFilter.length() + "' characters");
         Preconditions.checkArgument(
                 !(!mqttConfig.wildcardSubscriptionsEnabled() && Topics.containsWildcard(topicFilter)),
                 "Wildcard characters '+' or '#' are not allowed");
@@ -86,8 +85,7 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
             Preconditions.checkArgument(mqttConfig.sharedSubscriptionsEnabled(), "Shared subscriptions not allowed");
             final SharedSubscription sharedSubscription = Topics.checkForSharedSubscription(topicFilter);
             if (sharedSubscription != null) {
-                Preconditions.checkArgument(
-                        !sharedSubscription.getTopicFilter().isEmpty(),
+                Preconditions.checkArgument(!sharedSubscription.getTopicFilter().isEmpty(),
                         "Shared subscription topic must not be empty");
             }
         }
@@ -122,8 +120,8 @@ public class TopicSubscriptionBuilderImpl implements TopicSubscriptionBuilder {
 
     @Override
     public @NotNull TopicSubscriptionBuilder subscriptionIdentifier(final int subscriptionIdentifier) {
-        Preconditions
-                .checkArgument(mqttConfig.subscriptionIdentifierEnabled(), "Subscription identifier are not allowed");
+        Preconditions.checkArgument(mqttConfig.subscriptionIdentifierEnabled(),
+                "Subscription identifier are not allowed");
         Preconditions.checkArgument(
                 subscriptionIdentifier >= 1 && subscriptionIdentifier <= MAX_SUBSCRIPTION_IDENTIFIER,
                 "Subscription identifier must be between 1 and 268,435,455");

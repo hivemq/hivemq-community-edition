@@ -48,7 +48,8 @@ public class AbstractConfigurationTest {
     final @NotNull EnvVarUtil envVarUtil = mock();
     final ListenerConfigurationService listenerConfigurationService = new ListenerConfigurationServiceImpl();
     final MqttConfigurationService mqttConfigurationService = new MqttConfigurationServiceImpl();
-    final RestrictionsConfigurationService restrictionsConfigurationService = new RestrictionsConfigurationServiceImpl();
+    final RestrictionsConfigurationService restrictionsConfigurationService =
+            new RestrictionsConfigurationServiceImpl();
     final SecurityConfigurationService securityConfigurationService = new SecurityConfigurationServiceImpl();
     final UsageStatisticsConfig usageStatisticsConfig = new UsageStatisticsConfigImpl();
     final SystemInformation systemInformation = new SystemInformationImpl(false);
@@ -60,9 +61,12 @@ public class AbstractConfigurationTest {
         xmlFile = temporaryFolder.newFile();
         when(envVarUtil.replaceEnvironmentVariablePlaceholders(anyString())).thenCallRealMethod();
         final ConfigurationFile configurationFile = new ConfigurationFile(xmlFile);
-        reader = new ConfigFileReader(configurationFile, new RestrictionConfigurator(restrictionsConfigurationService),
-                new SecurityConfigurator(securityConfigurationService), envVarUtil,
-                new UsageStatisticsConfigurator(usageStatisticsConfig), new MqttConfigurator(mqttConfigurationService),
+        reader = new ConfigFileReader(configurationFile,
+                new RestrictionConfigurator(restrictionsConfigurationService),
+                new SecurityConfigurator(securityConfigurationService),
+                envVarUtil,
+                new UsageStatisticsConfigurator(usageStatisticsConfig),
+                new MqttConfigurator(mqttConfigurationService),
                 new ListenerConfigurator(listenerConfigurationService, systemInformation),
                 new PersistenceConfigurator(persistenceConfigurationService));
     }

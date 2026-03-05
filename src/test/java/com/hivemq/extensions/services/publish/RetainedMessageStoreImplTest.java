@@ -67,11 +67,13 @@ public class RetainedMessageStoreImplTest {
     private GlobalManagedExtensionExecutorService managedPluginExecutorService;
     @Before
     public void setUp() throws Exception {
-        closeableMock = managedPluginExecutorService = new GlobalManagedExtensionExecutorService(
-                Mockito.mock(ShutdownHooks.class));
+        closeableMock = managedPluginExecutorService =
+                new GlobalManagedExtensionExecutorService(Mockito.mock(ShutdownHooks.class));
         managedPluginExecutorService.postConstruct();
-        retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence, managedPluginExecutorService,
-                pluginServiceRateLimitService, asyncIteratorFactory);
+        retainedMessageStore = new RetainedMessageStoreImpl(retainedMessagePersistence,
+                managedPluginExecutorService,
+                pluginServiceRateLimitService,
+                asyncIteratorFactory);
         when(pluginServiceRateLimitService.rateLimitExceeded()).thenReturn(false);
     }
 
@@ -246,9 +248,15 @@ public class RetainedMessageStoreImplTest {
     }
 
     private RetainedPublishImpl getRetainedPublish() {
-        return new RetainedPublishImpl(Qos.AT_LEAST_ONCE, "topic", PayloadFormatIndicator.UTF_8, 12345L,
-                "response_topic", ByteBuffer.wrap("correlation_data".getBytes()), "content_type",
-                ByteBuffer.wrap("test3".getBytes()), UserPropertiesImpl.of(ImmutableList.of()));
+        return new RetainedPublishImpl(Qos.AT_LEAST_ONCE,
+                "topic",
+                PayloadFormatIndicator.UTF_8,
+                12345L,
+                "response_topic",
+                ByteBuffer.wrap("correlation_data".getBytes()),
+                "content_type",
+                ByteBuffer.wrap("test3".getBytes()),
+                UserPropertiesImpl.of(ImmutableList.of()));
     }
 
     private RetainedMessage getRetainedMessage() {

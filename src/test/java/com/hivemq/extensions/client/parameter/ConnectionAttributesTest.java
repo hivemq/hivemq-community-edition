@@ -170,11 +170,11 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getAll() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
-                "test.key1",
-                ByteBuffer.wrap("test.value1".getBytes()),
-                "test.key2",
-                ByteBuffer.wrap("test.value2".getBytes()));
+        final ImmutableMap<String,
+                ByteBuffer> values = ImmutableMap.of("test.key1",
+                        ByteBuffer.wrap("test.value1".getBytes()),
+                        "test.key2",
+                        ByteBuffer.wrap("test.value2".getBytes()));
         for (final Map.Entry<String, ByteBuffer> value : values.entrySet()) {
             connectionAttributes.put(value.getKey(), value.getValue());
         }
@@ -191,11 +191,11 @@ public class ConnectionAttributesTest {
 
     @Test
     public void test_getAll_immutable() {
-        final ImmutableMap<String, ByteBuffer> values = ImmutableMap.of(
-                "test.key1",
-                ByteBuffer.wrap("test.value1".getBytes()),
-                "test.key2",
-                ByteBuffer.wrap("test.value2".getBytes()));
+        final ImmutableMap<String,
+                ByteBuffer> values = ImmutableMap.of("test.key1",
+                        ByteBuffer.wrap("test.value1".getBytes()),
+                        "test.key2",
+                        ByteBuffer.wrap("test.value2".getBytes()));
         for (final Map.Entry<String, ByteBuffer> value : values.entrySet()) {
             connectionAttributes.put(value.getKey(), value.getValue());
         }

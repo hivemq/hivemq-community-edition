@@ -47,8 +47,8 @@ public class StartupListenerVerifierTest {
     public void test_verifier_verify_some_listeners_failed() {
         final ListenerStartupInformation failed = ListenerStartupInformation
                 .failedListenerStartup(new TcpListener(2000, "0.0.0.0"), new RuntimeException("reason"));
-        final ListenerStartupInformation success = ListenerStartupInformation
-                .successfulListenerStartup(new TcpListener(1234, "0.0.0.0"));
+        final ListenerStartupInformation success =
+                ListenerStartupInformation.successfulListenerStartup(new TcpListener(1234, "0.0.0.0"));
         new StartupListenerVerifier(List.of(failed, success)).verifyAndPrint();
         // We don't receive an exception so everything is good
     }

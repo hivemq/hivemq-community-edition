@@ -104,9 +104,15 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test
     public void test_serialize_minimal_publish() {
-        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withPacketIdentifier(10).withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE).withPublishId(123).withTimestamp(456).withHivemqId("hivemqId")
-                .withTopic("topic").withDuplicateDelivery(false).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt3Builder().withPacketIdentifier(10)
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withPublishId(123)
+                .withTimestamp(456)
+                .withHivemqId("hivemqId")
+                .withTopic("topic")
+                .withDuplicateDelivery(false)
+                .build();
         ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, false);
         serializedValue = serializer.serializeAndSetPacketId(serializedValue, publish.getPacketIdentifier());
         final Message messageWithID = serializer.deserializeValue(serializedValue);
@@ -126,13 +132,23 @@ public class ClientQueuePersistenceSerializerTest {
     public void test_serialize_mqtt_5_publish() {
         final Mqtt5UserProperties properties = Mqtt5UserProperties
                 .of(ImmutableList.of(new MqttUserProperty("name1", "value1"), new MqttUserProperty("name2", "value2")));
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10).withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE).withPublishId(123).withTimestamp(456).withHivemqId("hivemqId")
-                .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX).withTopic("topic").withRetain(true)
-                .withDuplicateDelivery(false).withUserProperties(properties).withResponseTopic("responseTopic")
-                .withContentType("contentType").withCorrelationData(new byte[]{1, 2, 3})
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10)
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withPublishId(123)
+                .withTimestamp(456)
+                .withHivemqId("hivemqId")
+                .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
+                .withTopic("topic")
+                .withRetain(true)
+                .withDuplicateDelivery(false)
+                .withUserProperties(properties)
+                .withResponseTopic("responseTopic")
+                .withContentType("contentType")
+                .withCorrelationData(new byte[]{1, 2, 3})
                 .withPayloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
-                .withSubscriptionIdentifiers(ImmutableIntArray.of(1, 2, 3)).build();
+                .withSubscriptionIdentifiers(ImmutableIntArray.of(1, 2, 3))
+                .build();
         ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, true);
         serializedValue = serializer.serializeAndSetPacketId(serializedValue, publish.getPacketIdentifier());
         final Message messageWithID = serializer.deserializeValue(serializedValue);
@@ -160,10 +176,17 @@ public class ClientQueuePersistenceSerializerTest {
 
     @Test
     public void test_serialize_mqtt_5_publish_null_properties() {
-        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10).withQoS(QoS.AT_LEAST_ONCE)
-                .withOnwardQos(QoS.AT_LEAST_ONCE).withPublishId(123).withTimestamp(456).withHivemqId("hivemqId")
-                .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX).withTopic("topic").withRetain(true)
-                .withDuplicateDelivery(false).build();
+        final PUBLISH publish = new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(10)
+                .withQoS(QoS.AT_LEAST_ONCE)
+                .withOnwardQos(QoS.AT_LEAST_ONCE)
+                .withPublishId(123)
+                .withTimestamp(456)
+                .withHivemqId("hivemqId")
+                .withMessageExpiryInterval(PUBLISH.MESSAGE_EXPIRY_INTERVAL_MAX)
+                .withTopic("topic")
+                .withRetain(true)
+                .withDuplicateDelivery(false)
+                .build();
         ByteIterable serializedValue = serializer.serializePublishWithoutPacketId(publish, false);
         serializedValue = serializer.serializeAndSetPacketId(serializedValue, publish.getPacketIdentifier());
         final Message messageWithID = serializer.deserializeValue(serializedValue);

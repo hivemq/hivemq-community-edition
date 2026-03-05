@@ -32,8 +32,7 @@ public class InitializerRegistryImplTest {
     private final @NotNull InitializerRegistry registry = new InitializerRegistryImpl(initializers);
     @Test
     public void test_set() {
-        final ClientInitializer clientInitializer = (input, pipeline) -> {
-        };
+        final ClientInitializer clientInitializer = (input, pipeline) -> {};
         registry.setClientInitializer(clientInitializer);
         verify(initializers).addClientInitializer(clientInitializer);
     }

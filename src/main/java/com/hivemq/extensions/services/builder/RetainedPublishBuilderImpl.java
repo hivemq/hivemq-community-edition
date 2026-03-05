@@ -89,8 +89,7 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
         if (!(publish instanceof PublishPacketImpl)) {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
-        return fromComplete(
-                publish.getQos(),
+        return fromComplete(publish.getQos(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
                 publish.getMessageExpiryInterval(),
@@ -108,8 +107,7 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
         if (!(publish instanceof PublishImpl)) {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
-        return fromComplete(
-                publish.getQos(),
+        return fromComplete(publish.getQos(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
                 publish.getMessageExpiryInterval(),
@@ -173,8 +171,8 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
     @NotNull
     @Override
     public RetainedPublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil
-                .checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
+                mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -226,7 +224,14 @@ public class RetainedPublishBuilderImpl implements RetainedPublishBuilder {
         if (messageExpiryInterval == MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
-        return new RetainedPublishImpl(qos, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
-                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
+        return new RetainedPublishImpl(qos,
+                topic,
+                payloadFormatIndicator,
+                messageExpiryInterval,
+                responseTopic,
+                correlationData,
+                contentType,
+                payload,
+                UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

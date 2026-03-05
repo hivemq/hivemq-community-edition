@@ -65,8 +65,7 @@ public class NoConnectIdleHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(final @NotNull ChannelHandlerContext ctx, final @NotNull Object evt) {
         if (evt instanceof IdleStateEvent && ((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-            mqttServerDisconnector.logAndClose(
-                    ctx.channel(),
+            mqttServerDisconnector.logAndClose(ctx.channel(),
                     "Client with IP {} disconnected. The client was idle for too long without sending a MQTT CONNECT packet.",
                     "No CONNECT sent in time");
         }

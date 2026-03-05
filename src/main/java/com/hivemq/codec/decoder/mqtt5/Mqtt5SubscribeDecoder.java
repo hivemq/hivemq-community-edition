@@ -51,7 +51,8 @@ import static com.hivemq.mqtt.message.subscribe.Mqtt5SUBSCRIBE.DEFAULT_NO_SUBSCR
 public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
     @Inject
-    public Mqtt5SubscribeDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt5SubscribeDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -86,8 +87,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             final int propertyIdentifier = buf.readByte();
             switch (propertyIdentifier) {
                 case USER_PROPERTY :
-                    userPropertiesBuilder = readUserProperty(
-                            clientConnectionContext,
+                    userPropertiesBuilder = readUserProperty(clientConnectionContext,
                             buf,
                             userPropertiesBuilder,
                             MessageType.SUBSCRIBE);
@@ -96,17 +96,14 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
                     }
                     break;
                 case SUBSCRIPTION_IDENTIFIER :
-                    subscriptionIdentifier = readSubscriptionIdentifier(
-                            clientConnectionContext,
-                            buf,
-                            subscriptionIdentifier);
+                    subscriptionIdentifier =
+                            readSubscriptionIdentifier(clientConnectionContext, buf, subscriptionIdentifier);
                     if (subscriptionIdentifier == DISCONNECTED) {
                         return null;
                     }
                     break;
                 default :
-                    disconnectByInvalidPropertyIdentifier(
-                            clientConnectionContext,
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
                             propertyIdentifier,
                             MessageType.SUBSCRIBE);
                     return null;
@@ -117,8 +114,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             return null;
         }
         if (!buf.isReadable()) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE which didn't contain any subscription. This is not allowed. Disconnecting client.",
                     "Sent a SUBSCRIBE without any subscriptions",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -136,7 +132,9 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (invalidUserPropertiesLength(clientConnectionContext, MessageType.SUBSCRIBE, userProperties)) {
             return null;
         }
-        return new SUBSCRIBE(userProperties, Objects.requireNonNull(topicBuilder).build(), packetIdentifier,
+        return new SUBSCRIBE(userProperties,
+                Objects.requireNonNull(topicBuilder).build(),
+                packetIdentifier,
                 subscriptionIdentifier);
     }
 
@@ -150,8 +148,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             return null;
         }
         if (buf.readableBytes() == 0) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE without subscription options. Disconnecting client.",
                     "Sent a SUBSCRIBE without subscription options",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -160,8 +157,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         }
         final byte subscriptionOptions = buf.readByte();
         if (Bytes.isBitSet(subscriptionOptions, 6) || Bytes.isBitSet(subscriptionOptions, 7)) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE with malformed subscription options. Disconnecting client.",
                     "Sent a SUBSCRIBE with malformed subscription options",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -174,8 +170,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         }
         final boolean noLocal = Bytes.isBitSet(subscriptionOptions, 2);
         if (noLocal && Topics.isSharedSubscriptionTopic(topicFilter)) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent SUBSCRIBE with a shared subscription and no local set to true. This is not allowed. Disconnecting client.",
                     "Sent a SUBSCRIBE with a shared subscription and no local set to true",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -193,9 +188,12 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         if (subscriptionIdentifier == -1) {
             subscriptionIdentifier = null;
         }
-        return topicBuilder.add(
-                new Topic(topicFilter, QoS.valueOf(qoS), noLocal, retainAsPublished, retainHandling,
-                        subscriptionIdentifier));
+        return topicBuilder.add(new Topic(topicFilter,
+                QoS.valueOf(qoS),
+                noLocal,
+                retainAsPublished,
+                retainHandling,
+                subscriptionIdentifier));
     }
 
     private int readSubscriptionIdentifier(
@@ -203,8 +201,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             final @NotNull ByteBuf buf,
             int subscriptionIdentifier) {
         if (!subscriptionIdentifiersAvailable) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE with a subscription identifier. Subscription identifiers are disabled. Disconnecting client.",
                     "Sent a SUBSCRIBE with a subscription identifier",
                     Mqtt5DisconnectReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED,
@@ -217,8 +214,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         }
         subscriptionIdentifier = MqttVariableByteInteger.decode(buf);
         if (subscriptionIdentifier == 0) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE with subscription identifier = '0'. This is not allowed. Disconnecting client.",
                     "Sent a SUBSCRIBE with subscription identifier = '0'",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -233,8 +229,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             final @NotNull ByteBuf buf) {
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE with message id = '0'. This is not allowed. Disconnecting client.",
                     "Sent a SUBSCRIBE with message id = '0'",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -261,8 +256,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
     private int decodeQoS(final @NotNull ClientConnectionContext clientConnectionContext, final byte flags) {
         final int qos = flags & 0b0000_0011;
         if (qos == 3) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE with invalid qos '3'. This is not allowed. Disconnecting client.",
                     "Invalid SUBSCRIBE with invalid qos '3'",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -277,8 +271,7 @@ public class Mqtt5SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             final byte flags) {
         final int code = (flags & 0b0011_0000) >> 4;
         if (code == 3) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE with invalid retain handling = '3'. This is not allowed. Disconnecting client.",
                     "Invalid SUBSCRIBE with retain handling = '3'",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,

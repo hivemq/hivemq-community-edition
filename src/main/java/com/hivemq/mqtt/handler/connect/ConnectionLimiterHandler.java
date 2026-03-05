@@ -48,7 +48,8 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
     private volatile long maxConnections;
     private volatile long warnThreshold;
     @Inject
-    public ConnectionLimiterHandler(final @NotNull MqttConnacker mqttConnacker,
+    public ConnectionLimiterHandler(
+            final @NotNull MqttConnacker mqttConnacker,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService,
             final @NotNull OpenConnectionsGauge openConnectionsGauge) {
         this.mqttConnacker = mqttConnacker;
@@ -77,12 +78,10 @@ public class ConnectionLimiterHandler extends ChannelInboundHandlerAdapter {
             final CONNECT connect = (CONNECT) msg;
             final long currentCount = openConnectionsGauge.getValue();
             if (currentCount > maxConnections) {
-                log.warn(
-                        "The connection limit ({}) is reached. ClientID ({}) connection denied.",
+                log.warn("The connection limit ({}) is reached. ClientID ({}) connection denied.",
                         maxConnections,
                         connect.getClientIdentifier());
-                mqttConnacker.connackError(
-                        ctx.channel(),
+                mqttConnacker.connackError(ctx.channel(),
                         null,
                         // logged on warn
                         "The configured maximum amount of connections is reached",

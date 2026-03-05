@@ -66,7 +66,8 @@ public class RetainedMessagesSender {
     private final @NotNull ClientQueuePersistence clientQueuePersistence;
     private final @NotNull MqttConfigurationService mqttConfigurationService;
     @Inject
-    public RetainedMessagesSender(final @NotNull HivemqId hiveMQId,
+    public RetainedMessagesSender(
+            final @NotNull HivemqId hiveMQId,
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
             final @NotNull ClientQueuePersistence clientQueuePersistence,
             final @NotNull MqttConfigurationService mqttConfigurationService) {
@@ -95,13 +96,17 @@ public class RetainedMessagesSender {
             retainedMessageFutures.add(retainedMessagePersistence.get(topic.getTopic()));
         }
         // Futures.allAsList preserves the original order
-        final ListenableFuture<List<RetainedMessage>> retainedMessagesFuture = Futures
-                .allAsList(retainedMessageFutures.build());
+        final ListenableFuture<List<RetainedMessage>> retainedMessagesFuture =
+                Futures.allAsList(retainedMessageFutures.build());
         final SettableFuture<Void> resultFuture = SettableFuture.create();
-        Futures.addCallback(
-                retainedMessagesFuture,
-                new SendRetainedMessageCallback(subscribedTopics, hiveMQId, clientId, resultFuture, channel,
-                        clientQueuePersistence, mqttConfigurationService),
+        Futures.addCallback(retainedMessagesFuture,
+                new SendRetainedMessageCallback(subscribedTopics,
+                        hiveMQId,
+                        clientId,
+                        resultFuture,
+                        channel,
+                        clientQueuePersistence,
+                        mqttConfigurationService),
                 channel.eventLoop());
         return resultFuture;
     }
@@ -114,9 +119,13 @@ public class RetainedMessagesSender {
         private final @NotNull Channel channel;
         private final @NotNull ClientQueuePersistence clientQueuePersistence;
         private final @NotNull MqttConfigurationService mqttConfigurationService;
-        SendRetainedMessageCallback(final @NotNull Topic[] subscribedTopics, final @NotNull HivemqId hivemqId,
-                final @NotNull String clientId, final @NotNull SettableFuture<Void> resultFuture,
-                final @NotNull Channel channel, final @NotNull ClientQueuePersistence clientQueuePersistence,
+        SendRetainedMessageCallback(
+                final @NotNull Topic[] subscribedTopics,
+                final @NotNull HivemqId hivemqId,
+                final @NotNull String clientId,
+                final @NotNull SettableFuture<Void> resultFuture,
+                final @NotNull Channel channel,
+                final @NotNull ClientQueuePersistence clientQueuePersistence,
                 final @NotNull MqttConfigurationService mqttConfigurationService) {
             this.subscribedTopics = subscribedTopics;
             this.hivemqId = hivemqId;
@@ -145,17 +154,23 @@ public class RetainedMessagesSender {
                 } else {
                     subscriptionIdentifiers = ImmutableIntArray.of();
                 }
-                final PUBLISHFactory.Mqtt5Builder publishBuilder = new PUBLISHFactory.Mqtt5Builder()
-                        .withTimestamp(System.currentTimeMillis()).withHivemqId(hivemqId.get())
-                        .withPayload(retainedMessage.getMessage()).withPublishId(retainedMessage.getPublishId())
-                        .withMessageExpiryInterval(retainedMessage.getMessageExpiryInterval())
-                        .withTopic(subscribedTopic.getTopic()).withRetain(true).withDuplicateDelivery(false)
-                        .withQoS(qos).withOnwardQos(qos).withUserProperties(retainedMessage.getUserProperties())
-                        .withResponseTopic(retainedMessage.getResponseTopic())
-                        .withContentType(retainedMessage.getContentType())
-                        .withCorrelationData(retainedMessage.getCorrelationData())
-                        .withPayloadFormatIndicator(retainedMessage.getPayloadFormatIndicator())
-                        .withSubscriptionIdentifiers(subscriptionIdentifiers);
+                final PUBLISHFactory.Mqtt5Builder publishBuilder =
+                        new PUBLISHFactory.Mqtt5Builder().withTimestamp(System.currentTimeMillis())
+                                .withHivemqId(hivemqId.get())
+                                .withPayload(retainedMessage.getMessage())
+                                .withPublishId(retainedMessage.getPublishId())
+                                .withMessageExpiryInterval(retainedMessage.getMessageExpiryInterval())
+                                .withTopic(subscribedTopic.getTopic())
+                                .withRetain(true)
+                                .withDuplicateDelivery(false)
+                                .withQoS(qos)
+                                .withOnwardQos(qos)
+                                .withUserProperties(retainedMessage.getUserProperties())
+                                .withResponseTopic(retainedMessage.getResponseTopic())
+                                .withContentType(retainedMessage.getContentType())
+                                .withCorrelationData(retainedMessage.getCorrelationData())
+                                .withPayloadFormatIndicator(retainedMessage.getPayloadFormatIndicator())
+                                .withSubscriptionIdentifiers(subscriptionIdentifiers);
                 builder.add(publishBuilder.build());
             }
             sendOutMessages(builder.build());
@@ -186,13 +201,11 @@ public class RetainedMessagesSender {
                 return;
             }
             final Long queueLimit = ClientConnection.of(channel).getQueueSizeMaximum();
-            futures.add(
-                    clientQueuePersistence.add(
-                            clientId,
-                            false,
-                            qos1and2Messages,
-                            true,
-                            Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages)));
+            futures.add(clientQueuePersistence.add(clientId,
+                    false,
+                    qos1and2Messages,
+                    true,
+                    Objects.requireNonNullElseGet(queueLimit, mqttConfigurationService::maxQueuedMessages)));
             resultFuture.setFuture(FutureUtils.voidFutureFromList(futures.build()));
         }
 
@@ -209,8 +222,8 @@ public class RetainedMessagesSender {
                         resultFuture.setException(new ClosedChannelException());
                     }
                     if (qos0Publish.getPacketIdentifier() != 0) {
-                        final FreePacketIdRanges freePacketIdRanges = ClientConnection.of(channel)
-                                .getFreePacketIdRanges();
+                        final FreePacketIdRanges freePacketIdRanges =
+                                ClientConnection.of(channel).getFreePacketIdRanges();
                         freePacketIdRanges.returnId(qos0Publish.getPacketIdentifier());
                     }
                 }

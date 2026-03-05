@@ -42,8 +42,12 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     private @NotNull AuthenticationState state = AuthenticationState.UNDECIDED;
     @NotNull
     T output;
-    AuthContext(final @NotNull String identifier, final @NotNull ChannelHandlerContext ctx,
-            final @NotNull MqttAuthSender authSender, final int authenticatorsCount, final @NotNull T output) {
+    AuthContext(
+            final @NotNull String identifier,
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull MqttAuthSender authSender,
+            final int authenticatorsCount,
+            final @NotNull T output) {
         super(identifier);
         this.ctx = ctx;
         this.authSender = authSender;
@@ -62,8 +66,8 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
                     output.nextByTimeout();
                     break;
             }
-        } else if ((output.getAuthenticationState() == AuthenticationState.UNDECIDED)
-                && output.isAuthenticatorPresent()) {
+        } else if ((output.getAuthenticationState() == AuthenticationState.UNDECIDED) &&
+                output.isAuthenticatorPresent()) {
             output.failByUndecided();
         }
         if (!state.isFinal() && (output.getAuthenticationState() != AuthenticationState.UNDECIDED)) {
@@ -110,8 +114,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
         } catch (final RejectedExecutionException ex) {
             if (!ctx.executor().isShutdown()) {
                 final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
-                log.error(
-                        "Execution of authentication was rejected for client with IP {}.",
+                log.error("Execution of authentication was rejected for client with IP {}.",
                         clientConnectionContext.getChannelIP().orElse("UNKNOWN"),
                         ex);
             }
@@ -119,16 +122,15 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     }
 
     private void continueAuthentication(final @NotNull T output) {
-        final ChannelFuture authFuture = authSender.sendAuth(
-                ctx.channel(),
+        final ChannelFuture authFuture = authSender.sendAuth(ctx.channel(),
                 output.getAuthenticationData(),
                 Mqtt5AuthReasonCode.CONTINUE_AUTHENTICATION,
                 Mqtt5UserProperties.of(output.getOutboundUserProperties().asInternalList()),
                 output.getReasonString());
         authFuture.addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
-                final ScheduledFuture<?> timeoutFuture = ctx.executor()
-                        .schedule(this::onTimeout, output.getTimeout(), TimeUnit.SECONDS);
+                final ScheduledFuture<?> timeoutFuture =
+                        ctx.executor().schedule(this::onTimeout, output.getTimeout(), TimeUnit.SECONDS);
                 ClientConnectionContext.of(ctx.channel()).setAuthFuture(timeoutFuture);
             } else if (future.channel().isActive()) {
                 onSendException(future.cause());

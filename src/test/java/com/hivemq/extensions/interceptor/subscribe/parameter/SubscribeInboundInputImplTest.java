@@ -37,8 +37,8 @@ public class SubscribeInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final SubscribePacketImpl packet = mock(SubscribePacketImpl.class);
-        final SubscribeInboundInputImpl input = new SubscribeInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final SubscribeInboundInputImpl input =
+                new SubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getSubscribePacket());
@@ -49,8 +49,8 @@ public class SubscribeInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final SubscribePacketImpl packet = mock(SubscribePacketImpl.class);
-        final SubscribeInboundInputImpl input = new SubscribeInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final SubscribeInboundInputImpl input =
+                new SubscribeInboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiableSubscribePacketImpl modifiablePacket = mock(ModifiableSubscribePacketImpl.class);
         final SubscribePacketImpl newPacket = mock(SubscribePacketImpl.class);
         final SubscribeInboundOutputImpl output = mock(SubscribeInboundOutputImpl.class);

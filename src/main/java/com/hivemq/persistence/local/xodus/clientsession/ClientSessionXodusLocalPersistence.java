@@ -83,12 +83,18 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     private final @NotNull MetricsHolder metricsHolder;
     private final @NotNull AtomicInteger sessionsCount = new AtomicInteger(0);
     @Inject
-    ClientSessionXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull EnvironmentUtil environmentUtil, final @NotNull PublishPayloadPersistence payloadPersistence,
-            final @NotNull EventLog eventLog, final @NotNull PersistenceStartup persistenceStartup,
+    ClientSessionXodusLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull EnvironmentUtil environmentUtil,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull EventLog eventLog,
+            final @NotNull PersistenceStartup persistenceStartup,
             final @NotNull MetricsHolder metricsHolder) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
-                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+                true);
         this.payloadPersistence = payloadPersistence;
         this.eventLog = eventLog;
         this.metricsHolder = metricsHolder;
@@ -208,8 +214,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             final boolean checkExpired,
             final boolean includeWill) {
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
-            final ByteIterable byteIterable = bucket.getStore()
-                    .get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
+            final ByteIterable byteIterable =
+                    bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
             if (byteIterable == null) {
                 return null;
             }
@@ -220,8 +226,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
             } else {
                 clientSession = serializer.deserializeValueWithoutWill(bytes);
             }
-            if (checkExpired
-                    && clientSession.isExpired(System.currentTimeMillis() - serializer.deserializeTimestamp(bytes))) {
+            if (checkExpired &&
+                    clientSession.isExpired(System.currentTimeMillis() - serializer.deserializeTimestamp(bytes))) {
                 return null;
             }
             if (includeWill) {
@@ -240,8 +246,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
     public @Nullable Long getTimestamp(final @NotNull String clientId, final int bucketIndex) {
         final Bucket bucket = buckets[bucketIndex];
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
-            final ByteIterable byteIterable = bucket.getStore()
-                    .get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
+            final ByteIterable byteIterable =
+                    bucket.getStore().get(txn, bytesToByteIterable(serializer.serializeKey(clientId)));
             if (byteIterable == null) {
                 return null;
             }
@@ -277,11 +283,11 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                     final ClientSession prevClientSession = serializer.deserializeValue(byteIterableToBytes(value));
                     handleWillPayloads(prevClientSession.getWillPublish(), newClientSession.getWillPublish());
                     final boolean prevIsPersistent = persistent(prevClientSession);
-                    if ((isPersistent || newClientSession.isConnected())
-                            && (!prevIsPersistent && !prevClientSession.isConnected())) {
+                    if ((isPersistent || newClientSession.isConnected()) &&
+                            (!prevIsPersistent && !prevClientSession.isConnected())) {
                         sessionsCount.incrementAndGet();
-                    } else if ((prevIsPersistent || prevClientSession.isConnected())
-                            && (!isPersistent && !newClientSession.isConnected())) {
+                    } else if ((prevIsPersistent || prevClientSession.isConnected()) &&
+                            (!isPersistent && !newClientSession.isConnected())) {
                         sessionsCount.decrementAndGet();
                     }
                 }
@@ -472,10 +478,10 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                 throw NoSessionException.INSTANCE;
             }
             clientSession.setSessionExpiryIntervalSec(sessionExpiryInterval);
-            bucket.getStore().put(
-                    txn,
-                    key,
-                    bytesToByteIterable(serializer.serializeValue(clientSession, System.currentTimeMillis())));
+            bucket.getStore()
+                    .put(txn,
+                            key,
+                            bytesToByteIterable(serializer.serializeValue(clientSession, System.currentTimeMillis())));
         });
     }
 
@@ -503,9 +509,8 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                         if (sessionExpiryInterval > SESSION_EXPIRE_ON_DISCONNECT) {
                             sessionCounterDelta.decrement();
                         }
-                        commitActions.add(
-                                () -> eventLog
-                                        .clientSessionExpired(timestamp + sessionExpiryInterval * 1000, clientId));
+                        commitActions.add(() -> eventLog.clientSessionExpired(timestamp + sessionExpiryInterval * 1000,
+                                clientId));
                         cursor.deleteCurrent();
                         expiredSessionsBuilder.add(clientId);
                     }
@@ -564,10 +569,10 @@ public class ClientSessionXodusLocalPersistence extends XodusLocalPersistence im
                         continue;
                     }
                     final ClientSessionWill willPublish = clientSession.getWillPublish();
-                    resultMap.put(
-                            clientId,
-                            new PendingWillMessages.PendingWill(Math
-                                    .min(willPublish.getDelayInterval(), clientSession.getSessionExpiryIntervalSec()),
+                    resultMap.put(clientId,
+                            new PendingWillMessages.PendingWill(
+                                    Math.min(willPublish.getDelayInterval(),
+                                            clientSession.getSessionExpiryIntervalSec()),
                                     timestamp));
                 }
             }

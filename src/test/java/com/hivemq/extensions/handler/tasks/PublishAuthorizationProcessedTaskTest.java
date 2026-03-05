@@ -96,8 +96,7 @@ public class PublishAuthorizationProcessedTaskTest {
         output.disconnectClient(DisconnectReasonCode.QUOTA_EXCEEDED, "test-string");
         task.onSuccess(output);
         channel.runPendingTasks();
-        verify(mqtt5ServerDisconnector).disconnect(
-                any(),
+        verify(mqtt5ServerDisconnector).disconnect(any(),
                 anyString(),
                 anyString(),
                 eq(Mqtt5DisconnectReasonCode.QUOTA_EXCEEDED),
@@ -134,8 +133,7 @@ public class PublishAuthorizationProcessedTaskTest {
         verify(incomingPublishService).processPublish(any(), any(), captor.capture());
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals(
-                "Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
                 result.getReasonString());
     }
 
@@ -149,8 +147,7 @@ public class PublishAuthorizationProcessedTaskTest {
         verify(incomingPublishService).processPublish(any(), any(), captor.capture());
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.TOPIC_NAME_INVALID, result.getAckReasonCode());
-        assertEquals(
-                "Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
                 result.getReasonString());
     }
 
@@ -177,8 +174,7 @@ public class PublishAuthorizationProcessedTaskTest {
         verify(incomingPublishService).processPublish(any(), any(), captor.capture());
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals(
-                "Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
                 result.getReasonString());
     }
 
@@ -192,8 +188,7 @@ public class PublishAuthorizationProcessedTaskTest {
         verify(incomingPublishService).processPublish(any(), any(), captor.capture());
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals(
-                "Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
                 result.getReasonString());
     }
 
@@ -241,8 +236,7 @@ public class PublishAuthorizationProcessedTaskTest {
         verify(incomingPublishService).processPublish(any(), any(), captor.capture());
         final PublishAuthorizerResult result = captor.getValue();
         assertEquals(AckReasonCode.NOT_AUTHORIZED, result.getAckReasonCode());
-        assertEquals(
-                "Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
+        assertEquals("Not authorized to publish on topic 'topic' with QoS '1' and retain 'false'",
                 result.getReasonString());
     }
 

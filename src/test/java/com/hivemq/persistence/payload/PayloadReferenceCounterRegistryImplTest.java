@@ -27,8 +27,7 @@ public class PayloadReferenceCounterRegistryImplTest {
     private @NotNull PayloadReferenceCounterRegistryImpl payloadReferenceCounterRegistry;
     @Before
     public void setUp() throws Exception {
-        @NotNull
-        final BucketLock bucketLock = new BucketLock(10);
+        @NotNull final BucketLock bucketLock = new BucketLock(10);
         payloadReferenceCounterRegistry = new PayloadReferenceCounterRegistryImpl(bucketLock);
     }
 

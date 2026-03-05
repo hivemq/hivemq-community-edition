@@ -245,8 +245,8 @@ public class ListenerConfiguratorTest extends AbstractConfigurationTest {
                 </hivemq>""";
         Files.write(contents.getBytes(UTF_8), xmlFile);
         reader.applyConfig();
-        final TlsWebsocketListener websocketListener = listenerConfigurationService.getTlsWebsocketListeners()
-                .getFirst();
+        final TlsWebsocketListener websocketListener =
+                listenerConfigurationService.getTlsWebsocketListeners().getFirst();
         assertEquals(8000, websocketListener.getPort());
         assertEquals("0.0.0.0", websocketListener.getBindAddress());
         assertEquals("/mqtt", websocketListener.getPath());

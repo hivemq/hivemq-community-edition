@@ -64,8 +64,12 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         this(conf, data, extensions, null, true);
     }
 
-    EmbeddedHiveMQImpl(final @Nullable File conf, final @Nullable File data, final @Nullable File extensions,
-            final @Nullable EmbeddedExtension embeddedExtension, final boolean enableLoggingBootstrap) {
+    EmbeddedHiveMQImpl(
+            final @Nullable File conf,
+            final @Nullable File data,
+            final @Nullable File extensions,
+            final @Nullable EmbeddedExtension embeddedExtension,
+            final boolean enableLoggingBootstrap) {
         this.embeddedExtension = embeddedExtension;
         this.enableLoggingBootstrap = enableLoggingBootstrap;
         log.info("Setting default authentication behavior to ALLOW ALL");
@@ -74,8 +78,8 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         // we create the metric registry here to make it accessible before start
         metricRegistry = new MetricRegistry();
         // Once the EmbeddedHiveMQ gets garbage collected this gets automatically shut down
-        stateChangeExecutor = Executors
-                .newSingleThreadExecutor(ThreadFactoryUtil.create("embedded-hivemq-state-change-executor"));
+        stateChangeExecutor =
+                Executors.newSingleThreadExecutor(ThreadFactoryUtil.create("embedded-hivemq-state-change-executor"));
     }
 
     @Override
@@ -91,7 +95,10 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
         shutDownFuture.get();
     }
     private enum State {
-        RUNNING, STOPPED, FAILED, CLOSED
+        RUNNING,
+        STOPPED,
+        FAILED,
+        CLOSED
     }
     private void stateChange() {
         final List<CompletableFuture<Void>> localStartFutures;
@@ -114,8 +121,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 failFutureLists(failedException, localStartFutures, localStopFutures);
             } else {
                 log.error("Encountered a FAILED EmbeddedHiveMQ state without a reason present.");
-                failFutureLists(
-                        new IllegalStateException("FAILED EmbeddedHiveMQ state without a reason present"),
+                failFutureLists(new IllegalStateException("FAILED EmbeddedHiveMQ state without a reason present"),
                         localStartFutures,
                         localStopFutures);
             }
@@ -129,8 +135,11 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
                 try {
                     systemInformation.init();
                     configurationService = ConfigurationBootstrap.bootstrapConfig(systemInformation);
-                    hiveMQServer = new HiveMQServer(systemInformation, metricRegistry, configurationService,
-                            enableLoggingBootstrap, false);
+                    hiveMQServer = new HiveMQServer(systemInformation,
+                            metricRegistry,
+                            configurationService,
+                            enableLoggingBootstrap,
+                            false);
                     hiveMQServer.bootstrap();
                     hiveMQServer.startInstance(embeddedExtension);
                     failFutureList(new AbortedStateChangeException("EmbeddedHiveMQ was started"), localStopFutures);

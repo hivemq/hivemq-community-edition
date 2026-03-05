@@ -34,8 +34,8 @@ public class ConnackOutboundProviderInputImplTest {
         final ServerInformation serverInformation = mock(ServerInformation.class);
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
-        final ConnackOutboundProviderInputImpl providerInput = new ConnackOutboundProviderInputImpl(serverInformation,
-                clientInformation, connectionInformation);
+        final ConnackOutboundProviderInputImpl providerInput =
+                new ConnackOutboundProviderInputImpl(serverInformation, clientInformation, connectionInformation);
         assertSame(serverInformation, providerInput.getServerInformation());
         assertSame(clientInformation, providerInput.getClientInformation());
         assertSame(connectionInformation, providerInput.getConnectionInformation());

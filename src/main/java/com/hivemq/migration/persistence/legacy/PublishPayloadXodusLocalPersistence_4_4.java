@@ -56,9 +56,13 @@ public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersisten
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
     private final @NotNull PublishPayloadXodusSerializer_4_4 serializer;
     @Inject
-    public PublishPayloadXodusLocalPersistence_4_4(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull EnvironmentUtil environmentUtil, final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
+    public PublishPayloadXodusLocalPersistence_4_4(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull EnvironmentUtil environmentUtil,
+            final @NotNull PersistenceStartup persistenceStartup) {
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 // check if enabled
                 false);
@@ -129,12 +133,8 @@ public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersisten
             }
             final byte[] result = new byte[resultSize];
             for (final Map.Entry<Long, byte[]> entry : chunks.entrySet()) {
-                System.arraycopy(
-                        entry.getValue(),
-                        0,
-                        result,
-                        (int) (entry.getKey() * CHUNK_SIZE),
-                        entry.getValue().length);
+                System.arraycopy(entry
+                        .getValue(), 0, result, (int) (entry.getKey() * CHUNK_SIZE), entry.getValue().length);
             }
             return result;
         });

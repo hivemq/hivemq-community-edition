@@ -50,9 +50,14 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     private final int blockCacheSizePortion;
     private final int blockSize;
     private final boolean enabled;
-    protected RocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull PersistenceStartup persistenceStartup, final int bucketCount, final int memTableSizePortion,
-            final int blockCacheSizePortion, final int blockSize, final boolean enabled) {
+    protected RocksDBLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PersistenceStartup persistenceStartup,
+            final int bucketCount,
+            final int memTableSizePortion,
+            final int blockCacheSizePortion,
+            final int blockSize,
+            final boolean enabled) {
         this.localPersistenceFileUtil = localPersistenceFileUtil;
         this.persistenceStartup = persistenceStartup;
         this.bucketCount = bucketCount;
@@ -110,8 +115,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
                 buckets[i] = rocksDB;
             }
         } catch (final RocksDBException e) {
-            logger.error(
-                    "An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
                     name);
             logger.info("Original Exception:", e);
             throw new UnrecoverableException();
@@ -162,8 +166,7 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
             }
             counter.await();
         } catch (final Exception e) {
-            logger.error(
-                    "An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
+            logger.error("An error occurred while opening the {} persistence. Is another HiveMQ instance running?",
                     name);
             logger.info("Original Exception:", e);
             throw new UnrecoverableException();
@@ -174,7 +177,8 @@ public abstract class RocksDBLocalPersistence implements LocalPersistence, FileP
     protected static long physicalMemory() {
         final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
         if (operatingSystemMXBean instanceof com.sun.management.OperatingSystemMXBean) {
-            final com.sun.management.OperatingSystemMXBean sunBeam = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
+            final com.sun.management.OperatingSystemMXBean sunBeam =
+                    (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
             final long physicalMemory = sunBeam.getTotalPhysicalMemorySize();
             if (physicalMemory > 0) {
                 return physicalMemory;

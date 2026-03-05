@@ -37,8 +37,8 @@ public class PubcompOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubcompPacketImpl packet = mock(PubcompPacketImpl.class);
-        final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PubcompOutboundInputImpl input =
+                new PubcompOutboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPubcompPacket());
@@ -49,8 +49,8 @@ public class PubcompOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PubcompPacketImpl packet = mock(PubcompPacketImpl.class);
-        final PubcompOutboundInputImpl input = new PubcompOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PubcompOutboundInputImpl input =
+                new PubcompOutboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiablePubcompPacketImpl modifiablePacket = mock(ModifiablePubcompPacketImpl.class);
         final PubcompPacketImpl newPacket = mock(PubcompPacketImpl.class);
         final PubcompOutboundOutputImpl output = mock(PubcompOutboundOutputImpl.class);

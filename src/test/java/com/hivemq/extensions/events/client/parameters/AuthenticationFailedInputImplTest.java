@@ -45,8 +45,8 @@ public class AuthenticationFailedInputImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client", null, null,
-                null);
+        final AuthenticationFailedInputImpl input =
+                new AuthenticationFailedInputImpl(channel, "client", null, null, null);
         assertEquals(input, input.get());
         assertEquals("client", input.getClientInformation().getClientId());
         assertEquals(Optional.empty(), input.getReasonCode());
@@ -61,8 +61,10 @@ public class AuthenticationFailedInputImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel, "client",
-                DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD, "reason",
+        final AuthenticationFailedInputImpl input = new AuthenticationFailedInputImpl(channel,
+                "client",
+                DisconnectedReasonCode.BAD_AUTHENTICATION_METHOD,
+                "reason",
                 UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "value"))));
         assertEquals(input, input.get());
         assertEquals("client", input.getClientInformation().getClientId());

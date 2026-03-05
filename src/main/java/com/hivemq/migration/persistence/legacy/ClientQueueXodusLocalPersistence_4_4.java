@@ -69,11 +69,15 @@ public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence 
     @VisibleForTesting
     final ConcurrentHashMap<String, AtomicInteger> sharedSubscriptionSizes;
     @Inject
-    ClientQueueXodusLocalPersistence_4_4(final @NotNull EnvironmentUtil environmentUtil,
+    ClientQueueXodusLocalPersistence_4_4(
+            final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
-                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), false);
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+                false);
         this.serializer = new ClientQueuePersistenceSerializer_4_4();
         this.queueSizeBuckets = new ConcurrentHashMap<>();
         this.retainedQueueSizeBuckets = new ConcurrentHashMap<>();

@@ -44,7 +44,9 @@ public class PUBRECTest {
 
     @Test
     public void test_constructMqtt5() {
-        final PUBREC origin = new PUBREC(1, Mqtt5PubRecReasonCode.NOT_AUTHORIZED, "NotAuthorized",
+        final PUBREC origin = new PUBREC(1,
+                Mqtt5PubRecReasonCode.NOT_AUTHORIZED,
+                "NotAuthorized",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
         final PubrecPacketImpl packet = new PubrecPacketImpl(origin);
         final PUBREC merged = PUBREC.from(packet);
@@ -55,8 +57,7 @@ public class PUBRECTest {
 
     @Test
     public void test_constructMqtt5_withUserProperties() {
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("user1", "value1"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user1", "value1"),
                 new MqttUserProperty("user2", "value2"),
                 new MqttUserProperty("user3", "value3"));
         final PUBREC origin = new PUBREC(1, Mqtt5PubRecReasonCode.NOT_AUTHORIZED, "NotAuthorized", userProperties);

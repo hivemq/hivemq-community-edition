@@ -43,13 +43,16 @@ public class IsolatedExtensionClassloaderUtil {
      * @param  <T>             the type of the loaded class
      * @return                 the loaded class
      */
-    public static <T> @NotNull Class<T> loadClass(
-            final @NotNull Path temporaryFolder,
-            final @NotNull Class<T> mainClass) throws Exception {
+    public static <
+            T> @NotNull Class<T> loadClass(final @NotNull Path temporaryFolder, final @NotNull Class<T> mainClass)
+                    throws Exception {
         final String mainClassName = mainClass.getName();
         // get referenced classes from same package
         final Set<String> referencedClasses = new HashSet<>();
-        for (final String referencedClassName : ClassPool.getDefault().get(mainClassName).getClassFile().getConstPool()
+        for (final String referencedClassName : ClassPool.getDefault()
+                .get(mainClassName)
+                .getClassFile()
+                .getConstPool()
                 .getClassNames()) {
             final String className = referencedClassName.replace("/", ".");
             if (!className.equals(mainClassName) && className.startsWith(mainClass.getPackageName())) {

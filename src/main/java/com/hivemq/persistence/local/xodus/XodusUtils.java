@@ -121,8 +121,7 @@ public class XodusUtils {
             @Nullable final String string,
             @NotNull final byte[] serialized,
             final int offset) {
-        return serializeShortLengthArray(
-                (string == null) ? null : string.getBytes(StandardCharsets.UTF_8),
+        return serializeShortLengthArray((string == null) ? null : string.getBytes(StandardCharsets.UTF_8),
                 serialized,
                 offset);
     }

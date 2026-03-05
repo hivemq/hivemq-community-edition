@@ -41,7 +41,8 @@ import java.util.List;
 public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
 
     @Inject
-    public Mqtt3UnsubscribeDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3UnsubscribeDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -76,8 +77,7 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
             if (isInvalidTopic(clientConnectionContext, topic)) {
-                disconnector.disconnect(
-                        clientConnectionContext.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent an UNSUBSCRIBE with an invalid topic filter. This is not allowed. Disconnecting client.",
                         "Sent UNSUBSCRIBE with an invalid topic filter",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -88,8 +88,7 @@ public class Mqtt3UnsubscribeDecoder extends AbstractMqttDecoder<UNSUBSCRIBE> {
             topics.add(topic);
         }
         if (topics.isEmpty()) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent an UNSUBSCRIBE without topic filters. This is not allowed. Disconnecting client.",
                     "Sent UNSUBSCRIBE without topic filters",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,

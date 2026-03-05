@@ -34,8 +34,10 @@ public class OnServerDisconnectEvent {
     private final @Nullable DisconnectedReasonCode reasonCode;
     private final @Nullable String reasonString;
     private final @Nullable UserPropertiesImpl userProperties;
-    public OnServerDisconnectEvent(final @Nullable DisconnectedReasonCode reasonCode,
-            final @Nullable String reasonString, final @Nullable Mqtt5UserProperties userProperties) {
+    public OnServerDisconnectEvent(
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable Mqtt5UserProperties userProperties) {
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
         this.userProperties = (userProperties == null) ? null : UserPropertiesImpl.of(userProperties.asList());

@@ -74,8 +74,7 @@ public class FreePacketIdRanges {
      * @param id an ID that the caller attempts to take.
      */
     public synchronized void takeSpecificId(final int id) throws MessageIdUnavailableException {
-        Preconditions.checkArgument(
-                id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
+        Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
                 "Attempting to take an ID %s that is outside the valid packet IDs range.",
                 id);
         Range current = rootRange;
@@ -115,8 +114,7 @@ public class FreePacketIdRanges {
      * @param id an ID that the caller attempts to return (to free).
      */
     public synchronized void returnId(final int id) {
-        Preconditions.checkArgument(
-                id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
+        Preconditions.checkArgument(id >= MIN_ALLOWED_MQTT_PACKET_ID && id <= MAX_ALLOWED_MQTT_PACKET_ID,
                 "Attempting to return an ID %s that is outside the valid packet IDs range.",
                 id);
         Range current = rootRange;

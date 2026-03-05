@@ -44,8 +44,7 @@ public class ModifiableUserPropertiesImplTest {
     private @NotNull ModifiableUserPropertiesImpl filledProps;
     @Before
     public void setUp() throws Exception {
-        filledProps = new ModifiableUserPropertiesImpl(ImmutableList.of(
-                MqttUserProperty.of("one", "one"),
+        filledProps = new ModifiableUserPropertiesImpl(ImmutableList.of(MqttUserProperty.of("one", "one"),
                 MqttUserProperty.of("one", "two"),
                 MqttUserProperty.of("two", "two")), true);
     }
@@ -218,8 +217,8 @@ public class ModifiableUserPropertiesImplTest {
 
     @Test
     public void copy_noChanges() {
-        final ImmutableList<MqttUserProperty> list = ImmutableList
-                .of(MqttUserProperty.of("name1", "value1"), MqttUserProperty.of("name2", "value2"));
+        final ImmutableList<MqttUserProperty> list =
+                ImmutableList.of(MqttUserProperty.of("name1", "value1"), MqttUserProperty.of("name2", "value2"));
         final ModifiableUserPropertiesImpl modifiableUserProperties = new ModifiableUserPropertiesImpl(list, true);
         final UserPropertiesImpl copy = modifiableUserProperties.copy();
         assertSame(list, copy.asInternalList());
@@ -227,25 +226,28 @@ public class ModifiableUserPropertiesImplTest {
 
     @Test
     public void copy_changes() {
-        final ImmutableList<MqttUserProperty> list = ImmutableList
-                .of(MqttUserProperty.of("name1", "value1"), MqttUserProperty.of("name2", "value2"));
+        final ImmutableList<MqttUserProperty> list =
+                ImmutableList.of(MqttUserProperty.of("name1", "value1"), MqttUserProperty.of("name2", "value2"));
         final ModifiableUserPropertiesImpl modifiableUserProperties = new ModifiableUserPropertiesImpl(list, true);
         modifiableUserProperties.removeName("name1");
         modifiableUserProperties.addUserProperty("name3", "value3");
         final UserPropertiesImpl copy = modifiableUserProperties.copy();
-        final ImmutableList<MqttUserProperty> expectedList = ImmutableList
-                .of(MqttUserProperty.of("name2", "value2"), MqttUserProperty.of("name3", "value3"));
+        final ImmutableList<MqttUserProperty> expectedList =
+                ImmutableList.of(MqttUserProperty.of("name2", "value2"), MqttUserProperty.of("name3", "value3"));
         assertEquals(expectedList, copy.asInternalList());
     }
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(ModifiableUserPropertiesImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier
-                                                                                                          // thinks
-                                                                                                          // @NotNull
-                                                                                                          // Optional is
-                                                                                                          // @NotNull
-                .withNonnullFields("list").withIgnoredFields("readWriteLock", "validateUTF8", "modified")
-                .suppress(Warning.STRICT_INHERITANCE, Warning.NONFINAL_FIELDS).verify();
+        EqualsVerifier.forClass(ModifiableUserPropertiesImpl.class)
+                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier
+                // thinks
+                // @NotNull
+                // Optional is
+                // @NotNull
+                .withNonnullFields("list")
+                .withIgnoredFields("readWriteLock", "validateUTF8", "modified")
+                .suppress(Warning.STRICT_INHERITANCE, Warning.NONFINAL_FIELDS)
+                .verify();
     }
 }

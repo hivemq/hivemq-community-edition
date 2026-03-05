@@ -48,20 +48,28 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
     }
 
     // MQTT 5
-    public SUBACK(final int packetIdentifier, final @NotNull List<Mqtt5SubAckReasonCode> grantedQos,
+    public SUBACK(
+            final int packetIdentifier,
+            final @NotNull List<Mqtt5SubAckReasonCode> grantedQos,
             final @Nullable String reasonString) {
         this(packetIdentifier, grantedQos, reasonString, Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
 
     // MQTT 5
-    public SUBACK(final int packetIdentifier, final @NotNull List<Mqtt5SubAckReasonCode> grantedQos,
-            final @Nullable String reasonString, final @NotNull Mqtt5UserProperties userProperties) {
+    public SUBACK(
+            final int packetIdentifier,
+            final @NotNull List<Mqtt5SubAckReasonCode> grantedQos,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties) {
         super(packetIdentifier, ImmutableList.copyOf(grantedQos), reasonString, userProperties);
     }
 
     // MQTT 5
-    public SUBACK(final int packetIdentifier, final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties, final @NotNull Mqtt5SubAckReasonCode... grantedQos) {
+    public SUBACK(
+            final int packetIdentifier,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final @NotNull Mqtt5SubAckReasonCode... grantedQos) {
         super(packetIdentifier, ImmutableList.copyOf(grantedQos), reasonString, userProperties);
     }
 
@@ -73,7 +81,8 @@ public class SUBACK extends MqttMessageWithIdAndReasonCodes<Mqtt5SubAckReasonCod
     public static @NotNull SUBACK from(final @NotNull SubackPacketImpl packet) {
         final ImmutableList.Builder<Mqtt5SubAckReasonCode> reasonCodesBuilder = ImmutableList.builder();
         packet.getReasonCodes().forEach(reasonCode -> reasonCodesBuilder.add(Mqtt5SubAckReasonCode.from(reasonCode)));
-        return new SUBACK(packet.getPacketIdentifier(), reasonCodesBuilder.build(),
+        return new SUBACK(packet.getPacketIdentifier(),
+                reasonCodesBuilder.build(),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }

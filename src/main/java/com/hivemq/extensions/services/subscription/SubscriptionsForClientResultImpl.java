@@ -28,7 +28,8 @@ public class SubscriptionsForClientResultImpl implements SubscriptionsForClientR
 
     private final @NotNull String clientId;
     private final @NotNull Set<TopicSubscription> topicSubscriptions;
-    public SubscriptionsForClientResultImpl(@NotNull final String clientId,
+    public SubscriptionsForClientResultImpl(
+            @NotNull final String clientId,
             @NotNull final Set<TopicSubscription> topicSubscriptions) {
         this.clientId = clientId;
         this.topicSubscriptions = topicSubscriptions;
@@ -46,7 +47,7 @@ public class SubscriptionsForClientResultImpl implements SubscriptionsForClientR
 
     @Override
     public String toString() {
-        return "SubscriptionsForClientResult{" + "clientId='" + clientId + '\'' + ", topicSubscriptions="
-                + topicSubscriptions + "}\n";
+        return "SubscriptionsForClientResult{" + "clientId='" + clientId + '\'' + ", topicSubscriptions=" +
+                topicSubscriptions + "}\n";
     }
 }

@@ -64,8 +64,8 @@ public class HiveMQExtensionsExtensionTest extends AbstractExtensionTest {
     private final @NotNull HiveMQExtension extension2 = mock(HiveMQExtension.class);
     private final @NotNull IsolatedExtensionClassloader loader1 = mock(IsolatedExtensionClassloader.class);
     private final @NotNull IsolatedExtensionClassloader loader2 = mock(IsolatedExtensionClassloader.class);
-    private final @NotNull ListenerConfigurationService listenerConfigurationService = mock(
-            ListenerConfigurationService.class);
+    private final @NotNull ListenerConfigurationService listenerConfigurationService =
+            mock(ListenerConfigurationService.class);
     private @NotNull String id1;
     private @NotNull String id2;
     private @NotNull HiveMQExtensions hiveMQExtensions;

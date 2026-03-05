@@ -37,8 +37,8 @@ public class PublishInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PublishPacketImpl packet = mock(PublishPacketImpl.class);
-        final PublishInboundInputImpl input = new PublishInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PublishInboundInputImpl input =
+                new PublishInboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getPublishPacket());
@@ -49,8 +49,8 @@ public class PublishInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final PublishPacketImpl packet = mock(PublishPacketImpl.class);
-        final PublishInboundInputImpl input = new PublishInboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final PublishInboundInputImpl input =
+                new PublishInboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiablePublishPacketImpl modifiablePacket = mock(ModifiablePublishPacketImpl.class);
         final PublishPacketImpl newPacket = mock(PublishPacketImpl.class);
         final PublishInboundOutputImpl output = mock(PublishInboundOutputImpl.class);

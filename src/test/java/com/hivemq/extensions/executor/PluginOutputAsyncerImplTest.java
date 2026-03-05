@@ -74,8 +74,8 @@ public class PluginOutputAsyncerImplTest {
     @Test
     public void test_shutdown_hook() {
         final ScheduledExecutorService scheduledExecutorService = mock(ScheduledExecutorService.class);
-        final PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook shutdownHook = new PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook(
-                scheduledExecutorService);
+        final PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook shutdownHook =
+                new PluginOutputAsyncerImpl.PluginOutputAsyncerShutdownHook(scheduledExecutorService);
         shutdownHook.run();
         verify(scheduledExecutorService).shutdown();
     }

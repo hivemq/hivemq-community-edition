@@ -58,21 +58,18 @@ class LocalPersistenceFileModule extends SingletonModule<Class<LocalPersistenceF
             bindLocalPersistence(PublishPayloadLocalPersistence.class, PublishPayloadXodusLocalPersistence.class, null);
         }
         if (retainedPersistenceType == PersistenceType.FILE) {
-            bindLocalPersistence(
-                    RetainedMessageLocalPersistence.class,
+            bindLocalPersistence(RetainedMessageLocalPersistence.class,
                     RetainedMessageXodusLocalPersistence.class,
                     null);
         }
-        if (payloadPersistenceType == PersistenceType.FILE_NATIVE
-                || retainedPersistenceType == PersistenceType.FILE_NATIVE) {
+        if (payloadPersistenceType == PersistenceType.FILE_NATIVE ||
+                retainedPersistenceType == PersistenceType.FILE_NATIVE) {
             install(new LocalPersistenceRocksDBModule(persistenceInjector));
         }
-        bindLocalPersistence(
-                ClientSessionLocalPersistence.class,
+        bindLocalPersistence(ClientSessionLocalPersistence.class,
                 ClientSessionXodusLocalPersistence.class,
                 ClientSessionLocalProvider.class);
-        bindLocalPersistence(
-                ClientSessionSubscriptionLocalPersistence.class,
+        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
                 ClientSessionSubscriptionXodusLocalPersistence.class,
                 ClientSessionSubscriptionLocalProvider.class);
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueXodusLocalPersistence.class, null);

@@ -41,11 +41,9 @@ public class NoTlsHandshakeIdleHandler extends ChannelInboundHandlerAdapter {
             throws Exception {
         if (evt instanceof IdleStateEvent) {
             if (((IdleStateEvent) evt).state() == IdleState.READER_IDLE) {
-                final String eventLogMessage = appendListenerToMessage(
-                        ctx.channel(),
-                        "TLS handshake not finished in time");
-                mqttServerDisconnector.logAndClose(
-                        ctx.channel(),
+                final String eventLogMessage =
+                        appendListenerToMessage(ctx.channel(), "TLS handshake not finished in time");
+                mqttServerDisconnector.logAndClose(ctx.channel(),
                         "Client with IP {} disconnected. The client was idle for too long without finishing the TLS handshake.",
                         eventLogMessage);
                 return;

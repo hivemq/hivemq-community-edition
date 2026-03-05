@@ -63,8 +63,11 @@ public class DisconnectHandlerTest {
     private @NotNull ClientConnection clientConnection;
     @Before
     public void setUp() throws Exception {
-        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog, metricsHolder, topicAliasLimiter,
-                clientSessionPersistence, connectionPersistence);
+        final DisconnectHandler disconnectHandler = new DisconnectHandler(eventLog,
+                metricsHolder,
+                topicAliasLimiter,
+                clientSessionPersistence,
+                connectionPersistence);
         channel = new EmbeddedChannel(disconnectHandler);
         final ClientConnectionContext clientConnectionContext = new UndefinedClientConnection(channel, null, mock());
         clientConnectionContext.setClientId("clientId");
@@ -82,9 +85,11 @@ public class DisconnectHandlerTest {
     public void test_disconnection_on_disconnect_message() {
         assertTrue(channel.isOpen());
         clientConnection.setClientSessionExpiryInterval(1000L);
-        channel.writeInbound(
-                new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, null,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
+        channel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+                null,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                2000L));
         assertEquals(2000, clientConnection.getClientSessionExpiryInterval().longValue());
         // verify that the client was disconnected
         assertFalse(channel.isOpen());
@@ -93,9 +98,11 @@ public class DisconnectHandlerTest {
     @Test
     public void test_disconnection_with_will() {
         assertTrue(channel.isOpen());
-        channel.writeInbound(
-                new DISCONNECT(Mqtt5DisconnectReasonCode.SERVER_SHUTTING_DOWN, null,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
+        channel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.SERVER_SHUTTING_DOWN,
+                null,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                2000L));
         assertTrue(clientConnection.isSendWill());
         // verify that the client was disconnected
         assertFalse(channel.isOpen());
@@ -104,9 +111,11 @@ public class DisconnectHandlerTest {
     @Test
     public void test_disconnection_without_will() {
         assertTrue(channel.isOpen());
-        channel.writeInbound(
-                new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, null,
-                        Mqtt5UserProperties.NO_USER_PROPERTIES, null, 2000L));
+        channel.writeInbound(new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+                null,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                2000L));
         assertFalse(clientConnection.isSendWill());
         // verify that the client was disconnected
         assertFalse(channel.isOpen());
@@ -158,8 +167,11 @@ public class DisconnectHandlerTest {
     @Test
     public void test_disconnect_mqtt5_reason_string_logged() {
         final String disconnectReason = "disconnectReason";
-        final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION, disconnectReason,
-                Mqtt5UserProperties.NO_USER_PROPERTIES, null, 0);
+        final DISCONNECT disconnect = new DISCONNECT(Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+                disconnectReason,
+                Mqtt5UserProperties.NO_USER_PROPERTIES,
+                null,
+                0);
         clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);

@@ -64,9 +64,9 @@ public class MessageBarrierTest {
 
     @Test
     public void test_connect_sent() {
-        channel.writeInbound(
-                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                        .withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
         assertTrue(messageBarrier.getConnectReceived());
     }
 
@@ -78,9 +78,9 @@ public class MessageBarrierTest {
 
     @Test
     public void test_queue_messages_after_connect() {
-        channel.writeInbound(
-                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                        .withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
@@ -93,9 +93,9 @@ public class MessageBarrierTest {
 
     @Test
     public void test_messages_not_sent_on_connack_fail() {
-        channel.writeInbound(
-                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                        .withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
         assertEquals(2, messageBarrier.getQueue().size());
@@ -113,9 +113,9 @@ public class MessageBarrierTest {
 
     @Test
     public void test_messages_sent_on_connack_success() {
-        channel.writeInbound(
-                new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
-                        .withClientIdentifier("clientID").build());
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new SUBSCRIBE(ImmutableList.of(), 1));
         assertEquals(2, messageBarrier.getQueue().size());
@@ -129,8 +129,8 @@ public class MessageBarrierTest {
                 }
             }
         });
-        final CONNACK connack = CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
-                .withSessionPresent(false).build();
+        final CONNACK connack =
+                CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS).withSessionPresent(false).build();
         channel.writeOutbound(connack);
         assertEquals(2, counter.get());
         assertFalse(channel.pipeline().names().contains(MQTT_MESSAGE_BARRIER));

@@ -29,11 +29,13 @@ public class PublishPacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(PublishPacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
-                                                                                               // @NotNull Optional is
-                                                                                               // @NotNull
+        EqualsVerifier.forClass(PublishPacketImpl.class)
+                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                // @NotNull Optional is
+                // @NotNull
                 .withNonnullFields("topic", "qos", "subscriptionIdentifiers", "userProperties")
                 .suppress(Warning.STRICT_INHERITANCE)
-                .withPrefabValues(ImmutableIntArray.class, ImmutableIntArray.of(), ImmutableIntArray.of(123)).verify();
+                .withPrefabValues(ImmutableIntArray.class, ImmutableIntArray.of(), ImmutableIntArray.of(123))
+                .verify();
     }
 }

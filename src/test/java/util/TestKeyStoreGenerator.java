@@ -113,21 +113,23 @@ public class TestKeyStoreGenerator {
             x500Name = new X500Name("CN=" + name);
         }
         final X509v3CertificateBuilder builder = new X509v3CertificateBuilder(x500Name,
-                BigInteger.valueOf(new SecureRandom().nextLong()), new Date(System.currentTimeMillis() - 10000),
-                new Date(System.currentTimeMillis() + 24L * 3600 * 1000), x500Name,
+                BigInteger.valueOf(new SecureRandom().nextLong()),
+                new Date(System.currentTimeMillis() - 10000),
+                new Date(System.currentTimeMillis() + 24L * 3600 * 1000),
+                x500Name,
                 SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
         final List<GeneralName> altNames = new ArrayList<>();
         altNames.add(new GeneralName(GeneralName.dNSName, "localhost"));
         altNames.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
-        final GeneralNames subjectAltNames = GeneralNames
-                .getInstance(new DERSequence(altNames.toArray(new GeneralName[]{})));
+        final GeneralNames subjectAltNames =
+                GeneralNames.getInstance(new DERSequence(altNames.toArray(new GeneralName[]{})));
         builder.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
-        final X509CertificateHolder holder = builder
-                .build(eclipticCurve ? createECContentSigner(keyPair) : createRSAContentSigner(keyPair));
+        final X509CertificateHolder holder =
+                builder.build(eclipticCurve ? createECContentSigner(keyPair) : createRSAContentSigner(keyPair));
         final org.bouncycastle.asn1.x509.Certificate certificate = holder.toASN1Structure();
         final InputStream is = new ByteArrayInputStream(certificate.getEncoded());
-        final X509Certificate x509Certificate = (X509Certificate) CertificateFactory.getInstance("X.509")
-                .generateCertificate(is);
+        final X509Certificate x509Certificate =
+                (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         is.close();
         return x509Certificate;
     }
@@ -149,10 +151,10 @@ public class TestKeyStoreGenerator {
 
     @NotNull
     private ContentSigner createRSAContentSigner(final KeyPair keyPair) throws Exception {
-        final AlgorithmIdentifier signatureAlgorithmId = new DefaultSignatureAlgorithmIdentifierFinder()
-                .find("SHA256withRSA");
-        final AlgorithmIdentifier digestAlgorithmId = new DefaultDigestAlgorithmIdentifierFinder()
-                .find(signatureAlgorithmId);
+        final AlgorithmIdentifier signatureAlgorithmId =
+                new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
+        final AlgorithmIdentifier digestAlgorithmId =
+                new DefaultDigestAlgorithmIdentifierFinder().find(signatureAlgorithmId);
         final byte[] encoded = keyPair.getPrivate().getEncoded();
         final AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey(encoded);
         return new BcRSAContentSignerBuilder(signatureAlgorithmId, digestAlgorithmId).build(privateKey);
@@ -160,10 +162,10 @@ public class TestKeyStoreGenerator {
 
     @NotNull
     private ContentSigner createECContentSigner(final KeyPair keyPair) throws Exception {
-        final AlgorithmIdentifier signatureAlgorithmId = new DefaultSignatureAlgorithmIdentifierFinder()
-                .find("SHA256withECDSA");
-        final AlgorithmIdentifier digestAlgorithmId = new DefaultDigestAlgorithmIdentifierFinder()
-                .find(signatureAlgorithmId);
+        final AlgorithmIdentifier signatureAlgorithmId =
+                new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withECDSA");
+        final AlgorithmIdentifier digestAlgorithmId =
+                new DefaultDigestAlgorithmIdentifierFinder().find(signatureAlgorithmId);
         final byte[] encoded = keyPair.getPrivate().getEncoded();
         final AsymmetricKeyParameter privateKey = PrivateKeyFactory.createKey(encoded);
         return new BcECContentSignerBuilder(signatureAlgorithmId, digestAlgorithmId).build(privateKey);

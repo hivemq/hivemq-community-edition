@@ -34,7 +34,8 @@ public class ConnectInboundInputImpl implements ConnectInboundInput, PluginTaskI
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ConnectPacketImpl connectPacket;
-    public ConnectInboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public ConnectInboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull ConnectPacketImpl connectPacket) {
         this.clientInformation = clientInformation;

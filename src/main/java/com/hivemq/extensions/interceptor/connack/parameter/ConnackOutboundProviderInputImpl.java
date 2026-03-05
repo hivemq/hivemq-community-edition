@@ -33,7 +33,8 @@ public class ConnackOutboundProviderInputImpl implements ConnackOutboundProvider
     private final @NotNull ServerInformation serverInformation;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    public ConnackOutboundProviderInputImpl(final @NotNull ServerInformation serverInformation,
+    public ConnackOutboundProviderInputImpl(
+            final @NotNull ServerInformation serverInformation,
             final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation) {
         this.serverInformation = serverInformation;

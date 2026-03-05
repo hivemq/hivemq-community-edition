@@ -81,8 +81,8 @@ public class ConnectionInformationImpl implements ConnectionInformation {
 
     @Override
     public @NotNull Optional<TlsInformation> getTlsInformation() {
-        if (tlsInformation != null && tlsInformation.getClientCertificate().isPresent()
-                && tlsInformation.getClientCertificateChain().isPresent()) {
+        if (tlsInformation != null && tlsInformation.getClientCertificate().isPresent() &&
+                tlsInformation.getClientCertificateChain().isPresent()) {
             return Optional.of((TlsInformation) tlsInformation);
         }
         return Optional.empty();

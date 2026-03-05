@@ -33,8 +33,11 @@ public class WrappedRunnableWithResult<T> implements Runnable {
     private final CompletableFuture<T> future;
     @NotNull
     private final T result;
-    WrappedRunnableWithResult(@NotNull final Runnable runnable, @NotNull final ClassLoader classLoader,
-            @NotNull final CompletableFuture<T> future, @NotNull final T result) {
+    WrappedRunnableWithResult(
+            @NotNull final Runnable runnable,
+            @NotNull final ClassLoader classLoader,
+            @NotNull final CompletableFuture<T> future,
+            @NotNull final T result) {
         this.runnable = runnable;
         this.classLoader = classLoader;
         this.future = future;

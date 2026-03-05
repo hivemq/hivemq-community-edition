@@ -87,8 +87,7 @@ public class PersistenceMigrationModuleTest {
                     }
                 });
         assertTrue(injector.getInstance(PublishPayloadPersistence.class) instanceof PublishPayloadNoopPersistenceImpl);
-        assertTrue(
-                injector.getInstance(
-                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
+        assertTrue(injector
+                .getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
     }
 }

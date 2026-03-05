@@ -64,8 +64,7 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
         for (int i = 0; i < bucketCount; i++) {
             topicTrees[i] = new PublishTopicTree();
         }
-        metricRegistry.register(
-                HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+        metricRegistry.register(HiveMQMetrics.RETAINED_MESSAGES_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) currentMemorySize::get);
     }
 
@@ -170,8 +169,8 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
             final int bucketIndex,
             final @Nullable String ignored,
             final int alsoIgnored) {
-        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages = buckets[bucketIndex].entrySet().stream()
-                .map(entry -> {
+        final ImmutableMap<String, RetainedMessage> collectedRetainedMessages =
+                buckets[bucketIndex].entrySet().stream().map(entry -> {
                     final String topic = entry.getKey();
                     final RetainedMessage retainedMessage = entry.getValue();
                     // ignore messages with exceeded message expiry interval
@@ -179,8 +178,9 @@ public class RetainedMessageMemoryLocalPersistence implements RetainedMessageLoc
                         return null;
                     }
                     return new AbstractMap.SimpleEntry<>(topic, retainedMessage);
-                }).filter(entry -> !Objects.isNull(entry))
-                .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+                })
+                        .filter(entry -> !Objects.isNull(entry))
+                        .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
         return new BucketChunkResult<>(collectedRetainedMessages, true, null, bucketIndex);
     }
 

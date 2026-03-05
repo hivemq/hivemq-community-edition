@@ -54,8 +54,7 @@ public class XodusUtilsTest {
 
     @Test
     public void test_byteiterable_to_bytes_conversion() {
-        final List<byte[]> bytes = Lists.newArrayList(
-                RandomUtils.nextBytes(1),
+        final List<byte[]> bytes = Lists.newArrayList(RandomUtils.nextBytes(1),
                 RandomUtils.nextBytes(1024),
                 RandomUtils.nextBytes(65535),
                 RandomUtils.nextBytes(1024 * 1024 * 10));

@@ -34,7 +34,8 @@ import io.netty.buffer.ByteBuf;
 public abstract class AbstractMqttPublishDecoder<T extends Message> extends AbstractMqttDecoder<T> {
 
     private static final byte @NotNull [] EMPTY_PAYLOAD = new byte[0];
-    protected AbstractMqttPublishDecoder(final @NotNull MqttServerDisconnector disconnector,
+    protected AbstractMqttPublishDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -53,8 +54,7 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
     protected int decodeQoS(final @NotNull ClientConnectionContext clientConnectionContext, final byte header) {
         final int qos = (header & 0b0000_0110) >> 1;
         if (qos == 3) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a PUBLISH with an invalid QoS. Disconnecting client.",
                     "Sent a PUBLISH with an invalid QoS",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,
@@ -82,8 +82,7 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
             final int qos) {
         final boolean dup = Bytes.isBitSet(header, 3);
         if (qos == 0 && dup) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a PUBLISH with QoS 0 and DUP set to 1. Disconnecting client.",
                     "Sent a PUBLISH with QoS 0 and DUP set to 1",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -109,8 +108,7 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
             final byte header) {
         final boolean retained = Bytes.isBitSet(header, 0);
         if (retained && !configurationService.mqttConfiguration().retainedMessagesEnabled()) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a PUBLISH with retain set to 1 although retain is not available. Disconnecting client.",
                     "Sent a PUBLISH with retain set to 1 although retain is not available",
                     Mqtt5DisconnectReasonCode.RETAIN_NOT_SUPPORTED,
@@ -138,8 +136,7 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
             final @NotNull ByteBuf buf) {
         final int packetIdentifier = buf.readUnsignedShort();
         if (packetIdentifier == 0) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a PUBLISH with QoS > 0 and packet identifier 0. Disconnecting client.",
                     "Sent a PUBLISH with QoS > 0 and packet identifier 0",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -175,8 +172,7 @@ public abstract class AbstractMqttPublishDecoder<T extends Message> extends Abst
             if (payloadFormatIndicator == Mqtt5PayloadFormatIndicator.UTF_8) {
                 if (validatePayloadFormat) {
                     if (!Utf8.isWellFormed(payload)) {
-                        disconnector.disconnect(
-                                clientConnectionContext.getChannel(),
+                        disconnector.disconnect(clientConnectionContext.getChannel(),
                                 "A client (IP: {}) sent a PUBLISH with an invalid UTF-8 payload. This is not allowed. Disconnecting client.",
                                 "Sent a PUBLISH with an invalid UTF-8 payload",
                                 Mqtt5DisconnectReasonCode.PAYLOAD_FORMAT_INVALID,

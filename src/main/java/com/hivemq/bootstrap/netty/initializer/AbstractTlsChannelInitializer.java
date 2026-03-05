@@ -48,8 +48,10 @@ public abstract class AbstractTlsChannelInitializer extends AbstractChannelIniti
     private final @NotNull TlsListener tlsListener;
     private final @NotNull SslFactory sslFactory;
     private final @NotNull ChannelDependencies channelDependencies;
-    public AbstractTlsChannelInitializer(@NotNull final ChannelDependencies channelDependencies,
-            @NotNull final TlsListener tlsListener, @NotNull final SslFactory sslFactory) {
+    public AbstractTlsChannelInitializer(
+            @NotNull final ChannelDependencies channelDependencies,
+            @NotNull final TlsListener tlsListener,
+            @NotNull final SslFactory sslFactory) {
         super(channelDependencies, tlsListener);
         this.tlsListener = tlsListener;
         this.sslFactory = sslFactory;
@@ -70,8 +72,8 @@ public abstract class AbstractTlsChannelInitializer extends AbstractChannelIniti
         final int handshakeTimeout = tlsListener.getTls().getHandshakeTimeout();
         final IdleStateHandler idleStateHandler = new IdleStateHandler(handshakeTimeout, 0, 0, TimeUnit.MILLISECONDS);
         final MqttServerDisconnector mqttServerDisconnector = channelDependencies.getMqttServerDisconnector();
-        final NoTlsHandshakeIdleHandler noTlsHandshakeIdleHandler = new NoTlsHandshakeIdleHandler(
-                mqttServerDisconnector);
+        final NoTlsHandshakeIdleHandler noTlsHandshakeIdleHandler =
+                new NoTlsHandshakeIdleHandler(mqttServerDisconnector);
         if (handshakeTimeout > 0) {
             ch.pipeline().addLast(NEW_CONNECTION_IDLE_HANDLER, idleStateHandler);
             ch.pipeline().addLast(NO_TLS_HANDSHAKE_IDLE_EVENT_HANDLER, noTlsHandshakeIdleHandler);
@@ -91,10 +93,10 @@ public abstract class AbstractTlsChannelInitializer extends AbstractChannelIniti
         ch.pipeline()
                 .addAfter(SSL_EXCEPTION_HANDLER, SSL_PARAMETER_HANDLER, channelDependencies.getSslParameterHandler());
         if (!Tls.ClientAuthMode.NONE.equals(tls.getClientAuthMode())) {
-            ch.pipeline().addAfter(
-                    SSL_PARAMETER_HANDLER,
-                    SSL_CLIENT_CERTIFICATE_HANDLER,
-                    new SslClientCertificateHandler(tls, mqttServerDisconnector));
+            ch.pipeline()
+                    .addAfter(SSL_PARAMETER_HANDLER,
+                            SSL_CLIENT_CERTIFICATE_HANDLER,
+                            new SslClientCertificateHandler(tls, mqttServerDisconnector));
         }
     }
 }

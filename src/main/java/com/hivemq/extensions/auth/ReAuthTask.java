@@ -27,8 +27,10 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
  */
 public class ReAuthTask extends AbstractEnhancedAuthTask<AuthInput, ReAuthOutput> {
 
-    public ReAuthTask(final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
-            final @NotNull AuthenticatorProviderInput authenticatorProviderInput, final @NotNull String extensionId,
+    public ReAuthTask(
+            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
+            final @NotNull String extensionId,
             final @NotNull ClientAuthenticators clientAuthenticators) {
         super(wrappedAuthenticatorProvider, authenticatorProviderInput, extensionId, clientAuthenticators);
     }

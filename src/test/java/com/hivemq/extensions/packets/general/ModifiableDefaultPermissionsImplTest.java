@@ -79,10 +79,8 @@ public class ModifiableDefaultPermissionsImplTest {
 
     @Test(expected = DoNotImplementException.class)
     public void test_addAll_illegal_class() {
-        modifiableDefaultPermissions.addAll(
-                Lists.newArrayList(
-                        new TestTopicPermissionsUtil.TestTopicPermission(),
-                        new TestTopicPermissionsUtil.TestTopicPermission()));
+        modifiableDefaultPermissions.addAll(Lists.newArrayList(new TestTopicPermissionsUtil.TestTopicPermission(),
+                new TestTopicPermissionsUtil.TestTopicPermission()));
     }
 
     @Test
@@ -111,10 +109,14 @@ public class ModifiableDefaultPermissionsImplTest {
 
     @Test
     public void test_add_remove_asList() {
-        final TopicPermission a = new TopicPermissionBuilderImpl(
-                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("a").build();
-        final TopicPermission b = new TopicPermissionBuilderImpl(
-                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("b").build();
+        final TopicPermission a =
+                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                        .topicFilter("a")
+                        .build();
+        final TopicPermission b =
+                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                        .topicFilter("b")
+                        .build();
         modifiableDefaultPermissions.add(a);
         assertEquals(1, modifiableDefaultPermissions.asList().size());
         modifiableDefaultPermissions.add(b);
@@ -128,10 +130,14 @@ public class ModifiableDefaultPermissionsImplTest {
 
     @Test
     public void test_addAll() {
-        final TopicPermission a = new TopicPermissionBuilderImpl(
-                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("a").build();
-        final TopicPermission b = new TopicPermissionBuilderImpl(
-                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("b").build();
+        final TopicPermission a =
+                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                        .topicFilter("a")
+                        .build();
+        final TopicPermission b =
+                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                        .topicFilter("b")
+                        .build();
         modifiableDefaultPermissions.addAll(Lists.newArrayList(a, b));
         assertEquals(2, modifiableDefaultPermissions.asList().size());
         assertTrue(modifiableDefaultPermissions.asList().contains(a));
@@ -140,10 +146,14 @@ public class ModifiableDefaultPermissionsImplTest {
 
     @Test
     public void test_clear() {
-        final TopicPermission a = new TopicPermissionBuilderImpl(
-                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("a").build();
-        final TopicPermission b = new TopicPermissionBuilderImpl(
-                new TestConfigurationBootstrap().getFullConfigurationService()).topicFilter("b").build();
+        final TopicPermission a =
+                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                        .topicFilter("a")
+                        .build();
+        final TopicPermission b =
+                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                        .topicFilter("b")
+                        .build();
         modifiableDefaultPermissions.addAll(Lists.newArrayList(a, b));
         assertEquals(2, modifiableDefaultPermissions.asList().size());
         modifiableDefaultPermissions.clear();

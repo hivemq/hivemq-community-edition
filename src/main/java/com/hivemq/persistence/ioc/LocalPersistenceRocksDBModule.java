@@ -46,14 +46,12 @@ class LocalPersistenceRocksDBModule extends SingletonModule<Class<LocalPersisten
     @Override
     protected void configure() {
         if (retainedPersistenceType == PersistenceType.FILE_NATIVE) {
-            bindLocalPersistence(
-                    RetainedMessageLocalPersistence.class,
+            bindLocalPersistence(RetainedMessageLocalPersistence.class,
                     RetainedMessageRocksDBLocalPersistence.class,
                     null);
         }
         if (payloadPersistenceType == PersistenceType.FILE_NATIVE) {
-            bindLocalPersistence(
-                    PublishPayloadLocalPersistence.class,
+            bindLocalPersistence(PublishPayloadLocalPersistence.class,
                     PublishPayloadRocksDBLocalPersistence.class,
                     null);
         }

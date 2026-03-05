@@ -44,12 +44,10 @@ public class PluginBuilderUtil {
     public static void checkMessageExpiryInterval(
             final long messageExpiryInterval,
             final long maxMessageExpiryInterval) {
-        checkArgument(
-                messageExpiryInterval <= maxMessageExpiryInterval,
-                "Message expiry interval " + messageExpiryInterval + " not allowed. Maximum = "
-                        + maxMessageExpiryInterval);
-        checkArgument(
-                messageExpiryInterval > 0,
+        checkArgument(messageExpiryInterval <= maxMessageExpiryInterval,
+                "Message expiry interval " + messageExpiryInterval + " not allowed. Maximum = " +
+                        maxMessageExpiryInterval);
+        checkArgument(messageExpiryInterval > 0,
                 "Message expiry interval must be bigger than 0 was " + messageExpiryInterval + ".");
     }
 
@@ -144,10 +142,9 @@ public class PluginBuilderUtil {
 
     public static void checkTopic(final @NotNull String topic, final int maxTopicLength, final boolean validateUtf8) {
         checkNotNull(topic, "Topic must not be null");
-        checkArgument(
-                topic.length() <= maxTopicLength,
-                "Topic length must not exceed '" + maxTopicLength + "' characters, but has '" + topic.length()
-                        + "' characters");
+        checkArgument(topic.length() <= maxTopicLength,
+                "Topic length must not exceed '" + maxTopicLength + "' characters, but has '" + topic.length() +
+                        "' characters");
         if (!Topics.isValidTopicToPublish(topic)) {
             throw new IllegalArgumentException("The topic (" + topic + ") is invalid for retained PUBLISH messages");
         }
@@ -169,8 +166,8 @@ public class PluginBuilderUtil {
 
     private static void checkUtf8StringLength(final @NotNull String utf8String, final @NotNull String type) {
         if (utf8String.length() > UTF_8_STRING_MAX_LENGTH) {
-            throw new IllegalArgumentException(type + " length must not exceed '" + UTF_8_STRING_MAX_LENGTH
-                    + "' characters, but has '" + utf8String.length() + "' characters");
+            throw new IllegalArgumentException(type + " length must not exceed '" + UTF_8_STRING_MAX_LENGTH +
+                    "' characters, but has '" + utf8String.length() + "' characters");
         }
     }
 }

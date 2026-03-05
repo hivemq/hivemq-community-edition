@@ -126,10 +126,10 @@ public class SharedSubscriptionServiceTest {
         service.postConstruct();
         final ImmutableSet<Topic> topics1 = ImmutableSet.of();
         when(subscriptionPersistence.getSharedSubscriptions("client")).thenReturn(topics1);
-        final ImmutableSet<Topic> topics2 = service
-                .getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
-        final ImmutableSet<Topic> topics3 = service
-                .getSharedSubscriptions("client", () -> subscriptionPersistence.getSharedSubscriptions("client"));
+        final ImmutableSet<Topic> topics2 = service.getSharedSubscriptions("client",
+                () -> subscriptionPersistence.getSharedSubscriptions("client"));
+        final ImmutableSet<Topic> topics3 = service.getSharedSubscriptions("client",
+                () -> subscriptionPersistence.getSharedSubscriptions("client"));
         verify(subscriptionPersistence, times(1)).getSharedSubscriptions("client");
         assertSame(topics1, topics2);
         assertSame(topics1, topics3);

@@ -91,12 +91,14 @@ public class PubrecInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("plugin");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new PubrecInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new PubrecInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
@@ -412,8 +414,7 @@ public class PubrecInterceptorHandlerTest {
         public void onOutboundPubrec(
                 final @NotNull PubrecOutboundInput pubrecOutboundInput,
                 final @NotNull PubrecOutboundOutput pubrecOutboundOutput) {
-            @Immutable
-            final ModifiablePubrecPacket pubrecPacket = pubrecOutboundOutput.getPubrecPacket();
+            @Immutable final ModifiablePubrecPacket pubrecPacket = pubrecOutboundOutput.getPubrecPacket();
             pubrecPacket.setReasonString("modified");
         }
     }

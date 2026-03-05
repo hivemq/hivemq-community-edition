@@ -75,10 +75,13 @@ public class PublishOutboundInterceptorHandlerTest {
         clientConnection = new DummyClientConnection(channel, mock(PublishFlushHandler.class));
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         ClientConnection.of(channel).setClientId("test_client");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
-        handler = new PublishOutboundInterceptorHandler(asyncer, configurationService, pluginTaskExecutorService,
-                hiveMQExtensions, messageDroppedService);
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
+        handler = new PublishOutboundInterceptorHandler(asyncer,
+                configurationService,
+                pluginTaskExecutorService,
+                hiveMQExtensions,
+                messageDroppedService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
             @Override
@@ -134,8 +137,8 @@ public class PublishOutboundInterceptorHandlerTest {
         final PublishOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), TestInterceptor.class);
         when(clientContext.getPublishOutboundInterceptors()).thenReturn(ImmutableList.of(interceptor));
-        final CollectUserEventsHandler<PublishDroppedEvent> events = new CollectUserEventsHandler<>(
-                PublishDroppedEvent.class);
+        final CollectUserEventsHandler<PublishDroppedEvent> events =
+                new CollectUserEventsHandler<>(PublishDroppedEvent.class);
         channel.pipeline().addLast(events);
         final ModifiableOutboundPublishImpl publishPacket = mock(ModifiableOutboundPublishImpl.class);
         final PublishOutboundInputImpl input = mock(PublishOutboundInputImpl.class);
@@ -144,9 +147,15 @@ public class PublishOutboundInterceptorHandlerTest {
         final ChannelHandlerContext ctx = channel.pipeline().context("test");
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish();
         final ChannelPromise promise = channel.newPromise();
-        final PublishOutboundInterceptorHandler.PublishOutboundInterceptorContext context = new PublishOutboundInterceptorHandler.PublishOutboundInterceptorContext(
-                "client", 1, ctx, promise, publish, new ExtensionParameterHolder<>(input),
-                new ExtensionParameterHolder<>(output), mock(MessageDroppedService.class));
+        final PublishOutboundInterceptorHandler.PublishOutboundInterceptorContext context =
+                new PublishOutboundInterceptorHandler.PublishOutboundInterceptorContext("client",
+                        1,
+                        ctx,
+                        promise,
+                        publish,
+                        new ExtensionParameterHolder<>(input),
+                        new ExtensionParameterHolder<>(output),
+                        mock(MessageDroppedService.class));
         context.run();
         PublishDroppedEvent publishDroppedEvent = events.pollEvent();
         while (publishDroppedEvent == null) {

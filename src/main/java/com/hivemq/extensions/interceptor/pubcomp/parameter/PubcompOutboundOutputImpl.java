@@ -30,7 +30,8 @@ public class PubcompOutboundOutputImpl extends AbstractSimpleAsyncOutput<Pubcomp
 
     private final @NotNull ModifiablePubcompPacketImpl pubcompPacket;
     private boolean failed = false;
-    public PubcompOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public PubcompOutboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiablePubcompPacketImpl pubcompPacket) {
         super(asyncer);
         this.pubcompPacket = pubcompPacket;

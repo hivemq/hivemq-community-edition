@@ -38,8 +38,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class TlsWebsocketListener extends WebsocketListener implements TlsListener {
 
     private final @NotNull Tls tls;
-    private TlsWebsocketListener(final int port, final @NotNull String bindAddress, final @NotNull String path,
-            final @NotNull Boolean allowExtensions, final @NotNull List<String> subprotocols, final @NotNull Tls tls,
+    private TlsWebsocketListener(
+            final int port,
+            final @NotNull String bindAddress,
+            final @NotNull String path,
+            final @NotNull Boolean allowExtensions,
+            final @NotNull List<String> subprotocols,
+            final @NotNull Tls tls,
             final @NotNull String name) {
         super(port, bindAddress, path, allowExtensions, subprotocols, name);
         this.tls = tls;

@@ -65,8 +65,7 @@ public class GuiceBootstrap {
             System.setProperty("guice_include_stack_traces", "OFF");
         }
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();
-        modules.add(
-                new SystemInformationModule(systemInformation),
+        modules.add(new SystemInformationModule(systemInformation),
                 /* For supporting lazy singletons */
                 new LazySingletonModule(),
                 /* Adds lifecycle methods like @PostConstruct */
@@ -112,8 +111,7 @@ public class GuiceBootstrap {
             final @NotNull FullConfigurationService configService,
             final @NotNull LifecycleModule lifecycleModule) {
         final ImmutableList.Builder<AbstractModule> modules = ImmutableList.builder();
-        modules.add(
-                new SystemInformationModule(systemInformation),
+        modules.add(new SystemInformationModule(systemInformation),
                 new ConfigurationModule(configService, hiveMQId),
                 new LazySingletonModule(),
                 lifecycleModule,

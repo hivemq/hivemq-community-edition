@@ -35,8 +35,11 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
     private final int authorizerCount;
     private final @NotNull ChannelHandlerContext ctx;
     private final @NotNull AtomicInteger counter;
-    public PublishAuthorizerContext(final @NotNull String identifier, final @NotNull PublishAuthorizerOutputImpl output,
-            final @NotNull SettableFuture<PublishAuthorizerOutputImpl> authorizeFuture, final int authorizerCount,
+    public PublishAuthorizerContext(
+            final @NotNull String identifier,
+            final @NotNull PublishAuthorizerOutputImpl output,
+            final @NotNull SettableFuture<PublishAuthorizerOutputImpl> authorizeFuture,
+            final int authorizerCount,
             final @NotNull ChannelHandlerContext ctx) {
         super(identifier);
         this.output = output;
@@ -48,13 +51,13 @@ public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuth
 
     @Override
     public void pluginPost(final @NotNull PublishAuthorizerOutputImpl pluginOutput) {
-        if (pluginOutput.isAsync() && pluginOutput.isTimedOut()
-                && pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
+        if (pluginOutput.isAsync() && pluginOutput.isTimedOut() &&
+                pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
             // Timeout fallback failure means publish delivery prevention
             pluginOutput.forceFailedAuthorization();
         }
-        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL
-                || pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
+        if (pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.FAIL ||
+                pluginOutput.getAuthorizationState() == PublishAuthorizerOutputImpl.AuthorizationState.DISCONNECT) {
             ClientConnectionContext.of(ctx.channel()).setIncomingPublishesSkipRest(true);
         }
         // the publish is done if any authorizer sets the outcome

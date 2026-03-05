@@ -72,7 +72,8 @@ public class ClientContextImpl {
     private volatile @NotNull ImmutableList<DisconnectOutboundInterceptor> disconnectOutbounds = ImmutableList.of();
     private volatile @NotNull ImmutableList<PingReqInboundInterceptor> pingReqInbounds = ImmutableList.of();
     private volatile @NotNull ImmutableList<PingRespOutboundInterceptor> pingRespOutbounds = ImmutableList.of();
-    public ClientContextImpl(final @NotNull HiveMQExtensions hiveMQExtensions,
+    public ClientContextImpl(
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull ModifiableDefaultPermissions defaultPermissions) {
         this.hiveMQExtensions = hiveMQExtensions;
         this.defaultPermissions = defaultPermissions;
@@ -240,8 +241,7 @@ public class ClientContextImpl {
     }
 
     private @NotNull Stream<Interceptor> streamAllInterceptors() {
-        return Streams.concat(
-                publishInbounds.stream(),
+        return Streams.concat(publishInbounds.stream(),
                 publishOutbounds.stream(),
                 pubackInbounds.stream(),
                 pubackOutbounds.stream(),
@@ -369,8 +369,9 @@ public class ClientContextImpl {
         return subackOutbounds;
     }
 
-    public @Immutable @NotNull List<@NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptorsOfExtension(
-            final @NotNull ClassLoader extensionClassLoader) {
+    public @Immutable @NotNull List<
+            @NotNull UnsubscribeInboundInterceptor> getUnsubscribeInboundInterceptorsOfExtension(
+                    final @NotNull ClassLoader extensionClassLoader) {
         return filterInterceptorsOfExtension(unsubscribeInbounds, extensionClassLoader);
     }
 
@@ -396,8 +397,9 @@ public class ClientContextImpl {
         return disconnectInbounds;
     }
 
-    public @Immutable @NotNull List<@NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptorsOfExtension(
-            final @NotNull ClassLoader extensionClassLoader) {
+    public @Immutable @NotNull List<
+            @NotNull DisconnectOutboundInterceptor> getDisconnectOutboundInterceptorsOfExtension(
+                    final @NotNull ClassLoader extensionClassLoader) {
         return filterInterceptorsOfExtension(disconnectOutbounds, extensionClassLoader);
     }
 
@@ -478,8 +480,8 @@ public class ClientContextImpl {
             final int midPriority = getExtensionPriority(midInterceptor);
             if (midPriority >= priority) {
                 if (midPriority == priority && midInterceptor == interceptor) {
-                    final ImmutableList.Builder<T> builder = ImmutableList
-                            .builderWithExpectedSize(interceptors.size() - 1);
+                    final ImmutableList.Builder<T> builder =
+                            ImmutableList.builderWithExpectedSize(interceptors.size() - 1);
                     for (int i = 0; i < mid; i++) {
                         builder.add(interceptors.get(i));
                     }
@@ -523,8 +525,8 @@ public class ClientContextImpl {
     }
 
     private int getExtensionPriority(final @NotNull Object object) {
-        final HiveMQExtension extension = hiveMQExtensions
-                .getExtensionForClassloader(object.getClass().getClassLoader());
+        final HiveMQExtension extension =
+                hiveMQExtensions.getExtensionForClassloader(object.getClass().getClassLoader());
         if (extension != null) {
             return extension.getPriority();
         } else {

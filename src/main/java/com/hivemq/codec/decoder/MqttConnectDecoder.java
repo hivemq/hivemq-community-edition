@@ -46,8 +46,10 @@ public class MqttConnectDecoder {
     private final @NotNull Mqtt311ConnectDecoder mqtt311ConnectDecoder;
     private final @NotNull Mqtt31ConnectDecoder mqtt31ConnectDecoder;
     @Inject
-    public MqttConnectDecoder(final @NotNull MqttConnacker mqttConnacker,
-            final @NotNull FullConfigurationService fullConfigurationService, final @NotNull HivemqId hiveMQId,
+    public MqttConnectDecoder(
+            final @NotNull MqttConnacker mqttConnacker,
+            final @NotNull FullConfigurationService fullConfigurationService,
+            final @NotNull HivemqId hiveMQId,
             final @NotNull ClientIds clientIds) {
         this.mqttConnacker = mqttConnacker;
         mqtt5ConnectDecoder = new Mqtt5ConnectDecoder(mqttConnacker, hiveMQId, clientIds, fullConfigurationService);
@@ -71,8 +73,7 @@ public class MqttConnectDecoder {
         // The reader index is now at the beginning of the variable MQTT header field. We're only
         // interested in the Length LSB byte
         if (buf.readableBytes() < 2) {
-            mqttConnacker.connackError(
-                    clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with a packet without protocol version.",
                     "Sent CONNECT without protocol version",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
@@ -129,8 +130,7 @@ public class MqttConnectDecoder {
     }
 
     private void connackInvalidProtocolVersion(final @NotNull ClientConnectionContext clientConnectionContext) {
-        mqttConnacker.connackError(
-                clientConnectionContext.getChannel(),
+        mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (IP: {}) connected with an invalid protocol version.",
                 "Sent CONNECT with an invalid protocol version",
                 Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,

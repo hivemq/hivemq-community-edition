@@ -77,8 +77,8 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         for (int i = 0; i < producers.length; i++) {
             producers[i] = new ProducerQueuesImpl(this, amountOfQueues);
         }
-        final ThreadFactory checkThreadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("single-writer-scheduled-check-%d").build();
+        final ThreadFactory checkThreadFactory =
+                new ThreadFactoryBuilder().setNameFormat("single-writer-scheduled-check-%d").build();
         checkScheduler = Executors.newSingleThreadScheduledExecutor(checkThreadFactory);
     }
 
@@ -88,9 +88,10 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         checkScheduler.scheduleAtFixedRate(() -> {
             try {
                 if (runningThreadsCount.getAndIncrement() == 0 && !singleWriterExecutor.isShutdown()) {
-                    singleWriterExecutor.submit(
-                            new SingleWriterTask(nonemptyQueueCounter, globalTaskCount, runningThreadsCount,
-                                    producers));
+                    singleWriterExecutor.submit(new SingleWriterTask(nonemptyQueueCounter,
+                            globalTaskCount,
+                            runningThreadsCount,
+                            producers));
                 } else {
                     runningThreadsCount.decrementAndGet();
                 }
@@ -201,8 +202,11 @@ public class SingleWriterServiceImpl implements SingleWriterService {
         final int @NotNull [] probabilities;
         private static final int MIN_PROBABILITY_IN_PERCENT = 5;
         private static final @NotNull SplittableRandom RANDOM = new SplittableRandom();
-        SingleWriterTask(final @NotNull AtomicLong nonemptyQueueCounter, final @NotNull AtomicLong globalTaskCount,
-                final @NotNull AtomicInteger runningThreadsCount, final ProducerQueuesImpl @NotNull [] producers) {
+        SingleWriterTask(
+                final @NotNull AtomicLong nonemptyQueueCounter,
+                final @NotNull AtomicLong globalTaskCount,
+                final @NotNull AtomicInteger runningThreadsCount,
+                final ProducerQueuesImpl @NotNull [] producers) {
             this.nonemptyQueueCounter = nonemptyQueueCounter;
             this.globalTaskCount = globalTaskCount;
             this.runningThreadsCount = runningThreadsCount;

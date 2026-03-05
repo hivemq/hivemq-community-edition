@@ -35,7 +35,8 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3PubrecDecoder extends AbstractMqttDecoder<PUBREC> {
 
     @Inject
-    public Mqtt3PubrecDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3PubrecDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }

@@ -32,7 +32,8 @@ public class ThreadFactoryUtil {
      */
     public static @NotNull ThreadFactory create(final @NotNull String nameFormat) {
         return new ThreadFactoryBuilder().setNameFormat(nameFormat)
-                .setUncaughtExceptionHandler(new UncaughtExceptionHandler()).build();
+                .setUncaughtExceptionHandler(new UncaughtExceptionHandler())
+                .build();
     }
     private static class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 

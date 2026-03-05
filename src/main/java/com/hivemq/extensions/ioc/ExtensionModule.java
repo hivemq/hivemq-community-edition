@@ -109,7 +109,8 @@ public class ExtensionModule extends SingletonModule<Class<ExtensionModule>> {
         bind(Authorizers.class).to(AuthorizersImpl.class);
         bind(SecurityRegistry.class).to(SecurityRegistryImpl.class);
         bind(ExecutorService.class).annotatedWith(PluginStartStop.class)
-                .toProvider(ExtensionStartStopExecutorProvider.class).in(LazySingleton.class);
+                .toProvider(ExtensionStartStopExecutorProvider.class)
+                .in(LazySingleton.class);
         bind(PluginTaskExecutorService.class).to(PluginTaskExecutorServiceImpl.class);
         bind(PluginOutPutAsyncer.class).to(PluginOutputAsyncerImpl.class);
         bind(InitializerRegistry.class).to(InitializerRegistryImpl.class);

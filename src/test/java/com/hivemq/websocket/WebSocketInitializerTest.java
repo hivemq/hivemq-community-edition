@@ -44,8 +44,8 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_handler_in_pipeline() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
-                .build();
+        final WebsocketListener websocketListener =
+                new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         webSocketInitializer.addHandlers(channel, "dummy");
         final List<String> handlerNames = channel.pipeline().names();
@@ -59,8 +59,8 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_handler_order() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
-                .build();
+        final WebsocketListener websocketListener =
+                new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0").build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         webSocketInitializer.addHandlers(channel, "dummy");
         final List<String> handlerNames = channel.pipeline().names();
@@ -79,8 +79,10 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_no_subprotocols() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
-                .subprotocols(new ArrayList<>()).build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
+                .bindAddress("0.0.0.0")
+                .subprotocols(new ArrayList<>())
+                .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
         assertEquals("", subprotocolString);
@@ -88,8 +90,10 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_one_subprotocol() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
-                .subprotocols(Lists.newArrayList("mqttv3.1")).build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
+                .bindAddress("0.0.0.0")
+                .subprotocols(Lists.newArrayList("mqttv3.1"))
+                .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
         assertEquals("mqttv3.1", subprotocolString);
@@ -97,8 +101,10 @@ public class WebSocketInitializerTest {
 
     @Test
     public void test_multiple_subprotocols() {
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000).bindAddress("0.0.0.0")
-                .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt")).build();
+        final WebsocketListener websocketListener = new WebsocketListener.Builder().port(8000)
+                .bindAddress("0.0.0.0")
+                .subprotocols(Lists.newArrayList("mqttv3.1", "mqtt"))
+                .build();
         final WebSocketInitializer webSocketInitializer = new WebSocketInitializer(websocketListener);
         final String subprotocolString = webSocketInitializer.getSubprotocolString();
         assertEquals("mqttv3.1,mqtt", subprotocolString);

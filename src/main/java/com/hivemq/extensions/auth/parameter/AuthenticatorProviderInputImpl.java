@@ -27,8 +27,10 @@ import io.netty.channel.Channel;
 public class AuthenticatorProviderInputImpl extends ClientBasedInputImpl implements AuthenticatorProviderInput {
 
     private final @NotNull ServerInformation serverInformation;
-    public AuthenticatorProviderInputImpl(final @NotNull ServerInformation serverInformation,
-            final @NotNull Channel channel, final @NotNull String clientId) {
+    public AuthenticatorProviderInputImpl(
+            final @NotNull ServerInformation serverInformation,
+            final @NotNull Channel channel,
+            final @NotNull String clientId) {
         super(clientId, channel);
         this.serverInformation = serverInformation;
     }

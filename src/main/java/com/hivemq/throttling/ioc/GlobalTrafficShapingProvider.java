@@ -45,7 +45,8 @@ public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapi
     private final @NotNull ShutdownHooks registry;
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     @Inject
-    GlobalTrafficShapingProvider(final @NotNull ShutdownHooks registry,
+    GlobalTrafficShapingProvider(
+            final @NotNull ShutdownHooks registry,
             final @NotNull RestrictionsConfigurationService restrictionsConfigurationService) {
         this.registry = registry;
         this.restrictionsConfigurationService = restrictionsConfigurationService;
@@ -54,10 +55,10 @@ public class GlobalTrafficShapingProvider implements Provider<GlobalTrafficShapi
     @Override
     public @NotNull GlobalTrafficShapingHandler get() {
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("global-traffic-shaper-executor-%d");
-        final ScheduledExecutorService scheduledExecutorService = Executors
-                .newSingleThreadScheduledExecutor(threadFactory);
-        final GlobalTrafficShaperExecutorShutdownHook shutdownHook = new GlobalTrafficShaperExecutorShutdownHook(
-                scheduledExecutorService);
+        final ScheduledExecutorService scheduledExecutorService =
+                Executors.newSingleThreadScheduledExecutor(threadFactory);
+        final GlobalTrafficShaperExecutorShutdownHook shutdownHook =
+                new GlobalTrafficShaperExecutorShutdownHook(scheduledExecutorService);
         registry.add(shutdownHook);
         final long incomingLimit = restrictionsConfigurationService.incomingLimit();
         log.debug("Throttling incoming traffic to {} B/s", incomingLimit);

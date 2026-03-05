@@ -45,7 +45,9 @@ public class PUBRELTest {
 
     @Test
     public void test_constructMqtt5() {
-        final PUBREL origin = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reasonString",
+        final PUBREL origin = new PUBREL(1,
+                Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                "reasonString",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
         final PubrelPacketImpl packet = new PubrelPacketImpl(origin);
         final PUBREL merged = PUBREL.from(packet);
@@ -56,12 +58,11 @@ public class PUBRELTest {
 
     @Test
     public void test_constructMqtt5_withUserProperties() {
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("user1", "value1"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user1", "value1"),
                 new MqttUserProperty("user2", "value2"),
                 new MqttUserProperty("user3", "value3"));
-        final PUBREL origin = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reasonString",
-                userProperties);
+        final PUBREL origin =
+                new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reasonString", userProperties);
         final PubrelPacketImpl packet = new PubrelPacketImpl(origin);
         final PUBREL merged = PUBREL.from(packet);
         assertNotNull(merged);
@@ -78,8 +79,7 @@ public class PUBRELTest {
 
     @Test
     public void test_estimated_size() {
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(
-                new MqttUserProperty("user1", "value1"),
+        final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(new MqttUserProperty("user1", "value1"),
                 new MqttUserProperty("user2", "value2"),
                 new MqttUserProperty("user3", "value3"));
         final int userPropertiesSize = 3 * (24 + // overhead
@@ -88,10 +88,14 @@ public class PUBRELTest {
         final int reasonStringSize = ObjectMemoryEstimation.stringSize(reasonString);
         final PUBREL pubrel1 = new PUBREL(1);
         final PUBREL pubrel2 = new PUBREL(1, 100L, 100L);
-        final PUBREL pubrel3 = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, reasonString,
-                userProperties);
-        final PUBREL pubrel4 = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, reasonString,
-                userProperties, 100L, 100L);
+        final PUBREL pubrel3 =
+                new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, reasonString, userProperties);
+        final PUBREL pubrel4 = new PUBREL(1,
+                Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                reasonString,
+                userProperties,
+                100L,
+                100L);
         final int fixedSize = ObjectMemoryEstimation.objectShellSize() + ObjectMemoryEstimation.intSize() + // sizeInMemory
                 ObjectMemoryEstimation.intSize() + // packet id
                 ObjectMemoryEstimation.enumSize() + // reason code

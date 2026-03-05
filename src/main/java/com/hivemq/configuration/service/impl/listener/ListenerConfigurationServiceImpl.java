@@ -44,11 +44,10 @@ public class ListenerConfigurationServiceImpl implements ListenerConfigurationSe
     private final List<Listener> listeners = new CopyOnWriteArrayList<>();
     @Override
     public <T extends Listener> void addListener(final @NotNull T listener) {
-        if (listener.getClass().equals(TcpListener.class) || listener.getClass().equals(TlsTcpListener.class)
-                || listener.getClass().equals(WebsocketListener.class)
-                || listener.getClass().equals(TlsWebsocketListener.class)) {
-            log.debug(
-                    "Adding {} on bind address {} and port {}. Name: {}.",
+        if (listener.getClass().equals(TcpListener.class) || listener.getClass().equals(TlsTcpListener.class) ||
+                listener.getClass().equals(WebsocketListener.class) ||
+                listener.getClass().equals(TlsWebsocketListener.class)) {
+            log.debug("Adding {} on bind address {} and port {}. Name: {}.",
                     listener.readableName(),
                     listener.getBindAddress(),
                     listener.getPort(),

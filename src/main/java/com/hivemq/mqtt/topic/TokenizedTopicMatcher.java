@@ -70,7 +70,7 @@ public class TokenizedTopicMatcher implements TopicMatcher {
         // If the length is equal or the subscription token with the number x+1 (where x is the topic length) is a
         // wildcard,
         // everything is alright.
-        return subscription.length == topic.length
-                || (subscription.length - topic.length == 1 && ("#".equals(subscription[subscription.length - 1])));
+        return subscription.length == topic.length ||
+                (subscription.length - topic.length == 1 && ("#".equals(subscription[subscription.length - 1])));
     }
 }

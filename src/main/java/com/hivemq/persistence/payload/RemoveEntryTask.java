@@ -26,7 +26,8 @@ class RemoveEntryTask implements Runnable {
     private final @NotNull BucketLock bucketLock;
     private final @NotNull RemovablePayloads @NotNull [] responsibleBuckets;
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
-    RemoveEntryTask(final @NotNull BucketLock bucketLock,
+    RemoveEntryTask(
+            final @NotNull BucketLock bucketLock,
             final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry,
             final @NotNull PublishPayloadLocalPersistence localPersistence,
             final @NotNull RemovablePayloads @NotNull [] responsibleBuckets) {
@@ -44,8 +45,7 @@ class RemoveEntryTask implements Runnable {
                 if (responsibleBucket.getQueue().isEmpty()) {
                     continue;
                 }
-                bucketLock.accessBucket(
-                        responsibleBucket.getBucketIndex(),
+                bucketLock.accessBucket(responsibleBucket.getBucketIndex(),
                         (index) -> cleanupQueueCompletely(responsibleBucket));
             }
         } catch (final Throwable t) {

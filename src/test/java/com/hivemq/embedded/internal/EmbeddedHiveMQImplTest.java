@@ -60,9 +60,9 @@ public class EmbeddedHiveMQImplTest {
         extensions = tmp.newFolder("extensions");
         conf = tmp.newFolder("conf");
         randomPort = RandomPortGenerator.get();
-        final String noListenerConfig = "<hivemq>\n" + "    <listeners>\n" + "        <tcp-listener>\n"
-                + "            <port>" + randomPort + "</port>\n" + "            <bind-address>0.0.0.0</bind-address>\n"
-                + "        </tcp-listener>\n" + "    </listeners>\n" + "</hivemq>";
+        final String noListenerConfig = "<hivemq>\n" + "    <listeners>\n" + "        <tcp-listener>\n" +
+                "            <port>" + randomPort + "</port>\n" + "            <bind-address>0.0.0.0</bind-address>\n" +
+                "        </tcp-listener>\n" + "    </listeners>\n" + "</hivemq>";
         FileUtils.write(new File(conf, "config.xml"), noListenerConfig, StandardCharsets.UTF_8);
         TestExtensionUtil.shrinkwrapExtension(extensions, extensionName, Main.class, true);
     }
@@ -72,8 +72,8 @@ public class EmbeddedHiveMQImplTest {
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions);
         embeddedHiveMQ.start().join();
         final Injector injector = embeddedHiveMQ.getInjector();
-        final ListenerConfigurationService listenerConfigurationService = injector
-                .getInstance(ListenerConfigurationService.class);
+        final ListenerConfigurationService listenerConfigurationService =
+                injector.getInstance(ListenerConfigurationService.class);
         final List<Listener> listeners = listenerConfigurationService.getListeners();
         assertEquals(1, listeners.size());
         assertEquals(randomPort, listeners.getFirst().getPort());
@@ -217,8 +217,8 @@ public class EmbeddedHiveMQImplTest {
     @Test(timeout = 20000L)
     public void test_hivemq_uses_embedded_extension_with_normal() throws Exception {
         final EmbeddedMain embeddedMain = new EmbeddedMain();
-        final EmbeddedExtensionImpl extension = new EmbeddedExtensionImpl("id", "name", "123", "luke_skywalker", 0,
-                1000, embeddedMain);
+        final EmbeddedExtensionImpl extension =
+                new EmbeddedExtensionImpl("id", "name", "123", "luke_skywalker", 0, 1000, embeddedMain);
         final EmbeddedHiveMQImpl embeddedHiveMQ = new EmbeddedHiveMQImpl(conf, data, extensions, extension, true);
         embeddedHiveMQ.start().get();
         assertTrue(embeddedMain.running.get());

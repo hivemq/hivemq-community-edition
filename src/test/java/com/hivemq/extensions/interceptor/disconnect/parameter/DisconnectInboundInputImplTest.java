@@ -37,8 +37,8 @@ public class DisconnectInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final DisconnectPacketImpl packet = mock(DisconnectPacketImpl.class);
-        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(clientInformation,
-                connectionInformation, packet);
+        final DisconnectInboundInputImpl input =
+                new DisconnectInboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getDisconnectPacket());
@@ -49,10 +49,10 @@ public class DisconnectInboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final DisconnectPacketImpl packet = mock(DisconnectPacketImpl.class);
-        final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(clientInformation,
-                connectionInformation, packet);
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = mock(
-                ModifiableInboundDisconnectPacketImpl.class);
+        final DisconnectInboundInputImpl input =
+                new DisconnectInboundInputImpl(clientInformation, connectionInformation, packet);
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                mock(ModifiableInboundDisconnectPacketImpl.class);
         final DisconnectPacketImpl newPacket = mock(DisconnectPacketImpl.class);
         final DisconnectInboundOutputImpl output = mock(DisconnectInboundOutputImpl.class);
         when(output.getDisconnectPacket()).thenReturn(modifiablePacket);

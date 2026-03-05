@@ -53,13 +53,16 @@ public class UsageStatisticsCollectorImplTest {
         final HiveMQExtension customExtension = mock(HiveMQExtension.class);
         final HiveMQExtension officialExtensionDcSquare = mock(HiveMQExtension.class);
         final HiveMQExtension officialExtensionHivemq = mock(HiveMQExtension.class);
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         systemInformation.init();
         metricRegistry = new MetricRegistry();
-        collector = new UsageStatisticsCollectorImpl(systemInformation, configurationService,
-                new MetricsHolder(metricRegistry), new HivemqId(systemInformation), extensions);
+        collector = new UsageStatisticsCollectorImpl(systemInformation,
+                configurationService,
+                new MetricsHolder(metricRegistry),
+                new HivemqId(systemInformation),
+                extensions);
         when(extensions.getEnabledHiveMQExtensions()).thenReturn(
                 ImmutableMap.of("1", customExtension, "2", officialExtensionDcSquare, "3", officialExtensionHivemq));
         when(customExtension.getAuthor()).thenReturn("another company");

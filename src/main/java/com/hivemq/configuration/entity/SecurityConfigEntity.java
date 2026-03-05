@@ -41,7 +41,8 @@ public class SecurityConfigEntity {
     @XmlElementRef(required = false)
     private @NotNull AllowEmptyClientIdEntity allowEmptyClientIdEntity = new AllowEmptyClientIdEntity();
     @XmlElementRef(required = false)
-    private @NotNull RequestProblemInformationEntityConfig allowRequestProblemInformationEntity = new RequestProblemInformationEntityConfig();
+    private @NotNull RequestProblemInformationEntityConfig allowRequestProblemInformationEntity =
+            new RequestProblemInformationEntityConfig();
     public @NotNull PayloadFormatValidationEntity getPayloadFormatValidationEntity() {
         return payloadFormatValidationEntity;
     }

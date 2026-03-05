@@ -42,7 +42,8 @@ public class ModifiableSubackPacketImpl implements ModifiableSubackPacket {
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
-    public ModifiableSubackPacketImpl(final @NotNull SubackPacketImpl packet,
+    public ModifiableSubackPacketImpl(
+            final @NotNull SubackPacketImpl packet,
             final @NotNull FullConfigurationService configurationService) {
         reasonCodes = packet.reasonCodes;
         reasonString = packet.reasonString;
@@ -67,8 +68,7 @@ public class ModifiableSubackPacketImpl implements ModifiableSubackPacket {
             Preconditions.checkNotNull(reasonCodes.get(i), "Reason code (at index %s) must never be null.", i);
             final Mqtt5SubAckReasonCode oldReasonCode = Mqtt5SubAckReasonCode.from(this.reasonCodes.get(i));
             final Mqtt5SubAckReasonCode newReasonCode = Mqtt5SubAckReasonCode.from(reasonCodes.get(i));
-            Preconditions.checkState(
-                    newReasonCode.isError() == oldReasonCode.isError(),
+            Preconditions.checkState(newReasonCode.isError() == oldReasonCode.isError(),
                     "Reason code (at index %s) must not switch from successful to unsuccessful or vice versa.",
                     i);
         }

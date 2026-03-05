@@ -61,8 +61,8 @@ public class ThreadPreConditions {
         }
         final String name = Thread.currentThread().getName();
         if (!name.startsWith(NETTY_NATIVE_CHILD_EVENTLOOP) && !name.startsWith(NETTY_CHILD_EVENTLOOP)) {
-            throw new ThreadPreConditionException("Thread name doesn't start with '" + NETTY_NATIVE_CHILD_EVENTLOOP
-                    + "' as expected. Thread name: '" + name + "'.");
+            throw new ThreadPreConditionException("Thread name doesn't start with '" + NETTY_NATIVE_CHILD_EVENTLOOP +
+                    "' as expected. Thread name: '" + name + "'.");
         }
     }
     public static class ThreadPreConditionException extends RuntimeException {

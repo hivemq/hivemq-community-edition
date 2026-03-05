@@ -26,16 +26,18 @@ import com.hivemq.extension.sdk.api.packets.subscribe.SubackReasonCode;
  */
 public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
 
-    GRANTED_QOS_0(0x00), GRANTED_QOS_1(0x01), GRANTED_QOS_2(0x02), UNSPECIFIED_ERROR(
-            MqttCommonReasonCode.UNSPECIFIED_ERROR), IMPLEMENTATION_SPECIFIC_ERROR(
-                    MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), NOT_AUTHORIZED(
-                            MqttCommonReasonCode.NOT_AUTHORIZED), TOPIC_FILTER_INVALID(
-                                    MqttCommonReasonCode.TOPIC_FILTER_INVALID), PACKET_IDENTIFIER_IN_USE(
-                                            MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE), QUOTA_EXCEEDED(
-                                                    MqttCommonReasonCode.QUOTA_EXCEEDED), SHARED_SUBSCRIPTION_NOT_SUPPORTED(
-                                                            MqttCommonReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED), SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED(
-                                                                    MqttCommonReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED), WILDCARD_SUBSCRIPTION_NOT_SUPPORTED(
-                                                                            MqttCommonReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
+    GRANTED_QOS_0(0x00),
+    GRANTED_QOS_1(0x01),
+    GRANTED_QOS_2(0x02),
+    UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
+    IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+    NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
+    TOPIC_FILTER_INVALID(MqttCommonReasonCode.TOPIC_FILTER_INVALID),
+    PACKET_IDENTIFIER_IN_USE(MqttCommonReasonCode.PACKET_IDENTIFIER_IN_USE),
+    QUOTA_EXCEEDED(MqttCommonReasonCode.QUOTA_EXCEEDED),
+    SHARED_SUBSCRIPTION_NOT_SUPPORTED(MqttCommonReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED),
+    SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED(MqttCommonReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED),
+    WILDCARD_SUBSCRIPTION_NOT_SUPPORTED(MqttCommonReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
     private static final @NotNull Mqtt5SubAckReasonCode[] VALUES = values();
     private final int code;
     private final @NotNull SubackReasonCode subackReasonCode;
@@ -56,8 +58,8 @@ public enum Mqtt5SubAckReasonCode implements Mqtt5ReasonCode {
     public @NotNull SubackReasonCode toSubackReasonCode() {
         return subackReasonCode;
     }
-    private static final @NotNull Mqtt5SubAckReasonCode @NotNull [] SUBACK_LOOKUP = new Mqtt5SubAckReasonCode[SubackReasonCode
-            .values().length];
+    private static final @NotNull Mqtt5SubAckReasonCode @NotNull [] SUBACK_LOOKUP =
+            new Mqtt5SubAckReasonCode[SubackReasonCode.values().length];
     static {
         for (final Mqtt5SubAckReasonCode reasonCode : values()) {
             SUBACK_LOOKUP[reasonCode.subackReasonCode.ordinal()] = reasonCode;

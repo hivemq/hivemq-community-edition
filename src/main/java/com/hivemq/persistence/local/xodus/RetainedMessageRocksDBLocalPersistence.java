@@ -64,10 +64,13 @@ public class RetainedMessageRocksDBLocalPersistence extends RocksDBLocalPersiste
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull AtomicLong retainMessageCounter = new AtomicLong(0);
     @Inject
-    public RetainedMessageRocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+    public RetainedMessageRocksDBLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+        super(localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION,
                 InternalConfigurations.RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION,
                 InternalConfigurations.RETAINED_MESSAGE_BLOCK_SIZE_BYTES,

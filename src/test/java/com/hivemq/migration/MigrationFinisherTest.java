@@ -50,20 +50,15 @@ public class MigrationFinisherTest {
         migrationFinisher.finishMigration();
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
         assertEquals("2019.1", metaInformation.getHivemqVersion());
-        assertEquals(
-                PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
-        assertEquals(
-                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getRetainedMessagesPersistenceVersion());
-        assertEquals(
-                ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getClientSessionPersistenceVersion());
-        assertEquals(
-                ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getQueuedMessagesPersistenceVersion());
-        assertEquals(
-                ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getSubscriptionPersistenceVersion());
         assertEquals(PersistenceType.FILE_NATIVE, metaInformation.getPublishPayloadPersistenceType());
         assertEquals(PersistenceType.FILE_NATIVE, metaInformation.getRetainedMessagesPersistenceType());
@@ -81,20 +76,15 @@ public class MigrationFinisherTest {
         migrationFinisher.finishMigration();
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);
         assertEquals("2019.1", metaInformation.getHivemqVersion());
-        assertEquals(
-                PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getPublishPayloadPersistenceVersion());
-        assertEquals(
-                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getRetainedMessagesPersistenceVersion());
-        assertEquals(
-                ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getClientSessionPersistenceVersion());
-        assertEquals(
-                ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getQueuedMessagesPersistenceVersion());
-        assertEquals(
-                ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
+        assertEquals(ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION,
                 metaInformation.getSubscriptionPersistenceVersion());
         assertEquals(PersistenceType.FILE, metaInformation.getPublishPayloadPersistenceType());
         assertEquals(PersistenceType.FILE, metaInformation.getRetainedMessagesPersistenceType());

@@ -33,7 +33,8 @@ public class PubcompOutboundInputImpl implements PubcompOutboundInput, PluginTas
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull PubcompPacketImpl pubcompPacket;
-    public PubcompOutboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public PubcompOutboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull PubcompPacketImpl pubcompPacket) {
         this.clientInformation = clientInformation;

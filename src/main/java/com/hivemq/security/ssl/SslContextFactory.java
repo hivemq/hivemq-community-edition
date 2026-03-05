@@ -41,7 +41,8 @@ public class SslContextFactory {
     public @NotNull SslContext createSslContext(final @NotNull Tls tls) {
         try {
             final SslContextBuilder builder = SslContextBuilder.forServer(SslUtil.getKeyManagerFactory(tls))
-                    .sslProvider(SslProvider.JDK).trustManager(SslUtil.getTrustManagerFactory(tls))
+                    .sslProvider(SslProvider.JDK)
+                    .trustManager(SslUtil.getTrustManagerFactory(tls))
                     .clientAuth(toClientAuth(tls.getClientAuthMode()));
             if (!tls.getProtocols().isEmpty()) {
                 builder.protocols(tls.getProtocols());

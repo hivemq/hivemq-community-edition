@@ -46,9 +46,12 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void setReasonCode() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonCode(DisconnectReasonCode.UNSPECIFIED_ERROR);
         assertTrue(modifiablePacket.isModified());
@@ -58,9 +61,12 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void setReasonCode_same() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonCode(DisconnectReasonCode.ADMINISTRATIVE_ACTION);
         assertFalse(modifiablePacket.isModified());
@@ -70,18 +76,24 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test(expected = NullPointerException.class)
     public void setReasonCode_null() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         modifiablePacket.setReasonCode(null);
     }
 
     @Test
     public void setReasonString() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION, null,
-                5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+                null,
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonString("reason");
         assertTrue(modifiablePacket.isModified());
@@ -91,9 +103,12 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void setReasonString_null() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonString(null);
         assertTrue(modifiablePacket.isModified());
@@ -102,10 +117,13 @@ public class ModifiableInboundDisconnectPacketImplTest {
 
     @Test
     public void setReasonString_same() {
-        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION, "same",
-                5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+        final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
+                "same",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonString("same");
         assertFalse(modifiablePacket.isModified());
@@ -115,18 +133,24 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void setReasonString_invalid() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         modifiablePacket.setReasonString("topic" + '\u0001');
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setReasonString_exceedsMaxLength() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         final StringBuilder s = new StringBuilder("s");
         s.append("s".repeat(65535));
         modifiablePacket.setReasonString(s.toString());
@@ -135,9 +159,12 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void setSessionExpiryInterval() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setSessionExpiryInterval(10L);
         assertTrue(modifiablePacket.isModified());
@@ -147,9 +174,12 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void setSessionExpiryInterval_null() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setSessionExpiryInterval(null);
         assertTrue(modifiablePacket.isModified());
@@ -159,9 +189,12 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void setSessionExpiryInterval_same() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setSessionExpiryInterval(5L);
         assertFalse(modifiablePacket.isModified());
@@ -171,36 +204,48 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void setSessionExpiryInterval_lessThan0() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         modifiablePacket.setSessionExpiryInterval(-1L);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void setSessionExpiryInterval_greaterThanMaximum() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         modifiablePacket.setSessionExpiryInterval(Long.MAX_VALUE);
     }
 
     @Test(expected = IllegalStateException.class)
     public void setSessionExpiryInterval_not0Original0() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 0);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 0);
         modifiablePacket.setSessionExpiryInterval(1L);
     }
 
     @Test
     public void copy_noChanges() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reasonString", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reasonString",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         final DisconnectPacketImpl copy = modifiablePacket.copy();
         assertEquals(packet, copy);
     }
@@ -208,16 +253,21 @@ public class ModifiableInboundDisconnectPacketImplTest {
     @Test
     public void copy_changes() {
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(DisconnectReasonCode.ADMINISTRATIVE_ACTION,
-                "reason", 5, "serverReference", UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiableInboundDisconnectPacketImpl modifiablePacket = new ModifiableInboundDisconnectPacketImpl(packet,
-                configurationService, 5);
+                "reason",
+                5,
+                "serverReference",
+                UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiableInboundDisconnectPacketImpl modifiablePacket =
+                new ModifiableInboundDisconnectPacketImpl(packet, configurationService, 5);
         modifiablePacket.setReasonCode(DisconnectReasonCode.UNSPECIFIED_ERROR);
         modifiablePacket.setReasonString("modifiedReasonString");
         modifiablePacket.setSessionExpiryInterval(10L);
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final DisconnectPacketImpl copy = modifiablePacket.copy();
         final DisconnectPacketImpl expectedPacket = new DisconnectPacketImpl(DisconnectReasonCode.UNSPECIFIED_ERROR,
-                "modifiedReasonString", 10, "serverReference",
+                "modifiedReasonString",
+                10,
+                "serverReference",
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }

@@ -82,12 +82,12 @@ public class PersistenceStartup implements HiveMQShutdownHook {
         persistenceStartExecutor.shutdown();
         environmentCreateExecutor.shutdown();
         try {
-            if (!persistenceStartExecutor
-                    .awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(), TimeUnit.SECONDS)) {
+            if (!persistenceStartExecutor.awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(),
+                    TimeUnit.SECONDS)) {
                 persistenceStartExecutor.shutdownNow();
             }
-            if (!environmentCreateExecutor
-                    .awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(), TimeUnit.SECONDS)) {
+            if (!environmentCreateExecutor.awaitTermination(PERSISTENCE_STARTUP_SHUTDOWN_TIMEOUT_SEC.get(),
+                    TimeUnit.SECONDS)) {
                 environmentCreateExecutor.shutdownNow();
             }
         } catch (final InterruptedException e) {

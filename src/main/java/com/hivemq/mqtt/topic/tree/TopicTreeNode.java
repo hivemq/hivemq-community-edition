@@ -114,8 +114,8 @@ class TopicTreeNode {
      * @return if the node is empty
      */
     public boolean isNodeEmpty() {
-        final boolean noChildrenPresent = (children == null && childrenMap == null)
-                || children != null && isEmptyArray(children) || childrenMap != null && childrenMap.isEmpty();
+        final boolean noChildrenPresent = (children == null && childrenMap == null) ||
+                children != null && isEmptyArray(children) || childrenMap != null && childrenMap.isEmpty();
         return noChildrenPresent && exactSubscriptions.isEmpty() && wildcardSubscriptions.isEmpty();
     }
 

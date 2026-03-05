@@ -107,8 +107,7 @@ public class EventLog {
             @Nullable final String client,
             @Nullable final String messageType,
             @NotNull final String reason) {
-        logMessageDropped.debug(
-                "Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
+        logMessageDropped.debug("Outgoing MQTT packet was dropped. Receiving client: {}, messageType: {}, reason: {}.",
                 valueOrUnknown(client),
                 valueOrUnknown(messageType),
                 reason);
@@ -125,8 +124,7 @@ public class EventLog {
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         final Long sessionExpiry = clientConnectionContext.getClientSessionExpiryInterval();
-        logClientConnected.debug(
-                "Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.",
+        logClientConnected.debug("Client ID: {}, IP: {}, Clean Start: {}, Session Expiry: {} connected.",
                 valueOrUnknown(clientId),
                 valueOrUnknown(ip),
                 valueOrUnknown(cleanStart),
@@ -149,14 +147,12 @@ public class EventLog {
             log.trace("Client {} disconnected gracefully.", clientId);
         }
         if (reason != null) {
-            logClientDisconnected.debug(
-                    "Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}",
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully. Reason given by client: {}",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip),
                     reason);
         } else {
-            logClientDisconnected.debug(
-                    "Client ID: {}, IP: {} disconnected gracefully.",
+            logClientDisconnected.debug("Client ID: {}, IP: {} disconnected gracefully.",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip));
         }
@@ -195,8 +191,7 @@ public class EventLog {
         if (log.isTraceEnabled()) {
             log.trace("Client {} was disconnected.", clientId);
         }
-        logClientDisconnected.debug(
-                "Client ID: {}, IP: {} was disconnected. reason: {}.",
+        logClientDisconnected.debug("Client ID: {}, IP: {} was disconnected. reason: {}.",
                 valueOrUnknown(clientId),
                 valueOrUnknown(ip),
                 reason);
@@ -216,14 +211,12 @@ public class EventLog {
         final String clientId = clientConnectionContext.getClientId();
         final String ip = clientConnectionContext.getChannelIP().orElse(null);
         if (received) {
-            logAuthentication.debug(
-                    "Received AUTH from Client ID: {}, IP: {}, reason code: {}.",
+            logAuthentication.debug("Received AUTH from Client ID: {}, IP: {}, reason code: {}.",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip),
                     reasonCode.name());
         } else {
-            logAuthentication.debug(
-                    "Sent AUTH to Client ID: {}, IP: {}, reason code: {}.",
+            logAuthentication.debug("Sent AUTH to Client ID: {}, IP: {}, reason code: {}.",
                     valueOrUnknown(clientId),
                     valueOrUnknown(ip),
                     reasonCode.name());
@@ -237,8 +230,8 @@ public class EventLog {
      * @param clientId        of the expired session
      */
     public void clientSessionExpired(final Long expiryTimestamp, @Nullable final String clientId) {
-        final LocalDateTime disconnectedSinceDateTime = LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZONE);
+        final LocalDateTime disconnectedSinceDateTime =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(expiryTimestamp), ZONE);
         logClientSessionExpired.debug(
                 "Client ID: {} session has expired at {}. All persistent data for this client has been removed.",
                 valueOrUnknown(clientId),

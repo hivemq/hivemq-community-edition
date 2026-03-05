@@ -48,8 +48,8 @@ public class ConfigurationFileProviderTest {
     public TemporaryFolder folder = new TemporaryFolder();
     private final @NotNull Appender<ILoggingEvent> mockAppender = mock();
     private final @NotNull SystemInformation systemInformation = mock();
-    private final @NotNull ArgumentCaptor<LoggingEvent> captorLoggingEvent = ArgumentCaptor
-            .forClass(LoggingEvent.class);
+    private final @NotNull ArgumentCaptor<LoggingEvent> captorLoggingEvent =
+            ArgumentCaptor.forClass(LoggingEvent.class);
     private File confFolder;
     @Before
     public void setUp() throws Exception {

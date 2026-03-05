@@ -69,10 +69,14 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
     @VisibleForTesting
     final @NotNull ConcurrentHashMap<Integer, PublishTopicTree> topicTrees = new ConcurrentHashMap<>();
     @Inject
-    public RetainedMessageXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull PublishPayloadPersistence payloadPersistence, final @NotNull EnvironmentUtil environmentUtil,
+    public RetainedMessageXodusLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull PublishPayloadPersistence payloadPersistence,
+            final @NotNull EnvironmentUtil environmentUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
                 InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
                 // check if enabled
                 InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get().equals(PersistenceType.FILE));
@@ -218,8 +222,8 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 final ByteIterable byteIterable = cursor.getSearchKey(bytesToByteIterable(serializeKey(topic)));
                 if (byteIterable != null) {
-                    final RetainedMessage retainedMessageFromStore = deserializeValue(
-                            byteIterableToBytes(cursor.getValue()));
+                    final RetainedMessage retainedMessageFromStore =
+                            deserializeValue(byteIterableToBytes(cursor.getValue()));
                     log.trace("Replacing retained message for topic {}", topic);
                     txn.setCommitHook(() -> {
                         // The previous retained message is replaced, so we have to decrement the reference count.
@@ -227,10 +231,10 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
                         // And add the new payload
                         payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
                     });
-                    bucket.getStore().put(
-                            txn,
-                            bytesToByteIterable(serializeKey(topic)),
-                            bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore()
+                            .put(txn,
+                                    bytesToByteIterable(serializeKey(topic)),
+                                    bytesToByteIterable(serializeValue(retainedMessage)));
                 } else {
                     txn.setCommitHook(() -> {
                         // persist needs increment.
@@ -238,10 +242,10 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
                         topicTrees.get(bucketIndex).add(topic);
                         payloadPersistence.add(retainedMessage.getMessage(), retainedMessage.getPublishId());
                     });
-                    bucket.getStore().put(
-                            txn,
-                            bytesToByteIterable(serializeKey(topic)),
-                            bytesToByteIterable(serializeValue(retainedMessage)));
+                    bucket.getStore()
+                            .put(txn,
+                                    bytesToByteIterable(serializeKey(topic)),
+                                    bytesToByteIterable(serializeValue(retainedMessage)));
                     log.trace("Creating new retained message for topic {}", topic);
                 }
             }
@@ -308,8 +312,8 @@ public class RetainedMessageXodusLocalPersistence extends XodusLocalPersistence
                 // we iterate either until the end of the persistence or until the maximum requested messages are found
                 while (hasNext && usedMemory < maxMemory) {
                     final String deserializedTopic = byteIterableToString(cursor.getKey());
-                    final RetainedMessage deserializedMessage = deserializeValue(
-                            byteIterableToBytes(cursor.getValue()));
+                    final RetainedMessage deserializedMessage =
+                            deserializeValue(byteIterableToBytes(cursor.getValue()));
                     // ignore messages with exceeded message expiry interval
                     if (deserializedMessage.hasExpired()) {
                         hasNext = cursor.getNext();

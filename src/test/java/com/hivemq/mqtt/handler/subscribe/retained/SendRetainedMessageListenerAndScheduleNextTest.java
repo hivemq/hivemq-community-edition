@@ -67,8 +67,8 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
         for (int i = 0; i < 90; i++) {
             topics.add("topic" + i);
         }
-        final SendRetainedMessageListenerAndScheduleNext listener = new SendRetainedMessageListenerAndScheduleNext(
-                topic, topics, channel, retainedMessagesSender, 25);
+        final SendRetainedMessageListenerAndScheduleNext listener =
+                new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onSuccess(null);
         verify(retainedMessagesSender, timeout(5000).times(4)).writeRetainedMessages(eq(channel), any(Topic[].class));
     }
@@ -81,8 +81,8 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
         for (int i = 0; i < 90; i++) {
             topics.add("topic" + i);
         }
-        final SendRetainedMessageListenerAndScheduleNext listener = new SendRetainedMessageListenerAndScheduleNext(
-                topic, topics, channel, retainedMessagesSender, 25);
+        final SendRetainedMessageListenerAndScheduleNext listener =
+                new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onSuccess(null);
         verify(retainedMessagesSender, never()).writeRetainedMessages(any(Channel.class), any(Topic[].class));
     }
@@ -96,8 +96,8 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
         for (int i = 0; i < 90; i++) {
             topics.add("topic" + i);
         }
-        final SendRetainedMessageListenerAndScheduleNext listener = new SendRetainedMessageListenerAndScheduleNext(
-                topic, topics, channel, retainedMessagesSender, 25);
+        final SendRetainedMessageListenerAndScheduleNext listener =
+                new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onFailure(new RuntimeException("test"));
         verify(retainedMessagesSender, never()).writeRetainedMessages(any(Channel.class), any(Topic[].class));
         verify(channel).disconnect();
@@ -114,10 +114,10 @@ public class SendRetainedMessageListenerAndScheduleNextTest {
         for (int i = 0; i < 90; i++) {
             topics.add("topic" + i);
         }
-        final SendRetainedMessageListenerAndScheduleNext listener = new SendRetainedMessageListenerAndScheduleNext(
-                topic, topics, channel, retainedMessagesSender, 25);
+        final SendRetainedMessageListenerAndScheduleNext listener =
+                new SendRetainedMessageListenerAndScheduleNext(topic, topics, channel, retainedMessagesSender, 25);
         listener.onFailure(new NoMessageIdAvailableException());
-        verify(retainedMessagesSender, timeout(5000).times(4))
-                .writeRetainedMessages(any(Channel.class), any(Topic[].class));
+        verify(retainedMessagesSender, timeout(5000).times(4)).writeRetainedMessages(any(Channel.class),
+                any(Topic[].class));
     }
 }

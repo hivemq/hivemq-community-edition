@@ -36,7 +36,8 @@ public class ConnectInboundOutputImpl extends AbstractAsyncOutput<ConnectInbound
     private final @NotNull AtomicBoolean prevent = new AtomicBoolean(false);
     private @Nullable String reasonString;
     private @Nullable String logMessage;
-    public ConnectInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public ConnectInboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableConnectPacketImpl connectPacket) {
         super(asyncer);
         this.connectPacket = connectPacket;

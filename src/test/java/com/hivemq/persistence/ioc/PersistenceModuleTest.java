@@ -78,10 +78,8 @@ public class PersistenceModuleTest {
 
     @Test
     public void test_shutdown_singleton() throws ClassNotFoundException {
-        final Injector injector = Guice.createInjector(
-                new PersistenceModule(persistenceInjector,
-                        new TestConfigurationBootstrap().getPersistenceConfigurationService()),
-                new AbstractModule() {
+        final Injector injector = Guice.createInjector(new PersistenceModule(persistenceInjector,
+                new TestConfigurationBootstrap().getPersistenceConfigurationService()), new AbstractModule() {
 
                     @Override
                     protected void configure() {

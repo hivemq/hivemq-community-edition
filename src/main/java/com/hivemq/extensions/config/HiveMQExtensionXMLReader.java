@@ -49,13 +49,12 @@ public class HiveMQExtensionXMLReader {
         try {
             final JAXBContext context = JAXBContext.newInstance(HiveMQExtensionEntity.class);
             final Unmarshaller unmarshaller = context.createUnmarshaller();
-            final HiveMQExtensionEntity unmarshal = (HiveMQExtensionEntity) unmarshaller
-                    .unmarshal(extensionXMLPath.toFile());
+            final HiveMQExtensionEntity unmarshal =
+                    (HiveMQExtensionEntity) unmarshaller.unmarshal(extensionXMLPath.toFile());
             final Optional<ValidationError> validationError = validateHiveMQExtensionEntity(unmarshal);
             if (validationError.isPresent()) {
                 if (logging) {
-                    log.warn(
-                            "Could not parse \"{}\" in {} because of {}. Not loading extension.",
+                    log.warn("Could not parse \"{}\" in {} because of {}. Not loading extension.",
                             HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE,
                             extensionFolder.toString(),
                             validationError.get().getMessage());
@@ -65,8 +64,7 @@ public class HiveMQExtensionXMLReader {
             return Optional.of(unmarshal);
         } catch (final JAXBException e) {
             if (logging) {
-                log.warn(
-                        "Could not parse \"{}\" in {}. Not loading extension.",
+                log.warn("Could not parse \"{}\" in {}. Not loading extension.",
                         HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE,
                         extensionFolder.toString(),
                         e);

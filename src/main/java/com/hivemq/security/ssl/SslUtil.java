@@ -36,8 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public final class SslUtil {
 
     public static @NotNull KeyManagerFactory getKeyManagerFactory(final @NotNull Tls tls) throws SslException {
-        return createKeyManagerFactory(
-                tls.getKeystoreType(),
+        return createKeyManagerFactory(tls.getKeystoreType(),
                 tls.getKeystorePath(),
                 tls.getKeystorePassword(),
                 tls.getPrivateKeyPassword());
@@ -72,13 +71,12 @@ public final class SslUtil {
     }
 
     public static @Nullable TrustManagerFactory getTrustManagerFactory(final @NotNull Tls tls) throws SslException {
-        return isNotBlank(tls.getTruststorePath()) && tls.getTruststoreType() != null
-                && tls.getTruststorePassword() != null
-                        ? createTrustManagerFactory(
-                                tls.getTruststoreType(),
+        return isNotBlank(tls.getTruststorePath()) && tls.getTruststoreType() != null &&
+                tls.getTruststorePassword() != null ?
+                        createTrustManagerFactory(tls.getTruststoreType(),
                                 tls.getTruststorePath(),
-                                tls.getTruststorePassword())
-                        : null;
+                                tls.getTruststorePassword()) :
+                        null;
     }
 
     public static @NotNull TrustManagerFactory createTrustManagerFactory(
@@ -90,8 +88,8 @@ public final class SslUtil {
             final KeyStore keyStoreTrust = KeyStore.getInstance(trustStoreType);
             keyStoreTrust.load(fileInputStream, trustStorePassword.toCharArray());
             // set up TrustManagerFactory
-            final TrustManagerFactory tmFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            final TrustManagerFactory tmFactory =
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmFactory.init(keyStoreTrust);
             return tmFactory;
         } catch (final FileNotFoundException e) {

@@ -145,7 +145,11 @@ public class ClientSessionSubscriptionXodusSerializer {
             subscriptionIdetifier = null;
         }
         cursor += 4;
-        return new Topic(topic, QoS.valueOf(qos), noLocal, retainAsPublished, mqtt5RetainHandling,
+        return new Topic(topic,
+                QoS.valueOf(qos),
+                noLocal,
+                retainAsPublished,
+                mqtt5RetainHandling,
                 subscriptionIdetifier);
     }
 

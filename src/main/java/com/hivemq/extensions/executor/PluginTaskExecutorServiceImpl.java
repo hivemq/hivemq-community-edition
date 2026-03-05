@@ -50,7 +50,8 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
     private final @NotNull PluginTaskExecutor[] taskExecutors;
     private final int taskExecutorCount;
     @Inject
-    public PluginTaskExecutorServiceImpl(final @NotNull Provider<PluginTaskExecutor> taskExecutorProvider,
+    public PluginTaskExecutorServiceImpl(
+            final @NotNull Provider<PluginTaskExecutor> taskExecutorProvider,
             final @NotNull ShutdownHooks shutdownHooks) {
         taskExecutorCount = EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.get();
         taskExecutors = new PluginTaskExecutor[taskExecutorCount];
@@ -69,9 +70,10 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         checkNotNull(pluginInTaskContext, "Extension context cannot be null");
         checkNotNull(pluginInputSupplier, "Input supplier cannot be null");
         checkNotNull(pluginTask, "Extension task cannot be null");
-        taskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<I, DefaultPluginTaskOutput>(pluginInTaskContext, pluginInputSupplier, null,
-                        pluginTask));
+        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<I, DefaultPluginTaskOutput>(pluginInTaskContext,
+                pluginInputSupplier,
+                null,
+                pluginTask));
     }
 
     @Override
@@ -83,9 +85,10 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
         checkNotNull(pluginOutputSupplier, "Output supplier cannot be null");
         checkNotNull(pluginTask, "Extension task cannot be null");
         final PluginTaskExecutor taskExecutor = getPluginTaskExecutor(pluginOutTaskContext);
-        taskExecutor.handlePluginTaskExecution(
-                new PluginTaskExecution<DefaultPluginTaskInput, O>(pluginOutTaskContext, null, pluginOutputSupplier,
-                        pluginTask));
+        taskExecutor.handlePluginTaskExecution(new PluginTaskExecution<DefaultPluginTaskInput, O>(pluginOutTaskContext,
+                null,
+                pluginOutputSupplier,
+                pluginTask));
     }
 
     @Override

@@ -75,8 +75,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_no_retained_message_available() throws Exception {
-        final List<SubscriptionResult> subscriptions = newArrayList(
-                subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
+        final List<SubscriptionResult> subscriptions =
+                newArrayList(subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
         final RetainedMessage nullMessage = null;
@@ -91,8 +91,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_channel_null() throws Exception {
-        final List<SubscriptionResult> subscriptions = newArrayList(
-                subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
+        final List<SubscriptionResult> subscriptions =
+                newArrayList(subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         when(channelFuture.isSuccess()).thenReturn(true);
         when(channelFuture.channel()).thenReturn(null);
@@ -102,8 +102,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_channel_inactive() throws Exception {
-        final List<SubscriptionResult> subscriptions = newArrayList(
-                subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
+        final List<SubscriptionResult> subscriptions =
+                newArrayList(subResult(new Topic("#", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.close();
@@ -126,22 +126,20 @@ public class SendRetainedMessagesListenerTest {
     @Test
     public void test_filter_ignored_topics() throws Exception {
         final Topic anothertopic = new Topic("anotherTopic", QoS.AT_LEAST_ONCE);
-        final List<SubscriptionResult> subscriptions = newArrayList(
-                subResult(new Topic("topic", QoS.AT_LEAST_ONCE), false),
-                subResult(anothertopic, false));
+        final List<SubscriptionResult> subscriptions =
+                newArrayList(subResult(new Topic("topic", QoS.AT_LEAST_ONCE), false), subResult(anothertopic, false));
         ignoredTopics.add(anothertopic);
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         ClientConnection.of(channel).setClientId("client");
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
-        when(retainedMessagePersistence.get("anotherTopic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("anotherTopic"))
+                .thenReturn(Futures.immediateFuture(new RetainedMessage("test".getBytes(UTF_8),
+                        QoS.EXACTLY_ONCE,
+                        1L,
+                        MqttConfigurationDefaults.TTL_DISABLED)));
         listener.operationComplete(channel.newSucceededFuture());
         channel.runPendingTasks();
         verify(queuePersistence).add(eq("client"), eq(false), anyList(), eq(true), anyLong());
@@ -149,10 +147,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_retained_messages_available_send() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("topic");
         final Set<String> set = builder.build();
@@ -165,8 +161,8 @@ public class SendRetainedMessagesListenerTest {
         ClientConnection.of(channel).setClientId("client");
         listener.operationComplete(channel.newSucceededFuture());
         channel.runPendingTasks();
-        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor
-                .forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor =
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
         final PUBLISH publish = captor.getValue().getFirst();
         assertEquals("topic", publish.getTopic());
@@ -177,10 +173,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_retained_messages_available_do_not_send() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final Set<String> set = ImmutableSet.of("topic");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE, false, false, Mqtt5RetainHandling.DO_NOT_SEND, 1);
@@ -194,14 +188,16 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_retained_messages_available_send_if_not_existing_exists() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final Set<String> set = ImmutableSet.of("topic");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
-        final Topic topic = new Topic("#", QoS.EXACTLY_ONCE, false, false,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1);
+        final Topic topic = new Topic("#",
+                QoS.EXACTLY_ONCE,
+                false,
+                false,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                1);
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, true));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
@@ -213,14 +209,16 @@ public class SendRetainedMessagesListenerTest {
     @Test
     public void test_wildcard_subscription_retained_messages_available_send_if_not_existing_does_not_exist()
             throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final Set<String> set = ImmutableSet.of("topic");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
-        final Topic topic = new Topic("#", QoS.EXACTLY_ONCE, false, false,
-                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1);
+        final Topic topic = new Topic("#",
+                QoS.EXACTLY_ONCE,
+                false,
+                false,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                1);
         final List<SubscriptionResult> subscriptions = newArrayList(subResult(topic, false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
@@ -228,8 +226,8 @@ public class SendRetainedMessagesListenerTest {
         ClientConnection.of(channel).setClientId("client");
         listener.operationComplete(channel.newSucceededFuture());
         channel.runPendingTasks();
-        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor
-                .forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor =
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
         final PUBLISH publish = captor.getValue().getFirst();
         assertEquals("topic", publish.getTopic());
@@ -240,19 +238,15 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_retained_messages_available_no_wildcard() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
-        when(retainedMessagePersistence.get("topic2")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.AT_MOST_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic2")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final ImmutableSet<String> set = ImmutableSet.of("topic", "topic2");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
-        final List<SubscriptionResult> subscriptions = newArrayList(
-                subResult(new Topic("topic", QoS.EXACTLY_ONCE), false),
-                subResult(new Topic("topic2", QoS.AT_MOST_ONCE), false));
+        final List<SubscriptionResult> subscriptions =
+                newArrayList(subResult(new Topic("topic", QoS.EXACTLY_ONCE), false),
+                        subResult(new Topic("topic2", QoS.AT_MOST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
@@ -260,8 +254,8 @@ public class SendRetainedMessagesListenerTest {
         listener.operationComplete(channel.newSucceededFuture());
         channel.runPendingTasks();
         channel.runPendingTasks();
-        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor
-                .forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor =
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
         verify(queuePersistence).add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
         final PUBLISH publish = captor.getAllValues().getFirst().getFirst();
         assertEquals("topic", publish.getTopic());
@@ -277,10 +271,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_qos_downgraded_to_actual_subscription() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("topic");
         final Set<String> set = builder.build();
@@ -297,10 +289,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_qos_not_upgraded_to_actual_subscription() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.AT_MOST_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.AT_MOST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("topic");
         final Set<String> set = builder.build();
@@ -319,8 +309,8 @@ public class SendRetainedMessagesListenerTest {
     public void test_on_failure_exception_handling() {
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
-        final SendRetainedMessageResultListener sendRetainedMessageResultListener = createSendRetainedMessageSingleListener(
-                channel);
+        final SendRetainedMessageResultListener sendRetainedMessageResultListener =
+                createSendRetainedMessageSingleListener(channel);
         sendRetainedMessageResultListener.onFailure(new ClosedChannelException());
         // We can not test Errors.NativeIoException. This exception can not be initialized.
         // sendRetainedMessageSingleListener.onFailure(new Errors.NativeIoException("some IOException", 1));
@@ -349,10 +339,8 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_subscription_shared() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.EXACTLY_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final Set<String> set = ImmutableSet.of("topic");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
         final Topic topic = new Topic("#", QoS.EXACTLY_ONCE);
@@ -366,21 +354,17 @@ public class SendRetainedMessagesListenerTest {
 
     @Test
     public void test_wildcard_subscription_batched_send() throws Exception {
-        when(retainedMessagePersistence.get("topic")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.AT_LEAST_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
-        when(retainedMessagePersistence.get("topic2")).thenReturn(
-                Futures.immediateFuture(
-                        new RetainedMessage("test".getBytes(UTF_8), QoS.AT_LEAST_ONCE, 1L,
-                                MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.AT_LEAST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
+        when(retainedMessagePersistence.get("topic2")).thenReturn(Futures.immediateFuture(new RetainedMessage("test"
+                .getBytes(UTF_8), QoS.AT_LEAST_ONCE, 1L, MqttConfigurationDefaults.TTL_DISABLED)));
         final ImmutableSet<String> set = ImmutableSet.of("topic", "topic2");
         when(retainedMessagePersistence.getWithWildcards("#")).thenReturn(Futures.immediateFuture(set));
         when(queuePersistence.add(eq("client"), eq(false), anyList(), eq(true), anyLong()))
                 .thenReturn(Futures.immediateFuture(null));
-        final List<SubscriptionResult> subscriptions = newArrayList(
-                subResult(new Topic("topic", QoS.AT_LEAST_ONCE), false),
-                subResult(new Topic("topic2", QoS.AT_LEAST_ONCE), false));
+        final List<SubscriptionResult> subscriptions =
+                newArrayList(subResult(new Topic("topic", QoS.AT_LEAST_ONCE), false),
+                        subResult(new Topic("topic2", QoS.AT_LEAST_ONCE), false));
         final SendRetainedMessagesListener listener = createListener(subscriptions, ignoredTopics);
         final EmbeddedChannel channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
@@ -388,8 +372,8 @@ public class SendRetainedMessagesListenerTest {
         listener.operationComplete(channel.newSucceededFuture());
         channel.runPendingTasks();
         channel.runPendingTasks();
-        final ArgumentCaptor<List<PUBLISH>> captor = ArgumentCaptor
-                .forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
+        final ArgumentCaptor<List<PUBLISH>> captor =
+                ArgumentCaptor.forClass((Class<List<PUBLISH>>) (Class<?>) List.class);
         verify(queuePersistence, timeout(5000).times(2))
                 .add(eq("client"), eq(false), captor.capture(), eq(true), anyLong());
         final PUBLISH publish = captor.getAllValues().getFirst().getFirst();
@@ -408,15 +392,21 @@ public class SendRetainedMessagesListenerTest {
             final List<SubscriptionResult> subscriptions,
             final Set<Topic> ignoredTopics) {
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
-                retainedMessagePersistence, queuePersistence, mqttConfigurationService);
-        return new SendRetainedMessagesListener(subscriptions, ignoredTopics, retainedMessagePersistence,
+                retainedMessagePersistence,
+                queuePersistence,
+                mqttConfigurationService);
+        return new SendRetainedMessagesListener(subscriptions,
+                ignoredTopics,
+                retainedMessagePersistence,
                 retainedMessagesSender);
     }
 
     private SendRetainedMessageResultListener createSendRetainedMessageSingleListener(final EmbeddedChannel channel) {
         final Topic topic = new Topic("topic", QoS.AT_LEAST_ONCE);
         final RetainedMessagesSender retainedMessagesSender = new RetainedMessagesSender(new HivemqId(),
-                retainedMessagePersistence, queuePersistence, mqttConfigurationService);
+                retainedMessagePersistence,
+                queuePersistence,
+                mqttConfigurationService);
         return new SendRetainedMessageResultListener(channel, topic, retainedMessagesSender);
     }
 

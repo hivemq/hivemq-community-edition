@@ -44,7 +44,8 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     private final @NotNull PayloadReferenceCounterRegistry payloadReferenceCounterRegistry;
     private final @NotNull RemovablePayloads[] removablePayloads;
     @Inject
-    PublishPayloadPersistenceImpl(final @NotNull PublishPayloadLocalPersistence localPersistence,
+    PublishPayloadPersistenceImpl(
+            final @NotNull PublishPayloadLocalPersistence localPersistence,
             final @NotNull @PayloadPersistence ListeningScheduledExecutorService scheduledExecutorService) {
         this.localPersistence = localPersistence;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -62,18 +63,15 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
     public void init() {
         final int cleanupThreadCount = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_THREADS.get();
         final long removeSchedule = InternalConfigurations.PAYLOAD_PERSISTENCE_CLEANUP_SCHEDULE_MSEC.get();
-        final RemovablePayloads[][] bucketResponsibilities = partitionBucketResponsibilities(
-                removablePayloads,
-                cleanupThreadCount);
+        final RemovablePayloads[][] bucketResponsibilities =
+                partitionBucketResponsibilities(removablePayloads, cleanupThreadCount);
         for (int i = 0; i < cleanupThreadCount; i++) {
             final RemovablePayloads[] responsibleBuckets = bucketResponsibilities[i];
             if (responsibleBuckets.length > 0 && !scheduledExecutorService.isShutdown()) {
-                scheduledExecutorService.scheduleWithFixedDelay(
-                        new RemoveEntryTask(bucketLock, payloadReferenceCounterRegistry, localPersistence,
-                                responsibleBuckets),
-                        removeSchedule,
-                        removeSchedule,
-                        TimeUnit.MILLISECONDS);
+                scheduledExecutorService.scheduleWithFixedDelay(new RemoveEntryTask(bucketLock,
+                        payloadReferenceCounterRegistry,
+                        localPersistence,
+                        responsibleBuckets), removeSchedule, removeSchedule, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -105,8 +103,7 @@ public class PublishPayloadPersistenceImpl implements PublishPayloadPersistence 
             if (result == UNKNOWN_PAYLOAD || result == REF_COUNT_ALREADY_ZERO) {
                 if (InternalConfigurations.LOG_REFERENCE_COUNTING_STACKTRACE_AS_WARNING) {
                     if (log.isWarnEnabled()) {
-                        log.warn(
-                                "Tried to decrement a payload reference counter ({}) that was already zero.",
+                        log.warn("Tried to decrement a payload reference counter ({}) that was already zero.",
                                 id,
                                 new Exception()); // We create here an exception to log the stacktrace.
                     }

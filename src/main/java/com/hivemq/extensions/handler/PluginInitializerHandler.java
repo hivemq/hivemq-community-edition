@@ -71,9 +71,11 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
     private @Nullable ClientContextImpl clientContext;
     private @Nullable InitializerInputImpl initializerInput;
     @Inject
-    public PluginInitializerHandler(final @NotNull Initializers initializers,
+    public PluginInitializerHandler(
+            final @NotNull Initializers initializers,
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
-            final @NotNull ServerInformation serverInformation, final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull ServerInformation serverInformation,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull MqttConnacker mqttConnacker) {
         this.initializers = initializers;
@@ -132,18 +134,20 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             initializerInput = new InitializerInputImpl(serverInformation, ctx.channel(), clientId);
         }
         final SettableFuture<Void> initializeFuture = SettableFuture.create();
-        final MultiInitializerTaskContext taskContext = new MultiInitializerTaskContext(clientId, ctx, initializeFuture,
-                clientContext, pluginInitializerMap.size());
+        final MultiInitializerTaskContext taskContext = new MultiInitializerTaskContext(clientId,
+                ctx,
+                initializeFuture,
+                clientContext,
+                pluginInitializerMap.size());
         for (final Map.Entry<String, ClientInitializer> initializerEntry : pluginInitializerMap.entrySet()) {
             final ClientInitializer initializer = initializerEntry.getValue();
-            final HiveMQExtension extension = hiveMQExtensions
-                    .getExtensionForClassloader(initializer.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(initializer.getClass().getClassLoader());
             if (extension == null || extension.getExtensionClassloader() == null) {
                 taskContext.finishInitializer();
                 continue;
             }
-            pluginTaskExecutorService.handlePluginInOutTaskExecution(
-                    taskContext,
+            pluginTaskExecutorService.handlePluginInOutTaskExecution(taskContext,
                     () -> initializerInput,
                     () -> new ClientContextPluginImpl(extension.getExtensionClassloader(), clientContext),
                     new InitializeTask(initializer, initializerEntry.getKey()));
@@ -185,8 +189,8 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         // Will is not authorized
         clientConnection.setPreventLwt(true);
         // We have already added the will to the session, so we need to remove it again
-        final ListenableFuture<Void> removeWillFuture = clientSessionPersistence
-                .deleteWill(clientConnection.getClientId());
+        final ListenableFuture<Void> removeWillFuture =
+                clientSessionPersistence.deleteWill(clientConnection.getClientId());
         Futures.addCallback(removeWillFuture, new FutureCallback<>() {
 
             @Override
@@ -202,17 +206,16 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
             private void sendConnackWillNotAuthorized() {
                 promise.setFailure(new ClosedChannelException());
                 // will publish is not authorized, disconnect client
-                mqttConnacker.connackError(
-                        ctx.channel(),
-                        "A client (IP: {}) sent a CONNECT message with an not authorized Will Publish to topic '"
-                                + willPublish.getTopic() + "' with QoS '" + willPublish.getQos().getQosNumber()
-                                + "' and retain '" + willPublish.isRetain() + "'.",
-                        "sent a CONNECT message with an not authorized Will Publish to topic '" + willPublish.getTopic()
-                                + "' with QoS '" + willPublish.getQos().getQosNumber() + "' and retain '"
-                                + willPublish.isRetain() + "'",
+                mqttConnacker.connackError(ctx.channel(),
+                        "A client (IP: {}) sent a CONNECT message with an not authorized Will Publish to topic '" +
+                                willPublish.getTopic() + "' with QoS '" + willPublish.getQos().getQosNumber() +
+                                "' and retain '" + willPublish.isRetain() + "'.",
+                        "sent a CONNECT message with an not authorized Will Publish to topic '" +
+                                willPublish.getTopic() + "' with QoS '" + willPublish.getQos().getQosNumber() +
+                                "' and retain '" + willPublish.isRetain() + "'",
                         Mqtt5ConnAckReasonCode.NOT_AUTHORIZED,
-                        "Will Publish is not authorized to topic '" + willPublish.getTopic() + "' with QoS '"
-                                + willPublish.getQos() + "' and retain '" + willPublish.isRetain() + "'",
+                        "Will Publish is not authorized to topic '" + willPublish.getTopic() + "' with QoS '" +
+                                willPublish.getQos() + "' and retain '" + willPublish.isRetain() + "'",
                         Mqtt5UserProperties.NO_USER_PROPERTIES,
                         true);
             }
@@ -229,9 +232,11 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
         private final int initializerSize;
         @NotNull
         private final AtomicInteger counter = new AtomicInteger(0);
-        MultiInitializerTaskContext(final @NotNull String clientId,
+        MultiInitializerTaskContext(
+                final @NotNull String clientId,
                 final @NotNull ChannelHandlerContext channelHandlerContext,
-                final @NotNull SettableFuture<Void> initializeFuture, final @NotNull ClientContextImpl clientContext,
+                final @NotNull SettableFuture<Void> initializeFuture,
+                final @NotNull ClientContextImpl clientContext,
                 final int clientInitializerCount) {
             super(clientId);
             this.channelHandlerContext = channelHandlerContext;

@@ -44,8 +44,14 @@ public interface HiveMQShutdownHook extends Runnable {
     }
     enum Priority {
 
-        FIRST(Integer.MAX_VALUE), CRITICAL(1_000_000), VERY_HIGH(500_000), HIGH(100_000), MEDIUM(50_000), LOW(
-                10_000), VERY_LOW(5_000), DOES_NOT_MATTER(Integer.MIN_VALUE);
+        FIRST(Integer.MAX_VALUE),
+        CRITICAL(1_000_000),
+        VERY_HIGH(500_000),
+        HIGH(100_000),
+        MEDIUM(50_000),
+        LOW(10_000),
+        VERY_LOW(5_000),
+        DOES_NOT_MATTER(Integer.MIN_VALUE);
         private final int value;
         Priority(final int value) {
             this.value = value;

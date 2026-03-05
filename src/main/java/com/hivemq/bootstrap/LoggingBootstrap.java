@@ -48,7 +48,8 @@ public class LoggingBootstrap {
     private static final Logger log = LoggerFactory.getLogger(LoggingBootstrap.class);
     private static final @NotNull ListAppender<ILoggingEvent> LIST_APPENDER = new ListAppender<>();
     private static final @NotNull List<Appender<ILoggingEvent>> DEFAULT_APPENDERS = new LinkedList<>();
-    private static final @NotNull LogLevelModifierTurboFilter LOG_LEVEL_MODIFIER_TURBO_FILTER = new LogLevelModifierTurboFilter();
+    private static final @NotNull LogLevelModifierTurboFilter LOG_LEVEL_MODIFIER_TURBO_FILTER =
+            new LogLevelModifierTurboFilter();
     private static final @NotNull LogbackChangeListener LOGBACK_CHANGE_LISTENER = new LogbackChangeListener();
     /**
      * Prepares the logging. This method must be called before any logging occurs

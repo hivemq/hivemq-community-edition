@@ -48,8 +48,10 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     private final @NotNull FullConfigurationService configurationService;
     private final long originalSessionExpiryInterval;
     private boolean modified = false;
-    public ModifiableInboundDisconnectPacketImpl(final @NotNull DisconnectPacketImpl packet,
-            final @NotNull FullConfigurationService configurationService, final long originalSessionExpiryInterval) {
+    public ModifiableInboundDisconnectPacketImpl(
+            final @NotNull DisconnectPacketImpl packet,
+            final @NotNull FullConfigurationService configurationService,
+            final long originalSessionExpiryInterval) {
         reasonCode = packet.reasonCode;
         reasonString = packet.reasonString;
         sessionExpiryInterval = packet.sessionExpiryInterval;
@@ -68,12 +70,10 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     @Override
     public void setReasonCode(final @NotNull DisconnectReasonCode reasonCode) {
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");
-        Preconditions.checkArgument(
-                reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+        Preconditions.checkArgument(reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                 "Reason code %s must not be used for disconnect packets.",
                 reasonCode);
-        Preconditions.checkArgument(
-                Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByClient(),
+        Preconditions.checkArgument(Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByClient(),
                 "Reason code %s must not be used for inbound disconnect packets from a client to the server.",
                 reasonCode);
         if (Objects.equals(this.reasonCode, reasonCode)) {
@@ -100,9 +100,8 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET)
-                ? Optional.empty()
-                : Optional.of(sessionExpiryInterval);
+        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
+                Optional.of(sessionExpiryInterval);
     }
 
     @Override
@@ -114,12 +113,10 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
             interval = sessionExpiryInterval;
             checkArgument(interval >= 0, "Session expiry interval must be greater than 0");
             final long configuredMaximum = configurationService.mqttConfiguration().maxSessionExpiryInterval();
-            checkArgument(
-                    interval < configuredMaximum,
+            checkArgument(interval < configuredMaximum,
                     "Session expiry interval must not be greater than the configured maximum of " + configuredMaximum);
             if (interval > 0) {
-                checkState(
-                        originalSessionExpiryInterval != 0,
+                checkState(originalSessionExpiryInterval != 0,
                         "Session expiry interval must not be set when a client connected with session expiry interval = '0'");
             }
         }
@@ -145,7 +142,10 @@ public class ModifiableInboundDisconnectPacketImpl implements ModifiableInboundD
     }
 
     public @NotNull DisconnectPacketImpl copy() {
-        return new DisconnectPacketImpl(reasonCode, reasonString, sessionExpiryInterval, serverReference,
+        return new DisconnectPacketImpl(reasonCode,
+                reasonString,
+                sessionExpiryInterval,
+                serverReference,
                 userProperties.copy());
     }
 

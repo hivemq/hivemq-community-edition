@@ -55,7 +55,8 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
     private final @NotNull MessageDroppedService messageDroppedService;
     // Need the security service here for enabling / disabling configuration on runtime.
     private final @NotNull SecurityConfigurationService securityConfigurationService;
-    Mqtt5MessageWithUserPropertiesEncoder(final @NotNull MessageDroppedService messageDroppedService,
+    Mqtt5MessageWithUserPropertiesEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService) {
         this.messageDroppedService = messageDroppedService;
         this.securityConfigurationService = securityConfigurationService;
@@ -76,30 +77,27 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
             // PUBLISH must not omit any properties
             if (msg instanceof PUBLISH) {
                 // The maximal packet size exceeds the clients accepted packet size
-                clientConnectionContext.getChannel().pipeline()
+                clientConnectionContext.getChannel()
+                        .pipeline()
                         .fireUserEventTriggered(new PublishDroppedEvent((PUBLISH) msg));
-                messageDroppedService.publishMaxPacketSizeExceeded(
-                        clientId,
+                messageDroppedService.publishMaxPacketSizeExceeded(clientId,
                         ((PUBLISH) msg).getTopic(),
                         ((PUBLISH) msg).getQoS().getQosNumber(),
                         maximumPacketSize,
                         msg.getEncodedLength());
                 if (log.isTraceEnabled()) {
-                    log.trace(
-                            "Could not encode publish message for client ({}): Maximum packet size limit exceeded",
+                    log.trace("Could not encode publish message for client ({}): Maximum packet size limit exceeded",
                             clientId);
                 }
                 return;
             }
             if (msg.getPropertyLength() < 0 && msg.getEncodedLength() > maximumPacketSize) {
-                messageDroppedService.messageMaxPacketSizeExceeded(
-                        clientId,
+                messageDroppedService.messageMaxPacketSizeExceeded(clientId,
                         msg.getType().name(),
                         maximumPacketSize,
                         msg.getEncodedLength());
                 if (log.isTraceEnabled()) {
-                    log.trace(
-                            "Could not encode message of type {} for client {}: Packet too large",
+                    log.trace("Could not encode message of type {} for client {}: Packet too large",
                             msg.getType(),
                             clientId);
                 }
@@ -113,9 +111,9 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
     public int bufferSize(final @NotNull ClientConnectionContext clientConnectionContext, final @NotNull T msg) {
         int omittedProperties = 0;
         int propertyLength = calculatePropertyLength(msg);
-        if (!securityConfigurationService.allowRequestProblemInformation() || !Objects.requireNonNullElse(
-                clientConnectionContext.getRequestProblemInformation(),
-                Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED)) {
+        if (!securityConfigurationService.allowRequestProblemInformation() ||
+                !Objects.requireNonNullElse(clientConnectionContext.getRequestProblemInformation(),
+                        Mqtt5CONNECT.DEFAULT_PROBLEM_INFORMATION_REQUESTED)) {
             // Must omit user properties and reason string for any other packet than PUBLISH, CONNACK, DISCONNECT
             // if no problem information requested.
             final boolean mustOmit = !(msg instanceof PUBLISH || msg instanceof CONNACK || msg instanceof DISCONNECT);
@@ -219,11 +217,12 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
     /**
      * Base class for encoders of MQTT messages with an omissible Reason String and omissible User Properties.
      */
-    abstract static class Mqtt5MessageWithReasonStringEncoder<M extends MqttMessageWithUserProperties.MqttMessageWithReasonString>
-            extends
-                Mqtt5MessageWithUserPropertiesEncoder<M> {
+    abstract static class Mqtt5MessageWithReasonStringEncoder<
+            M extends MqttMessageWithUserProperties.MqttMessageWithReasonString>
+            extends Mqtt5MessageWithUserPropertiesEncoder<M> {
 
-        Mqtt5MessageWithReasonStringEncoder(final @NotNull MessageDroppedService messageDroppedService,
+        Mqtt5MessageWithReasonStringEncoder(
+                final @NotNull MessageDroppedService messageDroppedService,
                 final @NotNull SecurityConfigurationService securityConfigurationService) {
             super(messageDroppedService, securityConfigurationService);
         }
@@ -271,11 +270,12 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
      * Base class for encoders of MQTT messages with an omissible Reason Code, an omissible Reason String and omissible
      * User Properties. The Reason Code is omitted if it is the default and the property length is 0.
      */
-    abstract static class Mqtt5MessageWithOmissibleReasonCodeEncoder<M extends MqttMessageWithUserProperties.MqttMessageWithReasonCode<R>, R extends Mqtt5ReasonCode>
-            extends
-                Mqtt5MessageWithReasonStringEncoder<M> {
+    abstract static class Mqtt5MessageWithOmissibleReasonCodeEncoder<
+            M extends MqttMessageWithUserProperties.MqttMessageWithReasonCode<R>, R extends Mqtt5ReasonCode>
+            extends Mqtt5MessageWithReasonStringEncoder<M> {
 
-        Mqtt5MessageWithOmissibleReasonCodeEncoder(final @NotNull MessageDroppedService messageDroppedService,
+        Mqtt5MessageWithOmissibleReasonCodeEncoder(
+                final @NotNull MessageDroppedService messageDroppedService,
                 final @NotNull SecurityConfigurationService securityConfigurationService) {
             super(messageDroppedService, securityConfigurationService);
         }
@@ -348,11 +348,12 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
      * String and omissible User Properties. The Reason Code is omitted if it is the default and the property length is
      * 0.
      */
-    abstract static class Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<M extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<R>, R extends Mqtt5ReasonCode>
-            extends
-                Mqtt5MessageWithOmissibleReasonCodeEncoder<M, R> {
+    abstract static class Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder<
+            M extends MqttMessageWithUserProperties.MqttMessageWithIdAndReasonCode<R>, R extends Mqtt5ReasonCode>
+            extends Mqtt5MessageWithOmissibleReasonCodeEncoder<M, R> {
 
-        Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder(final @NotNull MessageDroppedService messageDroppedService,
+        Mqtt5MessageWithIdAndOmissibleReasonCodeEncoder(
+                final @NotNull MessageDroppedService messageDroppedService,
                 final @NotNull SecurityConfigurationService securityConfigurationService) {
             super(messageDroppedService, securityConfigurationService);
         }

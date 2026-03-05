@@ -82,10 +82,12 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
     private final @NotNull IncomingSubscribeService incomingSubscribeService;
     private final boolean allowDollarTopics;
     @Inject
-    public PluginAuthorizerServiceImpl(final @NotNull Authorizers authorizers,
+    public PluginAuthorizerServiceImpl(
+            final @NotNull Authorizers authorizers,
             final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull PluginTaskExecutorService pluginTaskExecutorService,
-            final @NotNull ServerInformation serverInformation, final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull ServerInformation serverInformation,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull IncomingPublishService incomingPublishService,
             final @NotNull IncomingSubscribeService incomingSubscribeService) {
@@ -128,20 +130,18 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             return;
         }
         final ClientAuthorizers clientAuthorizers = getClientAuthorizers(ctx);
-        final AuthorizerProviderInput authorizerProviderInput = new AuthorizerProviderInputImpl(ctx.channel(),
-                serverInformation, clientId);
+        final AuthorizerProviderInput authorizerProviderInput =
+                new AuthorizerProviderInputImpl(ctx.channel(), serverInformation, clientId);
         final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(msg, ctx.channel(), clientId);
         final PublishAuthorizerOutputImpl output = new PublishAuthorizerOutputImpl(asyncer);
-        final SettableFuture<PublishAuthorizerOutputImpl> publishProcessedFuture = executePublishAuthorizer(
-                clientId,
+        final SettableFuture<PublishAuthorizerOutputImpl> publishProcessedFuture = executePublishAuthorizer(clientId,
                 providerMap,
                 clientAuthorizers,
                 authorizerProviderInput,
                 input,
                 output,
                 ctx);
-        Futures.addCallback(
-                publishProcessedFuture,
+        Futures.addCallback(publishProcessedFuture,
                 new PublishAuthorizationProcessedTask(msg, ctx, mqttServerDisconnector, incomingPublishService),
                 MoreExecutors.directExecutor());
     }
@@ -153,32 +153,32 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             return;
         }
         if (!authorizers.areAuthorizersAvailable() || connect.getWillPublish() == null) {
-            ctx.pipeline().fireUserEventTriggered(
-                    new AuthorizeWillResultEvent(connect, new PublishAuthorizerResult(null, null, false)));
+            ctx.pipeline()
+                    .fireUserEventTriggered(
+                            new AuthorizeWillResultEvent(connect, new PublishAuthorizerResult(null, null, false)));
             return;
         }
         final Map<String, AuthorizerProvider> providerMap = authorizers.getAuthorizerProviderMap();
         if (providerMap.isEmpty()) {
-            ctx.pipeline().fireUserEventTriggered(
-                    new AuthorizeWillResultEvent(connect, new PublishAuthorizerResult(null, null, false)));
+            ctx.pipeline()
+                    .fireUserEventTriggered(
+                            new AuthorizeWillResultEvent(connect, new PublishAuthorizerResult(null, null, false)));
             return;
         }
         final ClientAuthorizers clientAuthorizers = getClientAuthorizers(ctx);
-        final AuthorizerProviderInput authorizerProviderInput = new AuthorizerProviderInputImpl(ctx.channel(),
-                serverInformation, clientId);
-        final PublishAuthorizerInputImpl input = new PublishAuthorizerInputImpl(connect.getWillPublish(), ctx.channel(),
-                clientId);
+        final AuthorizerProviderInput authorizerProviderInput =
+                new AuthorizerProviderInputImpl(ctx.channel(), serverInformation, clientId);
+        final PublishAuthorizerInputImpl input =
+                new PublishAuthorizerInputImpl(connect.getWillPublish(), ctx.channel(), clientId);
         final PublishAuthorizerOutputImpl output = new PublishAuthorizerOutputImpl(asyncer);
-        final SettableFuture<PublishAuthorizerOutputImpl> publishProcessedFuture = executePublishAuthorizer(
-                clientId,
+        final SettableFuture<PublishAuthorizerOutputImpl> publishProcessedFuture = executePublishAuthorizer(clientId,
                 providerMap,
                 clientAuthorizers,
                 authorizerProviderInput,
                 input,
                 output,
                 ctx);
-        Futures.addCallback(
-                publishProcessedFuture,
+        Futures.addCallback(publishProcessedFuture,
                 new WillPublishAuthorizationProcessedTask(connect, ctx),
                 MoreExecutors.directExecutor());
     }
@@ -192,11 +192,11 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             final @NotNull PublishAuthorizerOutputImpl output,
             final @NotNull ChannelHandlerContext ctx) {
         final SettableFuture<PublishAuthorizerOutputImpl> publishProcessedFuture = SettableFuture.create();
-        final PublishAuthorizerContext context = new PublishAuthorizerContext(clientId, output, publishProcessedFuture,
-                providerMap.size(), ctx);
+        final PublishAuthorizerContext context =
+                new PublishAuthorizerContext(clientId, output, publishProcessedFuture, providerMap.size(), ctx);
         for (final Map.Entry<String, AuthorizerProvider> entry : providerMap.entrySet()) {
-            final PublishAuthorizerTask task = new PublishAuthorizerTask(entry.getValue(), entry.getKey(),
-                    authorizerProviderInput, clientAuthorizers, ctx);
+            final PublishAuthorizerTask task = new PublishAuthorizerTask(entry
+                    .getValue(), entry.getKey(), authorizerProviderInput, clientAuthorizers, ctx);
             pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
         }
         return publishProcessedFuture;
@@ -220,25 +220,30 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
         }
         final ClientAuthorizers clientAuthorizers = getClientAuthorizers(ctx);
         final List<ListenableFuture<SubscriptionAuthorizerOutputImpl>> listenableFutures = new ArrayList<>();
-        final AuthorizerProviderInput authorizerProviderInput = new AuthorizerProviderInputImpl(ctx.channel(),
-                serverInformation, clientId);
+        final AuthorizerProviderInput authorizerProviderInput =
+                new AuthorizerProviderInputImpl(ctx.channel(), serverInformation, clientId);
         // every topic gets its own task per authorizer
         for (final Topic topic : msg.getTopics()) {
-            final SubscriptionAuthorizerInputImpl input = new SubscriptionAuthorizerInputImpl(
-                    UserPropertiesImpl.of(msg.getUserProperties().asList()), topic, ctx.channel(), clientId);
+            final SubscriptionAuthorizerInputImpl input = new SubscriptionAuthorizerInputImpl(UserPropertiesImpl
+                    .of(msg.getUserProperties().asList()), topic, ctx.channel(), clientId);
             final SubscriptionAuthorizerOutputImpl output = new SubscriptionAuthorizerOutputImpl(asyncer);
             final SettableFuture<SubscriptionAuthorizerOutputImpl> topicProcessedFuture = SettableFuture.create();
             listenableFutures.add(topicProcessedFuture);
-            final SubscriptionAuthorizerContext context = new SubscriptionAuthorizerContext(clientId, output,
-                    topicProcessedFuture, providerMap.size());
+            final SubscriptionAuthorizerContext context =
+                    new SubscriptionAuthorizerContext(clientId, output, topicProcessedFuture, providerMap.size());
             for (final Map.Entry<String, AuthorizerProvider> entry : providerMap.entrySet()) {
-                final SubscriptionAuthorizerTask task = new SubscriptionAuthorizerTask(entry.getValue(), entry.getKey(),
-                        authorizerProviderInput, clientAuthorizers);
+                final SubscriptionAuthorizerTask task = new SubscriptionAuthorizerTask(entry.getValue(),
+                        entry.getKey(),
+                        authorizerProviderInput,
+                        clientAuthorizers);
                 pluginTaskExecutorService.handlePluginInOutTaskExecution(context, input, output, task);
             }
         }
-        final AllTopicsProcessedTask allTopicsProcessedTask = new AllTopicsProcessedTask(msg, listenableFutures, ctx,
-                mqttServerDisconnector, incomingSubscribeService);
+        final AllTopicsProcessedTask allTopicsProcessedTask = new AllTopicsProcessedTask(msg,
+                listenableFutures,
+                ctx,
+                mqttServerDisconnector,
+                incomingSubscribeService);
         Futures.whenAllComplete(listenableFutures).run(allTopicsProcessedTask, MoreExecutors.directExecutor());
     }
 
@@ -256,15 +261,11 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             @NotNull final String logReason,
             final @NotNull String reasonString) {
         if (ctx.channel().isActive()) {
-            final String logMessage = "Client (IP: {}) sent PUBLISH for " + logReason
-                    + ". This is not allowed. Disconnecting client.";
+            final String logMessage =
+                    "Client (IP: {}) sent PUBLISH for " + logReason + ". This is not allowed. Disconnecting client.";
             final String reasonMessage = "Sent PUBLISH for " + reasonString;
-            mqttServerDisconnector.disconnect(
-                    ctx.channel(),
-                    logMessage,
-                    reasonMessage,
-                    Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
-                    reasonMessage);
+            mqttServerDisconnector.disconnect(ctx
+                    .channel(), logMessage, reasonMessage, Mqtt5DisconnectReasonCode.PROTOCOL_ERROR, reasonMessage);
             ctx.close();
         }
     }

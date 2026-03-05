@@ -68,10 +68,14 @@ public class ExtensionBootstrapImplTest {
     public void before() {
         final SystemInformationImpl systemInformation = new SystemInformationImpl();
         systemInformation.init();
-        final ExtensionLifecycleHandler extensionLifecycleHandler = new ExtensionLifecycleHandlerImpl(hiveMQExtensions,
-                MoreExecutors.newDirectExecutorService());
-        pluginBootstrap = new ExtensionBootstrapImpl(extensionLoader, systemInformation, extensionLifecycleHandler,
-                hiveMQExtensions, shutdownHooks, authenticators);
+        final ExtensionLifecycleHandler extensionLifecycleHandler =
+                new ExtensionLifecycleHandlerImpl(hiveMQExtensions, MoreExecutors.newDirectExecutorService());
+        pluginBootstrap = new ExtensionBootstrapImpl(extensionLoader,
+                systemInformation,
+                extensionLifecycleHandler,
+                hiveMQExtensions,
+                shutdownHooks,
+                authenticators);
     }
 
     @Test
@@ -84,9 +88,12 @@ public class ExtensionBootstrapImplTest {
     @Test
     public void test_startPluginSystem_with_embeddedExtensions() {
         when(extensionLoader.loadExtensions(any(Path.class), anyBoolean())).thenReturn(ImmutableList.of());
-        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(
-                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE, "my-extension", 0,
-                        new File("/tmp").toPath(), true));
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class)))
+                .thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "my-extension",
+                        0,
+                        new File("/tmp").toPath(),
+                        true));
         pluginBootstrap.startExtensionSystem(embeddedExtension);
         verify(hiveMQExtensions).extensionStart("my-extension");
         verify(shutdownHooks).add(any(HiveMQShutdownHook.class));
@@ -94,13 +101,18 @@ public class ExtensionBootstrapImplTest {
 
     @Test
     public void test_startPluginSystem_mixed() {
-        when(extensionLoader.loadExtensions(any(Path.class), anyBoolean())).thenReturn(
-                ImmutableList.of(
-                        new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE, "my-extension-1", 0,
-                                new File("/folder").toPath(), false)));
-        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class))).thenReturn(
-                new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE, "my-extension-2", 0,
-                        new File("/tmp").toPath(), true));
+        when(extensionLoader.loadExtensions(any(Path.class), anyBoolean()))
+                .thenReturn(ImmutableList.of(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "my-extension-1",
+                        0,
+                        new File("/folder").toPath(),
+                        false)));
+        when(extensionLoader.loadEmbeddedExtension(any(EmbeddedExtension.class)))
+                .thenReturn(new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.ENABLE,
+                        "my-extension-2",
+                        0,
+                        new File("/tmp").toPath(),
+                        true));
         pluginBootstrap.startExtensionSystem(embeddedExtension);
         verify(hiveMQExtensions).extensionStart("my-extension-1");
         verify(hiveMQExtensions).extensionStart("my-extension-2");

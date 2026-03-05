@@ -86,8 +86,7 @@ public class PublishBuilderImpl implements PublishBuilder {
         if (!(publish instanceof PublishPacketImpl)) {
             throw new DoNotImplementException(PublishPacket.class.getSimpleName());
         }
-        return fromComplete(
-                publish.getQos(),
+        return fromComplete(publish.getQos(),
                 publish.getRetain(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
@@ -106,8 +105,7 @@ public class PublishBuilderImpl implements PublishBuilder {
         if (!(publish instanceof PublishImpl)) {
             throw new DoNotImplementException(Publish.class.getSimpleName());
         }
-        return fromComplete(
-                publish.getQos(),
+        return fromComplete(publish.getQos(),
                 publish.getRetain(),
                 publish.getTopic(),
                 publish.getPayloadFormatIndicator(),
@@ -188,8 +186,8 @@ public class PublishBuilderImpl implements PublishBuilder {
     @NotNull
     @Override
     public PublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
-        PluginBuilderUtil
-                .checkMessageExpiryInterval(messageExpiryInterval, mqttConfigurationService.maxMessageExpiryInterval());
+        PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
+                mqttConfigurationService.maxMessageExpiryInterval());
         this.messageExpiryInterval = messageExpiryInterval;
         return this;
     }
@@ -241,7 +239,15 @@ public class PublishBuilderImpl implements PublishBuilder {
         if (messageExpiryInterval == MESSAGE_EXPIRY_INTERVAL_NOT_SET) {
             messageExpiryInterval = mqttConfigurationService.maxMessageExpiryInterval();
         }
-        return new PublishImpl(qos, retain, topic, payloadFormatIndicator, messageExpiryInterval, responseTopic,
-                correlationData, contentType, payload, UserPropertiesImpl.of(userPropertyBuilder.build()));
+        return new PublishImpl(qos,
+                retain,
+                topic,
+                payloadFormatIndicator,
+                messageExpiryInterval,
+                responseTopic,
+                correlationData,
+                contentType,
+                payload,
+                UserPropertiesImpl.of(userPropertyBuilder.build()));
     }
 }

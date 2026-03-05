@@ -113,8 +113,7 @@ public final class DefaultPermissionsEvaluator {
             stripedTopic = topic;
         }
         for (final TopicPermission topicPermission : permissions.asList()) {
-            final boolean isImplied = implied(
-                    topicPermission,
+            final boolean isImplied = implied(topicPermission,
                     stripedTopic,
                     splitTopic,
                     subscription.getQoS(),
@@ -161,8 +160,8 @@ public final class DefaultPermissionsEvaluator {
         if (topicPermission.getSharedSubscription() == TopicPermission.SharedSubscription.SHARED && !isShared) {
             return false;
         }
-        if (sharedGroup != null && (!"#".equals(topicPermission.getSharedGroup())
-                && !sharedGroup.equals(topicPermission.getSharedGroup()))) {
+        if (sharedGroup != null && (!"#".equals(topicPermission.getSharedGroup()) &&
+                !sharedGroup.equals(topicPermission.getSharedGroup()))) {
             return false;
         }
         return implied(topicPermission, stripedTopic, splitTopic, messageQoS, activity);
@@ -175,8 +174,8 @@ public final class DefaultPermissionsEvaluator {
             final @NotNull QoS messageQoS,
             final @NotNull TopicPermission.MqttActivity activity) {
         // activity
-        if (topicPermission.getActivity() != TopicPermission.MqttActivity.ALL
-                && topicPermission.getActivity() != activity) {
+        if (topicPermission.getActivity() != TopicPermission.MqttActivity.ALL &&
+                topicPermission.getActivity() != activity) {
             return false;
         }
         // qos
@@ -194,14 +193,14 @@ public final class DefaultPermissionsEvaluator {
         }
         switch (qos) {
             case AT_MOST_ONCE :
-                return (permissionQos == TopicPermission.Qos.ZERO || permissionQos == TopicPermission.Qos.ZERO_ONE
-                        || permissionQos == TopicPermission.Qos.ZERO_TWO);
+                return (permissionQos == TopicPermission.Qos.ZERO || permissionQos == TopicPermission.Qos.ZERO_ONE ||
+                        permissionQos == TopicPermission.Qos.ZERO_TWO);
             case AT_LEAST_ONCE :
-                return (permissionQos == TopicPermission.Qos.ONE || permissionQos == TopicPermission.Qos.ZERO_ONE
-                        || permissionQos == TopicPermission.Qos.ONE_TWO);
+                return (permissionQos == TopicPermission.Qos.ONE || permissionQos == TopicPermission.Qos.ZERO_ONE ||
+                        permissionQos == TopicPermission.Qos.ONE_TWO);
             case EXACTLY_ONCE :
-                return (permissionQos == TopicPermission.Qos.TWO || permissionQos == TopicPermission.Qos.ZERO_TWO
-                        || permissionQos == TopicPermission.Qos.ONE_TWO);
+                return (permissionQos == TopicPermission.Qos.TWO || permissionQos == TopicPermission.Qos.ZERO_TWO ||
+                        permissionQos == TopicPermission.Qos.ONE_TWO);
         }
         return false;
     }
@@ -213,8 +212,7 @@ public final class DefaultPermissionsEvaluator {
         try {
             if (topicPermission instanceof InternalTopicPermission) {
                 final InternalTopicPermission internalTopicPermission = (InternalTopicPermission) topicPermission;
-                return PermissionTopicMatcherUtils.matches(
-                        StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
+                return PermissionTopicMatcherUtils.matches(StringUtils.stripEnd(topicPermission.getTopicFilter(), "/"),
                         ((InternalTopicPermission) topicPermission).getSplitTopic(),
                         !internalTopicPermission.containsWildcardCharacter(),
                         internalTopicPermission.endsWithWildcard(),

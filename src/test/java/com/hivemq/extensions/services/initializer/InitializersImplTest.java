@@ -67,8 +67,8 @@ public class InitializersImplTest {
     public void test_add_success() throws Exception {
         try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil
                 .buildClassLoader(temporaryFolder.getRoot().toPath(), new Class[]{TestClientInitializerOne.class})) {
-            final ClientInitializer clientInitializer = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl, TestClientInitializerOne.class);
+            final ClientInitializer clientInitializer =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl, TestClientInitializerOne.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(extension1);
             when(extension1.getId()).thenReturn("extension1");
             final Channel channelMock = mock(Channel.class);
@@ -85,14 +85,14 @@ public class InitializersImplTest {
     @Test
     public void test_add_two_different_priorities() throws Exception {
         final Class<?>[] classes = {TestClientInitializerOne.class, TestClientInitializerTwo.class};
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil
-                .buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
+        try (final IsolatedExtensionClassloader cl1 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
                 final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil
                         .buildClassLoader(temporaryFolder.getRoot().toPath(), classes)) {
-            final ClientInitializer clientInitializerOne = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl1, TestClientInitializerOne.class);
-            final ClientInitializer clientInitializerTwo = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl2, TestClientInitializerTwo.class);
+            final ClientInitializer clientInitializerOne =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl1, TestClientInitializerOne.class);
+            final ClientInitializer clientInitializerTwo =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl2, TestClientInitializerTwo.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
             when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
             when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);
@@ -114,14 +114,14 @@ public class InitializersImplTest {
     @Test
     public void test_add_two_equal_priorities() throws Exception {
         final Class<?>[] classes = {TestClientInitializerOne.class, TestClientInitializerTwo.class};
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil
-                .buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
+        try (final IsolatedExtensionClassloader cl1 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
                 final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil
                         .buildClassLoader(temporaryFolder.getRoot().toPath(), classes)) {
-            final ClientInitializer clientInitializerOne = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl1, TestClientInitializerOne.class);
-            final ClientInitializer clientInitializerTwo = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl2, TestClientInitializerTwo.class);
+            final ClientInitializer clientInitializerOne =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl1, TestClientInitializerOne.class);
+            final ClientInitializer clientInitializerTwo =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl2, TestClientInitializerTwo.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl1)).thenReturn(extension1);
             when(hiveMQExtensions.getExtensionForClassloader(cl2)).thenReturn(extension2);
             when(hiveMQExtensions.getExtension("extension1")).thenReturn(extension1);

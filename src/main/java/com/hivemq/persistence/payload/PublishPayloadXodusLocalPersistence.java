@@ -55,9 +55,13 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
     public static final String PERSISTENCE_VERSION = "040500";
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
     @Inject
-    public PublishPayloadXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull EnvironmentUtil environmentUtil, final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
+    public PublishPayloadXodusLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull EnvironmentUtil environmentUtil,
+            final @NotNull PersistenceStartup persistenceStartup) {
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE);
     }
@@ -164,12 +168,8 @@ public class PublishPayloadXodusLocalPersistence extends XodusLocalPersistence
             }
             final byte[] result = new byte[resultSize];
             for (final Map.Entry<Long, byte[]> entry : chunks.entrySet()) {
-                System.arraycopy(
-                        entry.getValue(),
-                        0,
-                        result,
-                        (int) (entry.getKey() * CHUNK_SIZE),
-                        entry.getValue().length);
+                System.arraycopy(entry
+                        .getValue(), 0, result, (int) (entry.getKey() * CHUNK_SIZE), entry.getValue().length);
             }
             return result;
         });

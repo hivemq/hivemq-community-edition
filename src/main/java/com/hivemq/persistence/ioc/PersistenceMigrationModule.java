@@ -43,7 +43,8 @@ public class PersistenceMigrationModule extends SingletonModule<Class<Persistenc
 
     private final @NotNull MetricRegistry metricRegistry;
     private final @NotNull PersistenceConfigurationService persistenceConfigurationService;
-    public PersistenceMigrationModule(@NotNull final MetricRegistry metricRegistry,
+    public PersistenceMigrationModule(
+            @NotNull final MetricRegistry metricRegistry,
             @NotNull final PersistenceConfigurationService persistenceConfigurationService) {
         super(PersistenceMigrationModule.class);
         this.metricRegistry = metricRegistry;
@@ -68,7 +69,8 @@ public class PersistenceMigrationModule extends SingletonModule<Class<Persistenc
         bind(MetricRegistry.class).toInstance(metricRegistry);
         bind(MetricsHolder.class).toProvider(MetricsHolderProvider.class).asEagerSingleton();
         bind(ListeningScheduledExecutorService.class).annotatedWith(PayloadPersistence.class)
-                .toProvider(PayloadPersistenceScheduledExecutorProvider.class).in(LazySingleton.class);
+                .toProvider(PayloadPersistenceScheduledExecutorProvider.class)
+                .in(LazySingleton.class);
         bind(MessageDroppedService.class).toProvider(MessageDroppedServiceProvider.class).in(Singleton.class);
     }
 }

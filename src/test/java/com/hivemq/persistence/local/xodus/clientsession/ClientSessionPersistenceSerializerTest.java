@@ -82,9 +82,14 @@ public class ClientSessionPersistenceSerializerTest {
 
     @Test
     public void test_will_without_properties() throws Exception {
-        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic").withDelayInterval(1)
-                .withMessageExpiryInterval(3).withQos(QoS.AT_MOST_ONCE).withRetain(true).withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).build();
+        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                .withDelayInterval(1)
+                .withMessageExpiryInterval(3)
+                .withQos(QoS.AT_MOST_ONCE)
+                .withRetain(true)
+                .withHivemqId("hivemqId")
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .build();
         final ClientSessionWill clientSessionWill = new ClientSessionWill(willPublish, 2L);
         final ClientSession session = new ClientSession(false, 10000, clientSessionWill, null);
         final byte[] bytes = serializer.serializeValue(session, 1234567890L);
@@ -105,11 +110,18 @@ public class ClientSessionPersistenceSerializerTest {
 
     @Test
     public void test_will_with_properties() throws Exception {
-        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic").withDelayInterval(1)
-                .withMessageExpiryInterval(3).withQos(QoS.AT_MOST_ONCE).withRetain(true).withHivemqId("hivemqId")
+        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                .withDelayInterval(1)
+                .withMessageExpiryInterval(3)
+                .withQos(QoS.AT_MOST_ONCE)
+                .withRetain(true)
+                .withHivemqId("hivemqId")
                 .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
-                .withPayloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8).withResponseTopic("responseTopic")
-                .withContentType("contentType").withCorrelationData(new byte[]{1, 2, 3}).build();
+                .withPayloadFormatIndicator(Mqtt5PayloadFormatIndicator.UTF_8)
+                .withResponseTopic("responseTopic")
+                .withContentType("contentType")
+                .withCorrelationData(new byte[]{1, 2, 3})
+                .build();
         final ClientSessionWill clientSessionWill = new ClientSessionWill(willPublish, 2L);
         final ClientSession session = new ClientSession(false, 10000, clientSessionWill, null);
         final byte[] bytes = serializer.serializeValue(session, 1234567890L);
@@ -138,9 +150,15 @@ public class ClientSessionPersistenceSerializerTest {
 
     @Test
     public void test_will_with_one_properties() throws Exception {
-        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic").withDelayInterval(1)
-                .withMessageExpiryInterval(3).withQos(QoS.AT_MOST_ONCE).withRetain(true).withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withContentType("contentType").build();
+        final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                .withDelayInterval(1)
+                .withMessageExpiryInterval(3)
+                .withQos(QoS.AT_MOST_ONCE)
+                .withRetain(true)
+                .withHivemqId("hivemqId")
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withContentType("contentType")
+                .build();
         final ClientSessionWill clientSessionWill = new ClientSessionWill(willPublish, 2L);
         final ClientSession session = new ClientSession(false, 10000, clientSessionWill, null);
         final byte[] bytes = serializer.serializeValue(session, 1234567890L);

@@ -118,8 +118,10 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     ClientInformation extensionClientInformation;
     @Nullable
     ConnectionInformation extensionConnectionInformation;
-    public UndefinedClientConnection(final @NotNull Channel channel,
-            final @NotNull PublishFlushHandler publishFlushHandler, final @NotNull Listener connectedListener) {
+    public UndefinedClientConnection(
+            final @NotNull Channel channel,
+            final @NotNull PublishFlushHandler publishFlushHandler,
+            final @NotNull Listener connectedListener) {
         this.channel = channel;
         this.publishFlushHandler = publishFlushHandler;
         this.connectedListener = connectedListener;

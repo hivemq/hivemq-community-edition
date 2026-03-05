@@ -55,9 +55,8 @@ public class UnsubscribeHandlerTest {
     private @NotNull ClientConnection clientConnection;
     @Before
     public void setUp() throws Exception {
-        @NotNull
-        final UnsubscribeHandler unsubscribeHandler = new UnsubscribeHandler(clientSessionSubscriptionPersistence,
-                sharedSubscriptionService);
+        @NotNull final UnsubscribeHandler unsubscribeHandler =
+                new UnsubscribeHandler(clientSessionSubscriptionPersistence, sharedSubscriptionService);
         clientConnection = new DummyClientConnection(channel, null);
         channel = new EmbeddedChannel(unsubscribeHandler);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);

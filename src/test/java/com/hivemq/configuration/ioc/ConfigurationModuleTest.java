@@ -44,10 +44,9 @@ public class ConfigurationModuleTest {
     @Before
     public void setUp() throws Exception {
         testConfigurationBootstrap = new TestConfigurationBootstrap();
-        final FullConfigurationService fullConfigurationService = testConfigurationBootstrap
-                .getFullConfigurationService();
-        injector = Guice.createInjector(
-                new SystemInformationModule(new SystemInformationImpl()),
+        final FullConfigurationService fullConfigurationService =
+                testConfigurationBootstrap.getFullConfigurationService();
+        injector = Guice.createInjector(new SystemInformationModule(new SystemInformationImpl()),
                 new ConfigurationModule(fullConfigurationService, new HivemqId()),
                 new AbstractModule() {
 
@@ -101,12 +100,10 @@ public class ConfigurationModuleTest {
     @Test
     public void test_configuration_service_bindings_same_as_direct_binding() throws Exception {
         final FullConfigurationService configurationService = injector.getInstance(FullConfigurationService.class);
-        assertSame(
-                configurationService.listenerConfiguration(),
+        assertSame(configurationService.listenerConfiguration(),
                 injector.getInstance(ListenerConfigurationService.class));
         assertSame(configurationService.mqttConfiguration(), injector.getInstance(MqttConfigurationService.class));
-        assertSame(
-                configurationService.restrictionsConfiguration(),
+        assertSame(configurationService.restrictionsConfiguration(),
                 injector.getInstance(RestrictionsConfigurationService.class));
     }
 }

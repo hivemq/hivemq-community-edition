@@ -27,15 +27,17 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
  */
 public class ConnectSimpleAuthTask extends AbstractAuthTask<AuthConnectInput, ConnectAuthOutput> {
 
-    public ConnectSimpleAuthTask(final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
-            final @NotNull AuthenticatorProviderInput authenticatorProviderInput, final @NotNull String extensionId) {
+    public ConnectSimpleAuthTask(
+            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
+            final @NotNull String extensionId) {
         super(wrappedAuthenticatorProvider, authenticatorProviderInput, extensionId);
     }
 
     @Override
     void call(final @NotNull AuthConnectInput input, final @NotNull ConnectAuthOutput output) {
-        final SimpleAuthenticator authenticator = wrappedAuthenticatorProvider
-                .getAuthenticator(authenticatorProviderInput);
+        final SimpleAuthenticator authenticator =
+                wrappedAuthenticatorProvider.getAuthenticator(authenticatorProviderInput);
         if (authenticator != null) {
             output.setAuthenticatorPresent();
             authenticator.onConnect(input, new ConnectSimpleAuthOutput(output));

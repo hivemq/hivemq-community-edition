@@ -33,7 +33,8 @@ public class SubscribeInboundOutputImpl extends AbstractAsyncOutput<SubscribeInb
 
     private final @NotNull ModifiableSubscribePacketImpl subscribePacket;
     private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
-    public SubscribeInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public SubscribeInboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableSubscribePacketImpl subscribePacket) {
         super(asyncer);
         this.subscribePacket = subscribePacket;

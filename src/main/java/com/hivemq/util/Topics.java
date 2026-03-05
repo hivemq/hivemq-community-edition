@@ -118,8 +118,8 @@ public class Topics {
                 sharedCounter++;
             }
             // finally, is it a shared subscription?
-            if (i == SHARED_SUBSCRIPTION_LENGTH && sharedCounter == SHARED_SUBSCRIPTION_LENGTH
-                    && currentChar == SHARED_SUBSCRIPTION_DELIMITER) {
+            if (i == SHARED_SUBSCRIPTION_LENGTH && sharedCounter == SHARED_SUBSCRIPTION_LENGTH &&
+                    currentChar == SHARED_SUBSCRIPTION_DELIMITER) {
                 isSharedSubscription = true;
             }
             // Check the shared name
@@ -147,8 +147,8 @@ public class Topics {
             }
             // Let's check if the + sign is in the middle of a string
             if (currentChar == '+' && lastChar != '/') {
-                if (sharedSubscriptionDelimiterCharCount != 2 || !isSharedSubscription
-                        || lastChar != SHARED_SUBSCRIPTION_DELIMITER) {
+                if (sharedSubscriptionDelimiterCharCount != 2 || !isSharedSubscription ||
+                        lastChar != SHARED_SUBSCRIPTION_DELIMITER) {
                     return false;
                 }
             }

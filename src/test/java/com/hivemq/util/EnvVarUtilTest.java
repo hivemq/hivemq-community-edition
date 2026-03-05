@@ -86,8 +86,10 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
-        final String testString = "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
-        final String expected = "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
+        final String testString =
+                "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
+        final String expected =
+                "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
         final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
         assertEquals(expected, result);
     }
@@ -97,8 +99,10 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
-        final String testString = "<test1><test2 id=\"VALUE1\"><test3>${ENV:VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
-        final String expected = "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
+        final String testString =
+                "<test1><test2 id=\"VALUE1\"><test3>${ENV:VALUE1}</test3><test4>${VALUE2}</test4><test5>${VALUE3}</test5></test2></test1>";
+        final String expected =
+                "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
         final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
         assertEquals(expected, result);
     }
@@ -108,8 +112,10 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(eq("VALUE1"))).thenReturn("value$1");
         when(envVarUtil.getValue(eq("VALUE2"))).thenReturn("2");
         when(envVarUtil.getValue(eq("VALUE3"))).thenReturn("value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}");
-        final String testString = "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${ENV:VALUE2}</test4><test5>${ENV:VALUE3}</test5></test2></test1>";
-        final String expected = "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
+        final String testString =
+                "<test1><test2 id=\"VALUE1\"><test3>${VALUE1}</test3><test4>${ENV:VALUE2}</test4><test5>${ENV:VALUE3}</test5></test2></test1>";
+        final String expected =
+                "<test1><test2 id=\"VALUE1\"><test3>value$1</test3><test4>2</test4><test5>value-_/!\"\\'3!§%&/()=?`*,;.:[]|{}</test5></test2></test1>";
         final String result = envVarUtil.replaceEnvironmentVariablePlaceholders(testString);
         assertEquals(expected, result);
     }

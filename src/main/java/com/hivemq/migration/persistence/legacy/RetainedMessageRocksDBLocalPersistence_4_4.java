@@ -54,13 +54,17 @@ public class RetainedMessageRocksDBLocalPersistence_4_4 extends RocksDBLocalPers
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     private final @NotNull AtomicLong retainMessageCounter = new AtomicLong(0);
     @Inject
-    public RetainedMessageRocksDBLocalPersistence_4_4(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+    public RetainedMessageRocksDBLocalPersistence_4_4(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PublishPayloadPersistence payloadPersistence,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(localPersistenceFileUtil, persistenceStartup, InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+        super(localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.RETAINED_MESSAGE_MEMTABLE_SIZE_PORTION,
                 InternalConfigurations.RETAINED_MESSAGE_BLOCK_CACHE_SIZE_PORTION,
-                InternalConfigurations.RETAINED_MESSAGE_BLOCK_SIZE_BYTES, false);
+                InternalConfigurations.RETAINED_MESSAGE_BLOCK_SIZE_BYTES,
+                false);
         this.payloadPersistence = payloadPersistence;
     }
 

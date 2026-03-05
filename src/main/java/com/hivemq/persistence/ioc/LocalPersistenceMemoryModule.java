@@ -44,8 +44,7 @@ class LocalPersistenceMemoryModule extends SingletonModule<Class<LocalPersistenc
     @Override
     protected void configure() {
         bindLocalPersistence(RetainedMessageLocalPersistence.class, RetainedMessageMemoryLocalPersistence.class);
-        bindLocalPersistence(
-                ClientSessionSubscriptionLocalPersistence.class,
+        bindLocalPersistence(ClientSessionSubscriptionLocalPersistence.class,
                 ClientSessionSubscriptionMemoryLocalPersistence.class);
         bindLocalPersistence(ClientSessionLocalPersistence.class, ClientSessionMemoryLocalPersistence.class);
         bindLocalPersistence(ClientQueueLocalPersistence.class, ClientQueueMemoryLocalPersistence.class);

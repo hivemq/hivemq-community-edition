@@ -76,7 +76,9 @@ public class HiveMQExtensions {
         final Lock lock = extensionsLock.readLock();
         try {
             lock.lock();
-            return knownExtensions.values().stream().filter(HiveMQExtension::isEnabled)
+            return knownExtensions.values()
+                    .stream()
+                    .filter(HiveMQExtension::isEnabled)
                     .sorted(Comparator.comparingInt(HiveMQExtension::getPriority))
                     .collect(ImmutableMap.toImmutableMap(HiveMQExtension::getId, Function.identity()));
         } finally {
@@ -204,8 +206,8 @@ public class HiveMQExtensions {
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             addClassLoaderMapping(extensionClassloader, extension);
-            final ExtensionStartStopInputImpl input = new ExtensionStartStopInputImpl(extension,
-                    getEnabledHiveMQExtensions(), serverInformation);
+            final ExtensionStartStopInputImpl input =
+                    new ExtensionStartStopInputImpl(extension, getEnabledHiveMQExtensions(), serverInformation);
             final ExtensionStartOutputImpl output = new ExtensionStartOutputImpl();
             Thread.currentThread().setContextClassLoader(extensionClassloader);
             extension.start(input, output);
@@ -217,8 +219,7 @@ public class HiveMQExtensions {
                         output.getReason().get());
                 extensionStartFailed(extension, extensionClassloader);
             } else {
-                log.info(
-                        "{}xtension \"{}\" version {} started successfully.",
+                log.info("{}xtension \"{}\" version {} started successfully.",
                         extension.isEmbedded() ? "Embedded e" : "E",
                         extension.getName(),
                         extension.getVersion());
@@ -268,20 +269,19 @@ public class HiveMQExtensions {
         notifyBeforeExtensionStopCallbacks(extension);
         final ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            final ExtensionStartStopInputImpl input = new ExtensionStartStopInputImpl(extension,
-                    getEnabledHiveMQExtensions(), serverInformation);
+            final ExtensionStartStopInputImpl input =
+                    new ExtensionStartStopInputImpl(extension, getEnabledHiveMQExtensions(), serverInformation);
             final ExtensionStopOutputImpl output = new ExtensionStopOutputImpl();
             Thread.currentThread().setContextClassLoader(extensionClassloader);
             extension.stop(input, output);
-            log.info(
-                    "{}xtension \"{}\" version {} stopped successfully.",
+            log.info("{}xtension \"{}\" version {} stopped successfully.",
                     extension.isEmbedded() ? "Embedded e" : "E",
                     extension.getName(),
                     extension.getVersion());
         } catch (final Throwable t) {
             log.warn(
-                    "Uncaught exception was thrown from extension with id \"" + extension.getId()
-                            + "\" on extension stop. Extensions are responsible on their own to handle exceptions.",
+                    "Uncaught exception was thrown from extension with id \"" + extension.getId() +
+                            "\" on extension stop. Extensions are responsible on their own to handle exceptions.",
                     t);
             disable = true;
         } finally {

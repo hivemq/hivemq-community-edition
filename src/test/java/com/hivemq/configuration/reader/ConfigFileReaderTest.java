@@ -51,9 +51,12 @@ public class ConfigFileReaderTest {
     public void setUp() throws Exception {
         final ListenerConfigurationService listenerConfigurationService = new ListenerConfigurationServiceImpl();
         final ConfigurationFile configurationFile = new ConfigurationFile(null);
-        reader = new ConfigFileReader(configurationFile, new RestrictionConfigurator(restrictionsConfigurationService),
-                new SecurityConfigurator(securityConfigurationService), envVarUtil,
-                new UsageStatisticsConfigurator(usageStatisticsConfig), new MqttConfigurator(mqttConfigurationService),
+        reader = new ConfigFileReader(configurationFile,
+                new RestrictionConfigurator(restrictionsConfigurationService),
+                new SecurityConfigurator(securityConfigurationService),
+                envVarUtil,
+                new UsageStatisticsConfigurator(usageStatisticsConfig),
+                new MqttConfigurator(mqttConfigurationService),
                 new ListenerConfigurator(listenerConfigurationService, systemInformation),
                 new PersistenceConfigurator(persistenceConfigurationService));
     }
@@ -62,9 +65,8 @@ public class ConfigFileReaderTest {
     public void verify_mqtt_default_values() {
         reader.applyConfig();
         final MqttConfigEntity defaultMqttValues = new MqttConfigEntity();
-        verify(mqttConfigurationService).setQueuedMessagesStrategy(
-                MqttConfigurationService.QueuedMessagesStrategy
-                        .valueOf(defaultMqttValues.getQueuedMessagesConfigEntity().getQueuedMessagesStrategy().name()));
+        verify(mqttConfigurationService).setQueuedMessagesStrategy(MqttConfigurationService.QueuedMessagesStrategy
+                .valueOf(defaultMqttValues.getQueuedMessagesConfigEntity().getQueuedMessagesStrategy().name()));
         verify(mqttConfigurationService)
                 .setMaxPacketSize(defaultMqttValues.getPacketsConfigEntity().getMaxPacketSize());
         verify(mqttConfigurationService)

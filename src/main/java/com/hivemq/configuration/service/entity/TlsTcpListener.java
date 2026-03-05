@@ -51,7 +51,10 @@ public class TlsTcpListener extends TcpListener implements TlsListener {
      * @param bindAddress the bind address
      * @param tls         the TLS configuration
      */
-    public TlsTcpListener(final int port, final @NotNull String bindAddress, final @NotNull Tls tls,
+    public TlsTcpListener(
+            final int port,
+            final @NotNull String bindAddress,
+            final @NotNull Tls tls,
             final @NotNull String name) {
         super(port, bindAddress, name);
         checkNotNull(tls);

@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermissions {
 
     private @NotNull ImmutableList<TopicPermission> topicPermissions = ImmutableList.of();
-    private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour = new AtomicReference<>(
-            DefaultAuthorizationBehaviour.ALLOW);
+    private final AtomicReference<DefaultAuthorizationBehaviour> defaultAuthorizationBehaviour =
+            new AtomicReference<>(DefaultAuthorizationBehaviour.ALLOW);
     private final AtomicBoolean defaultAuthorizationBehaviourOverridden = new AtomicBoolean(false);
     @Override
     public @NotNull List<TopicPermission> asList() {
@@ -67,8 +67,8 @@ public class ModifiableDefaultPermissionsImpl implements ModifiableDefaultPermis
         if (!defaultAuthorizationBehaviourOverridden.get()) {
             defaultAuthorizationBehaviour.set(DefaultAuthorizationBehaviour.DENY);
         }
-        topicPermissions = ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions)
-                .build();
+        topicPermissions =
+                ImmutableList.<TopicPermission>builder().addAll(topicPermissions).addAll(permissions).build();
     }
 
     @Override

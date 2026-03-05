@@ -59,11 +59,11 @@ public class InterceptorsImplTest {
 
     @Test
     public void test_add_and_remove() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder.getRoot().toPath(),
-                new Class[]{TestConnectInboundInterceptorProvider.class})) {
-            final ConnectInboundInterceptorProvider connectInterceptorProvider = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl, TestConnectInboundInterceptorProvider.class);
+        try (final IsolatedExtensionClassloader cl =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
+                        new Class[]{TestConnectInboundInterceptorProvider.class})) {
+            final ConnectInboundInterceptorProvider connectInterceptorProvider =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl, TestConnectInboundInterceptorProvider.class);
             when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class)))
                     .thenReturn(extension);
             when(extension.getId()).thenReturn("extension");
@@ -83,11 +83,11 @@ public class InterceptorsImplTest {
 
     @Test
     public void test_add_and_remove_connack() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder.getRoot().toPath(),
-                new Class[]{TestConnackOutboundInterceptorProvider.class})) {
-            final ConnackOutboundInterceptorProvider connackInterceptorProvider = IsolatedExtensionClassloaderUtil
-                    .loadInstance(cl, TestConnackOutboundInterceptorProvider.class);
+        try (final IsolatedExtensionClassloader cl =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
+                        new Class[]{TestConnackOutboundInterceptorProvider.class})) {
+            final ConnackOutboundInterceptorProvider connackInterceptorProvider =
+                    IsolatedExtensionClassloaderUtil.loadInstance(cl, TestConnackOutboundInterceptorProvider.class);
             when(hiveMQExtensions.getExtensionForClassloader(any(IsolatedExtensionClassloader.class)))
                     .thenReturn(extension);
             when(extension.getId()).thenReturn("extension");
@@ -122,8 +122,7 @@ public class InterceptorsImplTest {
         @Override
         public @Nullable ConnectInboundInterceptor getConnectInboundInterceptor(
                 @NotNull final ConnectInboundProviderInput input) {
-            return (connectInterceptorInput, connectInterceptorOutput) -> {
-            };
+            return (connectInterceptorInput, connectInterceptorOutput) -> {};
         }
     }
 
@@ -132,8 +131,7 @@ public class InterceptorsImplTest {
         @Override
         public @Nullable ConnackOutboundInterceptor getConnackOutboundInterceptor(
                 @NotNull final ConnackOutboundProviderInput input) {
-            return (connectInterceptorInput, connectInterceptorOutput) -> {
-            };
+            return (connectInterceptorInput, connectInterceptorOutput) -> {};
         }
     }
 }

@@ -36,7 +36,9 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
     private final @NotNull Channel channel;
     private final @NotNull Topic subscription;
     private final @NotNull RetainedMessagesSender retainedMessagesSender;
-    SendRetainedMessageResultListener(final @NotNull Channel channel, final @NotNull Topic subscription,
+    SendRetainedMessageResultListener(
+            final @NotNull Channel channel,
+            final @NotNull Topic subscription,
             final @NotNull RetainedMessagesSender retainedMessagesSender) {
         this.channel = channel;
         this.subscription = subscription;
@@ -61,19 +63,18 @@ public class SendRetainedMessageResultListener implements FutureCallback<Void> {
             // retry
             channel.eventLoop().schedule(() -> {
                 if (log.isTraceEnabled()) {
-                    log.trace(
-                            "Retrying retained message for client '{}' on topic '{}'.",
+                    log.trace("Retrying retained message for client '{}' on topic '{}'.",
                             ClientConnection.of(channel).getClientId(),
                             subscription.getTopic());
                 }
-                final ListenableFuture<Void> sentFuture = retainedMessagesSender
-                        .writeRetainedMessages(channel, subscription);
+                final ListenableFuture<Void> sentFuture =
+                        retainedMessagesSender.writeRetainedMessages(channel, subscription);
                 Futures.addCallback(sentFuture, this, channel.eventLoop());
             }, 1, TimeUnit.SECONDS);
         } else {
             Exceptions.rethrowError(
-                    "Unable to send retained message on topic " + subscription.getTopic() + " to client "
-                            + ClientConnection.of(channel).getClientId() + ".",
+                    "Unable to send retained message on topic " + subscription.getTopic() + " to client " +
+                            ClientConnection.of(channel).getClientId() + ".",
                     throwable);
         }
     }

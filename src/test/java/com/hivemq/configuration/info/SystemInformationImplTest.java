@@ -54,8 +54,7 @@ public class SystemInformationImplTest {
             systemInformation.init();
             // check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
             final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
-            assertEquals(
-                    Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
+            assertEquals(Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
                     systemInformation.getHiveMQVersion());
         });
     }
@@ -68,8 +67,7 @@ public class SystemInformationImplTest {
             systemInformation.init();
             // check if there is a manifest file present (happens on jenkins) and use the value from the manifest file
             final String valueFromManifest = ManifestUtils.getValueFromManifest(HiveMQServer.class, "HiveMQ-Version");
-            assertEquals(
-                    Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
+            assertEquals(Objects.requireNonNullElse(valueFromManifest, "Development Snapshot"),
                     systemInformation.getHiveMQVersion());
         });
     }
@@ -115,8 +113,7 @@ public class SystemInformationImplTest {
             System.setProperty(SystemProperties.HIVEMQ_HOME, tempFolderPath);
             systemInformation = new SystemInformationImpl();
             systemInformation.init();
-            assertEquals(
-                    tempFolderPath + File.separator + "conf",
+            assertEquals(tempFolderPath + File.separator + "conf",
                     systemInformation.getConfigFolder().getAbsolutePath());
         });
     }

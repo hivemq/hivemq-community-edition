@@ -66,9 +66,9 @@ public class LifecycleEventListenersImplTest {
 
     @Test
     public void test_add_success() throws Exception {
-        try (final IsolatedExtensionClassloader cl = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder.getRoot().toPath(),
-                new Class[]{TestClientLifecycleEventListenerProviderOne.class})) {
+        try (final IsolatedExtensionClassloader cl =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
+                        new Class[]{TestClientLifecycleEventListenerProviderOne.class})) {
             final ClientLifecycleEventListenerProvider clientInitializer = IsolatedExtensionClassloaderUtil
                     .loadInstance(cl, TestClientLifecycleEventListenerProviderOne.class);
             when(hiveMQExtensions.getExtensionForClassloader(cl)).thenReturn(extension1);
@@ -80,18 +80,17 @@ public class LifecycleEventListenersImplTest {
             when(channelMock.pipeline()).thenReturn(pipelineMock);
             connectionPersistence.persistIfAbsent(clientConnection);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializer);
-            assertEquals(
-                    clientInitializer,
+            assertEquals(clientInitializer,
                     lifecycleEventListeners.getClientLifecycleEventListenerProviderMap().get("extension1"));
         }
     }
 
     @Test
     public void test_add_two_different_priorities() throws Exception {
-        final Class<?>[] classes = {TestClientLifecycleEventListenerProviderOne.class,
-                TestClientLifecycleEventListenerProviderTwo.class};
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil
-                .buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
+        final Class<?>[] classes =
+                {TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class};
+        try (final IsolatedExtensionClassloader cl1 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
                 final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil
                         .buildClassLoader(temporaryFolder.getRoot().toPath(), classes)) {
             final ClientLifecycleEventListenerProvider clientInitializerOne = IsolatedExtensionClassloaderUtil
@@ -106,11 +105,11 @@ public class LifecycleEventListenersImplTest {
             when(extension2.getPriority()).thenReturn(101);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerOne);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerTwo);
-            final Map<String, ClientLifecycleEventListenerProvider> initializerMap = lifecycleEventListeners
-                    .getClientLifecycleEventListenerProviderMap();
+            final Map<String, ClientLifecycleEventListenerProvider> initializerMap =
+                    lifecycleEventListeners.getClientLifecycleEventListenerProviderMap();
             assertEquals(2, initializerMap.size());
-            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator = initializerMap.entrySet()
-                    .iterator();
+            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator =
+                    initializerMap.entrySet().iterator();
             assertEquals(clientInitializerTwo, iterator.next().getValue());
             assertEquals(clientInitializerOne, iterator.next().getValue());
         }
@@ -118,10 +117,10 @@ public class LifecycleEventListenersImplTest {
 
     @Test
     public void test_add_two_equal_priorities() throws Exception {
-        final Class<?>[] classes = {TestClientLifecycleEventListenerProviderOne.class,
-                TestClientLifecycleEventListenerProviderTwo.class};
-        try (final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil
-                .buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
+        final Class<?>[] classes =
+                {TestClientLifecycleEventListenerProviderOne.class, TestClientLifecycleEventListenerProviderTwo.class};
+        try (final IsolatedExtensionClassloader cl1 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(), classes);
                 final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil
                         .buildClassLoader(temporaryFolder.getRoot().toPath(), classes)) {
             final ClientLifecycleEventListenerProvider clientInitializerOne = IsolatedExtensionClassloaderUtil
@@ -136,11 +135,11 @@ public class LifecycleEventListenersImplTest {
             when(extension2.getPriority()).thenReturn(100);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerOne);
             lifecycleEventListeners.addClientLifecycleEventListenerProvider(clientInitializerTwo);
-            final Map<String, ClientLifecycleEventListenerProvider> initializerMap = lifecycleEventListeners
-                    .getClientLifecycleEventListenerProviderMap();
+            final Map<String, ClientLifecycleEventListenerProvider> initializerMap =
+                    lifecycleEventListeners.getClientLifecycleEventListenerProviderMap();
             assertEquals(2, initializerMap.size());
-            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator = initializerMap.entrySet()
-                    .iterator();
+            final Iterator<Map.Entry<String, ClientLifecycleEventListenerProvider>> iterator =
+                    initializerMap.entrySet().iterator();
             // the first one added is the first one shown
             assertEquals(clientInitializerOne, iterator.next().getValue());
             assertEquals(clientInitializerTwo, iterator.next().getValue());

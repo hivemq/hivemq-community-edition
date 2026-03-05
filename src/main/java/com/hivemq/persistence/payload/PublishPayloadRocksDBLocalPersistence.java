@@ -54,16 +54,18 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     private final boolean forceFlush;
     private long @NotNull [] rocksdbToMemTableSize;
     @Inject
-    public PublishPayloadRocksDBLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+    public PublishPayloadRocksDBLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull PersistenceStartup persistenceStartup) {
-        super(localPersistenceFileUtil, persistenceStartup,
+        super(localPersistenceFileUtil,
+                persistenceStartup,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_CACHE_SIZE_PORTION.get(),
                 InternalConfigurations.PAYLOAD_PERSISTENCE_BLOCK_SIZE_BYTES,
                 InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get() == PersistenceType.FILE_NATIVE);
-        this.memTableSize = physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get()
-                / InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
+        this.memTableSize = physicalMemory() / InternalConfigurations.PAYLOAD_PERSISTENCE_MEMTABLE_SIZE_PORTION.get() /
+                InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get();
         this.rocksdbToMemTableSize = new long[InternalConfigurations.PAYLOAD_PERSISTENCE_BUCKET_COUNT.get()];
         this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.get();
     }
@@ -86,7 +88,8 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
     @Override
     protected void configureOptions(final @NotNull Options options) {
         if (InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_ENABLED) {
-            options.setEnableBlobFiles(true).setEnableBlobGarbageCollection(true)
+            options.setEnableBlobFiles(true)
+                    .setEnableBlobGarbageCollection(true)
                     .setCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_REFERENCE_COMPRESSION_TYPE)
                     .setBlobCompressionType(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_COMPRESSION_TYPE)
                     .setTargetFileSizeBase(InternalConfigurations.PAYLOAD_PERSISTENCE_BLOB_FILE_SIZE_BASE_BYTES)

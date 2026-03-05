@@ -35,7 +35,8 @@ public class SecurityModule extends SingletonModule<Class<SecurityModule>> {
     protected void configure() {
         bind(SslFactory.class).in(LazySingleton.class);
         bind(SslContextStore.class).in(LazySingleton.class);
-        bind(ScheduledExecutorService.class).annotatedWith(Security.class).toProvider(SecurityExecutorProvider.class)
+        bind(ScheduledExecutorService.class).annotatedWith(Security.class)
+                .toProvider(SecurityExecutorProvider.class)
                 .in(LazySingleton.class);
     }
 }

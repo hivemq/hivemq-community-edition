@@ -64,7 +64,8 @@ public class ClientServiceImpl implements ClientService {
     private final @NotNull GlobalManagedExtensionExecutorService managedExtensionExecutorService;
     private final @NotNull AsyncIteratorFactory asyncIteratorFactory;
     @Inject
-    public ClientServiceImpl(@NotNull final PluginServiceRateLimitService pluginServiceRateLimitService,
+    public ClientServiceImpl(
+            @NotNull final PluginServiceRateLimitService pluginServiceRateLimitService,
             @NotNull final ClientSessionPersistence clientSessionPersistence,
             @NotNull final GlobalManagedExtensionExecutorService managedExtensionExecutorService,
             @NotNull final AsyncIteratorFactory asyncIteratorFactory) {
@@ -99,10 +100,8 @@ public class ClientServiceImpl implements ClientService {
         if (session == null) {
             return CompletableFuture.completedFuture(Optional.empty());
         }
-        return CompletableFuture.completedFuture(
-                Optional.of(
-                        new SessionInformationImpl(clientId, session.getSessionExpiryIntervalSec(),
-                                session.isConnected())));
+        return CompletableFuture.completedFuture(Optional.of(
+                new SessionInformationImpl(clientId, session.getSessionExpiryIntervalSec(), session.isConnected())));
     }
 
     @NotNull
@@ -128,21 +127,18 @@ public class ClientServiceImpl implements ClientService {
             final @Nullable String reasonString) {
         Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (reasonCode != null) {
-            Preconditions.checkArgument(
-                    reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+            Preconditions.checkArgument(reasonCode != DisconnectReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
                     "Reason code %s must not be used for disconnect packets.",
                     reasonCode);
-            Preconditions.checkArgument(
-                    Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByServer(),
+            Preconditions.checkArgument(Mqtt5DisconnectReasonCode.from(reasonCode).canBeSentByServer(),
                     "Reason code %s must not be used for outbound disconnect packets from the server to a client.",
                     reasonCode);
         }
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
-        final Mqtt5DisconnectReasonCode disconnectReasonCode = reasonCode != null
-                ? Mqtt5DisconnectReasonCode.valueOf(reasonCode.name())
-                : null;
+        final Mqtt5DisconnectReasonCode disconnectReasonCode =
+                reasonCode != null ? Mqtt5DisconnectReasonCode.valueOf(reasonCode.name()) : null;
         final ListenableFuture<Boolean> disconnectFuture = clientSessionPersistence
                 .forceDisconnectClient(clientId, preventWillMessage, EXTENSION, disconnectReasonCode, reasonString);
         return ListenableFutureConverter.toCompletable(disconnectFuture, managedExtensionExecutorService);
@@ -156,8 +152,8 @@ public class ClientServiceImpl implements ClientService {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
         final SettableFuture<Boolean> setSessionSettableFuture = SettableFuture.create();
-        final ListenableFuture<Boolean> setSessionFuture = clientSessionPersistence
-                .invalidateSession(clientId, EXTENSION);
+        final ListenableFuture<Boolean> setSessionFuture =
+                clientSessionPersistence.invalidateSession(clientId, EXTENSION);
         Futures.addCallback(setSessionFuture, new FutureCallback<>() {
 
             @Override
@@ -194,8 +190,8 @@ public class ClientServiceImpl implements ClientService {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
         }
         final FetchCallback<SessionInformation> fetchCallback = new AllClientsFetchCallback(clientSessionPersistence);
-        final AsyncIterator<SessionInformation> asyncIterator = asyncIteratorFactory
-                .createIterator(fetchCallback, new AllItemsItemCallback<>(callbackExecutor, callback));
+        final AsyncIterator<SessionInformation> asyncIterator = asyncIteratorFactory.createIterator(fetchCallback,
+                new AllItemsItemCallback<>(callbackExecutor, callback));
         asyncIterator.fetchAndIterate();
         final SettableFuture<Void> settableFuture = SettableFuture.create();
         asyncIterator.getFinishedFuture().whenComplete((aVoid, throwable) -> {
@@ -224,10 +220,11 @@ public class ClientServiceImpl implements ClientService {
         @Override
         protected @NotNull Collection<SessionInformation> transform(
                 final @NotNull Map<String, ClientSession> stringClientSessionMap) {
-            return stringClientSessionMap.entrySet().stream()
-                    .map(
-                            entry -> new SessionInformationImpl(entry.getKey(),
-                                    entry.getValue().getSessionExpiryIntervalSec(), entry.getValue().isConnected()))
+            return stringClientSessionMap.entrySet()
+                    .stream()
+                    .map(entry -> new SessionInformationImpl(entry.getKey(),
+                            entry.getValue().getSessionExpiryIntervalSec(),
+                            entry.getValue().isConnected()))
                     .collect(Collectors.toUnmodifiableList());
         }
     }

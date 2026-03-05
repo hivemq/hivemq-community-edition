@@ -52,7 +52,8 @@ public class ClientContextPluginImpl extends AbstractOutput implements ClientCon
 
     private final @NotNull ClassLoader pluginClassloader;
     private final @NotNull ClientContextImpl clientContext;
-    public ClientContextPluginImpl(final @NotNull ClassLoader pluginClassloader,
+    public ClientContextPluginImpl(
+            final @NotNull ClassLoader pluginClassloader,
             final @NotNull ClientContextImpl clientContext) {
         this.pluginClassloader = pluginClassloader;
         this.clientContext = clientContext;

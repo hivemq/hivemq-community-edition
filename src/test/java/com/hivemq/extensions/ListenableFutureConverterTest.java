@@ -51,8 +51,8 @@ public class ListenableFutureConverterTest {
     @Test
     public void test_cancel() {
         final ListenableFuture<Void> voidListenableFuture = SettableFuture.create();
-        final CompletableFuture<Void> voidCompletableFuture = ListenableFutureConverter
-                .toCompletable(voidListenableFuture, MoreExecutors.directExecutor());
+        final CompletableFuture<Void> voidCompletableFuture =
+                ListenableFutureConverter.toCompletable(voidListenableFuture, MoreExecutors.directExecutor());
         assertFalse(voidCompletableFuture.isCancelled());
         assertFalse(voidListenableFuture.isCancelled());
         voidCompletableFuture.cancel(true);
@@ -100,8 +100,8 @@ public class ListenableFutureConverterTest {
     public void test_conversion_nullable_not_null_result_no_converter()
             throws ExecutionException, InterruptedException {
         final SettableFuture<Integer> voidListenableFuture = SettableFuture.create();
-        final CompletableFuture<Integer> voidCompletableFuture = ListenableFutureConverter
-                .toCompletable(voidListenableFuture, MoreExecutors.directExecutor());
+        final CompletableFuture<Integer> voidCompletableFuture =
+                ListenableFutureConverter.toCompletable(voidListenableFuture, MoreExecutors.directExecutor());
         voidListenableFuture.set(5);
         assertTrue(voidCompletableFuture.isDone());
         assertFalse(voidCompletableFuture.isCompletedExceptionally());
@@ -111,8 +111,8 @@ public class ListenableFutureConverterTest {
     @Test
     public void test_conversion_nullable_null_result_no_converter() throws ExecutionException, InterruptedException {
         final SettableFuture<Integer> voidListenableFuture = SettableFuture.create();
-        final CompletableFuture<Integer> voidCompletableFuture = ListenableFutureConverter
-                .toCompletable(voidListenableFuture, MoreExecutors.directExecutor());
+        final CompletableFuture<Integer> voidCompletableFuture =
+                ListenableFutureConverter.toCompletable(voidListenableFuture, MoreExecutors.directExecutor());
         voidListenableFuture.set(null);
         assertTrue(voidCompletableFuture.isDone());
         assertFalse(voidCompletableFuture.isCompletedExceptionally());

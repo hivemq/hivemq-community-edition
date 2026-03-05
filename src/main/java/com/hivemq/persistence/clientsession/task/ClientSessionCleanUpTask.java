@@ -31,7 +31,8 @@ public class ClientSessionCleanUpTask implements SingleWriterService.Task<Void> 
     private final @NotNull ClientSessionLocalPersistence localPersistence;
     private final @NotNull ClientSessionPersistence clientSessionPersistence;
     private final @NotNull PendingWillMessages pendingWillMessages;
-    public ClientSessionCleanUpTask(final @NotNull ClientSessionLocalPersistence localPersistence,
+    public ClientSessionCleanUpTask(
+            final @NotNull ClientSessionLocalPersistence localPersistence,
             final @NotNull ClientSessionPersistenceImpl clientSessionPersistence,
             final @NotNull PendingWillMessages pendingWillMessages) {
         this.localPersistence = localPersistence;

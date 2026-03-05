@@ -81,8 +81,8 @@ public class InternalPublishServiceImplTest {
         when(topicTree.findTopicSubscribers(anyString()))
                 .thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
         publishService = new InternalPublishServiceImpl(retainedMessagePersistence, topicTree, publishDistributor);
-        final PUBLISH publish = TestMessageUtil
-                .createMqtt3Publish("hivemqId", "subonly", QoS.AT_LEAST_ONCE, new byte[0], true);
+        final PUBLISH publish =
+                TestMessageUtil.createMqtt3Publish("hivemqId", "subonly", QoS.AT_LEAST_ONCE, new byte[0], true);
         when(retainedMessagePersistence.remove(anyString())).thenReturn(Futures.immediateFuture(null));
         publishService.publish(publish, executorService, "sender").get();
         verify(retainedMessagePersistence).remove("subonly");
@@ -93,8 +93,8 @@ public class InternalPublishServiceImplTest {
         when(topicTree.findTopicSubscribers(anyString()))
                 .thenReturn(new TopicSubscribers(ImmutableSet.of(), ImmutableSet.of()));
         publishService = new InternalPublishServiceImpl(retainedMessagePersistence, topicTree, publishDistributor);
-        final PUBLISH publish = TestMessageUtil
-                .createMqtt3Publish("hivemqId", "subonly", QoS.AT_LEAST_ONCE, new byte[0], true);
+        final PUBLISH publish =
+                TestMessageUtil.createMqtt3Publish("hivemqId", "subonly", QoS.AT_LEAST_ONCE, new byte[0], true);
         when(retainedMessagePersistence.remove(anyString()))
                 .thenReturn(Futures.immediateFailedFuture(TestException.INSTANCE));
         publishService.publish(publish, executorService, "sender").get();
@@ -120,8 +120,8 @@ public class InternalPublishServiceImplTest {
                 .thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
         publishService.publish(publish, executorService, "sub1");
-        final ArgumentCaptor<Map<String, SubscriberWithIdentifiers>> mapArgumentCaptor = ArgumentCaptor
-                .forClass(Map.class);
+        final ArgumentCaptor<Map<String, SubscriberWithIdentifiers>> mapArgumentCaptor =
+                ArgumentCaptor.forClass(Map.class);
         verify(publishDistributor, atLeastOnce())
                 .distributeToNonSharedSubscribers(mapArgumentCaptor.capture(), any(), any());
         final Map<String, SubscriberWithIdentifiers> map = mapArgumentCaptor.getAllValues().getFirst();
@@ -138,8 +138,8 @@ public class InternalPublishServiceImplTest {
                 .thenReturn(new TopicSubscribers(ImmutableSet.of(sub1, sub2), ImmutableSet.of()));
         final PUBLISH publish = TestMessageUtil.createMqtt5Publish("topic");
         publishService.publish(publish, executorService, "sub1");
-        final ArgumentCaptor<Map<String, SubscriberWithIdentifiers>> mapArgumentCaptor = ArgumentCaptor
-                .forClass(Map.class);
+        final ArgumentCaptor<Map<String, SubscriberWithIdentifiers>> mapArgumentCaptor =
+                ArgumentCaptor.forClass(Map.class);
         verify(publishDistributor, atLeastOnce())
                 .distributeToNonSharedSubscribers(mapArgumentCaptor.capture(), any(), any());
         final Map<String, SubscriberWithIdentifiers> map = mapArgumentCaptor.getAllValues().getFirst();

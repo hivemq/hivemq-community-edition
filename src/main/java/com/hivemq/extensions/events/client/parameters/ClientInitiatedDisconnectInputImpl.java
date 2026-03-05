@@ -44,9 +44,13 @@ public class ClientInitiatedDisconnectInputImpl implements ClientInitiatedDiscon
     private final boolean graceful;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    public ClientInitiatedDisconnectInputImpl(final @NotNull String clientId, final @NotNull Channel channel,
-            final @Nullable DisconnectedReasonCode reasonCode, final @Nullable String reasonString,
-            final @Nullable UserProperties userProperties, final boolean graceful) {
+    public ClientInitiatedDisconnectInputImpl(
+            final @NotNull String clientId,
+            final @NotNull Channel channel,
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @Nullable UserProperties userProperties,
+            final boolean graceful) {
         Preconditions.checkNotNull(clientId, "client id must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");
         this.reasonCode = reasonCode;

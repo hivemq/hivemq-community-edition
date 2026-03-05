@@ -34,7 +34,8 @@ public class ConnackOutboundInputImpl implements ConnackOutboundInput, PluginTas
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull ConnackPacketImpl connackPacket;
-    public ConnackOutboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public ConnackOutboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull ConnackPacketImpl connackPacket) {
         this.clientInformation = clientInformation;

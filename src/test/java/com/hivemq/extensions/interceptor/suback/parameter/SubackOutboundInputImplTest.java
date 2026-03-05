@@ -37,8 +37,8 @@ public class SubackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final SubackPacketImpl packet = mock(SubackPacketImpl.class);
-        final SubackOutboundInputImpl input = new SubackOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final SubackOutboundInputImpl input =
+                new SubackOutboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getSubackPacket());
@@ -49,8 +49,8 @@ public class SubackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final SubackPacketImpl packet = mock(SubackPacketImpl.class);
-        final SubackOutboundInputImpl input = new SubackOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final SubackOutboundInputImpl input =
+                new SubackOutboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiableSubackPacketImpl modifiablePacket = mock(ModifiableSubackPacketImpl.class);
         final SubackPacketImpl newPacket = mock(SubackPacketImpl.class);
         final SubackOutboundOutputImpl output = mock(SubackOutboundOutputImpl.class);

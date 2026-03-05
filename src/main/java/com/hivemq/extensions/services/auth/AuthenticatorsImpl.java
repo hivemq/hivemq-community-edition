@@ -86,10 +86,9 @@ public class AuthenticatorsImpl implements Authenticators {
         if (InternalConfigurations.AUTH_DENY_UNAUTHENTICATED_CONNECTIONS.get()) {
             // Check lifeness
             if (getAuthenticatorProviderMap().isEmpty()) {
-                log.warn(
-                        "\n###############################################################################"
-                                + "\n# No security extension present, MQTT clients can not connect to this broker. #"
-                                + "\n###############################################################################");
+                log.warn("\n###############################################################################" +
+                        "\n# No security extension present, MQTT clients can not connect to this broker. #" +
+                        "\n###############################################################################");
             }
         }
     }

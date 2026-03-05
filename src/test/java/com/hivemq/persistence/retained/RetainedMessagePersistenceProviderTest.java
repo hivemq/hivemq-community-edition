@@ -28,10 +28,10 @@ public class RetainedMessagePersistenceProviderTest {
 
     @Test
     public void test_get() {
-        final RetainedMessagePersistenceImpl retainedMessagePersistence = Mockito
-                .mock(RetainedMessagePersistenceImpl.class);
-        final RetainedMessagePersistenceProvider provider = new RetainedMessagePersistenceProvider(
-                () -> retainedMessagePersistence);
+        final RetainedMessagePersistenceImpl retainedMessagePersistence =
+                Mockito.mock(RetainedMessagePersistenceImpl.class);
+        final RetainedMessagePersistenceProvider provider =
+                new RetainedMessagePersistenceProvider(() -> retainedMessagePersistence);
         assertEquals(retainedMessagePersistence, provider.get());
     }
 }

@@ -48,7 +48,10 @@ public class EnvironmentCloser {
      * @throws NullPointerException     if the name or the environment is {@code null}
      * @throws IllegalArgumentException if the maxTries or retry interval is smaller than 1
      */
-    public EnvironmentCloser(final @NotNull String name, final @NotNull Environment environment, final int maxTries,
+    public EnvironmentCloser(
+            final @NotNull String name,
+            final @NotNull Environment environment,
+            final int maxTries,
             final int retryInterval) {
         checkNotNull(name, "Name must not be null");
         checkNotNull(environment, "Environment must not be null");

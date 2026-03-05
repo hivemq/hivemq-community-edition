@@ -61,7 +61,9 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final SUBACK subAck = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), "success",
+        final SUBACK subAck = new SUBACK(3,
+                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, subAck);
     }
@@ -84,7 +86,9 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final SUBACK subAck = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), "reason",
+        final SUBACK subAck = new SUBACK(3,
+                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
+                "reason",
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, subAck);
     }
@@ -105,7 +109,9 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 0,
                 // payload
                 0x00};
-        final SUBACK subAck = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), "reason",
+        final SUBACK subAck = new SUBACK(3,
+                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
+                "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
         encodeTestBufferSize(expected, subAck);
     }
@@ -128,7 +134,9 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final SUBACK subAck = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), null,
+        final SUBACK subAck = new SUBACK(3,
+                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
+                null,
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, subAck);
     }
@@ -155,7 +163,9 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final SUBACK subAck = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), "success",
+        final SUBACK subAck = new SUBACK(3,
+                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty, mqttUserProperty, mqttUserProperty));
         encodeTestBufferSize(expected, subAck);
     }
@@ -183,7 +193,9 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
             expected = Bytes.concat(expected, new byte[]{(byte) mqtt5SubAckReasonCode.getCode()});
         }
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final SUBACK subAck = new SUBACK(3, Arrays.asList(Mqtt5SubAckReasonCode.values()), "success",
+        final SUBACK subAck = new SUBACK(3,
+                Arrays.asList(Mqtt5SubAckReasonCode.values()),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, subAck);
     }
@@ -213,8 +225,8 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
         maxUserProperties.encode(expected);
         // reason code
         expected.writeByte(0x01);
-        final SUBACK suback = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_1), reasonString,
-                maxUserProperties);
+        final SUBACK suback =
+                new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_1), reasonString, maxUserProperties);
         encodeTestBufferSize(expected.array(), suback);
         expected.release();
     }
@@ -240,8 +252,8 @@ public class Mqtt5SubackEncoderTest extends AbstractMqtt5EncoderTest {
         expected.writeByte(0);
         // reason code
         expected.writeByte(0x01);
-        final SUBACK suback = new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_1), reasonString,
-                maxUserProperties);
+        final SUBACK suback =
+                new SUBACK(3, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_1), reasonString, maxUserProperties);
         encodeTestBufferSize(expected.array(), suback);
         expected.release();
     }

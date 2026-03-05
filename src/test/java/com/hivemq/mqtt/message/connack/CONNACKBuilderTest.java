@@ -91,16 +91,27 @@ public class CONNACKBuilderTest {
         final MqttUserProperty userProperty = new MqttUserProperty("test1", "value");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(userProperty, userProperty);
         final boolean wildcardSubscriptionAvailable = true;
-        final CONNACK connack = CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
-                .withServerKeepAlive(serverKeepAlive).withTopicAliasMaximum(topicAliasMaximum)
-                .withMaximumPacketSize(maximumPacketSize).withSessionExpiryInterval(sessionExpiryInterval)
-                .withServerReference(serverReference).withResponseInformation(responseInformation)
-                .withAuthData(authData).withAuthMethod(authMethod).withReceiveMaximum(receiveMaximum)
-                .withMaximumQoS(maximumQoS).withSessionPresent(sessionPresent)
-                .withAssignedClientIdentifier(assignedClientIdentifier).withReasonString(reasonString)
-                .withRetainAvailable(retainAvailable).withSharedSubscriptionAvailable(sharedSubscriptionAvailable)
-                .withSubscriptionIdentifierAvailable(subscriptionIdentifierAvailable).withUserProperties(userProperties)
-                .withWildcardSubscriptionAvailable(wildcardSubscriptionAvailable).build();
+        final CONNACK connack = CONNACK.builder()
+                .withReasonCode(Mqtt5ConnAckReasonCode.SUCCESS)
+                .withServerKeepAlive(serverKeepAlive)
+                .withTopicAliasMaximum(topicAliasMaximum)
+                .withMaximumPacketSize(maximumPacketSize)
+                .withSessionExpiryInterval(sessionExpiryInterval)
+                .withServerReference(serverReference)
+                .withResponseInformation(responseInformation)
+                .withAuthData(authData)
+                .withAuthMethod(authMethod)
+                .withReceiveMaximum(receiveMaximum)
+                .withMaximumQoS(maximumQoS)
+                .withSessionPresent(sessionPresent)
+                .withAssignedClientIdentifier(assignedClientIdentifier)
+                .withReasonString(reasonString)
+                .withRetainAvailable(retainAvailable)
+                .withSharedSubscriptionAvailable(sharedSubscriptionAvailable)
+                .withSubscriptionIdentifierAvailable(subscriptionIdentifierAvailable)
+                .withUserProperties(userProperties)
+                .withWildcardSubscriptionAvailable(wildcardSubscriptionAvailable)
+                .build();
         assertEquals(connack.getServerKeepAlive(), serverKeepAlive);
         assertEquals(connack.getTopicAliasMaximum(), topicAliasMaximum);
         assertEquals(connack.getMaximumPacketSize(), maximumPacketSize);

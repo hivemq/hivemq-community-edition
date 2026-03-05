@@ -51,10 +51,16 @@ public class PublishImpl implements Publish {
     private final ByteBuffer payload;
     @NotNull
     private final UserPropertiesImpl userProperties;
-    public PublishImpl(@NotNull final Qos qos, final boolean retained, @NotNull final String topic,
-            @Nullable final PayloadFormatIndicator payloadFormatIndicator, @Nullable final Long messageExpiryInterval,
-            @Nullable final String responseTopic, @Nullable final ByteBuffer correlationData,
-            @Nullable final String contentType, @Nullable final ByteBuffer payload,
+    public PublishImpl(
+            @NotNull final Qos qos,
+            final boolean retained,
+            @NotNull final String topic,
+            @Nullable final PayloadFormatIndicator payloadFormatIndicator,
+            @Nullable final Long messageExpiryInterval,
+            @Nullable final String responseTopic,
+            @Nullable final ByteBuffer correlationData,
+            @Nullable final String contentType,
+            @Nullable final ByteBuffer payload,
             @NotNull final UserPropertiesImpl userProperties) {
         Preconditions.checkNotNull(qos, "QoS must never be null");
         Preconditions.checkNotNull(topic, "Topic must never be null");

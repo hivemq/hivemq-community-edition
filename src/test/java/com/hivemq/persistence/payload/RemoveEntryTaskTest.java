@@ -48,7 +48,9 @@ public class RemoveEntryTaskTest {
         removablePayloads.getQueue().add(1L);
         referenceCounter.getAndIncrement(1L);
         referenceCounter.decrementAndGet(1L);
-        final RemoveEntryTask task = new RemoveEntryTask(bucketLock, referenceCounter, localPersistence,
+        final RemoveEntryTask task = new RemoveEntryTask(bucketLock,
+                referenceCounter,
+                localPersistence,
                 new RemovablePayloads[]{removablePayloads});
         task.run();
         assertEquals(0, removablePayloads.getQueue().size());
@@ -60,7 +62,9 @@ public class RemoveEntryTaskTest {
     public void run_whenThePayloadIsInUse_removesThePayloadFromRemovablePayloadsWithoutDecrementing() {
         removablePayloads.getQueue().add(1L);
         referenceCounter.getAndIncrement(1L);
-        final RemoveEntryTask task = new RemoveEntryTask(bucketLock, referenceCounter, localPersistence,
+        final RemoveEntryTask task = new RemoveEntryTask(bucketLock,
+                referenceCounter,
+                localPersistence,
                 new RemovablePayloads[]{removablePayloads});
         task.run();
         assertEquals(0, removablePayloads.getQueue().size());
@@ -76,7 +80,9 @@ public class RemoveEntryTaskTest {
         referenceCounter.getAndIncrement(2L);
         referenceCounter.decrementAndGet(1L);
         referenceCounter.decrementAndGet(2L);
-        final RemoveEntryTask task = new RemoveEntryTask(bucketLock, referenceCounter, localPersistence,
+        final RemoveEntryTask task = new RemoveEntryTask(bucketLock,
+                referenceCounter,
+                localPersistence,
                 new RemovablePayloads[]{removablePayloads});
         task.run();
         assertEquals(0, removablePayloads.getQueue().size());
@@ -90,7 +96,9 @@ public class RemoveEntryTaskTest {
         removablePayloads.getQueue().add(1L);
         referenceCounter.getAndIncrement(1L);
         referenceCounter.decrementAndGet(1L);
-        final RemoveEntryTask task = new RemoveEntryTask(bucketLock, referenceCounter, localPersistence,
+        final RemoveEntryTask task = new RemoveEntryTask(bucketLock,
+                referenceCounter,
+                localPersistence,
                 new RemovablePayloads[]{removablePayloads});
         task.run();
         assertEquals(0, removablePayloads.getQueue().size());
@@ -123,7 +131,9 @@ public class RemoveEntryTaskTest {
         doAnswer(invocation -> {
             throw throwable;
         }).when(localPersistence).remove(anyLong());
-        return new RemoveEntryTask(bucketLock, referenceCounter, localPersistence,
+        return new RemoveEntryTask(bucketLock,
+                referenceCounter,
+                localPersistence,
                 new RemovablePayloads[]{removablePayloads});
     }
 }

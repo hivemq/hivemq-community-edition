@@ -94,7 +94,8 @@ public class IncomingSubscribeService {
     private final @NotNull RestrictionsConfigurationService restrictionsConfigurationService;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     @Inject
-    IncomingSubscribeService(final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
+    IncomingSubscribeService(
+            final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,
             final @NotNull SharedSubscriptionService sharedSubscriptionService,
             final @NotNull RetainedMessagesSender retainedMessagesSender,
@@ -114,8 +115,7 @@ public class IncomingSubscribeService {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull SUBSCRIBE msg,
             final boolean authorizersPresent) {
-        processSubscribe(
-                ctx,
+        processSubscribe(ctx,
                 msg,
                 new Mqtt5SubAckReasonCode[msg.getTopics().size()],
                 new String[msg.getTopics().size()],
@@ -149,9 +149,9 @@ public class IncomingSubscribeService {
             // if authorizers are present and no permissions are available and the default behaviour has not been
             // changed
             // then we deny the subscription
-            if (authorizersPresent && (defaultPermissions == null || (defaultPermissions.asList().size() < 1
-                    && defaultPermissions.getDefaultBehaviour() == DefaultAuthorizationBehaviour.ALLOW
-                    && !defaultPermissions.isDefaultAuthorizationBehaviourOverridden()))) {
+            if (authorizersPresent && (defaultPermissions == null || (defaultPermissions.asList().size() < 1 &&
+                    defaultPermissions.getDefaultBehaviour() == DefaultAuthorizationBehaviour.ALLOW &&
+                    !defaultPermissions.isDefaultAuthorizationBehaviourOverridden()))) {
                 providedCodes[i] = Mqtt5SubAckReasonCode.NOT_AUTHORIZED;
                 continue;
             }
@@ -159,8 +159,8 @@ public class IncomingSubscribeService {
             if (!DefaultPermissionsEvaluator.checkSubscription(permissions, subscription)) {
                 providedCodes[i] = Mqtt5SubAckReasonCode.NOT_AUTHORIZED;
                 // build reason string (concat multiple reasons)
-                reasonStrings[i] = "Not authorized to subscribe to topic '" + subscription.getTopic() + "' with QoS '"
-                        + subscription.getQoS().getQosNumber() + "'";
+                reasonStrings[i] = "Not authorized to subscribe to topic '" + subscription.getTopic() + "' with QoS '" +
+                        subscription.getQoS().getQosNumber() + "'";
             }
         }
         final StringBuilder reasonStringBuilder = new StringBuilder();
@@ -170,8 +170,7 @@ public class IncomingSubscribeService {
                 reasonStringBuilder.append(reasonString).append(". ");
             }
         }
-        persistSubscriptionForClient(
-                ctx,
+        persistSubscriptionForClient(ctx,
                 msg,
                 providedCodes,
                 reasonStringBuilder.length() > 0 ? reasonStringBuilder.toString() : null);
@@ -191,21 +190,19 @@ public class IncomingSubscribeService {
         for (final Topic topic : msg.getTopics()) {
             final String topicString = topic.getTopic();
             if (!Topics.isValidToSubscribe(topicString)) {
-                final String logMessage = "Disconnecting client '" + clientConnection.getClientId()
-                        + "'  (IP: {}) because it sent an invalid subscription: '" + topic.getTopic() + "'";
-                mqttServerDisconnector.disconnect(
-                        ctx.channel(),
+                final String logMessage = "Disconnecting client '" + clientConnection.getClientId() +
+                        "'  (IP: {}) because it sent an invalid subscription: '" + topic.getTopic() + "'";
+                mqttServerDisconnector.disconnect(ctx.channel(),
                         logMessage,
                         "Invalid subscription topic " + topic.getTopic(),
                         Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
                         ReasonStrings.DISCONNECT_SUBSCRIBE_TOPIC_FILTER_INVALID);
                 return false;
             } else if (topicString.length() > maxTopicLength) {
-                final String logMessage = "Disconnecting client '" + clientConnection.getClientId()
-                        + "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '"
-                        + topic.getTopic() + "'";
-                mqttServerDisconnector.disconnect(
-                        ctx.channel(),
+                final String logMessage = "Disconnecting client '" + clientConnection.getClientId() +
+                        "'  (IP: {}) because it sent a subscription to a topic exceeding the maximum topic length: '" +
+                        topic.getTopic() + "'";
+                mqttServerDisconnector.disconnect(ctx.channel(),
                         logMessage,
                         "Sent SUBSCRIBE for topic that exceeds maximum topic length",
                         Mqtt5DisconnectReasonCode.TOPIC_FILTER_INVALID,
@@ -225,39 +222,35 @@ public class IncomingSubscribeService {
         final String clientId = clientConnection.getClientId();
         downgradeSharedSubscriptions(msg);
         final ProtocolVersion mqttVersion = clientConnection.getProtocolVersion();
-        final Mqtt5SubAckReasonCode[] answerCodes = providedCodes != null
-                ? providedCodes
-                : new Mqtt5SubAckReasonCode[msg.getTopics().size()];
+        final Mqtt5SubAckReasonCode[] answerCodes =
+                providedCodes != null ? providedCodes : new Mqtt5SubAckReasonCode[msg.getTopics().size()];
         final ImmutableList.Builder<ListenableFuture<SubscriptionResult>> singleAddFutures = ImmutableList.builder();
         int futureCount = 0;
         final Set<Topic> ignoredTopics = new HashSet<>();
         for (int i = 0; i < msg.getTopics().size(); i++) {
             final Topic topic = msg.getTopics().get(i);
             if (answerCodes[i] == null || answerCodes[i].getCode() < 128) {
-                if (!mqttConfigurationService.wildcardSubscriptionsEnabled()
-                        && Topics.containsWildcard(topic.getTopic())) {
-                    final String logMessage = "Client '" + clientId
-                            + "' (IP: {}) sent a SUBSCRIBE with a wildcard character in the topic filter '"
-                            + topic.getTopic()
-                            + "', although wildcard subscriptions are disabled. Disconnecting client.";
-                    mqttServerDisconnector.disconnect(
-                            ctx.channel(),
+                if (!mqttConfigurationService.wildcardSubscriptionsEnabled() &&
+                        Topics.containsWildcard(topic.getTopic())) {
+                    final String logMessage = "Client '" + clientId +
+                            "' (IP: {}) sent a SUBSCRIBE with a wildcard character in the topic filter '" +
+                            topic.getTopic() + "', although wildcard subscriptions are disabled. Disconnecting client.";
+                    mqttServerDisconnector.disconnect(ctx.channel(),
                             logMessage,
-                            "Sent a SUBSCRIBE with a wildcard character in the topic filter '" + topic.getTopic()
-                                    + "', although wildcard subscriptions are disabled",
+                            "Sent a SUBSCRIBE with a wildcard character in the topic filter '" + topic.getTopic() +
+                                    "', although wildcard subscriptions are disabled",
                             Mqtt5DisconnectReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED,
                             ReasonStrings.DISCONNECT_WILDCARD_SUBSCRIPTIONS_NOT_SUPPORTED);
                     return;
-                } else if (!mqttConfigurationService.sharedSubscriptionsEnabled()
-                        && Topics.isSharedSubscriptionTopic(topic.getTopic())) {
-                    final String logMessage = "Client '" + clientId
-                            + "' (IP: {}) sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic()
-                            + "', although shared subscriptions are disabled. Disconnecting client.";
-                    mqttServerDisconnector.disconnect(
-                            ctx.channel(),
+                } else if (!mqttConfigurationService.sharedSubscriptionsEnabled() &&
+                        Topics.isSharedSubscriptionTopic(topic.getTopic())) {
+                    final String logMessage = "Client '" + clientId +
+                            "' (IP: {}) sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic() +
+                            "', although shared subscriptions are disabled. Disconnecting client.";
+                    mqttServerDisconnector.disconnect(ctx.channel(),
                             logMessage,
-                            "Sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic()
-                                    + "', although shared subscriptions are disabled",
+                            "Sent a SUBSCRIBE, which matches a shared subscription '" + topic.getTopic() +
+                                    "', although shared subscriptions are disabled",
                             Mqtt5DisconnectReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED,
                             ReasonStrings.DISCONNECT_SHARED_SUBSCRIPTIONS_NOT_SUPPORTED);
                     return;
@@ -298,10 +291,9 @@ public class IncomingSubscribeService {
                 final SettableFuture<SubscriptionResult> settableFuture = SettableFuture.create();
                 singleAddFutures.add(settableFuture);
                 futureCount++;
-                final ListenableFuture<SubscriptionResult> addSubscriptionFuture = clientSessionSubscriptionPersistence
-                        .addSubscription(clientId, topic);
-                Futures.addCallback(
-                        addSubscriptionFuture,
+                final ListenableFuture<SubscriptionResult> addSubscriptionFuture =
+                        clientSessionSubscriptionPersistence.addSubscription(clientId, topic);
+                Futures.addCallback(addSubscriptionFuture,
                         new SubscribePersistenceCallback(settableFuture, clientId, topic, mqttVersion, answerCodes, i),
                         MoreExecutors.directExecutor());
             }
@@ -309,8 +301,9 @@ public class IncomingSubscribeService {
         log.trace("Applied all subscriptions for client [{}]", clientId);
         if (futureCount == 0) {
             // we don't need to check for retained messages here, because we did not persist any of the subscriptions
-            ctx.channel().writeAndFlush(
-                    new SUBACK(msg.getPacketIdentifier(), ImmutableList.copyOf(answerCodes), reasonString));
+            ctx.channel()
+                    .writeAndFlush(
+                            new SUBACK(msg.getPacketIdentifier(), ImmutableList.copyOf(answerCodes), reasonString));
             return;
         }
         final SettableFuture<List<SubscriptionResult>> addResultsFuture = SettableFuture.create();
@@ -333,14 +326,16 @@ public class IncomingSubscribeService {
 
             @Override
             public void onSuccess(@Nullable final List<SubscriptionResult> subscriptionResults) {
-                final ChannelFuture future = ctx.channel().writeAndFlush(
-                        new SUBACK(msg.getPacketIdentifier(), ImmutableList.copyOf(answerCodes), reasonString));
+                final ChannelFuture future = ctx.channel()
+                        .writeAndFlush(
+                                new SUBACK(msg.getPacketIdentifier(), ImmutableList.copyOf(answerCodes), reasonString));
                 // actually the ignoredTopics are unnecessary in this case, as the batching logic already applies the
                 // filtering
                 if (subscriptionResults != null) {
-                    future.addListener(
-                            new SendRetainedMessagesListener(subscriptionResults, ignoredTopics,
-                                    retainedMessagePersistence, retainedMessagesSender));
+                    future.addListener(new SendRetainedMessagesListener(subscriptionResults,
+                            ignoredTopics,
+                            retainedMessagePersistence,
+                            retainedMessagesSender));
                 }
             }
 
@@ -393,10 +388,9 @@ public class IncomingSubscribeService {
             @NotNull final Mqtt5SubAckReasonCode[] answerCodes) {
         final SettableFuture<ImmutableList<SubscriptionResult>> settableFuture = SettableFuture.create();
         final ImmutableSet<Topic> topics = ImmutableSet.copyOf(cleanedSubscriptions);
-        final ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptionFuture = clientSessionSubscriptionPersistence
-                .addSubscriptions(clientId, topics);
-        Futures.addCallback(
-                addSubscriptionFuture,
+        final ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptionFuture =
+                clientSessionSubscriptionPersistence.addSubscriptions(clientId, topics);
+        Futures.addCallback(addSubscriptionFuture,
                 new SubscribePersistenceBatchedCallback(settableFuture, clientId, msg, mqttVersion, answerCodes),
                 MoreExecutors.directExecutor());
         return settableFuture;
@@ -412,8 +406,7 @@ public class IncomingSubscribeService {
                 clientConnection.getChannelIP().orElse("UNKNOWN"),
                 topic.getTopic(),
                 topic.getQoS().getQosNumber());
-        mqttServerDisconnector.disconnect(
-                ctx.channel(),
+        mqttServerDisconnector.disconnect(ctx.channel(),
                 null,
                 // already logged
                 "Not authorized to subscribe to topic '" + topic.getTopic() + "', QoS '" + topic.getQoS() + "'",
@@ -436,8 +429,10 @@ public class IncomingSubscribeService {
         private final Mqtt5SubAckReasonCode[] answerCodes;
         public SubscribePersistenceBatchedCallback(
                 @NotNull final SettableFuture<ImmutableList<SubscriptionResult>> settableFuture,
-                @NotNull final String clientId, @NotNull final SUBSCRIBE msg,
-                @NotNull final ProtocolVersion mqttVersion, @NotNull final Mqtt5SubAckReasonCode[] answerCodes) {
+                @NotNull final String clientId,
+                @NotNull final SUBSCRIBE msg,
+                @NotNull final ProtocolVersion mqttVersion,
+                @NotNull final Mqtt5SubAckReasonCode[] answerCodes) {
             this.settableFuture = settableFuture;
             this.clientId = clientId;
             this.msg = msg;
@@ -468,8 +463,8 @@ public class IncomingSubscribeService {
     }
     private void downgradeSharedSubscriptions(@NotNull final SUBSCRIBE subscribe) {
         for (final Topic topic : subscribe.getTopics()) {
-            final SharedSubscription sharedSubscription = sharedSubscriptionService
-                    .checkForSharedSubscription(topic.getTopic());
+            final SharedSubscription sharedSubscription =
+                    sharedSubscriptionService.checkForSharedSubscription(topic.getTopic());
             if (sharedSubscription == null) {
                 continue;
             }
@@ -492,9 +487,13 @@ public class IncomingSubscribeService {
         @NotNull
         private final Mqtt5SubAckReasonCode[] answerCodes;
         private final int index;
-        public SubscribePersistenceCallback(@NotNull final SettableFuture<SubscriptionResult> settableFuture,
-                @NotNull final String clientId, @NotNull final Topic topic, @NotNull final ProtocolVersion mqttVersion,
-                @NotNull final Mqtt5SubAckReasonCode[] answerCodes, final int index) {
+        public SubscribePersistenceCallback(
+                @NotNull final SettableFuture<SubscriptionResult> settableFuture,
+                @NotNull final String clientId,
+                @NotNull final Topic topic,
+                @NotNull final ProtocolVersion mqttVersion,
+                @NotNull final Mqtt5SubAckReasonCode[] answerCodes,
+                final int index) {
             this.settableFuture = settableFuture;
             this.clientId = clientId;
             this.topic = topic;
@@ -506,8 +505,7 @@ public class IncomingSubscribeService {
         @Override
         public void onSuccess(@Nullable final SubscriptionResult subscriptionResult) {
             settableFuture.set(subscriptionResult);
-            log.trace(
-                    "Adding subscriptions for client [{}] and topic [{}] with qos [{}]",
+            log.trace("Adding subscriptions for client [{}] and topic [{}] with qos [{}]",
                     clientId,
                     topic.getTopic(),
                     topic.getQoS());

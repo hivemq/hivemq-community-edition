@@ -95,13 +95,19 @@ public class ConnectInboundInterceptorHandlerTest {
         ClientConnection.of(channel).setClientId("client");
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new ConnectInboundInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
-                pluginTaskExecutorService, hivemqId, interceptors, serverInformation, connacker);
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new ConnectInboundInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
+                pluginTaskExecutorService,
+                hivemqId,
+                interceptors,
+                serverInformation,
+                connacker);
         channel.pipeline().addLast("test2", new ChannelInboundHandlerAdapter() {
 
             @Override
@@ -162,12 +168,9 @@ public class ConnectInboundInterceptorHandlerTest {
                 .thenReturn(ImmutableMap.of("extension", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
         final AtomicInteger counter = new AtomicInteger();
-        doAnswer(invocation -> counter.incrementAndGet()).when(connacker).connackError(
-                any(Channel.class),
-                anyString(),
-                anyString(),
-                any(Mqtt5ConnAckReasonCode.class),
-                anyString());
+        doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
+                .connackError(any(
+                        Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
         channel.writeInbound(testConnect());
         channel.runPendingTasks();
         await().pollInterval(10, TimeUnit.MILLISECONDS).until(() -> {
@@ -177,12 +180,8 @@ public class ConnectInboundInterceptorHandlerTest {
             }
             return true;
         });
-        verify(connacker, timeout(5000)).connackError(
-                any(Channel.class),
-                anyString(),
-                anyString(),
-                any(Mqtt5ConnAckReasonCode.class),
-                anyString());
+        verify(connacker, timeout(5000)).connackError(any(
+                Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
     }
 
     @Test(timeout = 5000)
@@ -193,12 +192,9 @@ public class ConnectInboundInterceptorHandlerTest {
                 .thenReturn(ImmutableMap.of("extension", interceptorProvider));
         when(hiveMQExtensions.getExtension(eq("extension"))).thenReturn(extension);
         final AtomicInteger counter = new AtomicInteger();
-        doAnswer(invocation -> counter.incrementAndGet()).when(connacker).connackError(
-                any(Channel.class),
-                anyString(),
-                anyString(),
-                any(Mqtt5ConnAckReasonCode.class),
-                anyString());
+        doAnswer(invocation -> counter.incrementAndGet()).when(connacker)
+                .connackError(any(
+                        Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
         channel.writeInbound(testConnect());
         channel.runPendingTasks();
         await().pollInterval(10, TimeUnit.MILLISECONDS).until(() -> {
@@ -208,12 +204,8 @@ public class ConnectInboundInterceptorHandlerTest {
             }
             return true;
         });
-        verify(connacker, timeout(5000)).connackError(
-                any(Channel.class),
-                anyString(),
-                anyString(),
-                any(Mqtt5ConnAckReasonCode.class),
-                anyString());
+        verify(connacker, timeout(5000)).connackError(any(
+                Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
     }
 
     @NotNull

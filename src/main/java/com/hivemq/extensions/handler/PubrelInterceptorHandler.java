@@ -62,8 +62,10 @@ public class PubrelInterceptorHandler {
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     private final @NotNull PluginTaskExecutorService executorService;
     @Inject
-    public PubrelInterceptorHandler(final @NotNull FullConfigurationService configurationService,
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
+    public PubrelInterceptorHandler(
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull PluginTaskExecutorService executorService) {
         this.configurationService = configurationService;
         this.asyncer = asyncer;
@@ -93,15 +95,15 @@ public class PubrelInterceptorHandler {
         final PubrelPacketImpl packet = new PubrelPacketImpl(pubrel);
         final PubrelInboundInputImpl input = new PubrelInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<PubrelInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-        final ModifiablePubrelPacketImpl modifiablePacket = new ModifiablePubrelPacketImpl(packet,
-                configurationService);
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
         final PubrelInboundOutputImpl output = new PubrelInboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubrelInboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
-        final PubrelInboundInterceptorContext context = new PubrelInboundInterceptorContext(clientId,
-                interceptors.size(), ctx, inputHolder, outputHolder);
+        final PubrelInboundInterceptorContext context =
+                new PubrelInboundInterceptorContext(clientId, interceptors.size(), ctx, inputHolder, outputHolder);
         for (final PubrelInboundInterceptor interceptor : interceptors) {
-            final HiveMQExtension extension = hiveMQExtensions
-                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
@@ -136,21 +138,25 @@ public class PubrelInterceptorHandler {
         final PubrelPacketImpl packet = new PubrelPacketImpl(pubrel);
         final PubrelOutboundInputImpl input = new PubrelOutboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<PubrelOutboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-        final ModifiablePubrelPacketImpl modifiablePacket = new ModifiablePubrelPacketImpl(packet,
-                configurationService);
+        final ModifiablePubrelPacketImpl modifiablePacket =
+                new ModifiablePubrelPacketImpl(packet, configurationService);
         final PubrelOutboundOutputImpl output = new PubrelOutboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<PubrelOutboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
         final PubrelOutboundInterceptorContext context = new PubrelOutboundInterceptorContext(clientId,
-                interceptors.size(), ctx, promise, inputHolder, outputHolder);
+                interceptors.size(),
+                ctx,
+                promise,
+                inputHolder,
+                outputHolder);
         for (final PubrelOutboundInterceptor interceptor : interceptors) {
-            final HiveMQExtension extension = hiveMQExtensions
-                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
             }
-            final PubrelOutboundInterceptorTask task = new PubrelOutboundInterceptorTask(interceptor,
-                    extension.getId());
+            final PubrelOutboundInterceptorTask task =
+                    new PubrelOutboundInterceptorTask(interceptor, extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
@@ -162,7 +168,9 @@ public class PubrelInterceptorHandler {
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ExtensionParameterHolder<PubrelInboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<PubrelInboundOutputImpl> outputHolder;
-        PubrelInboundInterceptorContext(final @NotNull String clientId, final int interceptorCount,
+        PubrelInboundInterceptorContext(
+                final @NotNull String clientId,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ExtensionParameterHolder<PubrelInboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<PubrelInboundOutputImpl> outputHolder) {
@@ -207,7 +215,8 @@ public class PubrelInterceptorHandler {
 
         private final @NotNull PubrelInboundInterceptor interceptor;
         private final @NotNull String extensionId;
-        PubrelInboundInterceptorTask(final @NotNull PubrelInboundInterceptor interceptor,
+        PubrelInboundInterceptorTask(
+                final @NotNull PubrelInboundInterceptor interceptor,
                 final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -221,8 +230,8 @@ public class PubrelInterceptorHandler {
                 interceptor.onInboundPubrel(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBREL interception. "
-                                + "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound PUBREL interception. " +
+                                "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 output.markAsFailed();
@@ -246,8 +255,11 @@ public class PubrelInterceptorHandler {
         private final @NotNull ChannelPromise promise;
         private final @NotNull ExtensionParameterHolder<PubrelOutboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<PubrelOutboundOutputImpl> outputHolder;
-        PubrelOutboundInterceptorContext(final @NotNull String clientId, final int interceptorCount,
-                final @NotNull ChannelHandlerContext ctx, final @NotNull ChannelPromise promise,
+        PubrelOutboundInterceptorContext(
+                final @NotNull String clientId,
+                final int interceptorCount,
+                final @NotNull ChannelHandlerContext ctx,
+                final @NotNull ChannelPromise promise,
                 final @NotNull ExtensionParameterHolder<PubrelOutboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<PubrelOutboundOutputImpl> outputHolder) {
             super(clientId);
@@ -292,7 +304,8 @@ public class PubrelInterceptorHandler {
 
         private final @NotNull PubrelOutboundInterceptor interceptor;
         private final @NotNull String extensionId;
-        PubrelOutboundInterceptorTask(final @NotNull PubrelOutboundInterceptor interceptor,
+        PubrelOutboundInterceptorTask(
+                final @NotNull PubrelOutboundInterceptor interceptor,
                 final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -306,8 +319,8 @@ public class PubrelInterceptorHandler {
                 interceptor.onOutboundPubrel(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBREL interception. "
-                                + "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on outbound PUBREL interception. " +
+                                "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 output.markAsFailed();

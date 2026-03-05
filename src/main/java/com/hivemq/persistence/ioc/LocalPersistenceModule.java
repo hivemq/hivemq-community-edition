@@ -45,7 +45,8 @@ class LocalPersistenceModule extends SingletonModule<Class<LocalPersistenceModul
 
     private final @NotNull Injector persistenceInjector;
     private final @NotNull PersistenceConfigurationService persistenceConfigurationService;
-    public LocalPersistenceModule(@NotNull final Injector persistenceInjector,
+    public LocalPersistenceModule(
+            @NotNull final Injector persistenceInjector,
             @NotNull final PersistenceConfigurationService persistenceConfigurationService) {
         super(LocalPersistenceModule.class);
         this.persistenceInjector = persistenceInjector;

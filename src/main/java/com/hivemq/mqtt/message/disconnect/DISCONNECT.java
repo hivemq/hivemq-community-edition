@@ -43,8 +43,11 @@ public class DISCONNECT extends MqttMessageWithUserProperties.MqttMessageWithRea
         serverReference = null;
     }
 
-    public DISCONNECT(final @NotNull Mqtt5DisconnectReasonCode reasonCode, final @Nullable String reasonString,
-            final @NotNull Mqtt5UserProperties userProperties, final @Nullable String serverReference,
+    public DISCONNECT(
+            final @NotNull Mqtt5DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties,
+            final @Nullable String serverReference,
             final long sessionExpiryInterval) {
         super(reasonCode, reasonString, userProperties);
         this.serverReference = serverReference;

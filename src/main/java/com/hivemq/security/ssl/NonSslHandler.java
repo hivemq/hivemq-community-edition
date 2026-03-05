@@ -52,13 +52,12 @@ public class NonSslHandler extends ByteToMessageDecoder {
         final boolean encrypted = SslHandler.isEncrypted(in);
         // With MQTT5 it is possible to craft a valid CONNECT packet, that matches an SSLv2 packet
         final boolean isConnectPacket = in.getUnsignedByte(0) == 16;
-        final boolean isMqttPacket = in.getUnsignedByte(7) == 'M' && in.getUnsignedByte(8) == 'Q'
-                && in.getUnsignedByte(9) == 'T' && in.getUnsignedByte(10) == 'T';
+        final boolean isMqttPacket = in.getUnsignedByte(7) == 'M' && in.getUnsignedByte(8) == 'Q' &&
+                in.getUnsignedByte(9) == 'T' && in.getUnsignedByte(10) == 'T';
         if (encrypted && !(isConnectPacket && isMqttPacket)) {
             final Channel channel = ctx.channel();
             final String eventLogMessage = appendListenerToMessage(channel, "SSL connection to non-SSL listener");
-            mqttServerDisconnector.logAndClose(
-                    channel,
+            mqttServerDisconnector.logAndClose(channel,
                     "SSL connection on non-SSL listener, dropping connection for client with IP '{}'",
                     eventLogMessage);
             in.clear();

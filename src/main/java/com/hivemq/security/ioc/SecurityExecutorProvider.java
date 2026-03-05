@@ -35,8 +35,8 @@ public class SecurityExecutorProvider implements Provider<ScheduledExecutorServi
     private final @NotNull ScheduledExecutorService sslContextStoreService;
     @Inject
     SecurityExecutorProvider(final @NotNull ShutdownHooks shutdownHooks) {
-        sslContextStoreService = Executors
-                .newScheduledThreadPool(2, ThreadFactoryUtil.create("ssl-context-executor-%d"));
+        sslContextStoreService =
+                Executors.newScheduledThreadPool(2, ThreadFactoryUtil.create("ssl-context-executor-%d"));
         shutdownHooks.add(new HiveMQShutdownHook() {
 
             @Override

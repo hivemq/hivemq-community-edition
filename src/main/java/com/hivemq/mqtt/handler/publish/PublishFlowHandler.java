@@ -70,7 +70,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private final @NotNull Map<Integer, Boolean> qos1AlreadySentMap;
     @VisibleForTesting
     @Inject
-    public PublishFlowHandler(final @NotNull PublishPollService publishPollService,
+    public PublishFlowHandler(
+            final @NotNull PublishPollService publishPollService,
             final @NotNull IncomingMessageFlowPersistence persistence,
             final @NotNull OrderedTopicService orderedTopicService,
             final @NotNull IncomingPublishHandler incomingPublishHandler,
@@ -116,8 +117,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
                 if (future.isSuccess()) {
                     qos1AlreadySentMap.remove(messageId);
                     if (log.isTraceEnabled()) {
-                        log.trace(
-                                "Client '{}' completed a PUBLISH flow with QoS 1 for packet identifier '{}'",
+                        log.trace("Client '{}' completed a PUBLISH flow with QoS 1 for packet identifier '{}'",
                                 ctx,
                                 messageId);
                     }
@@ -179,8 +179,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         } else if (publish.getQoS() == QoS.AT_LEAST_ONCE) {
             UNACKNOWLEDGED_PUBLISHES_COUNTER.incrementAndGet();
             if (publish.isDuplicateDelivery() && qos1AlreadySentMap.get(publish.getPacketIdentifier()) != null) {
-                log.debug(
-                        "Client {} sent a duplicate publish message with id {}. This message is ignored",
+                log.debug("Client {} sent a duplicate publish message with id {}. This message is ignored",
                         clientId,
                         publish.getPacketIdentifier());
             } else {
@@ -225,8 +224,8 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
     private void handlePubrec(@NotNull final ChannelHandlerContext ctx, @NotNull final PUBREC msg) {
         final String clientId = ClientConnection.of(ctx.channel()).getClientId();
         log.trace("Client {}: Received pubrec", clientId);
-        if (msg.getReasonCode() != Mqtt5PubRecReasonCode.SUCCESS
-                && msg.getReasonCode() != Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS) {
+        if (msg.getReasonCode() != Mqtt5PubRecReasonCode.SUCCESS &&
+                msg.getReasonCode() != Mqtt5PubRecReasonCode.NO_MATCHING_SUBSCRIBERS) {
             orderedTopicService.messageFlowComplete(ctx, ((MessageWithID) msg).getPacketIdentifier());
         }
         final ListenableFuture<Void> future = publishPollService.putPubrelInQueue(clientId, msg.getPacketIdentifier());
@@ -259,7 +258,9 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
         private final int messageId;
         private final @NotNull String client;
         private final @NotNull IncomingMessageFlowPersistence persistence;
-        PubcompSentListener(final int messageId, final @NotNull String client,
+        PubcompSentListener(
+                final int messageId,
+                final @NotNull String client,
                 final @NotNull IncomingMessageFlowPersistence persistence) {
             this.messageId = messageId;
             this.client = client;
@@ -271,8 +272,7 @@ public class PublishFlowHandler extends ChannelDuplexHandler {
             if (future.isSuccess()) {
                 UNACKNOWLEDGED_PUBLISHES_COUNTER.decrementAndGet();
                 persistence.remove(client, messageId);
-                log.trace(
-                        "Client '{}' completed a PUBLISH flow with QoS 2 for packet identifier '{}'",
+                log.trace("Client '{}' completed a PUBLISH flow with QoS 2 for packet identifier '{}'",
                         client,
                         messageId);
             }

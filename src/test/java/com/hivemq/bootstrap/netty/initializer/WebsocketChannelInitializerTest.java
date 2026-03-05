@@ -58,8 +58,8 @@ public class WebsocketChannelInitializerTest {
     @Test
     public void test_add_special_handlers() throws Exception {
         final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress("").port(0).build();
-        final WebsocketChannelInitializer websocketChannelInitializer = new WebsocketChannelInitializer(
-                channelDependencies, websocketListener, nonSslHandlerProvider);
+        final WebsocketChannelInitializer websocketChannelInitializer =
+                new WebsocketChannelInitializer(channelDependencies, websocketListener, nonSslHandlerProvider);
         websocketChannelInitializer.addSpecialHandlers(socketChannel);
         assertEquals(NON_SSL_HANDLER, pipeline.names().get(0));
         assertEquals(HTTP_SERVER_CODEC, pipeline.names().get(1));

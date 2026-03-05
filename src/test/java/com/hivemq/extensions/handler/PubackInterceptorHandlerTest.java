@@ -91,12 +91,14 @@ public class PubackInterceptorHandlerTest {
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new PubackInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new PubackInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test1", new ChannelOutboundHandlerAdapter() {
 
@@ -362,8 +364,7 @@ public class PubackInterceptorHandlerTest {
         public void onInboundPuback(
                 final @NotNull PubackInboundInput pubackInboundInput,
                 final @NotNull PubackInboundOutput pubackInboundOutput) {
-            @Immutable
-            final ModifiablePubackPacket pubackPacket = pubackInboundOutput.getPubackPacket();
+            @Immutable final ModifiablePubackPacket pubackPacket = pubackInboundOutput.getPubackPacket();
             pubackPacket.setReasonString("modified");
         }
     }
@@ -407,8 +408,7 @@ public class PubackInterceptorHandlerTest {
         public void onOutboundPuback(
                 final @NotNull PubackOutboundInput pubackOutboundInput,
                 final @NotNull PubackOutboundOutput pubackOutboundOutput) {
-            @Immutable
-            final ModifiablePubackPacket pubackPacket = pubackOutboundOutput.getPubackPacket();
+            @Immutable final ModifiablePubackPacket pubackPacket = pubackOutboundOutput.getPubackPacket();
             pubackPacket.setReasonString("modified");
         }
     }

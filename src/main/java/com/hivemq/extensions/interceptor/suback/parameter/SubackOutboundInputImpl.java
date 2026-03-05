@@ -33,8 +33,10 @@ public class SubackOutboundInputImpl implements SubackOutboundInput, PluginTaskI
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull SubackPacketImpl subackPacket;
-    public SubackOutboundInputImpl(final @NotNull ClientInformation clientInformation,
-            final @NotNull ConnectionInformation connectionInformation, final @NotNull SubackPacketImpl subackPacket) {
+    public SubackOutboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
+            final @NotNull ConnectionInformation connectionInformation,
+            final @NotNull SubackPacketImpl subackPacket) {
         this.clientInformation = clientInformation;
         this.connectionInformation = connectionInformation;
         this.subackPacket = subackPacket;

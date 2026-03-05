@@ -39,14 +39,13 @@ public class ClientAuthorizersImplTest {
 
     @Rule
     public final @NotNull TemporaryFolder temporaryFolder = new TemporaryFolder();
-    private final @NotNull ExtensionPriorityComparator extensionPriorityComparator = mock(
-            ExtensionPriorityComparator.class);
+    private final @NotNull ExtensionPriorityComparator extensionPriorityComparator =
+            mock(ExtensionPriorityComparator.class);
     private @NotNull ClientAuthorizersImpl authorizers;
     @Before
     public void before() {
-        when(extensionPriorityComparator.compare(any(), any())).thenAnswer(
-                invocation -> Integer
-                        .compare(invocation.getArguments()[0].hashCode(), invocation.getArguments()[1].hashCode()));
+        when(extensionPriorityComparator.compare(any(), any())).thenAnswer(invocation -> Integer
+                .compare(invocation.getArguments()[0].hashCode(), invocation.getArguments()[1].hashCode()));
         authorizers = new ClientAuthorizersImpl(extensionPriorityComparator);
     }
 
@@ -73,8 +72,8 @@ public class ClientAuthorizersImplTest {
         authorizers.put("extension-1", authorizer1);
         authorizers.put("extension-2", authorizer2);
         assertEquals(2, authorizers.getSubscriptionAuthorizersMap().size());
-        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) authorizer1.getClass()
-                .getClassLoader();
+        final IsolatedExtensionClassloader classloader =
+                (IsolatedExtensionClassloader) authorizer1.getClass().getClassLoader();
         authorizers.removeAllForPlugin(classloader);
         final Map<String, SubscriptionAuthorizer> map = authorizers.getSubscriptionAuthorizersMap();
         assertEquals(1, map.size());

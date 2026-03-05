@@ -60,20 +60,19 @@ public class PluginTaskExecutorServiceImplTest {
     @Before
     public void before() {
         InternalConfigurations.EXTENSION_TASK_QUEUE_EXECUTOR_THREADS_COUNT.set(2);
-        executorService = new PluginTaskExecutorServiceImpl(
-                new ExecutorProvider(Lists.newArrayList(executor1, executor2)), mock(ShutdownHooks.class));
+        executorService =
+                new PluginTaskExecutorServiceImpl(new ExecutorProvider(Lists.newArrayList(executor1, executor2)),
+                        mock(ShutdownHooks.class));
     }
 
     @Test
     public void test_inout_executed_in_the_right_executor() {
-        executorService.handlePluginInOutTaskExecution(
-                new TestPluginInOutContext(getIdForBucket(0)),
+        executorService.handlePluginInOutTaskExecution(new TestPluginInOutContext(getIdForBucket(0)),
                 TestPluginTaskInput::new,
                 TestPluginTaskOutput::new,
                 new TestPluginInOutTask(classloader));
         verify(executor1, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
-        executorService.handlePluginInOutTaskExecution(
-                new TestPluginInOutContext(getIdForBucket(1)),
+        executorService.handlePluginInOutTaskExecution(new TestPluginInOutContext(getIdForBucket(1)),
                 TestPluginTaskInput::new,
                 TestPluginTaskOutput::new,
                 new TestPluginInOutTask(classloader));
@@ -82,13 +81,11 @@ public class PluginTaskExecutorServiceImplTest {
 
     @Test
     public void test_in_executed_in_the_right_executor() {
-        executorService.handlePluginInTaskExecution(
-                new TestPluginInContext(getIdForBucket(0)),
+        executorService.handlePluginInTaskExecution(new TestPluginInContext(getIdForBucket(0)),
                 TestPluginTaskInput::new,
                 new TestPluginInTask(classloader));
         verify(executor1, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
-        executorService.handlePluginInTaskExecution(
-                new TestPluginInContext(getIdForBucket(1)),
+        executorService.handlePluginInTaskExecution(new TestPluginInContext(getIdForBucket(1)),
                 TestPluginTaskInput::new,
                 new TestPluginInTask(classloader));
         verify(executor2, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
@@ -96,13 +93,11 @@ public class PluginTaskExecutorServiceImplTest {
 
     @Test
     public void test_out_executed_in_the_right_executor() {
-        executorService.handlePluginOutTaskExecution(
-                new TestPluginOutContext(getIdForBucket(0)),
+        executorService.handlePluginOutTaskExecution(new TestPluginOutContext(getIdForBucket(0)),
                 TestPluginTaskOutput::new,
                 new TestPluginOutTask(classloader));
         verify(executor1, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));
-        executorService.handlePluginOutTaskExecution(
-                new TestPluginOutContext(getIdForBucket(1)),
+        executorService.handlePluginOutTaskExecution(new TestPluginOutContext(getIdForBucket(1)),
                 TestPluginTaskOutput::new,
                 new TestPluginOutTask(classloader));
         verify(executor2, times(1)).handlePluginTaskExecution(any(PluginTaskExecution.class));

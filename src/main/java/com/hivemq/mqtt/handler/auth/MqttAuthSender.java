@@ -49,8 +49,8 @@ public class MqttAuthSender {
             final @NotNull Mqtt5AuthReasonCode reasonCode,
             final @NotNull Mqtt5UserProperties userProperties,
             final @Nullable String reasonString) {
-        final AUTH auth = new AUTH(ClientConnectionContext.of(channel).getAuthMethod(),
-                Bytes.fromReadOnlyBuffer(authData), reasonCode, userProperties, reasonString);
+        final AUTH auth = new AUTH(ClientConnectionContext.of(channel)
+                .getAuthMethod(), Bytes.fromReadOnlyBuffer(authData), reasonCode, userProperties, reasonString);
         logAuth(channel, reasonCode, false);
         return channel.writeAndFlush(auth);
     }

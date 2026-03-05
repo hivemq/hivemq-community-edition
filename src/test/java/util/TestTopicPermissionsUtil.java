@@ -28,7 +28,8 @@ public class TestTopicPermissionsUtil {
 
     public static TopicPermission getTopicPermission() {
         return new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                .topicFilter("#").build();
+                .topicFilter("#")
+                .build();
     }
     @SuppressWarnings("NullabilityAnnotations")
     public static class TestTopicPermission implements TopicPermission {

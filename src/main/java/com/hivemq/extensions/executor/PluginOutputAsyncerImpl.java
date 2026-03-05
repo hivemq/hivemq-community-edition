@@ -62,9 +62,8 @@ public class PluginOutputAsyncerImpl implements PluginOutPutAsyncer {
     }
 
     @Override
-    public @NotNull <T extends PluginTaskOutput> Async<T> asyncify(
-            @NotNull final T output,
-            @NotNull final Duration timeout) {
+    public @NotNull <
+            T extends PluginTaskOutput> Async<T> asyncify(@NotNull final T output, @NotNull final Duration timeout) {
         output.markAsAsync();
         final SettableFuture<Boolean> asyncFuture = output.getAsyncFuture();
         Preconditions.checkNotNull(asyncFuture, "Async future cannot be null for async output");

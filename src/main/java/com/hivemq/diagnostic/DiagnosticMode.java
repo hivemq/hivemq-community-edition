@@ -60,9 +60,15 @@ public class DiagnosticMode {
     private final @NotNull ScheduledExecutorService executor;
     private @Nullable ConsoleReporter metricReporter;
     @Inject
-    DiagnosticMode(final @NotNull DiagnosticData diagnosticData, final @NotNull SystemInformation systemInformation,
-            final @NotNull MetricRegistry metricRegistry, final @NotNull ShutdownHooks shutdownHooks) {
-        this(diagnosticData, systemInformation, metricRegistry, shutdownHooks,
+    DiagnosticMode(
+            final @NotNull DiagnosticData diagnosticData,
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull MetricRegistry metricRegistry,
+            final @NotNull ShutdownHooks shutdownHooks) {
+        this(diagnosticData,
+                systemInformation,
+                metricRegistry,
+                shutdownHooks,
                 Executors.newSingleThreadScheduledExecutor(ThreadFactoryUtil.create(THREAD_NAME_FORMAT)));
     }
 
@@ -71,8 +77,11 @@ public class DiagnosticMode {
      *                 otherwise internally created executor of ConsoleReporter can't be accessed.
      */
     @VisibleForTesting
-    DiagnosticMode(final @NotNull DiagnosticData diagnosticData, final @NotNull SystemInformation systemInformation,
-            final @NotNull MetricRegistry metricRegistry, final @NotNull ShutdownHooks shutdownHooks,
+    DiagnosticMode(
+            final @NotNull DiagnosticData diagnosticData,
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull MetricRegistry metricRegistry,
+            final @NotNull ShutdownHooks shutdownHooks,
             final @NotNull ScheduledExecutorService executor) {
         this.diagnosticData = diagnosticData;
         this.systemInformation = systemInformation;
@@ -96,10 +105,14 @@ public class DiagnosticMode {
         final File metricLog = new File(diagnosticFolder, FILE_NAME_METRIC_LOG);
         try {
             final PrintStream logStream = new PrintStream(metricLog, Charset.defaultCharset().name());
-            metricReporter = ConsoleReporter.forRegistry(metricRegistry).scheduleOn(executor)
+            metricReporter = ConsoleReporter.forRegistry(metricRegistry)
+                    .scheduleOn(executor)
                     // Shut this executor down on stop. We can configure this here because we own it.
-                    .shutdownExecutorOnStop(true).convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MILLISECONDS).outputTo(logStream).build();
+                    .shutdownExecutorOnStop(true)
+                    .convertRatesTo(TimeUnit.SECONDS)
+                    .convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .outputTo(logStream)
+                    .build();
             metricReporter.start(1, TimeUnit.SECONDS);
             shutdownHooks.add(new HiveMQShutdownHook() {
 

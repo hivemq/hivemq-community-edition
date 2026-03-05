@@ -34,7 +34,8 @@ public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginT
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull SubscribePacketImpl subscribePacket;
-    public SubscribeInboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public SubscribeInboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull SubscribePacketImpl subscribePacket) {
         this.clientInformation = clientInformation;
@@ -58,7 +59,8 @@ public class SubscribeInboundInputImpl implements SubscribeInboundInput, PluginT
     }
 
     public @NotNull SubscribeInboundInputImpl update(final @NotNull SubscribeInboundOutputImpl output) {
-        return new SubscribeInboundInputImpl(clientInformation, connectionInformation,
+        return new SubscribeInboundInputImpl(clientInformation,
+                connectionInformation,
                 output.getSubscribePacket().copy());
     }
 }

@@ -51,9 +51,15 @@ public class PersistenceShutdownHookTest {
     @Before
     public void init() {
         persistenceShutdownHook = new PersistenceShutdownHook(clientSessionPersistence,
-                clientSessionSubscriptionPersistence, incomingMessageFlowPersistence, retainedMessagePersistence,
-                payloadPersistence, clientQueuePersistence, persistenceExecutorService,
-                persistenceScheduledExecutorService, payloadPersistenceExecutor, singleWriterService);
+                clientSessionSubscriptionPersistence,
+                incomingMessageFlowPersistence,
+                retainedMessagePersistence,
+                payloadPersistence,
+                clientQueuePersistence,
+                persistenceExecutorService,
+                persistenceScheduledExecutorService,
+                payloadPersistenceExecutor,
+                singleWriterService);
         when(clientSessionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(clientSessionSubscriptionPersistence.closeDB()).thenReturn(Futures.immediateFuture(null));
         when(retainedMessagePersistence.closeDB()).thenReturn(Futures.immediateFuture(null));

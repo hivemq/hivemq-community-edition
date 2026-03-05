@@ -131,8 +131,8 @@ public class SslClientCertificateHandlerTest {
     @Test
     public void test_class_cast_exception_no_ssl_handler() {
         final EmbeddedChannel freshChannel = new EmbeddedChannel();
-        final UndefinedClientConnection freshClientConnection = new UndefinedClientConnection(freshChannel, null,
-                mock());
+        final UndefinedClientConnection freshClientConnection =
+                new UndefinedClientConnection(freshChannel, null, mock());
         freshChannel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(freshClientConnection);
         freshChannel.pipeline().addLast(new SslClientCertificateHandler(tls, mqttServerDisconnector));
         freshChannel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, new WrongHandler());

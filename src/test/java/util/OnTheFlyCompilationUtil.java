@@ -55,8 +55,7 @@ public class OnTheFlyCompilationUtil {
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(toFolder));
         // compile the file
-        compiler.getTask(
-                null,
+        compiler.getTask(null,
                 fileManager,
                 null,
                 null,

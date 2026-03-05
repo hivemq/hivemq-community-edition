@@ -69,8 +69,8 @@ public class Mqtt5AuthEncoderTest extends AbstractMqtt5EncoderTest {
                 4,
                 // auth method
                 0x15, 0, 1, 'x'};
-        final AUTH auth = new AUTH("x", null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES,
-                null);
+        final AUTH auth =
+                new AUTH("x", null, Mqtt5AuthReasonCode.SUCCESS, Mqtt5UserProperties.NO_USER_PROPERTIES, null);
         encodeTestBufferSize(expected, auth);
     }
 

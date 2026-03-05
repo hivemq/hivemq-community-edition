@@ -27,7 +27,10 @@ public class BucketChunkResult<V> {
     private final boolean finished;
     private final @Nullable String lastKey;
     private final int bucketIndex;
-    public BucketChunkResult(@NotNull final V value, final boolean finished, @Nullable final String lastKey,
+    public BucketChunkResult(
+            @NotNull final V value,
+            final boolean finished,
+            @Nullable final String lastKey,
             final int bucketIndex) {
         this.value = value;
         this.finished = finished;
@@ -54,7 +57,7 @@ public class BucketChunkResult<V> {
 
     @Override
     public String toString() {
-        return "BucketChunkResult{" + "value=" + value + ", finished=" + finished + ", lastKey='" + lastKey + '\''
-                + ", bucketIndex=" + bucketIndex + '}';
+        return "BucketChunkResult{" + "value=" + value + ", finished=" + finished + ", lastKey='" + lastKey + '\'' +
+                ", bucketIndex=" + bucketIndex + '}';
     }
 }

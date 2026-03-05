@@ -89,8 +89,8 @@ public class ExtensionStaticInitializerImplTest {
     private final @NotNull SubscriptionStore subscriptionStore = mock(SubscriptionStore.class);
     private final @NotNull ClientService clientService = mock(ClientService.class);
     private final @NotNull HiveMQExtensions hiveMQExtensions = mock(HiveMQExtensions.class);
-    private final @NotNull GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService = mock(
-            GlobalManagedExtensionExecutorService.class);
+    private final @NotNull GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService =
+            mock(GlobalManagedExtensionExecutorService.class);
     private final @NotNull PublishService publishService = mock(PublishService.class);
     private final @NotNull EventRegistry eventRegistry = mock(EventRegistry.class);
     private final @NotNull ClusterService clusterService = mock(ClusterService.class);
@@ -109,8 +109,8 @@ public class ExtensionStaticInitializerImplTest {
     private @NotNull WillPublishBuilder willPublishBuilder;
     @Before
     public void before() {
-        final FullConfigurationService fullConfigurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService fullConfigurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         metricRegistry = new MetricRegistry();
         initializerRegistry = new InitializerRegistryImpl(new InitializersImpl(hiveMQExtensions));
         retainedPublishBuilder = new RetainedPublishBuilderImpl(fullConfigurationService);
@@ -119,15 +119,26 @@ public class ExtensionStaticInitializerImplTest {
         publishBuilder = new PublishBuilderImpl(fullConfigurationService);
         willPublishBuilder = new WillPublishBuilderImpl(fullConfigurationService);
         securityRegistry = new SecurityRegistryImpl(new AuthenticatorsImpl(hiveMQExtensions),
-                new AuthorizersImpl(hiveMQExtensions), hiveMQExtensions);
-        servicesDependencies = Mockito.spy(
-                new ExtensionServicesDependenciesImpl(metricRegistry, initializerRegistry, retainedMessageStore,
-                        clientService, subscriptionStore, globalManagedExtensionExecutorService, publishService,
-                        hiveMQExtensions, securityRegistry, eventRegistry, clusterService, interceptorRegistry,
-                        adminService));
-        builderDependencies = Mockito.spy(
-                new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder, () -> topicSubscriptionBuilder,
-                        () -> topicPermissionBuilder, () -> publishBuilder, () -> willPublishBuilder));
+                new AuthorizersImpl(hiveMQExtensions),
+                hiveMQExtensions);
+        servicesDependencies = Mockito.spy(new ExtensionServicesDependenciesImpl(metricRegistry,
+                initializerRegistry,
+                retainedMessageStore,
+                clientService,
+                subscriptionStore,
+                globalManagedExtensionExecutorService,
+                publishService,
+                hiveMQExtensions,
+                securityRegistry,
+                eventRegistry,
+                clusterService,
+                interceptorRegistry,
+                adminService));
+        builderDependencies = Mockito.spy(new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder,
+                () -> topicSubscriptionBuilder,
+                () -> topicPermissionBuilder,
+                () -> publishBuilder,
+                () -> willPublishBuilder));
         staticInitializer = new ExtensionStaticInitializerImpl(servicesDependencies, builderDependencies);
     }
 
@@ -308,8 +319,8 @@ public class ExtensionStaticInitializerImplTest {
     @NotNull
     private ImmutableMap<String, Object> getServicesMap(final Class<? extends ExtensionMain> extensionMainClass)
             throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        final Class<?> servicesClass = extensionMainClass.getClassLoader()
-                .loadClass("com.hivemq.extension.sdk.api.services.Services");
+        final Class<?> servicesClass =
+                extensionMainClass.getClassLoader().loadClass("com.hivemq.extension.sdk.api.services.Services");
         final Field servicesField = servicesClass.getDeclaredField("services");
         servicesField.setAccessible(true);
         final Object o = servicesField.get(null);
@@ -323,8 +334,8 @@ public class ExtensionStaticInitializerImplTest {
     private ImmutableMap<String, Supplier<Object>> getBuildersMap(
             final Class<? extends ExtensionMain> extensionMainClass)
             throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        final Class<?> buildersClass = extensionMainClass.getClassLoader()
-                .loadClass("com.hivemq.extension.sdk.api.services.builder.Builders");
+        final Class<?> buildersClass =
+                extensionMainClass.getClassLoader().loadClass("com.hivemq.extension.sdk.api.services.builder.Builders");
         final Field buildersField = buildersClass.getDeclaredField("builders");
         buildersField.setAccessible(true);
         final Object o = buildersField.get(null);
@@ -340,13 +351,13 @@ public class ExtensionStaticInitializerImplTest {
         final File jarFile = temporaryFolder.newFile();
         javaArchive.as(ZipExporter.class).exportTo(jarFile, true);
         // this classloader contains the classes from the JAR file
-        final IsolatedExtensionClassloader cl = new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()},
-                getClass().getClassLoader());
+        final IsolatedExtensionClassloader cl =
+                new IsolatedExtensionClassloader(new URL[]{jarFile.toURI().toURL()}, getClass().getClassLoader());
         cl.loadClassesWithStaticContext();
         staticInitializer.initialize("extensionid", cl);
         final ClassServiceLoader classServiceLoader = new ClassServiceLoader();
-        final Iterable<? extends Class<?>> loadedClasses = classServiceLoader
-                .load(Class.forName("com.hivemq.extension.sdk.api.ExtensionMain", true, cl), cl);
+        final Iterable<? extends Class<?>> loadedClasses =
+                classServiceLoader.load(Class.forName("com.hivemq.extension.sdk.api.ExtensionMain", true, cl), cl);
         // noinspection unchecked
         return (Class<? extends ExtensionMain>) loadedClasses.iterator().next();
     }

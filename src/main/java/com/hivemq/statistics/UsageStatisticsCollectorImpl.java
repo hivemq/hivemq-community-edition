@@ -58,9 +58,11 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
     private final @NotNull HivemqId hivemqId;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     @Inject
-    public UsageStatisticsCollectorImpl(final @NotNull SystemInformation systemInformation,
+    public UsageStatisticsCollectorImpl(
+            final @NotNull SystemInformation systemInformation,
             final @NotNull FullConfigurationService fullConfigurationService,
-            final @NotNull MetricsHolder metricsHolder, final @NotNull HivemqId hivemqId,
+            final @NotNull MetricsHolder metricsHolder,
+            final @NotNull HivemqId hivemqId,
             final @NotNull HiveMQExtensions hiveMQExtensions) {
         this.systemInformation = systemInformation;
         this.fullConfigurationService = fullConfigurationService;
@@ -148,8 +150,8 @@ public class UsageStatisticsCollectorImpl implements UsageStatisticsCollector {
 
     private @Nullable <T> T getGaugeValue(final String metricName) {
         try {
-            final SortedMap<String, Gauge> gauges = metricsHolder.getMetricRegistry()
-                    .getGauges((name, metric) -> metricName.equals(name));
+            final SortedMap<String, Gauge> gauges =
+                    metricsHolder.getMetricRegistry().getGauges((name, metric) -> metricName.equals(name));
             if (gauges.isEmpty()) {
                 return null;
             }

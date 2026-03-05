@@ -52,15 +52,19 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
     private final @Nullable Integer subscriptionIdentifier;
     private int sizeInMemory = SIZE_NOT_CALCULATED;
     // MQTT 5 Topic
-    public Topic(final @NotNull String topic, final @NotNull QoS qoS, final boolean noLocal,
-            final boolean retainAsPublished, final @NotNull Mqtt5RetainHandling retainHandling,
+    public Topic(
+            final @NotNull String topic,
+            final @NotNull QoS qoS,
+            final boolean noLocal,
+            final boolean retainAsPublished,
+            final @NotNull Mqtt5RetainHandling retainHandling,
             final @Nullable Integer subscriptionIdentifier) {
         checkNotNull(topic, "A Topic must not be null");
         checkNotNull(qoS, "A QoS must not be null");
         checkNotNull(retainHandling, "A RetainHandling must not be null");
         checkArgument(
-                (subscriptionIdentifier == null)
-                        || ((subscriptionIdentifier >= 1) && (subscriptionIdentifier <= 268_435_455)),
+                (subscriptionIdentifier == null) ||
+                        ((subscriptionIdentifier >= 1) && (subscriptionIdentifier <= 268_435_455)),
                 "Subscription identifier must be between 1 and 268_435_455");
         this.topic = topic;
         this.qoS = qoS;
@@ -70,7 +74,10 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
         this.subscriptionIdentifier = subscriptionIdentifier;
     }
 
-    public Topic(final @NotNull String topic, final @NotNull QoS qoS, final boolean noLocal,
+    public Topic(
+            final @NotNull String topic,
+            final @NotNull QoS qoS,
+            final boolean noLocal,
             final boolean retainAsPublished) {
         this(topic, qoS, noLocal, retainAsPublished, DEFAULT_RETAIN_HANDLING, null);
     }
@@ -89,7 +96,8 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
             @NotNull final Subscription subscription,
             final @Nullable Integer subscriptionIdentifier) {
         return new Topic(subscription.getTopicFilter(),
-                Objects.requireNonNull(QoS.valueOf(subscription.getQos().getQosNumber())), subscription.getNoLocal(),
+                Objects.requireNonNull(QoS.valueOf(subscription.getQos().getQosNumber())),
+                subscription.getNoLocal(),
                 subscription.getRetainAsPublished(),
                 Objects.requireNonNull(Mqtt5RetainHandling.fromCode(subscription.getRetainHandling().getCode())),
                 subscriptionIdentifier);

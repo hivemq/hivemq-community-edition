@@ -72,9 +72,11 @@ public class TestMqttDecoder {
         final MqttServerDisconnector disconnector = new MqttServerDisconnectorImpl(eventLog);
         final MqttConnacker mqttConnacker = new MqttConnackerImpl(eventLog);
         final MetricsHolder metricsHolder = new MetricsHolder(new MetricRegistry());
-        final MqttConnectDecoder mqttConnectDecoder = new MqttConnectDecoder(mqttConnacker, fullConfigurationService,
-                hiveMQId, new ClientIds(hiveMQId));
-        return new MQTTMessageDecoder(mqttConnectDecoder, mqttConnacker, fullConfigurationService.mqttConfiguration(),
+        final MqttConnectDecoder mqttConnectDecoder =
+                new MqttConnectDecoder(mqttConnacker, fullConfigurationService, hiveMQId, new ClientIds(hiveMQId));
+        return new MQTTMessageDecoder(mqttConnectDecoder,
+                mqttConnacker,
+                fullConfigurationService.mqttConfiguration(),
                 new MqttDecoders(new Mqtt3PublishDecoder(hiveMQId, disconnector, fullConfigurationService),
                         new Mqtt3PubackDecoder(disconnector, fullConfigurationService),
                         new Mqtt3PubrecDecoder(disconnector, fullConfigurationService),
@@ -84,7 +86,9 @@ public class TestMqttDecoder {
                         new Mqtt3SubscribeDecoder(disconnector, fullConfigurationService),
                         new Mqtt3UnsubscribeDecoder(disconnector, fullConfigurationService),
                         new MqttPingreqDecoder(disconnector),
-                        new Mqtt5PublishDecoder(disconnector, hiveMQId, fullConfigurationService,
+                        new Mqtt5PublishDecoder(disconnector,
+                                hiveMQId,
+                                fullConfigurationService,
                                 new TopicAliasLimiterImpl()),
                         new Mqtt5DisconnectDecoder(disconnector, fullConfigurationService),
                         new Mqtt5SubscribeDecoder(disconnector, fullConfigurationService),
@@ -94,6 +98,7 @@ public class TestMqttDecoder {
                         new Mqtt5PubcompDecoder(disconnector, fullConfigurationService),
                         new Mqtt5AuthDecoder(disconnector, fullConfigurationService),
                         new Mqtt5UnsubscribeDecoder(disconnector, fullConfigurationService)),
-                disconnector, new GlobalMQTTMessageCounter(metricsHolder));
+                disconnector,
+                new GlobalMQTTMessageCounter(metricsHolder));
     }
 }

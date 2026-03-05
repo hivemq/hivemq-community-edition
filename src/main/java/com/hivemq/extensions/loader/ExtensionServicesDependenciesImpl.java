@@ -53,13 +53,17 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
     private final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry;
     private final @NotNull AdminService adminService;
     @Inject
-    public ExtensionServicesDependenciesImpl(final @NotNull MetricRegistry metricRegistry,
+    public ExtensionServicesDependenciesImpl(
+            final @NotNull MetricRegistry metricRegistry,
             final @NotNull InitializerRegistry initializerRegistry,
-            final @NotNull RetainedMessageStore retainedMessageStore, final @NotNull ClientService clientService,
+            final @NotNull RetainedMessageStore retainedMessageStore,
+            final @NotNull ClientService clientService,
             final @NotNull SubscriptionStore subscriptionStore,
             final @NotNull GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService,
-            final @NotNull PublishService publishService, final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull SecurityRegistry securityRegistry, final @NotNull EventRegistry eventRegistry,
+            final @NotNull PublishService publishService,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull SecurityRegistry securityRegistry,
+            final @NotNull EventRegistry eventRegistry,
             final @NotNull ClusterService clusterService,
             final @NotNull GlobalInterceptorRegistry globalInterceptorRegistry,
             final @NotNull AdminService adminService) {
@@ -99,7 +103,8 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
 
     @NotNull
     private ManagedExecutorServicePerExtension getManagedExecutorService(final @NotNull ClassLoader classLoader) {
-        return new ManagedExecutorServicePerExtension(globalManagedExtensionExecutorService, classLoader,
+        return new ManagedExecutorServicePerExtension(globalManagedExtensionExecutorService,
+                classLoader,
                 hiveMQExtensions);
     }
 }

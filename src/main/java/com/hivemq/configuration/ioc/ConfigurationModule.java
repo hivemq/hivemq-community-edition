@@ -36,7 +36,8 @@ public class ConfigurationModule extends SingletonModule {
 
     private final FullConfigurationService configurationService;
     private final HivemqId hiveMQId;
-    public ConfigurationModule(final @NotNull FullConfigurationService configurationService,
+    public ConfigurationModule(
+            final @NotNull FullConfigurationService configurationService,
             final @NotNull HivemqId hiveMQId) {
         super(ConfigurationModule.class);
         this.configurationService = configurationService;

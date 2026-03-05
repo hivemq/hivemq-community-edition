@@ -50,8 +50,8 @@ import static org.mockito.Mockito.when;
  */
 public class PendingWillMessagesTest {
 
-    private final ListeningScheduledExecutorService executorService = MoreExecutors
-            .listeningDecorator(Executors.newSingleThreadScheduledExecutor());
+    private final ListeningScheduledExecutorService executorService =
+            MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
     private InternalPublishService publishService;
     private ClientSessionPersistence clientSessionPersistence;
     private ClientSessionLocalPersistence clientSessionLocalPersistence;
@@ -64,8 +64,11 @@ public class PendingWillMessagesTest {
         when(publishService.publish(any(), any(), anyString())).thenReturn(mock(ListenableFuture.class));
         final MetricsHolder metricsHolder = mock(MetricsHolder.class);
         when(metricsHolder.getPublishedWillMessagesCount()).thenReturn(mock(Counter.class));
-        pendingWillMessages = new PendingWillMessages(publishService, executorService, clientSessionPersistence,
-                clientSessionLocalPersistence, metricsHolder);
+        pendingWillMessages = new PendingWillMessages(publishService,
+                executorService,
+                clientSessionPersistence,
+                clientSessionLocalPersistence,
+                metricsHolder);
     }
 
     @After
@@ -76,8 +79,12 @@ public class PendingWillMessagesTest {
     @Test
     public void test_add() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(5)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
@@ -88,8 +95,12 @@ public class PendingWillMessagesTest {
     @Test
     public void test_add_session_expiry() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(10).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(10)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 5, sessionWill, 123L);
         pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
@@ -100,8 +111,12 @@ public class PendingWillMessagesTest {
     @Test
     public void test_add_and_send() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(0).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(0)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
@@ -112,8 +127,12 @@ public class PendingWillMessagesTest {
     @Test
     public void test_add_and_expiry() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(10).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(10)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 0, sessionWill, 123L);
         pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
@@ -124,15 +143,17 @@ public class PendingWillMessagesTest {
     @Test
     public void reset() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(5)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
-        when(clientSessionPersistence.pendingWills()).thenReturn(
-                Futures.immediateFuture(
-                        ImmutableMap
-                                .of("client1", new PendingWillMessages.PendingWill(3, System.currentTimeMillis()))));
+        when(clientSessionPersistence.pendingWills()).thenReturn(Futures.immediateFuture(
+                ImmutableMap.of("client1", new PendingWillMessages.PendingWill(3, System.currentTimeMillis()))));
         pendingWillMessages.reset();
         assertEquals(1, pendingWillMessages.getPendingWills().size());
         assertEquals(3, pendingWillMessages.getPendingWills().get("client1").getDelayInterval());
@@ -141,8 +162,12 @@ public class PendingWillMessagesTest {
     @Test
     public void test_check_dont_send() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(5)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         pendingWillMessages.sendOrEnqueueWillIfAvailable("client", clientSession);
@@ -154,8 +179,12 @@ public class PendingWillMessagesTest {
     @Test
     public void test_check_send() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(5).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(5)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         when(clientSessionLocalPersistence.getSession("client", false)).thenReturn(clientSession);
@@ -169,8 +198,12 @@ public class PendingWillMessagesTest {
     @Test
     public void sendWillIfPending_sendsPendingWillIfAvailable_andRemovesIt() {
         final MqttWillPublish mqttWillPublish = new MqttWillPublish.Mqtt5Builder().withHivemqId("hivemqId")
-                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES).withPayload("message".getBytes())
-                .withQos(QoS.AT_MOST_ONCE).withTopic("topic").withDelayInterval(1000).build();
+                .withUserProperties(Mqtt5UserProperties.NO_USER_PROPERTIES)
+                .withPayload("message".getBytes())
+                .withQos(QoS.AT_MOST_ONCE)
+                .withTopic("topic")
+                .withDelayInterval(1000)
+                .build();
         final ClientSessionWill sessionWill = new ClientSessionWill(mqttWillPublish, 1L);
         final ClientSession clientSession = new ClientSession(false, 10, sessionWill, 123L);
         final String clientId = "client";

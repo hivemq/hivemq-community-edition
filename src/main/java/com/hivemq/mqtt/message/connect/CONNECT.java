@@ -52,12 +52,23 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
     private final @Nullable String authMethod;
     private final byte @Nullable [] authData;
     private final @Nullable MqttWillPublish willPublish;
-    private CONNECT(final @NotNull ProtocolVersion protocolVersion, final @NotNull String clientIdentifier,
-            final int keepAlive, final boolean cleanStart, final long sessionExpiryInterval, final int receiveMaximum,
-            final int topicAliasMaximum, final long maximumPacketSize, final boolean responseInformationRequested,
-            final boolean problemInformationRequested, final @Nullable String username,
-            final byte @Nullable [] password, final @Nullable String authMethod, final byte @Nullable [] authData,
-            final @Nullable MqttWillPublish willPublish, final @NotNull Mqtt5UserProperties userProperties) {
+    private CONNECT(
+            final @NotNull ProtocolVersion protocolVersion,
+            final @NotNull String clientIdentifier,
+            final int keepAlive,
+            final boolean cleanStart,
+            final long sessionExpiryInterval,
+            final int receiveMaximum,
+            final int topicAliasMaximum,
+            final long maximumPacketSize,
+            final boolean responseInformationRequested,
+            final boolean problemInformationRequested,
+            final @Nullable String username,
+            final byte @Nullable [] password,
+            final @Nullable String authMethod,
+            final byte @Nullable [] authData,
+            final @Nullable MqttWillPublish willPublish,
+            final @NotNull Mqtt5UserProperties userProperties) {
         super(userProperties);
         this.protocolVersion = protocolVersion;
         this.clientIdentifier = clientIdentifier;
@@ -188,10 +199,22 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         private @Nullable MqttWillPublish willPublish;
         public @NotNull CONNECT build() {
             Preconditions.checkNotNull(clientIdentifier, "client identifier must never be null");
-            return new CONNECT(protocolVersion, clientIdentifier, keepAlive, cleanStart, sessionExpiryInterval,
-                    DEFAULT_RECEIVE_MAXIMUM, DEFAULT_TOPIC_ALIAS_MAXIMUM, DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
-                    DEFAULT_RESPONSE_INFORMATION_REQUESTED, DEFAULT_PROBLEM_INFORMATION_REQUESTED, username, password,
-                    null, null, willPublish, Mqtt5UserProperties.NO_USER_PROPERTIES);
+            return new CONNECT(protocolVersion,
+                    clientIdentifier,
+                    keepAlive,
+                    cleanStart,
+                    sessionExpiryInterval,
+                    DEFAULT_RECEIVE_MAXIMUM,
+                    DEFAULT_TOPIC_ALIAS_MAXIMUM,
+                    DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
+                    DEFAULT_RESPONSE_INFORMATION_REQUESTED,
+                    DEFAULT_PROBLEM_INFORMATION_REQUESTED,
+                    username,
+                    password,
+                    null,
+                    null,
+                    willPublish,
+                    Mqtt5UserProperties.NO_USER_PROPERTIES);
         }
 
         public @NotNull Mqtt3Builder withProtocolVersion(final @NotNull ProtocolVersion protocolVersion) {
@@ -257,9 +280,22 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         private @NotNull Mqtt5UserProperties userProperties = Mqtt5UserProperties.NO_USER_PROPERTIES;
         public @NotNull CONNECT build() {
             Preconditions.checkNotNull(clientIdentifier, "client identifier must never be null");
-            return new CONNECT(ProtocolVersion.MQTTv5, clientIdentifier, keepAlive, cleanStart, sessionExpiryInterval,
-                    receiveMaximum, topicAliasMaximum, maximumPacketSize, responseInformationRequested,
-                    problemInformationRequested, username, password, authMethod, authData, willPublish, userProperties);
+            return new CONNECT(ProtocolVersion.MQTTv5,
+                    clientIdentifier,
+                    keepAlive,
+                    cleanStart,
+                    sessionExpiryInterval,
+                    receiveMaximum,
+                    topicAliasMaximum,
+                    maximumPacketSize,
+                    responseInformationRequested,
+                    problemInformationRequested,
+                    username,
+                    password,
+                    authMethod,
+                    authData,
+                    willPublish,
+                    userProperties);
         }
 
         public @NotNull Mqtt5Builder withClientIdentifier(final @NotNull String clientIdentifier) {
@@ -338,11 +374,18 @@ public class CONNECT extends MqttMessageWithUserProperties implements Mqtt5CONNE
         }
     }
     public static @NotNull CONNECT from(final @NotNull ConnectPacketImpl packet, final @NotNull String clusterId) {
-        return new CONNECT(MqttVersionUtil.toProtocolVersion(packet.getMqttVersion()), packet.getClientId(),
-                packet.getKeepAlive(), packet.getCleanStart(), packet.getSessionExpiryInterval(),
-                packet.getReceiveMaximum(), packet.getTopicAliasMaximum(), packet.getMaximumPacketSize(),
-                packet.getRequestResponseInformation(), packet.getRequestProblemInformation(),
-                packet.getUserName().orElse(null), Bytes.getBytesFromReadOnlyBuffer(packet.getPassword()),
+        return new CONNECT(MqttVersionUtil.toProtocolVersion(packet.getMqttVersion()),
+                packet.getClientId(),
+                packet.getKeepAlive(),
+                packet.getCleanStart(),
+                packet.getSessionExpiryInterval(),
+                packet.getReceiveMaximum(),
+                packet.getTopicAliasMaximum(),
+                packet.getMaximumPacketSize(),
+                packet.getRequestResponseInformation(),
+                packet.getRequestProblemInformation(),
+                packet.getUserName().orElse(null),
+                Bytes.getBytesFromReadOnlyBuffer(packet.getPassword()),
                 packet.getAuthenticationMethod().orElse(null),
                 Bytes.getBytesFromReadOnlyBuffer(packet.getAuthenticationData()),
                 MqttWillPublish.fromWillPacket(clusterId, packet.getWillPublish().orElse(null)),

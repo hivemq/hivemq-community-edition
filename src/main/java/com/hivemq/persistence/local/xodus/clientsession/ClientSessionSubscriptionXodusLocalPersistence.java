@@ -67,10 +67,15 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     final @NotNull ClientSessionSubscriptionXodusSerializer serializer;
     private final AtomicLong nextId = new AtomicLong();
     @Inject
-    ClientSessionSubscriptionXodusLocalPersistence(final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
-            final @NotNull EnvironmentUtil environmentUtil, final @NotNull PersistenceStartup persistenceStartup) {
-        super(environmentUtil, localPersistenceFileUtil, persistenceStartup,
-                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(), true);
+    ClientSessionSubscriptionXodusLocalPersistence(
+            final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
+            final @NotNull EnvironmentUtil environmentUtil,
+            final @NotNull PersistenceStartup persistenceStartup) {
+        super(environmentUtil,
+                localPersistenceFileUtil,
+                persistenceStartup,
+                InternalConfigurations.PERSISTENCE_BUCKET_COUNT.get(),
+                true);
         this.serializer = new ClientSessionSubscriptionXodusSerializer();
     }
 
@@ -139,10 +144,10 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
         final Bucket bucket = buckets[bucketIndex];
         bucket.getEnvironment().executeInTransaction(txn -> {
             final ByteIterable key = bytesToByteIterable(serializer.serializeKey(client));
-            bucket.getStore().put(
-                    txn,
-                    key,
-                    bytesToByteIterable(serializer.serializeValue(topic, timestamp, nextId.getAndIncrement())));
+            bucket.getStore()
+                    .put(txn,
+                            key,
+                            bytesToByteIterable(serializer.serializeValue(topic, timestamp, nextId.getAndIncrement())));
         });
     }
 
@@ -202,8 +207,8 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
                 // since serialized-key starts with clientId length and then clientId, this only matches the exact
                 // client
-                final ByteIterable firstEntry = cursor
-                        .getSearchKey(bytesToByteIterable(serializer.serializeKey(client)));
+                final ByteIterable firstEntry =
+                        cursor.getSearchKey(bytesToByteIterable(serializer.serializeKey(client)));
                 if (firstEntry == null) {
                     return ImmutableSet.of();
                 }
@@ -262,9 +267,8 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
             String lastKey = null;
             int containedItemCount = 0;
             try (final Cursor cursor = bucket.getStore().openCursor(txn)) {
-                final ByteIterable lastClientIdKey = lastClientId != null
-                        ? bytesToByteIterable(serializer.serializeKey(lastClientId))
-                        : null;
+                final ByteIterable lastClientIdKey =
+                        lastClientId != null ? bytesToByteIterable(serializer.serializeKey(lastClientId)) : null;
                 if (lastClientIdKey != null) {
                     // jump to last known key or to next entry after key
                     cursor.getSearchKeyRange(lastClientIdKey);
@@ -308,7 +312,9 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
                         containedItemCount += topicSet.size();
                         resultBuilder.put(clientId, topicSet);
                         if (containedItemCount >= maxResults) {
-                            return new BucketChunkResult<>(resultBuilder.build(), !cursor.getNext(), lastKey,
+                            return new BucketChunkResult<>(resultBuilder.build(),
+                                    !cursor.getNext(),
+                                    lastKey,
                                     bucketIndex);
                         }
                     }

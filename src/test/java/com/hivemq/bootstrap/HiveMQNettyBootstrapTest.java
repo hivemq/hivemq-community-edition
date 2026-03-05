@@ -60,9 +60,13 @@ public class HiveMQNettyBootstrapTest {
     private final int randomPort = RandomPortGenerator.get();
     @Before
     public void before() {
-        hiveMQNettyBootstrap = new HiveMQNettyBootstrap(shutdownHooks, listenerConfigurationService,
-                channelInitializerFactoryImpl, connectionPersistence,
-                new NettyConfiguration(NioServerSocketChannel.class, NioSocketChannel.class, new NioEventLoopGroup(1),
+        hiveMQNettyBootstrap = new HiveMQNettyBootstrap(shutdownHooks,
+                listenerConfigurationService,
+                channelInitializerFactoryImpl,
+                connectionPersistence,
+                new NettyConfiguration(NioServerSocketChannel.class,
+                        NioSocketChannel.class,
+                        new NioEventLoopGroup(1),
                         new NioEventLoopGroup(1)));
         when(channelInitializerFactoryImpl.getChannelInitializer(any(Listener.class)))
                 .thenReturn(abstractChannelInitializer);
@@ -80,8 +84,8 @@ public class HiveMQNettyBootstrapTest {
     @Test
     public void bootstrapServer_whenTCPListenerProvided_thenSuccessfulBootstrap() throws Exception {
         setupTcpListener(randomPort);
-        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap
-                .bootstrapServer();
+        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture =
+                hiveMQNettyBootstrap.bootstrapServer();
         // check for netty shutdown hook
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
         assertEquals(1, listenableFuture.get().size());
@@ -91,8 +95,8 @@ public class HiveMQNettyBootstrapTest {
     @Test
     public void bootstrapServer_whenTCPListenerWithTLSProvided_thenSuccessfulBootstrap() throws Exception {
         setupTlsTcpListener(randomPort);
-        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap
-                .bootstrapServer();
+        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture =
+                hiveMQNettyBootstrap.bootstrapServer();
         // check for netty shutdown hook
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
         assertEquals(1, listenableFuture.get().size());
@@ -102,8 +106,8 @@ public class HiveMQNettyBootstrapTest {
     @Test
     public void bootstrapServer_whenWebsocketListenerProvided_thenSuccessfulBootstrap() throws Exception {
         setupWebsocketListener(randomPort);
-        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap
-                .bootstrapServer();
+        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture =
+                hiveMQNettyBootstrap.bootstrapServer();
         // check for netty shutdown hook
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
         assertEquals(1, listenableFuture.get().size());
@@ -113,8 +117,8 @@ public class HiveMQNettyBootstrapTest {
     @Test
     public void bootstrapServer_whenWebsocketListenerWithTLSProvided_thenSuccessfulBootstrap() throws Exception {
         setupTlsWebsocketListener(randomPort);
-        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap
-                .bootstrapServer();
+        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture =
+                hiveMQNettyBootstrap.bootstrapServer();
         // check for netty shutdown hook
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
         assertEquals(1, listenableFuture.get().size());
@@ -127,8 +131,8 @@ public class HiveMQNettyBootstrapTest {
         setupTlsTcpListener(randomPort + 1);
         setupWebsocketListener(randomPort + 2);
         setupTlsWebsocketListener(randomPort + 3);
-        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture = hiveMQNettyBootstrap
-                .bootstrapServer();
+        final ListenableFuture<List<ListenerStartupInformation>> listenableFuture =
+                hiveMQNettyBootstrap.bootstrapServer();
         // check for netty shutdown hook
         verify(shutdownHooks, atLeastOnce()).add(any(NettyShutdownHook.class));
         assertEquals(4, listenableFuture.get().size());
@@ -156,14 +160,14 @@ public class HiveMQNettyBootstrapTest {
 
     private WebsocketListener createWebsocketListener(final int givenPort) {
         final String bindAddress = "0.0.0.0";
-        final WebsocketListener websocketListener = new WebsocketListener.Builder().bindAddress(bindAddress)
-                .port(givenPort).build();
+        final WebsocketListener websocketListener =
+                new WebsocketListener.Builder().bindAddress(bindAddress).port(givenPort).build();
         return websocketListener;
     }
 
     private void setupTlsWebsocketListener(final int givenPort) {
-        final List<TlsWebsocketListener> tlsWebsocketListeners = Lists
-                .newArrayList(createTlsWebsocketListener(givenPort));
+        final List<TlsWebsocketListener> tlsWebsocketListeners =
+                Lists.newArrayList(createTlsWebsocketListener(givenPort));
         when(listenerConfigurationService.getTlsWebsocketListeners()).thenReturn(tlsWebsocketListeners);
     }
 

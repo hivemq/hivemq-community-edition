@@ -38,8 +38,11 @@ public class DisconnectPacketImpl implements DisconnectPacket {
     final long sessionExpiryInterval;
     final @Nullable String serverReference;
     final @NotNull UserPropertiesImpl userProperties;
-    public DisconnectPacketImpl(final @NotNull DisconnectReasonCode reasonCode, final @Nullable String reasonString,
-            final long sessionExpiryInterval, final @Nullable String serverReference,
+    public DisconnectPacketImpl(
+            final @NotNull DisconnectReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final long sessionExpiryInterval,
+            final @Nullable String serverReference,
             final @NotNull UserPropertiesImpl userProperties) {
         this.reasonCode = reasonCode;
         this.reasonString = reasonString;
@@ -49,8 +52,10 @@ public class DisconnectPacketImpl implements DisconnectPacket {
     }
 
     public DisconnectPacketImpl(final @NotNull DISCONNECT disconnect) {
-        this(disconnect.getReasonCode().toDisconnectReasonCode(), disconnect.getReasonString(),
-                disconnect.getSessionExpiryInterval(), disconnect.getServerReference(),
+        this(disconnect.getReasonCode().toDisconnectReasonCode(),
+                disconnect.getReasonString(),
+                disconnect.getSessionExpiryInterval(),
+                disconnect.getServerReference(),
                 UserPropertiesImpl.of(disconnect.getUserProperties().asList()));
     }
 
@@ -66,9 +71,8 @@ public class DisconnectPacketImpl implements DisconnectPacket {
 
     @Override
     public @NotNull Optional<Long> getSessionExpiryInterval() {
-        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET)
-                ? Optional.empty()
-                : Optional.of(sessionExpiryInterval);
+        return (sessionExpiryInterval == DISCONNECT.SESSION_EXPIRY_NOT_SET) ? Optional.empty() :
+                Optional.of(sessionExpiryInterval);
     }
 
     @Override
@@ -90,9 +94,9 @@ public class DisconnectPacketImpl implements DisconnectPacket {
             return false;
         }
         final DisconnectPacketImpl that = (DisconnectPacketImpl) o;
-        return (reasonCode == that.reasonCode) && Objects.equals(reasonString, that.reasonString)
-                && (sessionExpiryInterval == that.sessionExpiryInterval)
-                && Objects.equals(serverReference, that.serverReference) && userProperties.equals(that.userProperties);
+        return (reasonCode == that.reasonCode) && Objects.equals(reasonString, that.reasonString) &&
+                (sessionExpiryInterval == that.sessionExpiryInterval) &&
+                Objects.equals(serverReference, that.serverReference) && userProperties.equals(that.userProperties);
     }
 
     @Override

@@ -179,8 +179,8 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // variable header
                 // packet identifier
                 0, 1};
-        final PUBACK pubAck = new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null,
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final PUBACK pubAck =
+                new PUBACK(1, Mqtt5PubAckReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         encodeTestBufferSize(expected, pubAck);
     }
 
@@ -249,8 +249,8 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 4, 'u', 's', 'e', 'r', 0, 9, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', '2'};
         final MqttUserProperty userProperty = new MqttUserProperty("user", "property");
         final MqttUserProperty userProperty2 = new MqttUserProperty("user", "property2");
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties
-                .of(ImmutableList.of(userProperty, userProperty2));
+        final Mqtt5UserProperties userProperties =
+                Mqtt5UserProperties.of(ImmutableList.of(userProperty, userProperty2));
         final PUBACK pubAck = new PUBACK(1, reasonCode, "reason", userProperties);
         encodeTestBufferSize(expected, pubAck);
     }
@@ -267,8 +267,8 @@ public class Mqtt5PubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // packet identifier
                 0, 1};
         final MaximumPacketBuilder maxPacket = new MaximumPacketBuilder().build(MAX_PACKET_SIZE);
-        final PUBACK pubAck = new PUBACK(1, reasonCode, null,
-                getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1));
+        final PUBACK pubAck =
+                new PUBACK(1, reasonCode, null, getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1));
         encodeTestBufferSize(expected, pubAck);
     }
 

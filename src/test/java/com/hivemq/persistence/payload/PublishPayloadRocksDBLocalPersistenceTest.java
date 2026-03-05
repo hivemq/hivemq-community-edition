@@ -140,8 +140,8 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         final int highestPayloadId = 123456789;
         persistence.put(highestPayloadId, new byte[]{1, 2, 3});
         persistence.stop();
-        final PublishPayloadRocksDBLocalPersistence newPersistence = new PublishPayloadRocksDBLocalPersistence(
-                localPersistenceFileUtil, persistenceStartup);
+        final PublishPayloadRocksDBLocalPersistence newPersistence =
+                new PublishPayloadRocksDBLocalPersistence(localPersistenceFileUtil, persistenceStartup);
         newPersistence.start();
         System.err.println(PUBLISH.PUBLISH_COUNTER.get());
         assertTrue(PUBLISH.PUBLISH_COUNTER.get() > highestPayloadId);
@@ -168,9 +168,9 @@ public class PublishPayloadRocksDBLocalPersistenceTest {
         for (final long rocksDbMemTableSize : persistence.getRocksdbToMemTableSize()) {
             assertEquals(0L, rocksDbMemTableSize);
         }
-        assertTrue(
-                capturingAppender.getLastCapturedLog().getMessage()
-                        .contains("Hard flushing memTable due to exceeding memTable limit"));
+        assertTrue(capturingAppender.getLastCapturedLog()
+                .getMessage()
+                .contains("Hard flushing memTable due to exceeding memTable limit"));
     }
 
     @Test

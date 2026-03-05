@@ -26,8 +26,8 @@ import com.hivemq.extension.sdk.api.packets.pubcomp.PubcompReasonCode;
  */
 public enum Mqtt5PubCompReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS), PACKET_IDENTIFIER_NOT_FOUND(
-            MqttCommonReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
+    SUCCESS(MqttCommonReasonCode.SUCCESS),
+    PACKET_IDENTIFIER_NOT_FOUND(MqttCommonReasonCode.PACKET_IDENTIFIER_NOT_FOUND);
     private final int code;
     private final @NotNull PubcompReasonCode pubcompReasonCode;
     Mqtt5PubCompReasonCode(final int code) {
@@ -47,8 +47,8 @@ public enum Mqtt5PubCompReasonCode implements Mqtt5ReasonCode {
     public @NotNull PubcompReasonCode toPubcompReasonCode() {
         return pubcompReasonCode;
     }
-    private static final @NotNull Mqtt5PubCompReasonCode @NotNull [] PUBCOMP_LOOKUP = new Mqtt5PubCompReasonCode[PubcompReasonCode
-            .values().length];
+    private static final @NotNull Mqtt5PubCompReasonCode @NotNull [] PUBCOMP_LOOKUP =
+            new Mqtt5PubCompReasonCode[PubcompReasonCode.values().length];
     static {
         for (final Mqtt5PubCompReasonCode reasonCode : values()) {
             PUBCOMP_LOOKUP[reasonCode.pubcompReasonCode.ordinal()] = reasonCode;

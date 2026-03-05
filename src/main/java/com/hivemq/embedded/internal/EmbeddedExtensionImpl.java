@@ -29,8 +29,13 @@ class EmbeddedExtensionImpl implements EmbeddedExtension {
     private final int priority;
     private final int startPriority;
     private final @NotNull ExtensionMain extensionMain;
-    EmbeddedExtensionImpl(final @NotNull String id, final @NotNull String name, final @NotNull String version,
-            final @Nullable String author, final int priority, final int startPriority,
+    EmbeddedExtensionImpl(
+            final @NotNull String id,
+            final @NotNull String name,
+            final @NotNull String version,
+            final @Nullable String author,
+            final int priority,
+            final int startPriority,
             final @NotNull ExtensionMain extensionMain) {
         this.id = id;
         this.name = name;
@@ -77,8 +82,8 @@ class EmbeddedExtensionImpl implements EmbeddedExtension {
     @NotNull
     @Override
     public String toString() {
-        return "EmbeddedExtension{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", version='" + version + '\''
-                + ", author='" + author + '\'' + ", priority=" + priority + ", startPriority=" + startPriority
-                + ", extensionMain=" + extensionMain.getClass().getSimpleName() + '}';
+        return "EmbeddedExtension{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", version='" + version + '\'' +
+                ", author='" + author + '\'' + ", priority=" + priority + ", startPriority=" + startPriority +
+                ", extensionMain=" + extensionMain.getClass().getSimpleName() + '}';
     }
 }

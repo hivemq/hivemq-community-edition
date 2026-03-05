@@ -94,12 +94,14 @@ public class PubrelInterceptorHandlerTest {
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
         when(extension.getId()).thenReturn("plugin");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new PubrelInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new PubrelInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
@@ -356,7 +358,9 @@ public class PubrelInterceptorHandlerTest {
 
     @NotNull
     private PUBREL testPubrel() {
-        return new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason",
+        return new PUBREL(1,
+                Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
     public static class TestModifyInboundInterceptor implements PubrelInboundInterceptor {
@@ -365,8 +369,7 @@ public class PubrelInterceptorHandlerTest {
         public void onInboundPubrel(
                 final @NotNull PubrelInboundInput pubrelInboundInput,
                 final @NotNull PubrelInboundOutput pubrelInboundOutput) {
-            @Immutable
-            final ModifiablePubrelPacket pubrelPacket = pubrelInboundOutput.getPubrelPacket();
+            @Immutable final ModifiablePubrelPacket pubrelPacket = pubrelInboundOutput.getPubrelPacket();
             pubrelPacket.setReasonString("modified");
         }
     }
@@ -409,8 +412,7 @@ public class PubrelInterceptorHandlerTest {
         public void onOutboundPubrel(
                 final @NotNull PubrelOutboundInput pubrelOutboundInput,
                 final @NotNull PubrelOutboundOutput pubrelOutboundOutput) {
-            @Immutable
-            final ModifiablePubrelPacket pubrelPacket = pubrelOutboundOutput.getPubrelPacket();
+            @Immutable final ModifiablePubrelPacket pubrelPacket = pubrelOutboundOutput.getPubrelPacket();
             pubrelPacket.setReasonString("modified");
         }
     }

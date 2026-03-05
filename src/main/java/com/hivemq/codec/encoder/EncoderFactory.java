@@ -73,7 +73,8 @@ public class EncoderFactory {
     private final @NotNull Mqtt5EncoderFactory mqtt5Instance;
     private final @NotNull Mqtt3EncoderFactory mqtt3Instance;
     @Inject
-    public EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
+    public EncoderFactory(
+            final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService,
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
         mqtt5Instance = new Mqtt5EncoderFactory(messageDroppedService, securityConfigurationService);
@@ -151,7 +152,8 @@ public class EncoderFactory {
         private final @NotNull Mqtt5AuthEncoder mqtt5AuthEncoder;
         private final @NotNull Mqtt5UnsubackEncoder mqtt5UnsubackEncoder;
         private final @NotNull MqttPingrespEncoder mqttPingrespEncoder;
-        Mqtt5EncoderFactory(final @NotNull MessageDroppedService messageDroppedService,
+        Mqtt5EncoderFactory(
+                final @NotNull MessageDroppedService messageDroppedService,
                 final @NotNull SecurityConfigurationService securityConfigurationService) {
             mqtt5PublishEncoder = new Mqtt5PublishEncoder(messageDroppedService, securityConfigurationService);
             mqtt5DisconnectEncoder = new Mqtt5DisconnectEncoder(messageDroppedService, securityConfigurationService);

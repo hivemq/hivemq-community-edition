@@ -41,7 +41,8 @@ public class InMemorySingleWriter implements SingleWriterService {
     private static final int SUBSCRIPTION_QUEUE_INDEX = 2;
     private static final int QUEUED_MESSAGES_QUEUE_INDEX = 3;
     private static final int ATTRIBUTE_STORE_QUEUE_INDEX = 4;
-    private final @NotNull InMemoryProducerQueues @NotNull [] producers = new InMemoryProducerQueues[AMOUNT_OF_PRODUCERS];
+    private final @NotNull InMemoryProducerQueues @NotNull [] producers =
+            new InMemoryProducerQueues[AMOUNT_OF_PRODUCERS];
     private final int persistenceBucketCount;
     @Inject
     public InMemorySingleWriter() {

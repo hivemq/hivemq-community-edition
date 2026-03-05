@@ -34,7 +34,8 @@ public class MQTTMessageEncoder extends MessageToByteEncoder<Message> {
     private final @NotNull EncoderFactory encoderFactory;
     private final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter;
     @Inject
-    public MQTTMessageEncoder(final @NotNull EncoderFactory encoderFactory,
+    public MQTTMessageEncoder(
+            final @NotNull EncoderFactory encoderFactory,
             final @NotNull GlobalMQTTMessageCounter globalMQTTMessageCounter) {
         this.encoderFactory = encoderFactory;
         this.globalMQTTMessageCounter = globalMQTTMessageCounter;

@@ -91,13 +91,15 @@ public class SubackOutboundInterceptorHandlerTest {
         ClientConnection.of(channel).setRequestResponseInformation(true);
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(Mockito.mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
         final SubackOutboundInterceptorHandler handler = new SubackOutboundInterceptorHandler(configurationService,
-                asyncer, hiveMQExtensions, pluginTaskExecutorService);
+                asyncer,
+                hiveMQExtensions,
+                pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
             @Override
@@ -118,8 +120,8 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_intercept_simple_subAck() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
-                new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
         final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), SimpleSubackTestInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
@@ -140,8 +142,8 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_modify_subAck() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
-                new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
         final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), TestModifySubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
@@ -163,8 +165,8 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_outbound_exception() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
-                new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
         final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), TestExceptionSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
@@ -184,8 +186,8 @@ public class SubackOutboundInterceptorHandlerTest {
 
     @Test
     public void test_set_too_many_reasonCodes() throws Exception {
-        final ClientContextImpl clientContext = new ClientContextImpl(hiveMQExtensions,
-                new ModifiableDefaultPermissionsImpl());
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(hiveMQExtensions, new ModifiableDefaultPermissionsImpl());
         final SubackOutboundInterceptor interceptor = IsolatedExtensionClassloaderUtil
                 .loadInstance(temporaryFolder.getRoot().toPath(), TestIndexOutOfBoundsSubackInterceptor.class);
         clientContext.addSubackOutboundInterceptor(interceptor);
@@ -207,7 +209,9 @@ public class SubackOutboundInterceptorHandlerTest {
     }
 
     private @NotNull SUBACK testSubAck() {
-        return new SUBACK(1, ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0), "reason",
+        return new SUBACK(1,
+                ImmutableList.of(Mqtt5SubAckReasonCode.GRANTED_QOS_0),
+                "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
     public static class SimpleSubackTestInterceptor implements SubackOutboundInterceptor {

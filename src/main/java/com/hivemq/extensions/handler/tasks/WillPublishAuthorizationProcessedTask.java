@@ -33,7 +33,8 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
 
     private final @NotNull CONNECT connect;
     private final @NotNull ChannelHandlerContext ctx;
-    public WillPublishAuthorizationProcessedTask(@NotNull final CONNECT connect,
+    public WillPublishAuthorizationProcessedTask(
+            @NotNull final CONNECT connect,
             @NotNull final ChannelHandlerContext ctx) {
         this.connect = connect;
         this.ctx = ctx;
@@ -51,15 +52,13 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
         switch (output.getAuthorizationState()) {
             case DISCONNECT :
                 disconnectReasonCode = output.getDisconnectReasonCode();
-                reasonCode = output.getAckReasonCode() != null
-                        ? output.getAckReasonCode()
-                        : AckReasonCode.NOT_AUTHORIZED;
+                reasonCode =
+                        output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
                 reasonString = output.getReasonString() != null ? output.getReasonString() : getReasonString(connect);
                 break;
             case FAIL :
-                reasonCode = output.getAckReasonCode() != null
-                        ? output.getAckReasonCode()
-                        : AckReasonCode.NOT_AUTHORIZED;
+                reasonCode =
+                        output.getAckReasonCode() != null ? output.getAckReasonCode() : AckReasonCode.NOT_AUTHORIZED;
                 reasonString = output.getReasonString() != null ? output.getReasonString() : getReasonString(connect);
                 break;
             case UNDECIDED :
@@ -79,8 +78,10 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
                 // no state left
                 throw new IllegalStateException("Unknown type");
         }
-        final PublishAuthorizerResult result = new PublishAuthorizerResult(reasonCode, reasonString,
-                output.isAuthorizerPresent(), disconnectReasonCode);
+        final PublishAuthorizerResult result = new PublishAuthorizerResult(reasonCode,
+                reasonString,
+                output.isAuthorizerPresent(),
+                disconnectReasonCode);
         ctx.pipeline()
                 .fireUserEventTriggered(new PluginAuthorizerServiceImpl.AuthorizeWillResultEvent(connect, result));
     }
@@ -89,14 +90,17 @@ public class WillPublishAuthorizationProcessedTask implements FutureCallback<Pub
     public void onFailure(@NotNull final Throwable t) {
         Exceptions.rethrowError("Exception at PublishAuthorization", t);
         final PublishAuthorizerResult result = new PublishAuthorizerResult(AckReasonCode.NOT_AUTHORIZED,
-                getReasonString(connect), true, DisconnectReasonCode.NOT_AUTHORIZED);
+                getReasonString(connect),
+                true,
+                DisconnectReasonCode.NOT_AUTHORIZED);
         ctx.pipeline()
                 .fireUserEventTriggered(new PluginAuthorizerServiceImpl.AuthorizeWillResultEvent(connect, result));
     }
 
     private String getReasonString(@NotNull final CONNECT connect) {
-        return "Not allowed to connect with Will Publish for unauthorized topic '" + connect.getWillPublish().getTopic()
-                + "' with QoS '" + connect.getWillPublish().getQos().getQosNumber() + "' and retain '"
-                + connect.getWillPublish().isRetain() + "'";
+        return "Not allowed to connect with Will Publish for unauthorized topic '" +
+                connect.getWillPublish().getTopic() + "' with QoS '" +
+                connect.getWillPublish().getQos().getQosNumber() + "' and retain '" +
+                connect.getWillPublish().isRetain() + "'";
     }
 }

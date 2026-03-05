@@ -64,8 +64,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
                 connectReceived = true;
                 suspendRead(ctx.channel());
             } else if (!connectReceived) {
-                serverDisconnector.logAndClose(
-                        ctx.channel(),
+                serverDisconnector.logAndClose(ctx.channel(),
                         "A client (IP: {}) sent other message before CONNECT. Disconnecting client.",
                         "Sent other message before CONNECT");
                 return;
@@ -109,8 +108,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
         if (log.isTraceEnabled()) {
             final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
-            log.trace(
-                    "Suspending read operations for MQTT client with id {} and IP {}",
+            log.trace("Suspending read operations for MQTT client with id {} and IP {}",
                     clientConnectionContext.getClientId(),
                     channelIP.orElse("UNKNOWN"));
         }
@@ -121,8 +119,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
         if (log.isTraceEnabled()) {
             final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
             final Optional<String> channelIP = clientConnectionContext.getChannelIP();
-            log.trace(
-                    "Restarting read operations for MQTT client with id {} and IP {}",
+            log.trace("Restarting read operations for MQTT client with id {} and IP {}",
                     clientConnectionContext.getClientId(),
                     channelIP.orElse("UNKNOWN"));
         }

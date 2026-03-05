@@ -34,7 +34,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class ModifiableWillPublishImpl extends ModifiablePublishPacketImpl implements ModifiableWillPublish {
 
     private long willDelay;
-    public ModifiableWillPublishImpl(final @NotNull WillPublishPacketImpl willPublishPacket,
+    public ModifiableWillPublishImpl(
+            final @NotNull WillPublishPacketImpl willPublishPacket,
             final @NotNull FullConfigurationService configurationService) {
         super(willPublishPacket, configurationService);
         this.willDelay = willPublishPacket.willDelay;
@@ -58,8 +59,18 @@ public class ModifiableWillPublishImpl extends ModifiablePublishPacketImpl imple
 
     @Override
     public @NotNull WillPublishPacketImpl copy() {
-        return new WillPublishPacketImpl(topic, qos, payload, retain, messageExpiryInterval, payloadFormatIndicator,
-                contentType, responseTopic, correlationData, userProperties.copy(), willDelay, timestamp);
+        return new WillPublishPacketImpl(topic,
+                qos,
+                payload,
+                retain,
+                messageExpiryInterval,
+                payloadFormatIndicator,
+                contentType,
+                responseTopic,
+                correlationData,
+                userProperties.copy(),
+                willDelay,
+                timestamp);
     }
 
     @Override

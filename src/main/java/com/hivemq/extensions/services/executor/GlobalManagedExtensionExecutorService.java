@@ -90,18 +90,14 @@ public class GlobalManagedExtensionExecutorService implements ScheduledExecutorS
     }
 
     @NotNull
-    public ScheduledFuture<?> schedule(
-            @NotNull final Runnable command,
-            final long delay,
-            @NotNull final TimeUnit unit) {
+    public ScheduledFuture<
+            ?> schedule(@NotNull final Runnable command, final long delay, @NotNull final TimeUnit unit) {
         return Objects.requireNonNull(scheduledExecutorService).schedule(command, delay, unit);
     }
 
     @NotNull
-    public <V> ScheduledFuture<V> schedule(
-            @NotNull final Callable<V> callable,
-            final long delay,
-            @NotNull final TimeUnit unit) {
+    public <V> ScheduledFuture<
+            V> schedule(@NotNull final Callable<V> callable, final long delay, @NotNull final TimeUnit unit) {
         return Objects.requireNonNull(scheduledExecutorService).schedule(callable, delay, unit);
     }
 

@@ -32,7 +32,8 @@ public class PersistenceShutdownHookInstaller {
     private final @NotNull PersistenceShutdownHook persistenceShutdownHook;
     private final @NotNull PersistenceStartup persistenceStartup;
     @Inject
-    public PersistenceShutdownHookInstaller(final @NotNull ShutdownHooks shutdownHooks,
+    public PersistenceShutdownHookInstaller(
+            final @NotNull ShutdownHooks shutdownHooks,
             final @NotNull PersistenceShutdownHook persistenceShutdownHook,
             final @NotNull PersistenceStartup persistenceStartup) {
         this.shutdownHooks = shutdownHooks;

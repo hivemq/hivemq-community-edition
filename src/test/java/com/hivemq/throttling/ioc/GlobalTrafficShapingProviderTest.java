@@ -51,11 +51,14 @@ public class GlobalTrafficShapingProviderTest {
 
     @Test
     public void test_shutdown_hook_added() {
-        final GlobalTrafficShapingProvider globalTrafficShapingProvider = new GlobalTrafficShapingProvider(
-                shutdownHooks, configurationService);
+        final GlobalTrafficShapingProvider globalTrafficShapingProvider =
+                new GlobalTrafficShapingProvider(shutdownHooks, configurationService);
         globalTrafficShapingProvider.get();
-        final Collection<HiveMQShutdownHook> hooks = shutdownHooks.getShutdownHooks().values().stream()
-                .filter(x -> x instanceof GlobalTrafficShaperExecutorShutdownHook).collect(Collectors.toList());
+        final Collection<HiveMQShutdownHook> hooks = shutdownHooks.getShutdownHooks()
+                .values()
+                .stream()
+                .filter(x -> x instanceof GlobalTrafficShaperExecutorShutdownHook)
+                .collect(Collectors.toList());
         assertNotNull(hooks);
         assertEquals(1, hooks.size());
     }

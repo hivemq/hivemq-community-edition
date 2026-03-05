@@ -54,10 +54,11 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
             // HiveMQ dependencies
             "org.slf4j",
             "com.codahale.metrics").build();
-    private static final ImmutableSet<Class<?>> classesWithStaticContext = new ImmutableSet.Builder<Class<?>>()
-            .add(Services.class, Builders.class).build();
-    private static final ImmutableSet<String> classNamesWithStaticContext = new ImmutableSet.Builder<String>()
-            .add(Services.class.getCanonicalName(), Builders.class.getCanonicalName()).build();
+    private static final ImmutableSet<Class<?>> classesWithStaticContext =
+            new ImmutableSet.Builder<Class<?>>().add(Services.class, Builders.class).build();
+    private static final ImmutableSet<String> classNamesWithStaticContext =
+            new ImmutableSet.Builder<String>().add(Services.class.getCanonicalName(), Builders.class.getCanonicalName())
+                    .build();
     private final @Nullable ClassLoader delegate;
     public IsolatedExtensionClassloader(@NotNull final URL @NotNull [] classpath, @NotNull final ClassLoader parent) {
         super(classpath, parent);
@@ -71,8 +72,8 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
 
     public void loadClassesWithStaticContext() {
         for (final Class<?> staticClass : classesWithStaticContext) {
-            try (final InputStream resourceAsStream = staticClass
-                    .getResourceAsStream(staticClass.getSimpleName() + ".class")) {
+            try (final InputStream resourceAsStream =
+                    staticClass.getResourceAsStream(staticClass.getSimpleName() + ".class")) {
                 if (resourceAsStream != null) {
                     final byte[] bytes = resourceAsStream.readAllBytes();
                     defineClass(staticClass.getCanonicalName(), bytes, 0, bytes.length);

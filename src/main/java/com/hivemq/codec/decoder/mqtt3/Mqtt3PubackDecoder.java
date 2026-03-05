@@ -35,7 +35,8 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3PubackDecoder extends AbstractMqttDecoder<PUBACK> {
 
     @Inject
-    public Mqtt3PubackDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3PubackDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }

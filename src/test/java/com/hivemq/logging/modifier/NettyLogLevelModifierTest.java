@@ -73,8 +73,8 @@ public class NettyLogLevelModifierTest {
     public void test_level_info_format_neutral_throwable() {
         final LoggerContext context = (LoggerContext) org.slf4j.LoggerFactory.getILoggerFactory();
         rootLogger = context.getLogger("io.netty.channel.nio.NioEventLoop");
-        final FilterReply decide = nettyLogLevelModifier
-                .decide(null, rootLogger, Level.TRACE, format, null, new RuntimeException());
+        final FilterReply decide =
+                nettyLogLevelModifier.decide(null, rootLogger, Level.TRACE, format, null, new RuntimeException());
         assertEquals(FilterReply.NEUTRAL, decide);
     }
 

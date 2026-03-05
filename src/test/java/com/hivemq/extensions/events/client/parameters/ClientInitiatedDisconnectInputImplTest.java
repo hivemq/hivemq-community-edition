@@ -50,8 +50,8 @@ public class ClientInitiatedDisconnectInputImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
-        final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client",
-                channel, null, null, null, false);
+        final ClientInitiatedDisconnectInputImpl disconnectInput =
+                new ClientInitiatedDisconnectInputImpl("client", channel, null, null, null, false);
         assertEquals(Optional.empty(), disconnectInput.getReasonCode());
         assertEquals(Optional.empty(), disconnectInput.getReasonString());
         assertEquals(Optional.empty(), disconnectInput.getUserProperties());
@@ -68,8 +68,11 @@ public class ClientInitiatedDisconnectInputImplTest {
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv5);
         final ClientInitiatedDisconnectInputImpl disconnectInput = new ClientInitiatedDisconnectInputImpl("client",
-                channel, DisconnectedReasonCode.NORMAL_DISCONNECTION, "reason",
-                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))), true);
+                channel,
+                DisconnectedReasonCode.NORMAL_DISCONNECTION,
+                "reason",
+                UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("key", "val"))),
+                true);
         assertEquals(Optional.of(DisconnectedReasonCode.NORMAL_DISCONNECTION), disconnectInput.getReasonCode());
         assertEquals(Optional.of("reason"), disconnectInput.getReasonString());
         assertTrue(disconnectInput.getUserProperties().isPresent());

@@ -41,9 +41,11 @@ public class AllTopicsProcessedTask implements Runnable {
     private final @NotNull ChannelHandlerContext ctx;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     private final @NotNull IncomingSubscribeService incomingSubscribeService;
-    public AllTopicsProcessedTask(final @NotNull SUBSCRIBE msg,
+    public AllTopicsProcessedTask(
+            final @NotNull SUBSCRIBE msg,
             final @NotNull List<ListenableFuture<SubscriptionAuthorizerOutputImpl>> listenableFutures,
-            final @NotNull ChannelHandlerContext ctx, final @NotNull MqttServerDisconnector mqttServerDisconnector,
+            final @NotNull ChannelHandlerContext ctx,
+            final @NotNull MqttServerDisconnector mqttServerDisconnector,
             final @NotNull IncomingSubscribeService incomingSubscribeService) {
         this.msg = msg;
         this.listenableFutures = listenableFutures;
@@ -55,8 +57,7 @@ public class AllTopicsProcessedTask implements Runnable {
     @Override
     public void run() {
         try {
-            Preconditions.checkArgument(
-                    listenableFutures.size() == msg.getTopics().size(),
+            Preconditions.checkArgument(listenableFutures.size() == msg.getTopics().size(),
                     "The amount of futures must be equal to the amount of topics");
             final Mqtt5SubAckReasonCode[] answerCodes = new Mqtt5SubAckReasonCode[msg.getTopics().size()];
             final String[] reasonStrings = new String[msg.getTopics().size()];
@@ -97,8 +98,8 @@ public class AllTopicsProcessedTask implements Runnable {
             }
             final boolean finalAuthorizersPresent = authorizersPresent;
             if (ctx.channel().isActive()) {
-                ctx.executor().execute(
-                        () -> incomingSubscribeService
+                ctx.executor()
+                        .execute(() -> incomingSubscribeService
                                 .processSubscribe(ctx, msg, answerCodes, reasonStrings, finalAuthorizersPresent));
             }
         } catch (final Exception e) {
@@ -107,13 +108,12 @@ public class AllTopicsProcessedTask implements Runnable {
     }
 
     private void disconnectClient(final int topicIndex, final @NotNull SubscriptionAuthorizerOutputImpl output) {
-        final String logMessage = "A client (IP: {}) sent a SUBSCRIBE with an unauthorized subscription for topic '"
-                + msg.getTopics().get(topicIndex).getTopic() + "'. This is not allowed. Disconnecting client.";
-        final String eventLogMessage = "Sent a SUBSCRIBE with an unauthorized subscription for topic '"
-                + msg.getTopics().get(topicIndex).getTopic() + "'";
+        final String logMessage = "A client (IP: {}) sent a SUBSCRIBE with an unauthorized subscription for topic '" +
+                msg.getTopics().get(topicIndex).getTopic() + "'. This is not allowed. Disconnecting client.";
+        final String eventLogMessage = "Sent a SUBSCRIBE with an unauthorized subscription for topic '" +
+                msg.getTopics().get(topicIndex).getTopic() + "'";
         ctx.channel().eventLoop().execute(() -> {
-            mqttServerDisconnector.disconnect(
-                    ctx.channel(),
+            mqttServerDisconnector.disconnect(ctx.channel(),
                     logMessage,
                     eventLogMessage,
                     Mqtt5DisconnectReasonCode.from(output.getDisconnectReasonCode()),

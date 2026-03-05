@@ -99,8 +99,8 @@ public class LifecycleRegistry {
      * @return a {@link com.google.common.util.concurrent.ListenableFuture} of all preDestroy executions
      */
     public @NotNull ListenableFuture<?> executePreDestroy() {
-        final ExecutorService executorService = Executors
-                .newFixedThreadPool(3, ThreadFactoryUtil.create("PreDestroy-%d"));
+        final ExecutorService executorService =
+                Executors.newFixedThreadPool(3, ThreadFactoryUtil.create("PreDestroy-%d"));
         listeningExecutorService = MoreExecutors.listeningDecorator(executorService);
         final List<ListenableFuture<?>> futures = new ArrayList<>(preDestroyInvokables.size());
         for (final PreDestroyInvokable preDestroyInvokable : preDestroyInvokables) {
@@ -111,8 +111,7 @@ public class LifecycleRegistry {
                     try {
                         preDestroyInvokable.getPreDestroyMethod().invoke(preDestroyInvokable.getOnObject());
                     } catch (final IllegalAccessException | InvocationTargetException e) {
-                        log.error(
-                                "Could not execute preDestroy method for class {}",
+                        log.error("Could not execute preDestroy method for class {}",
                                 preDestroyInvokable.getOnObject().getClass(),
                                 e);
                     }

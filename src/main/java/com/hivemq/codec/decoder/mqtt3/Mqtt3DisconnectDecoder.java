@@ -36,7 +36,8 @@ public class Mqtt3DisconnectDecoder extends AbstractMqttDecoder<DISCONNECT> {
 
     private static final DISCONNECT DISCONNECT = new DISCONNECT();
     @Inject
-    public Mqtt3DisconnectDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3DisconnectDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }

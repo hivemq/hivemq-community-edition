@@ -48,7 +48,8 @@ public class PersistenceModule extends SingletonModule<Class<PersistenceModule>>
 
     private final @NotNull Injector persistenceInjector;
     private final PersistenceConfigurationService persistenceConfigurationService;
-    public PersistenceModule(final @NotNull Injector persistenceInjector,
+    public PersistenceModule(
+            final @NotNull Injector persistenceInjector,
             final PersistenceConfigurationService persistenceConfigurationService) {
         super(PersistenceModule.class);
         this.persistenceInjector = persistenceInjector;
@@ -58,24 +59,27 @@ public class PersistenceModule extends SingletonModule<Class<PersistenceModule>>
     @Override
     protected void configure() {
         install(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-        if ((persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY)
-                && InternalConfigurations.IN_MEMORY_SINGLE_WRITER.get()) {
+        if ((persistenceConfigurationService.getMode() == PersistenceConfigurationService.PersistenceMode.IN_MEMORY) &&
+                InternalConfigurations.IN_MEMORY_SINGLE_WRITER.get()) {
             bind(SingleWriterService.class).to(InMemorySingleWriter.class);
         } else {
             bind(SingleWriterService.class).to(SingleWriterServiceImpl.class);
         }
         bind(ShutdownHooks.class).toInstance(persistenceInjector.getInstance(ShutdownHooks.class));
         bind(PersistenceShutdownHookInstaller.class).asEagerSingleton();
-        bind(ExecutorService.class).annotatedWith(Persistence.class).toProvider(PersistenceExecutorProvider.class)
+        bind(ExecutorService.class).annotatedWith(Persistence.class)
+                .toProvider(PersistenceExecutorProvider.class)
                 .in(LazySingleton.class);
         bind(ListeningExecutorService.class).annotatedWith(Persistence.class)
-                .toProvider(PersistenceExecutorProvider.class).in(LazySingleton.class);
+                .toProvider(PersistenceExecutorProvider.class)
+                .in(LazySingleton.class);
         bind(ScheduledExecutorService.class).annotatedWith(Persistence.class)
-                .toProvider(PersistenceScheduledExecutorProvider.class).in(LazySingleton.class);
+                .toProvider(PersistenceScheduledExecutorProvider.class)
+                .in(LazySingleton.class);
         bind(ListeningScheduledExecutorService.class).annotatedWith(Persistence.class)
-                .toProvider(PersistenceScheduledExecutorProvider.class).in(LazySingleton.class);
-        bindIfAbsent(
-                ListeningScheduledExecutorService.class,
+                .toProvider(PersistenceScheduledExecutorProvider.class)
+                .in(LazySingleton.class);
+        bindIfAbsent(ListeningScheduledExecutorService.class,
                 PayloadPersistenceScheduledExecutorProvider.class,
                 PayloadPersistence.class);
         bind(TopicTreeStartup.class).asEagerSingleton();

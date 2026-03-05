@@ -31,7 +31,9 @@ public class StandardPublishCallback implements FutureCallback<PublishStatus> {
     private final @NotNull String subscriber;
     private final @NotNull PUBLISH msg;
     private final @NotNull SettableFuture<Void> publishFinishedFuture;
-    StandardPublishCallback(final @NotNull String subscriber, final @NotNull PUBLISH msg,
+    StandardPublishCallback(
+            final @NotNull String subscriber,
+            final @NotNull PUBLISH msg,
             final @NotNull SettableFuture<Void> publishFinishedFuture) {
         this.subscriber = subscriber;
         this.msg = msg;
@@ -47,8 +49,8 @@ public class StandardPublishCallback implements FutureCallback<PublishStatus> {
     public void onFailure(@NotNull final Throwable throwable) {
         publishFinishedFuture.set(null);
         Exceptions.rethrowError(
-                "Unable to send message with id " + msg.getUniqueId() + " on topic " + msg.getTopic() + " to client "
-                        + subscriber + "",
+                "Unable to send message with id " + msg.getUniqueId() + " on topic " + msg.getTopic() + " to client " +
+                        subscriber + "",
                 throwable);
     }
 }

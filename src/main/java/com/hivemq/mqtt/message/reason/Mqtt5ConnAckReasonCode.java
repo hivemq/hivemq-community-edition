@@ -30,26 +30,28 @@ import com.hivemq.mqtt.message.connack.Mqtt3ConnAckReturnCode;
  */
 public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS), UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR), MALFORMED_PACKET(
-            MqttCommonReasonCode.MALFORMED_PACKET), PROTOCOL_ERROR(
-                    MqttCommonReasonCode.PROTOCOL_ERROR), IMPLEMENTATION_SPECIFIC_ERROR(
-                            MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), UNSUPPORTED_PROTOCOL_VERSION(
-                                    0x84), CLIENT_IDENTIFIER_NOT_VALID(0x85), BAD_USER_NAME_OR_PASSWORD(
-                                            0x86), NOT_AUTHORIZED(
-                                                    MqttCommonReasonCode.NOT_AUTHORIZED), SERVER_UNAVAILABLE(
-                                                            0x88), SERVER_BUSY(
-                                                                    MqttCommonReasonCode.SERVER_BUSY), BANNED(
-                                                                            0x8A), BAD_AUTHENTICATION_METHOD(
-                                                                                    MqttCommonReasonCode.BAD_AUTHENTICATION_METHOD), TOPIC_NAME_INVALID(
-                                                                                            MqttCommonReasonCode.TOPIC_NAME_INVALID), PACKET_TOO_LARGE(
-                                                                                                    MqttCommonReasonCode.PACKET_TOO_LARGE), QUOTA_EXCEEDED(
-                                                                                                            MqttCommonReasonCode.QUOTA_EXCEEDED), PAYLOAD_FORMAT_INVALID(
-                                                                                                                    MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID), RETAIN_NOT_SUPPORTED(
-                                                                                                                            MqttCommonReasonCode.RETAIN_NOT_SUPPORTED), QOS_NOT_SUPPORTED(
-                                                                                                                                    MqttCommonReasonCode.QOS_NOT_SUPPORTED), USE_ANOTHER_SERVER(
-                                                                                                                                            MqttCommonReasonCode.USE_ANOTHER_SERVER), SERVER_MOVED(
-                                                                                                                                                    MqttCommonReasonCode.SERVER_MOVED), CONNECTION_RATE_EXCEEDED(
-                                                                                                                                                            MqttCommonReasonCode.CONNECTION_RATE_EXCEEDED);
+    SUCCESS(MqttCommonReasonCode.SUCCESS),
+    UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
+    MALFORMED_PACKET(MqttCommonReasonCode.MALFORMED_PACKET),
+    PROTOCOL_ERROR(MqttCommonReasonCode.PROTOCOL_ERROR),
+    IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+    UNSUPPORTED_PROTOCOL_VERSION(0x84),
+    CLIENT_IDENTIFIER_NOT_VALID(0x85),
+    BAD_USER_NAME_OR_PASSWORD(0x86),
+    NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
+    SERVER_UNAVAILABLE(0x88),
+    SERVER_BUSY(MqttCommonReasonCode.SERVER_BUSY),
+    BANNED(0x8A),
+    BAD_AUTHENTICATION_METHOD(MqttCommonReasonCode.BAD_AUTHENTICATION_METHOD),
+    TOPIC_NAME_INVALID(MqttCommonReasonCode.TOPIC_NAME_INVALID),
+    PACKET_TOO_LARGE(MqttCommonReasonCode.PACKET_TOO_LARGE),
+    QUOTA_EXCEEDED(MqttCommonReasonCode.QUOTA_EXCEEDED),
+    PAYLOAD_FORMAT_INVALID(MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID),
+    RETAIN_NOT_SUPPORTED(MqttCommonReasonCode.RETAIN_NOT_SUPPORTED),
+    QOS_NOT_SUPPORTED(MqttCommonReasonCode.QOS_NOT_SUPPORTED),
+    USE_ANOTHER_SERVER(MqttCommonReasonCode.USE_ANOTHER_SERVER),
+    SERVER_MOVED(MqttCommonReasonCode.SERVER_MOVED),
+    CONNECTION_RATE_EXCEEDED(MqttCommonReasonCode.CONNECTION_RATE_EXCEEDED);
     private final int code;
     private final @NotNull ConnackReasonCode connackReasonCode;
     private final @NotNull DisconnectedReasonCode disconnectedReasonCode;
@@ -77,12 +79,12 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
     }
     private static final int ERROR_CODE_MIN = UNSPECIFIED_ERROR.code;
     private static final int ERROR_CODE_MAX = CONNECTION_RATE_EXCEEDED.code;
-    private static final @Nullable Mqtt5ConnAckReasonCode @NotNull [] ERROR_CODE_LOOKUP = new Mqtt5ConnAckReasonCode[ERROR_CODE_MAX
-            - ERROR_CODE_MIN + 1];
-    private static final @NotNull Mqtt5ConnAckReasonCode @NotNull [] CONNACK_LOOKUP = new Mqtt5ConnAckReasonCode[ConnackReasonCode
-            .values().length];
-    private static final @Nullable Mqtt5ConnAckReasonCode @NotNull [] DISCONNECTED_LOOKUP = new Mqtt5ConnAckReasonCode[DisconnectedReasonCode
-            .values().length];
+    private static final @Nullable Mqtt5ConnAckReasonCode @NotNull [] ERROR_CODE_LOOKUP =
+            new Mqtt5ConnAckReasonCode[ERROR_CODE_MAX - ERROR_CODE_MIN + 1];
+    private static final @NotNull Mqtt5ConnAckReasonCode @NotNull [] CONNACK_LOOKUP =
+            new Mqtt5ConnAckReasonCode[ConnackReasonCode.values().length];
+    private static final @Nullable Mqtt5ConnAckReasonCode @NotNull [] DISCONNECTED_LOOKUP =
+            new Mqtt5ConnAckReasonCode[DisconnectedReasonCode.values().length];
     static {
         for (final Mqtt5ConnAckReasonCode reasonCode : values()) {
             if (reasonCode != SUCCESS) {

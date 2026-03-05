@@ -113,52 +113,42 @@ public class LocalPersistenceModuleTest {
 
     @Test
     public void test_singletons() throws Exception {
-        final Injector injector = createInjector(
-                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-        assertSame(
-                injector.getInstance(RetainedMessageLocalPersistence.class),
+        final Injector injector =
+                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertSame(injector.getInstance(RetainedMessageLocalPersistence.class),
                 injector.getInstance(RetainedMessageLocalPersistence.class));
-        assertSame(
-                injector.getInstance(ClientSessionLocalPersistence.class),
+        assertSame(injector.getInstance(ClientSessionLocalPersistence.class),
                 injector.getInstance(ClientSessionLocalPersistence.class));
-        assertSame(
-                injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
+        assertSame(injector.getInstance(ClientSessionSubscriptionLocalPersistence.class),
                 injector.getInstance(ClientSessionSubscriptionLocalPersistence.class));
-        assertSame(
-                injector.getInstance(ClientQueueLocalPersistence.class),
+        assertSame(injector.getInstance(ClientQueueLocalPersistence.class),
                 injector.getInstance(ClientQueueLocalPersistence.class));
-        assertSame(
-                injector.getInstance(PublishPayloadPersistence.class),
+        assertSame(injector.getInstance(PublishPayloadPersistence.class),
                 injector.getInstance(PublishPayloadPersistence.class));
-        assertSame(
-                injector.getInstance(PublishPayloadPersistenceImpl.class),
+        assertSame(injector.getInstance(PublishPayloadPersistenceImpl.class),
                 injector.getInstance(PublishPayloadPersistenceImpl.class));
     }
 
     @Test
     public void test_rocks_db_local_persistences() throws Exception {
-        final Injector injector = createInjector(
-                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-        assertTrue(
-                injector.getInstance(
-                        PublishPayloadLocalPersistence.class) instanceof PublishPayloadRocksDBLocalPersistence);
-        assertTrue(
-                injector.getInstance(
-                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageRocksDBLocalPersistence);
+        final Injector injector =
+                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertTrue(injector
+                .getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadRocksDBLocalPersistence);
+        assertTrue(injector
+                .getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageRocksDBLocalPersistence);
     }
 
     @Test
     public void test_xodus_local_persistences() throws Exception {
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(FILE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(FILE);
-        final Injector injector = createInjector(
-                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-        assertTrue(
-                injector.getInstance(
-                        PublishPayloadLocalPersistence.class) instanceof PublishPayloadXodusLocalPersistence);
-        assertTrue(
-                injector.getInstance(
-                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageXodusLocalPersistence);
+        final Injector injector =
+                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertTrue(injector
+                .getInstance(PublishPayloadLocalPersistence.class) instanceof PublishPayloadXodusLocalPersistence);
+        assertTrue(injector
+                .getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageXodusLocalPersistence);
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(FILE_NATIVE);
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(FILE_NATIVE);
     }
@@ -166,16 +156,14 @@ public class LocalPersistenceModuleTest {
     @Test
     public void test_memory_persistence() {
         when(persistenceConfigurationService.getMode()).thenReturn(PersistenceMode.IN_MEMORY);
-        final Injector injector = createInjector(
-                new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
-        assertTrue(
-                injector.getInstance(
-                        RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
+        final Injector injector =
+                createInjector(new LocalPersistenceModule(persistenceInjector, persistenceConfigurationService));
+        assertTrue(injector
+                .getInstance(RetainedMessageLocalPersistence.class) instanceof RetainedMessageMemoryLocalPersistence);
     }
 
     private Injector createInjector(final LocalPersistenceModule localPersistenceModule) {
-        return Guice.createInjector(
-                localPersistenceModule,
+        return Guice.createInjector(localPersistenceModule,
                 new LazySingletonModule(),
                 new ThrottlingModule(),
                 new MQTTServiceModule(),

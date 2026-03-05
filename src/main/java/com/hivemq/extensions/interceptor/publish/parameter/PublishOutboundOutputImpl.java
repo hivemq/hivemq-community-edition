@@ -33,7 +33,8 @@ public class PublishOutboundOutputImpl extends AbstractAsyncOutput<PublishOutbou
 
     private final @NotNull ModifiableOutboundPublishImpl publishPacket;
     private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
-    public PublishOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public PublishOutboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableOutboundPublishImpl publishPacket) {
         super(asyncer);
         this.publishPacket = publishPacket;

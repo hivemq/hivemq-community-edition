@@ -33,8 +33,7 @@ import java.util.Optional;
 abstract public class AbstractExtensionTest {
 
     protected @NotNull ExtensionStartOutput getTestExtensionStartOutput() {
-        return reason -> {
-        };
+        return reason -> {};
     }
 
     protected @NotNull ExtensionStartInput getTestExtensionStartInput() {

@@ -62,18 +62,14 @@ public class ConnectionLimiterHandlerTest {
     public void exceed_maximum_connections() throws Exception {
         when(restrictionsEntity.maxConnections()).thenReturn(10L);
         when(connectionCounter.getValue()).thenReturn(11);
-        final ConnectionLimiterHandler limiter = new ConnectionLimiterHandler(mqttConnacker, restrictionsEntity,
-                connectionCounter);
+        final ConnectionLimiterHandler limiter =
+                new ConnectionLimiterHandler(mqttConnacker, restrictionsEntity, connectionCounter);
         limiter.channelActive(ctx);
         limiter.channelRead(ctx, connect);
         assertEquals(10L, limiter.getMaxConnections());
         assertEquals(9L, limiter.getWarnThreshold());
-        verify(mqttConnacker).connackError(
-                any(Channel.class),
-                isNull(),
-                anyString(),
-                eq(Mqtt5ConnAckReasonCode.QUOTA_EXCEEDED),
-                isNull());
+        verify(mqttConnacker).connackError(any(
+                Channel.class), isNull(), anyString(), eq(Mqtt5ConnAckReasonCode.QUOTA_EXCEEDED), isNull());
         verify(ctx, never()).close();
     }
 
@@ -81,8 +77,8 @@ public class ConnectionLimiterHandlerTest {
     public void under_maximum_connections() throws Exception {
         when(restrictionsEntity.maxConnections()).thenReturn(4L);
         when(connectionCounter.getValue()).thenReturn(3);
-        final ConnectionLimiterHandler limiter = new ConnectionLimiterHandler(mqttConnacker, restrictionsEntity,
-                connectionCounter);
+        final ConnectionLimiterHandler limiter =
+                new ConnectionLimiterHandler(mqttConnacker, restrictionsEntity, connectionCounter);
         limiter.channelActive(ctx);
         limiter.channelRead(ctx, connect);
         assertEquals(4L, limiter.getMaxConnections());
@@ -93,8 +89,8 @@ public class ConnectionLimiterHandlerTest {
     public void unlimited_connections() throws Exception {
         when(restrictionsEntity.maxConnections()).thenReturn(-1L);
         when(connectionCounter.getValue()).thenReturn(11);
-        final ConnectionLimiterHandler limiter = new ConnectionLimiterHandler(mqttConnacker, restrictionsEntity,
-                connectionCounter);
+        final ConnectionLimiterHandler limiter =
+                new ConnectionLimiterHandler(mqttConnacker, restrictionsEntity, connectionCounter);
         limiter.channelActive(ctx);
         verify(pipeline, atLeastOnce()).remove(any(ChannelHandler.class));
     }

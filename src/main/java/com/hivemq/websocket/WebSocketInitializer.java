@@ -47,29 +47,32 @@ public class WebSocketInitializer {
 
     public void addHandlers(final Channel ch, final @NotNull String handlerBefore) {
         ch.pipeline().addAfter(handlerBefore, HTTP_SERVER_CODEC, new HttpServerCodec());
-        ch.pipeline().addAfter(
-                HTTP_SERVER_CODEC,
-                HTTP_OBJECT_AGGREGATOR,
-                new HttpObjectAggregator(WEBSOCKET_MAX_CONTENT_LENGTH));
+        ch.pipeline()
+                .addAfter(HTTP_SERVER_CODEC,
+                        HTTP_OBJECT_AGGREGATOR,
+                        new HttpObjectAggregator(WEBSOCKET_MAX_CONTENT_LENGTH));
         final String webSocketPath = websocketListener.getPath();
         final String subprotocols = getSubprotocolString();
         final boolean allowExtensions = websocketListener.getAllowExtensions();
-        ch.pipeline().addAfter(
-                HTTP_OBJECT_AGGREGATOR,
-                WEBSOCKET_SERVER_PROTOCOL_HANDLER,
-                new WebSocketServerProtocolHandler(webSocketPath, subprotocols, allowExtensions, Integer.MAX_VALUE));
-        ch.pipeline().addAfter(
-                WEBSOCKET_SERVER_PROTOCOL_HANDLER,
-                WEBSOCKET_BINARY_FRAME_HANDLER,
-                new WebSocketBinaryFrameHandler());
-        ch.pipeline().addAfter(
-                WEBSOCKET_BINARY_FRAME_HANDLER,
-                WEBSOCKET_CONTINUATION_FRAME_HANDLER,
-                new WebSocketContinuationFrameHandler());
-        ch.pipeline().addAfter(
-                WEBSOCKET_BINARY_FRAME_HANDLER,
-                WEBSOCKET_TEXT_FRAME_HANDLER,
-                new WebSocketTextFrameHandler());
+        ch.pipeline()
+                .addAfter(HTTP_OBJECT_AGGREGATOR,
+                        WEBSOCKET_SERVER_PROTOCOL_HANDLER,
+                        new WebSocketServerProtocolHandler(webSocketPath,
+                                subprotocols,
+                                allowExtensions,
+                                Integer.MAX_VALUE));
+        ch.pipeline()
+                .addAfter(WEBSOCKET_SERVER_PROTOCOL_HANDLER,
+                        WEBSOCKET_BINARY_FRAME_HANDLER,
+                        new WebSocketBinaryFrameHandler());
+        ch.pipeline()
+                .addAfter(WEBSOCKET_BINARY_FRAME_HANDLER,
+                        WEBSOCKET_CONTINUATION_FRAME_HANDLER,
+                        new WebSocketContinuationFrameHandler());
+        ch.pipeline()
+                .addAfter(WEBSOCKET_BINARY_FRAME_HANDLER,
+                        WEBSOCKET_TEXT_FRAME_HANDLER,
+                        new WebSocketTextFrameHandler());
         ch.pipeline().addAfter(WEBSOCKET_TEXT_FRAME_HANDLER, MQTT_WEBSOCKET_ENCODER, new MQTTWebsocketEncoder());
     }
 

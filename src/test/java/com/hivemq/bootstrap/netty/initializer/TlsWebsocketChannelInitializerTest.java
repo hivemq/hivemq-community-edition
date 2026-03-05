@@ -94,10 +94,12 @@ public class TlsWebsocketChannelInitializerTest {
 
     @Test
     public void test_add_special_handlers() {
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("").port(0)
-                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(0).build()).build();
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(
-                channelDependencies, tlsWebsocketListener, sslFactory);
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("")
+                .port(0)
+                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(0).build())
+                .build();
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer =
+                new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
         assertEquals(10, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));
@@ -114,10 +116,12 @@ public class TlsWebsocketChannelInitializerTest {
 
     @Test
     public void test_add_special_handlers_with_timeout() {
-        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("").port(0)
-                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(10).build()).build();
-        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer = new TlsWebsocketChannelInitializer(
-                channelDependencies, tlsWebsocketListener, sslFactory);
+        final TlsWebsocketListener tlsWebsocketListener = new TlsWebsocketListener.Builder().bindAddress("")
+                .port(0)
+                .tls(TlsTestUtil.createDefaultTLSBuilder().withHandshakeTimeout(10).build())
+                .build();
+        final TlsWebsocketChannelInitializer tlsWebsocketChannelInitializer =
+                new TlsWebsocketChannelInitializer(channelDependencies, tlsWebsocketListener, sslFactory);
         tlsWebsocketChannelInitializer.addSpecialHandlers(socketChannel);
         assertEquals(12, pipeline.names().size());
         assertEquals(SSL_HANDLER, pipeline.names().get(0));

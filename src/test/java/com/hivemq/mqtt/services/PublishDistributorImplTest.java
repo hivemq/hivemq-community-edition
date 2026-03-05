@@ -61,8 +61,10 @@ public class PublishDistributorImplTest {
     @Before
     public void setUp() throws Exception {
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        publishDistributor = new PublishDistributorImpl(clientQueuePersistence, clientSessionPersistence,
-                singleWriterService, mqttConfigurationService);
+        publishDistributor = new PublishDistributorImpl(clientQueuePersistence,
+                clientSessionPersistence,
+                singleWriterService,
+                mqttConfigurationService);
     }
 
     @After
@@ -73,26 +75,22 @@ public class PublishDistributorImplTest {
     @Test(timeout = 5000)
     public void test_not_connected() throws ExecutionException, InterruptedException {
         when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(false, 1000L));
-        final PublishStatus status = publishDistributor.sendMessageToSubscriber(
-                createPublish(QoS.AT_LEAST_ONCE),
-                "client",
-                0,
-                false,
-                false,
-                ImmutableIntArray.of(1)).get();
+        final PublishStatus status =
+                publishDistributor
+                        .sendMessageToSubscriber(createPublish(
+                                QoS.AT_LEAST_ONCE), "client", 0, false, false, ImmutableIntArray.of(1))
+                        .get();
         assertEquals(PublishStatus.NOT_CONNECTED, status);
     }
 
     @Test(timeout = 5000)
     public void test_session_expired() throws ExecutionException, InterruptedException {
         when(clientSessionPersistence.getSession("client", false)).thenReturn(null);
-        final PublishStatus status = publishDistributor.sendMessageToSubscriber(
-                createPublish(QoS.AT_LEAST_ONCE),
-                "client",
-                0,
-                false,
-                false,
-                ImmutableIntArray.of(1)).get();
+        final PublishStatus status =
+                publishDistributor
+                        .sendMessageToSubscriber(createPublish(
+                                QoS.AT_LEAST_ONCE), "client", 0, false, false, ImmutableIntArray.of(1))
+                        .get();
         assertEquals(PublishStatus.NOT_CONNECTED, status);
     }
 
@@ -101,13 +99,11 @@ public class PublishDistributorImplTest {
         when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(true, 1000L));
         when(clientQueuePersistence.add(eq("client"), eq(false), any(PUBLISH.class), anyBoolean(), anyLong()))
                 .thenReturn(Futures.immediateFuture(null));
-        final PublishStatus status = publishDistributor.sendMessageToSubscriber(
-                createPublish(QoS.AT_LEAST_ONCE),
-                "client",
-                0,
-                false,
-                false,
-                ImmutableIntArray.of(1)).get();
+        final PublishStatus status =
+                publishDistributor
+                        .sendMessageToSubscriber(createPublish(
+                                QoS.AT_LEAST_ONCE), "client", 0, false, false, ImmutableIntArray.of(1))
+                        .get();
         verify(clientQueuePersistence).add(eq("client"), eq(false), any(PUBLISH.class), anyBoolean(), anyLong());
         assertEquals(PublishStatus.DELIVERED, status);
     }
@@ -117,13 +113,11 @@ public class PublishDistributorImplTest {
         when(clientSessionPersistence.getSession("client", false)).thenReturn(new ClientSession(true, 1000L));
         when(clientQueuePersistence.add(eq("client"), eq(false), any(PUBLISH.class), anyBoolean(), anyLong()))
                 .thenReturn(Futures.immediateFailedFuture(new RuntimeException("test")));
-        final PublishStatus status = publishDistributor.sendMessageToSubscriber(
-                createPublish(QoS.AT_LEAST_ONCE),
-                "client",
-                0,
-                false,
-                false,
-                ImmutableIntArray.of(1)).get();
+        final PublishStatus status =
+                publishDistributor
+                        .sendMessageToSubscriber(createPublish(
+                                QoS.AT_LEAST_ONCE), "client", 0, false, false, ImmutableIntArray.of(1))
+                        .get();
         verify(clientQueuePersistence).add(eq("client"), eq(false), any(PUBLISH.class), anyBoolean(), anyLong());
         assertEquals(PublishStatus.FAILED, status);
     }
@@ -132,13 +126,11 @@ public class PublishDistributorImplTest {
     public void test_success_shared() throws ExecutionException, InterruptedException {
         when(clientQueuePersistence.add(eq("group/topic"), eq(true), any(PUBLISH.class), anyBoolean(), anyLong()))
                 .thenReturn(Futures.immediateFuture(null));
-        final PublishStatus status = publishDistributor.sendMessageToSubscriber(
-                createPublish(QoS.AT_LEAST_ONCE),
-                "group/topic",
-                0,
-                true,
-                false,
-                ImmutableIntArray.of(1)).get();
+        final PublishStatus status =
+                publishDistributor
+                        .sendMessageToSubscriber(createPublish(
+                                QoS.AT_LEAST_ONCE), "group/topic", 0, true, false, ImmutableIntArray.of(1))
+                        .get();
         verify(clientQueuePersistence).add(eq("group/topic"), eq(true), any(PUBLISH.class), anyBoolean(), anyLong());
         assertEquals(PublishStatus.DELIVERED, status);
     }
@@ -151,13 +143,12 @@ public class PublishDistributorImplTest {
                 .thenReturn(Futures.immediateFuture(null));
         when(clientQueuePersistence.add(eq("client2"), eq(false), any(PUBLISH.class), anyBoolean(), anyLong()))
                 .thenReturn(Futures.immediateFuture(null));
-        final Map<String, SubscriberWithIdentifiers> subscribers = Map.of(
-                "client1",
-                new SubscriberWithIdentifiers("client1", 1, (byte) 0, null),
-                "client2",
-                new SubscriberWithIdentifiers("client2", 1, (byte) 0, null));
-        publishDistributor.distributeToNonSharedSubscribers(
-                subscribers,
+        final Map<String,
+                SubscriberWithIdentifiers> subscribers = Map.of("client1",
+                        new SubscriberWithIdentifiers("client1", 1, (byte) 0, null),
+                        "client2",
+                        new SubscriberWithIdentifiers("client2", 1, (byte) 0, null));
+        publishDistributor.distributeToNonSharedSubscribers(subscribers,
                 TestMessageUtil.createMqtt5Publish(),
                 MoreExecutors.newDirectExecutorService());
         verify(clientQueuePersistence).add(eq("client1"), eq(false), any(PUBLISH.class), anyBoolean(), anyLong());
@@ -171,8 +162,7 @@ public class PublishDistributorImplTest {
         when(clientQueuePersistence.add(eq("name/topic2"), eq(true), any(PUBLISH.class), anyBoolean(), anyLong()))
                 .thenReturn(Futures.immediateFuture(null));
         final Set<String> subscribers = Set.of("name/topic1", "name/topic2");
-        publishDistributor.distributeToSharedSubscribers(
-                subscribers,
+        publishDistributor.distributeToSharedSubscribers(subscribers,
                 TestMessageUtil.createMqtt5Publish("topic"),
                 MoreExecutors.newDirectExecutorService());
         verify(clientQueuePersistence).add(eq("name/topic1"), eq(true), any(PUBLISH.class), anyBoolean(), anyLong());
@@ -180,7 +170,12 @@ public class PublishDistributorImplTest {
     }
 
     private PUBLISH createPublish(final @NotNull QoS qos) {
-        return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(0).withQoS(qos).withOnwardQos(qos)
-                .withPayload("message".getBytes()).withTopic("topic").withHivemqId("hivemqId").build();
+        return new PUBLISHFactory.Mqtt5Builder().withPacketIdentifier(0)
+                .withQoS(qos)
+                .withOnwardQos(qos)
+                .withPayload("message".getBytes())
+                .withTopic("topic")
+                .withHivemqId("hivemqId")
+                .build();
     }
 }

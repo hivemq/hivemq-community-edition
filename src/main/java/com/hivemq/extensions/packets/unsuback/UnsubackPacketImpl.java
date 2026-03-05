@@ -38,8 +38,10 @@ public class UnsubackPacketImpl implements UnsubackPacket {
     final @Nullable String reasonString;
     final int packetIdentifier;
     final @NotNull UserPropertiesImpl userProperties;
-    public UnsubackPacketImpl(final @NotNull ImmutableList<UnsubackReasonCode> reasonCodes,
-            final @Nullable String reasonString, final int packetIdentifier,
+    public UnsubackPacketImpl(
+            final @NotNull ImmutableList<UnsubackReasonCode> reasonCodes,
+            final @Nullable String reasonString,
+            final int packetIdentifier,
             final @NotNull UserPropertiesImpl userProperties) {
         this.reasonCodes = reasonCodes;
         this.reasonString = reasonString;
@@ -85,8 +87,8 @@ public class UnsubackPacketImpl implements UnsubackPacket {
             return false;
         }
         final UnsubackPacketImpl that = (UnsubackPacketImpl) o;
-        return reasonCodes.equals(that.reasonCodes) && Objects.equals(reasonString, that.reasonString)
-                && (packetIdentifier == that.packetIdentifier) && userProperties.equals(that.userProperties);
+        return reasonCodes.equals(that.reasonCodes) && Objects.equals(reasonString, that.reasonString) &&
+                (packetIdentifier == that.packetIdentifier) && userProperties.equals(that.userProperties);
     }
 
     @Override

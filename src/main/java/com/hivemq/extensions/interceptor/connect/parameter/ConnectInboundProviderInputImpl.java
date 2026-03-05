@@ -32,7 +32,8 @@ public class ConnectInboundProviderInputImpl implements ConnectInboundProviderIn
     private final @NotNull ServerInformation serverInformation;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    public ConnectInboundProviderInputImpl(final @NotNull ServerInformation serverInformation,
+    public ConnectInboundProviderInputImpl(
+            final @NotNull ServerInformation serverInformation,
             final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation) {
         this.serverInformation = serverInformation;

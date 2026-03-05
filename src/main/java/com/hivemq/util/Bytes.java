@@ -148,11 +148,10 @@ public class Bytes {
      */
     public static long readLong(final byte[] buffer, final int startPosition) {
         if (startPosition + Long.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" + buffer.length
-                    + "] is to small to read 8 bytes from start position " + startPosition);
+            throw new IllegalArgumentException("The provided array[" + buffer.length +
+                    "] is to small to read 8 bytes from start position " + startPosition);
         }
-        return Longs.fromBytes(
-                buffer[startPosition],
+        return Longs.fromBytes(buffer[startPosition],
                 buffer[startPosition + 1],
                 buffer[startPosition + 2],
                 buffer[startPosition + 3],
@@ -172,11 +171,10 @@ public class Bytes {
      */
     public static int readInt(final byte[] buffer, final int startPosition) {
         if (startPosition + Integer.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" + buffer.length
-                    + "] is to small to read 4 bytes from start position " + startPosition);
+            throw new IllegalArgumentException("The provided array[" + buffer.length +
+                    "] is to small to read 4 bytes from start position " + startPosition);
         }
-        return Ints.fromBytes(
-                buffer[startPosition],
+        return Ints.fromBytes(buffer[startPosition],
                 buffer[startPosition + 1],
                 buffer[startPosition + 2],
                 buffer[startPosition + 3]);
@@ -192,8 +190,8 @@ public class Bytes {
      */
     public static int readUnsignedShort(final byte[] buffer, final int startPosition) {
         if (startPosition + Short.BYTES > buffer.length) {
-            throw new IllegalArgumentException("The provided array[" + buffer.length
-                    + "] is to small to read 2 bytes from start position " + startPosition);
+            throw new IllegalArgumentException("The provided array[" + buffer.length +
+                    "] is to small to read 2 bytes from start position " + startPosition);
         }
         return Ints.fromBytes((byte) 0, (byte) 0, buffer[startPosition], buffer[startPosition + 1]);
     }

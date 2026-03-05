@@ -88,8 +88,7 @@ public class MqttVariableByteIntegerTest {
                             continue;
                         }
                         byteBuf.writeByte(128 + i).writeByte(128 + j).writeByte(128 + k).writeByte(l);
-                        assertEquals(
-                                i + j * 128 + k * 128 * 128 + l * 128 * 128 * 128,
+                        assertEquals(i + j * 128 + k * 128 * 128 + l * 128 * 128 * 128,
                                 MqttVariableByteInteger.decode(byteBuf));
                         byteBuf.clear();
                     }

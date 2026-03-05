@@ -70,7 +70,8 @@ public class ManagedExecutorServicePerExtensionTest {
         globalManagedPluginExecutorService = new GlobalManagedExtensionExecutorService(shutdownHooks);
         globalManagedPluginExecutorService.postConstruct();
         managedExecutorServicePerExtension = new ManagedExecutorServicePerExtension(globalManagedPluginExecutorService,
-                classLoader, hiveMQExtensions);
+                classLoader,
+                hiveMQExtensions);
     }
 
     @After
@@ -118,8 +119,8 @@ public class ManagedExecutorServicePerExtensionTest {
         final CountDownLatch runLatch = new CountDownLatch(1);
         final CountDownLatch futureLatch = new CountDownLatch(1);
         final AtomicBoolean delayNotPositive = new AtomicBoolean(false);
-        final CompletableScheduledFuture<?> schedule = managedExecutorServicePerExtension
-                .schedule(runLatch::countDown, 500, TimeUnit.MILLISECONDS);
+        final CompletableScheduledFuture<?> schedule =
+                managedExecutorServicePerExtension.schedule(runLatch::countDown, 500, TimeUnit.MILLISECONDS);
         schedule.whenComplete((BiConsumer<Object, Throwable>) (o, throwable) -> {
             delayNotPositive.set(schedule.getDelay(TimeUnit.MILLISECONDS) <= 0);
             futureLatch.countDown();
@@ -134,8 +135,8 @@ public class ManagedExecutorServicePerExtensionTest {
     public void test_schedule_runnable_plugin_stopped() throws Exception {
         final CountDownLatch runLatch = new CountDownLatch(1);
         when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
-        final CompletableScheduledFuture<?> schedule = managedExecutorServicePerExtension
-                .schedule(runLatch::countDown, 500, TimeUnit.MILLISECONDS);
+        final CompletableScheduledFuture<?> schedule =
+                managedExecutorServicePerExtension.schedule(runLatch::countDown, 500, TimeUnit.MILLISECONDS);
         assertTrue(runLatch.await(2, TimeUnit.SECONDS));
         schedule.get();
         assertFalse(schedule.isCancelled());
@@ -199,8 +200,8 @@ public class ManagedExecutorServicePerExtensionTest {
         final CountDownLatch runLatch = new CountDownLatch(10);
         final CountDownLatch completeLatch = new CountDownLatch(1);
         final Runnable task = runLatch::countDown;
-        final CompletableScheduledFuture<?> scheduledFuture = managedExecutorServicePerExtension
-                .scheduleAtFixedRate(task, 10, 10, TimeUnit.MILLISECONDS);
+        final CompletableScheduledFuture<?> scheduledFuture =
+                managedExecutorServicePerExtension.scheduleAtFixedRate(task, 10, 10, TimeUnit.MILLISECONDS);
         assertTrue(runLatch.await(2, TimeUnit.SECONDS));
         final long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
         assertTrue("bad delay: " + delay, delay <= 10);
@@ -223,8 +224,8 @@ public class ManagedExecutorServicePerExtensionTest {
                 when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
             }
         };
-        final CompletableScheduledFuture<?> scheduledFuture = managedExecutorServicePerExtension
-                .scheduleAtFixedRate(task, 10, 10, TimeUnit.MILLISECONDS);
+        final CompletableScheduledFuture<?> scheduledFuture =
+                managedExecutorServicePerExtension.scheduleAtFixedRate(task, 10, 10, TimeUnit.MILLISECONDS);
         assertTrue(runLatch.await(2, TimeUnit.SECONDS));
         final long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
         assertTrue("bad delay: " + delay, delay <= 100);
@@ -232,8 +233,8 @@ public class ManagedExecutorServicePerExtensionTest {
         scheduledFuture.whenComplete((object, throwable) -> completeLatch.countDown());
         assertTrue(completeLatch.await(200, TimeUnit.MILLISECONDS));
         assertEquals(0, completeLatch.getCount());
-        final ScheduledFuture<?> delegateFuture = ((CompletableScheduledFutureImpl<?>) scheduledFuture)
-                .getScheduledFuture();
+        final ScheduledFuture<?> delegateFuture =
+                ((CompletableScheduledFutureImpl<?>) scheduledFuture).getScheduledFuture();
         assertNotNull(delegateFuture);
         assertTrue(delegateFuture.isCancelled());
     }
@@ -250,8 +251,8 @@ public class ManagedExecutorServicePerExtensionTest {
             }
             runLatch.countDown();
         };
-        final CompletableScheduledFuture<?> scheduledFuture = managedExecutorServicePerExtension
-                .scheduleWithFixedDelay(task, 10, 10, TimeUnit.MILLISECONDS);
+        final CompletableScheduledFuture<?> scheduledFuture =
+                managedExecutorServicePerExtension.scheduleWithFixedDelay(task, 10, 10, TimeUnit.MILLISECONDS);
         assertTrue(runLatch.await(2, TimeUnit.SECONDS));
         final long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
         assertTrue("bad delay: " + delay, delay <= 10);
@@ -279,8 +280,8 @@ public class ManagedExecutorServicePerExtensionTest {
                 throw new RuntimeException("something is missing");
             }
         };
-        final CompletableScheduledFuture<?> scheduledFuture = managedExecutorServicePerExtension
-                .scheduleWithFixedDelay(task, 10, 10, TimeUnit.MILLISECONDS);
+        final CompletableScheduledFuture<?> scheduledFuture =
+                managedExecutorServicePerExtension.scheduleWithFixedDelay(task, 10, 10, TimeUnit.MILLISECONDS);
         assertTrue(runLatch.await(2, TimeUnit.SECONDS));
         final long delay = scheduledFuture.getDelay(TimeUnit.MILLISECONDS);
         assertTrue("bad delay: " + delay, delay <= 10);
@@ -344,8 +345,7 @@ public class ManagedExecutorServicePerExtensionTest {
     @Test
     public void test_submit_runnable() throws Exception {
         final CountDownLatch runLatch = new CountDownLatch(1);
-        final Runnable runnable = () -> {
-        };
+        final Runnable runnable = () -> {};
         final CompletableFuture<?> submit = managedExecutorServicePerExtension.submit(runnable);
         submit.whenComplete((s, throwable) -> runLatch.countDown());
         assertTrue(runLatch.await(1, TimeUnit.SECONDS));
@@ -372,8 +372,7 @@ public class ManagedExecutorServicePerExtensionTest {
     @Test
     public void test_submit_runnable_with_result() throws Exception {
         final CountDownLatch runLatch = new CountDownLatch(1);
-        final Runnable runnable = () -> {
-        };
+        final Runnable runnable = () -> {};
         final CompletableFuture<CountDownLatch> submit = managedExecutorServicePerExtension.submit(runnable, runLatch);
         submit.whenComplete((s, throwable) -> s.countDown());
         assertTrue(runLatch.await(1, TimeUnit.SECONDS));
@@ -385,8 +384,7 @@ public class ManagedExecutorServicePerExtensionTest {
     public void test_submit_runnable_with_result_plugin_stopped() throws Exception {
         final CountDownLatch runLatch = new CountDownLatch(1);
         when(hiveMQExtensions.getExtensionForClassloader(classLoader)).thenReturn(null);
-        final Runnable runnable = () -> {
-        };
+        final Runnable runnable = () -> {};
         final CompletableFuture<CountDownLatch> submit = managedExecutorServicePerExtension.submit(runnable, runLatch);
         submit.whenComplete((s, throwable) -> s.countDown());
         assertTrue(runLatch.await(1, TimeUnit.SECONDS));
@@ -418,8 +416,8 @@ public class ManagedExecutorServicePerExtensionTest {
     @Test
     public void test_invokeAll_callable() throws Exception {
         final CountDownLatch invokeAllLatch = new CountDownLatch(5);
-        final List<Callable<String>> callableList = Stream.generate((Supplier<Callable<String>>) () -> () -> "test")
-                .limit(5).collect(Collectors.toList());
+        final List<Callable<String>> callableList =
+                Stream.generate((Supplier<Callable<String>>) () -> () -> "test").limit(5).collect(Collectors.toList());
         final List<Future<String>> futures = managedExecutorServicePerExtension.invokeAll(callableList);
         for (final Future<String> future : futures) {
             final CompletableFuture<String> stringCompletableFuture = CompletableFuture.supplyAsync(() -> {
@@ -449,8 +447,8 @@ public class ManagedExecutorServicePerExtensionTest {
             waitLatch.await();
             return "test";
         }).limit(5).collect(Collectors.toList());
-        final List<Future<String>> futures = managedExecutorServicePerExtension
-                .invokeAll(callableList, 50, TimeUnit.MILLISECONDS);
+        final List<Future<String>> futures =
+                managedExecutorServicePerExtension.invokeAll(callableList, 50, TimeUnit.MILLISECONDS);
         for (final Future<String> future : futures) {
             final CompletableFuture<String> stringCompletableFuture = CompletableFuture.supplyAsync(() -> {
                 try {

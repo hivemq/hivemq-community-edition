@@ -55,8 +55,8 @@ public class PersistenceMigrationFileModule extends SingletonModule<Class<Persis
             bind(PublishPayloadLocalPersistence.class).to(PublishPayloadXodusLocalPersistence.class)
                     .in(Singleton.class);
         }
-        if (retainedPersistenceType == PersistenceType.FILE_NATIVE
-                || payloadPersistenceType == PersistenceType.FILE_NATIVE) {
+        if (retainedPersistenceType == PersistenceType.FILE_NATIVE ||
+                payloadPersistenceType == PersistenceType.FILE_NATIVE) {
             install(new PersistenceMigrationRocksDBModule());
         }
         bind(ClientSessionLocalPersistence.class).toProvider(ClientSessionLocalProvider.class).in(Singleton.class);

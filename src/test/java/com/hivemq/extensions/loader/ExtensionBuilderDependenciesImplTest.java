@@ -45,14 +45,16 @@ public class ExtensionBuilderDependenciesImplTest {
     @Before
     public void before() {
         extensionBuilderDependencies = new ExtensionBuilderDependenciesImpl(() -> retainedPublishBuilder,
-                () -> topicSubscriptionBuilder, () -> topicPermissionBuilderProvider, () -> publishBuilder,
+                () -> topicSubscriptionBuilder,
+                () -> topicPermissionBuilderProvider,
+                () -> publishBuilder,
                 () -> willPublishBuilder);
     }
 
     @Test
     public void test_map_contains_retained_message_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = extensionBuilderDependencies
-                .getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
         final Supplier<Object> o = dependenciesMap.get(RetainedPublishBuilder.class.getCanonicalName());
         assertNotNull(o);
         assertTrue(o.get() instanceof RetainedPublishBuilder);
@@ -60,8 +62,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_subscription_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = extensionBuilderDependencies
-                .getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
         final Supplier<Object> o = dependenciesMap.get(TopicSubscriptionBuilder.class.getCanonicalName());
         assertNotNull(o);
         assertTrue(o.get() instanceof TopicSubscriptionBuilder);
@@ -69,8 +71,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_topic_permission_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = extensionBuilderDependencies
-                .getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
         final Supplier<Object> o = dependenciesMap.get(TopicPermissionBuilder.class.getCanonicalName());
         assertNotNull(o);
         assertTrue(o.get() instanceof TopicPermissionBuilder);
@@ -78,8 +80,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_publish_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = extensionBuilderDependencies
-                .getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
         final Supplier<Object> o = dependenciesMap.get(PublishBuilder.class.getCanonicalName());
         assertNotNull(o);
         assertTrue(o.get() instanceof PublishBuilder);
@@ -87,8 +89,8 @@ public class ExtensionBuilderDependenciesImplTest {
 
     @Test
     public void test_map_contains_will_publish_builder() {
-        final ImmutableMap<String, Supplier<Object>> dependenciesMap = extensionBuilderDependencies
-                .getDependenciesMap();
+        final ImmutableMap<String, Supplier<Object>> dependenciesMap =
+                extensionBuilderDependencies.getDependenciesMap();
         final Supplier<Object> o = dependenciesMap.get(WillPublishBuilder.class.getCanonicalName());
         assertNotNull(o);
         assertTrue(o.get() instanceof WillPublishBuilder);

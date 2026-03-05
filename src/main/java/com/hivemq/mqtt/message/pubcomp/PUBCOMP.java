@@ -39,8 +39,11 @@ public class PUBCOMP extends MqttMessageWithUserProperties.MqttMessageWithIdAndR
     }
 
     // MQTT 5
-    public PUBCOMP(final int packetIdentifier, final @NotNull Mqtt5PubCompReasonCode reasonCode,
-            final @Nullable String reasonString, final @NotNull Mqtt5UserProperties userProperties) {
+    public PUBCOMP(
+            final int packetIdentifier,
+            final @NotNull Mqtt5PubCompReasonCode reasonCode,
+            final @Nullable String reasonString,
+            final @NotNull Mqtt5UserProperties userProperties) {
         super(packetIdentifier, reasonCode, reasonString, userProperties);
     }
 
@@ -50,7 +53,8 @@ public class PUBCOMP extends MqttMessageWithUserProperties.MqttMessageWithIdAndR
     }
 
     public static @NotNull PUBCOMP from(final @NotNull PubcompPacketImpl packet) {
-        return new PUBCOMP(packet.getPacketIdentifier(), Mqtt5PubCompReasonCode.from(packet.getReasonCode()),
+        return new PUBCOMP(packet.getPacketIdentifier(),
+                Mqtt5PubCompReasonCode.from(packet.getReasonCode()),
                 packet.getReasonString().orElse(null),
                 Mqtt5UserProperties.of(packet.getUserProperties().asInternalList()));
     }

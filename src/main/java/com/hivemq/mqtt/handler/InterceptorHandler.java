@@ -69,7 +69,8 @@ public class InterceptorHandler extends ChannelDuplexHandler {
     private final @NotNull PingInterceptorHandler pingInterceptorHandler;
     private final @NotNull DisconnectInterceptorHandler disconnectInterceptorHandler;
     @Inject
-    public InterceptorHandler(final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
+    public InterceptorHandler(
+            final @NotNull ConnectInboundInterceptorHandler connectInboundInterceptorHandler,
             final @NotNull ConnackOutboundInterceptorHandler connackOutboundInterceptorHandler,
             final @NotNull PublishOutboundInterceptorHandler publishOutboundInterceptorHandler,
             final @NotNull PubackInterceptorHandler pubackInterceptorHandler,

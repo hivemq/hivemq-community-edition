@@ -45,10 +45,10 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void setReasonString() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiablePubcompPacketImpl modifiablePacket = new ModifiablePubcompPacketImpl(packet,
-                configurationService);
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonString("reason");
         assertEquals(Optional.of("reason"), modifiablePacket.getReasonString());
@@ -57,10 +57,12 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void setReasonString_null() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, "reason",
+        final PubcompPacketImpl packet = new PubcompPacketImpl(1,
+                PubcompReasonCode.SUCCESS,
+                "reason",
                 UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiablePubcompPacketImpl modifiablePacket = new ModifiablePubcompPacketImpl(packet,
-                configurationService);
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonString(null);
         assertEquals(Optional.empty(), modifiablePacket.getReasonString());
@@ -69,10 +71,10 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void setReasonString_same() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, "same",
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiablePubcompPacketImpl modifiablePacket = new ModifiablePubcompPacketImpl(packet,
-                configurationService);
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, "same", UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
         assertFalse(modifiablePacket.isModified());
         modifiablePacket.setReasonString("same");
         assertEquals(Optional.of("same"), modifiablePacket.getReasonString());
@@ -81,24 +83,26 @@ public class ModifiablePubcompPacketImplTest {
 
     @Test
     public void copy_noChanges() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiablePubcompPacketImpl modifiablePacket = new ModifiablePubcompPacketImpl(packet,
-                configurationService);
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
         final PubcompPacketImpl copy = modifiablePacket.copy();
         assertEquals(packet, copy);
     }
 
     @Test
     public void copy_changes() {
-        final PubcompPacketImpl packet = new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null,
-                UserPropertiesImpl.of(ImmutableList.of()));
-        final ModifiablePubcompPacketImpl modifiablePacket = new ModifiablePubcompPacketImpl(packet,
-                configurationService);
+        final PubcompPacketImpl packet =
+                new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, null, UserPropertiesImpl.of(ImmutableList.of()));
+        final ModifiablePubcompPacketImpl modifiablePacket =
+                new ModifiablePubcompPacketImpl(packet, configurationService);
         modifiablePacket.setReasonString("reason");
         modifiablePacket.getUserProperties().addUserProperty("testName", "testValue");
         final PubcompPacketImpl copy = modifiablePacket.copy();
-        final PubcompPacketImpl expectedPacket = new PubcompPacketImpl(1, PubcompReasonCode.SUCCESS, "reason",
+        final PubcompPacketImpl expectedPacket = new PubcompPacketImpl(1,
+                PubcompReasonCode.SUCCESS,
+                "reason",
                 UserPropertiesImpl.of(ImmutableList.of(MqttUserProperty.of("testName", "testValue"))));
         assertEquals(expectedPacket, copy);
     }

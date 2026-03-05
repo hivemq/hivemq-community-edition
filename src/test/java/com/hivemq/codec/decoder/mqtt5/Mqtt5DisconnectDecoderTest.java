@@ -291,9 +291,9 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
                 // session expiry interval
                 0x11, 0, 0, 0, 100,};
         decodeNullExpected(encoded);
-        assertTrue(
-                logCapture.getLastCapturedLog().getFormattedMessage()
-                        .contains("session expiry interval was set to zero"));
+        assertTrue(logCapture.getLastCapturedLog()
+                .getFormattedMessage()
+                .contains("session expiry interval was set to zero"));
     }
 
     @Test

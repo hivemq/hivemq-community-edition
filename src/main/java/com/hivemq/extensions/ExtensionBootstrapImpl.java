@@ -48,10 +48,13 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
     private final @NotNull ShutdownHooks shutdownHooks;
     private final @NotNull Authenticators authenticators;
     @Inject
-    public ExtensionBootstrapImpl(final @NotNull ExtensionLoader extensionLoader,
+    public ExtensionBootstrapImpl(
+            final @NotNull ExtensionLoader extensionLoader,
             final @NotNull SystemInformation systemInformation,
-            final @NotNull ExtensionLifecycleHandler lifecycleHandler, final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull ShutdownHooks shutdownHooks, final @NotNull Authenticators authenticators) {
+            final @NotNull ExtensionLifecycleHandler lifecycleHandler,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull ShutdownHooks shutdownHooks,
+            final @NotNull Authenticators authenticators) {
         this.extensionLoader = extensionLoader;
         this.systemInformation = systemInformation;
         this.lifecycleHandler = lifecycleHandler;
@@ -67,10 +70,10 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
         shutdownHooks.add(new ExtensionSystemShutdownHook(this));
         final Path extensionFolder = systemInformation.getExtensionsFolder().toPath();
         // load already installed extensions
-        final ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents = extensionLoader
-                .loadExtensions(extensionFolder, systemInformation.isEmbedded());
-        final ImmutableList.Builder<HiveMQExtensionEvent> extensionEventBuilder = ImmutableList
-                .<HiveMQExtensionEvent>builder().addAll(hiveMQExtensionEvents);
+        final ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents =
+                extensionLoader.loadExtensions(extensionFolder, systemInformation.isEmbedded());
+        final ImmutableList.Builder<HiveMQExtensionEvent> extensionEventBuilder =
+                ImmutableList.<HiveMQExtensionEvent>builder().addAll(hiveMQExtensionEvents);
         if (embeddedExtension != null) {
             final HiveMQExtensionEvent extensionEvent = extensionLoader.loadEmbeddedExtension(embeddedExtension);
             if (extensionEvent != null) {
@@ -85,12 +88,14 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
 
     @Override
     public void stopExtensionSystem() {
-        final ImmutableList<HiveMQExtensionEvent> events = hiveMQExtensions.getEnabledHiveMQExtensions().values()
+        final ImmutableList<HiveMQExtensionEvent> events = hiveMQExtensions.getEnabledHiveMQExtensions()
+                .values()
                 .stream()
-                .map(
-                        extension -> new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.DISABLE, extension.getId(),
-                                extension.getStartPriority(), extension.getExtensionFolderPath(),
-                                extension.isEmbedded()))
+                .map(extension -> new HiveMQExtensionEvent(HiveMQExtensionEvent.Change.DISABLE,
+                        extension.getId(),
+                        extension.getStartPriority(),
+                        extension.getExtensionFolderPath(),
+                        extension.isEmbedded()))
                 .collect(ImmutableList.toImmutableList());
         // stop extensions
         lifecycleHandler.handleExtensionEvents(events).join();

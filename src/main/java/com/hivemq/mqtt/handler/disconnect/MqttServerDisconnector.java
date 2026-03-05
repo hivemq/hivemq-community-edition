@@ -43,8 +43,7 @@ public interface MqttServerDisconnector {
             final @NotNull Channel channel,
             final @Nullable String logMessage,
             final @Nullable String eventLogMessage) {
-        disconnect(
-                channel,
+        disconnect(channel,
                 logMessage,
                 eventLogMessage,
                 null,
@@ -73,8 +72,7 @@ public interface MqttServerDisconnector {
             final @Nullable String eventLogMessage,
             final @Nullable Mqtt5DisconnectReasonCode reasonCode,
             final @Nullable String reasonString) {
-        disconnect(
-                channel,
+        disconnect(channel,
                 logMessage,
                 eventLogMessage,
                 reasonCode,

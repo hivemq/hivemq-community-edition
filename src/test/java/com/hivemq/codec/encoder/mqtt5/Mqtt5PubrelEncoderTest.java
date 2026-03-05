@@ -81,7 +81,9 @@ public class Mqtt5PubrelEncoderTest extends AbstractMqtt5EncoderTest {
                 9,
                 // reason string
                 0x1F, 0, 6, 'r', 'e', 'a', 's', 'o', 'n'};
-        final PUBREL pubRel = new PUBREL(9, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason",
+        final PUBREL pubRel = new PUBREL(9,
+                Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
         encodeTestBufferSize(expected, pubRel);
     }
@@ -163,8 +165,8 @@ public class Mqtt5PubrelEncoderTest extends AbstractMqtt5EncoderTest {
                 (byte) Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND.getCode()};
         final MqttUserProperty userProperty = new MqttUserProperty("user", "property");
         final Mqtt5UserProperties userProperties = Mqtt5UserProperties.of(ImmutableList.of(userProperty));
-        final PUBREL pubRel = new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason",
-                userProperties);
+        final PUBREL pubRel =
+                new PUBREL(1, Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason", userProperties);
         encodeTestBufferSize(expected, pubRel);
     }
 
@@ -179,8 +181,8 @@ public class Mqtt5PubrelEncoderTest extends AbstractMqtt5EncoderTest {
                 // variable header
                 // packet identifier
                 0, 1};
-        final PUBREL pubRel = new PUBREL(1, Mqtt5PubRelReasonCode.SUCCESS, null,
-                Mqtt5UserProperties.NO_USER_PROPERTIES);
+        final PUBREL pubRel =
+                new PUBREL(1, Mqtt5PubRelReasonCode.SUCCESS, null, Mqtt5UserProperties.NO_USER_PROPERTIES);
         encodeTestBufferSize(expected, pubRel);
     }
 
@@ -249,8 +251,8 @@ public class Mqtt5PubrelEncoderTest extends AbstractMqtt5EncoderTest {
                 0x26, 0, 4, 'u', 's', 'e', 'r', 0, 9, 'p', 'r', 'o', 'p', 'e', 'r', 't', 'y', '2'};
         final MqttUserProperty userProperty = new MqttUserProperty("user", "property");
         final MqttUserProperty userProperty2 = new MqttUserProperty("user", "property2");
-        final Mqtt5UserProperties userProperties = Mqtt5UserProperties
-                .of(ImmutableList.of(userProperty, userProperty2));
+        final Mqtt5UserProperties userProperties =
+                Mqtt5UserProperties.of(ImmutableList.of(userProperty, userProperty2));
         final PUBREL pubRel = new PUBREL(1, SUCCESS, "reason", userProperties);
         encodeTestBufferSize(expected, pubRel);
     }
@@ -266,10 +268,10 @@ public class Mqtt5PubrelEncoderTest extends AbstractMqtt5EncoderTest {
                 // variable header
                 // packet identifier
                 0, 1};
-        final Mqtt5PubrelEncoderTest.MaximumPacketBuilder maxPacket = new Mqtt5PubrelEncoderTest.MaximumPacketBuilder()
-                .build(MAX_PACKET_SIZE);
-        final PUBREL pubRel = new PUBREL(1, SUCCESS, null,
-                getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1));
+        final Mqtt5PubrelEncoderTest.MaximumPacketBuilder maxPacket =
+                new Mqtt5PubrelEncoderTest.MaximumPacketBuilder().build(MAX_PACKET_SIZE);
+        final PUBREL pubRel =
+                new PUBREL(1, SUCCESS, null, getUserProperties(maxPacket.getMaxUserPropertiesCount() + 1));
         encodeTestBufferSize(expected, pubRel);
     }
 

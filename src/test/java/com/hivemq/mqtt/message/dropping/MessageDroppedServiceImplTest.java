@@ -56,8 +56,7 @@ public class MessageDroppedServiceImplTest {
     @Test
     public void test_qos0_memory_exceeded() {
         messageDroppedService.qos0MemoryExceeded(clientId, topic, qos, 1111, 1000);
-        verify(eventLog, times(1)).messageDropped(
-                clientId,
+        verify(eventLog, times(1)).messageDropped(clientId,
                 topic,
                 qos,
                 "The QoS 0 memory limit exceeded, size: 1,111 bytes, max: 1,000 bytes");
@@ -66,8 +65,7 @@ public class MessageDroppedServiceImplTest {
     @Test
     public void test_qos0_memory_exceeded_shared() {
         messageDroppedService.qos0MemoryExceededShared(clientId, topic, qos, 1111, 1000);
-        verify(eventLog, times(1)).sharedSubscriptionMessageDropped(
-                clientId,
+        verify(eventLog, times(1)).sharedSubscriptionMessageDropped(clientId,
                 topic,
                 qos,
                 "The QoS 0 memory limit exceeded, size: 1,111 bytes, max: 1,000 bytes");

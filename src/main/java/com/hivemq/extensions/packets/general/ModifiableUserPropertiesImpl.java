@@ -46,7 +46,8 @@ public class ModifiableUserPropertiesImpl implements ModifiableUserProperties {
     private @NotNull List<MqttUserProperty> list;
     private final boolean validateUTF8;
     private boolean modified = false;
-    public ModifiableUserPropertiesImpl(final @NotNull ImmutableList<MqttUserProperty> list,
+    public ModifiableUserPropertiesImpl(
+            final @NotNull ImmutableList<MqttUserProperty> list,
             final boolean validateUTF8) {
         this.list = list;
         this.validateUTF8 = validateUTF8;
@@ -58,7 +59,9 @@ public class ModifiableUserPropertiesImpl implements ModifiableUserProperties {
         final Lock lock = readWriteLock.readLock();
         lock.lock();
         try {
-            return list.stream().filter(userProperty -> userProperty.getName().equals(name)).findFirst()
+            return list.stream()
+                    .filter(userProperty -> userProperty.getName().equals(name))
+                    .findFirst()
                     .map(UserProperty::getValue);
         } finally {
             lock.unlock();
@@ -71,7 +74,9 @@ public class ModifiableUserPropertiesImpl implements ModifiableUserProperties {
         final Lock lock = readWriteLock.readLock();
         lock.lock();
         try {
-            return list.stream().filter(userProperty -> userProperty.getName().equals(name)).map(UserProperty::getValue)
+            return list.stream()
+                    .filter(userProperty -> userProperty.getName().equals(name))
+                    .map(UserProperty::getValue)
                     .collect(ImmutableList.toImmutableList());
         } finally {
             lock.unlock();

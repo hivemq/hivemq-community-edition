@@ -26,7 +26,9 @@ import com.hivemq.extension.sdk.api.packets.auth.AuthReasonCode;
  */
 public enum Mqtt5AuthReasonCode implements Mqtt5ReasonCode {
 
-    SUCCESS(MqttCommonReasonCode.SUCCESS), CONTINUE_AUTHENTICATION(0x18), REAUTHENTICATE(0x19);
+    SUCCESS(MqttCommonReasonCode.SUCCESS),
+    CONTINUE_AUTHENTICATION(0x18),
+    REAUTHENTICATE(0x19);
     private final int code;
     private final @NotNull AuthReasonCode authReasonCode;
     Mqtt5AuthReasonCode(final int code) {
@@ -46,8 +48,8 @@ public enum Mqtt5AuthReasonCode implements Mqtt5ReasonCode {
     public @NotNull AuthReasonCode toAuthReasonCode() {
         return authReasonCode;
     }
-    private static final @NotNull Mqtt5AuthReasonCode @NotNull [] AUTH_LOOKUP = new Mqtt5AuthReasonCode[AuthReasonCode
-            .values().length];
+    private static final @NotNull Mqtt5AuthReasonCode @NotNull [] AUTH_LOOKUP =
+            new Mqtt5AuthReasonCode[AuthReasonCode.values().length];
     static {
         for (final Mqtt5AuthReasonCode reasonCode : values()) {
             AUTH_LOOKUP[reasonCode.authReasonCode.ordinal()] = reasonCode;

@@ -33,7 +33,8 @@ public class UnsubackOutboundInputImpl implements UnsubackOutboundInput, PluginT
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull UnsubackPacketImpl unsubackPacket;
-    public UnsubackOutboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public UnsubackOutboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull UnsubackPacketImpl unsubackPacket) {
         this.clientInformation = clientInformation;
@@ -57,7 +58,8 @@ public class UnsubackOutboundInputImpl implements UnsubackOutboundInput, PluginT
     }
 
     public @NotNull UnsubackOutboundInputImpl update(final @NotNull UnsubackOutboundOutputImpl output) {
-        return new UnsubackOutboundInputImpl(clientInformation, connectionInformation,
+        return new UnsubackOutboundInputImpl(clientInformation,
+                connectionInformation,
                 output.getUnsubackPacket().copy());
     }
 }

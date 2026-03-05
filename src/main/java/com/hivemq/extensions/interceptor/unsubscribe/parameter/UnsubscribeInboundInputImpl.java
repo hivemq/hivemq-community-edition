@@ -33,7 +33,8 @@ public class UnsubscribeInboundInputImpl implements UnsubscribeInboundInput, Plu
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
     private final @NotNull UnsubscribePacketImpl unsubscribePacket;
-    public UnsubscribeInboundInputImpl(final @NotNull ClientInformation clientInformation,
+    public UnsubscribeInboundInputImpl(
+            final @NotNull ClientInformation clientInformation,
             final @NotNull ConnectionInformation connectionInformation,
             final @NotNull UnsubscribePacketImpl unsubscribePacket) {
         this.clientInformation = clientInformation;
@@ -57,7 +58,8 @@ public class UnsubscribeInboundInputImpl implements UnsubscribeInboundInput, Plu
     }
 
     public @NotNull UnsubscribeInboundInputImpl update(final @NotNull UnsubscribeInboundOutputImpl output) {
-        return new UnsubscribeInboundInputImpl(clientInformation, connectionInformation,
+        return new UnsubscribeInboundInputImpl(clientInformation,
+                connectionInformation,
                 output.getUnsubscribePacket().copy());
     }
 }

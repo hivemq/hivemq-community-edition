@@ -35,8 +35,11 @@ public class NettyShutdownHook implements HiveMQShutdownHook {
     private final int eventLoopsShutdownTimeout;
     private final int connectionPersistenceShutdownTimeout;
     private final @NotNull ConnectionPersistence connectionPersistence;
-    public NettyShutdownHook(final @NotNull EventLoopGroup workerGroup, final @NotNull EventLoopGroup bossGroup,
-            final int eventLoopsShutdownTimeout, final int connectionPersistenceShutdownTimeout,
+    public NettyShutdownHook(
+            final @NotNull EventLoopGroup workerGroup,
+            final @NotNull EventLoopGroup bossGroup,
+            final int eventLoopsShutdownTimeout,
+            final int connectionPersistenceShutdownTimeout,
             final @NotNull ConnectionPersistence connectionPersistence) {
         this.workerGroup = workerGroup;
         this.bossGroup = bossGroup;

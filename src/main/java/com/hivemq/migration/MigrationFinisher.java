@@ -54,14 +54,12 @@ class MigrationFinisher {
         metaFile.setClientSessionPersistenceVersion(ClientSessionXodusLocalPersistence.PERSISTENCE_VERSION);
         metaFile.setQueuedMessagesPersistenceVersion(ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION);
         metaFile.setSubscriptionPersistenceVersion(ClientSessionSubscriptionXodusLocalPersistence.PERSISTENCE_VERSION);
-        metaFile.setRetainedMessagesPersistenceVersion(
-                retainedType == PersistenceType.FILE_NATIVE
-                        ? RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION
-                        : RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
+        metaFile.setRetainedMessagesPersistenceVersion(retainedType == PersistenceType.FILE_NATIVE ?
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION :
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
         metaFile.setPublishPayloadPersistenceVersion(
-                payloadType == PersistenceType.FILE_NATIVE
-                        ? PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION
-                        : PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
+                payloadType == PersistenceType.FILE_NATIVE ? PublishPayloadRocksDBLocalPersistence.PERSISTENCE_VERSION :
+                        PublishPayloadXodusLocalPersistence.PERSISTENCE_VERSION);
         metaFile.setRetainedMessagesPersistenceType(retainedType);
         metaFile.setPublishPayloadPersistenceType(payloadType);
         MetaFileService.writeMetaFile(systemInformation, metaFile);

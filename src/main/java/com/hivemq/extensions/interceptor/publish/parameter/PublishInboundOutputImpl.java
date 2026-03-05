@@ -41,7 +41,8 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
     private final @NotNull AtomicBoolean preventDelivery = new AtomicBoolean(false);
     private @NotNull AckReasonCode reasonCode = AckReasonCode.SUCCESS;
     private @Nullable String reasonString;
-    public PublishInboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public PublishInboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiablePublishPacketImpl publishPacket) {
         super(asyncer);
         this.publishPacket = publishPacket;
@@ -66,8 +67,7 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
     public void preventPublishDelivery(final @NotNull AckReasonCode reasonCode, final @Nullable String reasonString) {
         Preconditions.checkNotNull(reasonCode, "reason code must never be null");
         if (reasonCode == AckReasonCode.SUCCESS) {
-            Preconditions.checkArgument(
-                    reasonString == null,
+            Preconditions.checkArgument(reasonString == null,
                     "reason string must not be set when ack reason code is success");
         }
         checkPrevented();
@@ -101,13 +101,11 @@ public class PublishInboundOutputImpl extends AbstractAsyncOutput<PublishInbound
         Preconditions.checkNotNull(duration, "Duration must never be null");
         Preconditions.checkNotNull(timeoutFallback, "Fallback must never be null");
         if (timeoutFallback == TimeoutFallback.SUCCESS) {
-            Preconditions.checkArgument(
-                    ackReasonCode == AckReasonCode.SUCCESS,
+            Preconditions.checkArgument(ackReasonCode == AckReasonCode.SUCCESS,
                     "reason code must be success when fallback success");
         }
         if (ackReasonCode == AckReasonCode.SUCCESS) {
-            Preconditions.checkArgument(
-                    reasonString == null,
+            Preconditions.checkArgument(reasonString == null,
                     "reason string must not be set when ack reason code is success");
         }
         Preconditions.checkNotNull(ackReasonCode, "Reason code must never be null");

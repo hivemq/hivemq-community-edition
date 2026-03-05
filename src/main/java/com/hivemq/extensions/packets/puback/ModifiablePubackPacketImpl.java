@@ -40,7 +40,8 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
-    public ModifiablePubackPacketImpl(final @NotNull PubackPacketImpl packet,
+    public ModifiablePubackPacketImpl(
+            final @NotNull PubackPacketImpl packet,
             final @NotNull FullConfigurationService configurationService) {
         packetIdentifier = packet.packetIdentifier;
         reasonCode = packet.reasonCode;
@@ -69,8 +70,8 @@ public class ModifiablePubackPacketImpl implements ModifiablePubackPacket {
         final Mqtt5PubAckReasonCode newReasonCode = Mqtt5PubAckReasonCode.from(reasonCode);
         final Mqtt5PubAckReasonCode oldReasonCode = Mqtt5PubAckReasonCode.from(this.reasonCode);
         final boolean switched = newReasonCode.isError() != oldReasonCode.isError();
-        Preconditions
-                .checkState(!switched, "Reason code must not switch from successful to unsuccessful or vice versa");
+        Preconditions.checkState(!switched,
+                "Reason code must not switch from successful to unsuccessful or vice versa");
         this.reasonCode = reasonCode;
         modified = true;
     }

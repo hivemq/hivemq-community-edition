@@ -71,10 +71,12 @@ public class PublishServiceImpl implements PublishService {
     @NotNull
     private final LocalTopicTree topicTree;
     @Inject
-    public PublishServiceImpl(@NotNull final PluginServiceRateLimitService rateLimitService,
+    public PublishServiceImpl(
+            @NotNull final PluginServiceRateLimitService rateLimitService,
             @NotNull final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService,
             @NotNull final InternalPublishService internalPublishService,
-            @NotNull final PublishDistributor publishDistributor, @NotNull final HivemqId hiveMQId,
+            @NotNull final PublishDistributor publishDistributor,
+            @NotNull final HivemqId hiveMQId,
             @NotNull final LocalTopicTree topicTree) {
         this.rateLimitService = rateLimitService;
         this.globalManagedExtensionExecutorService = globalManagedExtensionExecutorService;
@@ -95,8 +97,8 @@ public class PublishServiceImpl implements PublishService {
             return CompletableFuture.failedFuture(new DoNotImplementException(Publish.class.getSimpleName()));
         }
         final PUBLISH internalPublish = publishToPUBLISH((PublishImpl) publish);
-        final ListenableFuture<PublishReturnCode> publishFuture = internalPublishService
-                .publish(internalPublish, globalManagedExtensionExecutorService, null);
+        final ListenableFuture<PublishReturnCode> publishFuture =
+                internalPublishService.publish(internalPublish, globalManagedExtensionExecutorService, null);
         return ListenableFutureConverter.toVoidCompletable(publishFuture, globalManagedExtensionExecutorService);
     }
 
@@ -121,13 +123,13 @@ public class PublishServiceImpl implements PublishService {
             sendPublishFuture.set(PublishToClientResult.NOT_SUBSCRIBED);
             return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedExtensionExecutorService);
         }
-        final ListenableFuture<PublishStatus> publishSendFuture = publishDistributor.sendMessageToSubscriber(
-                internalPublish,
-                clientId,
-                subscriber.getQos(),
-                false,
-                subscriber.isRetainAsPublished(),
-                subscriber.getSubscriptionIdentifier());
+        final ListenableFuture<PublishStatus> publishSendFuture =
+                publishDistributor.sendMessageToSubscriber(internalPublish,
+                        clientId,
+                        subscriber.getQos(),
+                        false,
+                        subscriber.isRetainAsPublished(),
+                        subscriber.getSubscriptionIdentifier());
         Futures.addCallback(publishSendFuture, new FutureCallback<>() {
 
             @Override
@@ -147,17 +149,22 @@ public class PublishServiceImpl implements PublishService {
     private PUBLISH publishToPUBLISH(@NotNull final PublishImpl publish) {
         final byte[] payload = Bytes.getBytesFromReadOnlyBuffer(publish.getPayload());
         final byte[] correlationData = Bytes.getBytesFromReadOnlyBuffer(publish.getCorrelationData());
-        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent()
-                ? Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get())
-                : null;
+        final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent() ?
+                Mqtt5PayloadFormatIndicator.from(publish.getPayloadFormatIndicator().get()) :
+                null;
         return new PUBLISHFactory.Mqtt5Builder().withHivemqId(hiveMQId.get())
                 .withQoS(QoS.valueOf(publish.getQos().getQosNumber()))
-                .withOnwardQos(QoS.valueOf(publish.getQos().getQosNumber())).withRetain(publish.getRetain())
-                .withTopic(publish.getTopic()).withPayload(payload)
+                .withOnwardQos(QoS.valueOf(publish.getQos().getQosNumber()))
+                .withRetain(publish.getRetain())
+                .withTopic(publish.getTopic())
+                .withPayload(payload)
                 .withMessageExpiryInterval(publish.getMessageExpiryInterval().orElse(MESSAGE_EXPIRY_INTERVAL_NOT_SET))
-                .withResponseTopic(publish.getResponseTopic().orElse(null)).withCorrelationData(correlationData)
-                .withPayload(payload).withContentType(publish.getContentType().orElse(null))
+                .withResponseTopic(publish.getResponseTopic().orElse(null))
+                .withCorrelationData(correlationData)
+                .withPayload(payload)
+                .withContentType(publish.getContentType().orElse(null))
                 .withPayloadFormatIndicator(payloadFormatIndicator)
-                .withUserProperties(Mqtt5UserProperties.of(publish.getUserProperties().asInternalList())).build();
+                .withUserProperties(Mqtt5UserProperties.of(publish.getUserProperties().asInternalList()))
+                .build();
     }
 }

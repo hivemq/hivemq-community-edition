@@ -56,7 +56,8 @@ public class PersistenceShutdownHook implements HiveMQShutdownHook {
     private final @NotNull SingleWriterService singleWriterService;
     private final @NotNull PublishPayloadPersistence payloadPersistence;
     @Inject
-    PersistenceShutdownHook(final @NotNull ClientSessionPersistence clientSessionPersistence,
+    PersistenceShutdownHook(
+            final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence,
             final @NotNull IncomingMessageFlowPersistence incomingMessageFlowPersistence,
             final @NotNull RetainedMessagePersistence retainedMessagePersistence,

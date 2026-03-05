@@ -37,8 +37,8 @@ public class ConnackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final ConnackPacketImpl packet = mock(ConnackPacketImpl.class);
-        final ConnackOutboundInputImpl input = new ConnackOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final ConnackOutboundInputImpl input =
+                new ConnackOutboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getConnackPacket());
@@ -49,8 +49,8 @@ public class ConnackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final ConnackPacketImpl packet = mock(ConnackPacketImpl.class);
-        final ConnackOutboundInputImpl input = new ConnackOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final ConnackOutboundInputImpl input =
+                new ConnackOutboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiableConnackPacketImpl modifiablePacket = mock(ModifiableConnackPacketImpl.class);
         final ConnackPacketImpl newPacket = mock(ConnackPacketImpl.class);
         final ConnackOutboundOutputImpl output = mock(ConnackOutboundOutputImpl.class);

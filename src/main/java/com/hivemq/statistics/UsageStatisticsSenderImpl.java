@@ -51,8 +51,7 @@ public class UsageStatisticsSenderImpl implements UsageStatisticsSender {
             connection.setReadTimeout(30000);
             connection.setDoOutput(true);
             connection.setRequestMethod("POST");
-            connection.setRequestProperty(
-                    "hmq-digest",
+            connection.setRequestProperty("hmq-digest",
                     BaseEncoding.base64()
                             .encode(Hashing.sha256().hashString(jsonPayload, StandardCharsets.UTF_8).asBytes()));
             connection.setRequestProperty("Content-Type", "application/json");

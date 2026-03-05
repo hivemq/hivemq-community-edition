@@ -58,7 +58,8 @@ public class PendingWillMessages {
     private final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence;
     private final @NotNull MetricsHolder metricsHolder;
     @Inject
-    public PendingWillMessages(final @NotNull InternalPublishService publishService,
+    public PendingWillMessages(
+            final @NotNull InternalPublishService publishService,
             final @Persistence @NotNull ListeningScheduledExecutorService executorService,
             final @NotNull ClientSessionPersistence clientSessionPersistence,
             final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
@@ -68,8 +69,7 @@ public class PendingWillMessages {
         this.clientSessionPersistence = clientSessionPersistence;
         this.clientSessionLocalPersistence = clientSessionLocalPersistence;
         this.metricsHolder = metricsHolder;
-        executorService.scheduleAtFixedRate(
-                new CheckWillsTask(),
+        executorService.scheduleAtFixedRate(new CheckWillsTask(),
                 WILL_DELAY_CHECK_INTERVAL_SEC,
                 WILL_DELAY_CHECK_INTERVAL_SEC,
                 TimeUnit.SECONDS);
@@ -82,13 +82,12 @@ public class PendingWillMessages {
         if (session.getWillPublish() == null) {
             return;
         }
-        if (sessionWill.getDelayInterval() == 0
-                || session.getSessionExpiryIntervalSec() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
+        if (sessionWill.getDelayInterval() == 0 ||
+                session.getSessionExpiryIntervalSec() == Mqtt5CONNECT.SESSION_EXPIRE_ON_DISCONNECT) {
             sendWill(clientId, publishFromWill(sessionWill));
             return;
         }
-        pendingWills.put(
-                clientId,
+        pendingWills.put(clientId,
                 new PendingWill(Math.min(sessionWill.getDelayInterval(), session.getSessionExpiryIntervalSec()),
                         System.currentTimeMillis()));
     }
@@ -181,13 +180,19 @@ public class PendingWillMessages {
     }
 
     private static @NotNull PUBLISH publishFromWill(final @NotNull ClientSessionWill sessionWill) {
-        return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic()).withQoS(sessionWill.getQos())
-                .withOnwardQos(sessionWill.getQos()).withPayload(sessionWill.getPayload())
-                .withRetain(sessionWill.isRetain()).withHivemqId(sessionWill.getHivemqId())
-                .withUserProperties(sessionWill.getUserProperties()).withResponseTopic(sessionWill.getResponseTopic())
-                .withCorrelationData(sessionWill.getCorrelationData()).withContentType(sessionWill.getContentType())
+        return new PUBLISHFactory.Mqtt5Builder().withTopic(sessionWill.getTopic())
+                .withQoS(sessionWill.getQos())
+                .withOnwardQos(sessionWill.getQos())
+                .withPayload(sessionWill.getPayload())
+                .withRetain(sessionWill.isRetain())
+                .withHivemqId(sessionWill.getHivemqId())
+                .withUserProperties(sessionWill.getUserProperties())
+                .withResponseTopic(sessionWill.getResponseTopic())
+                .withCorrelationData(sessionWill.getCorrelationData())
+                .withContentType(sessionWill.getContentType())
                 .withPayloadFormatIndicator(sessionWill.getPayloadFormatIndicator())
-                .withMessageExpiryInterval(sessionWill.getMessageExpiryInterval()).build();
+                .withMessageExpiryInterval(sessionWill.getMessageExpiryInterval())
+                .build();
     }
 
     @VisibleForTesting

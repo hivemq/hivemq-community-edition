@@ -43,9 +43,12 @@ public class UsageStatistics {
     private final @NotNull ScheduledExecutorService scheduledExecutorService;
     private final @NotNull FullConfigurationService configurationService;
     @Inject
-    public UsageStatistics(final @NotNull UsageStatisticsCollector statisticsCollector,
-            final @NotNull SystemInformation systemInformation, final @NotNull UsageStatisticsSender statisticsSender,
-            final @NotNull FullConfigurationService configurationService, final @NotNull ShutdownHooks shutdownHooks) {
+    public UsageStatistics(
+            final @NotNull UsageStatisticsCollector statisticsCollector,
+            final @NotNull SystemInformation systemInformation,
+            final @NotNull UsageStatisticsSender statisticsSender,
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull ShutdownHooks shutdownHooks) {
         this.statisticsCollector = statisticsCollector;
         this.systemInformation = systemInformation;
         this.statisticsSender = statisticsSender;
@@ -89,9 +92,11 @@ public class UsageStatistics {
         private final @NotNull UsageStatisticsCollector statisticsCollector;
         private final @NotNull ScheduledExecutorService scheduledExecutorService;
         private final @NotNull String statisticType;
-        private SendStatisticsTask(final @NotNull UsageStatisticsSender statisticsSender,
+        private SendStatisticsTask(
+                final @NotNull UsageStatisticsSender statisticsSender,
                 final @NotNull UsageStatisticsCollector statisticsCollector,
-                final @NotNull ScheduledExecutorService scheduledExecutorService, final @NotNull String statisticType) {
+                final @NotNull ScheduledExecutorService scheduledExecutorService,
+                final @NotNull String statisticType) {
             this.statisticsSender = statisticsSender;
             this.statisticsCollector = statisticsCollector;
             this.scheduledExecutorService = scheduledExecutorService;
@@ -107,11 +112,10 @@ public class UsageStatistics {
                 log.trace("original exception", e);
             } finally {
                 // reschedule
-                scheduledExecutorService.schedule(
-                        new SendStatisticsTask(statisticsSender, statisticsCollector, scheduledExecutorService,
-                                "runtime"),
-                        InternalConfigurations.USAGE_STATISTICS_SEND_INTERVAL_MINUTES,
-                        TimeUnit.MINUTES);
+                scheduledExecutorService.schedule(new SendStatisticsTask(statisticsSender,
+                        statisticsCollector,
+                        scheduledExecutorService,
+                        "runtime"), InternalConfigurations.USAGE_STATISTICS_SEND_INTERVAL_MINUTES, TimeUnit.MINUTES);
             }
         }
     }

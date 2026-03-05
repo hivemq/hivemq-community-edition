@@ -49,8 +49,7 @@ public class LocalPersistenceFileUtilTest {
 
     @Test
     public void test_is_singleton() {
-        final Injector injector = Guice.createInjector(
-                new LazySingletonModule(),
+        final Injector injector = Guice.createInjector(new LazySingletonModule(),
                 new SystemInformationModule(new SystemInformationImpl(false)));
         final LocalPersistenceFileUtil instance = injector.getInstance(LocalPersistenceFileUtil.class);
         final LocalPersistenceFileUtil instance2 = injector.getInstance(LocalPersistenceFileUtil.class);

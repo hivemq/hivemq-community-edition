@@ -29,7 +29,8 @@ public class PollInflightMessageListener implements ChannelFutureListener {
     private final PublishPollService publishPollService;
     @NotNull
     private final String clientId;
-    public PollInflightMessageListener(@NotNull final PublishPollService publishPollService,
+    public PollInflightMessageListener(
+            @NotNull final PublishPollService publishPollService,
             @NotNull final String clientId) {
         this.publishPollService = publishPollService;
         this.clientId = clientId;

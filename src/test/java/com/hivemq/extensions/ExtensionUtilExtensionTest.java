@@ -46,31 +46,31 @@ public class ExtensionUtilExtensionTest extends AbstractExtensionTest {
 
     @Test(timeout = 5000)
     public void test_valid_extension_folder() throws Exception {
-        final File validExtensionFolder = TestExtensionUtil
-                .createValidExtension(folder.newFolder("extensions"), "validExtension");
+        final File validExtensionFolder =
+                TestExtensionUtil.createValidExtension(folder.newFolder("extensions"), "validExtension");
         assertTrue(ExtensionUtil.isValidExtensionFolder(validExtensionFolder.toPath(), true));
     }
 
     @Test(timeout = 5000)
     public void test_folder_jar_only() throws Exception {
-        final File validExtensionFolder = TestExtensionUtil
-                .createValidExtension(folder.newFolder("extensions"), "validExtension");
+        final File validExtensionFolder =
+                TestExtensionUtil.createValidExtension(folder.newFolder("extensions"), "validExtension");
         assertTrue(new File(validExtensionFolder, "hivemq-extension.xml").delete());
         assertFalse(ExtensionUtil.isValidExtensionFolder(validExtensionFolder.toPath(), true));
     }
 
     @Test(timeout = 5000)
     public void test_folder_xml_only() throws Exception {
-        final File validExtensionFolder = TestExtensionUtil
-                .createValidExtension(folder.newFolder("extension"), "validExtension");
+        final File validExtensionFolder =
+                TestExtensionUtil.createValidExtension(folder.newFolder("extension"), "validExtension");
         assertTrue(new File(validExtensionFolder, "extension.jar").delete());
         assertFalse(ExtensionUtil.isValidExtensionFolder(validExtensionFolder.toPath(), true));
     }
 
     @Test
     public void test_extension_disable() throws Exception {
-        final File validExtensionFolder = TestExtensionUtil
-                .createValidExtension(folder.newFolder("extensions"), "validExtension");
+        final File validExtensionFolder =
+                TestExtensionUtil.createValidExtension(folder.newFolder("extensions"), "validExtension");
         final boolean result = ExtensionUtil.disableExtensionFolder(validExtensionFolder.toPath());
         assertTrue(result);
         assertTrue(new File(validExtensionFolder, "DISABLED").exists());

@@ -46,12 +46,10 @@ public class FreePacketIdRangesTest {
             final int id = messageIDPool.takeNextId();
             integers.add(id);
         }
-        assertTrue(
-                areConsecutiveMessageIds(
-                        Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(0)));
-        assertTrue(
-                areConsecutiveMessageIds(
-                        Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(1)));
+        assertTrue(areConsecutiveMessageIds(
+                Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(0)));
+        assertTrue(areConsecutiveMessageIds(
+                Lists.partition(integers, FreePacketIdRanges.MAX_ALLOWED_MQTT_PACKET_ID).get(1)));
     }
 
     @Test

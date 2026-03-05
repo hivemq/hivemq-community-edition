@@ -34,12 +34,12 @@ import static org.mockito.Mockito.when;
  */
 public class ManagedPluginExecutorShutdownHookTest {
 
-    private final @NotNull GlobalManagedExtensionExecutorService executorService = mock(
-            GlobalManagedExtensionExecutorService.class);
+    private final @NotNull GlobalManagedExtensionExecutorService executorService =
+            mock(GlobalManagedExtensionExecutorService.class);
     @Test
     public void test_run() {
-        final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook = new ManagedPluginExecutorShutdownHook(
-                executorService, 60);
+        final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook =
+                new ManagedPluginExecutorShutdownHook(executorService, 60);
         assertEquals("ManagedExtensionExecutorService shutdown", pluginExecutorShutdownHook.name());
         assertEquals(HiveMQShutdownHook.Priority.DOES_NOT_MATTER, pluginExecutorShutdownHook.priority());
         pluginExecutorShutdownHook.run();
@@ -48,8 +48,8 @@ public class ManagedPluginExecutorShutdownHookTest {
 
     @Test
     public void test_run_exc() throws Exception {
-        final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook = new ManagedPluginExecutorShutdownHook(
-                executorService, 60);
+        final ManagedPluginExecutorShutdownHook pluginExecutorShutdownHook =
+                new ManagedPluginExecutorShutdownHook(executorService, 60);
         when(executorService.awaitTermination(anyLong(), any(TimeUnit.class)))
                 .thenThrow(new InterruptedException("test"));
         pluginExecutorShutdownHook.run();

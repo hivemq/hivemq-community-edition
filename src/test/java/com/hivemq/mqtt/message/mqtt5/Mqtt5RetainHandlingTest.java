@@ -22,8 +22,7 @@ public class Mqtt5RetainHandlingTest {
 
     @Test
     public void test_all_fromCode() {
-        EnumTestUtil.assertAllValueOfWithFallback(
-                Mqtt5RetainHandling.class,
+        EnumTestUtil.assertAllValueOfWithFallback(Mqtt5RetainHandling.class,
                 Mqtt5RetainHandling::getCode,
                 Mqtt5RetainHandling::fromCode,
                 null);

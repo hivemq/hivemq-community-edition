@@ -61,7 +61,9 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), "success",
+        final UNSUBACK unsubAck = new UNSUBACK(3,
+                Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, unsubAck);
     }
@@ -84,7 +86,9 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), "success",
+        final UNSUBACK unsubAck = new UNSUBACK(3,
+                Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, unsubAck);
     }
@@ -105,7 +109,9 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
                 0,
                 // payload
                 0x00};
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), "success",
+        final UNSUBACK unsubAck = new UNSUBACK(3,
+                Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS),
+                "success",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
         encodeTestBufferSize(expected, unsubAck);
     }
@@ -128,7 +134,9 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), null,
+        final UNSUBACK unsubAck = new UNSUBACK(3,
+                Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS),
+                null,
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, unsubAck);
     }
@@ -154,7 +162,9 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
                 // payload
                 0x00};
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), "success",
+        final UNSUBACK unsubAck = new UNSUBACK(3,
+                Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty, mqttUserProperty, mqttUserProperty));
         encodeTestBufferSize(expected, unsubAck);
     }
@@ -182,7 +192,9 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
             expected = Bytes.concat(expected, new byte[]{(byte) mqtt5SubAckReasonCode.getCode()});
         }
         final MqttUserProperty mqttUserProperty = new MqttUserProperty("test", "value");
-        final UNSUBACK unsubAck = new UNSUBACK(3, Arrays.asList(Mqtt5UnsubAckReasonCode.values()), "success",
+        final UNSUBACK unsubAck = new UNSUBACK(3,
+                Arrays.asList(Mqtt5UnsubAckReasonCode.values()),
+                "success",
                 Mqtt5UserProperties.of(mqttUserProperty));
         encodeTestBufferSize(expected, unsubAck);
     }
@@ -212,8 +224,8 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
         maxUserProperties.encode(expected);
         // reason code
         expected.writeByte(0x00);
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), reasonString,
-                maxUserProperties);
+        final UNSUBACK unsubAck =
+                new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), reasonString, maxUserProperties);
         encodeTestBufferSize(expected.array(), unsubAck);
         expected.release();
     }
@@ -240,8 +252,8 @@ public class Mqtt5UnsubackEncoderTest extends AbstractMqtt5EncoderTest {
         expected.writeByte(0);
         // reason code
         expected.writeByte(0x00);
-        final UNSUBACK unsubAck = new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), reasonString,
-                maxUserProperties);
+        final UNSUBACK unsubAck =
+                new UNSUBACK(3, Lists.newArrayList(Mqtt5UnsubAckReasonCode.SUCCESS), reasonString, maxUserProperties);
         encodeTestBufferSize(expected.array(), unsubAck);
         expected.release();
     }

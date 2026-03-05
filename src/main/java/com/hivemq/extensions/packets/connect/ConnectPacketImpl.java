@@ -54,12 +54,22 @@ public class ConnectPacketImpl implements ConnectPacket {
     final @Nullable ByteBuffer authenticationData;
     final @Nullable WillPublishPacketImpl willPublish;
     final @NotNull UserPropertiesImpl userProperties;
-    public ConnectPacketImpl(final @NotNull MqttVersion mqttVersion, final @NotNull String clientId,
-            final boolean cleanStart, final long sessionExpiryInterval, final int keepAlive, final int receiveMaximum,
-            final long maximumPacketSize, final int topicAliasMaximum, final boolean requestProblemInformation,
-            final boolean requestResponseInformation, final @Nullable String userName,
-            final @Nullable ByteBuffer password, final @Nullable String authenticationMethod,
-            final @Nullable ByteBuffer authenticationData, final @Nullable WillPublishPacketImpl willPublish,
+    public ConnectPacketImpl(
+            final @NotNull MqttVersion mqttVersion,
+            final @NotNull String clientId,
+            final boolean cleanStart,
+            final long sessionExpiryInterval,
+            final int keepAlive,
+            final int receiveMaximum,
+            final long maximumPacketSize,
+            final int topicAliasMaximum,
+            final boolean requestProblemInformation,
+            final boolean requestResponseInformation,
+            final @Nullable String userName,
+            final @Nullable ByteBuffer password,
+            final @Nullable String authenticationMethod,
+            final @Nullable ByteBuffer authenticationData,
+            final @Nullable WillPublishPacketImpl willPublish,
             final @NotNull UserPropertiesImpl userProperties) {
         this.mqttVersion = mqttVersion;
         this.clientId = clientId;
@@ -80,16 +90,22 @@ public class ConnectPacketImpl implements ConnectPacket {
     }
 
     public ConnectPacketImpl(final @NotNull CONNECT connect, final long timestamp) {
-        this(MqttVersionUtil.toMqttVersion(connect.getProtocolVersion()), connect.getClientIdentifier(),
-                connect.isCleanStart(), connect.getSessionExpiryInterval(), connect.getKeepAlive(),
-                connect.getReceiveMaximum(), connect.getMaximumPacketSize(), connect.getTopicAliasMaximum(),
-                connect.isProblemInformationRequested(), connect.isResponseInformationRequested(),
-                connect.getUsername(), (connect.getPassword() == null) ? null : ByteBuffer.wrap(connect.getPassword()),
+        this(MqttVersionUtil.toMqttVersion(connect.getProtocolVersion()),
+                connect.getClientIdentifier(),
+                connect.isCleanStart(),
+                connect.getSessionExpiryInterval(),
+                connect.getKeepAlive(),
+                connect.getReceiveMaximum(),
+                connect.getMaximumPacketSize(),
+                connect.getTopicAliasMaximum(),
+                connect.isProblemInformationRequested(),
+                connect.isResponseInformationRequested(),
+                connect.getUsername(),
+                (connect.getPassword() == null) ? null : ByteBuffer.wrap(connect.getPassword()),
                 connect.getAuthMethod(),
                 (connect.getAuthData() == null) ? null : ByteBuffer.wrap(connect.getAuthData()),
-                (connect.getWillPublish() == null)
-                        ? null
-                        : new WillPublishPacketImpl(connect.getWillPublish(), timestamp),
+                (connect.getWillPublish() == null) ? null :
+                        new WillPublishPacketImpl(connect.getWillPublish(), timestamp),
                 UserPropertiesImpl.of(connect.getUserProperties().asList()));
     }
 
@@ -182,22 +198,21 @@ public class ConnectPacketImpl implements ConnectPacket {
             return false;
         }
         final ConnectPacketImpl that = (ConnectPacketImpl) o;
-        return (mqttVersion == that.mqttVersion) && clientId.equals(that.clientId) && (cleanStart == that.cleanStart)
-                && (sessionExpiryInterval == that.sessionExpiryInterval) && (keepAlive == that.keepAlive)
-                && (receiveMaximum == that.receiveMaximum) && (maximumPacketSize == that.maximumPacketSize)
-                && (topicAliasMaximum == that.topicAliasMaximum)
-                && (requestProblemInformation == that.requestProblemInformation)
-                && (requestResponseInformation == that.requestResponseInformation)
-                && Objects.equals(userName, that.userName) && Objects.equals(password, that.password)
-                && Objects.equals(authenticationMethod, that.authenticationMethod)
-                && Objects.equals(authenticationData, that.authenticationData)
-                && Objects.equals(willPublish, that.willPublish) && userProperties.equals(that.userProperties);
+        return (mqttVersion == that.mqttVersion) && clientId.equals(that.clientId) && (cleanStart == that.cleanStart) &&
+                (sessionExpiryInterval == that.sessionExpiryInterval) && (keepAlive == that.keepAlive) &&
+                (receiveMaximum == that.receiveMaximum) && (maximumPacketSize == that.maximumPacketSize) &&
+                (topicAliasMaximum == that.topicAliasMaximum) &&
+                (requestProblemInformation == that.requestProblemInformation) &&
+                (requestResponseInformation == that.requestResponseInformation) &&
+                Objects.equals(userName, that.userName) && Objects.equals(password, that.password) &&
+                Objects.equals(authenticationMethod, that.authenticationMethod) &&
+                Objects.equals(authenticationData, that.authenticationData) &&
+                Objects.equals(willPublish, that.willPublish) && userProperties.equals(that.userProperties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                mqttVersion,
+        return Objects.hash(mqttVersion,
                 clientId,
                 cleanStart,
                 sessionExpiryInterval,

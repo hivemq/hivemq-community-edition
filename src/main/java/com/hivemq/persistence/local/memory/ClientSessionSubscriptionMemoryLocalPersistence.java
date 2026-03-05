@@ -64,8 +64,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
         for (int i = 0; i < bucketCount; i++) {
             buckets[i] = new HashMap<>();
         }
-        metricRegistry.register(
-                HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
+        metricRegistry.register(HiveMQMetrics.CLIENT_SESSION_SUBSCRIPTIONS_MEMORY_PERSISTENCE_TOTAL_SIZE.name(),
                 (Gauge<Long>) currentMemorySize::get);
     }
 
@@ -92,15 +91,15 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
         ThreadPreConditions.startsWith(SINGLE_WRITER_THREAD_PREFIX);
         buckets[bucketIndex].compute(client, (ignore, oldEntry) -> {
             if (oldEntry == null) {
-                final IterablePersistenceEntry<ImmutableSet<Topic>> newEntry = new IterablePersistenceEntry<>(topics,
-                        timestamp);
+                final IterablePersistenceEntry<ImmutableSet<Topic>> newEntry =
+                        new IterablePersistenceEntry<>(topics, timestamp);
                 currentMemorySize.addAndGet(newEntry.getEstimatedSize());
                 currentMemorySize.addAndGet(ObjectMemoryEstimation.stringSize(client));
                 return newEntry;
             }
             currentMemorySize.addAndGet(-oldEntry.getEstimatedSize());
-            final IterablePersistenceEntry<ImmutableSet<Topic>> mergedEntry = new IterablePersistenceEntry<>(
-                    Sets.union(topics, oldEntry.getObject()).immutableCopy(), timestamp);
+            final IterablePersistenceEntry<ImmutableSet<Topic>> mergedEntry =
+                    new IterablePersistenceEntry<>(Sets.union(topics, oldEntry.getObject()).immutableCopy(), timestamp);
             currentMemorySize.addAndGet(mergedEntry.getEstimatedSize());
             return mergedEntry;
         });
@@ -168,8 +167,8 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
     @NotNull
     public ImmutableSet<Topic> getSubscriptions(@NotNull final String client) {
         checkNotNull(client, "Clientid must not be null");
-        final IterablePersistenceEntry<ImmutableSet<Topic>> entry = buckets[BucketUtils.getBucket(client, bucketCount)]
-                .get(client);
+        final IterablePersistenceEntry<ImmutableSet<Topic>> entry =
+                buckets[BucketUtils.getBucket(client, bucketCount)].get(client);
         if (entry == null) {
             return ImmutableSet.of();
         } else {
@@ -184,8 +183,10 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
             @Nullable final String lastClientIdIgnored,
             final int maxResultsIgnored) {
         // as all subscriptions are already in memory, we can ignore any pagination here and return the whole bucket.
-        final Map<String, ImmutableSet<Topic>> result = buckets[bucketIndex].entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getObject()));
+        final Map<String,
+                ImmutableSet<Topic>> result = buckets[bucketIndex].entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getObject()));
         return new BucketChunkResult<>(result, true, lastClientIdIgnored, bucketIndex);
     }
 

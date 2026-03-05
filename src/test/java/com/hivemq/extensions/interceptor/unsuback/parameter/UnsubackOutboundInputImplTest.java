@@ -37,8 +37,8 @@ public class UnsubackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final UnsubackPacketImpl packet = mock(UnsubackPacketImpl.class);
-        final UnsubackOutboundInputImpl input = new UnsubackOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final UnsubackOutboundInputImpl input =
+                new UnsubackOutboundInputImpl(clientInformation, connectionInformation, packet);
         assertSame(clientInformation, input.getClientInformation());
         assertSame(connectionInformation, input.getConnectionInformation());
         assertSame(packet, input.getUnsubackPacket());
@@ -49,8 +49,8 @@ public class UnsubackOutboundInputImplTest {
         final ClientInformation clientInformation = mock(ClientInformation.class);
         final ConnectionInformation connectionInformation = mock(ConnectionInformation.class);
         final UnsubackPacketImpl packet = mock(UnsubackPacketImpl.class);
-        final UnsubackOutboundInputImpl input = new UnsubackOutboundInputImpl(clientInformation, connectionInformation,
-                packet);
+        final UnsubackOutboundInputImpl input =
+                new UnsubackOutboundInputImpl(clientInformation, connectionInformation, packet);
         final ModifiableUnsubackPacketImpl modifiablePacket = mock(ModifiableUnsubackPacketImpl.class);
         final UnsubackPacketImpl newPacket = mock(UnsubackPacketImpl.class);
         final UnsubackOutboundOutputImpl output = mock(UnsubackOutboundOutputImpl.class);

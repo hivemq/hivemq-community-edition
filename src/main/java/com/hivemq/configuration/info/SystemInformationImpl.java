@@ -57,8 +57,12 @@ public class SystemInformationImpl implements SystemInformation {
         this(usePathOfRunningJar, false, null, null, null);
     }
 
-    public SystemInformationImpl(final boolean usePathOfRunningJar, final boolean embedded,
-            final @Nullable File configFolder, final @Nullable File dataFolder, final @Nullable File pluginFolder) {
+    public SystemInformationImpl(
+            final boolean usePathOfRunningJar,
+            final boolean embedded,
+            final @Nullable File configFolder,
+            final @Nullable File dataFolder,
+            final @Nullable File pluginFolder) {
         this.usePathOfRunningJar = usePathOfRunningJar;
         this.embedded = embedded;
         this.configFolder = configFolder;
@@ -91,23 +95,18 @@ public class SystemInformationImpl implements SystemInformation {
 
     private void setFolders() {
         setHomeFolder();
-        configFolder = Objects.requireNonNullElseGet(
-                configFolder,
-                () -> setUpHiveMQFolder(
-                        SystemProperties.CONFIG_FOLDER,
+        configFolder = Objects.requireNonNullElseGet(configFolder,
+                () -> setUpHiveMQFolder(SystemProperties.CONFIG_FOLDER,
                         EnvironmentVariables.CONFIG_FOLDER,
                         "conf",
                         false));
         logFolder = setUpHiveMQFolder(SystemProperties.LOG_FOLDER, EnvironmentVariables.LOG_FOLDER, "log", !embedded);
         // Set log folder property for logger-xml-config
         System.setProperty(SystemProperties.LOG_FOLDER, logFolder.getAbsolutePath());
-        dataFolder = Objects.requireNonNullElseGet(
-                dataFolder,
+        dataFolder = Objects.requireNonNullElseGet(dataFolder,
                 () -> setUpHiveMQFolder(SystemProperties.DATA_FOLDER, EnvironmentVariables.DATA_FOLDER, "data", true));
-        pluginFolder = Objects.requireNonNullElseGet(
-                pluginFolder,
-                () -> setUpHiveMQFolder(
-                        SystemProperties.EXTENSIONS_FOLDER,
+        pluginFolder = Objects.requireNonNullElseGet(pluginFolder,
+                () -> setUpHiveMQFolder(SystemProperties.EXTENSIONS_FOLDER,
                         EnvironmentVariables.EXTENSION_FOLDER,
                         "extensions",
                         !embedded));
@@ -216,9 +215,8 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     private void setHomeFolder() {
-        final String home = getSystemPropertyOrEnvironmentVariable(
-                SystemProperties.HIVEMQ_HOME,
-                EnvironmentVariables.HIVEMQ_HOME);
+        final String home =
+                getSystemPropertyOrEnvironmentVariable(SystemProperties.HIVEMQ_HOME, EnvironmentVariables.HIVEMQ_HOME);
         if (home != null) {
             homeFolder = findAbsoluteAndRelative(home);
             log.info("HiveMQ home directory: {}", homeFolder.getAbsolutePath());
@@ -245,8 +243,7 @@ public class SystemInformationImpl implements SystemInformation {
     private void usePathOfRunningJarAsHomeFolder() {
         final File pathOfRunningJar = getPathOfRunningJar();
         if (!embedded) {
-            log.warn(
-                    "No {} property or {} environment variable was set. Using {}",
+            log.warn("No {} property or {} environment variable was set. Using {}",
                     SystemProperties.HIVEMQ_HOME,
                     EnvironmentVariables.HIVEMQ_HOME,
                     pathOfRunningJar.getAbsolutePath());
@@ -255,9 +252,9 @@ public class SystemInformationImpl implements SystemInformation {
     }
 
     private @NotNull File getPathOfRunningJar() {
-        final String decode = URLDecoder.decode(
-                HiveMQServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
-                StandardCharsets.UTF_8);
+        final String decode =
+                URLDecoder.decode(HiveMQServer.class.getProtectionDomain().getCodeSource().getLocation().getPath(),
+                        StandardCharsets.UTF_8);
         final String path = decode.substring(0, decode.lastIndexOf('/') + 1);
         return new File(path);
     }

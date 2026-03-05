@@ -95,8 +95,8 @@ public class PublishPollServiceImplTest {
         final MessageDroppedService messageDroppedService = mock(MessageDroppedService.class);
         sharedSubscriptionService = mock(SharedSubscriptionService.class);
         publishFlushHandler = mock(PublishFlushHandler.class);
-        final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence = mock(
-                ClientSessionSubscriptionPersistence.class);
+        final ClientSessionSubscriptionPersistence clientSessionSubscriptionPersistence =
+                mock(ClientSessionSubscriptionPersistence.class);
         when(channel.pipeline()).thenReturn(pipeline);
         clientConnection = spy(new DummyClientConnection(channel, publishFlushHandler));
         clientConnection.proposeClientState(ClientState.AUTHENTICATED);
@@ -109,8 +109,11 @@ public class PublishPollServiceImplTest {
         InternalConfigurations.PUBLISH_POLL_BATCH_SIZE = 50;
         InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES = 50;
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        publishPollService = new PublishPollServiceImpl(clientQueuePersistence, connectionPersistence,
-                messageDroppedService, sharedSubscriptionService, singleWriterService,
+        publishPollService = new PublishPollServiceImpl(clientQueuePersistence,
+                connectionPersistence,
+                messageDroppedService,
+                sharedSubscriptionService,
+                singleWriterService,
                 clientSessionSubscriptionPersistence);
     }
 
@@ -199,18 +202,13 @@ public class PublishPollServiceImplTest {
     public void test_poll_shared_publishes() throws NoMessageIdAvailableException {
         final PublishFlowHandler pubflishFlowHandler = mock(PublishFlowHandler.class);
         final byte flags = SubscriptionFlag.getDefaultFlags(true, false, false);
-        when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(
-                ImmutableSet.of(
-                        new SubscriberWithQoS("client1", 2, flags, 1),
-                        new SubscriberWithQoS("client2", 2, flags, 2)));
+        when(sharedSubscriptionService.getSharedSubscriber(anyString())).thenReturn(ImmutableSet
+                .of(new SubscriberWithQoS("client1", 2, flags, 1), new SubscriberWithQoS("client2", 2, flags, 2)));
         when(connectionPersistence.get("client1")).thenReturn(clientConnection);
         when(connectionPersistence.get("client2")).thenReturn(null);
-        when(clientQueuePersistence.readShared(eq("group/topic"), anyInt(), anyLong())).thenReturn(
-                Futures.immediateFuture(
-                        ImmutableList.of(
-                                createPublish(),
-                                createPublish(),
-                                TestMessageUtil.createMqtt3Publish(QoS.AT_MOST_ONCE))));
+        when(clientQueuePersistence.readShared(eq("group/topic"), anyInt(), anyLong()))
+                .thenReturn(Futures.immediateFuture(ImmutableList
+                        .of(createPublish(), createPublish(), TestMessageUtil.createMqtt3Publish(QoS.AT_MOST_ONCE))));
         when(freePacketIdRanges.takeNextId()).thenReturn(2).thenReturn(3);
         when(channel.isActive()).thenReturn(true);
         final AtomicInteger inFlightCount = new AtomicInteger(0);

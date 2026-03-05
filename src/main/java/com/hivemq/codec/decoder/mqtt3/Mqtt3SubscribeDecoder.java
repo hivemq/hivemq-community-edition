@@ -41,7 +41,8 @@ import io.netty.buffer.ByteBuf;
 public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
 
     @Inject
-    public Mqtt3SubscribeDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt3SubscribeDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -81,8 +82,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         }
         final ImmutableList.Builder<Topic> topics = new ImmutableList.Builder<>();
         if (!buf.isReadable()) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a SUBSCRIBE which didn't contain any subscription. This is not allowed. Disconnecting client.",
                     "Sent SUBSCRIBE without any subscriptions",
                     Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -93,8 +93,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
         while (buf.isReadable()) {
             final String topic = Strings.getPrefixedString(buf);
             if (isInvalidTopic(clientConnectionContext, topic)) {
-                disconnector.disconnect(
-                        clientConnectionContext.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         null,
                         // already logged
                         "Sent SUBSCRIBE with an invalid topic filter",
@@ -103,8 +102,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
                 return null;
             }
             if (buf.readableBytes() == 0) {
-                disconnector.disconnect(
-                        clientConnectionContext.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a SUBSCRIBE message without QoS. Disconnecting client.",
                         "Sent SUBSCRIBE without QoS",
                         Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,
@@ -114,8 +112,7 @@ public class Mqtt3SubscribeDecoder extends AbstractMqttDecoder<SUBSCRIBE> {
             }
             final int qos = buf.readByte();
             if (qos < 0 || qos > 2) {
-                disconnector.disconnect(
-                        clientConnectionContext.getChannel(),
+                disconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a SUBSCRIBE with an invalid qos '3'. This is not allowed. Disconnecting client.",
                         "Invalid SUBSCRIBE with invalid qos '3'",
                         Mqtt5DisconnectReasonCode.PROTOCOL_ERROR,

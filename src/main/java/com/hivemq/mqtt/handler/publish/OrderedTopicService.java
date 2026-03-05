@@ -70,9 +70,9 @@ public class OrderedTopicService {
             return;
         }
         final ClientConnection clientConnection = ClientConnection.of(ctx.channel());
-        final int maxInflightWindow = (clientConnection == null)
-                ? InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES
-                : clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
+        final int maxInflightWindow =
+                (clientConnection == null) ? InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES :
+                        clientConnection.getMaxInflightWindow(InternalConfigurations.MAX_INFLIGHT_WINDOW_SIZE_MESSAGES);
         do {
             final QueuedMessage poll = queue.poll();
             if (poll == null) {
@@ -111,8 +111,7 @@ public class OrderedTopicService {
         final PUBLISH publish = (PUBLISH) msg;
         final int qosNumber = publish.getQoS().getQosNumber();
         if (log.isTraceEnabled()) {
-            log.trace(
-                    "Client {}: Sending PUBLISH QoS {} Message with packet id {}",
+            log.trace("Client {}: Sending PUBLISH QoS {} Message with packet id {}",
                     clientId,
                     publish.getQoS().getQosNumber(),
                     publish.getPacketIdentifier());

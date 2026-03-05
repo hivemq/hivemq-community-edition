@@ -41,8 +41,8 @@ import static org.mockito.Mockito.when;
  */
 public class ServerInformationImplTest {
 
-    private final @NotNull ListenerConfigurationService listenerConfigurationService = mock(
-            ListenerConfigurationService.class);
+    private final @NotNull ListenerConfigurationService listenerConfigurationService =
+            mock(ListenerConfigurationService.class);
     private @NotNull ServerInformation serverInformation;
     private @NotNull SystemInformation systemInformation;
     @Before

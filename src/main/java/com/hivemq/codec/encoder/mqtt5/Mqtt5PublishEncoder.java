@@ -49,7 +49,8 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.SUBSCRIPTION_IDENT
 public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<PUBLISH> {
 
     private static final int FIXED_HEADER = MessageType.PUBLISH.ordinal() << 4;
-    public Mqtt5PublishEncoder(final @NotNull MessageDroppedService messageDroppedService,
+    public Mqtt5PublishEncoder(
+            final @NotNull MessageDroppedService messageDroppedService,
             final @NotNull SecurityConfigurationService securityConfigurationService) {
         super(messageDroppedService, securityConfigurationService);
     }
@@ -140,8 +141,7 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
     }
 
     private static void encodeFixedProperties(final @NotNull PUBLISH publish, final @NotNull ByteBuf out) {
-        encodeIntProperty(
-                MESSAGE_EXPIRY_INTERVAL,
+        encodeIntProperty(MESSAGE_EXPIRY_INTERVAL,
                 publish.getMessageExpiryInterval(),
                 MAX_EXPIRY_INTERVAL_DEFAULT,
                 out);

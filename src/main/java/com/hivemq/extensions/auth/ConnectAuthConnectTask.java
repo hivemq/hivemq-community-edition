@@ -26,8 +26,10 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
  */
 public class ConnectAuthConnectTask extends AbstractEnhancedAuthTask<AuthConnectInput, ConnectAuthOutput> {
 
-    public ConnectAuthConnectTask(final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
-            final @NotNull AuthenticatorProviderInput authenticatorProviderInput, final @NotNull String extensionId,
+    public ConnectAuthConnectTask(
+            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
+            final @NotNull String extensionId,
             final @NotNull ClientAuthenticators clientAuthenticators) {
         super(wrappedAuthenticatorProvider, authenticatorProviderInput, extensionId, clientAuthenticators);
     }

@@ -58,10 +58,14 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
     private static final Logger log = LoggerFactory.getLogger(RetainedMessagePayloadIDMigration.class);
     private static final Logger migrationLog = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
     private static final String FIRST_BUCKET_FOLDER = "retained_messages_0";
-    private final @NotNull Provider<RetainedMessageXodusLocalPersistence_4_4> retainedMessageXodusLocalPersistence_4_4Provider;
-    private final @NotNull Provider<RetainedMessageRocksDBLocalPersistence_4_4> retainedMessageRocksDBLocalPersistence_4_4Provider;
-    private final @NotNull Provider<PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider;
-    private final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider;
+    private final @NotNull Provider<
+            RetainedMessageXodusLocalPersistence_4_4> retainedMessageXodusLocalPersistence_4_4Provider;
+    private final @NotNull Provider<
+            RetainedMessageRocksDBLocalPersistence_4_4> retainedMessageRocksDBLocalPersistence_4_4Provider;
+    private final @NotNull Provider<
+            PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider;
+    private final @NotNull Provider<
+            PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider;
     private final @NotNull Provider<RetainedMessageXodusLocalPersistence> localXodusPersistenceProvider;
     private final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> localRocksPersistenceProvider;
     private final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil;
@@ -72,10 +76,14 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
     private final @NotNull AtomicReference<PersistenceType> previousRetainedType = new AtomicReference<>();
     @Inject
     public RetainedMessagePayloadIDMigration(
-            final @NotNull Provider<RetainedMessageXodusLocalPersistence_4_4> retainedMessageXodusLocalPersistence_4_4Provider,
-            final @NotNull Provider<RetainedMessageRocksDBLocalPersistence_4_4> retainedMessageRocksDBLocalPersistence_4_4Provider,
-            final @NotNull Provider<PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider,
-            final @NotNull Provider<PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider,
+            final @NotNull Provider<
+                    RetainedMessageXodusLocalPersistence_4_4> retainedMessageXodusLocalPersistence_4_4Provider,
+            final @NotNull Provider<
+                    RetainedMessageRocksDBLocalPersistence_4_4> retainedMessageRocksDBLocalPersistence_4_4Provider,
+            final @NotNull Provider<
+                    PublishPayloadXodusLocalPersistence_4_4> publishPayloadXodusLocalPersistence_4_4Provider,
+            final @NotNull Provider<
+                    PublishPayloadRocksDBLocalPersistence_4_4> publishPayloadRocksDBLocalPersistence_4_4Provider,
             final @NotNull LocalPersistenceFileUtil localPersistenceFileUtil,
             final @NotNull Provider<RetainedMessageXodusLocalPersistence> localXodusPersistenceProvider,
             final @NotNull Provider<RetainedMessageRocksDBLocalPersistence> localRocksPersistenceProvider,
@@ -105,10 +113,9 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
 
     private void savePersistenceVersion(final @NotNull PersistenceType persistenceType) {
         final MetaInformation metaFile = MetaFileService.readMetaFile(systemInformation);
-        metaFile.setRetainedMessagesPersistenceVersion(
-                persistenceType == PersistenceType.FILE_NATIVE
-                        ? RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION
-                        : RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
+        metaFile.setRetainedMessagesPersistenceVersion(persistenceType == PersistenceType.FILE_NATIVE ?
+                RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION :
+                RetainedMessageXodusLocalPersistence.PERSISTENCE_VERSION);
         MetaFileService.writeMetaFile(systemInformation, metaFile);
     }
 
@@ -143,8 +150,11 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
             legacyPayloadPersistence = publishPayloadXodusLocalPersistence_4_4Provider.get();
             previousPayloadType.set(PersistenceType.FILE);
         }
-        final RetainedMessagePersistenceValueSwitchCallback iterationCallback = new RetainedMessagePersistenceValueSwitchCallback(
-                bucketCount, retainedMessageLocalPersistence, payloadExceptionLogging, legacyPayloadPersistence);
+        final RetainedMessagePersistenceValueSwitchCallback iterationCallback =
+                new RetainedMessagePersistenceValueSwitchCallback(bucketCount,
+                        retainedMessageLocalPersistence,
+                        payloadExceptionLogging,
+                        legacyPayloadPersistence);
         if (metaFile.getRetainedMessagesPersistenceType() == PersistenceType.FILE_NATIVE) {
             retainedMessageRocksDBLocalPersistence_4_4Provider.get().iterate(iterationCallback);
             savePersistenceVersion(PersistenceType.FILE_NATIVE);
@@ -173,7 +183,8 @@ public class RetainedMessagePayloadIDMigration implements ValueMigration {
         private final @NotNull RetainedMessageLocalPersistence retainedMessageLocalPersistence;
         private final @NotNull PayloadExceptionLogging payloadExceptionLogging;
         private final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence;
-        RetainedMessagePersistenceValueSwitchCallback(final int bucketCount,
+        RetainedMessagePersistenceValueSwitchCallback(
+                final int bucketCount,
                 final @NotNull RetainedMessageLocalPersistence retainedMessageLocalPersistence,
                 final @NotNull PayloadExceptionLogging payloadExceptionLogging,
                 final @NotNull PublishPayloadLocalPersistence_4_4 legacyPayloadPersistence) {

@@ -94,7 +94,8 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
     public abstract static class MqttMessageWithReasonString extends MqttMessageWithUserProperties {
 
         private final String reasonString;
-        protected MqttMessageWithReasonString(@Nullable final String reasonString,
+        protected MqttMessageWithReasonString(
+                @Nullable final String reasonString,
                 @NotNull final Mqtt5UserProperties userProperties) {
             super(userProperties);
             if (reasonString != null) {
@@ -118,11 +119,12 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
      * @param <R> the type of the Reason Code.
      */
     public abstract static class MqttMessageWithReasonCode<R extends Mqtt5ReasonCode>
-            extends
-                MqttMessageWithReasonString {
+            extends MqttMessageWithReasonString {
 
         private final @NotNull R reasonCode;
-        protected MqttMessageWithReasonCode(@NotNull final R reasonCode, @Nullable final String reasonString,
+        protected MqttMessageWithReasonCode(
+                @NotNull final R reasonCode,
+                @Nullable final String reasonString,
                 @NotNull final Mqtt5UserProperties userProperties) {
             super(reasonString, userProperties);
             Preconditions.checkNotNull(reasonCode, "A reason code may never be null");
@@ -142,11 +144,13 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
      * @param <R> the type of the Reason Code.
      */
     public abstract static class MqttMessageWithIdAndReasonCode<R extends Mqtt5ReasonCode>
-            extends
-                MqttMessageWithReasonCode<R> {
+            extends MqttMessageWithReasonCode<R> {
 
-        protected MqttMessageWithIdAndReasonCode(final int packetIdentifier, @NotNull final R reasonCode,
-                @Nullable final String reasonString, @NotNull final Mqtt5UserProperties userProperties) {
+        protected MqttMessageWithIdAndReasonCode(
+                final int packetIdentifier,
+                @NotNull final R reasonCode,
+                @Nullable final String reasonString,
+                @NotNull final Mqtt5UserProperties userProperties) {
             super(reasonCode, reasonString, userProperties);
             super.packetIdentifier = packetIdentifier;
         }
@@ -163,12 +167,13 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
      * @param <R> the type of the Reason Codes.
      */
     public abstract static class MqttMessageWithIdAndReasonCodes<R extends Mqtt5ReasonCode>
-            extends
-                MqttMessageWithReasonString {
+            extends MqttMessageWithReasonString {
 
         private final ImmutableList<R> reasonCodes;
-        protected MqttMessageWithIdAndReasonCodes(final int packetIdentifier,
-                @NotNull final ImmutableList<R> reasonCodes, @Nullable final String reasonString,
+        protected MqttMessageWithIdAndReasonCodes(
+                final int packetIdentifier,
+                @NotNull final ImmutableList<R> reasonCodes,
+                @Nullable final String reasonString,
                 @NotNull final Mqtt5UserProperties userProperties) {
             super(reasonString, userProperties);
             super.packetIdentifier = packetIdentifier;

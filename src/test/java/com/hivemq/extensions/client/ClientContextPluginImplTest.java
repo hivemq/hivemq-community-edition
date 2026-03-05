@@ -47,12 +47,12 @@ public class ClientContextPluginImplTest {
     public void test_add_and_get_only_interceptors_from_my_class_loader() throws Exception {
         final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
         final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
-        final ClientContextImpl clientContext = new ClientContextImpl(new HiveMQExtensions(serverInformation),
-                new ModifiableDefaultPermissionsImpl());
-        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) interceptorList.getFirst()
-                .getClass().getClassLoader();
-        final IsolatedExtensionClassloader anotherClassLoader = (IsolatedExtensionClassloader) anotherInterceptorList
-                .getFirst().getClass().getClassLoader();
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
+        final IsolatedExtensionClassloader classloader =
+                (IsolatedExtensionClassloader) interceptorList.getFirst().getClass().getClassLoader();
+        final IsolatedExtensionClassloader anotherClassLoader =
+                (IsolatedExtensionClassloader) anotherInterceptorList.getFirst().getClass().getClassLoader();
         assertNotNull(classloader);
         assertNotNull(anotherClassLoader);
         final ClientContextPluginImpl contextPlugin1 = new ClientContextPluginImpl(classloader, clientContext);
@@ -80,12 +80,12 @@ public class ClientContextPluginImplTest {
     public void test_add_and_remove_and_get_only_interceptors_from_my_class_loader() throws Exception {
         final List<Interceptor> interceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
         final List<Interceptor> anotherInterceptorList = TestInterceptorUtil.getIsolatedInterceptors(temporaryFolder);
-        final ClientContextImpl clientContext = new ClientContextImpl(new HiveMQExtensions(serverInformation),
-                new ModifiableDefaultPermissionsImpl());
-        final IsolatedExtensionClassloader classloader = (IsolatedExtensionClassloader) interceptorList.getFirst()
-                .getClass().getClassLoader();
-        final IsolatedExtensionClassloader anotherClassLoader = (IsolatedExtensionClassloader) anotherInterceptorList
-                .getFirst().getClass().getClassLoader();
+        final ClientContextImpl clientContext =
+                new ClientContextImpl(new HiveMQExtensions(serverInformation), new ModifiableDefaultPermissionsImpl());
+        final IsolatedExtensionClassloader classloader =
+                (IsolatedExtensionClassloader) interceptorList.getFirst().getClass().getClassLoader();
+        final IsolatedExtensionClassloader anotherClassLoader =
+                (IsolatedExtensionClassloader) anotherInterceptorList.getFirst().getClass().getClassLoader();
         assertNotNull(classloader);
         assertNotNull(anotherClassLoader);
         final ClientContextPluginImpl contextPlugin1 = new ClientContextPluginImpl(classloader, clientContext);

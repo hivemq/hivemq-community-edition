@@ -29,35 +29,36 @@ import java.util.EnumSet;
  */
 public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
 
-    NORMAL_DISCONNECTION(0x00), DISCONNECT_WITH_WILL_MESSAGE(0x04), UNSPECIFIED_ERROR(
-            MqttCommonReasonCode.UNSPECIFIED_ERROR), MALFORMED_PACKET(
-                    MqttCommonReasonCode.MALFORMED_PACKET), PROTOCOL_ERROR(
-                            MqttCommonReasonCode.PROTOCOL_ERROR), IMPLEMENTATION_SPECIFIC_ERROR(
-                                    MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR), NOT_AUTHORIZED(
-                                            MqttCommonReasonCode.NOT_AUTHORIZED), SERVER_BUSY(
-                                                    MqttCommonReasonCode.SERVER_BUSY), SERVER_SHUTTING_DOWN(
-                                                            0x8B), BAD_AUTHENTICATION_METHOD(
-                                                                    MqttCommonReasonCode.BAD_AUTHENTICATION_METHOD), KEEP_ALIVE_TIMEOUT(
-                                                                            0x8D), SESSION_TAKEN_OVER(
-                                                                                    0x8E), TOPIC_FILTER_INVALID(
-                                                                                            MqttCommonReasonCode.TOPIC_FILTER_INVALID), TOPIC_NAME_INVALID(
-                                                                                                    MqttCommonReasonCode.TOPIC_NAME_INVALID), RECEIVE_MAXIMUM_EXCEEDED(
-                                                                                                            0x93), TOPIC_ALIAS_INVALID(
-                                                                                                                    0x94), PACKET_TOO_LARGE(
-                                                                                                                            MqttCommonReasonCode.PACKET_TOO_LARGE), MESSAGE_RATE_TOO_HIGH(
-                                                                                                                                    0x96), QUOTA_EXCEEDED(
-                                                                                                                                            MqttCommonReasonCode.QUOTA_EXCEEDED), ADMINISTRATIVE_ACTION(
-                                                                                                                                                    0x98), PAYLOAD_FORMAT_INVALID(
-                                                                                                                                                            MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID), RETAIN_NOT_SUPPORTED(
-                                                                                                                                                                    MqttCommonReasonCode.RETAIN_NOT_SUPPORTED), QOS_NOT_SUPPORTED(
-                                                                                                                                                                            MqttCommonReasonCode.QOS_NOT_SUPPORTED), USE_ANOTHER_SERVER(
-                                                                                                                                                                                    MqttCommonReasonCode.USE_ANOTHER_SERVER), SERVER_MOVED(
-                                                                                                                                                                                            MqttCommonReasonCode.SERVER_MOVED), SHARED_SUBSCRIPTION_NOT_SUPPORTED(
-                                                                                                                                                                                                    MqttCommonReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED), CONNECTION_RATE_EXCEEDED(
-                                                                                                                                                                                                            MqttCommonReasonCode.CONNECTION_RATE_EXCEEDED), MAXIMUM_CONNECT_TIME(
-                                                                                                                                                                                                                    0xA0), SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED(
-                                                                                                                                                                                                                            MqttCommonReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED), WILDCARD_SUBSCRIPTION_NOT_SUPPORTED(
-                                                                                                                                                                                                                                    MqttCommonReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
+    NORMAL_DISCONNECTION(0x00),
+    DISCONNECT_WITH_WILL_MESSAGE(0x04),
+    UNSPECIFIED_ERROR(MqttCommonReasonCode.UNSPECIFIED_ERROR),
+    MALFORMED_PACKET(MqttCommonReasonCode.MALFORMED_PACKET),
+    PROTOCOL_ERROR(MqttCommonReasonCode.PROTOCOL_ERROR),
+    IMPLEMENTATION_SPECIFIC_ERROR(MqttCommonReasonCode.IMPLEMENTATION_SPECIFIC_ERROR),
+    NOT_AUTHORIZED(MqttCommonReasonCode.NOT_AUTHORIZED),
+    SERVER_BUSY(MqttCommonReasonCode.SERVER_BUSY),
+    SERVER_SHUTTING_DOWN(0x8B),
+    BAD_AUTHENTICATION_METHOD(MqttCommonReasonCode.BAD_AUTHENTICATION_METHOD),
+    KEEP_ALIVE_TIMEOUT(0x8D),
+    SESSION_TAKEN_OVER(0x8E),
+    TOPIC_FILTER_INVALID(MqttCommonReasonCode.TOPIC_FILTER_INVALID),
+    TOPIC_NAME_INVALID(MqttCommonReasonCode.TOPIC_NAME_INVALID),
+    RECEIVE_MAXIMUM_EXCEEDED(0x93),
+    TOPIC_ALIAS_INVALID(0x94),
+    PACKET_TOO_LARGE(MqttCommonReasonCode.PACKET_TOO_LARGE),
+    MESSAGE_RATE_TOO_HIGH(0x96),
+    QUOTA_EXCEEDED(MqttCommonReasonCode.QUOTA_EXCEEDED),
+    ADMINISTRATIVE_ACTION(0x98),
+    PAYLOAD_FORMAT_INVALID(MqttCommonReasonCode.PAYLOAD_FORMAT_INVALID),
+    RETAIN_NOT_SUPPORTED(MqttCommonReasonCode.RETAIN_NOT_SUPPORTED),
+    QOS_NOT_SUPPORTED(MqttCommonReasonCode.QOS_NOT_SUPPORTED),
+    USE_ANOTHER_SERVER(MqttCommonReasonCode.USE_ANOTHER_SERVER),
+    SERVER_MOVED(MqttCommonReasonCode.SERVER_MOVED),
+    SHARED_SUBSCRIPTION_NOT_SUPPORTED(MqttCommonReasonCode.SHARED_SUBSCRIPTION_NOT_SUPPORTED),
+    CONNECTION_RATE_EXCEEDED(MqttCommonReasonCode.CONNECTION_RATE_EXCEEDED),
+    MAXIMUM_CONNECT_TIME(0xA0),
+    SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED(MqttCommonReasonCode.SUBSCRIPTION_IDENTIFIERS_NOT_SUPPORTED),
+    WILDCARD_SUBSCRIPTION_NOT_SUPPORTED(MqttCommonReasonCode.WILDCARD_SUBSCRIPTION_NOT_SUPPORTED);
     private final int code;
     private final @NotNull DisconnectReasonCode disconnectReasonCode;
     private final @NotNull DisconnectedReasonCode disconnectedReasonCode;
@@ -85,12 +86,12 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
     }
     private static final int ERROR_CODE_MIN = UNSPECIFIED_ERROR.code;
     private static final int ERROR_CODE_MAX = WILDCARD_SUBSCRIPTION_NOT_SUPPORTED.code;
-    private static final @NotNull Mqtt5DisconnectReasonCode[] ERROR_CODE_LOOKUP = new Mqtt5DisconnectReasonCode[ERROR_CODE_MAX
-            - ERROR_CODE_MIN + 1];
-    private static final @NotNull Mqtt5DisconnectReasonCode @NotNull [] DISCONNECT_LOOKUP = new Mqtt5DisconnectReasonCode[DisconnectReasonCode
-            .values().length];
-    private static final @Nullable Mqtt5DisconnectReasonCode @NotNull [] DISCONNECTED_LOOKUP = new Mqtt5DisconnectReasonCode[DisconnectedReasonCode
-            .values().length];
+    private static final @NotNull Mqtt5DisconnectReasonCode[] ERROR_CODE_LOOKUP =
+            new Mqtt5DisconnectReasonCode[ERROR_CODE_MAX - ERROR_CODE_MIN + 1];
+    private static final @NotNull Mqtt5DisconnectReasonCode @NotNull [] DISCONNECT_LOOKUP =
+            new Mqtt5DisconnectReasonCode[DisconnectReasonCode.values().length];
+    private static final @Nullable Mqtt5DisconnectReasonCode @NotNull [] DISCONNECTED_LOOKUP =
+            new Mqtt5DisconnectReasonCode[DisconnectedReasonCode.values().length];
     static {
         for (final Mqtt5DisconnectReasonCode reasonCode : values()) {
             if (reasonCode != NORMAL_DISCONNECTION && reasonCode != DISCONNECT_WITH_WILL_MESSAGE) {
@@ -127,8 +128,7 @@ public enum Mqtt5DisconnectReasonCode implements Mqtt5ReasonCode {
     public static @Nullable Mqtt5DisconnectReasonCode from(final @NotNull DisconnectedReasonCode reasonCode) {
         return DISCONNECTED_LOOKUP[reasonCode.ordinal()];
     }
-    private static final @NotNull EnumSet<Mqtt5DisconnectReasonCode> BY_CLIENT = EnumSet.of(
-            NORMAL_DISCONNECTION,
+    private static final @NotNull EnumSet<Mqtt5DisconnectReasonCode> BY_CLIENT = EnumSet.of(NORMAL_DISCONNECTION,
             DISCONNECT_WITH_WILL_MESSAGE,
             UNSPECIFIED_ERROR,
             PROTOCOL_ERROR,

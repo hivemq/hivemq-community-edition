@@ -41,7 +41,8 @@ public class InterceptorsImpl implements Interceptors {
     @NotNull
     private final Map<@NotNull String, @NotNull ConnectInboundInterceptorProvider> connectInboundInterceptorProviderMap;
     @NotNull
-    private final Map<@NotNull String, @NotNull ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviderMap;
+    private final Map<@NotNull String,
+            @NotNull ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviderMap;
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
     @NotNull
@@ -49,8 +50,8 @@ public class InterceptorsImpl implements Interceptors {
     @Inject
     public InterceptorsImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
-        final ExtensionPriorityComparator extensionPriorityComparator = new ExtensionPriorityComparator(
-                hiveMQExtensions);
+        final ExtensionPriorityComparator extensionPriorityComparator =
+                new ExtensionPriorityComparator(hiveMQExtensions);
         this.connectInboundInterceptorProviderMap = new TreeMap<>(extensionPriorityComparator);
         this.connackOutboundInterceptorProviderMap = new TreeMap<>(extensionPriorityComparator);
         this.readWriteLock = new ReentrantReadWriteLock();

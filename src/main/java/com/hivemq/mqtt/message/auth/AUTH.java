@@ -42,8 +42,11 @@ public class AUTH extends MqttMessageWithUserProperties.MqttMessageWithReasonCod
      */
     @Nullable
     private final byte[] authData;
-    public AUTH(@NotNull final String authMethod, @Nullable final byte[] authData,
-            @NotNull final Mqtt5AuthReasonCode reasonCode, @NotNull final Mqtt5UserProperties userProperties,
+    public AUTH(
+            @NotNull final String authMethod,
+            @Nullable final byte[] authData,
+            @NotNull final Mqtt5AuthReasonCode reasonCode,
+            @NotNull final Mqtt5UserProperties userProperties,
             @Nullable final String reasonString) {
         super(reasonCode, reasonString, userProperties);
         Preconditions.checkNotNull(reasonCode, "Reason code must never be null");

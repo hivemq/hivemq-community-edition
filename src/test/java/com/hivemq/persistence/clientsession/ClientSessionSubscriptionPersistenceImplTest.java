@@ -71,9 +71,15 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void setUp() throws Exception {
         when(topicTree.addTopic(anyString(), any(Topic.class), anyByte(), anyString())).thenReturn(true);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence, topicTree,
-                sharedSubscriptionService, singleWriterService, connectionPersistence, clientSessionLocalPersistence,
-                publishPollService, new Chunker(), mock(MqttServerDisconnector.class));
+        persistence = new ClientSessionSubscriptionPersistenceImpl(localPersistence,
+                topicTree,
+                sharedSubscriptionService,
+                singleWriterService,
+                connectionPersistence,
+                clientSessionLocalPersistence,
+                publishPollService,
+                new Chunker(),
+                mock(MqttServerDisconnector.class));
     }
 
     @After
@@ -116,8 +122,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_invalidate_caches_channel_null() {
         when(connectionPersistence.get("client")).thenReturn(null);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
-        verify(publishPollService, never()).pollSharedPublishesForClient(
-                anyString(),
+        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
@@ -132,8 +137,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
-        verify(publishPollService, never()).pollSharedPublishesForClient(
-                anyString(),
+        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
@@ -147,8 +151,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
         persistence.invalidateSharedSubscriptionCacheAndPoll("client", ImmutableSet.of());
-        verify(publishPollService, never()).pollSharedPublishesForClient(
-                anyString(),
+        verify(publishPollService, never()).pollSharedPublishesForClient(anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
@@ -163,11 +166,9 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         final ClientConnection clientConnection = new DummyClientConnection(channel, null);
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(clientConnection);
         when(connectionPersistence.get("client")).thenReturn(clientConnection);
-        persistence.invalidateSharedSubscriptionCacheAndPoll(
-                "client",
+        persistence.invalidateSharedSubscriptionCacheAndPoll("client",
                 ImmutableSet.of(new Subscription(new Topic("topic", QoS.AT_LEAST_ONCE), (byte) 2, "group")));
-        verify(publishPollService).pollSharedPublishesForClient(
-                anyString(),
+        verify(publishPollService).pollSharedPublishesForClient(anyString(),
                 anyString(),
                 anyInt(),
                 anyBoolean(),
@@ -188,8 +189,7 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_remove_shared_subscriptions() throws ExecutionException, InterruptedException {
         persistence.removeSubscriptions("client", ImmutableSet.of("$share/group/topic1", "$share/group/topic2")).get();
         verify(topicTree, times(2)).removeSubscriber(eq("client"), anyString(), anyString());
-        verify(localPersistence).removeSubscriptions(
-                eq("client"),
+        verify(localPersistence).removeSubscriptions(eq("client"),
                 eq(ImmutableSet.of("$share/group/topic1", "$share/group/topic2")),
                 anyLong(),
                 anyInt());
@@ -227,8 +227,8 @@ public class ClientSessionSubscriptionPersistenceImplTest {
     public void test_addSubscription_shared() throws Exception {
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
         final Topic topicShared = new Topic("topic/1", QoS.AT_LEAST_ONCE);
-        final Topic topic = new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE, true, true,
-                Mqtt5RetainHandling.DO_NOT_SEND, 1);
+        final Topic topic =
+                new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
         persistence.addSubscription("client", topic).get();
         verify(topicTree).addTopic(eq("client"), eq(topicShared), eq((byte) 14), eq("group1"));
         verify(localPersistence).addSubscription(eq("client"), eq(topic), anyLong(), anyInt());
@@ -247,8 +247,8 @@ public class ClientSessionSubscriptionPersistenceImplTest {
         when(clientSessionLocalPersistence.getSession("client")).thenReturn(new ClientSession(true, 350));
         final Topic expectedTopicTree = new Topic("topic/1", QoS.AT_LEAST_ONCE);
         final Topic expectedLocal = new Topic("$share/group1/topic/1", QoS.AT_LEAST_ONCE);
-        final Topic topic = new Topic("$share/group1/topic/1", QoS.EXACTLY_ONCE, true, true,
-                Mqtt5RetainHandling.DO_NOT_SEND, 1);
+        final Topic topic =
+                new Topic("$share/group1/topic/1", QoS.EXACTLY_ONCE, true, true, Mqtt5RetainHandling.DO_NOT_SEND, 1);
         persistence.addSubscription("client", topic).get();
         verify(topicTree).addTopic(eq("client"), eq(expectedTopicTree), eq((byte) 14), eq("group1"));
         verify(localPersistence).addSubscription(eq("client"), eq(expectedLocal), anyLong(), anyInt());

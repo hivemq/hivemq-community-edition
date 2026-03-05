@@ -38,7 +38,8 @@ public class ModifiablePubrelPacketImpl implements ModifiablePubrelPacket {
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final @NotNull FullConfigurationService configurationService;
     private boolean modified = false;
-    public ModifiablePubrelPacketImpl(final @NotNull PubrelPacketImpl packet,
+    public ModifiablePubrelPacketImpl(
+            final @NotNull PubrelPacketImpl packet,
             final @NotNull FullConfigurationService configurationService) {
         packetIdentifier = packet.packetIdentifier;
         reasonCode = packet.reasonCode;

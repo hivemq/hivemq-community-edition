@@ -43,8 +43,13 @@ public class WebsocketListener implements Listener {
     private final boolean allowExtensions;
     private final @NotNull List<String> subprotocols;
     private final @NotNull String name;
-    protected WebsocketListener(final int port, final @NotNull String bindAddress, final @NotNull String path,
-            final boolean allowExtensions, final @NotNull List<String> subprotocols, final @NotNull String name) {
+    protected WebsocketListener(
+            final int port,
+            final @NotNull String bindAddress,
+            final @NotNull String path,
+            final boolean allowExtensions,
+            final @NotNull List<String> subprotocols,
+            final @NotNull String name) {
         this.port = port;
         this.bindAddress = bindAddress;
         this.path = path;

@@ -46,8 +46,11 @@ public class TestConfigurationBootstrap {
         securityConfigurationService = new SecurityConfigurationServiceImpl();
         final UsageStatisticsConfig usageStatisticsConfig = new UsageStatisticsConfigImpl();
         persistenceConfigurationService = new PersistenceConfigurationServiceImpl();
-        configurationService = new ConfigurationServiceImpl(listenerConfigurationService, mqttConfigurationService,
-                restrictionsConfigurationService, securityConfigurationService, usageStatisticsConfig,
+        configurationService = new ConfigurationServiceImpl(listenerConfigurationService,
+                mqttConfigurationService,
+                restrictionsConfigurationService,
+                securityConfigurationService,
+                usageStatisticsConfig,
                 persistenceConfigurationService);
     }
 

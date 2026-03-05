@@ -37,7 +37,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class LifecycleEventListenersImpl implements LifecycleEventListeners {
 
     @NotNull
-    private final Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> clientLifecycleEventListenerProviderMap;
+    private final Map<@NotNull String,
+            @NotNull ClientLifecycleEventListenerProvider> clientLifecycleEventListenerProviderMap;
     @NotNull
     private final HiveMQExtensions hiveMQExtensions;
     @NotNull
@@ -65,7 +66,8 @@ public class LifecycleEventListenersImpl implements LifecycleEventListeners {
     }
 
     @Override
-    public @NotNull Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> getClientLifecycleEventListenerProviderMap() {
+    public @NotNull Map<@NotNull String,
+            @NotNull ClientLifecycleEventListenerProvider> getClientLifecycleEventListenerProviderMap() {
         final Lock lock = readWriteLock.readLock();
         lock.lock();
         try {

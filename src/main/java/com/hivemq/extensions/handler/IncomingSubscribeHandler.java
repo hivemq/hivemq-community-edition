@@ -70,8 +70,10 @@ public class IncomingSubscribeHandler {
     private final @NotNull FullConfigurationService configurationService;
     private final @NotNull MqttServerDisconnector mqttServerDisconnector;
     @Inject
-    public IncomingSubscribeHandler(final @NotNull PluginTaskExecutorService executorService,
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
+    public IncomingSubscribeHandler(
+            final @NotNull PluginTaskExecutorService executorService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
             final @NotNull PluginAuthorizerService authorizerService,
             final @NotNull FullConfigurationService configurationService,
             final @NotNull MqttServerDisconnector mqttServerDisconnector) {
@@ -112,22 +114,22 @@ public class IncomingSubscribeHandler {
         final SubscribePacketImpl packet = new SubscribePacketImpl(subscribe);
         final SubscribeInboundInputImpl input = new SubscribeInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<SubscribeInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-        final ModifiableSubscribePacketImpl modifiablePacket = new ModifiableSubscribePacketImpl(packet,
-                configurationService);
+        final ModifiableSubscribePacketImpl modifiablePacket =
+                new ModifiableSubscribePacketImpl(packet, configurationService);
         final SubscribeInboundOutputImpl output = new SubscribeInboundOutputImpl(asyncer, modifiablePacket);
-        final ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(
-                output);
-        final SubscribeInboundInterceptorContext context = new SubscribeInboundInterceptorContext(clientId,
-                interceptors.size(), ctx, inputHolder, outputHolder);
+        final ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder =
+                new ExtensionParameterHolder<>(output);
+        final SubscribeInboundInterceptorContext context =
+                new SubscribeInboundInterceptorContext(clientId, interceptors.size(), ctx, inputHolder, outputHolder);
         for (final SubscribeInboundInterceptor interceptor : interceptors) {
-            final HiveMQExtension extension = hiveMQExtensions
-                    .getExtensionForClassloader(interceptor.getClass().getClassLoader());
+            final HiveMQExtension extension =
+                    hiveMQExtensions.getExtensionForClassloader(interceptor.getClass().getClassLoader());
             if (extension == null) { // disabled extension would be null
                 context.finishInterceptor();
                 continue;
             }
-            final SubscribeInboundInterceptorTask task = new SubscribeInboundInterceptorTask(interceptor,
-                    extension.getId());
+            final SubscribeInboundInterceptorTask task =
+                    new SubscribeInboundInterceptorTask(interceptor, extension.getId());
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
@@ -139,7 +141,9 @@ public class IncomingSubscribeHandler {
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ExtensionParameterHolder<SubscribeInboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder;
-        SubscribeInboundInterceptorContext(final @NotNull String clientId, final int interceptorCount,
+        SubscribeInboundInterceptorContext(
+                final @NotNull String clientId,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ExtensionParameterHolder<SubscribeInboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<SubscribeInboundOutputImpl> outputHolder) {
@@ -193,8 +197,7 @@ public class IncomingSubscribeHandler {
             final List<Mqtt5SubAckReasonCode> reasonCodesBuilder = new ArrayList<>(size);
             // MQTT 3.1 does not support SUBACK failure codes
             if (version == ProtocolVersion.MQTTv3_1) {
-                mqttServerDisconnector.disconnect(
-                        ctx.channel(),
+                mqttServerDisconnector.disconnect(ctx.channel(),
                         null,
                         "Negative SUBSCRIBE acknowledgement for an MQTT 3.1 client is not possible; the client was disconnected instead",
                         Mqtt5DisconnectReasonCode.UNSPECIFIED_ERROR,
@@ -208,9 +211,9 @@ public class IncomingSubscribeHandler {
                 reasonCodesBuilder.add(Mqtt5SubAckReasonCode.UNSPECIFIED_ERROR);
             }
             // no need to check mqtt version since the mqtt 3 encoder will just not encode reason string and properties.
-            ctx.writeAndFlush(
-                    new SUBACK(output.getSubscribePacket().getPacketId(), reasonCodesBuilder,
-                            ReasonStrings.SUBACK_EXTENSION_PREVENTED));
+            ctx.writeAndFlush(new SUBACK(output.getSubscribePacket().getPacketId(),
+                    reasonCodesBuilder,
+                    ReasonStrings.SUBACK_EXTENSION_PREVENTED));
         }
     }
 
@@ -219,7 +222,8 @@ public class IncomingSubscribeHandler {
 
         private final @NotNull SubscribeInboundInterceptor interceptor;
         private final @NotNull String extensionId;
-        private SubscribeInboundInterceptorTask(final @NotNull SubscribeInboundInterceptor interceptor,
+        private SubscribeInboundInterceptorTask(
+                final @NotNull SubscribeInboundInterceptor interceptor,
                 final @NotNull String extensionId) {
             this.interceptor = interceptor;
             this.extensionId = extensionId;
@@ -237,8 +241,8 @@ public class IncomingSubscribeHandler {
                 interceptor.onInboundSubscribe(input, output);
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound SUBSCRIBE interception. "
-                                + "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound SUBSCRIBE interception. " +
+                                "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
                 output.forciblyPreventSubscribeDelivery();

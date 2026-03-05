@@ -34,10 +34,12 @@ public class ClientSession implements Sizable {
         this(connected, sessionExpiryInterval, null, null);
     }
 
-    public ClientSession(final boolean connected, final long sessionExpiryIntervalSec,
-            final @Nullable ClientSessionWill willPublish, final @Nullable Long queueLimit) {
-        Preconditions.checkArgument(
-                sessionExpiryIntervalSec >= SESSION_EXPIRE_ON_DISCONNECT,
+    public ClientSession(
+            final boolean connected,
+            final long sessionExpiryIntervalSec,
+            final @Nullable ClientSessionWill willPublish,
+            final @Nullable Long queueLimit) {
+        Preconditions.checkArgument(sessionExpiryIntervalSec >= SESSION_EXPIRE_ON_DISCONNECT,
                 "Session expiry interval must never be less than zero");
         this.connected = connected;
         this.sessionExpiryIntervalSec = sessionExpiryIntervalSec;
@@ -74,8 +76,10 @@ public class ClientSession implements Sizable {
     }
 
     public @NotNull ClientSession deepCopy() {
-        return new ClientSession(connected, sessionExpiryIntervalSec,
-                willPublish != null ? willPublish.deepCopy() : null, queueLimit);
+        return new ClientSession(connected,
+                sessionExpiryIntervalSec,
+                willPublish != null ? willPublish.deepCopy() : null,
+                queueLimit);
     }
 
     public @NotNull ClientSession copyWithoutWill() {

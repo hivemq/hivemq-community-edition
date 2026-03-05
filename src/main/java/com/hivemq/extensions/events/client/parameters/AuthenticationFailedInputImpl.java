@@ -42,8 +42,11 @@ public class AuthenticationFailedInputImpl
     private final @Nullable UserProperties userProperties;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    public AuthenticationFailedInputImpl(final @NotNull Channel channel, final @NotNull String clientId,
-            final @Nullable DisconnectedReasonCode reasonCode, final @Nullable String reasonString,
+    public AuthenticationFailedInputImpl(
+            final @NotNull Channel channel,
+            final @NotNull String clientId,
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
             final @Nullable UserProperties userProperties) {
         Preconditions.checkNotNull(channel, "channel must never be null");
         Preconditions.checkNotNull(clientId, "Client id must never be null");

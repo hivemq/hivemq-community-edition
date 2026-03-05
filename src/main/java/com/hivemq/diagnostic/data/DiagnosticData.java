@@ -25,18 +25,21 @@ import java.time.LocalDateTime;
  */
 public class DiagnosticData {
 
-    private static final String BANNER = "   __ ___          __  _______     ___  _                         __  _       \n"
-            + "  / // (_)  _____ /  |/  / __ \\   / _ \\(_)__ ____ ____  ___  ___ / /_(_)______\n"
-            + " / _  / / |/ / -_) /|_/ / /_/ /  / // / / _ `/ _ `/ _ \\/ _ \\(_-</ __/ / __(_-<\n"
-            + "/_//_/_/|___/\\__/_/  /_/\\___\\_\\ /____/_/\\_,_/\\_, /_//_/\\___/___/\\__/_/\\__/___/\n"
-            + "                                            /___/                             \n";
+    private static final String BANNER =
+            "   __ ___          __  _______     ___  _                         __  _       \n" +
+                    "  / // (_)  _____ /  |/  / __ \\   / _ \\(_)__ ____ ____  ___  ___ / /_(_)______\n" +
+                    " / _  / / |/ / -_) /|_/ / /_/ /  / // / / _ `/ _ `/ _ \\/ _ \\(_-</ __/ / __(_-<\n" +
+                    "/_//_/_/|___/\\__/_/  /_/\\___\\_\\ /____/_/\\_,_/\\_, /_//_/\\___/___/\\__/_/\\__/___/\n" +
+                    "                                            /___/                             \n";
     private static final String SECTION_HEADLINE = "##############################\n";
     private final SystemPropertyInformation systemPropertyInformation;
     private final HiveMQInformation hiveMQInformation;
     private final HiveMQSystemInformation systemInformation;
     private final NetworkInterfaceInformation networkInterfaceInformation;
     @Inject
-    DiagnosticData(final SystemPropertyInformation systemPropertyInformation, final HiveMQInformation hiveMQInformation,
+    DiagnosticData(
+            final SystemPropertyInformation systemPropertyInformation,
+            final HiveMQInformation hiveMQInformation,
             final HiveMQSystemInformation systemInformation,
             final NetworkInterfaceInformation networkInterfaceInformation) {
         this.systemPropertyInformation = systemPropertyInformation;

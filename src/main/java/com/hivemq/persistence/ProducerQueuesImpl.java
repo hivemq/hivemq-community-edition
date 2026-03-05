@@ -98,12 +98,10 @@ public class ProducerQueuesImpl implements ProducerQueues {
     }
 
     @Nullable
-    public <R> ListenableFuture<R> submitInternal(
-            final int bucketIndex,
-            @NotNull final Task<R> task,
-            final boolean ignoreShutdown) {
-        if (!ignoreShutdown && shutdown.get()
-                && System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
+    public <R> ListenableFuture<
+            R> submitInternal(final int bucketIndex, @NotNull final Task<R> task, final boolean ignoreShutdown) {
+        if (!ignoreShutdown && shutdown.get() &&
+                System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
             return SettableFuture.create(); // Future will never return since we are shutting down.
         }
         final int queueIndex = bucketIndex / bucketsPerQueue;
@@ -126,9 +124,8 @@ public class ProducerQueuesImpl implements ProducerQueues {
      * @param  parallel true for parallel, false for sequential
      * @return          a list of listenableFutures of type R
      */
-    public @NotNull <R> List<ListenableFuture<R>> submitToAllBuckets(
-            final @NotNull Task<R> task,
-            final boolean parallel) {
+    public @NotNull <
+            R> List<ListenableFuture<R>> submitToAllBuckets(final @NotNull Task<R> task, final boolean parallel) {
         if (parallel) {
             return submitToAllBucketsParallel(task, false);
         } else {
@@ -166,8 +163,8 @@ public class ProducerQueuesImpl implements ProducerQueues {
         for (int bucket = 0; bucket < bucketCount; bucket++) {
             final int finalBucket = bucket;
             final SettableFuture<R> future = SettableFuture.create();
-            previousFuture
-                    .addListener(() -> future.setFuture(submit(finalBucket, task)), MoreExecutors.directExecutor());
+            previousFuture.addListener(() -> future.setFuture(submit(finalBucket, task)),
+                    MoreExecutors.directExecutor());
             previousFuture = future;
             builder.add(future);
         }
@@ -229,8 +226,8 @@ public class ProducerQueuesImpl implements ProducerQueues {
         shutdownStartTime = System.currentTimeMillis();
         // We create a temporary single thread executor when we shut down, so we don't waste a thread at runtime.
         final ThreadFactory threadFactory = ThreadFactoryUtil.create("persistence-shutdown-%d");
-        final ListeningScheduledExecutorService executorService = MoreExecutors
-                .listeningDecorator(Executors.newSingleThreadScheduledExecutor(threadFactory));
+        final ListeningScheduledExecutorService executorService =
+                MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor(threadFactory));
         closeFuture = executorService.schedule(() -> {
             // Even if no task has to be executed on shutdown, we still have to delay the success of the close future by
             // the shutdown grace period.
@@ -269,7 +266,9 @@ public class ProducerQueuesImpl implements ProducerQueues {
         private final @NotNull SettableFuture<T> future;
         private final @NotNull Task task;
         private final int bucketIndex;
-        private TaskWithFuture(final @NotNull SettableFuture<T> future, final @NotNull Task task,
+        private TaskWithFuture(
+                final @NotNull SettableFuture<T> future,
+                final @NotNull Task task,
                 final int bucketIndex) {
             this.future = future;
             this.task = task;

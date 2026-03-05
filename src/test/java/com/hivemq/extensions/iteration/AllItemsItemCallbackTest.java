@@ -34,8 +34,8 @@ public class AllItemsItemCallbackTest {
     public void iterateAllItems() throws ExecutionException, InterruptedException {
         final List<String> input = Arrays.asList("1", "2", "3");
         final List<String> output = new ArrayList<>();
-        final AllItemsItemCallback<String> stringCallback = new AllItemsItemCallback<>(MoreExecutors.directExecutor(),
-                (ctx, item) -> {
+        final AllItemsItemCallback<String> stringCallback =
+                new AllItemsItemCallback<>(MoreExecutors.directExecutor(), (ctx, item) -> {
                     output.add(item);
                 });
         final ListenableFuture<Boolean> future = stringCallback.onItems(input);
@@ -47,8 +47,8 @@ public class AllItemsItemCallbackTest {
     public void contextCancelled() throws ExecutionException, InterruptedException {
         final List<String> input = Arrays.asList("1", "2", "3");
         final List<String> output = new ArrayList<>();
-        final AllItemsItemCallback<String> stringCallback = new AllItemsItemCallback<>(MoreExecutors.directExecutor(),
-                (ctx, item) -> {
+        final AllItemsItemCallback<String> stringCallback =
+                new AllItemsItemCallback<>(MoreExecutors.directExecutor(), (ctx, item) -> {
                     ctx.abortIteration();
                     output.add(item);
                 });
@@ -60,8 +60,8 @@ public class AllItemsItemCallbackTest {
     @Test(timeout = 10000, expected = RuntimeException.class)
     public void iterateExceptionally() throws Throwable {
         final List<String> input = Arrays.asList("1", "2", "3");
-        final AllItemsItemCallback<String> stringCallback = new AllItemsItemCallback<>(MoreExecutors.directExecutor(),
-                (ctx, item) -> {
+        final AllItemsItemCallback<String> stringCallback =
+                new AllItemsItemCallback<>(MoreExecutors.directExecutor(), (ctx, item) -> {
                     throw new RuntimeException("test-exception");
                 });
         final ListenableFuture<Boolean> future = stringCallback.onItems(input);
@@ -75,8 +75,8 @@ public class AllItemsItemCallbackTest {
     @Test(timeout = 10000, expected = Error.class)
     public void iterateError() throws Throwable {
         final List<String> input = Arrays.asList("1", "2", "3");
-        final AllItemsItemCallback<String> stringCallback = new AllItemsItemCallback<>(MoreExecutors.directExecutor(),
-                (ctx, item) -> {
+        final AllItemsItemCallback<String> stringCallback =
+                new AllItemsItemCallback<>(MoreExecutors.directExecutor(), (ctx, item) -> {
                     throw new Error("test-exception");
                 });
         final ListenableFuture<Boolean> future = stringCallback.onItems(input);

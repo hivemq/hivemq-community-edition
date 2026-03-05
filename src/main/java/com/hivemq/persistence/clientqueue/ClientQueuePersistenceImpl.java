@@ -57,11 +57,13 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
     private final @NotNull ConnectionPersistence connectionPersistence;
     private final @NotNull PublishPollService publishPollService;
     @Inject
-    public ClientQueuePersistenceImpl(final @NotNull ClientQueueLocalPersistence localPersistence,
+    public ClientQueuePersistenceImpl(
+            final @NotNull ClientQueueLocalPersistence localPersistence,
             final @NotNull SingleWriterService singleWriterService,
             final @NotNull MqttConfigurationService mqttConfigurationService,
             final @NotNull ClientSessionLocalPersistence clientSessionLocalPersistence,
-            final @NotNull LocalTopicTree topicTree, final @NotNull ConnectionPersistence connectionPersistence,
+            final @NotNull LocalTopicTree topicTree,
+            final @NotNull ConnectionPersistence connectionPersistence,
             final @NotNull PublishPollService publishPollService) {
         this.localPersistence = localPersistence;
         this.mqttConfigurationService = mqttConfigurationService;
@@ -86,8 +88,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
             return Futures.immediateFailedFuture(exception);
         }
         return singleWriter.submit(queueId, (bucketIndex) -> {
-            localPersistence.add(
-                    queueId,
+            localPersistence.add(queueId,
                     shared,
                     publish,
                     queueLimit,
@@ -121,8 +122,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         }
         return singleWriter.submit(queueId, (bucketIndex) -> {
             final boolean queueWasEmpty = localPersistence.size(queueId, shared, bucketIndex) == 0;
-            localPersistence.add(
-                    queueId,
+            localPersistence.add(queueId,
                     shared,
                     publishes,
                     queueLimit,
@@ -153,7 +153,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         if (clientConnection.isMessagesInFlight()) {
             return;
         }
-        clientConnection.getChannel().eventLoop()
+        clientConnection.getChannel()
+                .eventLoop()
                 .submit(() -> publishPollService.pollNewMessages(client, clientConnection.getChannel()));
     }
 
@@ -174,8 +175,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         } catch (final Exception exception) {
             return Futures.immediateFailedFuture(exception);
         }
-        return singleWriter.submit(
-                queueId,
+        return singleWriter.submit(queueId,
                 bucketIndex -> localPersistence.readNew(queueId, shared, packetIds, byteLimit, bucketIndex));
     }
 
@@ -200,8 +200,7 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
             final long byteLimit,
             final int messageLimit) {
         checkNotNull(client, "Client ID must not be null");
-        return singleWriter.submit(
-                client,
+        return singleWriter.submit(client,
                 bucketIndex -> localPersistence.readInflight(client, false, messageLimit, byteLimit, bucketIndex));
     }
 
@@ -242,8 +241,8 @@ public class ClientQueuePersistenceImpl extends AbstractPersistence implements C
         return singleWriter.submit(bucketIndex, (bucketIndex1) -> {
             final ImmutableSet<String> sharedQueues = localPersistence.cleanUp(bucketIndex1);
             for (final String sharedQueue : sharedQueues) {
-                final SharedSubscriptionService.SharedSubscription sharedSubscription = SharedSubscriptionService
-                        .splitTopicAndGroup(sharedQueue);
+                final SharedSubscriptionService.SharedSubscription sharedSubscription =
+                        SharedSubscriptionService.splitTopicAndGroup(sharedQueue);
                 final ImmutableSet<SubscriberWithQoS> sharedSubscriber = topicTree
                         .getSharedSubscriber(sharedSubscription.getShareName(), sharedSubscription.getTopicFilter());
                 if (sharedSubscriber.isEmpty()) {

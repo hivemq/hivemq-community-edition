@@ -50,9 +50,12 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
     private final @NotNull ModifiableDefaultPermissions defaultPermissions;
     private final @NotNull ModifiableClientSettingsImpl clientSettings;
     private int timeout;
-    AuthOutput(final @NotNull PluginOutPutAsyncer asyncer, final boolean validateUTF8,
+    AuthOutput(
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final boolean validateUTF8,
             final @NotNull ModifiableDefaultPermissions defaultPermissions,
-            final @NotNull ModifiableClientSettingsImpl clientSettings, final int timeout) {
+            final @NotNull ModifiableClientSettingsImpl clientSettings,
+            final int timeout) {
         super(asyncer);
         this.validateUTF8 = validateUTF8;
         this.userProperties = new ModifiableUserPropertiesImpl(ImmutableList.of(), validateUTF8);
@@ -200,8 +203,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
             if (isTimedOut()) {
                 throw new UnsupportedOperationException(method + " has no effect as the async operation timed out.");
             }
-            throw new UnsupportedOperationException(method + " must not be called if authenticateSuccessfully, "
-                    + "failAuthentication, continueAuthentication or nextExtensionOrDefault has already been called.");
+            throw new UnsupportedOperationException(method + " must not be called if authenticateSuccessfully, " +
+                    "failAuthentication, continueAuthentication or nextExtensionOrDefault has already been called.");
         }
     }
 }

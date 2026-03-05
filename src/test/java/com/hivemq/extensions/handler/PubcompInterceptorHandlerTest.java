@@ -90,12 +90,14 @@ public class PubcompInterceptorHandlerTest {
         ClientConnection.of(channel).setExtensionClientContext(clientContext);
         ClientConnection.of(channel).setProtocolVersion(ProtocolVersion.MQTTv5);
         when(extension.getId()).thenReturn("extension");
-        final FullConfigurationService configurationService = new TestConfigurationBootstrap()
-                .getFullConfigurationService();
+        final FullConfigurationService configurationService =
+                new TestConfigurationBootstrap().getFullConfigurationService();
         final PluginOutPutAsyncer asyncer = new PluginOutputAsyncerImpl(mock(ShutdownHooks.class));
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        handler = new PubcompInterceptorHandler(configurationService, asyncer, hiveMQExtensions,
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        handler = new PubcompInterceptorHandler(configurationService,
+                asyncer,
+                hiveMQExtensions,
                 pluginTaskExecutorService);
         channel.pipeline().addLast("test", new ChannelOutboundHandlerAdapter() {
 
@@ -347,7 +349,9 @@ public class PubcompInterceptorHandlerTest {
 
     @NotNull
     private PUBCOMP testPubcomp() {
-        return new PUBCOMP(1, Mqtt5PubCompReasonCode.PACKET_IDENTIFIER_NOT_FOUND, "reason",
+        return new PUBCOMP(1,
+                Mqtt5PubCompReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
+                "reason",
                 Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
     public static class TestModifyInboundInterceptor implements PubcompInboundInterceptor {
@@ -356,8 +360,7 @@ public class PubcompInterceptorHandlerTest {
         public void onInboundPubcomp(
                 final @NotNull PubcompInboundInput pubcompInboundInput,
                 final @NotNull PubcompInboundOutput pubcompInboundOutput) {
-            @Immutable
-            final ModifiablePubcompPacket pubcompPacket = pubcompInboundOutput.getPubcompPacket();
+            @Immutable final ModifiablePubcompPacket pubcompPacket = pubcompInboundOutput.getPubcompPacket();
             pubcompPacket.setReasonString("modified");
         }
     }
@@ -400,8 +403,7 @@ public class PubcompInterceptorHandlerTest {
         public void onOutboundPubcomp(
                 final @NotNull PubcompOutboundInput pubcompOutboundInput,
                 final @NotNull PubcompOutboundOutput pubcompOutboundOutput) {
-            @Immutable
-            final ModifiablePubcompPacket pubcompPacket = pubcompOutboundOutput.getPubcompPacket();
+            @Immutable final ModifiablePubcompPacket pubcompPacket = pubcompOutboundOutput.getPubcompPacket();
             pubcompPacket.setReasonString("modified");
         }
     }

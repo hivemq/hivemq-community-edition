@@ -63,8 +63,8 @@ public class TestExtensionUtil {
             final @NotNull Class<? extends ExtensionMain> mainClazz,
             final boolean enable) throws Exception {
         final File validExtension = createValidExtension(extensionsFolder, extensionId, false, enable);
-        final JavaArchive javaArchive = ShrinkWrap.create(JavaArchive.class)
-                .addAsServiceProviderAndClasses(ExtensionMain.class, mainClazz);
+        final JavaArchive javaArchive =
+                ShrinkWrap.create(JavaArchive.class).addAsServiceProviderAndClasses(ExtensionMain.class, mainClazz);
         javaArchive.as(ZipExporter.class).exportTo(new File(validExtension, "extension.jar"));
     }
 }

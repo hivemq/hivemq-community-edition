@@ -34,7 +34,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
  */
 public class SecurityConfigurationServiceImplTest {
 
-    private final SecurityConfigurationServiceImpl securityConfigurationService = new SecurityConfigurationServiceImpl();
+    private final SecurityConfigurationServiceImpl securityConfigurationService =
+            new SecurityConfigurationServiceImpl();
     private LogbackCapturingAppender logCapture;
     @Before
     public void setup() {
@@ -62,18 +63,15 @@ public class SecurityConfigurationServiceImplTest {
         securityConfigurationService.setAllowRequestProblemInformation(false);
         assertTrue(logCapture.isLogCaptured());
         assertEquals(Level.DEBUG, logCapture.getLastCapturedLog().getLevel());
-        assertEquals(
-                "Setting allow-problem-information to false",
+        assertEquals("Setting allow-problem-information to false",
                 logCapture.getLastCapturedLog().getFormattedMessage());
         securityConfigurationService.setAllowServerAssignedClientId(false);
         assertEquals(Level.DEBUG, logCapture.getLastCapturedLog().getLevel());
-        assertEquals(
-                "Setting allow server assigned client identifier to false",
+        assertEquals("Setting allow server assigned client identifier to false",
                 logCapture.getLastCapturedLog().getFormattedMessage());
         securityConfigurationService.setPayloadFormatValidation(true);
         assertEquals(Level.DEBUG, logCapture.getLastCapturedLog().getLevel());
-        assertEquals(
-                "Setting payload format validation to true",
+        assertEquals("Setting payload format validation to true",
                 logCapture.getLastCapturedLog().getFormattedMessage());
         securityConfigurationService.setValidateUTF8(false);
         assertEquals(Level.DEBUG, logCapture.getLastCapturedLog().getLevel());

@@ -56,7 +56,8 @@ public class SslContextStore {
     private final @NotNull ConcurrentMap<Tls, SslContext> sslContextMap;
     private final @NotNull ConcurrentMap<Tls, HashCode> checksumMap;
     @Inject
-    public SslContextStore(final @Security @NotNull ScheduledExecutorService executorService,
+    public SslContextStore(
+            final @Security @NotNull ScheduledExecutorService executorService,
             final @NotNull SslContextFactory sslContextFactory) {
         this.executorService = executorService;
         this.sslContextFactory = sslContextFactory;
@@ -65,8 +66,7 @@ public class SslContextStore {
     }
 
     public @NotNull SslContext getAndInitAsync(final @NotNull Tls tls) {
-        return getAndInit(tls, executorService, sslContext -> {
-        });
+        return getAndInit(tls, executorService, sslContext -> {});
     }
 
     public void createAndInitIfAbsent(final @NotNull Tls tls, final @NotNull Consumer<SslContext> onCreate) {
@@ -113,8 +113,7 @@ public class SslContextStore {
                     throw new UnrecoverableException();
                 }
                 // only start scheduled execution if first hash went through
-                executorService.scheduleAtFixedRate(
-                        new SslContextScheduledRunnable(tls),
+                executorService.scheduleAtFixedRate(new SslContextScheduledRunnable(tls),
                         SSL_RELOAD_INTERVAL_SEC,
                         SSL_RELOAD_INTERVAL_SEC,
                         TimeUnit.SECONDS);

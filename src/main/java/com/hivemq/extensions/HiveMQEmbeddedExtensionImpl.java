@@ -31,10 +31,23 @@ public class HiveMQEmbeddedExtensionImpl extends AbstractHiveMQExtension {
 
     private static final @NotNull Logger log = LoggerFactory.getLogger(HiveMQEmbeddedExtensionImpl.class);
     private final @Nullable ClassLoader classLoader;
-    public HiveMQEmbeddedExtensionImpl(final @NotNull String id, final @NotNull String version,
-            final @NotNull String name, final @Nullable String author, final int priority, final int startPriority,
-            final @NotNull ExtensionMain extensionMain, final boolean enabled) {
-        super(id, version, name, author, priority, startPriority, extensionMain, enabled,
+    public HiveMQEmbeddedExtensionImpl(
+            final @NotNull String id,
+            final @NotNull String version,
+            final @NotNull String name,
+            final @Nullable String author,
+            final int priority,
+            final int startPriority,
+            final @NotNull ExtensionMain extensionMain,
+            final boolean enabled) {
+        super(id,
+                version,
+                name,
+                author,
+                priority,
+                startPriority,
+                extensionMain,
+                enabled,
                 new File(System.getProperty("java.io.tmpdir")).toPath());
         classLoader = extensionMain.getClass().getClassLoader();
     }

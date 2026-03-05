@@ -45,11 +45,11 @@ public class ExceptionsTest {
 
     @Test
     public void test_is_connection_closed_exception_batched() {
-        final BatchedException batchedException1 = new BatchedException(
-                ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
+        final BatchedException batchedException1 =
+                new BatchedException(ImmutableList.of(new ClosedChannelException(), new ClosedChannelException()));
         assertTrue(Exceptions.isConnectionClosedException(batchedException1));
-        final BatchedException batchedException2 = new BatchedException(
-                ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
+        final BatchedException batchedException2 =
+                new BatchedException(ImmutableList.of(new ClosedChannelException(), new RuntimeException()));
         assertFalse(Exceptions.isConnectionClosedException(batchedException2));
     }
 }

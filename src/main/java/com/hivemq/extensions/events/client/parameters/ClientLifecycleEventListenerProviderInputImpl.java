@@ -31,7 +31,8 @@ public class ClientLifecycleEventListenerProviderInputImpl implements ClientLife
 
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    public ClientLifecycleEventListenerProviderInputImpl(final @NotNull String clientId,
+    public ClientLifecycleEventListenerProviderInputImpl(
+            final @NotNull String clientId,
             final @NotNull Channel channel) {
         Preconditions.checkNotNull(clientId, "client id must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");

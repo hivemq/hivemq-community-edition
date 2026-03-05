@@ -92,8 +92,8 @@ public class TopicPermissionBuilderImplTest {
     @Test()
     public void test_shared_topic_valid_utf8_should_not() {
         configurationService.securityConfiguration().setValidateUTF8(false);
-        final TopicPermission topicPermission = topicPermissionBuilder.sharedGroup("group" + '\u0001')
-                .topicFilter("topic").build();
+        final TopicPermission topicPermission =
+                topicPermissionBuilder.sharedGroup("group" + '\u0001').topicFilter("topic").build();
         assertEquals("group" + '\u0001', topicPermission.getSharedGroup());
     }
 
@@ -145,9 +145,13 @@ public class TopicPermissionBuilderImplTest {
     @Test
     public void test_full_values() {
         final TopicPermission permission = topicPermissionBuilder.topicFilter("test/unique2id/#")
-                .activity(TopicPermission.MqttActivity.PUBLISH).retain(TopicPermission.Retain.NOT_RETAINED)
-                .type(TopicPermission.PermissionType.DENY).qos(TopicPermission.Qos.ONE_TWO).sharedGroup("abc")
-                .sharedSubscription(TopicPermission.SharedSubscription.NOT_SHARED).build();
+                .activity(TopicPermission.MqttActivity.PUBLISH)
+                .retain(TopicPermission.Retain.NOT_RETAINED)
+                .type(TopicPermission.PermissionType.DENY)
+                .qos(TopicPermission.Qos.ONE_TWO)
+                .sharedGroup("abc")
+                .sharedSubscription(TopicPermission.SharedSubscription.NOT_SHARED)
+                .build();
         assertEquals("test/unique2id/#", permission.getTopicFilter());
         assertEquals(TopicPermission.MqttActivity.PUBLISH, permission.getActivity());
         assertEquals(TopicPermission.Retain.NOT_RETAINED, permission.getPublishRetain());

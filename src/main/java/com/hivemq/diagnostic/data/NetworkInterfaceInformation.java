@@ -153,8 +153,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
     @VisibleForTesting
     public static String formatMACAddress(final byte[] hardwareAddress) {
         checkNotNull(hardwareAddress);
-        checkArgument(
-                hardwareAddress.length == ADDRESS_LENGTH,
+        checkArgument(hardwareAddress.length == ADDRESS_LENGTH,
                 "Hardware address must be of length %s but was %s",
                 ADDRESS_LENGTH,
                 hardwareAddress.length);

@@ -37,9 +37,12 @@ public class ReAuthOutput extends AuthOutput<EnhancedAuthOutput> implements Enha
 
     private @NotNull Mqtt5DisconnectReasonCode reasonCode = Mqtt5DisconnectReasonCode.NOT_AUTHORIZED;
     private @NotNull Mqtt5DisconnectReasonCode timeoutReasonCode = Mqtt5DisconnectReasonCode.NOT_AUTHORIZED;
-    public ReAuthOutput(final @NotNull PluginOutPutAsyncer asyncer, final boolean validateUTF8,
+    public ReAuthOutput(
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final boolean validateUTF8,
             final @NotNull ModifiableDefaultPermissions defaultPermissions,
-            final @NotNull ModifiableClientSettingsImpl clientSettings, final int timeout) {
+            final @NotNull ModifiableClientSettingsImpl clientSettings,
+            final int timeout) {
         super(asyncer, validateUTF8, defaultPermissions, clientSettings, timeout);
         setDefaultReasonStrings();
     }
@@ -120,15 +123,12 @@ public class ReAuthOutput extends AuthOutput<EnhancedAuthOutput> implements Enha
             final @NotNull DisconnectedReasonCode disconnectedReasonCode) {
         Preconditions.checkNotNull(disconnectedReasonCode, "Disconnected reason code must never be null");
         final Mqtt5DisconnectReasonCode disconnectReasonCode = Mqtt5DisconnectReasonCode.from(disconnectedReasonCode);
-        Preconditions.checkArgument(
-                disconnectReasonCode != null,
-                "The disconnected reason code " + disconnectedReasonCode.name()
-                        + " is not a DISCONNECT reason code and therefore must not be used during re-authentication.");
-        Preconditions.checkArgument(
-                disconnectReasonCode != Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
+        Preconditions.checkArgument(disconnectReasonCode != null,
+                "The disconnected reason code " + disconnectedReasonCode.name() +
+                        " is not a DISCONNECT reason code and therefore must not be used during re-authentication.");
+        Preconditions.checkArgument(disconnectReasonCode != Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION,
                 "DISCONNECT reason code must not be NORMAL_DISCONNECTION for failed authentication");
-        Preconditions.checkArgument(
-                disconnectReasonCode.canBeSentByServer(),
+        Preconditions.checkArgument(disconnectReasonCode.canBeSentByServer(),
                 "The DISCONNECT reason code " + disconnectedReasonCode.name() + " cannot be sent by the server.");
         return disconnectReasonCode;
     }

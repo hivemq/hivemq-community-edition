@@ -42,7 +42,8 @@ import static com.hivemq.configuration.service.InternalConfigurations.XODUS_PERS
 public class EnvironmentUtil {
 
     public enum GCType {
-        DELETE, RENAME
+        DELETE,
+        RENAME
     }
     private static final Logger log = LoggerFactory.getLogger(EnvironmentUtil.class);
     /**
@@ -54,8 +55,7 @@ public class EnvironmentUtil {
      */
     public EnvironmentConfig createEnvironmentConfig(@NotNull final String name) {
         checkNotNull(name, "Name for environment config must not be null");
-        return createEnvironmentConfig(
-                XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE,
+        return createEnvironmentConfig(XODUS_PERSISTENCE_ENVIRONMENT_GC_MIN_AGE,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_DELETION_DELAY_MSEC,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_FILES_INTERVAL,
                 XODUS_PERSISTENCE_ENVIRONMENT_GC_RUN_PERIOD_MSEC,
@@ -114,8 +114,8 @@ public class EnvironmentUtil {
         log.trace("Setting JMX enabled for persistence {} to {}", name, jmxEnabled);
         environmentConfig.setLogCacheUseNio(XODUS_LOG_CACHE_USE_NIO);
         final PersistenceType payloadPersistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
-        final PersistenceType retainedMessagePersistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE
-                .get();
+        final PersistenceType retainedMessagePersistenceType =
+                InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
         // Use the default cache size if only xodus persistences are used.
         if (payloadPersistenceType != PersistenceType.FILE && retainedMessagePersistenceType != PersistenceType.FILE) {
             final int logCacheMemory = InternalConfigurations.XODUS_PERSISTENCE_LOG_MEMORY_HEAP_PERCENTAGE;

@@ -46,16 +46,25 @@ public class ConnectPacketImplTest {
     private @NotNull ConnectPacketImpl emptyPacket;
     @Before
     public void setUp() {
-        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client").withUsername("user")
-                .withPassword("password".getBytes()).withAuthMethod("method").withAuthData("data".getBytes())
-                .withSessionExpiryInterval(Long.MAX_VALUE).withCleanStart(true).withKeepAlive(Integer.MAX_VALUE)
-                .withReceiveMaximum(Integer.MAX_VALUE).withTopicAliasMaximum(Integer.MAX_VALUE)
-                .withMaximumPacketSize(Long.MAX_VALUE).withResponseInformationRequested(true)
+        final CONNECT connect = new CONNECT.Mqtt5Builder().withClientIdentifier("client")
+                .withUsername("user")
+                .withPassword("password".getBytes())
+                .withAuthMethod("method")
+                .withAuthData("data".getBytes())
+                .withSessionExpiryInterval(Long.MAX_VALUE)
+                .withCleanStart(true)
+                .withKeepAlive(Integer.MAX_VALUE)
+                .withReceiveMaximum(Integer.MAX_VALUE)
+                .withTopicAliasMaximum(Integer.MAX_VALUE)
+                .withMaximumPacketSize(Long.MAX_VALUE)
+                .withResponseInformationRequested(true)
                 .withProblemInformationRequested(true)
-                .withWillPublish(
-                        new MqttWillPublish.Mqtt5Builder().withTopic("topic").withPayload("payload".getBytes())
-                                .withQos(QoS.AT_LEAST_ONCE).build())
-                .withUserProperties(Mqtt5UserProperties.of(new MqttUserProperty("one", "one"))).build();
+                .withWillPublish(new MqttWillPublish.Mqtt5Builder().withTopic("topic")
+                        .withPayload("payload".getBytes())
+                        .withQos(QoS.AT_LEAST_ONCE)
+                        .build())
+                .withUserProperties(Mqtt5UserProperties.of(new MqttUserProperty("one", "one")))
+                .build();
         final CONNECT empty = new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
         connectPacket = new ConnectPacketImpl(connect, System.currentTimeMillis());
         emptyPacket = new ConnectPacketImpl(empty, System.currentTimeMillis());
@@ -68,8 +77,7 @@ public class ConnectPacketImplTest {
 
     @Test(timeout = 5000)
     public void test_user_properties() {
-        assertEquals(
-                Mqtt5UserProperties.of(new MqttUserProperty("one", "one")).asList(),
+        assertEquals(Mqtt5UserProperties.of(new MqttUserProperty("one", "one")).asList(),
                 connectPacket.getUserProperties().asList());
     }
 
@@ -155,10 +163,12 @@ public class ConnectPacketImplTest {
 
     @Test
     public void equals() {
-        EqualsVerifier.forClass(ConnectPacketImpl.class).withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
-                                                                                               // @NotNull Optional is
-                                                                                               // @NotNull
-                .withNonnullFields("mqttVersion", "clientId", "userProperties").suppress(Warning.STRICT_INHERITANCE)
+        EqualsVerifier.forClass(ConnectPacketImpl.class)
+                .withIgnoredAnnotations(NotNull.class) // EqualsVerifier thinks
+                // @NotNull Optional is
+                // @NotNull
+                .withNonnullFields("mqttVersion", "clientId", "userProperties")
+                .suppress(Warning.STRICT_INHERITANCE)
                 .verify();
     }
 }

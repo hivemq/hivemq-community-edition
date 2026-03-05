@@ -48,8 +48,7 @@ public class MqttPingreqDecoder extends MqttDecoder<PINGREQ> {
         // Pingreq of MQTTv5 is equal to MQTTv3_1_1
         if (protocolVersion == ProtocolVersion.MQTTv5 || protocolVersion == ProtocolVersion.MQTTv3_1_1) {
             if (!validateHeader(header)) {
-                serverDisconnector.disconnect(
-                        clientConnectionContext.getChannel(),
+                serverDisconnector.disconnect(clientConnectionContext.getChannel(),
                         "A client (IP: {}) sent a PINGREQ with an invalid fixed header. Disconnecting client.",
                         "Sent a PINGREQ with invalid fixed header",
                         Mqtt5DisconnectReasonCode.MALFORMED_PACKET,

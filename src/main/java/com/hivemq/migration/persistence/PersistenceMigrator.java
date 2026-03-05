@@ -48,7 +48,8 @@ public class PersistenceMigrator {
     private final @NotNull Provider<RetainedMessagePayloadIDMigration> retainedMessagePayloadIDMigrationProvider;
     private final @NotNull Provider<ClientQueuePayloadIDMigration> clientQueuePayloadIDMigrationProvider;
     @Inject
-    public PersistenceMigrator(final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider,
+    public PersistenceMigrator(
+            final @NotNull Provider<PublishPayloadTypeMigration> publishPayloadMigrationProvider,
             final @NotNull Provider<RetainedMessageTypeMigration> retainedMessageMigrationProvider,
             final @NotNull Provider<RetainedMessagePayloadIDMigration> retainedMessagePayloadIDMigrationProvider,
             final @NotNull Provider<ClientQueuePayloadIDMigration> clientQueuePayloadIDMigrationProvider) {
@@ -80,13 +81,11 @@ public class PersistenceMigrator {
             migrationlog.info("Migrating {} to type {}.", migrationUnit, persistenceType);
             log.debug("Migrating {} to type {}.", migrationUnit, persistenceType);
             migrator.migrateToType(persistenceType);
-            migrationlog.info(
-                    "Migrated {} to type {} successfully in {} ms",
+            migrationlog.info("Migrated {} to type {} successfully in {} ms",
                     migrationUnit,
                     persistenceType,
                     (System.currentTimeMillis() - startOne));
-            log.debug(
-                    "Migrated {} to type {} successfully in {} ms",
+            log.debug("Migrated {} to type {} successfully in {} ms",
                     migrationUnit,
                     persistenceType,
                     (System.currentTimeMillis() - startOne));

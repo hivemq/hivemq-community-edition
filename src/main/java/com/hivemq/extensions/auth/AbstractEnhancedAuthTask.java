@@ -27,12 +27,13 @@ import com.hivemq.extensions.services.auth.WrappedAuthenticatorProvider;
  * @author Silvio Giebl
  */
 abstract class AbstractEnhancedAuthTask<I extends PluginTaskInput, O extends AuthOutput<?>>
-        extends
-            AbstractAuthTask<I, O> {
+        extends AbstractAuthTask<I, O> {
 
     private final @NotNull ClientAuthenticators clientAuthenticators;
-    AbstractEnhancedAuthTask(final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
-            final @NotNull AuthenticatorProviderInput authenticatorProviderInput, final @NotNull String extensionId,
+    AbstractEnhancedAuthTask(
+            final @NotNull WrappedAuthenticatorProvider wrappedAuthenticatorProvider,
+            final @NotNull AuthenticatorProviderInput authenticatorProviderInput,
+            final @NotNull String extensionId,
             final @NotNull ClientAuthenticators clientAuthenticators) {
         super(wrappedAuthenticatorProvider, authenticatorProviderInput, extensionId);
         this.clientAuthenticators = clientAuthenticators;
@@ -52,12 +53,12 @@ abstract class AbstractEnhancedAuthTask<I extends PluginTaskInput, O extends Aut
     @Nullable
     EnhancedAuthenticator updateAndGetAuthenticator() {
         final EnhancedAuthenticator authenticator = clientAuthenticators.getAuthenticatorMap().get(extensionId);
-        if ((authenticator != null)
-                && authenticator.getClass().getClassLoader().equals(wrappedAuthenticatorProvider.getClassLoader())) {
+        if ((authenticator != null) &&
+                authenticator.getClass().getClassLoader().equals(wrappedAuthenticatorProvider.getClassLoader())) {
             return authenticator;
         }
-        final EnhancedAuthenticator newAuthenticator = wrappedAuthenticatorProvider
-                .getEnhancedAuthenticator(authenticatorProviderInput);
+        final EnhancedAuthenticator newAuthenticator =
+                wrappedAuthenticatorProvider.getEnhancedAuthenticator(authenticatorProviderInput);
         if (newAuthenticator != null) {
             clientAuthenticators.put(extensionId, newAuthenticator);
             return newAuthenticator;

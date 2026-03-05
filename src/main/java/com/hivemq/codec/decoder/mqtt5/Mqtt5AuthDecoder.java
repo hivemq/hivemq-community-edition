@@ -63,7 +63,8 @@ import static com.hivemq.mqtt.message.mqtt5.MessageProperties.USER_PROPERTY;
 public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
 
     @Inject
-    public Mqtt5AuthDecoder(final @NotNull MqttServerDisconnector disconnector,
+    public Mqtt5AuthDecoder(
+            final @NotNull MqttServerDisconnector disconnector,
             final @NotNull FullConfigurationService configurationService) {
         super(disconnector, configurationService);
     }
@@ -110,8 +111,7 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
             final int propertyIdentifier = buf.readByte();
             switch (propertyIdentifier) {
                 case AUTHENTICATION_METHOD :
-                    authenticationMethod = decodeAuthenticationMethod(
-                            clientConnectionContext,
+                    authenticationMethod = decodeAuthenticationMethod(clientConnectionContext,
                             buf,
                             authenticationMethod,
                             MessageType.AUTH);
@@ -132,18 +132,14 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
                     }
                     break;
                 case USER_PROPERTY :
-                    userPropertiesBuilder = readUserProperty(
-                            clientConnectionContext,
-                            buf,
-                            userPropertiesBuilder,
-                            MessageType.AUTH);
+                    userPropertiesBuilder =
+                            readUserProperty(clientConnectionContext, buf, userPropertiesBuilder, MessageType.AUTH);
                     if (userPropertiesBuilder == null) {
                         return null;
                     }
                     break;
                 default :
-                    disconnectByInvalidPropertyIdentifier(
-                            clientConnectionContext,
+                    disconnectByInvalidPropertyIdentifier(clientConnectionContext,
                             propertyIdentifier,
                             MessageType.AUTH);
                     return null;
@@ -178,8 +174,7 @@ public class Mqtt5AuthDecoder extends AbstractMqttDecoder<AUTH> {
         }
         authenticationData = MqttBinaryData.decode(buf);
         if (authenticationData == null) {
-            disconnector.disconnect(
-                    clientConnectionContext.getChannel(),
+            disconnector.disconnect(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent an AUTH with a malformed authentication data. This is not allowed. Disconnecting client.",
                     "sent an AUTH with a malformed authentication data",
                     Mqtt5DisconnectReasonCode.MALFORMED_PACKET,

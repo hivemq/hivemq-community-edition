@@ -73,11 +73,15 @@ public class SharedSubscriptionService {
         sharedSubscriberCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(SHARED_SUBSCRIBER_CACHE_TIME_TO_LIVE_MSEC, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(SHARED_SUBSCRIBER_CACHE_CONCURRENCY_LEVEL.get())
-                .maximumSize(SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS).recordStats().build();
+                .maximumSize(SHARED_SUBSCRIBER_CACHE_MAX_SIZE_SUBSCRIBERS)
+                .recordStats()
+                .build();
         sharedSubscriptionCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(SHARED_SUBSCRIPTION_CACHE_TIME_TO_LIVE_MSEC, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(SHARED_SUBSCRIPTION_CACHE_CONCURRENCY_LEVEL.get())
-                .maximumSize(SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS).recordStats().build();
+                .maximumSize(SHARED_SUBSCRIPTION_CACHE_MAX_SIZE_SUBSCRIPTIONS)
+                .recordStats()
+                .build();
     }
 
     /**
@@ -109,11 +113,16 @@ public class SharedSubscriptionService {
         final SharedSubscription sharedSubscription = checkForSharedSubscription(topic.getTopic());
         if (sharedSubscription == null) {
             return new Subscription(topic,
-                    SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()), null);
+                    SubscriptionFlag.getDefaultFlags(false, topic.isRetainAsPublished(), topic.isNoLocal()),
+                    null);
         } else {
             return new Subscription(
-                    new Topic(sharedSubscription.getTopicFilter(), topic.getQoS(), topic.isNoLocal(),
-                            topic.isRetainAsPublished(), topic.getRetainHandling(), topic.getSubscriptionIdentifier()),
+                    new Topic(sharedSubscription.getTopicFilter(),
+                            topic.getQoS(),
+                            topic.isNoLocal(),
+                            topic.isRetainAsPublished(),
+                            topic.getRetainHandling(),
+                            topic.getSubscriptionIdentifier()),
                     SubscriptionFlag.getDefaultFlags(true, topic.isRetainAsPublished(), topic.isNoLocal()),
                     sharedSubscription.getShareName());
         }

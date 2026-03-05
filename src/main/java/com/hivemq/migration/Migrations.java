@@ -90,12 +90,12 @@ public class Migrations {
         final PersistenceType currentRetainedType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
         final PersistenceType currentPayloadType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
         final Map<MigrationUnit, PersistenceType> neededMigrations = new EnumMap<>(MigrationUnit.class);
-        if (!previousPayloadType.equals(currentPayloadType)
-                && isPreviousPersistenceExistent(systemInformation, PublishPayloadLocalPersistence.PERSISTENCE_NAME)) {
+        if (!previousPayloadType.equals(currentPayloadType) &&
+                isPreviousPersistenceExistent(systemInformation, PublishPayloadLocalPersistence.PERSISTENCE_NAME)) {
             neededMigrations.put(MigrationUnit.FILE_PERSISTENCE_PUBLISH_PAYLOAD, currentPayloadType);
         }
-        if (!previousRetainedType.equals(currentRetainedType)
-                && isPreviousPersistenceExistent(systemInformation, RetainedMessageLocalPersistence.PERSISTENCE_NAME)) {
+        if (!previousRetainedType.equals(currentRetainedType) &&
+                isPreviousPersistenceExistent(systemInformation, RetainedMessageLocalPersistence.PERSISTENCE_NAME)) {
             neededMigrations.put(MigrationUnit.FILE_PERSISTENCE_RETAINED_MESSAGES, currentRetainedType);
         }
         if (neededMigrations.isEmpty()) {
@@ -107,8 +107,8 @@ public class Migrations {
     }
 
     public static Set<MigrationUnit> checkForValueMigration(final @NotNull SystemInformation systemInformation) {
-        MIGRATION_LOGGER
-                .info("Checking for value migrations (HiveMQ version {}).", systemInformation.getHiveMQVersion());
+        MIGRATION_LOGGER.info("Checking for value migrations (HiveMQ version {}).",
+                systemInformation.getHiveMQVersion());
         if (systemInformation.getHiveMQVersion().equals(DEVELOPMENT_VERSION)) {
             MIGRATION_LOGGER.info("Skipping migration because it is a Development Snapshot.");
             return Collections.emptySet();
@@ -155,8 +155,8 @@ public class Migrations {
         } else {
             currentRetainedVersion = RetainedMessageRocksDBLocalPersistence.PERSISTENCE_VERSION;
         }
-        return !previousRetainedVersion.equals(currentRetainedVersion)
-                && isPreviousPersistenceExistent(systemInformation, RetainedMessageLocalPersistence.PERSISTENCE_NAME);
+        return !previousRetainedVersion.equals(currentRetainedVersion) &&
+                isPreviousPersistenceExistent(systemInformation, RetainedMessageLocalPersistence.PERSISTENCE_NAME);
     }
 
     private static boolean queuedNeeded(
@@ -169,15 +169,17 @@ public class Migrations {
             previousQueuedVersion = metaInformation.getQueuedMessagesPersistenceVersion();
         }
         final String currentQueuedVersion = ClientQueueXodusLocalPersistence.PERSISTENCE_VERSION;
-        return !previousQueuedVersion.equals(currentQueuedVersion)
-                && isPreviousPersistenceExistent(systemInformation, ClientQueueXodusLocalPersistence.PERSISTENCE_NAME);
+        return !previousQueuedVersion.equals(currentQueuedVersion) &&
+                isPreviousPersistenceExistent(systemInformation, ClientQueueXodusLocalPersistence.PERSISTENCE_NAME);
     }
 
     private static boolean isPreviousPersistenceExistent(
             final @NotNull SystemInformation systemInformation,
             final @NotNull String persistence) {
-        return new File(systemInformation.getDataFolder() + File.separator
-                + LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME, persistence).exists();
+        return new File(
+                systemInformation.getDataFolder() + File.separator +
+                        LocalPersistenceFileUtil.PERSISTENCE_SUBFOLDER_NAME,
+                persistence).exists();
     }
 
     public static void migrate(

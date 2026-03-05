@@ -73,10 +73,14 @@ public class ConnectInboundInterceptorHandler {
     private final @NotNull ServerInformation serverInformation;
     private final @NotNull MqttConnacker connacker;
     @Inject
-    public ConnectInboundInterceptorHandler(final @NotNull FullConfigurationService configurationService,
-            final @NotNull PluginOutPutAsyncer asyncer, final @NotNull HiveMQExtensions hiveMQExtensions,
-            final @NotNull PluginTaskExecutorService executorService, final @NotNull HivemqId hivemqId,
-            final @NotNull Interceptors interceptors, final @NotNull ServerInformation serverInformation,
+    public ConnectInboundInterceptorHandler(
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull PluginOutPutAsyncer asyncer,
+            final @NotNull HiveMQExtensions hiveMQExtensions,
+            final @NotNull PluginTaskExecutorService executorService,
+            final @NotNull HivemqId hivemqId,
+            final @NotNull Interceptors interceptors,
+            final @NotNull ServerInformation serverInformation,
             final @NotNull MqttConnacker connacker) {
         this.configurationService = configurationService;
         this.asyncer = asyncer;
@@ -95,27 +99,27 @@ public class ConnectInboundInterceptorHandler {
         if (clientId == null) {
             return;
         }
-        final ImmutableMap<String, ConnectInboundInterceptorProvider> providers = interceptors
-                .connectInboundInterceptorProviders();
+        final ImmutableMap<String, ConnectInboundInterceptorProvider> providers =
+                interceptors.connectInboundInterceptorProviders();
         if (providers.isEmpty()) {
             ctx.fireChannelRead(connect);
             return;
         }
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        final ConnectInboundProviderInputImpl providerInput = new ConnectInboundProviderInputImpl(serverInformation,
-                clientInfo, connectionInfo);
-        final long timestamp = Objects
-                .requireNonNullElse(clientConnectionContext.getConnectReceivedTimestamp(), System.currentTimeMillis());
+        final ConnectInboundProviderInputImpl providerInput =
+                new ConnectInboundProviderInputImpl(serverInformation, clientInfo, connectionInfo);
+        final long timestamp = Objects.requireNonNullElse(clientConnectionContext.getConnectReceivedTimestamp(),
+                System.currentTimeMillis());
         final ConnectPacketImpl packet = new ConnectPacketImpl(connect, timestamp);
         final ConnectInboundInputImpl input = new ConnectInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<ConnectInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
-        final ModifiableConnectPacketImpl modifiablePacket = new ModifiableConnectPacketImpl(packet,
-                configurationService);
+        final ModifiableConnectPacketImpl modifiablePacket =
+                new ModifiableConnectPacketImpl(packet, configurationService);
         final ConnectInboundOutputImpl output = new ConnectInboundOutputImpl(asyncer, modifiablePacket);
         final ExtensionParameterHolder<ConnectInboundOutputImpl> outputHolder = new ExtensionParameterHolder<>(output);
-        final ConnectInterceptorContext context = new ConnectInterceptorContext(clientId, providers.size(), ctx,
-                inputHolder, outputHolder);
+        final ConnectInterceptorContext context =
+                new ConnectInterceptorContext(clientId, providers.size(), ctx, inputHolder, outputHolder);
         for (final Map.Entry<String, ConnectInboundInterceptorProvider> entry : providers.entrySet()) {
             final ConnectInboundInterceptorProvider provider = entry.getValue();
             final HiveMQExtension extension = hiveMQExtensions.getExtension(entry.getKey());
@@ -123,8 +127,8 @@ public class ConnectInboundInterceptorHandler {
                 context.finishInterceptor();
                 continue;
             }
-            final ConnectInterceptorTask task = new ConnectInterceptorTask(provider, providerInput, extension.getId(),
-                    clientId);
+            final ConnectInterceptorTask task =
+                    new ConnectInterceptorTask(provider, providerInput, extension.getId(), clientId);
             executorService.handlePluginInOutTaskExecution(context, inputHolder, outputHolder, task);
         }
     }
@@ -136,7 +140,9 @@ public class ConnectInboundInterceptorHandler {
         private final @NotNull ChannelHandlerContext ctx;
         private final @NotNull ExtensionParameterHolder<ConnectInboundInputImpl> inputHolder;
         private final @NotNull ExtensionParameterHolder<ConnectInboundOutputImpl> outputHolder;
-        ConnectInterceptorContext(final @NotNull String clientId, final int interceptorCount,
+        ConnectInterceptorContext(
+                final @NotNull String clientId,
+                final int interceptorCount,
                 final @NotNull ChannelHandlerContext ctx,
                 final @NotNull ExtensionParameterHolder<ConnectInboundInputImpl> inputHolder,
                 final @NotNull ExtensionParameterHolder<ConnectInboundOutputImpl> outputHolder) {
@@ -181,12 +187,8 @@ public class ConnectInboundInterceptorHandler {
             if (output.isPrevent()) {
                 final String logMessage = output.getLogMessage();
                 final String reasonString = output.getReasonString();
-                connacker.connackError(
-                        ctx.channel(),
-                        logMessage,
-                        logMessage,
-                        Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR,
-                        reasonString);
+                connacker.connackError(ctx
+                        .channel(), logMessage, logMessage, Mqtt5ConnAckReasonCode.UNSPECIFIED_ERROR, reasonString);
             } else {
                 final CONNECT connect = CONNECT.from(inputHolder.get().getConnectPacket(), hivemqId.get());
                 final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
@@ -209,8 +211,10 @@ public class ConnectInboundInterceptorHandler {
         private final @NotNull ConnectInboundProviderInputImpl providerInput;
         private final @NotNull String extensionId;
         private final @NotNull String clientId;
-        private ConnectInterceptorTask(final @NotNull ConnectInboundInterceptorProvider provider,
-                final @NotNull ConnectInboundProviderInputImpl providerInput, final @NotNull String extensionId,
+        private ConnectInterceptorTask(
+                final @NotNull ConnectInboundInterceptorProvider provider,
+                final @NotNull ConnectInboundProviderInputImpl providerInput,
+                final @NotNull String extensionId,
                 final @NotNull String clientId) {
             this.provider = provider;
             this.providerInput = providerInput;
@@ -233,12 +237,11 @@ public class ConnectInboundInterceptorHandler {
                 }
             } catch (final Throwable e) {
                 log.warn(
-                        "Uncaught exception was thrown from extension with id \"{}\" on inbound CONNECT interception. "
-                                + "Extensions are responsible for their own exception handling.",
+                        "Uncaught exception was thrown from extension with id \"{}\" on inbound CONNECT interception. " +
+                                "Extensions are responsible for their own exception handling.",
                         extensionId,
                         e);
-                output.prevent(
-                        String.format(ReasonStrings.CONNACK_UNSPECIFIED_ERROR_EXTENSION_EXCEPTION, clientId),
+                output.prevent(String.format(ReasonStrings.CONNACK_UNSPECIFIED_ERROR_EXTENSION_EXCEPTION, clientId),
                         "Exception in CONNECT inbound interceptor");
                 Exceptions.rethrowError(e);
             }

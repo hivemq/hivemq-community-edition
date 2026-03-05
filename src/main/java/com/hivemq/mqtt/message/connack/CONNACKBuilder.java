@@ -74,14 +74,12 @@ public class CONNACKBuilder {
                     "A client Id must never exceed 65.535 bytes");
         }
         if (authMethod != null) {
-            checkArgument(
-                    UnsignedDataTypes.isUnsignedShort(authMethod.getBytes(StandardCharsets.UTF_8).length),
+            checkArgument(UnsignedDataTypes.isUnsignedShort(authMethod.getBytes(StandardCharsets.UTF_8).length),
                     "An auth method must never exceed 65.535 bytes");
         }
         if (authData != null) {
             checkNotNull(authMethod, "Auth method must be set if auth data is set");
-            checkArgument(
-                    UnsignedDataTypes.isUnsignedShort(authData.length),
+            checkArgument(UnsignedDataTypes.isUnsignedShort(authData.length),
                     "An auth data must never exceed 65.535 bytes");
         }
         if (responseInformation != null) {
@@ -90,24 +88,19 @@ public class CONNACKBuilder {
                     "A response information must never exceed 65.535 bytes");
         }
         if (serverReference != null) {
-            checkArgument(
-                    UnsignedDataTypes.isUnsignedShort(serverReference.getBytes(StandardCharsets.UTF_8).length),
+            checkArgument(UnsignedDataTypes.isUnsignedShort(serverReference.getBytes(StandardCharsets.UTF_8).length),
                     "A server reference must never exceed 65.535 bytes");
         }
         if (sessionExpiryInterval != SESSION_EXPIRY_NOT_SET) {
-            checkArgument(
-                    UnsignedDataTypes.isUnsignedInt(sessionExpiryInterval),
+            checkArgument(UnsignedDataTypes.isUnsignedInt(sessionExpiryInterval),
                     "A session expiry interval must never be larger than 4.294.967.296");
         }
-        checkArgument(
-                maximumPacketSize <= Mqtt5CONNECT.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
+        checkArgument(maximumPacketSize <= Mqtt5CONNECT.DEFAULT_MAXIMUM_PACKET_SIZE_NO_LIMIT,
                 "A maximum packet size must never be larger than 268.435.460");
-        checkArgument(
-                UnsignedDataTypes.isUnsignedShort(topicAliasMaximum),
+        checkArgument(UnsignedDataTypes.isUnsignedShort(topicAliasMaximum),
                 "A topic alias maximum must never be larger than 65.535");
         if (serverKeepAlive != KEEP_ALIVE_NOT_SET) {
-            checkArgument(
-                    UnsignedDataTypes.isUnsignedShort(serverKeepAlive),
+            checkArgument(UnsignedDataTypes.isUnsignedShort(serverKeepAlive),
                     "A server keep alive must never be larger than 65.535");
         }
         if (mqtt3ConnAckReturnCode != null) {
@@ -118,11 +111,25 @@ public class CONNACKBuilder {
             mqtt5ConnAckReasonCode = Mqtt5ConnAckReasonCode.fromReturnCode(mqtt3ConnAckReturnCode);
         }
         checkNotNull(mqtt5ConnAckReasonCode);
-        return new CONNACK(mqtt5ConnAckReasonCode, reasonString,
-                Objects.requireNonNullElse(userProperties, Mqtt5UserProperties.NO_USER_PROPERTIES), sessionPresent,
-                sessionExpiryInterval, serverKeepAlive, assignedClientIdentifier, authMethod, authData, receiveMaximum,
-                topicAliasMaximum, maximumPacketSize, maximumQoS, isRetainAvailable, isWildcardSubscriptionAvailable,
-                isSubscriptionIdentifierAvailable, isSharedSubscriptionAvailable, responseInformation, serverReference);
+        return new CONNACK(mqtt5ConnAckReasonCode,
+                reasonString,
+                Objects.requireNonNullElse(userProperties, Mqtt5UserProperties.NO_USER_PROPERTIES),
+                sessionPresent,
+                sessionExpiryInterval,
+                serverKeepAlive,
+                assignedClientIdentifier,
+                authMethod,
+                authData,
+                receiveMaximum,
+                topicAliasMaximum,
+                maximumPacketSize,
+                maximumQoS,
+                isRetainAvailable,
+                isWildcardSubscriptionAvailable,
+                isSubscriptionIdentifierAvailable,
+                isSharedSubscriptionAvailable,
+                responseInformation,
+                serverReference);
     }
 
     private @NotNull CONNACKBuilder self() {

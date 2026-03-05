@@ -55,8 +55,8 @@ public class RetainedMessagePersistenceImplTest {
     public void setUp() throws Exception {
         message = new RetainedMessage(TestMessageUtil.createMqtt3Publish(), 1000);
         singleWriterService = TestSingleWriterFactory.defaultSingleWriter();
-        retainedMessagePersistence = new RetainedMessagePersistenceImpl(localPersistence, singleWriterService,
-                new Chunker());
+        retainedMessagePersistence =
+                new RetainedMessagePersistenceImpl(localPersistence, singleWriterService, new Chunker());
     }
 
     @After

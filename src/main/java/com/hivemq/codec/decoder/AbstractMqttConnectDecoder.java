@@ -49,8 +49,10 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
     protected final long maxUserPropertiesLength;
     protected final boolean allowAssignedClientId;
     protected final boolean validateUTF8;
-    protected AbstractMqttConnectDecoder(final @NotNull MqttConnacker mqttConnacker,
-            final @NotNull FullConfigurationService configurationService, final @NotNull ClientIds clientIds) {
+    protected AbstractMqttConnectDecoder(
+            final @NotNull MqttConnacker mqttConnacker,
+            final @NotNull FullConfigurationService configurationService,
+            final @NotNull ClientIds clientIds) {
         this.mqttConnacker = mqttConnacker;
         this.clientIds = clientIds;
         validateUTF8 = configurationService.securityConfiguration().validateUTF8();
@@ -60,8 +62,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
     }
 
     protected void disconnectByInvalidFixedHeader(final @NotNull ClientConnectionContext clientConnectionContext) {
-        mqttConnacker.connackError(
-                clientConnectionContext.getChannel(),
+        mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (IP: {}) connected with an invalid fixed header.",
                 "Invalid CONNECT fixed header",
                 Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -69,8 +70,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
     }
 
     protected void disconnectByInvalidHeader(final @NotNull ClientConnectionContext clientConnectionContext) {
-        mqttConnacker.connackError(
-                clientConnectionContext.getChannel(),
+        mqttConnacker.connackError(clientConnectionContext.getChannel(),
                 "A client (ID: {},IP: {}) connected with an invalid CONNECT header.",
                 "Invalid CONNECT header",
                 Mqtt5ConnAckReasonCode.PROTOCOL_ERROR,
@@ -102,8 +102,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
             final @NotNull ClientConnectionContext clientConnectionContext) {
         final boolean valid = (isWillFlag && willQoS < 3) || (!isWillRetain && willQoS == 0);
         if (!valid) {
-            mqttConnacker.connackError(
-                    clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with an invalid willTopic flag combination. Disconnecting client.",
                     "Invalid will-topic/flag combination",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -125,8 +124,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
             final byte connectFlagsByte,
             final @NotNull ClientConnectionContext clientConnectionContext) {
         if (isBitSet(connectFlagsByte, 0)) {
-            mqttConnacker.connackError(
-                    clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with invalid CONNECT flags. Disconnecting client.",
                     "Invalid CONNECT flags",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -150,8 +148,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull String protocolName) {
         if (!protocolName.equals(Strings.getPrefixedString(variableHeader))) {
-            mqttConnacker.connackError(
-                    clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) connected with an invalid protocol name. Disconnecting client.",
                     "Invalid CONNECT protocol name",
                     Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
@@ -227,8 +224,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
         final String willTopic;
         final int utf8StringLengthWill;
         if (buf.readableBytes() < 2 || buf.readableBytes() < (utf8StringLengthWill = buf.readUnsignedShort())) {
-            mqttConnacker.connackError(
-                    clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     "A client (IP: {}) sent a CONNECT with an incorrect will-topic length. Disconnecting client.",
                     "Incorrect CONNECT will-topic length",
                     Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -238,8 +234,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
         if (validateUTF8) {
             willTopic = Strings.getValidatedPrefixedString(buf, utf8StringLengthWill, true);
             if (willTopic == null) {
-                mqttConnacker.connackError(
-                        clientConnectionContext.getChannel(),
+                mqttConnacker.connackError(clientConnectionContext.getChannel(),
                         "The will-topic of the client (IP: {}) is not well formed. This is not allowed. Disconnecting client.",
                         "Sent CONNECT with bad UTF-8 character",
                         Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
@@ -250,8 +245,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
             willTopic = Strings.getPrefixedString(buf, utf8StringLengthWill);
         }
         if (isInvalidTopic(clientConnectionContext, willTopic)) {
-            mqttConnacker.connackError(
-                    clientConnectionContext.getChannel(),
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
                     null,
                     // already logged
                     "Sent CONNECT with invalid will-topic",

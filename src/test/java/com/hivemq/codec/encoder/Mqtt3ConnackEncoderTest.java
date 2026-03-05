@@ -47,8 +47,10 @@ public class Mqtt3ConnackEncoderTest {
     @Test
     public void test_mqtt311_connack_no_sp() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        final CONNACK connack = CONNACK.builder().withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED)
-                .withSessionPresent(false).build();
+        final CONNACK connack = CONNACK.builder()
+                .withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED)
+                .withSessionPresent(false)
+                .build();
         channel.writeOutbound(connack);
         final ByteBuf buf = channel.readOutbound();
         // Fixed header
@@ -68,8 +70,8 @@ public class Mqtt3ConnackEncoderTest {
     @Test
     public void test_mqtt311_connack_session_present() {
         clientConnection.setProtocolVersion(ProtocolVersion.MQTTv3_1_1);
-        final CONNACK connack = CONNACK.builder().withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED)
-                .withSessionPresent(true).build();
+        final CONNACK connack =
+                CONNACK.builder().withMqtt3ReturnCode(Mqtt3ConnAckReturnCode.ACCEPTED).withSessionPresent(true).build();
         channel.writeOutbound(connack);
         final ByteBuf buf = channel.readOutbound();
         // Fixed header

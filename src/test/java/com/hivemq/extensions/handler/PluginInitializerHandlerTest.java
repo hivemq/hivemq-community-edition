@@ -93,8 +93,8 @@ public class PluginInitializerHandlerTest {
     private final @NotNull HiveMQExtension extension = mock(HiveMQExtension.class);
     private final @NotNull ClientSessionPersistence clientSessionPersistence = mock(ClientSessionPersistence.class);
     private final @NotNull MqttConnacker mqttConnacker = mock(MqttConnacker.class);
-    private final @NotNull ListenerConfigurationService listenerConfigurationService = mock(
-            ListenerConfigurationService.class);
+    private final @NotNull ListenerConfigurationService listenerConfigurationService =
+            mock(ListenerConfigurationService.class);
     private final @NotNull PublishFlushHandler publishFlushHandler = mock(PublishFlushHandler.class);
     private @NotNull ClientConnection clientConnection;
     private @NotNull PluginTaskExecutor executor;
@@ -115,11 +115,14 @@ public class PluginInitializerHandlerTest {
         when(channelHandlerContext.executor()).thenReturn(ImmediateEventExecutor.INSTANCE);
         when(hiveMQExtensions.getExtensionForClassloader(any(ClassLoader.class))).thenReturn(extension);
         when(extension.getExtensionClassloader()).thenReturn(classloader);
-        final PluginTaskExecutorService pluginTaskExecutorService = new PluginTaskExecutorServiceImpl(() -> executor,
-                mock(ShutdownHooks.class));
-        pluginInitializerHandler = new PluginInitializerHandler(initializers, pluginTaskExecutorService,
-                new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService), hiveMQExtensions,
-                clientSessionPersistence, mqttConnacker);
+        final PluginTaskExecutorService pluginTaskExecutorService =
+                new PluginTaskExecutorServiceImpl(() -> executor, mock(ShutdownHooks.class));
+        pluginInitializerHandler = new PluginInitializerHandler(initializers,
+                pluginTaskExecutorService,
+                new ServerInformationImpl(new SystemInformationImpl(), listenerConfigurationService),
+                hiveMQExtensions,
+                clientSessionPersistence,
+                mqttConnacker);
     }
 
     @Test(timeout = 10000)
@@ -131,8 +134,7 @@ public class PluginInitializerHandlerTest {
 
     @Test(timeout = 10000)
     public void test_write_connack_not_success() throws Exception {
-        pluginInitializerHandler.write(
-                channelHandlerContext,
+        pluginInitializerHandler.write(channelHandlerContext,
                 CONNACK.builder().withReasonCode(Mqtt5ConnAckReasonCode.MALFORMED_PACKET).build(),
                 channelPromise);
         verify(initializers, never()).getClientInitializerMap();
@@ -162,7 +164,9 @@ public class PluginInitializerHandlerTest {
     @Test(timeout = 10000)
     public void test_write_connack_fire_initialize() throws Exception {
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
-        channelHandlerContext.channel().attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).get()
+        channelHandlerContext.channel()
+                .attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME)
+                .get()
                 .setAuthPermissions(new ModifiableDefaultPermissionsImpl());
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
         verify(initializers, timeout(5000).times(1)).getClientInitializerMap();
@@ -183,16 +187,18 @@ public class PluginInitializerHandlerTest {
         when(clientSessionPersistence.deleteWill(anyString())).thenReturn(Futures.immediateFuture(null));
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
+                .withQos(QoS.AT_LEAST_ONCE)
+                .withPayload(new byte[]{1, 2, 3})
+                .build();
         ClientConnection.of(channel).setWillPublish(willPublish);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("topic").type(TopicPermission.PermissionType.DENY).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("topic")
+                .type(TopicPermission.PermissionType.DENY)
+                .build());
         ClientConnection.of(channel).setAuthPermissions(permissions);
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
-        verify(mqttConnacker, timeout(5000)).connackError(
-                any(Channel.class),
+        verify(mqttConnacker, timeout(5000)).connackError(any(Channel.class),
                 anyString(),
                 anyString(),
                 eq(Mqtt5ConnAckReasonCode.NOT_AUTHORIZED),
@@ -209,12 +215,15 @@ public class PluginInitializerHandlerTest {
         when(clientSessionPersistence.deleteWill(anyString())).thenReturn(Futures.immediateFuture(null));
         when(initializers.getClientInitializerMap()).thenReturn(createClientInitializerMap());
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
-                .withQos(QoS.AT_LEAST_ONCE).withPayload(new byte[]{1, 2, 3}).build();
+                .withQos(QoS.AT_LEAST_ONCE)
+                .withPayload(new byte[]{1, 2, 3})
+                .build();
         ClientConnection.of(channel).setWillPublish(willPublish);
         final ModifiableDefaultPermissionsImpl permissions = new ModifiableDefaultPermissionsImpl();
-        permissions.add(
-                new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
-                        .topicFilter("topic").type(TopicPermission.PermissionType.ALLOW).build());
+        permissions.add(new TopicPermissionBuilderImpl(new TestConfigurationBootstrap().getFullConfigurationService())
+                .topicFilter("topic")
+                .type(TopicPermission.PermissionType.ALLOW)
+                .build());
         ClientConnection.of(channel).setAuthPermissions(permissions);
         pluginInitializerHandler.write(channelHandlerContext, TestMessageUtil.createFullMqtt5Connack(), channelPromise);
         // the future must be set, so we need to wait a little
@@ -226,23 +235,21 @@ public class PluginInitializerHandlerTest {
     }
 
     private Map<String, ClientInitializer> createClientInitializerMap() throws Exception {
-        final IsolatedExtensionClassloader cl1 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder.getRoot().toPath(),
-                new Class[]{InitializersImplTest.TestClientInitializerOne.class,
-                        InitializersImplTest.TestClientInitializerTwo.class});
-        final IsolatedExtensionClassloader cl2 = IsolatedExtensionClassloaderUtil.buildClassLoader(
-                temporaryFolder.getRoot().toPath(),
-                new Class[]{InitializersImplTest.TestClientInitializerOne.class,
-                        InitializersImplTest.TestClientInitializerTwo.class});
+        final IsolatedExtensionClassloader cl1 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
+                        new Class[]{InitializersImplTest.TestClientInitializerOne.class,
+                                InitializersImplTest.TestClientInitializerTwo.class});
+        final IsolatedExtensionClassloader cl2 =
+                IsolatedExtensionClassloaderUtil.buildClassLoader(temporaryFolder.getRoot().toPath(),
+                        new Class[]{InitializersImplTest.TestClientInitializerOne.class,
+                                InitializersImplTest.TestClientInitializerTwo.class});
         final TreeMap<String, ClientInitializer> clientInitializerTreeMap = new TreeMap<>();
-        clientInitializerTreeMap.put(
-                "extension1",
-                IsolatedExtensionClassloaderUtil
-                        .loadInstance(cl1, InitializersImplTest.TestClientInitializerOne.class));
-        clientInitializerTreeMap.put(
-                "extension2",
-                IsolatedExtensionClassloaderUtil
-                        .loadInstance(cl2, InitializersImplTest.TestClientInitializerTwo.class));
+        clientInitializerTreeMap.put("extension1",
+                IsolatedExtensionClassloaderUtil.loadInstance(cl1,
+                        InitializersImplTest.TestClientInitializerOne.class));
+        clientInitializerTreeMap.put("extension2",
+                IsolatedExtensionClassloaderUtil.loadInstance(cl2,
+                        InitializersImplTest.TestClientInitializerTwo.class));
         return clientInitializerTreeMap;
     }
 }

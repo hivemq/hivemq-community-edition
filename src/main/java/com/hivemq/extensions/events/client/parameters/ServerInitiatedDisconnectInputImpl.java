@@ -43,8 +43,11 @@ public class ServerInitiatedDisconnectInputImpl implements ServerInitiatedDiscon
     private final @Nullable UserProperties userProperties;
     private final @NotNull ClientInformation clientInformation;
     private final @NotNull ConnectionInformation connectionInformation;
-    public ServerInitiatedDisconnectInputImpl(final @NotNull String clientId, final @NotNull Channel channel,
-            final @Nullable DisconnectedReasonCode reasonCode, final @Nullable String reasonString,
+    public ServerInitiatedDisconnectInputImpl(
+            final @NotNull String clientId,
+            final @NotNull Channel channel,
+            final @Nullable DisconnectedReasonCode reasonCode,
+            final @Nullable String reasonString,
             final @Nullable UserProperties userProperties) {
         Preconditions.checkNotNull(clientId, "client id must never be null");
         Preconditions.checkNotNull(channel, "channel must never be null");

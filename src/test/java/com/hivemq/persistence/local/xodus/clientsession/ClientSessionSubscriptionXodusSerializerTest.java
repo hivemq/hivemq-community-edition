@@ -80,11 +80,12 @@ public class ClientSessionSubscriptionXodusSerializerTest {
     @Test
     public void test_serialize_deserialize_max_topic_value() throws Exception {
         final String topicString = RandomStringUtils.randomAlphanumeric(65535);
-        final byte[] bytes = serializer.serializeValue(
-                new Topic(topicString, QoS.EXACTLY_ONCE, true, false,
-                        Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST, 1),
-                123456790L,
-                1L);
+        final byte[] bytes = serializer.serializeValue(new Topic(topicString,
+                QoS.EXACTLY_ONCE,
+                true,
+                false,
+                Mqtt5RetainHandling.SEND_IF_SUBSCRIPTION_DOES_NOT_EXIST,
+                1), 123456790L, 1L);
         final Topic topic = serializer.deserializeValue(bytes);
         assertEquals(topicString, topic.getTopic());
         assertEquals(QoS.EXACTLY_ONCE, topic.getQoS());

@@ -40,7 +40,8 @@ public class ServerInformationImpl implements ServerInformation {
     @NotNull
     private final ListenerConfigurationService listenerConfigurationService;
     @Inject
-    public ServerInformationImpl(@NotNull final SystemInformation systemInformation,
+    public ServerInformationImpl(
+            @NotNull final SystemInformation systemInformation,
             @NotNull final ListenerConfigurationService listenerConfigurationService) {
         this.systemInformation = systemInformation;
         this.listenerConfigurationService = listenerConfigurationService;
@@ -79,8 +80,8 @@ public class ServerInformationImpl implements ServerInformation {
     @NotNull
     @Override
     public Set<Listener> getListener() {
-        final List<com.hivemq.configuration.service.entity.Listener> listeners = listenerConfigurationService
-                .getListeners();
+        final List<com.hivemq.configuration.service.entity.Listener> listeners =
+                listenerConfigurationService.getListeners();
         final ImmutableSet.Builder<Listener> builder = ImmutableSet.builder();
         for (final com.hivemq.configuration.service.entity.Listener listener : listeners) {
             builder.add(new ListenerImpl(listener));

@@ -57,22 +57,29 @@ public class HiveMQExtensionExtensionTest extends AbstractExtensionTest {
     private ExtensionStartStopInputImpl extensionStartStopInput;
     @Before
     public void setUp() throws Exception {
-        final File validExtensionFolder = TestExtensionUtil
-                .createValidExtension(tmpFolder.newFolder("extension"), "id");
-        final Optional<HiveMQExtensionEntity> extensionEntityFromXML = HiveMQExtensionXMLReader
-                .getExtensionEntityFromXML(validExtensionFolder.toPath(), true);
+        final File validExtensionFolder =
+                TestExtensionUtil.createValidExtension(tmpFolder.newFolder("extension"), "id");
+        final Optional<HiveMQExtensionEntity> extensionEntityFromXML =
+                HiveMQExtensionXMLReader.getExtensionEntityFromXML(validExtensionFolder.toPath(), true);
         assertTrue(extensionEntityFromXML.isPresent());
         final HiveMQExtensionEntity hiveMQExtensionEntity = extensionEntityFromXML.get();
-        startExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity, validExtensionFolder.toPath(),
-                new StartTestExtension(), true);
-        stopExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity, validExtensionFolder.toPath(),
-                new StopTestExtension(), true);
-        reasonExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity, validExtensionFolder.toPath(),
-                new ReasonTestExtension(), true);
+        startExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity,
+                validExtensionFolder.toPath(),
+                new StartTestExtension(),
+                true);
+        stopExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity,
+                validExtensionFolder.toPath(),
+                new StopTestExtension(),
+                true);
+        reasonExtension = new HiveMQExtensionImpl(hiveMQExtensionEntity,
+                validExtensionFolder.toPath(),
+                new ReasonTestExtension(),
+                true);
         extensionStartOutput = new ExtensionStartOutputImpl();
         extensionStopOutput = new ExtensionStopOutputImpl();
         extensionStartStopInput = new ExtensionStartStopInputImpl(startExtension,
-                Collections.singletonMap(startExtension.getId(), startExtension), serverInformation);
+                Collections.singletonMap(startExtension.getId(), startExtension),
+                serverInformation);
     }
 
     @Test(timeout = 5000)

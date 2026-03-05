@@ -30,7 +30,8 @@ public class UnsubackOutboundOutputImpl extends AbstractSimpleAsyncOutput<Unsuba
 
     private final @NotNull ModifiableUnsubackPacketImpl unsubackPacket;
     private boolean failed = false;
-    public UnsubackOutboundOutputImpl(final @NotNull PluginOutPutAsyncer asyncer,
+    public UnsubackOutboundOutputImpl(
+            final @NotNull PluginOutPutAsyncer asyncer,
             final @NotNull ModifiableUnsubackPacketImpl unsubackPacket) {
         super(asyncer);
         this.unsubackPacket = unsubackPacket;

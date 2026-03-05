@@ -40,8 +40,8 @@ import static org.mockito.Mockito.when;
 public class PublishPayloadPersistenceImplTest {
 
     private final @NotNull PublishPayloadLocalPersistence localPersistence = mock(PublishPayloadLocalPersistence.class);
-    private final @NotNull ListeningScheduledExecutorService scheduledExecutorService = mock(
-            ListeningScheduledExecutorService.class);
+    private final @NotNull ListeningScheduledExecutorService scheduledExecutorService =
+            mock(ListeningScheduledExecutorService.class);
     private @NotNull PublishPayloadPersistenceImpl persistence;
     @Before
     public void setUp() throws Exception {
@@ -139,11 +139,11 @@ public class PublishPayloadPersistenceImplTest {
 
     @Test
     public void partitionBucketResponsibilities_whenRemovablePayloadsDividesEvenly_thenEveryThreadHasSameAmountOfResponsibilities() {
-        final RemovablePayloads[] removablePayloadsArray = {new RemovablePayloads(1, new LinkedList<>()),
-                new RemovablePayloads(2, new LinkedList<>()), new RemovablePayloads(3, new LinkedList<>()),
-                new RemovablePayloads(4, new LinkedList<>())};
-        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads = PublishPayloadPersistenceImpl
-                .partitionBucketResponsibilities(removablePayloadsArray, 2);
+        final RemovablePayloads[] removablePayloadsArray =
+                {new RemovablePayloads(1, new LinkedList<>()), new RemovablePayloads(2, new LinkedList<>()),
+                        new RemovablePayloads(3, new LinkedList<>()), new RemovablePayloads(4, new LinkedList<>())};
+        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads =
+                PublishPayloadPersistenceImpl.partitionBucketResponsibilities(removablePayloadsArray, 2);
         assertNotNull(removablePayloads);
         assertEquals(2, removablePayloads.length);
         assertEquals(2, removablePayloads[0].length);
@@ -162,8 +162,8 @@ public class PublishPayloadPersistenceImplTest {
                 new RemovablePayloads(5, queue), new RemovablePayloads(6, queue), new RemovablePayloads(7, queue),
                 new RemovablePayloads(8, queue), new RemovablePayloads(9, queue), new RemovablePayloads(10, queue),
                 new RemovablePayloads(11, queue)};
-        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads = PublishPayloadPersistenceImpl
-                .partitionBucketResponsibilities(removablePayloadsArray, 3);
+        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads =
+                PublishPayloadPersistenceImpl.partitionBucketResponsibilities(removablePayloadsArray, 3);
         assertNotNull(removablePayloads);
         assertEquals(3, removablePayloads.length);
         assertEquals(4, removablePayloads[0].length);
@@ -187,8 +187,8 @@ public class PublishPayloadPersistenceImplTest {
         final LinkedList<Long> queue = new LinkedList<>();
         final RemovablePayloads[] removablePayloadsArray = {new RemovablePayloads(1, queue),
                 new RemovablePayloads(2, queue), new RemovablePayloads(3, queue), new RemovablePayloads(4, queue),};
-        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads = PublishPayloadPersistenceImpl
-                .partitionBucketResponsibilities(removablePayloadsArray, 6);
+        final @NotNull RemovablePayloads[] @NotNull [] removablePayloads =
+                PublishPayloadPersistenceImpl.partitionBucketResponsibilities(removablePayloadsArray, 6);
         assertNotNull(removablePayloads);
         assertEquals(6, removablePayloads.length);
         assertEquals(1, removablePayloads[0].length);

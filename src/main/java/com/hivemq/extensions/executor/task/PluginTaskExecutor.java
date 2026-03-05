@@ -100,8 +100,8 @@ public class PluginTaskExecutor {
         final Lock lock = stripedLock.get(identifier);
         try {
             lock.lock();
-            final Queue<PluginTaskExecution> queueForId = taskQueues
-                    .computeIfAbsent(identifier, new CreateQueueIfNotPresent());
+            final Queue<PluginTaskExecution> queueForId =
+                    taskQueues.computeIfAbsent(identifier, new CreateQueueIfNotPresent());
             queueForId.add(pluginTaskExecution);
         } finally {
             lock.unlock();

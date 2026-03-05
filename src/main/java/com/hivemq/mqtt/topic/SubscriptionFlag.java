@@ -19,7 +19,9 @@ import com.hivemq.util.Bytes;
 
 public enum SubscriptionFlag {
 
-    SHARED_SUBSCRIPTION(1), RETAIN_AS_PUBLISHED(2), NO_LOCAL(3);
+    SHARED_SUBSCRIPTION(1),
+    RETAIN_AS_PUBLISHED(2),
+    NO_LOCAL(3);
     private final int flagIndex;
     SubscriptionFlag(final int flagIndex) {
         this.flagIndex = flagIndex;
