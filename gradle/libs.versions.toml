@@ -82,7 +82,7 @@ zeroAllocationHashing = { module = "net.openhft:zero-allocation-hashing", versio
 defaults = { id = "io.github.sgtsilvio.gradle.defaults", version = "0.2.0" }
 forbiddenApis = { id = "de.thetaphi.forbiddenapis", version = "3.10" }
 githubRelease = { id = "com.github.breadmoirai.github-release", version = "2.5.2" }
-hivemq-license = { id = "com.hivemq.license", version = "1.0.1" }
+hivemq-license = { id = "com.hivemq.tools.license", version = "1.0.0" }
 javadocLinks = { id = "io.github.sgtsilvio.gradle.javadoc-links", version = "0.9.0" }
 metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.6.0" }
 mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.4.1" }
