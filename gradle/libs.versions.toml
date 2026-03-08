@@ -79,13 +79,13 @@ xodus-openApi = { module = "org.jetbrains.xodus:xodus-openAPI", version.ref = "x
 zeroAllocationHashing = { module = "net.openhft:zero-allocation-hashing", version.ref = "zeroAllocationHashing" }
 
 [plugins]
-defaults = { id = "io.github.sgtsilvio.gradle.defaults", version = "0.2.0" }
+defaults = { id = "io.github.sgtsilvio.gradle.defaults", version = "0.3.0" }
 forbiddenApis = { id = "de.thetaphi.forbiddenapis", version = "3.10" }
 githubRelease = { id = "com.github.breadmoirai.github-release", version = "2.5.2" }
 hivemq-license = { id = "com.hivemq.tools.license", version = "1.0.0" }
-javadocLinks = { id = "io.github.sgtsilvio.gradle.javadoc-links", version = "0.9.0" }
-metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.6.0" }
-mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.4.1" }
+javadocLinks = { id = "io.github.sgtsilvio.gradle.javadoc-links", version = "0.10.0" }
+metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.7.0" }
+mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.5.0" }
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.25.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.3.2" }
 spotless = { id = "com.diffplug.spotless", version = "8.3.0" }
