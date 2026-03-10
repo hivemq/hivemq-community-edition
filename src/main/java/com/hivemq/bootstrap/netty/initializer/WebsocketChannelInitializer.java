@@ -31,10 +31,8 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NON_SSL_HANDLER;
  */
 public class WebsocketChannelInitializer extends AbstractChannelInitializer {
 
-    @NotNull
-    private final WebsocketListener websocketListener;
-    @NotNull
-    private final Provider<NonSslHandler> nonSslHandlerProvider;
+    @NotNull private final WebsocketListener websocketListener;
+    @NotNull private final Provider<NonSslHandler> nonSslHandlerProvider;
     public WebsocketChannelInitializer(
             @NotNull final ChannelDependencies channelDependencies,
             @NotNull final WebsocketListener websocketListener,
