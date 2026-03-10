@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <hivemq-extension>
     <id>hivemq-allow-all-extension</id>
-    <version>1.1.0</version>
+    <version>1.1.4</version>
     <name>Allow All Extension</name>
     <author>HiveMQ</author>
     <priority>0</priority>
