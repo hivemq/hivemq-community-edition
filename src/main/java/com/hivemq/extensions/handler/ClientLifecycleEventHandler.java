@@ -83,8 +83,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
     private final @NotNull PluginTaskExecutorService pluginTaskExecutorService;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     @VisibleForTesting
-    @Nullable
-    ClientLifecycleEventListenerProviderInput providerInput;
+    @Nullable ClientLifecycleEventListenerProviderInput providerInput;
     @Inject
     public ClientLifecycleEventHandler(
             final @NotNull LifecycleEventListeners lifecycleEventListeners,
@@ -286,8 +285,7 @@ public class ClientLifecycleEventHandler extends SimpleChannelInboundHandler<CON
         }
     }
 
-    @NotNull
-    private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
+    @NotNull private ClientEventListeners getClientEventListeners(final @NotNull ChannelHandlerContext ctx) {
         final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(ctx.channel());
         if (clientConnectionContext.getExtensionClientEventListeners() == null) {
             clientConnectionContext.setExtensionClientEventListeners(new ClientEventListeners(hiveMQExtensions));

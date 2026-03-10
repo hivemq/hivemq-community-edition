@@ -132,8 +132,7 @@ public class MessageBarrier extends ChannelDuplexHandler {
     }
 
     @VisibleForTesting
-    @NotNull
-    Collection<Message> getQueue() {
+    @NotNull Collection<Message> getQueue() {
         return Collections.unmodifiableCollection(messageQueue);
     }
 }

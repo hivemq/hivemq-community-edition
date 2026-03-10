@@ -25,14 +25,10 @@ import java.util.concurrent.CompletableFuture;
  */
 public class WrappedRunnableWithResult<T> implements Runnable {
 
-    @NotNull
-    private final Runnable runnable;
-    @NotNull
-    private final ClassLoader classLoader;
-    @NotNull
-    private final CompletableFuture<T> future;
-    @NotNull
-    private final T result;
+    @NotNull private final Runnable runnable;
+    @NotNull private final ClassLoader classLoader;
+    @NotNull private final CompletableFuture<T> future;
+    @NotNull private final T result;
     WrappedRunnableWithResult(
             @NotNull final Runnable runnable,
             @NotNull final ClassLoader classLoader,

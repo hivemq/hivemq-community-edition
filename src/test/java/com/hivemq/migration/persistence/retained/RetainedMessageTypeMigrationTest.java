@@ -257,8 +257,7 @@ public class RetainedMessageTypeMigrationTest {
         InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
     }
 
-    @NotNull
-    private MetaInformation getMetaInformation() {
+    @NotNull private MetaInformation getMetaInformation() {
         final MetaInformation metaInformation = new MetaInformation();
         metaInformation.setHivemqVersion("2019.2");
         metaInformation.setPublishPayloadPersistenceType(PersistenceType.FILE_NATIVE);

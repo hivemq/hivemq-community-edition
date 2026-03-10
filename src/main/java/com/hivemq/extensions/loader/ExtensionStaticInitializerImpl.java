@@ -33,10 +33,8 @@ public class ExtensionStaticInitializerImpl implements ExtensionStaticInitialize
 
     private static final String SERVICES_CLASS = Services.class.getCanonicalName();
     private static final String BUILDERS_CLASS = Builders.class.getCanonicalName();
-    @NotNull
-    private final ExtensionServicesDependencies servicesDependencies;
-    @NotNull
-    private final ExtensionBuilderDependencies builderDependencies;
+    @NotNull private final ExtensionServicesDependencies servicesDependencies;
+    @NotNull private final ExtensionBuilderDependencies builderDependencies;
     @Inject
     public ExtensionStaticInitializerImpl(
             final @NotNull ExtensionServicesDependencies servicesDependencies,

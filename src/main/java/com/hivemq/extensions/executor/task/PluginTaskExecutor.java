@@ -61,8 +61,7 @@ public class PluginTaskExecutor {
     private static final @NotNull AtomicInteger COUNTER = new AtomicInteger();
     private final @NotNull ExecutorService executorService;
     private final @NotNull AtomicBoolean running = new AtomicBoolean(true);
-    @GuardedBy("stripedLock")
-    private final @NotNull ConcurrentMap<String, Queue<PluginTaskExecution>> taskQueues = new ConcurrentHashMap<>();
+    @GuardedBy("stripedLock") private final @NotNull ConcurrentMap<String, Queue<PluginTaskExecution>> taskQueues = new ConcurrentHashMap<>();
     private final @NotNull AtomicLong counterAllQueues;
     /**
      * The semaphore is used to make the thread wait if no more tasks are available. The thread is therefore *not*
@@ -110,8 +109,7 @@ public class PluginTaskExecutor {
     }
     private static class CreateQueueIfNotPresent implements Function<String, Queue<PluginTaskExecution>> {
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Queue<PluginTaskExecution> apply(@NotNull final String id) {
             return new ConcurrentLinkedQueue<>();
         }
@@ -268,8 +266,7 @@ public class PluginTaskExecutor {
             }
         }
 
-        @NotNull
-        private PluginTaskOutput runTask(@NotNull final PluginTaskExecution task) {
+        @NotNull private PluginTaskOutput runTask(@NotNull final PluginTaskExecution task) {
             final Thread thread = Thread.currentThread();
             final ClassLoader contextClassLoader = thread.getContextClassLoader();
             try {
@@ -291,14 +288,12 @@ public class PluginTaskExecutor {
             }
         }
 
-        @NotNull
-        private PluginTaskOutput runOutTask(@NotNull final PluginTaskExecution task, final PluginOutTask pluginTask) {
+        @NotNull private PluginTaskOutput runOutTask(@NotNull final PluginTaskExecution task, final PluginOutTask pluginTask) {
             // noinspection unchecked: cast is safe because accept has generics that extend PluginTaskOutput
             return (PluginTaskOutput) pluginTask.apply(task.getOutputObject());
         }
 
-        @NotNull
-        private PluginTaskOutput runInTask(
+        @NotNull private PluginTaskOutput runInTask(
                 @NotNull final PluginTaskExecution task,
                 @NotNull final PluginInTask pluginTask) {
             // noinspection unchecked: cast is safe because accept has generics that extend PluginTaskOutput
@@ -306,8 +301,7 @@ public class PluginTaskExecutor {
             return DefaultPluginTaskOutput.getInstance();
         }
 
-        @NotNull
-        private PluginTaskOutput runInOutTask(
+        @NotNull private PluginTaskOutput runInOutTask(
                 @NotNull final PluginTaskExecution task,
                 final PluginInOutTask pluginTask) {
             // noinspection unchecked: cast is safe because apply has generics that extend PluginTaskOutput

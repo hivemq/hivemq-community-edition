@@ -42,13 +42,11 @@ public class CollectUserEventsHandler<T> extends ChannelInboundHandlerAdapter {
         super.userEventTriggered(ctx, evt);
     }
 
-    @NotNull
-    public Queue<T> getEvents() {
+    @NotNull public Queue<T> getEvents() {
         return objects;
     }
 
-    @Nullable
-    public T pollEvent() {
+    @Nullable public T pollEvent() {
         return objects.poll();
     }
 }

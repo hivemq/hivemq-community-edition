@@ -24,22 +24,18 @@ import com.hivemq.extension.sdk.api.annotations.Nullable;
 @Immutable
 public class ConnectResult {
 
-    @Nullable
-    private final Long previousTimestamp;
-    @Nullable
-    private final ClientSession previousClientSession;
+    @Nullable private final Long previousTimestamp;
+    @Nullable private final ClientSession previousClientSession;
     public ConnectResult(@Nullable final Long previousTimestamp, @Nullable final ClientSession previousClientSession) {
         this.previousTimestamp = previousTimestamp;
         this.previousClientSession = previousClientSession;
     }
 
-    @Nullable
-    public Long getPreviousTimestamp() {
+    @Nullable public Long getPreviousTimestamp() {
         return previousTimestamp;
     }
 
-    @Nullable
-    public ClientSession getPreviousClientSession() {
+    @Nullable public ClientSession getPreviousClientSession() {
         return previousClientSession;
     }
 }

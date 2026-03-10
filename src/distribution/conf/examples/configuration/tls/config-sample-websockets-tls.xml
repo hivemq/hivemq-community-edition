@@ -16,7 +16,6 @@
   -->
 
 <hivemq>
-
     <listeners>
         <tls-websocket-listener>
             <port>8001</port>
@@ -41,5 +40,4 @@
             </tls>
         </tls-websocket-listener>
     </listeners>
-
 </hivemq>

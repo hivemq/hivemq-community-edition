@@ -39,8 +39,7 @@ import java.util.Optional;
 @ThreadSafe
 public class ConnectionAttributes {
 
-    @Nullable
-    private Map<String, ByteBuffer> data;
+    @Nullable private Map<String, ByteBuffer> data;
     private final int maxValueSizeBytes;
     /**
      * Retrieves the {@link ConnectionAttributes} associated with the given channel.
@@ -48,8 +47,7 @@ public class ConnectionAttributes {
      * @param  channel the channel which the {@link ConnectionAttributes} are associated to
      * @return         the {@link ConnectionAttributes} associated to the given channel if present.
      */
-    @Nullable
-    static ConnectionAttributes getInstanceIfPresent(@NotNull final Channel channel) {
+    @Nullable static ConnectionAttributes getInstanceIfPresent(@NotNull final Channel channel) {
         Preconditions.checkNotNull(channel, "Channel for connection attributes must not be null.");
         return ClientConnectionContext.of(channel).getConnectionAttributes();
     }
@@ -61,8 +59,7 @@ public class ConnectionAttributes {
      * @param  channel the channel which the {@link ConnectionAttributes} are associated to
      * @return         the {@link ConnectionAttributes} associated to the given channel.
      */
-    @NotNull
-    public static ConnectionAttributes getInstance(@NotNull final Channel channel) {
+    @NotNull public static ConnectionAttributes getInstance(@NotNull final Channel channel) {
         Preconditions.checkNotNull(channel, "Channel for connection attributes must not be null.");
         final ConnectionAttributes connectionAttributes = getInstanceIfPresent(channel);
         if (connectionAttributes != null) {
@@ -105,8 +102,7 @@ public class ConnectionAttributes {
      * @param  key the key the connection attribute
      * @return     the value of the connection attribute with the given key if present, otherwise null
      */
-    @NotNull
-    public synchronized Optional<ByteBuffer> get(@NotNull final String key) {
+    @NotNull public synchronized Optional<ByteBuffer> get(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         if (data == null) {
             return Optional.empty();
@@ -123,8 +119,7 @@ public class ConnectionAttributes {
      *
      * @return all connection attributes as a map of key and value pairs
      */
-    @NotNull
-    public synchronized Optional<Map<String, ByteBuffer>> getAll() {
+    @NotNull public synchronized Optional<Map<String, ByteBuffer>> getAll() {
         if (data == null) {
             return Optional.empty();
         }
@@ -141,8 +136,7 @@ public class ConnectionAttributes {
      * @param  key the key the connection attribute
      * @return     the value of the removed connection attribute if it was present, otherwise null
      */
-    @NotNull
-    public synchronized Optional<ByteBuffer> remove(@NotNull final String key) {
+    @NotNull public synchronized Optional<ByteBuffer> remove(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         if (data == null) {
             return Optional.empty();

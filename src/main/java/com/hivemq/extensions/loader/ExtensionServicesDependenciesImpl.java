@@ -82,8 +82,7 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
         this.adminService = adminService;
     }
 
-    @NotNull
-    public ImmutableMap<String, Object> getDependenciesMap(final @NotNull ClassLoader classLoader) {
+    @NotNull public ImmutableMap<String, Object> getDependenciesMap(final @NotNull ClassLoader classLoader) {
         // classLoader is unused but prepared here for future use
         final ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         builder.put(MetricRegistry.class.getCanonicalName(), metricRegistry);
@@ -101,8 +100,7 @@ public class ExtensionServicesDependenciesImpl implements ExtensionServicesDepen
         return builder.build();
     }
 
-    @NotNull
-    private ManagedExecutorServicePerExtension getManagedExecutorService(final @NotNull ClassLoader classLoader) {
+    @NotNull private ManagedExecutorServicePerExtension getManagedExecutorService(final @NotNull ClassLoader classLoader) {
         return new ManagedExecutorServicePerExtension(globalManagedExtensionExecutorService,
                 classLoader,
                 hiveMQExtensions);

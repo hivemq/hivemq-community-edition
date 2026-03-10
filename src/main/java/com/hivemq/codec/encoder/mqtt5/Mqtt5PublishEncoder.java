@@ -92,8 +92,7 @@ public class Mqtt5PublishEncoder extends Mqtt5MessageWithUserPropertiesEncoder<P
     }
 
     @Override
-    @NotNull
-    Mqtt5UserProperties getUserProperties(final @NotNull PUBLISH publish) {
+    @NotNull Mqtt5UserProperties getUserProperties(final @NotNull PUBLISH publish) {
         return publish.getUserProperties();
     }
 

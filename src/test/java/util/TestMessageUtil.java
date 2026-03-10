@@ -354,8 +354,7 @@ public class TestMessageUtil {
                 "reason");
     }
 
-    @NotNull
-    public static CONNECT createMqtt5ConnectWithWill() {
+    @NotNull public static CONNECT createMqtt5ConnectWithWill() {
         final MqttWillPublish willPublish = new MqttWillPublish.Mqtt5Builder().withTopic("topic")
                 .withQos(QoS.EXACTLY_ONCE)
                 .withPayload(new byte[]{1, 2, 3})

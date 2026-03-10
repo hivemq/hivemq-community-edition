@@ -85,20 +85,17 @@ public class ProducerQueuesImpl implements ProducerQueues {
         queueTaskCounter = counterBuilder.build();
     }
 
-    @NotNull
-    public <R> ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
+    @NotNull public <R> ListenableFuture<R> submit(@NotNull final String key, @NotNull final Task<R> task) {
         // noinspection ConstantConditions (futuer is never null if the callbacks are null)
         return submitInternal(getBucket(key), task, false);
     }
 
-    @NotNull
-    public <R> ListenableFuture<R> submit(final int bucketIndex, @NotNull final Task<R> task) {
+    @NotNull public <R> ListenableFuture<R> submit(final int bucketIndex, @NotNull final Task<R> task) {
         // noinspection ConstantConditions (futuer is never null if the callbacks are null)
         return submitInternal(bucketIndex, task, false);
     }
 
-    @Nullable
-    public <R> ListenableFuture<
+    @Nullable public <R> ListenableFuture<
             R> submitInternal(final int bucketIndex, @NotNull final Task<R> task, final boolean ignoreShutdown) {
         if (!ignoreShutdown && shutdown.get() &&
                 System.currentTimeMillis() - shutdownStartTime > singleWriterServiceImpl.getShutdownGracePeriod()) {
@@ -211,8 +208,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
         }
     }
 
-    @NotNull
-    public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {
+    @NotNull public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {
         if (shutdown.getAndSet(true)) {
             // guard from being called twice
             // needed for integration tests because shutdown hooks for every Embedded HiveMQ are added to the JVM
@@ -256,8 +252,7 @@ public class ProducerQueuesImpl implements ProducerQueues {
         return closeFuture;
     }
 
-    @NotNull
-    public AtomicLong getTaskCount() {
+    @NotNull public AtomicLong getTaskCount() {
         return taskCount;
     }
     @VisibleForTesting

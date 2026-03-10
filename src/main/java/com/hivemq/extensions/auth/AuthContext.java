@@ -40,8 +40,7 @@ abstract class AuthContext<T extends AuthOutput<?>> extends PluginInOutTaskConte
     private final int authenticatorsCount;
     private int counter;
     private @NotNull AuthenticationState state = AuthenticationState.UNDECIDED;
-    @NotNull
-    T output;
+    @NotNull T output;
     AuthContext(
             final @NotNull String identifier,
             final @NotNull ChannelHandlerContext ctx,

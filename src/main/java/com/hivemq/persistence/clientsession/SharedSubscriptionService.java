@@ -213,13 +213,11 @@ public class SharedSubscriptionService {
             this.shareName = shareName;
         }
 
-        @NotNull
-        public String getTopicFilter() {
+        @NotNull public String getTopicFilter() {
             return topicFilter;
         }
 
-        @NotNull
-        public String getShareName() {
+        @NotNull public String getShareName() {
             return shareName;
         }
     }

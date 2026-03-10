@@ -16,23 +16,18 @@
   -->
 
 <hivemq>
-
     <listeners>
         <tcp-listener>
             <port>1883</port>
             <bind-address>0.0.0.0</bind-address>
         </tcp-listener>
     </listeners>
-
     <restrictions>
         <!-- Maximum simultaneous connections (-1 = unlimited) -->
         <max-connections>-1</max-connections>
-
         <!-- Maximum length of client identifier -->
         <max-client-id-length>65535</max-client-id-length>
-
         <!-- Incoming/Outgoing limit in bytes/second (0 = unlimited) -->
         <incoming-bandwidth-throttling>0</incoming-bandwidth-throttling>
     </restrictions>
-
 </hivemq>

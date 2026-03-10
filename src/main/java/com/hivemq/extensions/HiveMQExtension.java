@@ -80,50 +80,42 @@ public interface HiveMQExtension {
     /**
      * @return the extension's name which is taken from the extension's hivemq-extension.xml
      */
-    @NotNull
-    String getName();
+    @NotNull String getName();
 
     /**
      * @return the extension's author which is taken from the extension's hivemq-extension.xml
      */
-    @Nullable
-    String getAuthor();
+    @Nullable String getAuthor();
 
     /**
      * @return the extension's version which is taken from the extension's hivemq-extension.xml
      */
-    @NotNull
-    String getVersion();
+    @NotNull String getVersion();
 
     /**
      * @return the extension's id which is taken from the extension's hivemq-extension.xml
      */
-    @NotNull
-    String getId();
+    @NotNull String getId();
 
     /**
      * @return the {@link Class} of the extension's implementation of the {@link ExtensionMain} class
      */
-    @Nullable
-    Class<? extends ExtensionMain> getExtensionMainClazz();
+    @Nullable Class<? extends ExtensionMain> getExtensionMainClazz();
 
     /**
      * @return the {@link ClassLoader} used to load the {@link ExtensionMain} class
      */
-    @Nullable
-    ClassLoader getExtensionClassloader();
+    @Nullable ClassLoader getExtensionClassloader();
 
     /**
      * @return the path to the extension's folder
      */
-    @NotNull
-    Path getExtensionFolderPath();
+    @NotNull Path getExtensionFolderPath();
 
     /**
      * @return the previously enabled version of the extension, or null if no previous version was enabled
      */
-    @Nullable
-    String getPreviousVersion();
+    @Nullable String getPreviousVersion();
 
     /**
      * Set the previously enabled version of the extension

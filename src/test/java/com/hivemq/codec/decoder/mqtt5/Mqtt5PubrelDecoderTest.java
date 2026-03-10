@@ -255,8 +255,7 @@ public class Mqtt5PubrelDecoderTest extends AbstractMqtt5DecoderTest {
         assertNull(pubRel);
     }
 
-    @NotNull
-    private PUBREL decode(final byte @NotNull [] encoded) {
+    @NotNull private PUBREL decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

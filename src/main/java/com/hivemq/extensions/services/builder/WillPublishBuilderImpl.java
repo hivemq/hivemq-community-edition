@@ -55,31 +55,20 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
  */
 public class WillPublishBuilderImpl implements WillPublishBuilder {
 
-    @NotNull
-    private Qos qos = Qos.AT_MOST_ONCE;
+    @NotNull private Qos qos = Qos.AT_MOST_ONCE;
     private boolean retain = false;
     private long willDelay = WILL_DELAY_INTERVAL_DEFAULT;
-    @Nullable
-    private String topic;
-    @Nullable
-    private PayloadFormatIndicator payloadFormatIndicator;
+    @Nullable private String topic;
+    @Nullable private PayloadFormatIndicator payloadFormatIndicator;
     private long messageExpiryInterval = MESSAGE_EXPIRY_INTERVAL_NOT_SET;
-    @Nullable
-    private String responseTopic;
-    @Nullable
-    private ByteBuffer correlationData;
-    @Nullable
-    private String contentType;
-    @Nullable
-    private ByteBuffer payload;
-    @NotNull
-    private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-    @NotNull
-    private final MqttConfigurationService mqttConfigurationService;
-    @NotNull
-    private final RestrictionsConfigurationService restrictionsConfig;
-    @NotNull
-    private final SecurityConfigurationService securityConfigurationService;
+    @Nullable private String responseTopic;
+    @Nullable private ByteBuffer correlationData;
+    @Nullable private String contentType;
+    @Nullable private ByteBuffer payload;
+    @NotNull private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+    @NotNull private final MqttConfigurationService mqttConfigurationService;
+    @NotNull private final RestrictionsConfigurationService restrictionsConfig;
+    @NotNull private final SecurityConfigurationService securityConfigurationService;
     @Inject
     public WillPublishBuilderImpl(final @NotNull FullConfigurationService fullConfigurationService) {
         this.mqttConfigurationService = fullConfigurationService.mqttConfiguration();
@@ -144,8 +133,7 @@ public class WillPublishBuilderImpl implements WillPublishBuilder {
                 willPublish.getWillDelay());
     }
 
-    @NotNull
-    private WillPublishBuilder fromComplete(
+    @NotNull private WillPublishBuilder fromComplete(
             final @NotNull Qos qos,
             final boolean retain,
             final @NotNull String topic,

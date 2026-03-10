@@ -354,8 +354,7 @@ public class PubackInterceptorHandlerTest {
         assertNotEquals(Mqtt5PubAckReasonCode.NOT_AUTHORIZED, puback.getReasonCode());
     }
 
-    @NotNull
-    private PUBACK testPuback() {
+    @NotNull private PUBACK testPuback() {
         return new PUBACK(1, Mqtt5PubAckReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
     public static class TestModifyInboundInterceptor implements PubackInboundInterceptor {

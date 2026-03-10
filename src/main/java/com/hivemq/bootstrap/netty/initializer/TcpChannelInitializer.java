@@ -30,8 +30,7 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.NON_SSL_HANDLER;
  */
 public class TcpChannelInitializer extends AbstractChannelInitializer {
 
-    @NotNull
-    private final Provider<NonSslHandler> nonSslHandlerProvider;
+    @NotNull private final Provider<NonSslHandler> nonSslHandlerProvider;
     public TcpChannelInitializer(
             @NotNull final ChannelDependencies channelDependencies,
             @NotNull final TcpListener tcpListener,

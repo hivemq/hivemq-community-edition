@@ -28,8 +28,7 @@ import java.util.Collection;
 public class ResultBuffer<V> {
 
     private ChunkResult<V> currentChunk = null;
-    @NotNull
-    private final NextChunkCallback<V> nextChunkCallback;
+    @NotNull private final NextChunkCallback<V> nextChunkCallback;
     ResultBuffer(@NotNull final NextChunkCallback<V> nextChunkCallback) {
         this.nextChunkCallback = nextChunkCallback;
     }
@@ -38,8 +37,7 @@ public class ResultBuffer<V> {
         currentChunk = chunk;
     }
 
-    @Nullable
-    synchronized Collection<V> getNextChunk() {
+    @Nullable synchronized Collection<V> getNextChunk() {
         if (currentChunk == null) {
             return null;
         }

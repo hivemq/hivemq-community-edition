@@ -106,8 +106,7 @@ public class PluginOutputAsyncerImplTest {
         public void resetAsyncStatus() {
         }
 
-        @Nullable
-        @Override
+        @Nullable @Override
         public SettableFuture<Boolean> getAsyncFuture() {
             return future;
         }

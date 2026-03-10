@@ -72,8 +72,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
     /**
      * @inheritDoc
      */
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Optional<RetainedPublish>> getRetainedMessage(@NotNull final String topic) {
         Preconditions.checkNotNull(topic, "A topic must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
@@ -89,8 +88,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
     /**
      * @inheritDoc
      */
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Void> remove(@NotNull final String topic) {
         Preconditions.checkNotNull(topic, "A topic must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
@@ -103,8 +101,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
     /**
      * @inheritDoc
      */
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Void> clear() {
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
@@ -116,8 +113,7 @@ public class RetainedMessageStoreImpl implements RetainedMessageStore {
     /**
      * @inheritDoc
      */
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Void> addOrReplace(@NotNull final RetainedPublish retainedPublish) {
         Preconditions.checkNotNull(retainedPublish, "A retained publish must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {

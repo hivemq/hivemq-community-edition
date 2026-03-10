@@ -53,8 +53,7 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
         this.restrictionsConfig = configurationService.restrictionsConfiguration();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder topicFilter(@NotNull final String topicFilter) {
         Preconditions.checkNotNull(topicFilter, "Topic filter cannot be null");
         Preconditions.checkArgument(!topicFilter.isEmpty(), "Topic filter cannot be empty");
@@ -73,48 +72,42 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder type(@NotNull final PermissionType type) {
         Preconditions.checkNotNull(type, "Type cannot be null");
         this.type = type;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder qos(@NotNull final Qos qos) {
         Preconditions.checkNotNull(qos, "QoS cannot be null");
         this.qos = qos;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder activity(@NotNull final MqttActivity activity) {
         Preconditions.checkNotNull(activity, "Activity cannot be null");
         this.activity = activity;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder retain(@NotNull final Retain retain) {
         Preconditions.checkNotNull(retain, "Retain cannot be null");
         this.retain = retain;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder sharedSubscription(@NotNull final SharedSubscription sharedSubscription) {
         Preconditions.checkNotNull(sharedSubscription, "Shared subscription cannot be null");
         this.sharedSubscription = sharedSubscription;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermissionBuilder sharedGroup(@NotNull final String sharedGroup) {
         Preconditions.checkNotNull(sharedGroup, "Shared group cannot be null");
         Preconditions.checkArgument(!sharedGroup.isEmpty(), "Shared group cannot be empty");
@@ -129,8 +122,7 @@ public class TopicPermissionBuilderImpl implements TopicPermissionBuilder {
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public TopicPermission build() {
         Preconditions.checkNotNull(topicFilter, "Topic filter must be set for a TopicPermission");
         return new TopicPermissionImpl(topicFilter, type, qos, activity, retain, sharedSubscription, sharedGroup);

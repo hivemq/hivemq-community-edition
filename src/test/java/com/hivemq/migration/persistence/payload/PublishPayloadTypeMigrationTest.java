@@ -185,8 +185,7 @@ public class PublishPayloadTypeMigrationTest {
         InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE_NATIVE);
     }
 
-    @NotNull
-    private MetaInformation getMetaInformation() {
+    @NotNull private MetaInformation getMetaInformation() {
         final MetaInformation metaInformation = new MetaInformation();
         metaInformation.setHivemqVersion("2019.1");
         metaInformation.setPublishPayloadPersistenceType(PersistenceType.FILE_NATIVE);

@@ -211,8 +211,7 @@ public abstract class AbstractMqttConnectDecoder extends MqttDecoder<CONNECT> {
      * @param  hiveMQId                the HiveMQ identifier
      * @return                         a {@link MqttWillPublish} if valid, else {@code null}.
      */
-    @Nullable
-    protected MqttWillPublish readMqtt3WillPublish(
+    @Nullable protected MqttWillPublish readMqtt3WillPublish(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final int willQoS,

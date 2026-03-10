@@ -31,8 +31,7 @@ public interface HiveMQShutdownHook extends Runnable {
      *
      * @return the name of the HiveMQ shutdown hook
      */
-    @NotNull
-    String name();
+    @NotNull String name();
 
     /**
      * The {@link HiveMQShutdownHook.Priority} of the shutdown hook.

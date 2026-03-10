@@ -36,6 +36,5 @@ public interface Initializers {
     /**
      * @return a map of extension ids and client initializers, sorted descending by extension priority.
      */
-    @NotNull
-    Map<@NotNull String, @NotNull ClientInitializer> getClientInitializerMap();
+    @NotNull Map<@NotNull String, @NotNull ClientInitializer> getClientInitializerMap();
 }

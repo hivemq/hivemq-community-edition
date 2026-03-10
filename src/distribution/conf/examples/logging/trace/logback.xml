@@ -15,7 +15,6 @@
   -->
 
 <configuration scan="true" scanPeriod="60 seconds">
-
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%-30(%d %level)- %msg%n%ex</pattern>
@@ -92,5 +91,4 @@
     <logger name="org.eclipse.jetty" level="ERROR"/>
     <logger name="com.google.common.util.concurrent.Futures.CombinedFuture" level="OFF"/>
     <logger name="oshi" level="ERROR"/>
-
 </configuration>

@@ -17,7 +17,6 @@ package util;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extensions.classloader.IsolatedExtensionClassloader;
-import javassist.ClassPool;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -27,6 +26,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import javassist.ClassPool;
 
 /**
  * Creates JAR files for a given class on the fly and loads them via the {@link IsolatedExtensionClassloader}.

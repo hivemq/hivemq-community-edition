@@ -666,8 +666,7 @@ public class ClientSessionMemoryLocalPersistenceTest {
         assertEquals(10L, Objects.requireNonNull(session.getQueueLimit()).longValue());
     }
 
-    @NotNull
-    public ArrayList<String> getRandomUniqueIds() {
+    @NotNull public ArrayList<String> getRandomUniqueIds() {
         final Set<String> clientIdSet = new HashSet<>();
         final Random random = new Random();
         while (clientIdSet.size() < 100) {

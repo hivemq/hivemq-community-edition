@@ -103,8 +103,7 @@ public class SslContextStoreTest {
     @Test
     public void test_create_at_start() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
-        final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath())
+        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath())
                 .withKeystoreType("JKS")
                 .withKeystorePassword("pw")
                 .withPrivateKeyPassword("pkpw")
@@ -131,8 +130,7 @@ public class SslContextStoreTest {
     public void test_hash_key_and_trust_store() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
-        final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath())
+        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath())
                 .withKeystoreType("JKS")
                 .withKeystorePassword("pw")
                 .withPrivateKeyPassword("pkpw")
@@ -148,7 +146,7 @@ public class SslContextStoreTest {
         final HashCode secondHash = SslContextStore.hashKeystoreAndTruststore(tls);
         assertEquals(firstHash, secondHash);
         try (final FileInputStream input =
-                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
+                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw"));
                 final FileOutputStream output = new FileOutputStream(trust, false)) {
             input.transferTo(output);
         }
@@ -160,8 +158,7 @@ public class SslContextStoreTest {
     public void test_hash_key_and_trust_store_throws_exception() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
-        final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath())
+        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath())
                 .withKeystoreType("JKS")
                 .withKeystorePassword("pw")
                 .withPrivateKeyPassword("pkpw")
@@ -180,8 +177,7 @@ public class SslContextStoreTest {
     public void test_scheduled_runnable() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
-        final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath())
+        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath())
                 .withKeystoreType("JKS")
                 .withKeystorePassword("pw")
                 .withPrivateKeyPassword("pkpw")
@@ -200,7 +196,7 @@ public class SslContextStoreTest {
             }
         }
         try (final FileInputStream input =
-                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
+                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw"));
                 final FileOutputStream output = new FileOutputStream(trust, false)) {
             input.transferTo(output);
         }
@@ -213,8 +209,7 @@ public class SslContextStoreTest {
     public void test_scheduled_runnable_run() throws Exception {
         final File keystore = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
         final File trust = keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw");
-        final Tls tls = new Tls.Builder() //
-                .withKeystorePath(keystore.getAbsolutePath())
+        final Tls tls = new Tls.Builder().withKeystorePath(keystore.getAbsolutePath())
                 .withKeystoreType("JKS")
                 .withKeystorePassword("pw")
                 .withPrivateKeyPassword("pkpw")
@@ -233,16 +228,12 @@ public class SslContextStoreTest {
             }
         }
         try (final FileInputStream input =
-                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw")); //
+                new FileInputStream(keyStoreGenerator.generateKeyStore("test", "JKS", "pw", "pkpw"));
                 final FileOutputStream output = new FileOutputStream(trust, false)) {
             input.transferTo(output);
         }
         // was called with the normal interval
-        verify(executorService).scheduleAtFixedRate( //
-                captor.capture(),
-                eq(10L),
-                eq(10L),
-                eq(TimeUnit.SECONDS));
+        verify(executorService).scheduleAtFixedRate(captor.capture(), eq(10L), eq(10L), eq(TimeUnit.SECONDS));
         assertTrue(captor.getValue() instanceof SslContextStore.SslContextScheduledRunnable);
     }
 

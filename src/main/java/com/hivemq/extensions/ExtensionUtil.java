@@ -70,8 +70,7 @@ public class ExtensionUtil {
         return false;
     }
 
-    @NotNull
-    public static List<Path> findAllExtensionFolders(@NotNull final Path extensionPath) throws IOException {
+    @NotNull public static List<Path> findAllExtensionFolders(@NotNull final Path extensionPath) throws IOException {
         checkNotNull(extensionPath, "provided extension folder path CAN NOT be null");
         final ImmutableList.Builder<Path> builder = ImmutableList.builder();
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(extensionPath)) {

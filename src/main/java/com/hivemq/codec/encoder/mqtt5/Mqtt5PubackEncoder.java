@@ -46,8 +46,7 @@ public class Mqtt5PubackEncoder
     }
 
     @Override
-    @NotNull
-    Mqtt5PubAckReasonCode getDefaultReasonCode() {
+    @NotNull Mqtt5PubAckReasonCode getDefaultReasonCode() {
         return Mqtt5PubAckReasonCode.SUCCESS;
     }
 }

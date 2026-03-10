@@ -316,8 +316,7 @@ public class ExtensionStaticInitializerImplTest {
         createAndLoadExtension();
     }
 
-    @NotNull
-    private ImmutableMap<String, Object> getServicesMap(final Class<? extends ExtensionMain> extensionMainClass)
+    @NotNull private ImmutableMap<String, Object> getServicesMap(final Class<? extends ExtensionMain> extensionMainClass)
             throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         final Class<?> servicesClass =
                 extensionMainClass.getClassLoader().loadClass("com.hivemq.extension.sdk.api.services.Services");
@@ -330,8 +329,7 @@ public class ExtensionStaticInitializerImplTest {
         return (ImmutableMap<String, Object>) o;
     }
 
-    @NotNull
-    private ImmutableMap<String, Supplier<Object>> getBuildersMap(
+    @NotNull private ImmutableMap<String, Supplier<Object>> getBuildersMap(
             final Class<? extends ExtensionMain> extensionMainClass)
             throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         final Class<?> buildersClass =

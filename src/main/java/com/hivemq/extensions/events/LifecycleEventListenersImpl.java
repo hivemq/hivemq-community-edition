@@ -36,13 +36,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Singleton
 public class LifecycleEventListenersImpl implements LifecycleEventListeners {
 
-    @NotNull
-    private final Map<@NotNull String,
+    @NotNull private final Map<@NotNull String,
             @NotNull ClientLifecycleEventListenerProvider> clientLifecycleEventListenerProviderMap;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
-    @NotNull
-    private final ReadWriteLock readWriteLock;
+    @NotNull private final HiveMQExtensions hiveMQExtensions;
+    @NotNull private final ReadWriteLock readWriteLock;
     @Inject
     public LifecycleEventListenersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;

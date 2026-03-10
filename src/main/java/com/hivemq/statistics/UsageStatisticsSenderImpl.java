@@ -114,8 +114,7 @@ public class UsageStatisticsSenderImpl implements UsageStatisticsSender {
     }
 
     @VisibleForTesting
-    @NotNull
-    String getUrl() {
+    @NotNull String getUrl() {
         return "https://analytics.hivemq.com/v1";
     }
 }

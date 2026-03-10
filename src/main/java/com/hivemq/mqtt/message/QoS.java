@@ -69,8 +69,7 @@ public enum QoS {
      * @param  i the QoS level as integer (0,1,2)
      * @return   the QoS level or <code>null</code> if an invalid QoS level was passed
      */
-    @Nullable
-    public static QoS valueOf(final int i) {
+    @Nullable public static QoS valueOf(final int i) {
         return i >= 0 && i < VALUES.length ? VALUES[i] : null;
     }
 

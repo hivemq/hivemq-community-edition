@@ -90,8 +90,7 @@ public class MqttConfigurator {
         return maxPerClient;
     }
 
-    @NotNull
-    private QoS validateQoS(final int qos) {
+    @NotNull private QoS validateQoS(final int qos) {
         final QoS qoS = QoS.valueOf(qos);
         if (qoS != null) {
             return qoS;

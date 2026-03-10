@@ -88,8 +88,7 @@ public class SendRetainedMessagesListener implements ChannelFutureListener {
      * @param  channel the {@link io.netty.channel.Channel} to send the messages to.
      * @return         a List of all topics which contained wildcards and thus were not processed by this method
      */
-    @NotNull
-    private List<Topic> sendExactMatches(@NotNull final Channel channel) {
+    @NotNull private List<Topic> sendExactMatches(@NotNull final Channel channel) {
         final List<Topic> topicsWithWildcards = new ArrayList<>(subscriptions.size());
         for (final SubscriptionResult subscription : subscriptions) {
             if (subscription == null) {

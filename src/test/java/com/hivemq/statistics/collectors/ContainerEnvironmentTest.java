@@ -41,8 +41,7 @@ public class ContainerEnvironmentTest {
         assumeTrue(Platform.isLinux());
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getCgroupFile() {
                 return new File("/this/file/does/not/exist");
             }
@@ -65,8 +64,7 @@ public class ContainerEnvironmentTest {
         FileUtils.writeStringToFile(cgroupFile, exampleContent, StandardCharsets.UTF_8);
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getCgroupFile() {
                 return cgroupFile;
             }
@@ -89,8 +87,7 @@ public class ContainerEnvironmentTest {
         FileUtils.writeStringToFile(cgroupFile, exampleContent, StandardCharsets.UTF_8);
         final ContainerEnvironment containerEnvironment = new ContainerEnvironment() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getCgroupFile() {
                 return cgroupFile;
             }

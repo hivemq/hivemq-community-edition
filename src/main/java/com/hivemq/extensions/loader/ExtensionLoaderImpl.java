@@ -207,8 +207,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
     }
 
     @VisibleForTesting
-    @Nullable
-    HiveMQExtension loadSingleExtension(
+    @Nullable HiveMQExtension loadSingleExtension(
             final @NotNull Path extensionFolder,
             final @NotNull HiveMQExtensionEntity xmlEntity) {
         final ImmutableList.Builder<Path> jarPaths = ImmutableList.builder();
@@ -271,8 +270,7 @@ public class ExtensionLoaderImpl implements ExtensionLoader {
     }
 
     @VisibleForTesting
-    @NotNull
-    Optional<Class<? extends ExtensionMain>> loadFromUrls(
+    @NotNull Optional<Class<? extends ExtensionMain>> loadFromUrls(
             final @NotNull Collection<URL> urls,
             final @NotNull String extensionId) {
         checkNotNull(urls, "urls must not be null");

@@ -24,8 +24,7 @@ import com.hivemq.util.Bytes;
  */
 public class PublishPayloadRocksDBSerializer_4_4 {
 
-    @NotNull
-    public static byte[] serializeKey(final long id) {
+    @NotNull public static byte[] serializeKey(final long id) {
         final byte[] bytes = new byte[8];
         Bytes.copyLongToByteArray(id, bytes, 0);
         return bytes;

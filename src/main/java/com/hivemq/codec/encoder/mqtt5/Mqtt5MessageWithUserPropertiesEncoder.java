@@ -260,8 +260,7 @@ abstract class Mqtt5MessageWithUserPropertiesEncoder<T extends Message> implemen
         }
 
         @Override
-        @NotNull
-        Mqtt5UserProperties getUserProperties(final @NotNull M message) {
+        @NotNull Mqtt5UserProperties getUserProperties(final @NotNull M message) {
             return message.getUserProperties();
         }
     }

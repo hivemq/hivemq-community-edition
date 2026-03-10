@@ -106,8 +106,7 @@ public class MqttWillPublish implements Sizable {
         this.delayInterval = WILL_DELAY_INTERVAL_DEFAULT;
     }
 
-    @Nullable
-    public static MqttWillPublish fromWillPacket(
+    @Nullable public static MqttWillPublish fromWillPacket(
             @NotNull final String hivemqId,
             @Nullable final WillPublishPacket packet) {
         if (packet == null) {

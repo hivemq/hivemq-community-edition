@@ -49,38 +49,25 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
  */
 public class PublishBuilderImpl implements PublishBuilder {
 
-    @NotNull
-    private Qos qos = Qos.AT_MOST_ONCE;
+    @NotNull private Qos qos = Qos.AT_MOST_ONCE;
     private boolean retain = false;
-    @Nullable
-    private String topic;
-    @Nullable
-    private PayloadFormatIndicator payloadFormatIndicator;
-    @NotNull
-    private Long messageExpiryInterval = PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
-    @Nullable
-    private String responseTopic;
-    @Nullable
-    private ByteBuffer correlationData;
-    @Nullable
-    private String contentType;
-    @Nullable
-    private ByteBuffer payload;
-    @NotNull
-    private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
-    @NotNull
-    private final MqttConfigurationService mqttConfigurationService;
-    @NotNull
-    private final SecurityConfigurationService securityConfigurationService;
-    @NotNull
-    @Inject
+    @Nullable private String topic;
+    @Nullable private PayloadFormatIndicator payloadFormatIndicator;
+    @NotNull private Long messageExpiryInterval = PUBLISH.MESSAGE_EXPIRY_INTERVAL_NOT_SET;
+    @Nullable private String responseTopic;
+    @Nullable private ByteBuffer correlationData;
+    @Nullable private String contentType;
+    @Nullable private ByteBuffer payload;
+    @NotNull private final ImmutableList.Builder<MqttUserProperty> userPropertyBuilder = ImmutableList.builder();
+    @NotNull private final MqttConfigurationService mqttConfigurationService;
+    @NotNull private final SecurityConfigurationService securityConfigurationService;
+    @NotNull @Inject
     public PublishBuilderImpl(@NotNull final FullConfigurationService configurationService) {
         this.mqttConfigurationService = configurationService.mqttConfiguration();
         this.securityConfigurationService = configurationService.securityConfiguration();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder fromPublish(@NotNull final PublishPacket publish) {
         Preconditions.checkNotNull(publish, "publish must not be null");
         if (!(publish instanceof PublishPacketImpl)) {
@@ -98,8 +85,7 @@ public class PublishBuilderImpl implements PublishBuilder {
                 publish.getUserProperties());
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder fromPublish(@NotNull final Publish publish) {
         Preconditions.checkNotNull(publish, "publish must not be null");
         if (!(publish instanceof PublishImpl)) {
@@ -117,8 +103,7 @@ public class PublishBuilderImpl implements PublishBuilder {
                 publish.getUserProperties());
     }
 
-    @NotNull
-    private PublishBuilder fromComplete(
+    @NotNull private PublishBuilder fromComplete(
             @NotNull final Qos qos,
             final boolean retain,
             @NotNull final String topic,
@@ -144,16 +129,14 @@ public class PublishBuilderImpl implements PublishBuilder {
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder qos(@NotNull final Qos qos) {
         PluginBuilderUtil.checkQos(qos, mqttConfigurationService.maximumQos().getQosNumber());
         this.qos = qos;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder retain(final boolean retain) {
         if (!mqttConfigurationService.retainedMessagesEnabled() && retain) {
             throw new IllegalArgumentException("Retained messages are disabled");
@@ -162,8 +145,7 @@ public class PublishBuilderImpl implements PublishBuilder {
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder topic(@NotNull final String topic) {
         checkNotNull(topic, "Topic must not be null");
         if (!Topics.isValidTopicToPublish(topic)) {
@@ -176,15 +158,13 @@ public class PublishBuilderImpl implements PublishBuilder {
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder payloadFormatIndicator(@Nullable final PayloadFormatIndicator payloadFormatIndicator) {
         this.payloadFormatIndicator = payloadFormatIndicator;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder messageExpiryInterval(final long messageExpiryInterval) {
         PluginBuilderUtil.checkMessageExpiryInterval(messageExpiryInterval,
                 mqttConfigurationService.maxMessageExpiryInterval());
@@ -192,47 +172,41 @@ public class PublishBuilderImpl implements PublishBuilder {
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder responseTopic(@Nullable final String responseTopic) {
         PluginBuilderUtil.checkResponseTopic(responseTopic, securityConfigurationService.validateUTF8());
         this.responseTopic = responseTopic;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder correlationData(@Nullable final ByteBuffer correlationData) {
         this.correlationData = correlationData;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder contentType(@Nullable final String contentType) {
         PluginBuilderUtil.checkContentType(contentType, securityConfigurationService.validateUTF8());
         this.contentType = contentType;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder payload(@NotNull final ByteBuffer payload) {
         checkNotNull(payload, "Payload must not be null");
         this.payload = payload;
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishBuilder userProperty(@NotNull final String name, @NotNull final String value) {
         PluginBuilderUtil.checkUserProperty(name, value, securityConfigurationService.validateUTF8());
         this.userPropertyBuilder.add(new MqttUserProperty(name, value));
         return this;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Publish build() {
         checkNotNull(topic, "Topic must never be null");
         checkNotNull(payload, "Payload must never be null");

@@ -444,8 +444,7 @@ public class TestGetSubscribersWithFilterFromTopicTreeImpl {
         new Random().nextInt();
     }
 
-    @NotNull
-    public Predicate<SubscriberWithQoS> getMatchAllFilter() {
+    @NotNull public Predicate<SubscriberWithQoS> getMatchAllFilter() {
         return subscriber -> true;
     }
 }

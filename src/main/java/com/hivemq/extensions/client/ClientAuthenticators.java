@@ -44,6 +44,5 @@ public interface ClientAuthenticators {
     /**
      * @return a map containing all extensions with their registered enhanced authenticators.
      */
-    @NotNull
-    Map<String, EnhancedAuthenticator> getAuthenticatorMap();
+    @NotNull Map<String, EnhancedAuthenticator> getAuthenticatorMap();
 }

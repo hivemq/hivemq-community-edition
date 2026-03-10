@@ -42,8 +42,7 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
     }
 
     @Override
-    @Nullable
-    public MessageWithID get(@NotNull final String client, final int messageId) {
+    @Nullable public MessageWithID get(@NotNull final String client, final int messageId) {
         return backingMap.get(new MessageFlowKey(client, messageId));
     }
 
@@ -63,11 +62,11 @@ public class IncomingMessageFlowInMemoryLocalPersistence implements IncomingMess
          * dobermai: This is a dangerous operation since that delete is not atomic. It shouldn't be a problem, though,
          * since if delete is called, no adds / removes are expected for the same client key at the same time due to
          * other threads interfering.
-         * 
+         *
          * Since the Netty layer gives us this guarantee, this should work for us. In case this guarantee is removed in
          * the future, then we have a problem here and we need to lock the whole map while doing this expensive
          * operation!
-         * 
+         *
          * Another problem here is that the removal has a complexity of O(n), which isn't really good for large maps.
          * Fortunately we don't block and don't lock, so this shouldn't be much of a problem. However, the calling
          * thread will be blocked. In case we have very large maps, it may be a good idea to execute this in a separate

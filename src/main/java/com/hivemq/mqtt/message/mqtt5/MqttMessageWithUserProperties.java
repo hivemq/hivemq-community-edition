@@ -30,8 +30,7 @@ import java.nio.charset.StandardCharsets;
  */
 public abstract class MqttMessageWithUserProperties extends MessageWithID {
 
-    @NotNull
-    private Mqtt5UserProperties userProperties;
+    @NotNull private Mqtt5UserProperties userProperties;
     public MqttMessageWithUserProperties(@NotNull final Mqtt5UserProperties userProperties) {
         Preconditions.checkNotNull(userProperties, "User properties may never be null");
         this.userProperties = userProperties;
@@ -40,8 +39,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
     protected int remainingLength = -1;
     protected int propertyLength = -1;
     protected int omittedProperties = -1;
-    @NotNull
-    public Mqtt5UserProperties getUserProperties() {
+    @NotNull public Mqtt5UserProperties getUserProperties() {
         return userProperties;
     }
 
@@ -107,8 +105,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
             this.reasonString = reasonString;
         }
 
-        @Nullable
-        public String getReasonString() {
+        @Nullable public String getReasonString() {
             return reasonString;
         }
     }
@@ -131,8 +128,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
             this.reasonCode = reasonCode;
         }
 
-        @NotNull
-        public R getReasonCode() {
+        @NotNull public R getReasonCode() {
             return reasonCode;
         }
     }
@@ -184,8 +180,7 @@ public abstract class MqttMessageWithUserProperties extends MessageWithID {
             return packetIdentifier;
         }
 
-        @NotNull
-        public ImmutableList<R> getReasonCodes() {
+        @NotNull public ImmutableList<R> getReasonCodes() {
             return reasonCodes;
         }
     }

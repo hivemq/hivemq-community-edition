@@ -48,8 +48,7 @@ public class UsageStatisticsSenderImplTest {
     public void before() {
         sender = new UsageStatisticsSenderImpl() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             String getUrl() {
                 return "http://localhost:" + port + "/api/test";
             }

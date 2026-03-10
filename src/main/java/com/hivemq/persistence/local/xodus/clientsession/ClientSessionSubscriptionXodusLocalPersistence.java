@@ -79,26 +79,22 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
         this.serializer = new ClientSessionSubscriptionXodusSerializer();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected StoreConfig getStoreConfig() {
         return StoreConfig.WITH_DUPLICATES_WITH_PREFIXING;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected Logger getLogger() {
         return log;
     }
@@ -198,8 +194,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     }
 
     @Override
-    @NotNull
-    public ImmutableSet<Topic> getSubscriptions(@NotNull final String client) {
+    @NotNull public ImmutableSet<Topic> getSubscriptions(@NotNull final String client) {
         checkNotNull(client, "Clientid must not be null");
         final Bucket bucket = buckets[BucketUtils.getBucket(client, bucketCount)];
         return bucket.getEnvironment().computeInReadonlyTransaction(txn -> {
@@ -255,8 +250,7 @@ public class ClientSessionSubscriptionXodusLocalPersistence extends XodusLocalPe
     }
 
     @Override
-    @NotNull
-    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
+    @NotNull public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
             final int bucketIndex,
             @Nullable final String lastClientId,
             final int maxResults) {

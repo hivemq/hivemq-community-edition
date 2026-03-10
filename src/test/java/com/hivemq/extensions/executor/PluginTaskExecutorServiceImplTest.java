@@ -172,7 +172,6 @@ public class PluginTaskExecutorServiceImplTest {
 
         @Override
         public void markAsAsync() {
-            //
         }
 
         @Override
@@ -188,8 +187,7 @@ public class PluginTaskExecutorServiceImplTest {
         public void resetAsyncStatus() {
         }
 
-        @Nullable
-        @Override
+        @Nullable @Override
         public SettableFuture<Boolean> getAsyncFuture() {
             return null;
         }
@@ -207,8 +205,7 @@ public class PluginTaskExecutorServiceImplTest {
             this.classloader = classloader;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public TestPluginTaskOutput apply(
                 @NotNull final TestPluginTaskInput testPluginTaskInput,
                 @NotNull final TestPluginTaskOutput testPluginTaskOutput) {

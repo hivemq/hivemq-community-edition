@@ -53,8 +53,7 @@ public class ConnectAuthContext extends AuthContext<ConnectAuthOutput> {
     }
 
     @Override
-    @NotNull
-    ConnectAuthOutput createNextOutput(final @NotNull ConnectAuthOutput prevOutput) {
+    @NotNull ConnectAuthOutput createNextOutput(final @NotNull ConnectAuthOutput prevOutput) {
         return new ConnectAuthOutput(prevOutput);
     }
 

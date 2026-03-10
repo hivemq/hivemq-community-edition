@@ -37,8 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 public class NettyConfigurationProvider implements Provider<NettyConfiguration> {
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public NettyConfiguration get() {
         final EventLoopGroup parentGroup = createParentEventLoop();
         final EventLoopGroup childGroup = createChildEventLoop();
@@ -51,8 +50,7 @@ public class NettyConfigurationProvider implements Provider<NettyConfiguration> 
      *
      * @return the Boss EventLoopGroup
      */
-    @NotNull
-    private EventLoopGroup createParentEventLoop() {
+    @NotNull private EventLoopGroup createParentEventLoop() {
         return new NioEventLoopGroup(1, createThreadFactory("hivemq-eventloop-parent-%d"));
     }
 
@@ -62,8 +60,7 @@ public class NettyConfigurationProvider implements Provider<NettyConfiguration> 
      *
      * @return the Boss EventLoopGroup
      */
-    @NotNull
-    private EventLoopGroup createChildEventLoop() {
+    @NotNull private EventLoopGroup createChildEventLoop() {
         // Default Netty Threads.
         return new NioEventLoopGroup(0, createThreadFactory("hivemq-eventloop-child-%d"));
     }

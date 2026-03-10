@@ -39,6 +39,5 @@ public interface PluginTaskPost<O extends PluginTaskOutput> {
      *
      * @return the string that is used to calculate the Thread number, e.g. a ClientId.
      */
-    @NotNull
-    String getIdentifier();
+    @NotNull String getIdentifier();
 }

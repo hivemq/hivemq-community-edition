@@ -69,26 +69,22 @@ public class PublishAuthorizerInputImpl
         this.connectionInformation = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishPacket getPublishPacket() {
         return publishPacket;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ConnectionInformation getConnectionInformation() {
         return connectionInformation;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ClientInformation getClientInformation() {
         return clientInformation;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishAuthorizerInputImpl get() {
         return this;
     }

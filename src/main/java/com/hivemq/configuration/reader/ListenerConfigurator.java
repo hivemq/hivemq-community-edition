@@ -74,8 +74,7 @@ public class ListenerConfigurator {
         return builder.build();
     }
 
-    @Nullable
-    Listener convertListener(final @NotNull ListenerEntity entity) {
+    @Nullable Listener convertListener(final @NotNull ListenerEntity entity) {
         if (entity instanceof TCPListenerEntity) {
             return convertTcpListener((TCPListenerEntity) entity);
         } else if (entity instanceof WebsocketListenerEntity) {
@@ -88,13 +87,11 @@ public class ListenerConfigurator {
         return null;
     }
 
-    @NotNull
-    TcpListener convertTcpListener(final @NotNull TCPListenerEntity entity) {
+    @NotNull TcpListener convertTcpListener(final @NotNull TCPListenerEntity entity) {
         return new TcpListener(entity.getPort(), entity.getBindAddress(), getName(entity, "tcp-listener-"));
     }
 
-    @NotNull
-    WebsocketListener convertWebsocketListener(final @NotNull WebsocketListenerEntity entity) {
+    @NotNull WebsocketListener convertWebsocketListener(final @NotNull WebsocketListenerEntity entity) {
         return new WebsocketListener.Builder().allowExtensions(entity.isAllowExtensions())
                 .bindAddress(entity.getBindAddress())
                 .path(entity.getPath())
@@ -104,16 +101,14 @@ public class ListenerConfigurator {
                 .build();
     }
 
-    @NotNull
-    TlsTcpListener convertTlsTcpListener(final @NotNull TlsTCPListenerEntity entity) {
+    @NotNull TlsTcpListener convertTlsTcpListener(final @NotNull TlsTCPListenerEntity entity) {
         return new TlsTcpListener(entity.getPort(),
                 entity.getBindAddress(),
                 convertTls(entity.getTls()),
                 getName(entity, "tls-tcp-listener-"));
     }
 
-    @NotNull
-    TlsWebsocketListener convertTlsWebsocketListener(final @NotNull TlsWebsocketListenerEntity entity) {
+    @NotNull TlsWebsocketListener convertTlsWebsocketListener(final @NotNull TlsWebsocketListenerEntity entity) {
         return new TlsWebsocketListener.Builder().port(entity.getPort())
                 .bindAddress(entity.getBindAddress())
                 .path(entity.getPath())
@@ -124,8 +119,7 @@ public class ListenerConfigurator {
                 .build();
     }
 
-    @NotNull
-    private String getName(final @NotNull ListenerEntity entity, final @NotNull String defaultPrefix) {
+    @NotNull private String getName(final @NotNull ListenerEntity entity, final @NotNull String defaultPrefix) {
         final String chosenName =
                 (entity.getName() == null || entity.getName().trim().isEmpty()) ? defaultPrefix + entity.getPort() :
                         entity.getName();
@@ -148,8 +142,7 @@ public class ListenerConfigurator {
         }
     }
 
-    @NotNull
-    Tls convertTls(final @NotNull TLSEntity entity) {
+    @NotNull Tls convertTls(final @NotNull TLSEntity entity) {
         final String keystorePath = getPathFromEntityPath(entity.getKeystoreEntity().getPath());
         final String truststorePath = getPathFromEntityPath(entity.getTruststoreEntity().getPath());
         Preconditions.checkNotNull(keystorePath, "Keystore path must not be null");
@@ -174,8 +167,7 @@ public class ListenerConfigurator {
      * @param  path the absolute or relative path set in the config entity.
      * @return      the absolute path to the file or null if unset.
      */
-    @Nullable
-    private String getPathFromEntityPath(final @NotNull String path) {
+    @Nullable private String getPathFromEntityPath(final @NotNull String path) {
         // blank is default for unused
         if (path.isBlank()) {
             return null;
@@ -189,8 +181,7 @@ public class ListenerConfigurator {
         }
     }
 
-    @NotNull
-    Tls.ClientAuthMode getClientAuthMode(final @NotNull ClientAuthenticationModeEntity entity) {
+    @NotNull Tls.ClientAuthMode getClientAuthMode(final @NotNull ClientAuthenticationModeEntity entity) {
         switch (entity) {
             case OPTIONAL :
                 return Tls.ClientAuthMode.OPTIONAL;

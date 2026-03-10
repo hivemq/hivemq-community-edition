@@ -31,8 +31,7 @@ import javax.inject.Inject;
 @LazySingleton
 public class GlobalInterceptorRegistryImpl implements GlobalInterceptorRegistry {
 
-    @NotNull
-    private final Interceptors interceptors;
+    @NotNull private final Interceptors interceptors;
     @Inject
     public GlobalInterceptorRegistryImpl(@NotNull final Interceptors interceptors) {
         this.interceptors = interceptors;

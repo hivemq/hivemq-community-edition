@@ -38,14 +38,12 @@ class MatchingNodeSubscriptions {
      * This array gets lazy initialized for memory saving purposes. May contain {@code null} values. These null values
      * are reassigned if possible before the array gets expanded.
      */
-    @Nullable
-    SubscriberWithQoS @Nullable [] nonSharedSubscribersArray;
+    @Nullable SubscriberWithQoS @Nullable [] nonSharedSubscribersArray;
     /**
      * An optional index for quick subscription info lookup. Gets initialized once the number of subscriptions in the
      * array gets to a certain threshold configured via parameter passed to the constructor of the topic tree.
      */
-    @Nullable
-    Map<String, SubscriberWithQoS> nonSharedSubscribersMap;
+    @Nullable Map<String, SubscriberWithQoS> nonSharedSubscribersMap;
     /**
      * An optional index for quick shared subscription info lookup. Shared subscriptions' information is grouped in
      * {@link SubscriptionGroup} containers. Each {@link SubscriptionGroup} container is uniquely identifiable by the
@@ -54,8 +52,7 @@ class MatchingNodeSubscriptions {
      * This grouping improves the retrieval for shared subscriptions' groups and topic filters in case of massive
      * subscriptions in the same group to the same topic filter.
      */
-    @NotNull
-    Map<String, SubscriptionGroup> sharedSubscribersMap;
+    @NotNull Map<String, SubscriptionGroup> sharedSubscribersMap;
     MatchingNodeSubscriptions() {
         sharedSubscribersMap = Map.of();
     }
@@ -185,9 +182,9 @@ class MatchingNodeSubscriptions {
     }
 
     ///////////////////////////////////////////////////////////////////////
-    //                                                                   //
-    // INTERNAL STRUCTURES MANAGEMENT //
-    // //
+    //
+    // INTERNAL STRUCTURES MANAGEMENT
+    //
     ///////////////////////////////////////////////////////////////////////
     private static @NotNull String sharedSubscriptionKey(
             final @NotNull String sharedName,
@@ -202,18 +199,15 @@ class MatchingNodeSubscriptions {
     private static class SubscriptionGroup {
 
         private final @NotNull Map<String, SubscriberWithQoS> subscriptions = new HashMap<>();
-        @Nullable
-        SubscriberWithQoS put(final @NotNull SubscriberWithQoS subscription) {
+        @Nullable SubscriberWithQoS put(final @NotNull SubscriberWithQoS subscription) {
             return subscriptions.put(subscription.getSubscriber(), subscription);
         }
 
-        @Nullable
-        SubscriberWithQoS remove(final @NotNull String subscriber) {
+        @Nullable SubscriberWithQoS remove(final @NotNull String subscriber) {
             return subscriptions.remove(subscriber);
         }
 
-        @NotNull
-        Collection<SubscriberWithQoS> getSubscriptionsInfos() {
+        @NotNull Collection<SubscriberWithQoS> getSubscriptionsInfos() {
             return subscriptions.values();
         }
 

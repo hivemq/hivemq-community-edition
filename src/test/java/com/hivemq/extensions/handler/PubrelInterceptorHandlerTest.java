@@ -356,8 +356,7 @@ public class PubrelInterceptorHandlerTest {
         assertNotEquals(Mqtt5PubRelReasonCode.SUCCESS, pubrel.getReasonCode());
     }
 
-    @NotNull
-    private PUBREL testPubrel() {
+    @NotNull private PUBREL testPubrel() {
         return new PUBREL(1,
                 Mqtt5PubRelReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
                 "reason",

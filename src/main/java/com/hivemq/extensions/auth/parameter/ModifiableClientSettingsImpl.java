@@ -80,8 +80,7 @@ public class ModifiableClientSettingsImpl implements ModifiableClientSettings {
         return receiveMaximum;
     }
 
-    @Nullable
-    public Long getQueueSizeMaximum() {
+    @Nullable public Long getQueueSizeMaximum() {
         return queueSizeMaximum;
     }
 

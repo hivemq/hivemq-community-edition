@@ -95,13 +95,11 @@ public class AsyncLocalChunkIterator<V> implements AsyncIterator<V> {
         Futures.addCallback(itemFuture, new ChunkCallback<V>(this, resultBuffer, lock), executorService);
     }
 
-    @NotNull
-    public CompletableFuture<Void> getFinishedFuture() {
+    @NotNull public CompletableFuture<Void> getFinishedFuture() {
         return finishedFuture;
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     CompletableFuture<Void> getFetchFuture() {
         return fetchFuture;
     }

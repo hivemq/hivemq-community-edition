@@ -29,13 +29,15 @@ import static org.junit.Assert.assertTrue;
 
 public class TestExtensionUtil {
 
-    public static final String validExtensionXML = "<hivemq-extension>" + //
-            "<id>%s</id>" + //
-            "<name>Some Name</name>" + //
-            "<version>1.2.3-Version</version>" + //
-            "<priority>1000</priority>" + //
-            "<start-priority>500</start-priority>" + //
-            "</hivemq-extension>";
+    public static final String validExtensionXML = """
+            <hivemq-extension>
+            <id>%s</id>
+            <name>Some Name</name>
+            <version>1.2.3-Version</version>
+            <priority>1000</priority>
+            <start-priority>500</start-priority>
+            </hivemq-extension>""";
+
     public static @NotNull File createValidExtension(
             final @NotNull File extensionsFolder,
             final @NotNull String extensionId) throws Exception {

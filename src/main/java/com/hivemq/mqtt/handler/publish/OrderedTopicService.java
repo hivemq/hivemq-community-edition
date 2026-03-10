@@ -174,30 +174,25 @@ public class OrderedTopicService {
         queue.add(new QueuedMessage(publish, promise));
     }
 
-    @NotNull
-    public Set<Integer> unacknowledgedMessages() {
+    @NotNull public Set<Integer> unacknowledgedMessages() {
         return unacknowledgedMessages;
     }
     @Immutable
     @VisibleForTesting
     static class QueuedMessage {
 
-        @NotNull
-        private final PUBLISH publish;
-        @NotNull
-        private final ChannelPromise promise;
+        @NotNull private final PUBLISH publish;
+        @NotNull private final ChannelPromise promise;
         QueuedMessage(final @NotNull PUBLISH publish, final @NotNull ChannelPromise promise) {
             this.publish = publish;
             this.promise = promise;
         }
 
-        @NotNull
-        public PUBLISH getPublish() {
+        @NotNull public PUBLISH getPublish() {
             return publish;
         }
 
-        @NotNull
-        public ChannelPromise getPromise() {
+        @NotNull public ChannelPromise getPromise() {
             return promise;
         }
     }

@@ -39,13 +39,11 @@ class TopicTreeNode {
      * The child nodes of this node. The children get initialized lazily for memory saving purposes. If a threshold is
      * exceeded this is null and the childrenMap contains all the children.
      */
-    @Nullable
-    TopicTreeNode @Nullable [] children;
+    @Nullable TopicTreeNode @Nullable [] children;
     /**
      * An optional map for quick access to children (only exists if a threshold is exceeded)
      */
-    @Nullable
-    Map<String, TopicTreeNode> childrenMap;
+    @Nullable Map<String, TopicTreeNode> childrenMap;
     TopicTreeNode(final @NotNull String topicPart) {
         this.topicPart = topicPart;
         wildcardSubscriptions = new MatchingNodeSubscriptions();

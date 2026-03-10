@@ -23,8 +23,7 @@ import com.hivemq.extension.sdk.api.services.subscription.SubscriberWithFilterRe
  */
 public class SubscriberWithFilterResultImpl implements SubscriberWithFilterResult {
 
-    @NotNull
-    private final String clientId;
+    @NotNull private final String clientId;
     public SubscriberWithFilterResultImpl(@NotNull final String clientId) {
         this.clientId = clientId;
     }
@@ -32,8 +31,7 @@ public class SubscriberWithFilterResultImpl implements SubscriberWithFilterResul
     /**
      * @return the subscribers MQTT client identifier
      */
-    @NotNull
-    public String getClientId() {
+    @NotNull public String getClientId() {
         return clientId;
     }
 }

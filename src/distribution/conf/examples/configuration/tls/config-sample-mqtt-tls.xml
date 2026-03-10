@@ -16,7 +16,6 @@
   -->
 
 <hivemq>
-
     <listeners>
         <tls-tcp-listener>
             <port>8883</port>
@@ -35,6 +34,4 @@
             </tls>
         </tls-tcp-listener>
     </listeners>
-
-
 </hivemq>

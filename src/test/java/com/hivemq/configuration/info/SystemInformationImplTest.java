@@ -98,11 +98,10 @@ public class SystemInformationImplTest {
             System.setProperty(SystemProperties.HIVEMQ_HOME, tempFolderPath);
             final File testfolder = tempFolder.newFolder("home");
             System.getProperties().remove(SystemProperties.HIVEMQ_HOME);
-            withEnvironmentVariable(EnvironmentVariables.HIVEMQ_HOME, testfolder.getAbsolutePath()) //
-                    .execute(() -> {
-                        systemInformation = new SystemInformationImpl();
-                        systemInformation.init();
-                    });
+            withEnvironmentVariable(EnvironmentVariables.HIVEMQ_HOME, testfolder.getAbsolutePath()).execute(() -> {
+                systemInformation = new SystemInformationImpl();
+                systemInformation.init();
+            });
             assertEquals(testfolder.getAbsolutePath(), systemInformation.getHiveMQHomeFolder().getAbsolutePath());
         });
     }
@@ -135,11 +134,10 @@ public class SystemInformationImplTest {
         restoreSystemProperties(() -> {
             System.setProperty(SystemProperties.HIVEMQ_HOME, tempFolderPath);
             final File testfolder = tempFolder.newFolder("testconfig");
-            withEnvironmentVariable(EnvironmentVariables.CONFIG_FOLDER, testfolder.getAbsolutePath()) //
-                    .execute(() -> {
-                        systemInformation = new SystemInformationImpl();
-                        systemInformation.init();
-                    });
+            withEnvironmentVariable(EnvironmentVariables.CONFIG_FOLDER, testfolder.getAbsolutePath()).execute(() -> {
+                systemInformation = new SystemInformationImpl();
+                systemInformation.init();
+            });
             assertEquals(testfolder.getAbsolutePath(), systemInformation.getConfigFolder().getAbsolutePath());
         });
     }
@@ -171,11 +169,10 @@ public class SystemInformationImplTest {
         restoreSystemProperties(() -> {
             System.setProperty(SystemProperties.HIVEMQ_HOME, tempFolderPath);
             final File testfolder = tempFolder.newFolder("testlogs");
-            withEnvironmentVariable(EnvironmentVariables.LOG_FOLDER, testfolder.getAbsolutePath()) //
-                    .execute(() -> {
-                        systemInformation = new SystemInformationImpl();
-                        systemInformation.init();
-                    });
+            withEnvironmentVariable(EnvironmentVariables.LOG_FOLDER, testfolder.getAbsolutePath()).execute(() -> {
+                systemInformation = new SystemInformationImpl();
+                systemInformation.init();
+            });
             assertEquals(testfolder.getAbsolutePath(), systemInformation.getLogFolder().getAbsolutePath());
         });
     }
@@ -207,11 +204,10 @@ public class SystemInformationImplTest {
         restoreSystemProperties(() -> {
             System.setProperty(SystemProperties.HIVEMQ_HOME, tempFolderPath);
             final File testfolder = tempFolder.newFolder("testdatas");
-            withEnvironmentVariable(EnvironmentVariables.DATA_FOLDER, testfolder.getAbsolutePath()) //
-                    .execute(() -> {
-                        systemInformation = new SystemInformationImpl();
-                        systemInformation.init();
-                    });
+            withEnvironmentVariable(EnvironmentVariables.DATA_FOLDER, testfolder.getAbsolutePath()).execute(() -> {
+                systemInformation = new SystemInformationImpl();
+                systemInformation.init();
+            });
             assertEquals(testfolder.getAbsolutePath(), systemInformation.getDataFolder().getAbsolutePath());
         });
     }

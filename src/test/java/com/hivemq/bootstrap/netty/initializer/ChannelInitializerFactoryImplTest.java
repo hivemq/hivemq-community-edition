@@ -149,23 +149,19 @@ public class ChannelInitializerFactoryImplTest {
             super(channelDependencies, sslFactory, nonSslHandlerProvider, eventLog);
         }
 
-        @NotNull
-        protected AbstractChannelInitializer createTcpInitializer(@NotNull final TcpListener listener) {
+        @NotNull protected AbstractChannelInitializer createTcpInitializer(@NotNull final TcpListener listener) {
             return new FakeAbstractChannelInitializer(channelDependencies, TYPE_TCP);
         }
 
-        @NotNull
-        protected AbstractChannelInitializer createTlsTcpInitializer(@NotNull final TlsTcpListener listener) {
+        @NotNull protected AbstractChannelInitializer createTlsTcpInitializer(@NotNull final TlsTcpListener listener) {
             return new FakeAbstractChannelInitializer(channelDependencies, TYPE_TLS_TCP);
         }
 
-        @NotNull
-        protected AbstractChannelInitializer createWebsocketInitializer(@NotNull final WebsocketListener listener) {
+        @NotNull protected AbstractChannelInitializer createWebsocketInitializer(@NotNull final WebsocketListener listener) {
             return new FakeAbstractChannelInitializer(channelDependencies, TYPE_WEBSOCKET);
         }
 
-        @NotNull
-        protected AbstractChannelInitializer createTlsWebsocketInitializer(
+        @NotNull protected AbstractChannelInitializer createTlsWebsocketInitializer(
                 @NotNull final TlsWebsocketListener listener) {
             return new FakeAbstractChannelInitializer(channelDependencies, TYPE_TLS_WEBSOCKET);
         }

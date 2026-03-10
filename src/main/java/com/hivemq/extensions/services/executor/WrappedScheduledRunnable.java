@@ -25,14 +25,10 @@ import com.hivemq.extensions.HiveMQExtensions;
  */
 public class WrappedScheduledRunnable implements Runnable {
 
-    @NotNull
-    private final Runnable runnable;
-    @NotNull
-    private final ClassLoader classLoader;
-    @NotNull
-    private final CompletableScheduledFuture<?> future;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
+    @NotNull private final Runnable runnable;
+    @NotNull private final ClassLoader classLoader;
+    @NotNull private final CompletableScheduledFuture<?> future;
+    @NotNull private final HiveMQExtensions hiveMQExtensions;
     WrappedScheduledRunnable(
             @NotNull final Runnable runnable,
             @NotNull final ClassLoader classLoader,

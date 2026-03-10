@@ -39,13 +39,11 @@ public class IterablePersistenceEntry<T extends Collection<? extends Sizable>> i
         return timestamp;
     }
 
-    @NotNull
-    public T getObject() {
+    @NotNull public T getObject() {
         return object;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String toString() {
         return object.toString();
     }

@@ -41,8 +41,7 @@ public class PublishPayloadLocalPersistenceProvider implements Provider<PublishP
         this.persistenceType = InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.get();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishPayloadLocalPersistence get() {
         if (persistenceType == PersistenceType.FILE_NATIVE) {
             return rocksDBProvider.get();

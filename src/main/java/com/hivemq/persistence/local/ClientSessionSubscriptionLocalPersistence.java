@@ -109,8 +109,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @return        A read only set of {@link Topic}s.
      */
     @ReadOnly
-    @NotNull
-    ImmutableSet<Topic> getSubscriptions(@NotNull final String client);
+    @NotNull ImmutableSet<Topic> getSubscriptions(@NotNull final String client);
 
     /**
      * Get a chunk of subscriptions.
@@ -123,8 +122,7 @@ public interface ClientSessionSubscriptionLocalPersistence extends LocalPersiste
      * @return              a {@link BucketChunkResult} with the entries and the information if more chunks are
      *                      available
      */
-    @NotNull
-    BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
+    @NotNull BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
             int bucketIndex,
             @Nullable String lastClientId,
             int maxResults);

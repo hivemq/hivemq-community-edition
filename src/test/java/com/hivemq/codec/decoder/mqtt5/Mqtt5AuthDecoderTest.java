@@ -931,8 +931,7 @@ public class Mqtt5AuthDecoderTest extends AbstractMqtt5DecoderTest {
         decodeNok(encoded);
     }
 
-    @NotNull
-    private AUTH decodeAuth(final byte @NotNull [] encoded) {
+    @NotNull private AUTH decodeAuth(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

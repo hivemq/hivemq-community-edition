@@ -40,13 +40,11 @@ public class ChunkCursor {
         this.finishedBuckets = finishedBuckets;
     }
 
-    @NotNull
-    public Map<Integer, String> getLastKeys() {
+    @NotNull public Map<Integer, String> getLastKeys() {
         return lastKeys;
     }
 
-    @NotNull
-    public Set<Integer> getFinishedBuckets() {
+    @NotNull public Set<Integer> getFinishedBuckets() {
         return finishedBuckets;
     }
 

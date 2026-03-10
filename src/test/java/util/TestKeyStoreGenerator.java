@@ -67,8 +67,7 @@ public class TestKeyStoreGenerator {
         Security.removeProvider(bouncyCastleProvider.getName());
     }
 
-    @NotNull
-    public File generateKeyStore(
+    @NotNull public File generateKeyStore(
             final @NotNull String name,
             final @NotNull String keystoreType,
             final @NotNull String keyStorePassword,
@@ -76,8 +75,7 @@ public class TestKeyStoreGenerator {
         return generateKeyStore(name, keystoreType, keyStorePassword, privateKeyPassword, true, false);
     }
 
-    @NotNull
-    public File generateKeyStore(
+    @NotNull public File generateKeyStore(
             final @NotNull String name,
             final @NotNull String keystoreType,
             final @NotNull String keyStorePassword,
@@ -98,8 +96,7 @@ public class TestKeyStoreGenerator {
         return keyStoreFile;
     }
 
-    @NotNull
-    private X509Certificate generateX509Certificate(
+    @NotNull private X509Certificate generateX509Certificate(
             final @NotNull KeyPair keyPair,
             final @NotNull String name,
             final boolean withX500,
@@ -134,23 +131,20 @@ public class TestKeyStoreGenerator {
         return x509Certificate;
     }
 
-    @NotNull
-    public KeyPair generateRSAKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
+    @NotNull public KeyPair generateRSAKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
         final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
         keyPairGenerator.initialize(2048, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 
-    @NotNull
-    public KeyPair generateECKeyPair()
+    @NotNull public KeyPair generateECKeyPair()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
         final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", "BC");
         keyGen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
         return keyGen.generateKeyPair();
     }
 
-    @NotNull
-    private ContentSigner createRSAContentSigner(final KeyPair keyPair) throws Exception {
+    @NotNull private ContentSigner createRSAContentSigner(final KeyPair keyPair) throws Exception {
         final AlgorithmIdentifier signatureAlgorithmId =
                 new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
         final AlgorithmIdentifier digestAlgorithmId =
@@ -160,8 +154,7 @@ public class TestKeyStoreGenerator {
         return new BcRSAContentSignerBuilder(signatureAlgorithmId, digestAlgorithmId).build(privateKey);
     }
 
-    @NotNull
-    private ContentSigner createECContentSigner(final KeyPair keyPair) throws Exception {
+    @NotNull private ContentSigner createECContentSigner(final KeyPair keyPair) throws Exception {
         final AlgorithmIdentifier signatureAlgorithmId =
                 new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withECDSA");
         final AlgorithmIdentifier digestAlgorithmId =

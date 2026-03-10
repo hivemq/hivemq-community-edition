@@ -48,8 +48,7 @@ public interface ExtensionLoader {
      *                                            of the folder
      */
     @ReadOnly
-    @NotNull
-    ImmutableCollection<HiveMQExtensionEvent> loadExtensions(final @NotNull Path extensionFolder, boolean permissive);
+    @NotNull ImmutableCollection<HiveMQExtensionEvent> loadExtensions(final @NotNull Path extensionFolder, boolean permissive);
 
     /**
      * Loads a single extension.
@@ -58,9 +57,7 @@ public interface ExtensionLoader {
      * @return                 An Optional of a loaded extension. Empty if loading fails or extension <id> already
      *                         known.
      */
-    @Nullable
-    HiveMQExtensionEvent processSingleExtensionFolder(final @NotNull Path extensionFolder);
+    @Nullable HiveMQExtensionEvent processSingleExtensionFolder(final @NotNull Path extensionFolder);
 
-    @Nullable
-    HiveMQExtensionEvent loadEmbeddedExtension(@NotNull EmbeddedExtension extensionMain);
+    @Nullable HiveMQExtensionEvent loadEmbeddedExtension(@NotNull EmbeddedExtension extensionMain);
 }

@@ -50,8 +50,7 @@ public class ReAuthContext extends AuthContext<ReAuthOutput> {
     }
 
     @Override
-    @NotNull
-    ReAuthOutput createNextOutput(final @NotNull ReAuthOutput prevOutput) {
+    @NotNull ReAuthOutput createNextOutput(final @NotNull ReAuthOutput prevOutput) {
         return new ReAuthOutput(prevOutput);
     }
 

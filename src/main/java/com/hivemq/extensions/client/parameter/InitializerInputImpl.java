@@ -31,12 +31,9 @@ import io.netty.channel.Channel;
  */
 public class InitializerInputImpl implements InitializerInput, PluginTaskInput {
 
-    @NotNull
-    private final ServerInformation serverInformation;
-    @NotNull
-    private final ConnectionInformation connectionInformation;
-    @NotNull
-    private final ClientInformation clientInformation;
+    @NotNull private final ServerInformation serverInformation;
+    @NotNull private final ConnectionInformation connectionInformation;
+    @NotNull private final ClientInformation clientInformation;
     public InitializerInputImpl(
             final @NotNull ServerInformation serverInformation,
             final @NotNull Channel channel,
@@ -49,20 +46,17 @@ public class InitializerInputImpl implements InitializerInput, PluginTaskInput {
         this.serverInformation = serverInformation;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ServerInformation getServerInformation() {
         return serverInformation;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ConnectionInformation getConnectionInformation() {
         return connectionInformation;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public ClientInformation getClientInformation() {
         return clientInformation;
     }

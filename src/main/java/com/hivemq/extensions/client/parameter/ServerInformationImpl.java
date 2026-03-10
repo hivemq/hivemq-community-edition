@@ -35,10 +35,8 @@ import java.util.Set;
 @LazySingleton
 public class ServerInformationImpl implements ServerInformation {
 
-    @NotNull
-    private final SystemInformation systemInformation;
-    @NotNull
-    private final ListenerConfigurationService listenerConfigurationService;
+    @NotNull private final SystemInformation systemInformation;
+    @NotNull private final ListenerConfigurationService listenerConfigurationService;
     @Inject
     public ServerInformationImpl(
             @NotNull final SystemInformation systemInformation,
@@ -47,38 +45,32 @@ public class ServerInformationImpl implements ServerInformation {
         this.listenerConfigurationService = listenerConfigurationService;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String getVersion() {
         return systemInformation.getHiveMQVersion();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public File getHomeFolder() {
         return systemInformation.getHiveMQHomeFolder();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public File getDataFolder() {
         return systemInformation.getDataFolder();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public File getLogFolder() {
         return systemInformation.getLogFolder();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public File getExtensionsFolder() {
         return systemInformation.getExtensionsFolder();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<Listener> getListener() {
         final List<com.hivemq.configuration.service.entity.Listener> listeners =
                 listenerConfigurationService.getListeners();

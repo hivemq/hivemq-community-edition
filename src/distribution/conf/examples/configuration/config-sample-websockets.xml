@@ -16,7 +16,6 @@
   -->
 
 <hivemq>
-
     <listeners>
         <websocket-listener>
             <port>8000</port>

@@ -47,8 +47,7 @@ public class RetainedMessageLocalPersistenceProvider implements Provider<Retaine
         this.persistenceType = InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.get();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public RetainedMessageLocalPersistence get() {
         if (persistenceType == PersistenceType.FILE_NATIVE) {
             return rocksDBProvider.get();

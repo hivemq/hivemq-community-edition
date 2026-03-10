@@ -50,8 +50,7 @@ public class ExtensionBuilderDependenciesImpl implements ExtensionBuilderDepende
         this.willPublishBuilderProvider = willPublishBuilderProvider;
     }
 
-    @NotNull
-    public ImmutableMap<String, Supplier<Object>> getDependenciesMap() {
+    @NotNull public ImmutableMap<String, Supplier<Object>> getDependenciesMap() {
         // classLoader is unused but prepared here for future use
         final ImmutableMap.Builder<String, Supplier<Object>> builder = ImmutableMap.builder();
         builder.put(RetainedPublishBuilder.class.getCanonicalName(), retainedPublishBuilderProvider::get);

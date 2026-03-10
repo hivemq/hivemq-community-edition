@@ -25,10 +25,8 @@ import io.netty.channel.ChannelFutureListener;
  */
 public class PollInflightMessageListener implements ChannelFutureListener {
 
-    @NotNull
-    private final PublishPollService publishPollService;
-    @NotNull
-    private final String clientId;
+    @NotNull private final PublishPollService publishPollService;
+    @NotNull private final String clientId;
     public PollInflightMessageListener(
             @NotNull final PublishPollService publishPollService,
             @NotNull final String clientId) {

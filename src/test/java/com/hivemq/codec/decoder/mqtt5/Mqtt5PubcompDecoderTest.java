@@ -307,8 +307,7 @@ public class Mqtt5PubcompDecoderTest extends AbstractMqtt5DecoderTest {
         assertNull(pubComp);
     }
 
-    @NotNull
-    private PUBCOMP decode(final byte @NotNull [] encoded) {
+    @NotNull private PUBCOMP decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

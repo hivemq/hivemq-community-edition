@@ -347,8 +347,7 @@ public class PubcompInterceptorHandlerTest {
         assertNotEquals(Mqtt5PubCompReasonCode.SUCCESS, pubcomp.getReasonCode());
     }
 
-    @NotNull
-    private PUBCOMP testPubcomp() {
+    @NotNull private PUBCOMP testPubcomp() {
         return new PUBCOMP(1,
                 Mqtt5PubCompReasonCode.PACKET_IDENTIFIER_NOT_FOUND,
                 "reason",

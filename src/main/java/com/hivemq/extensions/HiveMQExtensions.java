@@ -54,14 +54,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class HiveMQExtensions {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQExtensions.class);
-    @GuardedBy("extensionsLock")
-    private final @NotNull HashMap<String, HiveMQExtension> knownExtensions = new HashMap<>();
-    @GuardedBy("classloaderLock")
-    private final @NotNull HashMap<ClassLoader, HiveMQExtension> classloaderToExtension = new HashMap<>();
-    @GuardedBy("beforeExtensionStopCallbacksLock")
-    private final @NotNull List<Consumer<HiveMQExtension>> beforeExtensionStopCallbacks = new LinkedList<>();
-    @GuardedBy("afterExtensionStopCallbacksLock")
-    private final @NotNull List<Consumer<HiveMQExtension>> afterExtensionStopCallbacks = new LinkedList<>();
+    @GuardedBy("extensionsLock") private final @NotNull HashMap<String, HiveMQExtension> knownExtensions = new HashMap<>();
+    @GuardedBy("classloaderLock") private final @NotNull HashMap<ClassLoader, HiveMQExtension> classloaderToExtension = new HashMap<>();
+    @GuardedBy("beforeExtensionStopCallbacksLock") private final @NotNull List<Consumer<HiveMQExtension>> beforeExtensionStopCallbacks = new LinkedList<>();
+    @GuardedBy("afterExtensionStopCallbacksLock") private final @NotNull List<Consumer<HiveMQExtension>> afterExtensionStopCallbacks = new LinkedList<>();
     private final @NotNull ReadWriteLock extensionsLock = new ReentrantReadWriteLock();
     private final @NotNull ReadWriteLock classloaderLock = new ReentrantReadWriteLock();
     private final @NotNull ReadWriteLock beforeExtensionStopCallbacksLock = new ReentrantReadWriteLock();

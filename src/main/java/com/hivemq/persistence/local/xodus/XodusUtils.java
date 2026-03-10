@@ -43,8 +43,7 @@ public class XodusUtils {
      * @param  string a UTF-8 String
      * @return        a ByteIterable
      */
-    @NotNull
-    public static ByteIterable stringToByteIterable(@NotNull final String string) {
+    @NotNull public static ByteIterable stringToByteIterable(@NotNull final String string) {
         checkNotNull(string, "String must not be null");
         final byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
         return new ArrayByteIterable(bytes);
@@ -56,8 +55,7 @@ public class XodusUtils {
      * @param  bytes the byte array
      * @return       a byte iterable, backed by the byte array
      */
-    @NotNull
-    public static ByteIterable bytesToByteIterable(@NotNull final byte[] bytes) {
+    @NotNull public static ByteIterable bytesToByteIterable(@NotNull final byte[] bytes) {
         checkNotNull(bytes, "bytes must not be null");
         return new ArrayByteIterable(bytes);
     }
@@ -68,8 +66,7 @@ public class XodusUtils {
      * @param  byteIterable a ByteIterable
      * @return              an UTF-8 String
      */
-    @NotNull
-    public static String byteIterableToString(@NotNull final ByteIterable byteIterable) {
+    @NotNull public static String byteIterableToString(@NotNull final ByteIterable byteIterable) {
         checkNotNull(byteIterable, "ByteIterable must not be null");
         return new String(byteIterable.getBytesUnsafe(), 0, byteIterable.getLength(), StandardCharsets.UTF_8);
     }
@@ -80,8 +77,7 @@ public class XodusUtils {
      * @param  byteIterable the ByteIterable to convert
      * @return              a byte array
      */
-    @NotNull
-    public static byte[] byteIterableToBytes(@NotNull final ByteIterable byteIterable) {
+    @NotNull public static byte[] byteIterableToBytes(@NotNull final ByteIterable byteIterable) {
         checkNotNull(byteIterable, "ByteIterable must not be null");
         final byte[] unsafeBytes = byteIterable.getBytesUnsafe();
         if (unsafeBytes.length == byteIterable.getLength()) {

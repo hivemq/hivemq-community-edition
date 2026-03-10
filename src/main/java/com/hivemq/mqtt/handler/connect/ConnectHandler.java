@@ -286,8 +286,7 @@ public class ConnectHandler extends SimpleChannelInboundHandler<CONNECT> {
         }
     }
 
-    @NotNull
-    private ListenableFuture<Void> updatePersistenceData(
+    @NotNull private ListenableFuture<Void> updatePersistenceData(
             final boolean cleanStart,
             final @NotNull String clientId,
             final long sessionExpiryInterval,

@@ -29,7 +29,6 @@ public interface ExtensionLifecycleHandler {
      * @param hiveMQExtensionEvents {@link ImmutableCollection} of {@link HiveMQExtensionEvent}s which should be
      *                              processed.
      */
-    @NotNull
-    CompletableFuture<Void> handleExtensionEvents(
+    @NotNull CompletableFuture<Void> handleExtensionEvents(
             @NotNull ImmutableCollection<HiveMQExtensionEvent> hiveMQExtensionEvents);
 }

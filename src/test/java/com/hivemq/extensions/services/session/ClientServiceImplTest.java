@@ -320,8 +320,7 @@ public class ClientServiceImplTest {
         assertEquals(false, clientService.isClientConnected(clientId).get());
     }
 
-    @NotNull
-    private ClientSession getSession(final boolean connected) {
+    @NotNull private ClientSession getSession(final boolean connected) {
         return new ClientSession(connected,
                 sessionExpiry,
                 new ClientSessionWill(mock(MqttWillPublish.class), 12345L),
@@ -442,8 +441,7 @@ public class ClientServiceImplTest {
         assertEquals(3, chunkResult.getResults().size());
     }
 
-    @NotNull
-    private GlobalManagedExtensionExecutorService getManagedExtensionExecutorService() {
+    @NotNull private GlobalManagedExtensionExecutorService getManagedExtensionExecutorService() {
         final GlobalManagedExtensionExecutorService globalManagedPluginExecutorService =
                 new GlobalManagedExtensionExecutorService(mock(ShutdownHooks.class));
         globalManagedPluginExecutorService.postConstruct();

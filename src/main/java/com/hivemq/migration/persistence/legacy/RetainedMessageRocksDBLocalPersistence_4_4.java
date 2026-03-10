@@ -68,20 +68,17 @@ public class RetainedMessageRocksDBLocalPersistence_4_4 extends RocksDBLocalPers
         this.payloadPersistence = payloadPersistence;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected Logger getLogger() {
         return log;
     }

@@ -53,8 +53,7 @@ public class Mqtt5AuthEncoder extends
     }
 
     @Override
-    @NotNull
-    Mqtt5AuthReasonCode getDefaultReasonCode() {
+    @NotNull Mqtt5AuthReasonCode getDefaultReasonCode() {
         return Mqtt5AuthReasonCode.SUCCESS;
     }
 

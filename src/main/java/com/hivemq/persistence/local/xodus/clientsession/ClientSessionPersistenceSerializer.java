@@ -152,8 +152,7 @@ public class ClientSessionPersistenceSerializer {
         return bytes;
     }
 
-    @NotNull
-    public ClientSession deserializeValue(final byte[] bytes) {
+    @NotNull public ClientSession deserializeValue(final byte[] bytes) {
         int cursor = Long.BYTES; // skip time stamp
         final long timeToLive = Bytes.readLong(bytes, cursor);
         cursor += Long.BYTES;
@@ -221,8 +220,7 @@ public class ClientSessionPersistenceSerializer {
         return new ClientSession(connected, timeToLive, sessionWill, queueLimit);
     }
 
-    @NotNull
-    public ClientSession deserializeValueWithoutWill(final byte[] bytes) {
+    @NotNull public ClientSession deserializeValueWithoutWill(final byte[] bytes) {
         int cursor = Long.BYTES; // Skip timestamp
         final long timeToLive = Bytes.readLong(bytes, cursor);
         cursor += Long.BYTES;

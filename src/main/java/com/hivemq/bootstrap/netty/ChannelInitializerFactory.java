@@ -45,6 +45,5 @@ public interface ChannelInitializerFactory {
      * @throws NullPointerException     If listener is null.
      * @throws IllegalArgumentException If listener type is unknown.
      */
-    @NotNull
-    AbstractChannelInitializer getChannelInitializer(final @NotNull Listener listener);
+    @NotNull AbstractChannelInitializer getChannelInitializer(final @NotNull Listener listener);
 }

@@ -32,8 +32,7 @@ import static com.hivemq.bootstrap.netty.ChannelHandlerNames.SSL_PARAMETER_HANDL
  */
 public class TlsWebsocketChannelInitializer extends AbstractTlsChannelInitializer {
 
-    @NotNull
-    private final TlsWebsocketListener tlsWebsocketListener;
+    @NotNull private final TlsWebsocketListener tlsWebsocketListener;
     public TlsWebsocketChannelInitializer(
             @NotNull final ChannelDependencies channelDependencies,
             @NotNull final TlsWebsocketListener tlsWebsocketListener,

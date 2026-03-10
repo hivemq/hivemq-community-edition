@@ -67,8 +67,7 @@ public class ClientQueuePersistenceSerializer {
      * @param  key to be serialized
      * @return     the serialized key for storing a new PUBLISH
      */
-    @NotNull
-    ByteIterable serializeNewPublishKey(final @NotNull Key key) {
+    @NotNull ByteIterable serializeNewPublishKey(final @NotNull Key key) {
         return serializeKey(key, NEXT_PUBLISH_NUMBER.getAndIncrement());
     }
 
@@ -78,15 +77,13 @@ public class ClientQueuePersistenceSerializer {
      * @param  key to be serialized
      * @return     the serialized key for storing an unknown PUBREL
      */
-    @NotNull
-    ByteIterable serializeUnknownPubRelKey(final @NotNull Key key) {
+    @NotNull ByteIterable serializeUnknownPubRelKey(final @NotNull Key key) {
         // Ensure unknown PUBRELs are always first
         final long messageNumber = NEXT_PUBLISH_NUMBER.getAndIncrement() - Long.MAX_VALUE / 2;
         return serializeKey(key, messageNumber);
     }
 
-    @NotNull
-    ByteIterable serializeKey(final @NotNull Key key, final long number) {
+    @NotNull ByteIterable serializeKey(final @NotNull Key key, final long number) {
         final byte[] clientBytes = key.getQueueId().getBytes(UTF_8);
         final byte[] result = new byte[clientBytes.length + 1 + Long.BYTES];
         System.arraycopy(clientBytes, 0, result, 0, clientBytes.length);
@@ -101,8 +98,7 @@ public class ClientQueuePersistenceSerializer {
      * @param  key to be serialized
      * @return     the serialized client id for searching
      */
-    @NotNull
-    ByteIterable serializeKey(final @NotNull Key key) {
+    @NotNull ByteIterable serializeKey(final @NotNull Key key) {
         final byte[] clientBytes = key.getQueueId().getBytes(UTF_8);
         final byte[] result = new byte[clientBytes.length + 1];
         System.arraycopy(clientBytes, 0, result, 0, clientBytes.length);
@@ -121,8 +117,7 @@ public class ClientQueuePersistenceSerializer {
         return CLIENT_ID_SAME_PREFIX;
     }
 
-    @NotNull
-    Key deserializeKeyId(final @NotNull ByteIterable serializedKey) {
+    @NotNull Key deserializeKeyId(final @NotNull ByteIterable serializedKey) {
         final byte[] bytes = serializedKey.getBytesUnsafe();
         final int clientIdLength = serializedKey.getLength() - 1 - Long.BYTES;
         final String client = new String(bytes, 0, clientIdLength, UTF_8);
@@ -137,20 +132,17 @@ public class ClientQueuePersistenceSerializer {
     }
     // ********** Value **********
 
-    @NotNull
-    ByteIterable serializePublishWithoutPacketId(final @NotNull PUBLISH publish, final boolean retained) {
+    @NotNull ByteIterable serializePublishWithoutPacketId(final @NotNull PUBLISH publish, final boolean retained) {
         return XodusUtils.bytesToByteIterable(createPublishBytes(publish, retained));
     }
 
-    @NotNull
-    ByteIterable serializeAndSetPacketId(final @NotNull ByteIterable serializedValue, final int packetId) {
+    @NotNull ByteIterable serializeAndSetPacketId(final @NotNull ByteIterable serializedValue, final int packetId) {
         final byte[] bytes = XodusUtils.byteIterableToBytes(serializedValue);
         Bytes.copyUnsignedShortToByteArray(packetId, bytes, 0);
         return XodusUtils.bytesToByteIterable(bytes);
     }
 
-    @NotNull
-    ByteIterable serializePubRel(final @NotNull PUBREL pubrel, final boolean retained) {
+    @NotNull ByteIterable serializePubRel(final @NotNull PUBREL pubrel, final boolean retained) {
         return XodusUtils.bytesToByteIterable(createPubrelBytes(pubrel.getPacketIdentifier(),
                 retained,
                 pubrel.getMessageExpiryInterval(),
@@ -161,8 +153,7 @@ public class ClientQueuePersistenceSerializer {
         return Bytes.readUnsignedShort(serializedValue.getBytesUnsafe(), 0);
     }
 
-    @NotNull
-    MessageWithID deserializeValue(final @NotNull ByteIterable serializedValue) {
+    @NotNull MessageWithID deserializeValue(final @NotNull ByteIterable serializedValue) {
         final byte[] bytes = serializedValue.getBytesUnsafe();
         if ((bytes[Short.BYTES] & PUBREL_BIT) == PUBREL_BIT) {
             final int packetId = Bytes.readUnsignedShort(bytes, 0);

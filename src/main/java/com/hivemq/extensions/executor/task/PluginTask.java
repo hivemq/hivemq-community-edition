@@ -24,6 +24,5 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  */
 public interface PluginTask {
 
-    @NotNull
-    ClassLoader getPluginClassLoader();
+    @NotNull ClassLoader getPluginClassLoader();
 }

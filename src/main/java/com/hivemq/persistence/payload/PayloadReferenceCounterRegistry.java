@@ -74,8 +74,7 @@ public interface PayloadReferenceCounterRegistry {
     /**
      * @return all reference counter entries for all buckets and nodes
      */
-    @NotNull
-    ImmutableMap<Long, Integer> getAll();
+    @NotNull ImmutableMap<Long, Integer> getAll();
 
     /**
      * @return the amount of entries for all buckets and nodes

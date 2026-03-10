@@ -30,8 +30,7 @@ import javax.inject.Singleton;
 @Singleton
 public class EventRegistryImpl implements EventRegistry {
 
-    @NotNull
-    private final LifecycleEventListeners lifecycleEventListeners;
+    @NotNull private final LifecycleEventListeners lifecycleEventListeners;
     @Inject
     public EventRegistryImpl(final @NotNull LifecycleEventListeners lifecycleEventListeners) {
         this.lifecycleEventListeners = lifecycleEventListeners;

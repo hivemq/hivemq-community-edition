@@ -37,8 +37,7 @@ public class Mqtt5UserProperties {
      * @param  userProperties the User Properties.
      * @return                the created collection of User Properties.
      */
-    @NotNull
-    public static Mqtt5UserProperties of(final @NotNull MqttUserProperty... userProperties) {
+    @NotNull public static Mqtt5UserProperties of(final @NotNull MqttUserProperty... userProperties) {
         Preconditions.checkNotNull(userProperties);
         return Mqtt5UserProperties.of(ImmutableList.copyOf(userProperties));
     }

@@ -70,18 +70,15 @@ public class PublishPayloadRocksDBLocalPersistence extends RocksDBLocalPersisten
         this.forceFlush = InternalConfigurations.PUBLISH_PAYLOAD_FORCE_FLUSH_ENABLED.get();
     }
 
-    @NotNull
-    protected String getName() {
+    @NotNull protected String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
-    protected String getVersion() {
+    @NotNull protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    protected Logger getLogger() {
+    @NotNull protected Logger getLogger() {
         return log;
     }
 

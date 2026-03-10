@@ -246,8 +246,7 @@ class EmbeddedHiveMQImpl implements EmbeddedHiveMQ {
     }
 
     @VisibleForTesting
-    @Nullable
-    Injector getInjector() {
+    @Nullable Injector getInjector() {
         return hiveMQServer.getInjector();
     }
     private static class AbortedStateChangeException extends Exception {

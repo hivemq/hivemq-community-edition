@@ -80,46 +80,39 @@ public class LocalPersistenceFileUtilTest {
         assertTrue(tempFile.exists());
     }
 
-    @NotNull
-    private SystemInformation createInfoForTest(final File dataFolder) {
+    @NotNull private SystemInformation createInfoForTest(final File dataFolder) {
         return new SystemInformation() {
 
             @Override
             public void init() {
             }
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public String getHiveMQVersion() {
                 return "0";
             }
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public File getHiveMQHomeFolder() {
                 return systemFolder;
             }
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public File getConfigFolder() {
                 return systemFolder;
             }
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public File getLogFolder() {
                 return systemFolder;
             }
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public File getDataFolder() {
                 return dataFolder;
             }
 
-            @NotNull
-            @Override
+            @NotNull @Override
             public File getExtensionsFolder() {
                 return systemFolder;
             }

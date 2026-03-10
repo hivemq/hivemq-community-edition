@@ -38,8 +38,7 @@ public class BucketChunkResult<V> {
         this.bucketIndex = bucketIndex;
     }
 
-    @NotNull
-    public V getValue() {
+    @NotNull public V getValue() {
         return value;
     }
 

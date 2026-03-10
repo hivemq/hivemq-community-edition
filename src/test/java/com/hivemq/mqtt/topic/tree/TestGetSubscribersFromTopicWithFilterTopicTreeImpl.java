@@ -316,18 +316,15 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
         assertEquals(4, subscribers.size());
     }
 
-    @NotNull
-    public Predicate<SubscriberWithQoS> getMatchAllFilter() {
+    @NotNull public Predicate<SubscriberWithQoS> getMatchAllFilter() {
         return subscriber -> true;
     }
 
-    @NotNull
-    public Predicate<SubscriberWithQoS> getSharedSubFilter() {
+    @NotNull public Predicate<SubscriberWithQoS> getSharedSubFilter() {
         return SubscriberWithQoS::isSharedSubscription;
     }
 
-    @NotNull
-    public Predicate<SubscriberWithQoS> getIndividualSubFilter() {
+    @NotNull public Predicate<SubscriberWithQoS> getIndividualSubFilter() {
         return subscriber -> !subscriber.isSharedSubscription();
     }
 }

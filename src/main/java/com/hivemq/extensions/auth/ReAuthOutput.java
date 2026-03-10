@@ -114,8 +114,7 @@ public class ReAuthOutput extends AuthOutput<EnhancedAuthOutput> implements Enha
         reasonString = ReasonStrings.RE_AUTH_FAILED_EXCEPTION;
     }
 
-    @NotNull
-    Mqtt5DisconnectReasonCode getReasonCode() {
+    @NotNull Mqtt5DisconnectReasonCode getReasonCode() {
         return reasonCode;
     }
 

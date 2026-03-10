@@ -72,10 +72,8 @@ import static com.hivemq.mqtt.message.reason.Mqtt5SubAckReasonCode.fromCode;
 @Singleton
 public class IncomingSubscribeService {
 
-    @NotNull
-    private static final Logger log = LoggerFactory.getLogger(IncomingSubscribeService.class);
-    @NotNull
-    private static final Comparator<Topic> TOPIC_AND_QOS_COMPARATOR = new Comparator<>() {
+    @NotNull private static final Logger log = LoggerFactory.getLogger(IncomingSubscribeService.class);
+    @NotNull private static final Comparator<Topic> TOPIC_AND_QOS_COMPARATOR = new Comparator<>() {
 
         @Override
         public int compare(final Topic o1, final Topic o2) {
@@ -356,8 +354,7 @@ public class IncomingSubscribeService {
      * @param  msg a SUBSCRIBE message
      * @return     the cleaned subscriptions
      */
-    @NotNull
-    private Set<Topic> getCleanedSubscriptions(final SUBSCRIBE msg) {
+    @NotNull private Set<Topic> getCleanedSubscriptions(final SUBSCRIBE msg) {
         final List<Topic> topics = msg.getTopics();
         final int size = topics.size();
         if (size < 2) {
@@ -379,8 +376,7 @@ public class IncomingSubscribeService {
         return topics.size() >= 2;
     }
 
-    @NotNull
-    private ListenableFuture<ImmutableList<SubscriptionResult>> persistBatchedSubscriptions(
+    @NotNull private ListenableFuture<ImmutableList<SubscriptionResult>> persistBatchedSubscriptions(
             @NotNull final String clientId,
             @NotNull final SUBSCRIBE msg,
             @NotNull final Set<Topic> cleanedSubscriptions,
@@ -417,16 +413,11 @@ public class IncomingSubscribeService {
     private static class SubscribePersistenceBatchedCallback
             implements FutureCallback<ImmutableList<SubscriptionResult>> {
 
-        @NotNull
-        private final SettableFuture<ImmutableList<SubscriptionResult>> settableFuture;
-        @NotNull
-        private final String clientId;
-        @NotNull
-        private final SUBSCRIBE msg;
-        @NotNull
-        private final ProtocolVersion mqttVersion;
-        @NotNull
-        private final Mqtt5SubAckReasonCode[] answerCodes;
+        @NotNull private final SettableFuture<ImmutableList<SubscriptionResult>> settableFuture;
+        @NotNull private final String clientId;
+        @NotNull private final SUBSCRIBE msg;
+        @NotNull private final ProtocolVersion mqttVersion;
+        @NotNull private final Mqtt5SubAckReasonCode[] answerCodes;
         public SubscribePersistenceBatchedCallback(
                 @NotNull final SettableFuture<ImmutableList<SubscriptionResult>> settableFuture,
                 @NotNull final String clientId,
@@ -476,16 +467,11 @@ public class IncomingSubscribeService {
     }
     private static class SubscribePersistenceCallback implements FutureCallback<SubscriptionResult> {
 
-        @NotNull
-        private final SettableFuture<SubscriptionResult> settableFuture;
-        @NotNull
-        private final String clientId;
-        @NotNull
-        private final Topic topic;
-        @NotNull
-        private final ProtocolVersion mqttVersion;
-        @NotNull
-        private final Mqtt5SubAckReasonCode[] answerCodes;
+        @NotNull private final SettableFuture<SubscriptionResult> settableFuture;
+        @NotNull private final String clientId;
+        @NotNull private final Topic topic;
+        @NotNull private final ProtocolVersion mqttVersion;
+        @NotNull private final Mqtt5SubAckReasonCode[] answerCodes;
         private final int index;
         public SubscribePersistenceCallback(
                 @NotNull final SettableFuture<SubscriptionResult> settableFuture,

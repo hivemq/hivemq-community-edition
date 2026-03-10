@@ -16,7 +16,6 @@
   -->
 
 <hivemq>
-
     <listeners>
         <tcp-listener>
             <port>1883</port>

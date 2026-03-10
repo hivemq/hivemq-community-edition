@@ -360,8 +360,7 @@ public class PubrecInterceptorHandlerTest {
         assertNotEquals(Mqtt5PubRecReasonCode.NOT_AUTHORIZED, pubrec.getReasonCode());
     }
 
-    @NotNull
-    private PUBREC testPubrec() {
+    @NotNull private PUBREC testPubrec() {
         return new PUBREC(1, Mqtt5PubRecReasonCode.UNSPECIFIED_ERROR, "reason", Mqtt5UserProperties.NO_USER_PROPERTIES);
     }
     public static class TestModifyInboundInterceptor implements PubrecInboundInterceptor {

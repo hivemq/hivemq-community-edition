@@ -78,8 +78,7 @@ public class InMemoryProducerQueues implements ProducerQueues {
     }
 
     @VisibleForTesting
-    @NotNull
-    ImmutableList<Integer> createBucketIndexes(final int queueIndex, final int bucketsPerQueue) {
+    @NotNull ImmutableList<Integer> createBucketIndexes(final int queueIndex, final int bucketsPerQueue) {
         final ImmutableList.Builder<Integer> builder = ImmutableList.builder();
         for (int i = bucketsPerQueue * queueIndex; i < bucketsPerQueue * (queueIndex + 1); i++) {
             builder.add(i);
@@ -196,8 +195,7 @@ public class InMemoryProducerQueues implements ProducerQueues {
         return BucketUtils.getBucket(key, persistenceBucketCount);
     }
 
-    @NotNull
-    public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {
+    @NotNull public ListenableFuture<Void> shutdown(final @Nullable Task<Void> finalTask) {
         if (shutdown.getAndSet(true)) {
             // guard from being called twice
             // needed for integration tests because shutdown hooks for every Embedded HiveMQ are added to the JVM

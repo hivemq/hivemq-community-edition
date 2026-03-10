@@ -45,26 +45,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @ThreadSafe
 public class ModifiablePublishPacketImpl implements ModifiablePublishPacket {
 
-    @NotNull
-    String topic;
-    @NotNull
-    Qos qos;
-    @NotNull
-    Qos onwardQos;
+    @NotNull String topic;
+    @NotNull Qos qos;
+    @NotNull Qos onwardQos;
     final int packetId;
     final boolean dupFlag;
-    @Nullable
-    ByteBuffer payload;
+    @Nullable ByteBuffer payload;
     boolean retain;
     long messageExpiryInterval;
-    @Nullable
-    PayloadFormatIndicator payloadFormatIndicator;
-    @Nullable
-    String contentType;
-    @Nullable
-    String responseTopic;
-    @Nullable
-    ByteBuffer correlationData;
+    @Nullable PayloadFormatIndicator payloadFormatIndicator;
+    @Nullable String contentType;
+    @Nullable String responseTopic;
+    @Nullable ByteBuffer correlationData;
     final @NotNull ImmutableIntArray subscriptionIdentifiers;
     final @NotNull ModifiableUserPropertiesImpl userProperties;
     final long timestamp;

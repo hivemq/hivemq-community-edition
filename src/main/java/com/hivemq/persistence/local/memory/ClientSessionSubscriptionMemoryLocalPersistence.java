@@ -164,8 +164,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
     }
 
     @Override
-    @NotNull
-    public ImmutableSet<Topic> getSubscriptions(@NotNull final String client) {
+    @NotNull public ImmutableSet<Topic> getSubscriptions(@NotNull final String client) {
         checkNotNull(client, "Clientid must not be null");
         final IterablePersistenceEntry<ImmutableSet<Topic>> entry =
                 buckets[BucketUtils.getBucket(client, bucketCount)].get(client);
@@ -177,8 +176,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistence implements ClientSe
     }
 
     @Override
-    @NotNull
-    public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
+    @NotNull public BucketChunkResult<Map<String, ImmutableSet<Topic>>> getAllSubscribersChunk(
             final int bucketIndex,
             @Nullable final String lastClientIdIgnored,
             final int maxResultsIgnored) {

@@ -278,13 +278,11 @@ public class PluginAuthorizerServiceImpl implements PluginAuthorizerService {
             this.result = result;
         }
 
-        @NotNull
-        public CONNECT getConnect() {
+        @NotNull public CONNECT getConnect() {
             return connect;
         }
 
-        @NotNull
-        public PublishAuthorizerResult getResult() {
+        @NotNull public PublishAuthorizerResult getResult() {
             return result;
         }
     }

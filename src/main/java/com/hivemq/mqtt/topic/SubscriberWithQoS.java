@@ -63,8 +63,7 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
         this.topicFilter = topicFilter;
     }
 
-    @NotNull
-    public String getSubscriber() {
+    @NotNull public String getSubscriber() {
         return subscriber;
     }
 
@@ -100,18 +99,15 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
         return Bytes.isBitSet(flags, SubscriptionFlag.NO_LOCAL.getFlagIndex());
     }
 
-    @Nullable
-    public String getSharedName() {
+    @Nullable public String getSharedName() {
         return sharedName;
     }
 
-    @Nullable
-    public Integer getSubscriptionIdentifier() {
+    @Nullable public Integer getSubscriptionIdentifier() {
         return subscriptionIdentifier;
     }
 
-    @Nullable
-    public String getTopicFilter() {
+    @Nullable public String getTopicFilter() {
         return topicFilter;
     }
 
@@ -153,8 +149,7 @@ public class SubscriberWithQoS implements Comparable<SubscriberWithQoS> {
         return subscriberCompare;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String toString() {
         return "SubscriberWithQoS{" + "subscriber='" + subscriber + '\'' + ", qos=" + qos + '}';
     }

@@ -34,8 +34,7 @@ import static org.mockito.Mockito.when;
 public class ProducerQueuesImplTest {
 
     private final @NotNull SingleWriterServiceImpl singleWriterServiceImpl = mock();
-    @NotNull
-    ProducerQueuesImpl producerQueues;
+    @NotNull ProducerQueuesImpl producerQueues;
     @Before
     public void setUp() throws Exception {
         when(singleWriterServiceImpl.getPersistenceBucketCount()).thenReturn(64);

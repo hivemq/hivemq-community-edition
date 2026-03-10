@@ -34,8 +34,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class ClientAuthenticatorsImpl implements ClientAuthenticators {
 
     private final @NotNull ReadWriteLock authenticatorLock;
-    @GuardedBy("authenticatorLock")
-    private final @NotNull Map<String, EnhancedAuthenticator> enhancedAuthenticatorMap;
+    @GuardedBy("authenticatorLock") private final @NotNull Map<String, EnhancedAuthenticator> enhancedAuthenticatorMap;
     public ClientAuthenticatorsImpl(final @NotNull ExtensionPriorityComparator extensionPriorityComparator) {
         this.enhancedAuthenticatorMap = new TreeMap<>(extensionPriorityComparator);
         this.authenticatorLock = new ReentrantReadWriteLock();

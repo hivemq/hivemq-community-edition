@@ -74,26 +74,22 @@ public class RetainedMessageXodusLocalPersistence_4_4 extends XodusLocalPersiste
         this.payloadPersistence = payloadPersistence;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected StoreConfig getStoreConfig() {
         return StoreConfig.WITHOUT_DUPLICATES;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected Logger getLogger() {
         return log;
     }

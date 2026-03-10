@@ -119,8 +119,7 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
         return DISCONNECTED_LOOKUP[reasonCode.ordinal()];
     }
 
-    @NotNull
-    public static Mqtt5ConnAckReasonCode fromReturnCode(@NotNull final Mqtt3ConnAckReturnCode returnCode) {
+    @NotNull public static Mqtt5ConnAckReasonCode fromReturnCode(@NotNull final Mqtt3ConnAckReturnCode returnCode) {
         switch (returnCode) {
             case ACCEPTED :
                 return Mqtt5ConnAckReasonCode.SUCCESS;
@@ -139,8 +138,7 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
         }
     }
 
-    @NotNull
-    public static Mqtt5ConnAckReasonCode fromDisconnectReasonCode(
+    @NotNull public static Mqtt5ConnAckReasonCode fromDisconnectReasonCode(
             @NotNull final DisconnectReasonCode disconnectReasonCode) {
         switch (disconnectReasonCode) {
             case NORMAL_DISCONNECTION :
@@ -197,8 +195,7 @@ public enum Mqtt5ConnAckReasonCode implements Mqtt5ReasonCode {
         }
     }
 
-    @NotNull
-    public static Mqtt5ConnAckReasonCode fromAckReasonCode(@NotNull final AckReasonCode ackReasonCode) {
+    @NotNull public static Mqtt5ConnAckReasonCode fromAckReasonCode(@NotNull final AckReasonCode ackReasonCode) {
         switch (ackReasonCode) {
             case SUCCESS :
                 return Mqtt5ConnAckReasonCode.SUCCESS;

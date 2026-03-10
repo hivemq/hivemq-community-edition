@@ -189,8 +189,7 @@ public class ConnectAuthOutput extends AuthOutput<EnhancedAuthOutput> implements
         reasonString = ReasonStrings.AUTH_FAILED_EXCEPTION;
     }
 
-    @NotNull
-    Mqtt5ConnAckReasonCode getReasonCode() {
+    @NotNull Mqtt5ConnAckReasonCode getReasonCode() {
         return reasonCode;
     }
 

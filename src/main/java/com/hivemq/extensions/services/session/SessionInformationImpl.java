@@ -24,8 +24,7 @@ import com.hivemq.extension.sdk.api.services.session.SessionInformation;
  */
 public class SessionInformationImpl implements SessionInformation {
 
-    @NotNull
-    private final String clientIdentifier;
+    @NotNull private final String clientIdentifier;
     private final long sessionExpiryInterval;
     private final boolean connected;
     public SessionInformationImpl(
@@ -37,8 +36,7 @@ public class SessionInformationImpl implements SessionInformation {
         this.connected = connected;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String getClientIdentifier() {
         return clientIdentifier;
     }

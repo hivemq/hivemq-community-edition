@@ -733,8 +733,7 @@ public class Mqtt5SubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         assertFalse(channel.isActive());
     }
 
-    @NotNull
-    private SUBSCRIBE decode(final byte @NotNull [] encoded) {
+    @NotNull private SUBSCRIBE decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

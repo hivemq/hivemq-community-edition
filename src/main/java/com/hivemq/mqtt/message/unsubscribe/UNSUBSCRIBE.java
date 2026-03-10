@@ -74,13 +74,11 @@ public class UNSUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3U
      * @return a list of topic the client wants to unsubscribe to
      */
     @Override
-    @NotNull
-    public ImmutableList<String> getTopics() {
+    @NotNull public ImmutableList<String> getTopics() {
         return topics;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public MessageType getType() {
         return MessageType.UNSUBSCRIBE;
     }

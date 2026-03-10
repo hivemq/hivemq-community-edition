@@ -50,8 +50,7 @@ abstract class AbstractEnhancedAuthTask<I extends PluginTaskInput, O extends Aut
 
     abstract void call(@NotNull EnhancedAuthenticator authenticator, @NotNull I input, @NotNull O output);
 
-    @Nullable
-    EnhancedAuthenticator updateAndGetAuthenticator() {
+    @Nullable EnhancedAuthenticator updateAndGetAuthenticator() {
         final EnhancedAuthenticator authenticator = clientAuthenticators.getAuthenticatorMap().get(extensionId);
         if ((authenticator != null) &&
                 authenticator.getClass().getClassLoader().equals(wrappedAuthenticatorProvider.getClassLoader())) {

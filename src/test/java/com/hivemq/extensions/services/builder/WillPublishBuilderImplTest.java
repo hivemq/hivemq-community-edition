@@ -314,8 +314,7 @@ public class WillPublishBuilderImplTest {
             return false;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Qos getQos() {
             return Qos.EXACTLY_ONCE;
         }
@@ -325,8 +324,7 @@ public class WillPublishBuilderImplTest {
             return true;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public String getTopic() {
             return "topic";
         }
@@ -336,26 +334,22 @@ public class WillPublishBuilderImplTest {
             return 0;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Optional<PayloadFormatIndicator> getPayloadFormatIndicator() {
             return Optional.of(PayloadFormatIndicator.UTF_8);
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Optional<Long> getMessageExpiryInterval() {
             return Optional.of(12345L);
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Optional<String> getResponseTopic() {
             return Optional.of("response_topic");
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Optional<ByteBuffer> getCorrelationData() {
             return Optional.of(ByteBuffer.wrap("correlation_data".getBytes()));
         }
@@ -365,20 +359,17 @@ public class WillPublishBuilderImplTest {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Optional<String> getContentType() {
             return Optional.of("content_type");
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Optional<ByteBuffer> getPayload() {
             return Optional.of(ByteBuffer.wrap("test3".getBytes()));
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public UserProperties getUserProperties() {
             return UserPropertiesImpl.of(ImmutableList.of(new MqttUserProperty("name", "value"),
                     new MqttUserProperty("name", "value2"),

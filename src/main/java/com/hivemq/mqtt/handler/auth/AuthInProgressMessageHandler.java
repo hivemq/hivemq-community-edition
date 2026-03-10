@@ -37,8 +37,7 @@ import javax.inject.Singleton;
 @Singleton
 public class AuthInProgressMessageHandler extends ChannelInboundHandlerAdapter {
 
-    @NotNull
-    private static final String DISCONNECT_LOG_MESSAGE = "The client with id %s and IP {} sent a message other than " +
+    @NotNull private static final String DISCONNECT_LOG_MESSAGE = "The client with id %s and IP {} sent a message other than " +
             "AUTH or DISCONNECT during enhanced authentication. " + "This is not allowed. Disconnecting client.";
     private final @NotNull MqttConnacker connacker;
     @VisibleForTesting

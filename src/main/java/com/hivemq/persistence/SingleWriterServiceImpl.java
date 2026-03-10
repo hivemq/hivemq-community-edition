@@ -20,7 +20,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
 import com.hivemq.configuration.service.InternalConfigurations;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.persistence.local.xodus.bucket.BucketUtils;
 import com.hivemq.util.Exceptions;
 import com.hivemq.util.ThreadFactoryUtil;
 import org.slf4j.Logger;
@@ -61,8 +60,7 @@ public class SingleWriterServiceImpl implements SingleWriterService {
     private final @NotNull AtomicLong globalTaskCount = new AtomicLong(0);
     private final @NotNull ProducerQueuesImpl @NotNull [] producers = new ProducerQueuesImpl[AMOUNT_OF_PRODUCERS];
     @VisibleForTesting
-    @NotNull
-    ExecutorService singleWriterExecutor;
+    @NotNull ExecutorService singleWriterExecutor;
     @VisibleForTesting
     final @NotNull ScheduledExecutorService checkScheduler;
     @Inject

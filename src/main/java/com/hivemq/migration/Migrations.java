@@ -51,8 +51,7 @@ public class Migrations {
     public static final String MIGRATION_LOGGER_NAME = "migrations";
     private static final Logger log = LoggerFactory.getLogger(Migrations.class);
     private static final Logger MIGRATION_LOGGER = LoggerFactory.getLogger(MIGRATION_LOGGER_NAME);
-    @NotNull
-    public static Map<MigrationUnit, PersistenceType> checkForTypeMigration(
+    @NotNull public static Map<MigrationUnit, PersistenceType> checkForTypeMigration(
             final @NotNull SystemInformation systemInformation) {
         MIGRATION_LOGGER.info("Checking for migrations (HiveMQ version {}).", systemInformation.getHiveMQVersion());
         final MetaInformation metaInformation = MetaFileService.readMetaFile(systemInformation);

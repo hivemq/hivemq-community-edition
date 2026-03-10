@@ -36,8 +36,7 @@ class ClientSessionTimestampSerializer {
      * @param  timestamp the timestamp to convert
      * @return           a six byte long byte array
      */
-    @NotNull
-    public byte[] timestampLongToByteArray(final long timestamp) {
+    @NotNull public byte[] timestampLongToByteArray(final long timestamp) {
         return new byte[]{(byte) timestamp, (byte) (timestamp >> 8), (byte) (timestamp >> 16), (byte) (timestamp >> 24),
                 (byte) (timestamp >> 32), (byte) (timestamp >> 40)};
     }

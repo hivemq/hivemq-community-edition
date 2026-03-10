@@ -106,8 +106,7 @@ public class PluginTaskExecutorServiceImpl implements PluginTaskExecutorService 
                 new PluginTaskExecution<>(pluginInOutContext, pluginInputSupplier, pluginOutputSupplier, pluginTask));
     }
 
-    @NotNull
-    private PluginTaskExecutor getPluginTaskExecutor(@NotNull final PluginTaskContext pluginTaskContext) {
+    @NotNull private PluginTaskExecutor getPluginTaskExecutor(@NotNull final PluginTaskContext pluginTaskContext) {
         final int bucket = BucketUtils.getBucket(pluginTaskContext.getIdentifier(), taskExecutorCount);
         return taskExecutors[bucket];
     }

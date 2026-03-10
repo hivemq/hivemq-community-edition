@@ -747,8 +747,7 @@ public class ClientSessionSubscriptionMemoryLocalPersistenceTest {
         assertEquals(100, clientIds.size());
     }
 
-    @NotNull
-    public ArrayList<String> getRandomUniqueIds() {
+    @NotNull public ArrayList<String> getRandomUniqueIds() {
         final Set<String> clientIdSet = new HashSet<>();
         final Random random = new Random();
         while (clientIdSet.size() < 100) {

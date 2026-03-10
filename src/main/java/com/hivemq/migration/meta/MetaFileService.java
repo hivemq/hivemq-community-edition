@@ -37,8 +37,7 @@ public class MetaFileService {
     public static final MetaInformationSerializer serializer = new MetaInformationSerializer();
     private static final Logger log = LoggerFactory.getLogger(MetaFileService.class);
     private static final Logger migrationlog = LoggerFactory.getLogger(Migrations.MIGRATION_LOGGER_NAME);
-    @NotNull
-    public static MetaInformation readMetaFile(final @NotNull SystemInformation systemInformation) {
+    @NotNull public static MetaInformation readMetaFile(final @NotNull SystemInformation systemInformation) {
         final File dataFolder = systemInformation.getDataFolder();
         final MetaInformation metaInformation = new MetaInformation();
         if (!dataFolder.exists()) {
@@ -82,8 +81,7 @@ public class MetaFileService {
         }
     }
 
-    @NotNull
-    private static File getMetaFile(final SystemInformation systemInformation) {
+    @NotNull private static File getMetaFile(final SystemInformation systemInformation) {
         return new File(systemInformation.getDataFolder(), META_FOLDER_NAME + File.separator + META_FILE_NAME);
     }
 }

@@ -41,8 +41,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param  clientId The id associated with the session
      * @return          A {@link ClientSession} object or {@code null} if there is no session stored for the given id
      */
-    @Nullable
-    ClientSession getSession(@NotNull String clientId);
+    @Nullable ClientSession getSession(@NotNull String clientId);
 
     /**
      * Get a {@link ClientSession} for a specific client id and a bucket index with an expired check.
@@ -51,8 +50,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param  bucketIndex The index of the bucket in which the session is stored
      * @return             A {@link ClientSession} object or {@code null} if there is no session stored for the given id
      */
-    @Nullable
-    ClientSession getSession(@NotNull String clientId, int bucketIndex);
+    @Nullable ClientSession getSession(@NotNull String clientId, int bucketIndex);
 
     /**
      * Get a {@link ClientSession} for a specific client id with an optional expired check.
@@ -62,8 +60,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return              A {@link ClientSession} object or {@code null} if there is no session stored for the given
      *                      id
      */
-    @Nullable
-    ClientSession getSession(@NotNull String clientId, boolean checkExpired);
+    @Nullable ClientSession getSession(@NotNull String clientId, boolean checkExpired);
 
     /**
      * Get a {@link ClientSession} for a specific client id and a bucket index with an expired check.
@@ -74,8 +71,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return              A {@link ClientSession} object or {@code null} if there is no session stored for the given
      *                      id
      */
-    @Nullable
-    ClientSession getSession(@NotNull String clientId, int bucketIndex, boolean checkExpired);
+    @Nullable ClientSession getSession(@NotNull String clientId, int bucketIndex, boolean checkExpired);
 
     /**
      * Get a {@link ClientSession} for a specific client id with an optional expired check.
@@ -87,16 +83,14 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return              A {@link ClientSession} object or {@code null} if there is no session stored for the given
      *                      id
      */
-    @Nullable
-    ClientSession getSession(@NotNull String clientId, boolean checkExpired, boolean includeWill);
+    @Nullable ClientSession getSession(@NotNull String clientId, boolean checkExpired, boolean includeWill);
 
     /**
      * @param  clientId The id associated with the session
      * @return          The timestamp of the client session (last connected/disconnected) or {@code null} if there is no
      *                  session stored for the given id
      */
-    @Nullable
-    Long getTimestamp(@NotNull String clientId);
+    @Nullable Long getTimestamp(@NotNull String clientId);
 
     /**
      * @param  clientId    The id associated with the session
@@ -104,8 +98,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return             The timestamp of the client session (last connected/disconnected) or null if there is no
      *                     session stored for the given id
      */
-    @Nullable
-    Long getTimestamp(@NotNull String clientId, int bucketIndex);
+    @Nullable Long getTimestamp(@NotNull String clientId, int bucketIndex);
 
     /**
      * Put a {@link ClientSession} for specific client id, timestamp and persistence bucket index into the persistence.
@@ -129,8 +122,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return                       the disconnected {@link ClientSession}.
      */
     @ExecuteInSingleWriter
-    @NotNull
-    ClientSession disconnect(
+    @NotNull ClientSession disconnect(
             @NotNull String clientId,
             long timestamp,
             boolean sendWill,
@@ -143,8 +135,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @param  bucketIndex The index of the bucket in which the client sessions are stored.
      * @return             A set of strings containing all client identifiers found.
      */
-    @NotNull
-    Set<@NotNull String> getAllClients(int bucketIndex);
+    @NotNull Set<@NotNull String> getAllClients(int bucketIndex);
 
     /**
      * Trigger a cleanup for a specific persistence bucket.
@@ -153,8 +144,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return             A set of strings containing all client identifiers which were cleaned up.
      */
     @ExecuteInSingleWriter
-    @NotNull
-    Set<@NotNull String> cleanUp(int bucketIndex);
+    @NotNull Set<@NotNull String> cleanUp(int bucketIndex);
 
     /**
      * get all client identifiers of all stored disconnected clients form a specific persistence bucket.
@@ -163,8 +153,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return             A set of strings containing all client identifiers of the found disconnected client sessions.
      */
     @VisibleForTesting
-    @NotNull
-    Set<@NotNull String> getDisconnectedClients(int bucketIndex);
+    @NotNull Set<@NotNull String> getDisconnectedClients(int bucketIndex);
 
     /**
      * @return the amount of not expired client sessions.
@@ -184,15 +173,13 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
     /**
      * @return the delay of all wills of disconnected clients that have not been sent yet. The key is the client id
      */
-    @NotNull
-    Map<String, PendingWillMessages.PendingWill> getPendingWills(int bucketIndex);
+    @NotNull Map<String, PendingWillMessages.PendingWill> getPendingWills(int bucketIndex);
 
     /**
      * Remove Will message of a client session.
      */
     @ExecuteInSingleWriter
-    @Nullable
-    PersistenceEntry<@NotNull ClientSession> deleteWill(@NotNull String clientId, int bucketIndex);
+    @Nullable PersistenceEntry<@NotNull ClientSession> deleteWill(@NotNull String clientId, int bucketIndex);
 
     /**
      * Gets a chunk of client sessions from the persistence.
@@ -205,8 +192,7 @@ public interface ClientSessionLocalPersistence extends LocalPersistence {
      * @return              a {@link BucketChunkResult} with the entries and the information if more chunks are
      *                      available
      */
-    @NotNull
-    BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
+    @NotNull BucketChunkResult<Map<String, ClientSession>> getAllClientsChunk(
             int bucketIndex,
             @Nullable String lastClientId,
             int maxResults);

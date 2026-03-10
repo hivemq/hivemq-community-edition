@@ -43,11 +43,10 @@ public class EnvVarUtilTest {
     @Test
     public void test_getValue_existing() throws Exception {
         when(envVarUtil.getValue(anyString())).thenCallRealMethod();
-        withEnvironmentVariable("TEST_EXISTING_ENVVAR", "iamset") //
-                .execute(() -> {
-                    final String result = envVarUtil.getValue("TEST_EXISTING_ENVVAR");
-                    assertEquals("iamset", result);
-                });
+        withEnvironmentVariable("TEST_EXISTING_ENVVAR", "iamset").execute(() -> {
+            final String result = envVarUtil.getValue("TEST_EXISTING_ENVVAR");
+            assertEquals("iamset", result);
+        });
     }
 
     @Test
@@ -65,12 +64,11 @@ public class EnvVarUtilTest {
         when(envVarUtil.getValue(anyString())).thenCallRealMethod();
         restoreSystemProperties(() -> {
             System.setProperty("test.existing.both", "iamset2");
-            withEnvironmentVariable("test.existing.both", "iamset") //
-                    .execute(() -> {
-                        final String result = envVarUtil.getValue("test.existing.both");
-                        // expect System.property to win
-                        assertEquals("iamset2", result);
-                    });
+            withEnvironmentVariable("test.existing.both", "iamset").execute(() -> {
+                final String result = envVarUtil.getValue("test.existing.both");
+                // expect System.property to win
+                assertEquals("iamset2", result);
+            });
         });
     }
 

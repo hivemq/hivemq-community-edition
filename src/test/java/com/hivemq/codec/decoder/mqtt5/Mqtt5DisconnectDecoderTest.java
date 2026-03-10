@@ -702,8 +702,7 @@ public class Mqtt5DisconnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertTrue(logCapture.getLastCapturedLog().getFormattedMessage().contains("invalid property identifier '-1'"));
     }
 
-    @NotNull
-    private DISCONNECT decode(final byte @NotNull [] encoded) {
+    @NotNull private DISCONNECT decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

@@ -40,8 +40,7 @@ public class AuthenticatorsImpl implements Authenticators {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorsImpl.class);
     private final @NotNull ReadWriteLock authenticatorsLock = new ReentrantReadWriteLock();
-    @GuardedBy("authenticatorsLock")
-    private final @NotNull TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
+    @GuardedBy("authenticatorsLock") private final @NotNull TreeMap<String, WrappedAuthenticatorProvider> authenticatorPluginMap;
     private final @NotNull HiveMQExtensions hiveMQExtensions;
     @Inject
     public AuthenticatorsImpl(final @NotNull HiveMQExtensions hiveMQExtensions) {

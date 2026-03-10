@@ -51,8 +51,7 @@ public class ContainerEnvironment {
         return null;
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     File getCgroupFile() {
         final long pid = ProcessHandle.current().pid();
         return new File("/proc/" + pid + "/cgroup");

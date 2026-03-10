@@ -34,10 +34,8 @@ import java.util.concurrent.ThreadFactory;
 @LazySingleton
 public class PersistenceExecutorProvider implements Provider<ListeningExecutorService> {
 
-    @Nullable
-    private ListeningExecutorService executorService;
-    @NotNull
-    @Override
+    @Nullable private ListeningExecutorService executorService;
+    @NotNull @Override
     @Persistence
     public ListeningExecutorService get() {
         if (executorService == null) {

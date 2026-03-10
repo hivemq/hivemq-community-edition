@@ -40,8 +40,7 @@ public interface ConnectionPersistence {
      * @param  clientId The client identifier.
      * @return          The ClientConnection of the client or {@code null} if not found.
      */
-    @Nullable
-    ClientConnection get(@NotNull String clientId);
+    @Nullable ClientConnection get(@NotNull String clientId);
 
     /**
      * Try to persist a ClientConnection. This method stores one ClientConnection per unique client ID. Returns the
@@ -50,8 +49,7 @@ public interface ConnectionPersistence {
      * @param  clientConnection The ClientConnection to persist.
      * @return                  ClientConnection persisted in ConnectionPersistence after the operation completes.
      */
-    @NotNull
-    ClientConnection persistIfAbsent(@NotNull ClientConnection clientConnection);
+    @NotNull ClientConnection persistIfAbsent(@NotNull ClientConnection clientConnection);
 
     /**
      * Remove a {@link ClientConnection} from the persistence, for a specific client id.
@@ -62,8 +60,7 @@ public interface ConnectionPersistence {
 
     void addServerChannel(@NotNull String listenerName, @NotNull Channel channel);
 
-    @NotNull
-    ListenableFuture<Void> shutDown();
+    @NotNull ListenableFuture<Void> shutDown();
 
     void interruptShutdown();
 }

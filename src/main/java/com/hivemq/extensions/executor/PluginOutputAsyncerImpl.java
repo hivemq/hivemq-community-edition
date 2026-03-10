@@ -41,10 +41,8 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class PluginOutputAsyncerImpl implements PluginOutPutAsyncer {
 
-    @NotNull
-    private final ScheduledExecutorService scheduledExecutor;
-    @NotNull
-    private final ShutdownHooks shutdownHooks;
+    @NotNull private final ScheduledExecutorService scheduledExecutor;
+    @NotNull private final ShutdownHooks shutdownHooks;
     @PostConstruct
     public void postConstruct() {
         shutdownHooks.add(new PluginOutputAsyncerShutdownHook(scheduledExecutor));

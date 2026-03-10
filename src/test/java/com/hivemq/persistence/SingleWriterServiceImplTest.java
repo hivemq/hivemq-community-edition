@@ -98,8 +98,7 @@ public class SingleWriterServiceImplTest {
         public void shutdown() {
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public List<Runnable> shutdownNow() {
             return null;
         }
@@ -119,33 +118,28 @@ public class SingleWriterServiceImplTest {
             return false;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public <T> Future<T> submit(@NotNull final Callable<T> task) {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public <T> Future<T> submit(@NotNull final Runnable task, final T result) {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Future<?> submit(@NotNull final Runnable task) {
             return SettableFuture.create();
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public <T> List<Future<T>> invokeAll(@NotNull final Collection<? extends Callable<T>> tasks)
                 throws InterruptedException {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public <T> List<Future<T>> invokeAll(
                 @NotNull final Collection<? extends Callable<T>> tasks,
                 final long timeout,
@@ -153,8 +147,7 @@ public class SingleWriterServiceImplTest {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public <T> T invokeAny(@NotNull final Collection<? extends Callable<T>> tasks)
                 throws InterruptedException, ExecutionException {
             return null;

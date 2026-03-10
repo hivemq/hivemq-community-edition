@@ -306,8 +306,7 @@ public class Mqtt5PubackDecoderTest extends AbstractMqtt5DecoderTest {
         assertNull(pubAck);
     }
 
-    @NotNull
-    private PUBACK decode(final byte @NotNull [] encoded) {
+    @NotNull private PUBACK decode(final byte @NotNull [] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

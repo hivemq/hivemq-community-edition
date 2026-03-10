@@ -44,8 +44,7 @@ public interface MqttConnacker {
      * @param  connect the CONNECT message sent by the MQTT client.
      * @return         the connack sent future that completes when the CONNACK is sent
      */
-    @NotNull
-    ChannelFuture connackSuccess(
+    @NotNull ChannelFuture connackSuccess(
             @NotNull ChannelHandlerContext ctx,
             @NotNull CONNACK connack,
             @NotNull CONNECT connect);

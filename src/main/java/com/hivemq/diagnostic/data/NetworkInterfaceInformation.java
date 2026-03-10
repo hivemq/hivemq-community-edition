@@ -65,8 +65,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         return stringBuilder;
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getIsLoopback(final @NotNull NetworkInterface networkInterface) {
         try {
             return String.valueOf(networkInterface.isLoopback());
@@ -75,8 +74,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getIsP2P(final @NotNull NetworkInterface networkInterface) {
         try {
             return String.valueOf(networkInterface.isPointToPoint());
@@ -85,8 +83,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getIsUp(final @NotNull NetworkInterface networkInterface) {
         try {
             return String.valueOf(networkInterface.isUp());
@@ -95,8 +92,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getIsVirtual(final @NotNull NetworkInterface networkInterface) {
         try {
             return String.valueOf(networkInterface.isVirtual());
@@ -105,8 +101,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getSupportsMulticast(final @NotNull NetworkInterface networkInterface) {
         try {
             return String.valueOf(networkInterface.supportsMulticast());
@@ -115,8 +110,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getMTU(final @NotNull NetworkInterface networkInterface) {
         try {
             return String.valueOf(networkInterface.getMTU());
@@ -125,8 +119,7 @@ class NetworkInterfaceInformation extends AbstractInformation {
         }
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     String getMacAddress(final @NotNull NetworkInterface networkInterface) {
         try {
             final byte[] hardwareAddress = networkInterface.getHardwareAddress();

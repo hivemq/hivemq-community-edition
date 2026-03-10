@@ -41,12 +41,9 @@ public class WrappedAuthenticatorProvider {
                     "nor EnhancedAuthenticator. The authenticator will be ignored.";
     private static final String UNCAUGHT_EXCEPTION_LOG_STATEMENT = "Uncaught exception was thrown in " +
             "AuthenticatorProvider from extension. Extensions are responsible on their own to handle exceptions.";
-    @Nullable
-    private final AuthenticatorProvider simpleAuthenticatorProvider;
-    @Nullable
-    private final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider;
-    @NotNull
-    private final ClassLoader classLoader;
+    @Nullable private final AuthenticatorProvider simpleAuthenticatorProvider;
+    @Nullable private final EnhancedAuthenticatorProvider enhancedAuthenticatorProvider;
+    @NotNull private final ClassLoader classLoader;
     public WrappedAuthenticatorProvider(
             @NotNull final AuthenticatorProvider simpleAuthenticatorProvider,
             @NotNull final ClassLoader classLoader) {
@@ -67,8 +64,7 @@ public class WrappedAuthenticatorProvider {
         return classLoader;
     }
 
-    @Nullable
-    public SimpleAuthenticator getAuthenticator(@NotNull final AuthenticatorProviderInput authenticatorProviderInput) {
+    @Nullable public SimpleAuthenticator getAuthenticator(@NotNull final AuthenticatorProviderInput authenticatorProviderInput) {
         if (enhancedAuthenticatorProvider != null) {
             return null;
         }
@@ -89,8 +85,7 @@ public class WrappedAuthenticatorProvider {
         }
     }
 
-    @Nullable
-    public EnhancedAuthenticator getEnhancedAuthenticator(
+    @Nullable public EnhancedAuthenticator getEnhancedAuthenticator(
             @NotNull final AuthenticatorProviderInput authenticatorProviderInput) {
         if (enhancedAuthenticatorProvider == null) {
             return null;

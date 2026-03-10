@@ -37,13 +37,11 @@ public class PersistenceEntry<T extends Sizable> implements Sizable {
         return timestamp;
     }
 
-    @NotNull
-    public T getObject() {
+    @NotNull public T getObject() {
         return object;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String toString() {
         return object.toString();
     }

@@ -23,8 +23,7 @@ import com.hivemq.extension.sdk.api.services.subscription.SubscriberForTopicResu
  */
 public class SubscriberForTopicResultImpl implements SubscriberForTopicResult {
 
-    @NotNull
-    private final String clientId;
+    @NotNull private final String clientId;
     public SubscriberForTopicResultImpl(@NotNull final String clientId) {
         this.clientId = clientId;
     }
@@ -32,8 +31,7 @@ public class SubscriberForTopicResultImpl implements SubscriberForTopicResult {
     /**
      * @return the subscribers MQTT client identifier
      */
-    @NotNull
-    public String getClientId() {
+    @NotNull public String getClientId() {
         return clientId;
     }
 }

@@ -55,7 +55,7 @@ public class LifecycleModuleTest {
     }
     /*
      * **********************
-     * 
+     *
      * @PostConstruct tests * ******************+
      **/
 
@@ -261,7 +261,7 @@ public class LifecycleModuleTest {
     }
     /*
      * ***************************************
-     * 
+     *
      * @Postconstruct tests with inheritance *
      ***************************************/
     @Test
@@ -319,7 +319,7 @@ public class LifecycleModuleTest {
     }
     /*
      * **********************
-     * 
+     *
      * @PreDestroy tests * ******************+
      **/
     @Test
@@ -478,7 +478,7 @@ public class LifecycleModuleTest {
     }
     /*
      * **************************************
-     * 
+     *
      * @PreDestroy and @PostConstruct tests * ***********************************+
      **/
     @Test

@@ -58,18 +58,12 @@ import static com.hivemq.mqtt.message.publish.PUBLISH.MESSAGE_EXPIRY_INTERVAL_NO
 @LazySingleton
 public class PublishServiceImpl implements PublishService {
 
-    @NotNull
-    private final PluginServiceRateLimitService rateLimitService;
-    @NotNull
-    private final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService;
-    @NotNull
-    private final InternalPublishService internalPublishService;
-    @NotNull
-    private final PublishDistributor publishDistributor;
-    @NotNull
-    private final HivemqId hiveMQId;
-    @NotNull
-    private final LocalTopicTree topicTree;
+    @NotNull private final PluginServiceRateLimitService rateLimitService;
+    @NotNull private final GlobalManagedExtensionExecutorService globalManagedExtensionExecutorService;
+    @NotNull private final InternalPublishService internalPublishService;
+    @NotNull private final PublishDistributor publishDistributor;
+    @NotNull private final HivemqId hiveMQId;
+    @NotNull private final LocalTopicTree topicTree;
     @Inject
     public PublishServiceImpl(
             @NotNull final PluginServiceRateLimitService rateLimitService,
@@ -87,8 +81,7 @@ public class PublishServiceImpl implements PublishService {
     }
 
     @Override
-    @NotNull
-    public CompletableFuture<Void> publish(@NotNull final Publish publish) {
+    @NotNull public CompletableFuture<Void> publish(@NotNull final Publish publish) {
         checkNotNull(publish, "Publish must never be null");
         if (rateLimitService.rateLimitExceeded()) {
             return CompletableFuture.failedFuture(PluginServiceRateLimitService.RATE_LIMIT_EXCEEDED_EXCEPTION);
@@ -103,8 +96,7 @@ public class PublishServiceImpl implements PublishService {
     }
 
     @Override
-    @NotNull
-    public CompletableFuture<PublishToClientResult> publishToClient(
+    @NotNull public CompletableFuture<PublishToClientResult> publishToClient(
             @NotNull final Publish publish,
             @NotNull final String clientId) {
         checkNotNull(publish, "Publish must never be null");
@@ -145,8 +137,7 @@ public class PublishServiceImpl implements PublishService {
         return ListenableFutureConverter.toCompletable(sendPublishFuture, globalManagedExtensionExecutorService);
     }
 
-    @NotNull
-    private PUBLISH publishToPUBLISH(@NotNull final PublishImpl publish) {
+    @NotNull private PUBLISH publishToPUBLISH(@NotNull final PublishImpl publish) {
         final byte[] payload = Bytes.getBytesFromReadOnlyBuffer(publish.getPayload());
         final byte[] correlationData = Bytes.getBytesFromReadOnlyBuffer(publish.getCorrelationData());
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator = publish.getPayloadFormatIndicator().isPresent() ?

@@ -58,20 +58,16 @@ public interface Mqtt5CONNECT extends Message {
     boolean isProblemInformationRequested();
 
     // simple auth
-    @Nullable
-    String getUsername();
+    @Nullable String getUsername();
 
     byte @Nullable [] getPassword();
 
-    @Nullable
-    String getPasswordAsUTF8String();
+    @Nullable String getPasswordAsUTF8String();
 
     // enhanced auth
-    @Nullable
-    String getAuthMethod();
+    @Nullable String getAuthMethod();
 
     byte @Nullable [] getAuthData();
 
-    @Nullable
-    MqttWillPublish getWillPublish();
+    @Nullable MqttWillPublish getWillPublish();
 }

@@ -24,8 +24,7 @@ import com.hivemq.mqtt.message.ProtocolVersion;
  */
 public class MqttVersionUtil {
 
-    @NotNull
-    public static MqttVersion toMqttVersion(@NotNull final ProtocolVersion protocolVersion) {
+    @NotNull public static MqttVersion toMqttVersion(@NotNull final ProtocolVersion protocolVersion) {
         switch (protocolVersion) {
             case MQTTv3_1 :
                 return MqttVersion.V_3_1;
@@ -38,8 +37,7 @@ public class MqttVersionUtil {
         }
     }
 
-    @NotNull
-    public static ProtocolVersion toProtocolVersion(@NotNull final MqttVersion mqttVersion) {
+    @NotNull public static ProtocolVersion toProtocolVersion(@NotNull final MqttVersion mqttVersion) {
         switch (mqttVersion) {
             case V_3_1 :
                 return ProtocolVersion.MQTTv3_1;

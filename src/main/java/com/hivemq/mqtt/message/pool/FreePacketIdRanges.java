@@ -158,8 +158,7 @@ public class FreePacketIdRanges {
 
         int start;
         int end;
-        @Nullable
-        Range next;
+        @Nullable Range next;
         Range(final int start, final int end) {
             this.start = start;
             this.end = end;

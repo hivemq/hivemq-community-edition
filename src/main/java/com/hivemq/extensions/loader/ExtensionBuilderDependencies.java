@@ -30,6 +30,5 @@ public interface ExtensionBuilderDependencies {
      * @return a {@link ImmutableMap} which contains all dependencies which are accessible via {@link Builders} in an
      *         extension
      */
-    @NotNull
-    ImmutableMap<String, Supplier<Object>> getDependenciesMap();
+    @NotNull ImmutableMap<String, Supplier<Object>> getDependenciesMap();
 }

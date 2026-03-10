@@ -59,18 +59,15 @@ public class PublishPayloadRocksDBLocalPersistence_4_4 extends RocksDBLocalPersi
                 false);
     }
 
-    @NotNull
-    protected String getName() {
+    @NotNull protected String getName() {
         return PublishPayloadLocalPersistence.PERSISTENCE_NAME;
     }
 
-    @NotNull
-    protected String getVersion() {
+    @NotNull protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    protected Logger getLogger() {
+    @NotNull protected Logger getLogger() {
         return log;
     }
 
@@ -84,8 +81,7 @@ public class PublishPayloadRocksDBLocalPersistence_4_4 extends RocksDBLocalPersi
         // noop
     }
 
-    @Nullable
-    public byte[] get(final long id) {
+    @Nullable public byte[] get(final long id) {
         final RocksDB bucket = getRocksDb(Long.toString(id));
         try {
             return bucket.get(serializeKey(id));

@@ -66,8 +66,7 @@ public class SUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3SUB
                 DEFAULT_NO_SUBSCRIPTION_IDENTIFIER);
     }
 
-    @NotNull
-    public static SUBSCRIBE from(final @NotNull SubscribePacketImpl packet) {
+    @NotNull public static SUBSCRIBE from(final @NotNull SubscribePacketImpl packet) {
         final ImmutableList.Builder<Topic> subscriptionBuilder = ImmutableList.builder();
         packet.getSubscriptions()
                 .forEach(subscription -> subscriptionBuilder.add(
@@ -88,8 +87,7 @@ public class SUBSCRIBE extends MqttMessageWithUserProperties implements Mqtt3SUB
         return subscriptionIdentifier;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public MessageType getType() {
         return MessageType.SUBSCRIBE;
     }

@@ -223,15 +223,11 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
     }
     private static class MultiInitializerTaskContext extends PluginInOutTaskContext<ClientContextPluginImpl> {
 
-        @NotNull
-        private final ChannelHandlerContext channelHandlerContext;
-        @NotNull
-        private final SettableFuture<Void> initializeFuture;
-        @NotNull
-        private final ClientContextImpl clientContext;
+        @NotNull private final ChannelHandlerContext channelHandlerContext;
+        @NotNull private final SettableFuture<Void> initializeFuture;
+        @NotNull private final ClientContextImpl clientContext;
         private final int initializerSize;
-        @NotNull
-        private final AtomicInteger counter = new AtomicInteger(0);
+        @NotNull private final AtomicInteger counter = new AtomicInteger(0);
         MultiInitializerTaskContext(
                 final @NotNull String clientId,
                 final @NotNull ChannelHandlerContext channelHandlerContext,
@@ -267,17 +263,14 @@ public class PluginInitializerHandler extends ChannelOutboundHandlerAdapter {
 
     private static class InitializeTask implements PluginInOutTask<InitializerInputImpl, ClientContextPluginImpl> {
 
-        @NotNull
-        private final ClientInitializer clientInitializer;
-        @NotNull
-        private final String pluginId;
+        @NotNull private final ClientInitializer clientInitializer;
+        @NotNull private final String pluginId;
         InitializeTask(final @NotNull ClientInitializer clientInitializer, final @NotNull String pluginId) {
             this.clientInitializer = clientInitializer;
             this.pluginId = pluginId;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public ClientContextPluginImpl apply(
                 final @NotNull InitializerInputImpl initializerInput,
                 final @NotNull ClientContextPluginImpl clientContext) {

@@ -34,44 +34,37 @@ public class TestTopicPermissionsUtil {
     @SuppressWarnings("NullabilityAnnotations")
     public static class TestTopicPermission implements TopicPermission {
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public String getTopicFilter() {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public PermissionType getType() {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Qos getQos() {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public MqttActivity getActivity() {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public Retain getPublishRetain() {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public SharedSubscription getSharedSubscription() {
             return null;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public String getSharedGroup() {
             return null;
         }

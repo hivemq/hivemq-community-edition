@@ -51,8 +51,7 @@ public class CloudPlatform {
         return null;
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     File getUuidFile() {
         return new File("/sys/hypervisor/uuid");
     }

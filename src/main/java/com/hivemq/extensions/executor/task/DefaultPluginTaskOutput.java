@@ -26,8 +26,7 @@ import com.hivemq.extension.sdk.api.async.TimeoutFallback;
 public class DefaultPluginTaskOutput implements PluginTaskOutput {
 
     private static final DefaultPluginTaskOutput INSTANCE = new DefaultPluginTaskOutput();
-    @NotNull
-    public static DefaultPluginTaskOutput getInstance() {
+    @NotNull public static DefaultPluginTaskOutput getInstance() {
         return INSTANCE;
     }
 
@@ -59,8 +58,7 @@ public class DefaultPluginTaskOutput implements PluginTaskOutput {
         // noop
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public SettableFuture<Boolean> getAsyncFuture() {
         return null;
     }

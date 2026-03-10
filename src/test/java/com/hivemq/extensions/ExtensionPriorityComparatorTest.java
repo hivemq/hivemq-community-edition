@@ -90,8 +90,7 @@ public class ExtensionPriorityComparatorTest {
         assertEquals(-1, comparator.compare("extension-1", "extension-3"));
     }
 
-    @NotNull
-    private HiveMQExtension getHiveMQExtension(final int priority) {
+    @NotNull private HiveMQExtension getHiveMQExtension(final int priority) {
         final HiveMQExtension extension = mock(HiveMQExtension.class);
         when(extension.getPriority()).thenReturn(priority);
         return extension;

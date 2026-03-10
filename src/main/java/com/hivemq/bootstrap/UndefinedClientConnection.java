@@ -49,75 +49,44 @@ public class UndefinedClientConnection implements ClientConnectionContext {
     final @NotNull PublishFlushHandler publishFlushHandler;
     final @NotNull Listener connectedListener;
     volatile @NotNull ClientState clientState = ClientState.CONNECTING;
-    @Nullable
-    ProtocolVersion protocolVersion;
-    @Nullable
-    String clientId;
+    @Nullable ProtocolVersion protocolVersion;
+    @Nullable String clientId;
     boolean cleanStart;
-    @Nullable
-    ModifiableDefaultPermissions authPermissions;
-    @Nullable
-    MqttWillPublish willPublish;
-    @Nullable
-    Integer clientReceiveMaximum;
-    @Nullable
-    Integer connectKeepAlive;
-    @Nullable
-    Long queueSizeMaximum;
-    @Nullable
-    Long clientSessionExpiryInterval;
-    @Nullable
-    Long connectReceivedTimestamp;
-    @NotNull
-    String @Nullable [] topicAliasMapping;
+    @Nullable ModifiableDefaultPermissions authPermissions;
+    @Nullable MqttWillPublish willPublish;
+    @Nullable Integer clientReceiveMaximum;
+    @Nullable Integer connectKeepAlive;
+    @Nullable Long queueSizeMaximum;
+    @Nullable Long clientSessionExpiryInterval;
+    @Nullable Long connectReceivedTimestamp;
+    @NotNull String @Nullable [] topicAliasMapping;
     boolean clientIdAssigned;
     boolean incomingPublishesSkipRest;
     boolean requestResponseInformation;
-    @Nullable
-    Boolean requestProblemInformation;
-    @Nullable
-    SettableFuture<Void> disconnectFuture;
-    @Nullable
-    ConnectionAttributes connectionAttributes;
+    @Nullable Boolean requestProblemInformation;
+    @Nullable SettableFuture<Void> disconnectFuture;
+    @Nullable ConnectionAttributes connectionAttributes;
     boolean sendWill = true;
     boolean preventLwt;
-    @Nullable
-    SslClientCertificate authCertificate;
-    @Nullable
-    String authSniHostname;
-    @Nullable
-    String authCipherSuite;
-    @Nullable
-    String authProtocol;
-    @Nullable
-    String authUsername;
+    @Nullable SslClientCertificate authCertificate;
+    @Nullable String authSniHostname;
+    @Nullable String authCipherSuite;
+    @Nullable String authProtocol;
+    @Nullable String authUsername;
     byte @Nullable [] authPassword;
-    @Nullable
-    CONNECT authConnect;
-    @Nullable
-    String authMethod;
-    @Nullable
-    ByteBuffer authData;
-    @Nullable
-    Mqtt5UserProperties authUserProperties;
-    @Nullable
-    ScheduledFuture<?> authFuture;
-    @Nullable
-    Boolean clearPasswordAfterAuth;
-    @Nullable
-    Long maxPacketSizeSend;
-    @Nullable
-    ClientContextImpl extensionClientContext;
-    @Nullable
-    ClientEventListeners extensionClientEventListeners;
-    @Nullable
-    ClientAuthenticators extensionClientAuthenticators;
-    @Nullable
-    ClientAuthorizers extensionClientAuthorizers;
-    @Nullable
-    ClientInformation extensionClientInformation;
-    @Nullable
-    ConnectionInformation extensionConnectionInformation;
+    @Nullable CONNECT authConnect;
+    @Nullable String authMethod;
+    @Nullable ByteBuffer authData;
+    @Nullable Mqtt5UserProperties authUserProperties;
+    @Nullable ScheduledFuture<?> authFuture;
+    @Nullable Boolean clearPasswordAfterAuth;
+    @Nullable Long maxPacketSizeSend;
+    @Nullable ClientContextImpl extensionClientContext;
+    @Nullable ClientEventListeners extensionClientEventListeners;
+    @Nullable ClientAuthenticators extensionClientAuthenticators;
+    @Nullable ClientAuthorizers extensionClientAuthorizers;
+    @Nullable ClientInformation extensionClientInformation;
+    @Nullable ConnectionInformation extensionConnectionInformation;
     public UndefinedClientConnection(
             final @NotNull Channel channel,
             final @NotNull PublishFlushHandler publishFlushHandler,

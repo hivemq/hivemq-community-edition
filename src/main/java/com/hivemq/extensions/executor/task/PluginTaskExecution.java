@@ -28,22 +28,14 @@ import java.util.function.Supplier;
  */
 public class PluginTaskExecution<I extends PluginTaskInput, O extends PluginTaskOutput> {
 
-    @NotNull
-    private final PluginTaskContext pluginInOutContext;
-    @Nullable
-    private final Supplier<I> pluginInputSupplier;
-    @Nullable
-    private final Supplier<O> pluginOutputSupplier;
-    @NotNull
-    private final PluginTask pluginTask;
-    @Nullable
-    private O output;
-    @Nullable
-    private I input;
-    @NotNull
-    private final AtomicBoolean async = new AtomicBoolean(false);
-    @NotNull
-    private final AtomicBoolean done = new AtomicBoolean(false);
+    @NotNull private final PluginTaskContext pluginInOutContext;
+    @Nullable private final Supplier<I> pluginInputSupplier;
+    @Nullable private final Supplier<O> pluginOutputSupplier;
+    @NotNull private final PluginTask pluginTask;
+    @Nullable private O output;
+    @Nullable private I input;
+    @NotNull private final AtomicBoolean async = new AtomicBoolean(false);
+    @NotNull private final AtomicBoolean done = new AtomicBoolean(false);
     public PluginTaskExecution(
             @NotNull final PluginTaskContext pluginInOutContext,
             @Nullable final Supplier<I> pluginInputSupplier,
@@ -55,13 +47,11 @@ public class PluginTaskExecution<I extends PluginTaskInput, O extends PluginTask
         this.pluginTask = pluginTask;
     }
 
-    @NotNull
-    public PluginTaskContext getPluginContext() {
+    @NotNull public PluginTaskContext getPluginContext() {
         return pluginInOutContext;
     }
 
-    @NotNull
-    public PluginTask getPluginTask() {
+    @NotNull public PluginTask getPluginTask() {
         return pluginTask;
     }
 
@@ -81,16 +71,14 @@ public class PluginTaskExecution<I extends PluginTaskInput, O extends PluginTask
         this.done.set(true);
     }
 
-    @Nullable
-    public O getOutputObject() {
+    @Nullable public O getOutputObject() {
         if (output == null && pluginOutputSupplier != null) {
             output = pluginOutputSupplier.get();
         }
         return output;
     }
 
-    @Nullable
-    public I getInputObject() {
+    @Nullable public I getInputObject() {
         if (input == null && pluginInputSupplier != null) {
             input = pluginInputSupplier.get();
         }

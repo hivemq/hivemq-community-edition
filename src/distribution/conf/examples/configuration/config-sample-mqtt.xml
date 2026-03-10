@@ -16,7 +16,6 @@
   -->
 
 <hivemq>
-
     <listeners>
         <tcp-listener>
             <port>1883</port>
@@ -24,58 +23,44 @@
         </tcp-listener>
     </listeners>
     <mqtt>
-
         <queued-messages>
             <max-queue-size>1000</max-queue-size>
             <strategy>discard</strategy>
         </queued-messages>
-
         <topic-alias>
             <enabled>true</enabled>
             <max-per-client>5</max-per-client>
         </topic-alias>
-
         <message-expiry>
             <max-interval>4294967296</max-interval> <!-- this value means no message expiry -->
         </message-expiry>
-
         <session-expiry>
             <max-interval>4294967295</max-interval> <!-- ~ 130 years -->
-
         </session-expiry>
-
         <keep-alive>
             <allow-unlimited>true</allow-unlimited>
             <max-keep-alive>65535</max-keep-alive>
         </keep-alive>
-
         <packets>
             <max-packet-size>268435460</max-packet-size> <!-- 256 MB -->
         </packets>
-
         <receive-maximum>
             <server-receive-maximum>10</server-receive-maximum>
         </receive-maximum>
-
         <quality-of-service>
             <max-qos>2</max-qos>
         </quality-of-service>
-
         <wildcard-subscriptions>
             <enabled>true</enabled>
         </wildcard-subscriptions>
-
         <shared-subscriptions>
             <enabled>true</enabled>
         </shared-subscriptions>
-
         <subscription-identifier>
             <enabled>true</enabled>
         </subscription-identifier>
-
         <retained-messages>
             <enabled>true</enabled>
         </retained-messages>
-
     </mqtt>
 </hivemq>

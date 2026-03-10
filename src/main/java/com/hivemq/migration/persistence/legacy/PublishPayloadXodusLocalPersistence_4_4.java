@@ -69,26 +69,22 @@ public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersisten
         this.serializer = new PublishPayloadXodusSerializer_4_4();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getName() {
         return PublishPayloadLocalPersistence.PERSISTENCE_NAME;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected StoreConfig getStoreConfig() {
         return StoreConfig.WITHOUT_DUPLICATES_WITH_PREFIXING;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected Logger getLogger() {
         return log;
     }
@@ -103,8 +99,7 @@ public class PublishPayloadXodusLocalPersistence_4_4 extends XodusLocalPersisten
         // noop
     }
 
-    @Nullable
-    public byte[] get(final long id) {
+    @Nullable public byte[] get(final long id) {
         final Bucket bucket = getBucket(Long.toString(id));
         return bucket.getEnvironment().computeInReadonlyTransaction(transaction -> {
             final Map<Long, byte[]> chunks = new HashMap<>();

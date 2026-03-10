@@ -76,8 +76,7 @@ public class RetainedPublishImpl extends PublishImpl implements RetainedPublish 
                 UserPropertiesImpl.of(retainedMessage.getUserProperties().asList()));
     }
 
-    @NotNull
-    public static RetainedMessage convert(@NotNull final RetainedPublishImpl retainedPublish) {
+    @NotNull public static RetainedMessage convert(@NotNull final RetainedPublishImpl retainedPublish) {
         final byte[] payloadAsArray = getBytesFromReadOnlyBuffer(retainedPublish.getPayload());
         final byte[] correlationDataAsArray = getBytesFromReadOnlyBuffer(retainedPublish.getCorrelationData());
         final Mqtt5PayloadFormatIndicator payloadFormatIndicator =

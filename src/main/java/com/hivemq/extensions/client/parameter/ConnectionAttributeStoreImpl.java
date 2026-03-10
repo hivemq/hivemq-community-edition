@@ -62,8 +62,7 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
         put(key, ByteBuffer.wrap(value.getBytes(charset)));
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Optional<ByteBuffer> get(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         final ConnectionAttributes connectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
@@ -73,15 +72,13 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
         return connectionAttributes.get(key);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Optional<String> getAsString(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         return getAsString(key, DEFAULT_CHARSET);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Optional<String> getAsString(@NotNull final String key, @NotNull final Charset charset) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         Preconditions.checkNotNull(charset, "Charset of connection attribute must not be null.");
@@ -92,8 +89,7 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
         return Optional.of(new String(bytes, charset));
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Optional<Map<String, ByteBuffer>> getAll() {
         final ConnectionAttributes connectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);
         if (connectionAttributes == null) {
@@ -102,8 +98,7 @@ public class ConnectionAttributeStoreImpl implements ConnectionAttributeStore {
         return connectionAttributes.getAll();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Optional<ByteBuffer> remove(@NotNull final String key) {
         Preconditions.checkNotNull(key, "Key of connection attribute must not be null.");
         final ConnectionAttributes connectionAttributes = ConnectionAttributes.getInstanceIfPresent(channel);

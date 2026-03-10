@@ -230,8 +230,7 @@ public class HiveMQExtensionsExtensionTest extends AbstractExtensionTest {
     }
     private static class ExtensionStopCallback implements Consumer<HiveMQExtension> {
 
-        @Nullable
-        HiveMQExtension hiveMQExtension;
+        @Nullable HiveMQExtension hiveMQExtension;
         int count;
         @Override
         public void accept(final @NotNull HiveMQExtension hiveMQExtension) {

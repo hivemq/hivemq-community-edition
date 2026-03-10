@@ -17,11 +17,10 @@ package com.hivemq.logging;
 
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.bootstrap.ioc.lazysingleton.LazySingleton;
+import com.hivemq.configuration.service.entity.Listener;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.mqtt.message.reason.Mqtt5AuthReasonCode;
-import com.hivemq.configuration.service.entity.Listener;
-
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,8 +237,7 @@ public class EventLog {
                 disconnectedSinceDateTime.format(dateTimeFormatter));
     }
 
-    @NotNull
-    private String valueOrUnknown(@Nullable final Object object) {
+    @NotNull private String valueOrUnknown(@Nullable final Object object) {
         return object != null ? object.toString() : "UNKNOWN";
     }
 }

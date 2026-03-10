@@ -36,6 +36,5 @@ public interface LifecycleEventListeners {
     /**
      * @return a map of extension ids and ClientLifecycleEventListenerProvider, sorted descending by extension priority.
      */
-    @NotNull
-    Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> getClientLifecycleEventListenerProviderMap();
+    @NotNull Map<@NotNull String, @NotNull ClientLifecycleEventListenerProvider> getClientLifecycleEventListenerProviderMap();
 }

@@ -563,7 +563,7 @@ public class PluginTaskExecutorTest {
 
         @Override
         public void markAsAsync() {
-            //
+
         }
 
         @Override
@@ -579,8 +579,7 @@ public class PluginTaskExecutorTest {
         public void resetAsyncStatus() {
         }
 
-        @Nullable
-        @Override
+        @Nullable @Override
         public SettableFuture<Boolean> getAsyncFuture() {
             return null;
         }
@@ -598,8 +597,7 @@ public class PluginTaskExecutorTest {
             return true;
         }
 
-        @Nullable
-        @Override
+        @Nullable @Override
         public SettableFuture<Boolean> getAsyncFuture() {
             final SettableFuture<Boolean> booleanSettableFuture = SettableFuture.create();
             booleanSettableFuture.set(true);
@@ -614,8 +612,7 @@ public class PluginTaskExecutorTest {
             return true;
         }
 
-        @Nullable
-        @Override
+        @Nullable @Override
         public SettableFuture<Boolean> getAsyncFuture() {
             final SettableFuture<Boolean> booleanSettableFuture = SettableFuture.create();
             booleanSettableFuture.setException(new RuntimeException("Test-Exception"));
@@ -625,11 +622,9 @@ public class PluginTaskExecutorTest {
 
     private static class TestPluginInOutTask implements PluginInOutTask<TestPluginTaskInput, TestPluginTaskOutput> {
 
-        @NotNull
-        private final CountDownLatch latch;
+        @NotNull private final CountDownLatch latch;
         private final int number;
-        @NotNull
-        private final List<Integer> executionOrder;
+        @NotNull private final List<Integer> executionOrder;
         private final int delay;
         private final IsolatedExtensionClassloader classloader;
         TestPluginInOutTask(
@@ -645,8 +640,7 @@ public class PluginTaskExecutorTest {
             this.classloader = classloader;
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public TestPluginTaskOutput apply(
                 @NotNull final TestPluginTaskInput testPluginTaskInput,
                 @NotNull final TestPluginTaskOutput testPluginTaskOutput) {
@@ -674,11 +668,9 @@ public class PluginTaskExecutorTest {
 
     private static class TestPluginOutTask implements PluginOutTask<TestPluginTaskOutput> {
 
-        @NotNull
-        private final CountDownLatch latch;
+        @NotNull private final CountDownLatch latch;
         private final int number;
-        @NotNull
-        private final List<Integer> executionOrder;
+        @NotNull private final List<Integer> executionOrder;
         private final int delay;
         private final IsolatedExtensionClassloader classloader;
         TestPluginOutTask(
@@ -720,11 +712,9 @@ public class PluginTaskExecutorTest {
 
     private static class TestPluginInTask implements PluginInTask<TestPluginTaskInput> {
 
-        @NotNull
-        private final CountDownLatch latch;
+        @NotNull private final CountDownLatch latch;
         private final int number;
-        @NotNull
-        private final List<Integer> executionOrder;
+        @NotNull private final List<Integer> executionOrder;
         private final int delay;
         private final IsolatedExtensionClassloader classloader;
         TestPluginInTask(

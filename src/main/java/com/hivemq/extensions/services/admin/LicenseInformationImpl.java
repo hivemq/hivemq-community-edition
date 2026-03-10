@@ -24,8 +24,7 @@ import com.hivemq.extension.sdk.api.services.admin.LicenseInformation;
  */
 public class LicenseInformationImpl implements LicenseInformation {
 
-    @NotNull
-    private final LicenseEdition edition;
+    @NotNull private final LicenseEdition edition;
     public LicenseInformationImpl(@NotNull final LicenseEdition edition) {
         this.edition = edition;
     }

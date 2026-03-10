@@ -49,13 +49,11 @@ public class PublishAuthorizerResult {
         this.disconnectReasonCode = null;
     }
 
-    @Nullable
-    public AckReasonCode getAckReasonCode() {
+    @Nullable public AckReasonCode getAckReasonCode() {
         return ackReasonCode;
     }
 
-    @Nullable
-    public String getReasonString() {
+    @Nullable public String getReasonString() {
         return reasonString;
     }
 
@@ -63,8 +61,7 @@ public class PublishAuthorizerResult {
         return authorizerPresent;
     }
 
-    @Nullable
-    public DisconnectReasonCode getDisconnectReasonCode() {
+    @Nullable public DisconnectReasonCode getDisconnectReasonCode() {
         return disconnectReasonCode;
     }
 }

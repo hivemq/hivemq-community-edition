@@ -38,8 +38,7 @@ import java.util.Optional;
 public class HiveMQExtensionXMLReader {
 
     private static final Logger log = LoggerFactory.getLogger(HiveMQExtensionXMLReader.class);
-    @NotNull
-    public static Optional<HiveMQExtensionEntity> getExtensionEntityFromXML(
+    @NotNull public static Optional<HiveMQExtensionEntity> getExtensionEntityFromXML(
             @NotNull final Path extensionFolder,
             final boolean logging) {
         final Path extensionXMLPath = extensionFolder.resolve(HiveMQExtension.HIVEMQ_EXTENSION_XML_FILE);
@@ -73,8 +72,7 @@ public class HiveMQExtensionXMLReader {
         }
     }
 
-    @NotNull
-    private static Optional<ValidationError> validateHiveMQExtensionEntity(
+    @NotNull private static Optional<ValidationError> validateHiveMQExtensionEntity(
             @Nullable final HiveMQExtensionEntity hiveMQExtensionEntity) {
         final String message = "missing %s";
         if (hiveMQExtensionEntity == null || hiveMQExtensionEntity.getId().isEmpty()) {

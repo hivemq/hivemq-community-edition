@@ -37,16 +37,11 @@ import java.util.function.Supplier;
 public class SubscriptionAuthorizerInputImpl
         implements SubscriptionAuthorizerInput, PluginTaskInput, Supplier<SubscriptionAuthorizerInputImpl> {
 
-    @NotNull
-    private final UserProperties userProperties;
-    @NotNull
-    private final Optional<Integer> subscriptionIdentifier;
-    @NotNull
-    private final Subscription subscription;
-    @NotNull
-    private final ConnectionInformation connectionInformation;
-    @NotNull
-    private final ClientInformation clientInformation;
+    @NotNull private final UserProperties userProperties;
+    @NotNull private final Optional<Integer> subscriptionIdentifier;
+    @NotNull private final Subscription subscription;
+    @NotNull private final ConnectionInformation connectionInformation;
+    @NotNull private final ClientInformation clientInformation;
     public SubscriptionAuthorizerInputImpl(
             final @NotNull UserProperties userProperties,
             final @NotNull Topic topic,

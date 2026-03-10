@@ -41,8 +41,7 @@ public class CloudPlatformTest {
         assumeTrue(Platform.isLinux());
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getUuidFile() {
                 return new File("/this/file/does/not/exist");
             }
@@ -58,8 +57,7 @@ public class CloudPlatformTest {
         FileUtils.writeStringToFile(uuidFile, exampleContent, StandardCharsets.UTF_8);
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getUuidFile() {
                 return uuidFile;
             }
@@ -75,8 +73,7 @@ public class CloudPlatformTest {
         FileUtils.writeStringToFile(uuidFile, exampleContent, StandardCharsets.UTF_8);
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getUuidFile() {
                 return uuidFile;
             }
@@ -92,8 +89,7 @@ public class CloudPlatformTest {
         FileUtils.writeStringToFile(uuidFile, exampleContent, StandardCharsets.UTF_8);
         final CloudPlatform cloudPlatform = new CloudPlatform() {
 
-            @NotNull
-            @Override
+            @NotNull @Override
             File getUuidFile() {
                 return uuidFile;
             }

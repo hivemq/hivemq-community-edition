@@ -52,8 +52,7 @@ import org.slf4j.LoggerFactory;
 public class GuiceBootstrap {
 
     private static final Logger log = LoggerFactory.getLogger(GuiceBootstrap.class);
-    @Nullable
-    public static Injector bootstrapInjector(
+    @Nullable public static Injector bootstrapInjector(
             final @NotNull SystemInformation systemInformation,
             final @NotNull MetricRegistry metricRegistry,
             final @NotNull HivemqId hiveMQId,

@@ -37,13 +37,11 @@ public class ClientSessionWill implements Sizable {
         this.publishId = publishId;
     }
 
-    @NotNull
-    public MqttWillPublish getMqttWillPublish() {
+    @NotNull public MqttWillPublish getMqttWillPublish() {
         return mqttWillPublish;
     }
 
-    @NotNull
-    public long getPublishId() {
+    @NotNull public long getPublishId() {
         return publishId;
     }
 
@@ -51,13 +49,11 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getDelayInterval();
     }
 
-    @NotNull
-    public String getHivemqId() {
+    @NotNull public String getHivemqId() {
         return mqttWillPublish.getHivemqId();
     }
 
-    @NotNull
-    public String getTopic() {
+    @NotNull public String getTopic() {
         return mqttWillPublish.getTopic();
     }
 
@@ -65,8 +61,7 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getPayload();
     }
 
-    @NotNull
-    public QoS getQos() {
+    @NotNull public QoS getQos() {
         return mqttWillPublish.getQos();
     }
 
@@ -78,28 +73,23 @@ public class ClientSessionWill implements Sizable {
         return mqttWillPublish.getMessageExpiryInterval();
     }
 
-    @Nullable
-    public Mqtt5PayloadFormatIndicator getPayloadFormatIndicator() {
+    @Nullable public Mqtt5PayloadFormatIndicator getPayloadFormatIndicator() {
         return mqttWillPublish.getPayloadFormatIndicator();
     }
 
-    @Nullable
-    public String getContentType() {
+    @Nullable public String getContentType() {
         return mqttWillPublish.getContentType();
     }
 
-    @Nullable
-    public String getResponseTopic() {
+    @Nullable public String getResponseTopic() {
         return mqttWillPublish.getResponseTopic();
     }
 
-    @Nullable
-    public byte @Nullable [] getCorrelationData() {
+    @Nullable public byte @Nullable [] getCorrelationData() {
         return mqttWillPublish.getCorrelationData();
     }
 
-    @NotNull
-    public Mqtt5UserProperties getUserProperties() {
+    @NotNull public Mqtt5UserProperties getUserProperties() {
         return mqttWillPublish.getUserProperties();
     }
 

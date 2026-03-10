@@ -40,19 +40,16 @@ public interface Listener {
     /**
      * @return the bind address of a listener
      */
-    @NotNull
-    String getBindAddress();
+    @NotNull String getBindAddress();
 
     /**
      * @return the human readable, name of the listener
      */
-    @NotNull
-    String readableName();
+    @NotNull String readableName();
 
     /**
      * @return the name of the listener
      * @since  4.1
      */
-    @NotNull
-    String getName();
+    @NotNull String getName();
 }

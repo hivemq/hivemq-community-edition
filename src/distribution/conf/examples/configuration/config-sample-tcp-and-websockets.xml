@@ -16,7 +16,6 @@
   -->
 
 <hivemq>
-
     <listeners>
         <tcp-listener>
             <port>1883</port>
@@ -33,5 +32,4 @@
             <allow-extensions>true</allow-extensions>
         </websocket-listener>
     </listeners>
-
 </hivemq>

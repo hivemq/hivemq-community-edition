@@ -46,8 +46,7 @@ public class Mqtt5PubrelEncoder
     }
 
     @Override
-    @NotNull
-    Mqtt5PubRelReasonCode getDefaultReasonCode() {
+    @NotNull Mqtt5PubRelReasonCode getDefaultReasonCode() {
         return Mqtt5PubRelReasonCode.SUCCESS;
     }
 }

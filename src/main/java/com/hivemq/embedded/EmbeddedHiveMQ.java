@@ -45,8 +45,7 @@ public interface EmbeddedHiveMQ extends AutoCloseable {
      *
      * @return a {@link CompletableFuture} that completes when HiveMQ is started and ready
      */
-    @NotNull
-    CompletableFuture<Void> start();
+    @NotNull CompletableFuture<Void> start();
 
     /**
      * Stop an EmbeddedHiveMQ. Calling stop clears the metric registry returned by {@link #getMetricRegistry()}.
@@ -58,16 +57,14 @@ public interface EmbeddedHiveMQ extends AutoCloseable {
      *
      * @return a {@link CompletableFuture} that completes when HiveMQ is stopped
      */
-    @NotNull
-    CompletableFuture<Void> stop();
+    @NotNull CompletableFuture<Void> stop();
 
     /**
      * Access the metric registry of HiveMQ. The metric registry can be accessed before EmbeddedHiveMQ is started.
      *
      * @return the {@link MetricRegistry} that contains all HiveMQ metrics
      */
-    @NotNull
-    MetricRegistry getMetricRegistry();
+    @NotNull MetricRegistry getMetricRegistry();
 
     /**
      * {@inheritDoc}

@@ -39,8 +39,7 @@ public class PublishTopicTree {
         root.add(subTopics);
     }
 
-    @NotNull
-    public Set<String> get(@NotNull final String topic) {
+    @NotNull public Set<String> get(@NotNull final String topic) {
         final ArrayList<String> subTopics =
                 new ArrayList<>(Arrays.asList(StringUtils.splitPreserveAllTokens(topic, '/')));
         return root.get(subTopics, null, false);
@@ -54,12 +53,9 @@ public class PublishTopicTree {
     private static class Node {
 
         // child and childSubTopic are only used if there is no more than one child node.
-        @Nullable
-        Node child = null;
-        @Nullable
-        String childSubTopic = null;
-        @Nullable
-        Map<String, Node> childNodes = null;
+        @Nullable Node child = null;
+        @Nullable String childSubTopic = null;
+        @Nullable Map<String, Node> childNodes = null;
         /*
          * The boolean "directMatch" is true if a topic that ends at this node is stored in the tree. This is important
          * if for example the topics "a/b/c" and "a/b" are both stored in the tree.
@@ -149,8 +145,7 @@ public class PublishTopicTree {
             }
         }
 
-        @NotNull
-        public Set<String> get(
+        @NotNull public Set<String> get(
                 @NotNull final ArrayList<String> subTopics,
                 @Nullable final String currentTopic,
                 final boolean getAll) {

@@ -46,23 +46,19 @@ class EmbeddedExtensionImpl implements EmbeddedExtension {
         this.extensionMain = extensionMain;
     }
 
-    @NotNull
-    public String getId() {
+    @NotNull public String getId() {
         return id;
     }
 
-    @NotNull
-    public String getName() {
+    @NotNull public String getName() {
         return name;
     }
 
-    @NotNull
-    public String getVersion() {
+    @NotNull public String getVersion() {
         return version;
     }
 
-    @Nullable
-    public String getAuthor() {
+    @Nullable public String getAuthor() {
         return author;
     }
 
@@ -74,13 +70,11 @@ class EmbeddedExtensionImpl implements EmbeddedExtension {
         return startPriority;
     }
 
-    @NotNull
-    public ExtensionMain getExtensionMain() {
+    @NotNull public ExtensionMain getExtensionMain() {
         return extensionMain;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String toString() {
         return "EmbeddedExtension{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", version='" + version + '\'' +
                 ", author='" + author + '\'' + ", priority=" + priority + ", startPriority=" + startPriority +

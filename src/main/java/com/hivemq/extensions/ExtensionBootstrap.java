@@ -34,8 +34,7 @@ public interface ExtensionBootstrap {
      * <p>
      * This method runs asynchronously and does NOT block until the extensions are started.
      */
-    @NotNull
-    CompletableFuture<Void> startExtensionSystem(@Nullable EmbeddedExtension embeddedExtension);
+    @NotNull CompletableFuture<Void> startExtensionSystem(@Nullable EmbeddedExtension embeddedExtension);
 
     /**
      * Stops all currently enabled HiveMQ extensions and the extension system.

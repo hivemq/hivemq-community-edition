@@ -152,14 +152,12 @@ public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuth
         return completed.get();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PublishAuthorizerOutputImpl get() {
         return this;
     }
 
-    @Nullable
-    public AckReasonCode getAckReasonCode() {
+    @Nullable public AckReasonCode getAckReasonCode() {
         return ackReasonCode;
     }
 

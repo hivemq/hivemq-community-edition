@@ -29,8 +29,7 @@ public class MultipleChunkResult<V> {
         this.values = values;
     }
 
-    @NotNull
-    public Map<Integer, BucketChunkResult<V>> getValues() {
+    @NotNull public Map<Integer, BucketChunkResult<V>> getValues() {
         return values;
     }
 }

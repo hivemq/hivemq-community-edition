@@ -50,8 +50,7 @@ public class AbstractOutput implements PluginTaskOutput {
         throw new UnsupportedOperationException();
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public SettableFuture<Boolean> getAsyncFuture() {
         return null;
     }

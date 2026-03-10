@@ -110,72 +110,72 @@ public interface PluginTaskExecutorService {
             @NotNull final PluginInOutTask<I, O> pluginTask);
     /*
      * Usage example:
-     * 
+     *
      * public class PublishAuthorizerHandler {
-     * 
+     *
      * @NotNull private final PluginOutPutAsyncer asyncer;
-     * 
+     *
      * @NotNull private final PluginTaskExecutorService service;
-     * 
+     *
      * @NotNull private final ClientSessionPersistence clientSessionPersistence;
-     * 
+     *
      * @Inject public PublishAuthorizerHandler(@NotNull final PluginOutPutAsyncer asyncer,
-     * 
+     *
      * @NotNull final PluginTaskExecutorService service,
-     * 
+     *
      * @NotNull final ClientSessionPersistence clientSessionPersistence) { this.asyncer = asyncer; this.service =
      * service; this.clientSessionPersistence = clientSessionPersistence; }
-     * 
+     *
      * void handle(@NotNull final String id, @NotNull final PublishAuthorizer authorizer) { final
      * PublishAuthorizerContext pluginInOutContext = new PublishAuthorizerContext(authorizer.getClass(), id,
      * clientSessionPersistence); service.handlePluginInOutTaskExecution(pluginInOutContext, () -> new
      * PublishAuthorizerInputImpl(), () -> new PublishAuthorizerOutputImpl(asyncer, pluginInOutContext), new
      * PublishAuthorizerTask(authorizer)); } }
-     * 
+     *
      * public class PublishAuthorizerContext extends PluginInOutTaskContext<PublishAuthorizerOutputImpl> {
-     * 
+     *
      * @NotNull private final String clientId;
-     * 
+     *
      * @NotNull private final ClientSessionPersistence clientSessionPersistence;
-     * 
+     *
      * protected PublishAuthorizerContext(@NotNull final Class<?> taskClazz,
-     * 
+     *
      * @NotNull final String clientId,
-     * 
+     *
      * @NotNull final ClientSessionPersistence clientSessionPersistence) { super(taskClazz, clientId); this.clientId =
      * clientId; this.clientSessionPersistence = clientSessionPersistence; }
-     * 
+     *
      * @Override public void pluginPost(@NotNull final PublishAuthorizerOutputImpl pluginOutput) { // handle extension
      * result if (pluginOutput.isTimedOut() { if (pluginOutput.getTimeoutFallback() == TimeoutFallback.FAILURE) {
      * clientSessionPersistence.forceDisconnectClient(clientId, true); } else { //continue } }
-     * 
+     *
      * if (pluginOutput.isDisconnect()) { clientSessionPersistence.forceDisconnectClient(clientId, true); } } }
-     * 
+     *
      * public class PublishAuthorizerOutputImpl extends AbstractAsyncOutput<PublishAuthorizeOutput> implements
      * PublishAuthorizeOutput {
-     * 
+     *
      * @Nullable private final PluginOutPutAsyncer asyncer;
-     * 
+     *
      * @Nullable private final PublishAuthorizerContext pluginInOutContext;
-     * 
+     *
      * public PublishAuthorizerOutputImpl(@Nullable final PluginOutPutAsyncer asyncer, @Nullable final
      * PublishAuthorizerContext pluginInOutContext) {
-     * 
+     *
      * this.asyncer = asyncer; this.pluginInOutContext = pluginInOutContext; }
-     * 
+     *
      * // ... implementation of PublishAuthorizeOutput methods
-     * 
+     *
      * }
-     * 
+     *
      * public class PublishAuthorizerTask implements PluginInOutTask<PublishAuthorizerInputImpl,
      * PublishAuthorizerOutputImpl> {
-     * 
+     *
      * @NotNull private final PublishAuthorizer authorizer;
-     * 
+     *
      * public PublishAuthorizerTask(@NotNull final PublishAuthorizer authorizer) { this.authorizer = authorizer; }
-     * 
+     *
      * @NotNull
-     * 
+     *
      * @Override public PublishAuthorizerOutputImpl apply(@NotNull final PublishAuthorizerInputImpl
      * publishAuthorizerInput, @NotNull final PublishAuthorizerOutputImpl publishAuthorizerOutput) { try {
      * authorizer.authorizePublish(publishAuthorizerInput, publishAuthorizerOutput); return publishAuthorizerOutput; }

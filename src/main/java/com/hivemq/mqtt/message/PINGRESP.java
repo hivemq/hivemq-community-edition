@@ -26,8 +26,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
 public class PINGRESP implements Message {
 
     public static final PINGRESP INSTANCE = new PINGRESP();
-    @NotNull
-    @Override
+    @NotNull @Override
     public MessageType getType() {
         return MessageType.PINGRESP;
     }

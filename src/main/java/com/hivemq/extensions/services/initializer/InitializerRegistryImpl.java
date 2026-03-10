@@ -30,8 +30,7 @@ import javax.inject.Singleton;
 @Singleton
 public class InitializerRegistryImpl implements InitializerRegistry {
 
-    @NotNull
-    private final Initializers initializers;
+    @NotNull private final Initializers initializers;
     @Inject
     public InitializerRegistryImpl(@NotNull final Initializers initializers) {
         this.initializers = initializers;

@@ -147,73 +147,59 @@ public class ChannelDependencies {
         this.globalMQTTMessageCounter = globalMQTTMessageCounter;
     }
 
-    @NotNull
-    public NoConnectIdleHandler getNoConnectIdleHandler() {
+    @NotNull public NoConnectIdleHandler getNoConnectIdleHandler() {
         return noConnectIdleHandler;
     }
 
-    @NotNull
-    public ConnectHandler getConnectHandler() {
+    @NotNull public ConnectHandler getConnectHandler() {
         return connectHandlerProvider.get();
     }
 
-    @NotNull
-    public ConnectionLimiterHandler getConnectionLimiterHandler() {
+    @NotNull public ConnectionLimiterHandler getConnectionLimiterHandler() {
         return connectionLimiterHandler;
     }
 
-    @NotNull
-    public DisconnectHandler getDisconnectHandler() {
+    @NotNull public DisconnectHandler getDisconnectHandler() {
         return disconnectHandler;
     }
 
-    @NotNull
-    public SubscribeHandler getSubscribeHandler() {
+    @NotNull public SubscribeHandler getSubscribeHandler() {
         return subscribeHandlerProvider.get();
     }
 
-    @NotNull
-    public UnsubscribeHandler getUnsubscribeHandler() {
+    @NotNull public UnsubscribeHandler getUnsubscribeHandler() {
         return unsubscribeHandler;
     }
 
-    @NotNull
-    public ChannelGroup getChannelGroup() {
+    @NotNull public ChannelGroup getChannelGroup() {
         return channelGroup;
     }
 
-    @NotNull
-    public FullConfigurationService getConfigurationService() {
+    @NotNull public FullConfigurationService getConfigurationService() {
         return fullConfigurationService;
     }
 
-    @NotNull
-    public GlobalTrafficShapingHandler getGlobalTrafficShapingHandler() {
+    @NotNull public GlobalTrafficShapingHandler getGlobalTrafficShapingHandler() {
         return globalTrafficShapingHandler;
     }
 
-    @NotNull
-    public MetricsHolder getMetricsHolder() {
+    @NotNull public MetricsHolder getMetricsHolder() {
         return metricsHolder;
     }
 
-    @NotNull
-    public ExceptionHandler getExceptionHandler() {
+    @NotNull public ExceptionHandler getExceptionHandler() {
         return exceptionHandler;
     }
 
-    @NotNull
-    public PingRequestHandler getPingRequestHandler() {
+    @NotNull public PingRequestHandler getPingRequestHandler() {
         return pingRequestHandler;
     }
 
-    @NotNull
-    public RestrictionsConfigurationService getRestrictionsConfigurationService() {
+    @NotNull public RestrictionsConfigurationService getRestrictionsConfigurationService() {
         return restrictionsConfigurationService;
     }
 
-    @NotNull
-    public MqttConnectDecoder getMqttConnectDecoder() {
+    @NotNull public MqttConnectDecoder getMqttConnectDecoder() {
         return mqttConnectDecoder;
     }
 
@@ -221,83 +207,67 @@ public class ChannelDependencies {
         return mqttConnacker;
     }
 
-    @NotNull
-    public MQTTMessageEncoder getMqttMessageEncoder() {
+    @NotNull public MQTTMessageEncoder getMqttMessageEncoder() {
         return mqttMessageEncoder;
     }
 
-    @NotNull
-    public MessageExpiryHandler getPublishMessageExpiryHandler() {
+    @NotNull public MessageExpiryHandler getPublishMessageExpiryHandler() {
         return publishMessageExpiryHandlerProvider.get();
     }
 
-    @NotNull
-    public EventLog getEventLog() {
+    @NotNull public EventLog getEventLog() {
         return eventLog;
     }
 
-    @NotNull
-    public SslParameterHandler getSslParameterHandler() {
+    @NotNull public SslParameterHandler getSslParameterHandler() {
         return sslParameterHandler;
     }
 
-    @NotNull
-    public MqttDecoders getMqttDecoders() {
+    @NotNull public MqttDecoders getMqttDecoders() {
         return mqttDecoders;
     }
 
-    @NotNull
-    public AuthHandler getAuthHandler() {
+    @NotNull public AuthHandler getAuthHandler() {
         return authHandlerProvider.get();
     }
 
-    @NotNull
-    public AuthInProgressMessageHandler getAuthInProgressMessageHandler() {
+    @NotNull public AuthInProgressMessageHandler getAuthInProgressMessageHandler() {
         return authInProgressMessageHandler;
     }
 
-    @NotNull
-    public PluginInitializerHandler getPluginInitializerHandler() {
+    @NotNull public PluginInitializerHandler getPluginInitializerHandler() {
         return pluginInitializerHandlerProvider.get();
     }
 
-    @NotNull
-    public ClientLifecycleEventHandler getClientLifecycleEventHandler() {
+    @NotNull public ClientLifecycleEventHandler getClientLifecycleEventHandler() {
         return clientLifecycleEventHandlerProvider.get();
     }
 
-    @NotNull
-    public IncomingPublishHandler getIncomingPublishHandler() {
+    @NotNull public IncomingPublishHandler getIncomingPublishHandler() {
         return incomingPublishHandlerProvider.get();
     }
 
-    @NotNull
-    public IncomingSubscribeHandler getIncomingSubscribeHandler() {
+    @NotNull public IncomingSubscribeHandler getIncomingSubscribeHandler() {
         return incomingSubscribeHandlerProvider.get();
     }
 
-    @NotNull
-    public MqttServerDisconnector getMqttServerDisconnector() {
+    @NotNull public MqttServerDisconnector getMqttServerDisconnector() {
         return mqttServerDisconnector;
     }
 
-    @NotNull
-    public InterceptorHandler getInterceptorHandler() {
+    @NotNull public InterceptorHandler getInterceptorHandler() {
         return interceptorHandler;
     }
 
-    @NotNull
-    public GlobalMQTTMessageCounter getGlobalMQTTMessageCounter() {
+    @NotNull public GlobalMQTTMessageCounter getGlobalMQTTMessageCounter() {
         return globalMQTTMessageCounter;
     }
 
-    @NotNull
-    public PublishFlushHandler createPublishFlushHandler() {
+    @NotNull public PublishFlushHandler createPublishFlushHandler() {
         return new PublishFlushHandler(metricsHolder);
     }
 
-    @NotNull
-    public ShutdownHooks getShutdownHooks() {
+    @NotNull public ShutdownHooks getShutdownHooks() {
         return shutdownHooks;
     }
 }

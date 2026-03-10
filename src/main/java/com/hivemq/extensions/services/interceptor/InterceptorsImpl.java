@@ -38,15 +38,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @LazySingleton
 public class InterceptorsImpl implements Interceptors {
 
-    @NotNull
-    private final Map<@NotNull String, @NotNull ConnectInboundInterceptorProvider> connectInboundInterceptorProviderMap;
-    @NotNull
-    private final Map<@NotNull String,
+    @NotNull private final Map<@NotNull String, @NotNull ConnectInboundInterceptorProvider> connectInboundInterceptorProviderMap;
+    @NotNull private final Map<@NotNull String,
             @NotNull ConnackOutboundInterceptorProvider> connackOutboundInterceptorProviderMap;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
-    @NotNull
-    private final ReadWriteLock readWriteLock;
+    @NotNull private final HiveMQExtensions hiveMQExtensions;
+    @NotNull private final ReadWriteLock readWriteLock;
     @Inject
     public InterceptorsImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
@@ -79,8 +75,7 @@ public class InterceptorsImpl implements Interceptors {
     }
 
     @Override
-    @NotNull
-    public ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders() {
+    @NotNull public ImmutableMap<String, ConnectInboundInterceptorProvider> connectInboundInterceptorProviders() {
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {

@@ -183,16 +183,14 @@ public class IsolatedExtensionClassloader extends URLClassLoader {
                 return iterator.hasNext();
             }
 
-            @NotNull
-            public URL nextElement() {
+            @NotNull public URL nextElement() {
                 return iterator.next();
             }
         };
     }
 
     @Override
-    @Nullable
-    public InputStream getResourceAsStream(@NotNull final String name) {
+    @Nullable public InputStream getResourceAsStream(@NotNull final String name) {
         final URL url = getResource(name);
         try {
             return url != null ? url.openStream() : null;

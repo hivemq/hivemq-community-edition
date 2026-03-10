@@ -112,8 +112,7 @@ public interface Mqtt5CONNACK extends Message {
     /**
      * @return the reason code of this CONNACK packet.
      */
-    @NotNull
-    Mqtt5ConnAckReasonCode getReasonCode();
+    @NotNull Mqtt5ConnAckReasonCode getReasonCode();
 
     /**
      * Returns <code>true</code> if there is already a session present on the MQTT Broker for a client. Returns
@@ -139,42 +138,35 @@ public interface Mqtt5CONNACK extends Message {
      * @return the optional client identifier assigned by the server. If absent, the client identifier from the CONNECT
      *         packet is used.
      */
-    @Nullable
-    String getAssignedClientIdentifier();
+    @Nullable String getAssignedClientIdentifier();
 
     /**
      * @return the authentication/authorization method.
      */
-    @Nullable
-    String getAuthMethod();
+    @Nullable String getAuthMethod();
 
     /**
      * @return the optional authentication/authorization data.
      */
-    @Nullable
-    byte[] getAuthData();
+    @Nullable byte[] getAuthData();
 
     /**
      * @return the optional response information of this CONNACK packet to retrieve a response topic from.
      */
-    @Nullable
-    String getResponseInformation();
+    @Nullable String getResponseInformation();
 
     /**
      * @return the optional server reference.
      */
-    @Nullable
-    String getServerReference();
+    @Nullable String getServerReference();
 
     /**
      * @return the optional reason string of this CONNACK packet.
      */
-    @Nullable
-    String getReasonString();
+    @Nullable String getReasonString();
 
     /**
      * @return the optional user properties of this CONNACK packet.
      */
-    @NotNull
-    Mqtt5UserProperties getUserProperties();
+    @NotNull Mqtt5UserProperties getUserProperties();
 }

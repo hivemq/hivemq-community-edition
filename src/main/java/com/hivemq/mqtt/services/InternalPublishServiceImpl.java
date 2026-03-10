@@ -67,8 +67,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
         this.acknowledgeAfterPersist = ACKNOWLEDGE_INCOMING_PUBLISH_AFTER_PERSISTING_ENABLED.get();
     }
 
-    @NotNull
-    public ListenableFuture<PublishReturnCode> publish(
+    @NotNull public ListenableFuture<PublishReturnCode> publish(
             final @NotNull PUBLISH publish,
             final @NotNull ExecutorService executorService,
             final @Nullable String sender) {
@@ -124,8 +123,7 @@ public class InternalPublishServiceImpl implements InternalPublishService {
         return Futures.immediateFuture(null);
     }
 
-    @NotNull
-    private ListenableFuture<PublishReturnCode> handlePublish(
+    @NotNull private ListenableFuture<PublishReturnCode> handlePublish(
             final @NotNull PUBLISH publish,
             final @NotNull ExecutorService executorService,
             final @Nullable String sender) {

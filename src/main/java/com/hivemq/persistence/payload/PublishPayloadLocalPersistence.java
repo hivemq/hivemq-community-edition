@@ -55,8 +55,7 @@ public interface PublishPayloadLocalPersistence {
      * @return all payload ids as a readonly list.
      */
     @ReadOnly
-    @NotNull
-    ImmutableList<Long> getAllIds();
+    @NotNull ImmutableList<Long> getAllIds();
 
     /**
      * close the persistence with all buckets.

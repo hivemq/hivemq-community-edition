@@ -40,8 +40,7 @@ public class PayloadExceptionLogging {
     private static final String smallLine =
             "--------------------------------------------------------------------------------";
     private int counter = 0;
-    @NotNull
-    private final Map<Long, MissingMessageInformation> payloadIdMissingMessagesMap;
+    @NotNull private final Map<Long, MissingMessageInformation> payloadIdMissingMessagesMap;
     @VisibleForTesting
     public PayloadExceptionLogging() {
         payloadIdMissingMessagesMap = new TreeMap<>();
@@ -90,8 +89,7 @@ public class PayloadExceptionLogging {
         payloadIdMissingMessagesMap.clear();
     }
 
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     Map<Long, MissingMessageInformation> getMap() {
         return payloadIdMissingMessagesMap;
     }
@@ -116,8 +114,7 @@ public class PayloadExceptionLogging {
             this.retained = retained;
         }
 
-        @Nullable
-        public String getTopic() {
+        @Nullable public String getTopic() {
             return topic;
         }
 

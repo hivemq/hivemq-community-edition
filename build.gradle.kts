@@ -331,8 +331,20 @@ tasks.forbiddenApisTest { enabled = false }
 
 spotless {
     java {
-        licenseHeaderFile("HEADER")
-        eclipse().configFile("eclipse-formatter.xml")
+        licenseHeaderFile(rootDir.resolve("HEADER"))
+        eclipse().configFile(rootDir.resolve("eclipse-formatter.xml"))
+        endWithNewline()
+        formatAnnotations()
+        importOrder("", "javax|java", "\\#")
+        removeUnusedImports()
+        trimTrailingWhitespace()
+    }
+    format("misc") {
+        target("**/*.md", "**/*.yml", "**/*.yaml", "**/*.xml", "**/*.properties", "**/*.kts")
+        targetExclude("**/.claude/**", "**/.idea/**", "**/build/**", "eclipse-formatter.xml")
+        trimTrailingWhitespace()
+        endWithNewline()
+        leadingTabsToSpaces(4)
     }
 }
 

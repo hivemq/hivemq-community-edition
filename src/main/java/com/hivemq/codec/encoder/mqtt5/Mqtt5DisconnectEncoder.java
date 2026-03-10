@@ -51,8 +51,7 @@ public class Mqtt5DisconnectEncoder
     }
 
     @Override
-    @NotNull
-    Mqtt5DisconnectReasonCode getDefaultReasonCode() {
+    @NotNull Mqtt5DisconnectReasonCode getDefaultReasonCode() {
         return Mqtt5DisconnectReasonCode.NORMAL_DISCONNECTION;
     }
 

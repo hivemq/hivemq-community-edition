@@ -87,8 +87,7 @@ public class ClassServiceLoader {
         return services.build();
     }
 
-    @NotNull
-    private String stripComments(final @NotNull String line) {
+    @NotNull private String stripComments(final @NotNull String line) {
         String tempLine = line;
         final int comment = line.indexOf('#');
         if (comment >= 0) {

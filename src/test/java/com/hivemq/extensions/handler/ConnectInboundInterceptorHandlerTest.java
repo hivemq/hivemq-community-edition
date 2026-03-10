@@ -208,8 +208,7 @@ public class ConnectInboundInterceptorHandlerTest {
                 Channel.class), anyString(), anyString(), any(Mqtt5ConnAckReasonCode.class), anyString());
     }
 
-    @NotNull
-    private CONNECT testConnect() {
+    @NotNull private CONNECT testConnect() {
         return new CONNECT.Mqtt5Builder().withClientIdentifier("client").build();
     }
     public static class TestModifyInboundInterceptor implements ConnectInboundInterceptorProvider {

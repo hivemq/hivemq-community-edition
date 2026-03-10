@@ -23,14 +23,12 @@ import com.hivemq.mqtt.message.publish.PUBLISH;
  */
 public class PublishDroppedEvent {
 
-    @NotNull
-    private final PUBLISH message;
+    @NotNull private final PUBLISH message;
     public PublishDroppedEvent(@NotNull final PUBLISH message) {
         this.message = message;
     }
 
-    @NotNull
-    public PUBLISH getMessage() {
+    @NotNull public PUBLISH getMessage() {
         return message;
     }
 }

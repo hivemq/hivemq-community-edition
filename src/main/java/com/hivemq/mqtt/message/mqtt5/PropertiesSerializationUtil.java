@@ -45,8 +45,7 @@ public class PropertiesSerializationUtil {
         return offset;
     }
 
-    @NotNull
-    public static Mqtt5UserProperties read(@NotNull final byte[] bytes, int offset) {
+    @NotNull public static Mqtt5UserProperties read(@NotNull final byte[] bytes, int offset) {
         final int size = Bytes.readInt(bytes, offset);
         offset += Integer.BYTES;
         final ImmutableList.Builder<MqttUserProperty> builder = ImmutableList.builderWithExpectedSize(size);

@@ -30,14 +30,11 @@ public interface ProducerQueues {
 
     <R> @NotNull ListenableFuture<R> submit(int bucketIndex, @NotNull SingleWriterServiceImpl.Task<R> task);
 
-    @NotNull
-    <R> List<ListenableFuture<R>> submitToAllBucketsParallel(@NotNull SingleWriterService.Task<R> task);
+    @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsParallel(@NotNull SingleWriterService.Task<R> task);
 
-    @NotNull
-    <R> List<ListenableFuture<R>> submitToAllBucketsSequential(@NotNull SingleWriterService.Task<R> task);
+    @NotNull <R> List<ListenableFuture<R>> submitToAllBucketsSequential(@NotNull SingleWriterService.Task<R> task);
 
     int getBucket(@NotNull String key);
 
-    @NotNull
-    ListenableFuture<Void> shutdown(@Nullable SingleWriterServiceImpl.Task<Void> finalTask);
+    @NotNull ListenableFuture<Void> shutdown(@Nullable SingleWriterServiceImpl.Task<Void> finalTask);
 }

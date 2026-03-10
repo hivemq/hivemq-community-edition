@@ -137,8 +137,7 @@ class ConnectSimpleAuthOutput implements SimpleAuthOutput {
             delegate.resume();
         }
 
-        @NotNull
-        @Override
+        @NotNull @Override
         public T getOutput() {
             return output;
         }

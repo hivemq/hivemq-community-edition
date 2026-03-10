@@ -34,13 +34,11 @@ import java.util.concurrent.ThreadFactory;
 @LazySingleton
 public class PersistenceScheduledExecutorProvider implements Provider<ListeningScheduledExecutorService> {
 
-    @Nullable
-    private ListeningScheduledExecutorService executorService;
+    @Nullable private ListeningScheduledExecutorService executorService;
     @Override
     @LazySingleton
     @Persistence
-    @NotNull
-    public ListeningScheduledExecutorService get() {
+    @NotNull public ListeningScheduledExecutorService get() {
         if (executorService == null) {
             final ThreadFactory threadFactory = ThreadFactoryUtil.create("scheduled-persistence-executor");
             final ScheduledExecutorService singleThreadExecutor =

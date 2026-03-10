@@ -63,8 +63,7 @@ public class ExtensionBootstrapImpl implements ExtensionBootstrap {
         this.authenticators = authenticators;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Void> startExtensionSystem(final @Nullable EmbeddedExtension embeddedExtension) {
         log.info("Starting HiveMQ extension system.");
         shutdownHooks.add(new ExtensionSystemShutdownHook(this));

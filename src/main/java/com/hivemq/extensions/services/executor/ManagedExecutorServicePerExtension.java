@@ -37,12 +37,9 @@ import java.util.stream.Collectors;
  */
 public class ManagedExecutorServicePerExtension implements ManagedExtensionExecutorService {
 
-    @NotNull
-    private final GlobalManagedExtensionExecutorService managedPluginExecutorService;
-    @NotNull
-    private final ClassLoader classLoader;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
+    @NotNull private final GlobalManagedExtensionExecutorService managedPluginExecutorService;
+    @NotNull private final ClassLoader classLoader;
+    @NotNull private final HiveMQExtensions hiveMQExtensions;
     public ManagedExecutorServicePerExtension(
             @NotNull final GlobalManagedExtensionExecutorService managedPluginExecutorService,
             @NotNull final ClassLoader classLoader,
@@ -59,8 +56,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
         }
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableScheduledFuture<
             ?> schedule(@NotNull final Runnable command, final long delay, @NotNull final TimeUnit unit) {
         final CompletableScheduledFutureImpl<?> completableScheduledFuture = new CompletableScheduledFutureImpl<>();
@@ -70,8 +66,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
         return completableScheduledFuture;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <V> CompletableScheduledFuture<
             V> schedule(@NotNull final Callable<V> callable, final long delay, @NotNull final TimeUnit unit) {
         final CompletableScheduledFutureImpl<V> completableScheduledFuture = new CompletableScheduledFutureImpl<>();
@@ -81,8 +76,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
         return completableScheduledFuture;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableScheduledFuture<?> scheduleAtFixedRate(
             @NotNull final Runnable command,
             final long initialDelay,
@@ -98,8 +92,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
         return completableScheduledFuture;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableScheduledFuture<?> scheduleWithFixedDelay(
             @NotNull final Runnable command,
             final long initialDelay,
@@ -130,16 +123,14 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
         return managedPluginExecutorService.awaitTermination(timeout, unit);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> CompletableFuture<T> submit(@NotNull final Callable<T> task) {
         final CompletableFuture<T> completableFuture = new CompletableFuture<>();
         managedPluginExecutorService.submit(new WrappedCallable<>(task, classLoader, completableFuture));
         return completableFuture;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> CompletableFuture<T> submit(@NotNull final Runnable task, @NotNull final T result) {
         final CompletableFuture<T> completableFuture = new CompletableFuture<>();
         managedPluginExecutorService
@@ -147,16 +138,14 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
         return completableFuture;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<?> submit(@NotNull final Runnable task) {
         final CompletableFuture<?> completableFuture = new CompletableFuture<>();
         managedPluginExecutorService.submit(new WrappedRunnable(task, classLoader, completableFuture));
         return completableFuture;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> List<Future<T>> invokeAll(@NotNull final Collection<? extends Callable<T>> tasks)
             throws InterruptedException {
         return managedPluginExecutorService.invokeAll(tasks.stream()
@@ -164,8 +153,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
                 .collect(Collectors.toList()));
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> List<Future<T>> invokeAll(
             @NotNull final Collection<? extends Callable<T>> tasks,
             final long timeout,
@@ -175,8 +163,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
                 .collect(Collectors.toList()), timeout, unit);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> T invokeAny(@NotNull final Collection<? extends Callable<T>> tasks)
             throws InterruptedException, ExecutionException {
         return managedPluginExecutorService.invokeAny(tasks.stream()
@@ -184,8 +171,7 @@ public class ManagedExecutorServicePerExtension implements ManagedExtensionExecu
                 .collect(Collectors.toList()));
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public <T> T invokeAny(
             @NotNull final Collection<? extends Callable<T>> tasks,
             final long timeout,

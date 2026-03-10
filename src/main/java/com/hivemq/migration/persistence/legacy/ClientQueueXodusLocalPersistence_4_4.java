@@ -48,25 +48,19 @@ import static com.hivemq.util.ThreadPreConditions.SINGLE_WRITER_THREAD_PREFIX;
 @LazySingleton
 public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence {
 
-    @NotNull
-    private static final Logger log = LoggerFactory.getLogger(ClientQueueXodusLocalPersistence_4_4.class);
+    @NotNull private static final Logger log = LoggerFactory.getLogger(ClientQueueXodusLocalPersistence_4_4.class);
     private static final String PERSISTENCE_NAME = "client_queue";
     public static final String PERSISTENCE_VERSION = "040000";
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     final ClientQueuePersistenceSerializer_4_4 serializer;
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     final ConcurrentHashMap<Integer, Map<Key, AtomicInteger>> queueSizeBuckets;
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     final ConcurrentHashMap<Integer, Map<Key, AtomicInteger>> retainedQueueSizeBuckets;
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     final ConcurrentHashMap<String, AtomicInteger> queueQos0MemoryMap;
     // Key = shared-name/topic-filter, Value = amount of QoS > 0 messages
-    @NotNull
-    @VisibleForTesting
+    @NotNull @VisibleForTesting
     final ConcurrentHashMap<String, AtomicInteger> sharedSubscriptionSizes;
     @Inject
     ClientQueueXodusLocalPersistence_4_4(
@@ -85,26 +79,22 @@ public class ClientQueueXodusLocalPersistence_4_4 extends XodusLocalPersistence 
         this.sharedSubscriptionSizes = new ConcurrentHashMap<>();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getName() {
         return PERSISTENCE_NAME;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected String getVersion() {
         return PERSISTENCE_VERSION;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected StoreConfig getStoreConfig() {
         return StoreConfig.WITHOUT_DUPLICATES_WITH_PREFIXING;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     protected Logger getLogger() {
         return log;
     }

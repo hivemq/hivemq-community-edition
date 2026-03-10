@@ -50,8 +50,7 @@ public enum Mqtt5RetainHandling {
      * @return      the Retain Handling belonging to the byte code or null if the byte code is not a valid Retain
      *              Handling.
      */
-    @Nullable
-    public static Mqtt5RetainHandling fromCode(final int code) {
+    @Nullable public static Mqtt5RetainHandling fromCode(final int code) {
         return (code >= 0 && code < VALUES.length) ? VALUES[code] : null;
     }
 }

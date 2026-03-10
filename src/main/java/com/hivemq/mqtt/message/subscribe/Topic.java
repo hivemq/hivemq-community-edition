@@ -91,8 +91,7 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
         return new Topic(string, DEFAULT_QOS);
     }
 
-    @NotNull
-    public static Topic topicFromSubscription(
+    @NotNull public static Topic topicFromSubscription(
             @NotNull final Subscription subscription,
             final @Nullable Integer subscriptionIdentifier) {
         return new Topic(subscription.getTopicFilter(),
@@ -106,16 +105,14 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
     /**
      * @return the topic as String representation
      */
-    @NotNull
-    public String getTopic() {
+    @NotNull public String getTopic() {
         return topic;
     }
 
     /**
      * @return the QoS of a Topic
      */
-    @NotNull
-    public QoS getQoS() {
+    @NotNull public QoS getQoS() {
         return qoS;
     }
 
@@ -135,8 +132,7 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
     /**
      * @return the handling of retained message for this subscription. The default is {@link #DEFAULT_RETAIN_HANDLING}.
      */
-    @NotNull
-    public Mqtt5RetainHandling getRetainHandling() {
+    @NotNull public Mqtt5RetainHandling getRetainHandling() {
         return retainHandling;
     }
 
@@ -147,8 +143,7 @@ public class Topic implements Serializable, Comparable<Topic>, Mqtt3Topic, Mqtt5
         return retainAsPublished;
     }
 
-    @Nullable
-    public Integer getSubscriptionIdentifier() {
+    @Nullable public Integer getSubscriptionIdentifier() {
         return subscriptionIdentifier;
     }
 

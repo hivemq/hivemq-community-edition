@@ -45,8 +45,7 @@ public interface EmbeddedExtensionBuilder {
      * @return    the builder itself
      * @since     CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withId(@NotNull String id);
+    @NotNull EmbeddedExtensionBuilder withId(@NotNull String id);
 
     /**
      * Sets the human readable name of the extension.
@@ -57,8 +56,7 @@ public interface EmbeddedExtensionBuilder {
      * @return      the builder itself
      * @since       CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withName(@NotNull String name);
+    @NotNull EmbeddedExtensionBuilder withName(@NotNull String name);
 
     /**
      * Sets the version of the extension.
@@ -69,8 +67,7 @@ public interface EmbeddedExtensionBuilder {
      * @return         the builder itself
      * @since          CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withVersion(@NotNull String version);
+    @NotNull EmbeddedExtensionBuilder withVersion(@NotNull String version);
 
     /**
      * Sets the author of the extension.
@@ -81,8 +78,7 @@ public interface EmbeddedExtensionBuilder {
      * @return        the builder itself
      * @since         CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withAuthor(@Nullable String author);
+    @NotNull EmbeddedExtensionBuilder withAuthor(@Nullable String author);
 
     /**
      * Sets the extension's priority, the extension with a higher priority is used first
@@ -93,8 +89,7 @@ public interface EmbeddedExtensionBuilder {
      * @return          the builder itself
      * @since           CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withPriority(int priority);
+    @NotNull EmbeddedExtensionBuilder withPriority(int priority);
 
     /**
      * Sets the extension's start priority, the extension with a higher priority starts first
@@ -105,8 +100,7 @@ public interface EmbeddedExtensionBuilder {
      * @return               the builder itself
      * @since                CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withStartPriority(int startPriority);
+    @NotNull EmbeddedExtensionBuilder withStartPriority(int startPriority);
 
     /**
      * Sets the main class of the extension
@@ -117,8 +111,7 @@ public interface EmbeddedExtensionBuilder {
      * @return               the builder itself
      * @since                CE 2020.5
      */
-    @NotNull
-    EmbeddedExtensionBuilder withExtensionMain(@NotNull ExtensionMain extensionMain);
+    @NotNull EmbeddedExtensionBuilder withExtensionMain(@NotNull ExtensionMain extensionMain);
 
     /**
      * Creates an instance of an EmbeddedExtension.
@@ -135,6 +128,5 @@ public interface EmbeddedExtensionBuilder {
      * @throws IllegalStateException if any required parameter is missing.
      * @since                        CE 2020.5
      */
-    @NotNull
-    EmbeddedExtension build();
+    @NotNull EmbeddedExtension build();
 }

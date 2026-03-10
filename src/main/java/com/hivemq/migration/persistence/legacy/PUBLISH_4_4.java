@@ -38,8 +38,7 @@ public class PUBLISH_4_4 extends MessageWithID {
         return payloadID;
     }
 
-    @NotNull
-    public PUBLISH getPublish() {
+    @NotNull public PUBLISH getPublish() {
         return publish;
     }
 

@@ -27,8 +27,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class MetaInformationSerializer {
 
-    @NotNull
-    public byte[] serialize(final @NotNull MetaInformation metaInformation) {
+    @NotNull public byte[] serialize(final @NotNull MetaInformation metaInformation) {
         final byte[] hivemqVersion =
                 metaInformation.getHivemqVersion() != null ? metaInformation.getHivemqVersion().getBytes(UTF_8) :
                         new byte[0];
@@ -80,8 +79,7 @@ public class MetaInformationSerializer {
         }
     }
 
-    @NotNull
-    public MetaInformation deserialize(final @NotNull byte[] metaBytes) {
+    @NotNull public MetaInformation deserialize(final @NotNull byte[] metaBytes) {
         final ByteBuffer metaFileAsByteBuffer = ByteBuffer.wrap(metaBytes);
         final String hivemqVersion = getStringFromBuffer(metaFileAsByteBuffer);
         final String publishPayloadPersistenceVersion = getStringFromBuffer(metaFileAsByteBuffer);
@@ -112,8 +110,7 @@ public class MetaInformationSerializer {
         return typeAsByte > -1 ? PersistenceType.forCode(typeAsByte) : null;
     }
 
-    @Nullable
-    private String getStringFromBuffer(final ByteBuffer metaFileAsByteBuffer) {
+    @Nullable private String getStringFromBuffer(final ByteBuffer metaFileAsByteBuffer) {
         final int stringLength = metaFileAsByteBuffer.getInt();
         if (stringLength == 0) {
             return null;

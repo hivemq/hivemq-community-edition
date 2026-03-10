@@ -75,8 +75,7 @@ public class ClientServiceImpl implements ClientService {
         this.asyncIteratorFactory = asyncIteratorFactory;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Boolean> isClientConnected(@NotNull final String clientId) {
         Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
@@ -89,8 +88,7 @@ public class ClientServiceImpl implements ClientService {
         return CompletableFuture.completedFuture(session.isConnected());
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Optional<SessionInformation>> getSession(@NotNull final String clientId) {
         Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
@@ -104,22 +102,19 @@ public class ClientServiceImpl implements ClientService {
                 new SessionInformationImpl(clientId, session.getSessionExpiryIntervalSec(), session.isConnected())));
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Boolean> disconnectClient(@NotNull final String clientId) {
         return disconnectClient(clientId, false);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Boolean> disconnectClient(
             @NotNull final String clientId,
             final boolean preventWillMessage) {
         return disconnectClient(clientId, preventWillMessage, null, null);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Boolean> disconnectClient(
             final @NotNull String clientId,
             final boolean preventWillMessage,
@@ -144,8 +139,7 @@ public class ClientServiceImpl implements ClientService {
         return ListenableFutureConverter.toCompletable(disconnectFuture, managedExtensionExecutorService);
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public CompletableFuture<Boolean> invalidateSession(@NotNull final String clientId) {
         Preconditions.checkNotNull(clientId, "A client id must never be null");
         if (pluginServiceRateLimitService.rateLimitExceeded()) {
@@ -205,8 +199,7 @@ public class ClientServiceImpl implements ClientService {
     }
     static class AllClientsFetchCallback extends AllItemsFetchCallback<SessionInformation, Map<String, ClientSession>> {
 
-        @NotNull
-        private final ClientSessionPersistence clientSessionPersistence;
+        @NotNull private final ClientSessionPersistence clientSessionPersistence;
         AllClientsFetchCallback(@NotNull final ClientSessionPersistence clientSessionPersistence) {
             this.clientSessionPersistence = clientSessionPersistence;
         }

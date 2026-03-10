@@ -23,14 +23,12 @@ import com.hivemq.mqtt.message.pubrel.PUBREL;
  */
 public class PubrelDroppedEvent {
 
-    @NotNull
-    private final PUBREL message;
+    @NotNull private final PUBREL message;
     public PubrelDroppedEvent(@NotNull final PUBREL message) {
         this.message = message;
     }
 
-    @NotNull
-    public PUBREL getMessage() {
+    @NotNull public PUBREL getMessage() {
         return message;
     }
 }

@@ -74,18 +74,15 @@ public class ConfigFileReader {
         setConfigFromXML();
     }
 
-    @NotNull
-    HiveMQConfigEntity getDefaultConfig() {
+    @NotNull HiveMQConfigEntity getDefaultConfig() {
         return new HiveMQConfigEntity();
     }
 
-    @NotNull
-    Class<? extends HiveMQConfigEntity> getConfigEntityClass() {
+    @NotNull Class<? extends HiveMQConfigEntity> getConfigEntityClass() {
         return HiveMQConfigEntity.class;
     }
 
-    @NotNull
-    List<Class<?>> getInheritedEntityClasses() {
+    @NotNull List<Class<?>> getInheritedEntityClasses() {
         return ImmutableList.of(
                 /* ListenerEntity */
                 TCPListenerEntity.class,

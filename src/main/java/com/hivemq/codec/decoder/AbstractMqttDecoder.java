@@ -149,8 +149,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param  messageType             the type of the message
      * @return                         the topic as String or {@code null} if failed
      */
-    @Nullable
-    protected String decodeUTF8Topic(
+    @Nullable protected String decodeUTF8Topic(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final @NotNull String key,
@@ -180,8 +179,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param  messageType             the type of the message
      * @return                         the topic as String or {@code null} if failed
      */
-    @Nullable
-    protected String decodeUTF8Topic(
+    @Nullable protected String decodeUTF8Topic(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             final int utf8StringLength,
@@ -208,8 +206,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param  messageType             the {@link MessageType} type of the message
      * @return                         decoded authentication method as {@link String}
      */
-    @Nullable
-    protected String decodeAuthenticationMethod(
+    @Nullable protected String decodeAuthenticationMethod(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String authenticationMethod,
@@ -337,8 +334,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param  responseTopic           the initial response topic (must be null)
      * @return                         a response topic, or {@code null} when failed.
      */
-    @Nullable
-    protected String readResponseTopic(
+    @Nullable protected String readResponseTopic(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String responseTopic,
@@ -384,8 +380,7 @@ public abstract class AbstractMqttDecoder<T extends Message> extends MqttDecoder
      * @param  messageType             the type of the message
      * @return                         a content type, or {@code null} when failed.
      */
-    @Nullable
-    protected String readContentType(
+    @Nullable protected String readContentType(
             final @NotNull ClientConnectionContext clientConnectionContext,
             final @NotNull ByteBuf buf,
             @Nullable String contentType,

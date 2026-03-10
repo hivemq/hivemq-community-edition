@@ -148,8 +148,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
         return processAddSubscriptions(clientID, topicsToProcess.build());
     }
 
-    @NotNull
-    private CompletableFuture<Void> processAddSubscriptions(
+    @NotNull private CompletableFuture<Void> processAddSubscriptions(
             final @NotNull String clientID,
             final @NotNull ImmutableSet<Topic> successTopics) {
         final ListenableFuture<ImmutableList<SubscriptionResult>> addSubscriptionFuture =
@@ -410,8 +409,7 @@ public class SubscriptionStoreImpl implements SubscriptionStore {
     static class AllSubscribersFetchCallback
             extends AllItemsFetchCallback<SubscriptionsForClientResult, Map<String, ImmutableSet<Topic>>> {
 
-        @NotNull
-        private final ClientSessionSubscriptionPersistence subscriptionPersistence;
+        @NotNull private final ClientSessionSubscriptionPersistence subscriptionPersistence;
         AllSubscribersFetchCallback(@NotNull final ClientSessionSubscriptionPersistence subscriptionPersistence) {
             this.subscriptionPersistence = subscriptionPersistence;
         }

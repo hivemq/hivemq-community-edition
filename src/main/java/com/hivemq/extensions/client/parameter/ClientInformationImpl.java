@@ -27,15 +27,13 @@ import com.hivemq.extension.sdk.api.client.parameter.ClientInformation;
 @Immutable
 public class ClientInformationImpl implements ClientInformation {
 
-    @NotNull
-    private final String clientId;
+    @NotNull private final String clientId;
     public ClientInformationImpl(@NotNull final String clientId) {
         Preconditions.checkNotNull(clientId, "client id must never be null");
         this.clientId = clientId;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String getClientId() {
         return clientId;
     }

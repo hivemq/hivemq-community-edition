@@ -45,12 +45,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @ThreadSafe
 public class InitializersImpl implements Initializers {
 
-    @NotNull
-    private final Map<@NotNull String, @NotNull ClientInitializer> clientInitializerMap;
-    @NotNull
-    private final ReadWriteLock readWriteLock;
-    @NotNull
-    private final HiveMQExtensions hiveMQExtensions;
+    @NotNull private final Map<@NotNull String, @NotNull ClientInitializer> clientInitializerMap;
+    @NotNull private final ReadWriteLock readWriteLock;
+    @NotNull private final HiveMQExtensions hiveMQExtensions;
     @Inject
     public InitializersImpl(@NotNull final HiveMQExtensions hiveMQExtensions) {
         this.hiveMQExtensions = hiveMQExtensions;
@@ -74,8 +71,7 @@ public class InitializersImpl implements Initializers {
     }
 
     @Override
-    @NotNull
-    public Map<@NotNull String, @NotNull ClientInitializer> getClientInitializerMap() {
+    @NotNull public Map<@NotNull String, @NotNull ClientInitializer> getClientInitializerMap() {
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {

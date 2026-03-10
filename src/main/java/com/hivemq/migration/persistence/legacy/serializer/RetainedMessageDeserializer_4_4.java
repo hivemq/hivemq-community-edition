@@ -31,14 +31,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class RetainedMessageDeserializer_4_4 {
 
-    @NotNull
-    public static byte[] serializeKey(final @NotNull String topic) {
+    @NotNull public static byte[] serializeKey(final @NotNull String topic) {
         checkNotNull(topic, "Topic must not be null");
         return topic.getBytes(UTF_8);
     }
 
-    @NotNull
-    public static byte[] serializeValue(final RetainedMessage retainedMessage) {
+    @NotNull public static byte[] serializeValue(final RetainedMessage retainedMessage) {
         final byte[] responseTopic =
                 retainedMessage.getResponseTopic() == null ? null : retainedMessage.getResponseTopic().getBytes(UTF_8);
         final byte[] contentType =
@@ -86,14 +84,12 @@ public class RetainedMessageDeserializer_4_4 {
         return bytes;
     }
 
-    @NotNull
-    public static String deserializeKey(final @NotNull byte[] serialized) {
+    @NotNull public static String deserializeKey(final @NotNull byte[] serialized) {
         checkNotNull(serialized, "Byte array must not be null");
         return new String(serialized, 0, serialized.length, UTF_8);
     }
 
-    @NotNull
-    public static RetainedMessage deserializeValue(@NotNull final byte @NotNull [] serialized) {
+    @NotNull public static RetainedMessage deserializeValue(@NotNull final byte @NotNull [] serialized) {
         checkNotNull(serialized, "Byte array must not be null");
         final QoS qoS = QoS.valueOf(serialized[0] & 0b0000_0011);
         int cursor = 1;

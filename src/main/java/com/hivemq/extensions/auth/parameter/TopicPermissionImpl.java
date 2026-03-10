@@ -59,50 +59,42 @@ public class TopicPermissionImpl implements InternalTopicPermission {
         endsWithWildcard = StringUtils.endsWith(strippedPermissionTopic, "/#");
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String getTopicFilter() {
         return topic;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public PermissionType getType() {
         return type;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Qos getQos() {
         return qos;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public MqttActivity getActivity() {
         return activity;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Retain getPublishRetain() {
         return retain;
     }
 
     @Override
-    @NotNull
-    public SharedSubscription getSharedSubscription() {
+    @NotNull public SharedSubscription getSharedSubscription() {
         return sharedSubscription;
     }
 
     @Override
-    @NotNull
-    public String getSharedGroup() {
+    @NotNull public String getSharedGroup() {
         return sharedGroup;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public String[] getSplitTopic() {
         return splitTopic;
     }

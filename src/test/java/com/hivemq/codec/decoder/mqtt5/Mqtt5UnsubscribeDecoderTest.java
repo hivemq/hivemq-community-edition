@@ -442,8 +442,7 @@ public class Mqtt5UnsubscribeDecoderTest extends AbstractMqtt5DecoderTest {
         decodeNullExpected(encoded);
     }
 
-    @NotNull
-    private UNSUBSCRIBE decode(final byte[] encoded) {
+    @NotNull private UNSUBSCRIBE decode(final byte[] encoded) {
         final ByteBuf byteBuf = channel.alloc().buffer();
         byteBuf.writeBytes(encoded);
         channel.writeInbound(byteBuf);

@@ -43,13 +43,11 @@ public class HiveMQExtensionEvent {
         this.embedded = embedded;
     }
 
-    @NotNull
-    public Change getChange() {
+    @NotNull public Change getChange() {
         return change;
     }
 
-    @NotNull
-    public String getExtensionId() {
+    @NotNull public String getExtensionId() {
         return extensionId;
     }
 
@@ -57,8 +55,7 @@ public class HiveMQExtensionEvent {
         return priority;
     }
 
-    @NotNull
-    public Path getExtensionFolder() {
+    @NotNull public Path getExtensionFolder() {
         return extensionFolder;
     }
 

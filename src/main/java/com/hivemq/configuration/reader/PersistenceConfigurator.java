@@ -24,8 +24,7 @@ import com.hivemq.extension.sdk.api.annotations.NotNull;
  */
 public class PersistenceConfigurator {
 
-    @NotNull
-    private final PersistenceConfigurationService persistenceConfigurationService;
+    @NotNull private final PersistenceConfigurationService persistenceConfigurationService;
     public PersistenceConfigurator(@NotNull final PersistenceConfigurationService persistenceConfigurationService) {
         this.persistenceConfigurationService = persistenceConfigurationService;
     }

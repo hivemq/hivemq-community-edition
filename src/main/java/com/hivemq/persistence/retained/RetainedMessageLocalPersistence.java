@@ -58,8 +58,7 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @param  bucketIndex The index of the bucket in which the retained messages are stored.
      * @return             the {@link RetainedMessage} or <null> if no retained message found.
      */
-    @Nullable
-    RetainedMessage get(@NotNull String topic, int bucketIndex);
+    @Nullable RetainedMessage get(@NotNull String topic, int bucketIndex);
 
     /**
      * Set a retained message for a given topic to the local persistence
@@ -74,8 +73,7 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @return              a readonly set of topic strings.
      */
     @ReadOnly
-    @NotNull
-    Set<String> getAllTopics(@NotNull String subscription, int bucket);
+    @NotNull Set<String> getAllTopics(@NotNull String subscription, int bucket);
 
     /**
      * Trigger a cleanup for a specific bucket.
@@ -98,8 +96,7 @@ public interface RetainedMessageLocalPersistence extends LocalPersistence {
      * @since              4.4.0
      */
     @ExecuteInSingleWriter
-    @NotNull
-    BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
+    @NotNull BucketChunkResult<Map<String, @NotNull RetainedMessage>> getAllRetainedMessagesChunk(
             int bucketIndex,
             @Nullable String lastTopic,
             int maxMemory);

@@ -1406,8 +1406,7 @@ public class ConnectHandlerTest {
             super.write(channelHandlerContext, o, channelPromise);
         }
 
-        @Nullable
-        public DISCONNECT getDisconnectMessage() {
+        @Nullable public DISCONNECT getDisconnectMessage() {
             return disconnectMessage;
         }
     }

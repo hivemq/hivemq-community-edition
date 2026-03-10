@@ -42,8 +42,7 @@ public class PersistenceEntity {
     }
     @XmlElement(name = "mode", defaultValue = "file")
     private @NotNull PersistenceEntity.PersistenceMode mode = PersistenceMode.FILE;
-    @NotNull
-    public PersistenceMode getMode() {
+    @NotNull public PersistenceMode getMode() {
         return mode;
     }
 }

@@ -47,12 +47,10 @@ public interface ClientAuthorizers {
     /**
      * @return a map of all subscription authorizers per extension id.
      */
-    @NotNull
-    Map<String, SubscriptionAuthorizer> getSubscriptionAuthorizersMap();
+    @NotNull Map<String, SubscriptionAuthorizer> getSubscriptionAuthorizersMap();
 
     /**
      * @return a map of all publish authorizers per extension id.
      */
-    @NotNull
-    Map<String, PublishAuthorizer> getPublishAuthorizersMap();
+    @NotNull Map<String, PublishAuthorizer> getPublishAuthorizersMap();
 }

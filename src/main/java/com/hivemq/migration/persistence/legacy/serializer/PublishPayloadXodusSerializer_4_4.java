@@ -25,16 +25,14 @@ import com.hivemq.util.Bytes;
  */
 public class PublishPayloadXodusSerializer_4_4 {
 
-    @NotNull
-    public byte[] serializeKey(final long id, final long chunkIndex) {
+    @NotNull public byte[] serializeKey(final long id, final long chunkIndex) {
         final byte[] bytes = new byte[16];
         Bytes.copyLongToByteArray(id, bytes, 0);
         Bytes.copyLongToByteArray(chunkIndex, bytes, 8);
         return bytes;
     }
 
-    @NotNull
-    public KeyPair deserializeKey(final @NotNull byte[] bytes) {
+    @NotNull public KeyPair deserializeKey(final @NotNull byte[] bytes) {
         final long id = Bytes.readLong(bytes, 0);
         final long chunkIndex = Bytes.readLong(bytes, 8);
         return new KeyPair(id, chunkIndex);

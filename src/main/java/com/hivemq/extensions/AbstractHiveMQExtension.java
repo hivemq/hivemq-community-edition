@@ -128,8 +128,7 @@ public abstract class AbstractHiveMQExtension implements HiveMQExtension {
     @Override
     public abstract @Nullable ClassLoader getExtensionClassloader();
 
-    @NotNull
-    public abstract Logger getLogger();
+    @NotNull public abstract Logger getLogger();
 
     @Override
     public void start(

@@ -41,10 +41,8 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
     private boolean authenticatorPresent = false;
     private @NotNull AuthenticationState authenticationState = AuthenticationState.UNDECIDED;
     private @Nullable ByteBuffer authenticationData;
-    @Nullable
-    String reasonString;
-    @Nullable
-    String timeoutReasonString;
+    @Nullable String reasonString;
+    @Nullable String timeoutReasonString;
     private final boolean validateUTF8;
     private final @NotNull ModifiableUserPropertiesImpl userProperties;
     private final @NotNull ModifiableDefaultPermissions defaultPermissions;
@@ -155,13 +153,11 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         authenticationState = AuthenticationState.FAILED;
     }
 
-    @Nullable
-    ByteBuffer getAuthenticationData() {
+    @Nullable ByteBuffer getAuthenticationData() {
         return authenticationData;
     }
 
-    @Nullable
-    String getReasonString() {
+    @Nullable String getReasonString() {
         return reasonString;
     }
 
@@ -193,8 +189,7 @@ abstract class AuthOutput<T> extends AbstractAsyncOutput<T> {
         return authenticatorPresent;
     }
 
-    @NotNull
-    AuthenticationState getAuthenticationState() {
+    @NotNull AuthenticationState getAuthenticationState() {
         return authenticationState;
     }
 
