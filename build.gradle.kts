@@ -353,7 +353,6 @@ spotless {
 hivemqLicense {
     projectName.set("HiveMQ")
     thirdPartyLicenseDirectory.set(layout.projectDirectory.dir("src/distribution/third-party-licenses"))
-    overriddenLicenses.put("javax.annotation:javax.annotation-api", "CDDL-1.1")
 }
 
 /* ******************** publishing ******************** */

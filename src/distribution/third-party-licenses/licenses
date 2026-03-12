@@ -51,7 +51,7 @@ HiveMQ uses the following third party libraries:
  org.glassfish.jaxb:jaxb-core                                               | 4.0.6                                     | BSD-3-Clause  | https://spdx.org/licenses/BSD-3-Clause.html
  org.glassfish.jaxb:jaxb-runtime                                            | 4.0.6                                     | BSD-3-Clause  | https://spdx.org/licenses/BSD-3-Clause.html
  org.glassfish.jaxb:txw2                                                    | 4.0.6                                     | BSD-3-Clause  | https://spdx.org/licenses/BSD-3-Clause.html
- org.jctools:jctools-core                                                   | 4.0.5                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
+ org.jctools:jctools-core                                                   | 4.0.6                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.jetbrains.kotlin:kotlin-stdlib                                         | 2.3.10                                    | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.jetbrains.xodus:xodus-compress                                         | 1.2.3                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
  org.jetbrains.xodus:xodus-environment                                      | 1.2.3                                     | Apache-2.0    | https://spdx.org/licenses/Apache-2.0.html
