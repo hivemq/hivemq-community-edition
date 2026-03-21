@@ -31,7 +31,7 @@ jobs:
             21
 
       - name: Check for new issues
-        uses: hivemq/hivemq-snyk-composite-action@87155e0bc5cddd95ad2d4d184952bb2dbb9d225f # v2
+        uses: hivemq/hivemq-snyk-composite-action@1c18f39e10e7b1d35fa121b91b99c0445b7a4a56 # v2
         with:
           snyk-args: --org=hivemq-community-broker --project-name=hivemq-community-edition --configuration-matching=^runtimeClasspath$ -d hivemq-community-edition
           snyk-token: ${{ secrets.SNYK_TOKEN }}
