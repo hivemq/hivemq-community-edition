@@ -5,7 +5,6 @@
     ],
     baseBranchPatterns: [
         'master',
-        'renovate-playground',
     ],
     useBaseBranchConfig: 'merge',
     branchPrefix: 'renovate/hivemq-community-edition/',
