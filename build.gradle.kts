@@ -217,7 +217,12 @@ val hivemqZip by tasks.registering(Zip::class) {
 
     archiveFileName = "$name.zip"
 
-    from("src/distribution") { exclude("**/.gitkeep") }
+    from("src/distribution") {
+        exclude("**/.gitkeep")
+        filesMatching(listOf("**/*.sh", "bin/init-script/hivemq", "bin/init-script/hivemq-debian")) {
+            permissions { unix(0b111_101_101) }
+        }
+    }
     from("src/main/resources/config.xml") { into("conf") }
     from("src/main/resources/config.xsd") { into("conf") }
     from(tasks.shadowJar) { into("bin").rename { "hivemq.jar" } }
