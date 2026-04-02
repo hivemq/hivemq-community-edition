@@ -240,7 +240,7 @@ oci {
         imageName = "hivemq/hivemq-ce"
         allPlatforms {
             dependencies {
-                runtime("library:eclipse-temurin:sha256!01868992089327fe0871354378a499e34823e6c7439d32ca62a4876a152f6ccb") // 21-jre-noble
+                runtime(ociImages.eclipse.temurin.oci)
             }
             config {
                 user = "10000"
