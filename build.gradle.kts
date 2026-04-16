@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.shadow)
     alias(libs.plugins.defaults)
     alias(libs.plugins.metadata)
+    alias(libs.plugins.hivemq.oci.version.catalog)
     alias(libs.plugins.oci)
     alias(libs.plugins.javadocLinks)
     alias(libs.plugins.githubRelease)
