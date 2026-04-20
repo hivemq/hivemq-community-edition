@@ -17,6 +17,7 @@ package com.hivemq.mqtt.handler.connect;
 
 import com.google.common.collect.ImmutableList;
 import com.hivemq.bootstrap.ClientConnectionContext;
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.logging.EventLog;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnector;
 import com.hivemq.mqtt.handler.disconnect.MqttServerDisconnectorImpl;
@@ -86,9 +87,31 @@ public class MessageBarrierTest {
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
         channel.writeInbound(new PINGREQ());
         channel.writeInbound(TestMessageUtil.createMqtt3Publish());
-        channel.writeInbound(new DISCONNECT());
         assertTrue(channel.isActive());
-        assertEquals(6, messageBarrier.getQueue().size());
+        assertEquals(5, messageBarrier.getQueue().size());
+    }
+
+    @Test
+    public void test_disconnect_bypasses_queue_before_connack() {
+        channel.writeInbound(new CONNECT.Mqtt3Builder().withProtocolVersion(ProtocolVersion.MQTTv3_1_1)
+                .withClientIdentifier("clientID")
+                .build());
+
+        final AtomicInteger disconnectCounter = new AtomicInteger(0);
+        channel.pipeline().addAfter(MQTT_MESSAGE_BARRIER, "test", new ChannelDuplexHandler() {
+
+            @Override
+            public void channelRead(final @NotNull ChannelHandlerContext ctx, final @NotNull Object msg) {
+                if (msg instanceof DISCONNECT) {
+                    disconnectCounter.incrementAndGet();
+                }
+            }
+        });
+
+        channel.writeInbound(new DISCONNECT());
+
+        assertEquals(1, disconnectCounter.get());
+        assertEquals(0, messageBarrier.getQueue().size());
     }
 
     @Test

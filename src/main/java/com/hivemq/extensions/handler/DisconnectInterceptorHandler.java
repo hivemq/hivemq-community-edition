@@ -16,7 +16,6 @@
 package com.hivemq.extensions.handler;
 
 import com.google.inject.Inject;
-import com.hivemq.bootstrap.ClientConnection;
 import com.hivemq.bootstrap.ClientConnectionContext;
 import com.hivemq.configuration.service.FullConfigurationService;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
@@ -80,12 +79,12 @@ public class DisconnectInterceptorHandler {
             final @NotNull ChannelHandlerContext ctx,
             final @NotNull DISCONNECT disconnect) {
         final Channel channel = ctx.channel();
-        final ClientConnection clientConnection = ClientConnection.of(channel);
-        final String clientId = clientConnection.getClientId();
+        final ClientConnectionContext clientConnectionContext = ClientConnectionContext.of(channel);
+        final String clientId = clientConnectionContext.getClientId();
         if (clientId == null) {
             return;
         }
-        final ClientContextImpl clientContext = clientConnection.getExtensionClientContext();
+        final ClientContextImpl clientContext = clientConnectionContext.getExtensionClientContext();
         if (clientContext == null) {
             ctx.fireChannelRead(disconnect);
             return;
@@ -98,7 +97,7 @@ public class DisconnectInterceptorHandler {
         channel.config().setOption(ChannelOption.ALLOW_HALF_CLOSURE, true);
         final ClientInformation clientInfo = ExtensionInformationUtil.getAndSetClientInformation(channel, clientId);
         final ConnectionInformation connectionInfo = ExtensionInformationUtil.getAndSetConnectionInformation(channel);
-        final Long originalSessionExpiryInterval = clientConnection.getClientSessionExpiryInterval();
+        final Long originalSessionExpiryInterval = clientConnectionContext.getClientSessionExpiryInterval();
         final DisconnectPacketImpl packet = new DisconnectPacketImpl(disconnect);
         final DisconnectInboundInputImpl input = new DisconnectInboundInputImpl(clientInfo, connectionInfo, packet);
         final ExtensionParameterHolder<DisconnectInboundInputImpl> inputHolder = new ExtensionParameterHolder<>(input);
