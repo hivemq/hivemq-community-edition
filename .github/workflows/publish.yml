@@ -11,13 +11,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
       - name: Setup Java
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
+          cache: gradle
           distribution: temurin
           java-version: |
             11
             21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
+        with:
+          cache-disabled: true
+
       - name: Publish to Maven Central
         run: ./gradlew publishEmbeddedPublicationToMavenCentral
         env:
@@ -25,11 +33,13 @@ jobs:
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+
       - name: Push To Docker Hub
         run: ./gradlew pushOciImage --registry dockerHub --tag . --tag latest # . is a placeholder for the default tag
         env:
           ORG_GRADLE_PROJECT_dockerHubUsername: ${{ secrets.DOCKER_USERNAME }}
           ORG_GRADLE_PROJECT_dockerHubPassword: ${{ secrets.DOCKER_TOKEN }}
+
       - name: Attach HiveMQ Zip to GitHub Release
         run: ./gradlew githubRelease
         env:
