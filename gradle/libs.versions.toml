@@ -1,6 +1,6 @@
 [versions]
 apache-commonsCompress = "1.28.0"
-apache-commonsIO = "2.21.0"
+apache-commonsIO = "2.22.0"
 apache-commonsLang = "3.20.0"
 awaitility = "4.3.0"
 bouncycastle = "1.84"
