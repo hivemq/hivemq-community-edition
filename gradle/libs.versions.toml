@@ -87,7 +87,7 @@ hivemq-oci-version-catalog = { id = "com.hivemq.tools.oci-version-catalog", vers
 javadocLinks = { id = "io.github.sgtsilvio.gradle.javadoc-links", version = "0.10.0" }
 metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.7.0" }
 mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.5.0" }
-oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.25.0" }
+oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.26.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.4.1" }
 spotless = { id = "com.diffplug.spotless", version = "8.4.0" }
 versions = { id = "com.github.ben-manes.versions", version = "0.54.0" }
