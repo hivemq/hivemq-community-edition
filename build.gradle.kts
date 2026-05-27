@@ -391,7 +391,8 @@ githubRelease {
     allowUploadToExisting = true
 }
 
-val javaComponent = components["java"] as AdhocComponentWithVariants
-javaComponent.withVariantsFromConfiguration(configurations.shadowRuntimeElements.get()) {
-    skip()
+shadow {
+    // Disable publishing `shadowRuntimeElements` as an optional variant of the `java` component.
+    // See https://github.com/GradleUp/shadow/pull/1662 (Shadow 9.1.0).
+    addShadowVariantIntoJavaComponent = false
 }
