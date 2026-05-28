@@ -30,28 +30,6 @@ Run this locally before cutting a release tag:
 
 That command is what jitpack runs. If it fails locally, jitpack will fail too — and so will Maven Central publishing on release. The `jitpack-smoke` CI job runs the same command on every PR that touches build files.
 
-## Common foot-guns (real bugs we have hit)
+## Common foot-guns
 
-1. **`jitpack.yml` drift.** When `hivemq-extension-sdk` was removed as an included build (#632) and the toolchain rose to JDK 21 (#635), `jitpack.yml` kept its `openjdk11` + included-build `before_install`. JitPack 2026.5 failed silently and the cached failure had to be deleted by hand in the JitPack UI. Touch `settings.gradle.kts` or change the Java toolchain → update `jitpack.yml` in the same PR.
-2. **Shadow plugin 9.x publication variants.** Shadow 9.x adds `shadowRuntimeElements` to the `java` component lazily. The old top-level idiom
-   ```kotlin
-   javaComponent.withVariantsFromConfiguration(configurations.shadowRuntimeElements.get()) { skip() }
-   ```
-   throws `Variant for configuration 'shadowRuntimeElements' does not exist in component 'java'`. Use the plugin-level toggle (Shadow 9.1.0+, PR [GradleUp/shadow#1662](https://github.com/GradleUp/shadow/pull/1662)):
-   ```kotlin
-   shadow {
-       addShadowVariantIntoJavaComponent = false
-   }
-   ```
-3. **Branch protection on `master`.** The release flow requires temporarily disabling "Do not allow bypassing the above settings" on rule [5047065](https://github.com/hivemq/hivemq-community-edition/settings/branch_protection_rules/5047065) to push the version-bump commit. **Always re-enable it** after pushing.
-
-## Releasing
-
-The full CE release runbook lives in the dev handbook:
-https://github.com/hivemq/hivemq-dev-handbook/blob/master/_kanban/documentation/templates/ce-release.md
-
-Key steps that span multiple repos:
-
-- This repo: version bump in `gradle.properties`, `gradle/libs.versions.toml` (`hivemq-extensionSdk`), `README.adoc`; run `./gradlew updateThirdPartyLicenses`; commit `Version to YYYY.i`; tag `YYYY.i`; create GitHub release; approve publish workflow.
-- `hivemq-website-cms`: add blogpost under `src/lib/cms/releases/hivemq-ce/`, then promote `develop` → `staging` → `production`.
-- After tagging, **verify** the JitPack build at `https://jitpack.io/#hivemq/hivemq-community-edition/<version>` actually succeeded — a stale `jitpack.yml` will not be caught by the GitHub Actions publish workflow.
+1. **`jitpack.yml` drift.** `jitpack.yml` has its own `jdk:` and `install:` directives that are independent of the GitHub Actions workflows. When `hivemq-extension-sdk` was removed as an included build and the toolchain rose to JDK 21, `jitpack.yml` had to be updated separately. Touch `settings.gradle.kts` or change the Java toolchain → update `jitpack.yml` in the same PR.

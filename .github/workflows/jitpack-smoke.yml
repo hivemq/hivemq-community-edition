@@ -4,8 +4,9 @@ name: JitPack smoke test
 # in CI rather than at release time. JitPack runs `./gradlew publishToMavenLocal
 # -PsigningDisabled=true` on JDK 21 — we do the same.
 #
-# Background: 2026.5 shipped with a stale jitpack.yml and a Shadow 9.x
-# publication wiring bug that this job would have caught on the PR.
+# `jitpack.yml` has its own jdk/install config that lives outside the
+# regular GitHub Actions workflows, so it can silently drift when the
+# build setup changes. This job is the gate.
 
 on:
   push:
