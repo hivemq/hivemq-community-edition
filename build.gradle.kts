@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.PreserveFirstFoundResourceTransformer
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -208,7 +209,32 @@ tasks.jar {
 }
 
 tasks.shadowJar {
+    // INCLUDE lets the service/metadata transformers process every duplicate copy instead of silently
+    // dropping the later ones, which the default EXCLUDE does before the transformers ever run.
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
+    // Several dependencies ship their own copy of these license/notice/metadata files under identical
+    // paths; INCLUDE would otherwise pack each as a duplicate jar entry. Keep the first found copy.
+    // Third-party license compliance is covered separately by src/distribution/third-party-licenses.
+    transform<PreserveFirstFoundResourceTransformer> {
+        include(
+            "about.html",
+            "LICENSE-EDL-1.0.txt",
+            "LICENSE-EPL-1.0.txt",
+            "META-INF/AL2.0",
+            "META-INF/LGPL2.1",
+            "META-INF/LICENSE",
+            "META-INF/LICENSE.md",
+            "META-INF/LICENSE.txt",
+            "META-INF/NOTICE",
+            "META-INF/NOTICE.md",
+            "META-INF/NOTICE.txt",
+            "META-INF/io.netty.versions.properties",
+            "META-INF/maven/org.jctools/jctools-core/pom.properties",
+            "META-INF/maven/org.jctools/jctools-core/pom.xml",
+            "META-INF/versions/9/OSGI-INF/MANIFEST.MF",
+        )
+    }
 }
 
 val hivemqZip by tasks.registering(Zip::class) {
