@@ -47,7 +47,9 @@ public class SslExceptionHandlerTest {
     private final @NotNull Channel channel = mock();
     private final @NotNull Throwable throwable = mock();
     private final @NotNull EventLog eventLog = mock();
-    SslExceptionHandler sslExceptionHandler;
+
+    private @NotNull SslExceptionHandler sslExceptionHandler;
+
     @Before
     public void setUp() {
         when(ctx.channel()).thenReturn(channel);
@@ -62,14 +64,14 @@ public class SslExceptionHandlerTest {
     }
 
     @Test
-    public void test_ignorable_exception() throws Exception {
+    public void test_ignorable_exception() {
         sslExceptionHandler.exceptionCaught(ctx, new NotSslRecordException());
         verify(channel).close();
         verify(ctx, never()).fireExceptionCaught(any(Throwable.class));
     }
 
     @Test
-    public void test_handshake_exception() throws Exception {
+    public void test_handshake_exception() {
         when(throwable.getCause()).thenReturn(new SSLHandshakeException(""));
         sslExceptionHandler.exceptionCaught(ctx, throwable);
         verify(channel).close();
@@ -77,7 +79,7 @@ public class SslExceptionHandlerTest {
     }
 
     @Test
-    public void test_ssl_exception() throws Exception {
+    public void test_ssl_exception() {
         when(throwable.getCause()).thenReturn(new SSLException(""));
         sslExceptionHandler.exceptionCaught(ctx, throwable);
         verify(channel).close();
@@ -85,7 +87,7 @@ public class SslExceptionHandlerTest {
     }
 
     @Test
-    public void test_any_exception() throws Exception {
+    public void test_any_exception() {
         sslExceptionHandler.exceptionCaught(ctx, throwable);
         verify(channel, never()).close();
         verify(ctx).fireExceptionCaught(any(Throwable.class));

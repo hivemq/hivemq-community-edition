@@ -56,7 +56,9 @@ public class SslClientCertificateHandlerTest {
     private final @NotNull SSLEngine sslEngine = mock();
     private final @NotNull SSLSession sslSession = mock();
     private final @NotNull EmbeddedChannel channel = new EmbeddedChannel();
-    private UndefinedClientConnection clientConnection;
+
+    private @NotNull UndefinedClientConnection clientConnection;
+
     @Before
     public void setUp() throws Exception {
         when(sslHandler.engine()).thenReturn(sslEngine);
@@ -139,6 +141,7 @@ public class SslClientCertificateHandlerTest {
         freshChannel.pipeline().fireUserEventTriggered(SslHandshakeCompletionEvent.SUCCESS);
         verify(mqttServerDisconnector).logAndClose(eq(freshChannel), isNull(), anyString());
     }
+
     private static class WrongHandler extends SimpleChannelInboundHandler<Object> {
 
         @Override

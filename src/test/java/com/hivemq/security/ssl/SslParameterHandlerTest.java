@@ -41,13 +41,13 @@ import static org.mockito.Mockito.when;
  */
 public class SslParameterHandlerTest {
 
-    private EmbeddedChannel channel;
     private final @NotNull SslHandler sslHandler = mock();
     private final @NotNull SSLEngine sslEngine = mock();
     private final @NotNull SSLSession sslSession = mock();
+    private final @NotNull EmbeddedChannel channel = new EmbeddedChannel();
+
     @Before
     public void setUp() throws Exception {
-        channel = new EmbeddedChannel();
         channel.attr(ClientConnectionContext.CHANNEL_ATTRIBUTE_NAME).set(new DummyClientConnection(channel, null));
         channel.pipeline().addLast(new SslParameterHandler());
         channel.pipeline().addLast(ChannelHandlerNames.SSL_HANDLER, sslHandler);

@@ -57,9 +57,10 @@ import java.util.List;
 public class TestKeyStoreGenerator {
 
     public static final String KEY_ALIAS = "hivemqkeys";
-    private final @NotNull BouncyCastleProvider bouncyCastleProvider;
+
+    private final @NotNull BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
+
     public TestKeyStoreGenerator() {
-        bouncyCastleProvider = new BouncyCastleProvider();
         Security.addProvider(bouncyCastleProvider);
     }
 
@@ -67,7 +68,7 @@ public class TestKeyStoreGenerator {
         Security.removeProvider(bouncyCastleProvider.getName());
     }
 
-    @NotNull public File generateKeyStore(
+    public @NotNull File generateKeyStore(
             final @NotNull String name,
             final @NotNull String keystoreType,
             final @NotNull String keyStorePassword,
@@ -75,7 +76,7 @@ public class TestKeyStoreGenerator {
         return generateKeyStore(name, keystoreType, keyStorePassword, privateKeyPassword, true, false);
     }
 
-    @NotNull public File generateKeyStore(
+    public @NotNull File generateKeyStore(
             final @NotNull String name,
             final @NotNull String keystoreType,
             final @NotNull String keyStorePassword,
@@ -96,15 +97,15 @@ public class TestKeyStoreGenerator {
         return keyStoreFile;
     }
 
-    @NotNull private X509Certificate generateX509Certificate(
+    private @NotNull X509Certificate generateX509Certificate(
             final @NotNull KeyPair keyPair,
             final @NotNull String name,
             final boolean withX500,
             final boolean eclipticCurve) throws Exception {
         final X500Name x500Name;
         if (withX500) {
-            // CN = Common Name, OU = Organisational Unit, O = Organisation, C = Country, ST = State
-            x500Name = new X500Name("CN=" + name + ", OU=" + name + ", O=" + name + ", C=" + name + ", ST=" + name);
+            // CN = Common Name, OU = Organizational Unit, O = Organisation, C = Country, ST = State
+            x500Name = new X500Name("CN=" + name + ", OU=" + name + ", O=" + name + ", C=de, ST=" + name);
         } else {
             // At least 1 attribute is required
             x500Name = new X500Name("CN=" + name);
@@ -131,20 +132,20 @@ public class TestKeyStoreGenerator {
         return x509Certificate;
     }
 
-    @NotNull public KeyPair generateRSAKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
+    public @NotNull KeyPair generateRSAKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException {
         final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", "BC");
         keyPairGenerator.initialize(2048, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 
-    @NotNull public KeyPair generateECKeyPair()
+    public @NotNull KeyPair generateECKeyPair()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchProviderException {
         final KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", "BC");
         keyGen.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
         return keyGen.generateKeyPair();
     }
 
-    @NotNull private ContentSigner createRSAContentSigner(final KeyPair keyPair) throws Exception {
+    private @NotNull ContentSigner createRSAContentSigner(final KeyPair keyPair) throws Exception {
         final AlgorithmIdentifier signatureAlgorithmId =
                 new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
         final AlgorithmIdentifier digestAlgorithmId =
@@ -154,7 +155,7 @@ public class TestKeyStoreGenerator {
         return new BcRSAContentSignerBuilder(signatureAlgorithmId, digestAlgorithmId).build(privateKey);
     }
 
-    @NotNull private ContentSigner createECContentSigner(final KeyPair keyPair) throws Exception {
+    private @NotNull ContentSigner createECContentSigner(final KeyPair keyPair) throws Exception {
         final AlgorithmIdentifier signatureAlgorithmId =
                 new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withECDSA");
         final AlgorithmIdentifier digestAlgorithmId =
