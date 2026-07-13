@@ -15,6 +15,7 @@
  */
 package com.hivemq.security.ssl;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.security.auth.SslClientCertificate;
 import org.bouncycastle.asn1.DERUTF8String;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -28,7 +29,6 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,14 +36,11 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
@@ -53,8 +50,9 @@ import static org.junit.Assert.assertNull;
 
 public class SslClientCertificateImplTest {
 
-    private Certificate certificate;
-    private SslClientCertificate clientCertificate;
+    private @NotNull Certificate certificate;
+    private @NotNull SslClientCertificate clientCertificate;
+
     @Before
     public void before() throws Exception {
         certificate = generateCert();
@@ -128,7 +126,7 @@ public class SslClientCertificateImplTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void test_certs_not_null() throws Exception {
+    public void test_certs_not_null() {
         new SslClientCertificateImpl(null);
     }
 
@@ -155,7 +153,7 @@ public class SslClientCertificateImplTest {
         clientCertificate = new SslClientCertificateImpl(certificates);
     }
 
-    private Certificate generateBadCert() throws Exception {
+    private @NotNull Certificate generateBadCert() throws Exception {
         final KeyPair keyPair = createKeyPair();
         final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name("CN="),
                 BigInteger.valueOf(0),
@@ -166,7 +164,7 @@ public class SslClientCertificateImplTest {
         return getCertificate(keyPair, certificateBuilder);
     }
 
-    private Certificate generateCert() throws Exception {
+    private @NotNull Certificate generateCert() throws Exception {
         final KeyPair keyPair = createKeyPair();
         final JcaX509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(new X500Name(
                 "CN=Test commonName, C=DE, O=Test organization, OU=Test Unit, T=Test Title, L=Test locality, ST=Test state"),
@@ -179,7 +177,7 @@ public class SslClientCertificateImplTest {
         return getCertificate(keyPair, certificateBuilder);
     }
 
-    private Certificate generateCertWithExtension() throws Exception {
+    private @NotNull Certificate generateCertWithExtension() throws Exception {
         final KeyPair keyPair = createKeyPair();
         final JcaX509v3CertificateBuilder certificateBuilder =
                 new JcaX509v3CertificateBuilder(new X500Name("CN=Test commonName"),
@@ -197,8 +195,9 @@ public class SslClientCertificateImplTest {
         return getCertificate(keyPair, certificateBuilder);
     }
 
-    private Certificate getCertificate(final KeyPair keyPair, final JcaX509v3CertificateBuilder certificateBuilder)
-            throws OperatorCreationException, CertificateException {
+    private @NotNull Certificate getCertificate(
+            final KeyPair keyPair,
+            final JcaX509v3CertificateBuilder certificateBuilder) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder("SHA256WithRSAEncryption");
         signerBuilder = signerBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -208,7 +207,7 @@ public class SslClientCertificateImplTest {
         return converter.getCertificate(certificateBuilder.build(contentSigner));
     }
 
-    private KeyPair createKeyPair() throws InvalidKeySpecException, NoSuchAlgorithmException {
+    private @NotNull KeyPair createKeyPair() throws Exception {
         final RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
         gen.init(new RSAKeyGenerationParameters(BigInteger.valueOf(3), new SecureRandom(), 1024, 80));
         final AsymmetricCipherKeyPair keypair = gen.generateKeyPair();

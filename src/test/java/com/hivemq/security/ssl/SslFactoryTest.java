@@ -57,9 +57,11 @@ public class SslFactoryTest {
     private final @NotNull SocketChannel socketChannel = mock();
     private final @NotNull ByteBufAllocator byteBufAllocator = mock();
     private final @NotNull ListeningScheduledExecutorService executorService = mock();
+
     private @NotNull SslFactory sslFactory;
     private @NotNull TestKeyStoreGenerator testKeyStoreGenerator;
     private @NotNull LogbackCapturingAppender logCapture;
+
     @Before
     public void before() {
         final Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -101,21 +103,20 @@ public class SslFactoryTest {
 
     @Test(expected = SslException.class)
     public void test_invalid_keystore() {
-        final Tls tls = new Tls.Builder().withKeystorePath(RandomStringUtils.randomAlphabetic(32))
+        final Tls tls = new Tls.Builder().withKeystorePath(RandomStringUtils.secure().nextAlphabetic(32))
                 .withKeystoreType("JKS")
-                .withKeystorePassword(RandomStringUtils.randomAlphabetic(32))
-                .withPrivateKeyPassword(RandomStringUtils.randomAlphabetic(32))
+                .withKeystorePassword(RandomStringUtils.secure().nextAlphabetic(32))
+                .withPrivateKeyPassword(RandomStringUtils.secure().nextAlphabetic(32))
                 .withProtocols(new ArrayList<>())
-                .withTruststorePath(RandomStringUtils.randomAlphabetic(32))
+                .withTruststorePath(RandomStringUtils.secure().nextAlphabetic(32))
                 .withTruststoreType("JKS")
-                .withTruststorePassword(RandomStringUtils.randomAlphabetic(32))
+                .withTruststorePassword(RandomStringUtils.secure().nextAlphabetic(32))
                 .withClientAuthMode(Tls.ClientAuthMode.NONE)
                 .withCipherSuites(new ArrayList<>())
                 .withHandshakeTimeout(10)
                 .build();
-        // Only check if the exception is really thrown and not caught somewhere by accident
-        // noinspection unused
-        final SslContext sslContext = sslFactory.getSslContext(tls);
+        // only check if the exception is really thrown and not caught somewhere by accident
+        sslFactory.getSslContext(tls);
     }
 
     @Test(expected = SslException.class)
@@ -127,16 +128,15 @@ public class SslFactoryTest {
                 .withKeystorePassword("passwd1")
                 .withPrivateKeyPassword("passwd2")
                 .withProtocols(new ArrayList<>())
-                .withTruststorePath(RandomStringUtils.randomAlphabetic(32))
+                .withTruststorePath(RandomStringUtils.secure().nextAlphabetic(32))
                 .withTruststoreType("JKS")
-                .withTruststorePassword(RandomStringUtils.randomAlphabetic(32))
+                .withTruststorePassword(RandomStringUtils.secure().nextAlphabetic(32))
                 .withClientAuthMode(Tls.ClientAuthMode.NONE)
                 .withCipherSuites(new ArrayList<>())
                 .withHandshakeTimeout(12345)
                 .build();
-        // Only check if the exception is really thrown and not caught somewhere by accident
-        // noinspection unused
-        final SslContext sslContext = sslFactory.getSslContext(tls);
+        // only check if the exception is really thrown and not caught somewhere by accident
+        sslFactory.getSslContext(tls);
     }
 
     @Test
@@ -456,7 +456,7 @@ public class SslFactoryTest {
         assertEquals(!engineDefaultPreferServerCipherSuites, sslParameters2.getUseCipherSuitesOrder());
     }
 
-    private List<String> getSupportedCipherSuites() throws SslException {
+    private @NotNull List<String> getSupportedCipherSuites() throws SslException {
         try {
             final SSLEngine engine = getDefaultSslEngine();
             return ImmutableList.copyOf(engine.getSupportedCipherSuites());
@@ -465,7 +465,7 @@ public class SslFactoryTest {
         }
     }
 
-    private List<String> getSupportedProtocols() throws SslException {
+    private @NotNull List<String> getSupportedProtocols() throws SslException {
         try {
             final SSLEngine engine = getDefaultSslEngine();
             return ImmutableList.copyOf(engine.getSupportedProtocols());
@@ -474,7 +474,7 @@ public class SslFactoryTest {
         }
     }
 
-    private SSLEngine getDefaultSslEngine() throws NoSuchAlgorithmException, KeyManagementException {
+    private @NotNull SSLEngine getDefaultSslEngine() throws NoSuchAlgorithmException, KeyManagementException {
         final SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, null, null);
         return context.createSSLEngine();

@@ -54,7 +54,9 @@ public class SslContextStoreTest {
     private final @NotNull ScheduledExecutorService executorService = mock();
     private final @NotNull ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
     private final @NotNull TestKeyStoreGenerator keyStoreGenerator = new TestKeyStoreGenerator();
-    private SslContextStore sslContextStore;
+
+    private @NotNull SslContextStore sslContextStore;
+
     @Before
     public void before() {
         final SslContextFactory sslContextFactory = mock();
