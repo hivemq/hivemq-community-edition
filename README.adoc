@@ -6,8 +6,8 @@
 
 = HiveMQ Community Edition
 
-image:https://maven-badges.herokuapp.com/maven-central/com.hivemq/hivemq-community-edition-embedded/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/com.hivemq/hivemq-community-edition-embedded"]
-image:https://jitpack.io/v/hivemq/hivemq-community-edition.svg["JitPack",link="https://jitpack.io/#hivemq/hivemq-community-edition"]
+image:https://maven-badges.sml.io/maven-central/com.hivemq/hivemq-community-edition-embedded/badge.svg["Maven Central",link="https://maven-badges.sml.io/sonatype-central/com.hivemq/hivemq-community-edition-embedded"]
+image:https://img.shields.io/jitpack/version/com.github.hivemq/hivemq-community-edition["JitPack",link="https://jitpack.io/#hivemq/hivemq-community-edition"]
 image:https://javadoc.io/badge2/com.hivemq/hivemq-community-edition-embedded/javadoc.svg["javadoc",link=https://javadoc.io/doc/com.hivemq/hivemq-community-edition-embedded]
 image:https://img.shields.io/github/actions/workflow/status/hivemq/hivemq-community-edition/check.yml?branch=master[GitHub Workflow Status (with branch),link=https://github.com/hivemq/hivemq-community-edition/actions/workflows/check.yml?query=branch%3Amaster]
 
@@ -19,7 +19,7 @@ This project is the technical core of many large MQTT deployments and is now ava
 * Website: https://www.hivemq.com/
 * Documentation: https://github.com/hivemq/hivemq-community-edition/wiki
 * Community Forum: https://community.hivemq.com/
-* Contribution guidelines: link:CONTRIBUTING.adoc[Contributing.adoc]
+* Contribution guidelines: link:CONTRIBUTING.md[Contributing.md]
 * License: The source files in this repository are made available under the link:LICENSE[Apache License Version 2.0].
 
 == Features
@@ -32,7 +32,7 @@ This project is the technical core of many large MQTT deployments and is now ava
 ** Client Initializers
 ** MQTT Packet Interceptors
 ** Interacting with Publishes, Retained Messages, Clients and Subscriptions
-* Running on Windows, Linux and MacOS (Linux is recommended)
+* Running on Windows, Linux and macOS (Linux is recommended)
 * Embedded Mode
 
 HiveMQ CE is compatible with all MQTT 3 and MQTT 5 clients, including Eclipse Paho and https://github.com/hivemq/hivemq-mqtt-client[HiveMQ MQTT Client].
@@ -127,7 +127,7 @@ cd hivemq-community-edition
 
 The Docker image `hivemq/hivemq-ce:snapshot` is created locally.
 
-For further development instructions see the link:CONTRIBUTING.adoc[contribution guidelines].
+For further development instructions see the link:CONTRIBUTING.md[contribution guidelines].
 
 === Embedded Mode
 
@@ -174,12 +174,11 @@ Entry into the embedded mode is done with the `com.hivemq.embedded.EmbeddedHiveM
 ----
 public class Main {
 
-    public static void main(String[] args) {
-
+    public static void main(final String[] args) {
         final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQ.builder()
-            .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
-            .withDataFolder(Path.of("/path/to/embedded-data-folder"))
-            .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"));
+                .withConfigurationFolder(Path.of("/path/to/embedded-config-folder"))
+                .withDataFolder(Path.of("/path/to/embedded-data-folder"))
+                .withExtensionsFolder(Path.of("/path/to/embedded-extensions-folder"));
         ...
     }
 }
@@ -191,15 +190,15 @@ Once built, an EmbeddedHiveMQ can be started with `start()`.
 ----
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final EmbeddedHiveMQBuilder embeddedHiveMQBuilder = EmbeddedHiveMQ.builder();
         ...
 
         try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
             hiveMQ.start().join();
             ...
-        } catch (final Exception ex) {
-            ex.printStackTrace();
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 }
@@ -211,15 +210,13 @@ A running EmbeddedHiveMQ can be stopped with `stop()`.
 ----
 public class Main {
 
-    public static void main(String[] args) {
-
+    public static void main(final String[] args) {
         ...
-
         try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
             ...
             hiveMQ.stop().join();
-        } catch (final Exception ex) {
-            ex.printStackTrace();
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 }
@@ -233,8 +230,7 @@ Then add the embedded extension to the embedded HiveMQ builder.
 ----
 public class Main {
 
-    public static void main(String[] args) {
-
+    public static void main(final String[] args) {
         final EmbeddedExtension embeddedExtension = EmbeddedExtension.builder()
                 .withId("embedded-ext-1")
                 .withName("Embedded Extension")
@@ -253,9 +249,9 @@ public class Main {
 
         try (final EmbeddedHiveMQ hiveMQ = builder.build()) {
             hiveMQ.start().join();
-            //do something with hivemq
-        } catch (final Exception ex) {
-            ex.printStackTrace();
+            // do something with HiveMQ
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -274,24 +270,24 @@ public class Main {
 }
 ----
 
-NOTE: An EmbeddedHiveMQ is a resource that is similar to a e.g. network connection and implements the `java.lang.AutoCloseable` interface.
+NOTE: An EmbeddedHiveMQ is a resource that is similar to an e.g. network connection and implements the `java.lang.AutoCloseable` interface.
 Always use ARM (_try with resources_) or ensure a call to `close()`.
 
 ==== Exclusions
 
 When you deploy an application that includes EmbeddedHiveMQ, it can be useful to exclude some dependencies.
-One way to exclude dependencies is with the  link:https://maven.apache.org/plugins/maven-shade-plugin/[maven shade plugin].
+One way to exclude dependencies is with the link:https://maven.apache.org/plugins/maven-shade-plugin/[maven shade plugin].
 
 [source,xml]
 ----
 <project>
-...
- <build>
+    ...
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -301,7 +297,7 @@ One way to exclude dependencies is with the  link:https://maven.apache.org/plugi
                         <configuration>
                             <artifactSet>
                                 <excludes>
-                                    <!--Exclude the undesired dependencies-->
+                                    <!-- exclude the undesired dependencies -->
                                     <exclude>org.rocksdb:rocksdbjni</exclude>
                                     <exclude>ch.qos.logback:logback-classic</exclude>
                                 </excludes>
@@ -322,7 +318,7 @@ One way to exclude dependencies is with the  link:https://maven.apache.org/plugi
             </plugin>
         </plugins>
     </build>
-...
+    ...
 </project>
 ----
 
@@ -334,31 +330,29 @@ To exclude the `org.rocksdb:rocksdbjni` dependency, two internal configurations 
 ----
 public class Main {
 
-    public static void main(String[] args) {
-
+    public static void main(final String[] args) {
         ...
-
         try (final EmbeddedHiveMQ hiveMQ = embeddedHiveMQBuilder.build()) {
-
             InternalConfigurations.PAYLOAD_PERSISTENCE_TYPE.set(PersistenceType.FILE);
             InternalConfigurations.RETAINED_MESSAGE_PERSISTENCE_TYPE.set(PersistenceType.FILE);
 
             hiveMQ.start().join();
-
             ...
-        } catch (final Exception ex) {
-            ex.printStackTrace();
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 }
 ----
 
 // Scarf Tracking Pixel
-<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=39c2b98a-0d1a-4a1c-8ce2-1cce4d0fbcf1&page=README.adoc" />
+++++
+<img alt="" referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=39c2b98a-0d1a-4a1c-8ce2-1cce4d0fbcf1&page=README.adoc" />
+++++
 
 == Contributing
 
-If you want to contribute to HiveMQ CE, see the link:CONTRIBUTING.adoc[contribution guidelines].
+If you want to contribute to HiveMQ CE, see the link:CONTRIBUTING.md[contribution guidelines].
 
 == License
 
