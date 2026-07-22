@@ -262,9 +262,6 @@ oci {
         dockerHub {
             optionalCredentials()
         }
-        // The eclipse-temurin base image is served from ECR Public (PLT-1261). The registry host, namespace and
-        // group are read from oci.versions.toml so the image is declared in exactly one place; anonymous pulls
-        // need no credentials. exclusiveContent keeps this group from also being looked up on Docker Hub.
         registry(ociImages.eclipse.temurin.registry!!) {
             url = uri("https://${ociImages.eclipse.temurin.registry}")
             exclusiveContent { includeGroup(ociImages.eclipse.temurin.group) }

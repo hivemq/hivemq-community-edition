@@ -1,5 +1,4 @@
-# Security-patched base image published to ECR Public by hivemq/images (PLT-941).
-# Renovate bumps the digest via the oci.versions.toml custom manager.
+# https://gallery.ecr.aws/y7j2u9c5/base-images/eclipse-temurin
 [[oci]]
 name = "eclipse-temurin"
 image = "public.ecr.aws/y7j2u9c5/base-images/eclipse-temurin"
