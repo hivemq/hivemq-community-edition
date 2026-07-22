@@ -1,5 +1,5 @@
-# https://gallery.ecr.aws/y7j2u9c5/base-images/eclipse-temurin
+# https://gallery.ecr.aws/hivemq/base-images/eclipse-temurin
 [[oci]]
 name = "eclipse-temurin"
-image = "public.ecr.aws/y7j2u9c5/base-images/eclipse-temurin"
-reference = "21-jre-noble@sha256:aea6de429229caa8aadf712d648e59ef22ce54e2690a857103cde797fbfd2170"
+image = "public.ecr.aws/hivemq/base-images/eclipse-temurin"
+reference = "21-jre-noble@sha256:5e349bf28c22a00d7ca2dea836586725698ee7252a178ea94c40ba45a59ec4a0"
