@@ -14,7 +14,6 @@ plugins {
     alias(libs.plugins.oci)
     alias(libs.plugins.javadocLinks)
     alias(libs.plugins.githubRelease)
-    alias(libs.plugins.versions)
 
     /* Code Quality Plugins */
     jacoco
