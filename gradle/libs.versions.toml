@@ -90,4 +90,3 @@ mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publis
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.28.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
 spotless = { id = "com.diffplug.spotless", version = "8.8.0" }
-versions = { id = "com.github.ben-manes.versions", version = "0.56.0" }
