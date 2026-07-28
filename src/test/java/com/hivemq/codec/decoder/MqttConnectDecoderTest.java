@@ -21,6 +21,7 @@ import com.hivemq.configuration.HivemqId;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.mqtt.handler.connack.MqttConnacker;
 import com.hivemq.mqtt.message.ProtocolVersion;
+import com.hivemq.mqtt.message.connect.CONNECT;
 import com.hivemq.mqtt.message.reason.Mqtt5ConnAckReasonCode;
 import com.hivemq.util.ClientIds;
 import io.netty.buffer.ByteBuf;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class MqttConnectDecoderTest {
 
@@ -135,6 +137,41 @@ public class MqttConnectDecoderTest {
     public void decode_whenInvalidLength_thenConnectionIsClosedAndCONNACKIsReceived() {
         final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 5, 'M', 'Q', 'T', 'T', 7});
         decoder.decode(clientConnection, buf, FIXED_HEADER);
+        verify(mqttConnacker).connackError(eq(channel),
+                anyString(),
+                anyString(),
+                eq(Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION),
+                anyString());
+    }
+
+   @Test
+    public void decode_whenMosquittoTryPrivateProtocolVersion_thenSuccessfullyDecodedAsMqtt311() {
+        final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{
+                0, 4, 'M', 'Q', 'T', 'T',
+                (byte) 0x84, // Mosquitto try_private protocol level (0x84)
+                2,          // Clean session
+                0, 60,      // Keep alive (60s)
+                0, 6, 'b', 'r', 'i', 'd', 'g', 'e' // Client ID
+        });
+
+        final CONNECT connect = decoder.decode(clientConnection, buf, FIXED_HEADER);
+        assertNotNull(connect);
+        assertSame(ProtocolVersion.MQTTv3_1_1, connect.getProtocolVersion());
+        verifyNoMoreInteractions(mqttConnacker);
+    }
+
+    @Test
+    public void decode_whenInvalidProtocolVersion_thenConnectionIsClosedAndCONNACKIsReceived() {
+        final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{
+                0, 4, 'M', 'Q', 'T', 'T',
+                2,          // Invalid protocol version
+                2,          // Clean session
+                0, 60,      // Keep alive (60s)
+                0, 6, 'b', 'r', 'i', 'd', 'g', 'e' // Client ID
+        });
+
+        decoder.decode(clientConnection, buf, FIXED_HEADER);
+
         verify(mqttConnacker).connackError(eq(channel),
                 anyString(),
                 anyString(),

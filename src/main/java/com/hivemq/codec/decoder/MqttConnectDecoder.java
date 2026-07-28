@@ -90,7 +90,8 @@ public class MqttConnectDecoder {
                     return null;
                 }
                 final ByteBuf protocolVersionBuf = buf.slice(buf.readerIndex() + 6, 1);
-                final byte versionByte = protocolVersionBuf.readByte();
+                final byte rawVersionByte = protocolVersionBuf.readByte();
+                final int versionByte = normalizeProtocolVersionByte(rawVersionByte);
                 if (versionByte == 5) {
                     protocolVersion = ProtocolVersion.MQTTv5;
                 } else if (versionByte == 4) {
@@ -135,5 +136,24 @@ public class MqttConnectDecoder {
                 "Sent CONNECT with an invalid protocol version",
                 Mqtt5ConnAckReasonCode.UNSUPPORTED_PROTOCOL_VERSION,
                 ReasonStrings.CONNACK_UNSUPPORTED_PROTOCOL_VERSION);
+    }
+
+    /**
+     * Normalizes the raw MQTT protocol version byte.
+     * <p>
+     * When Mosquitto connects as a bridge with try_private enabled, it sets the MSB (0x80)
+     * of the protocol level byte (e.g. 0x04 becomes 0x84 / -124 in signed byte arithmetic).
+     *
+     * @param rawByte the raw protocol version byte from the payload
+     * @return normalized integer representation of the protocol version
+     */
+    private static int normalizeProtocolVersionByte(final byte rawByte) {
+        // Early return if MSB / first bit (0x80) is not set
+        if ((rawByte & 0x80) == 0) {
+            return rawByte;
+        }
+
+        // Mask out the Mosquitto try_private bit
+        return rawByte & 0x7F;
     }
 }
