@@ -144,13 +144,11 @@ public class MqttConnectDecoderTest {
                 anyString());
     }
 
-   @Test
+    @Test
     public void decode_whenMosquittoTryPrivateProtocolVersion_thenSuccessfullyDecodedAsMqtt311() {
-        final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{
-                0, 4, 'M', 'Q', 'T', 'T',
-                (byte) 0x84, // Mosquitto try_private protocol level (0x84) (try_private = true)
-                2,          // Clean session
-                0, 60,      // Keep alive (60s)
+        final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', (byte) 0x84, // Mosquitto try_private protocol level (0x84) (try_private = true)
+                2, // Clean session
+                0, 60, // Keep alive (60s)
                 0, 6, 'b', 'r', 'i', 'd', 'g', 'e' // Client ID
         });
 
@@ -162,18 +160,16 @@ public class MqttConnectDecoderTest {
 
     @Test
     public void decode_whenStandardProtocolVersion_thenSuccessfullyDecodedAsMqtt311() {
-    final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{
-            0, 4, 'M', 'Q', 'T', 'T',
-            (byte) 0x04, // Standard MQTT 3.1.1 protocol level (try_private = false)
-            2,          // Clean session
-            0, 60,      // Keep alive (60s)
-            0, 6, 'b', 'r', 'i', 'd', 'g', 'e' // Client ID
-    });
+        final ByteBuf buf = Unpooled.wrappedBuffer(new byte[]{0, 4, 'M', 'Q', 'T', 'T', (byte) 0x04, // Standard MQTT 3.1.1 protocol level (try_private = false)
+                2, // Clean session
+                0, 60, // Keep alive (60s)
+                0, 6, 'b', 'r', 'i', 'd', 'g', 'e' // Client ID
+        });
 
-    final CONNECT connect = decoder.decode(clientConnection, buf, FIXED_HEADER);
-    assertNotNull(connect);
-    assertSame(ProtocolVersion.MQTTv3_1_1, connect.getProtocolVersion());
-    verifyNoMoreInteractions(mqttConnacker);
-}
+        final CONNECT connect = decoder.decode(clientConnection, buf, FIXED_HEADER);
+        assertNotNull(connect);
+        assertSame(ProtocolVersion.MQTTv3_1_1, connect.getProtocolVersion());
+        verifyNoMoreInteractions(mqttConnacker);
+    }
 
 }

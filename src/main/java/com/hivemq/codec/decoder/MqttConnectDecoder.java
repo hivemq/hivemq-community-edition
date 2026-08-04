@@ -141,11 +141,11 @@ public class MqttConnectDecoder {
     /**
      * Normalizes the raw MQTT protocol version byte.
      * <p>
-     * When Mosquitto connects as a bridge with try_private enabled, it sets the Most Significant Bit (MSB) (0x80)
-     * of the protocol level byte (e.g. 0x04 becomes 0x84 / -124 in signed byte arithmetic).
+     * When Mosquitto connects as a bridge with try_private enabled, it sets the Most Significant Bit (MSB) (0x80) of
+     * the protocol level byte (e.g. 0x04 becomes 0x84 / -124 in signed byte arithmetic).
      *
-     * @param rawByte the raw protocol version byte from the payload
-     * @return normalized integer representation of the protocol version
+     * @param  rawByte the raw protocol version byte from the payload
+     * @return         normalized integer representation of the protocol version
      */
     private static int normalizeProtocolVersionByte(final byte rawByte) {
         // Early return if MSB / first bit (0x80) is not set
