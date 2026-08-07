@@ -98,6 +98,7 @@ dependencies {
     implementation(libs.logback.classic)
 
     // security
+    implementation(platform(libs.bouncycastle.bom))
     implementation(libs.bouncycastle.prov)
     implementation(libs.bouncycastle.pkix)
 
