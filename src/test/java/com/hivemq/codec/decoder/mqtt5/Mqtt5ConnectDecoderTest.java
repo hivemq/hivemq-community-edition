@@ -3012,4 +3012,90 @@ public class Mqtt5ConnectDecoderTest extends AbstractMqtt5DecoderTest {
         assertNotNull(publishInternal);
         return publishInternal;
     }
+
+    // --- [MQTT-3.1.2-16],[MQTT-3.1.2-18]: CONNECT with trailing data after payload must be rejected ---
+
+    @Test
+    public void decode_connect_with_trailing_data_after_payload() {
+        final byte[] encoded = {
+                // fixed header
+                0b0001_0000,
+                // remaining length: 17 (normal) + 2 (trailing) = 19
+                19,
+                // variable header
+                // protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                // protocol version 5
+                5,
+                // connect flags (clean start)
+                0b0000_0010,
+                // keep alive
+                0, 30,
+                // properties length
+                0,
+                // payload: client identifier
+                0, 4, 't', 'e', 's', 't',
+                // trailing data (should not be here)
+                0x01, 0x02,
+        };
+        decodeNullExpected(encoded);
+    }
+
+    @Test
+    public void decode_connect_with_single_trailing_byte() {
+        final byte[] encoded = {
+                // fixed header
+                0b0001_0000,
+                // remaining length: 17 (normal) + 1 (trailing) = 18
+                18,
+                // variable header
+                // protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                // protocol version 5
+                5,
+                // connect flags (clean start)
+                0b0000_0010,
+                // keep alive
+                0, 30,
+                // properties length
+                0,
+                // payload: client identifier
+                0, 4, 't', 'e', 's', 't',
+                // trailing byte
+                0x00,
+        };
+        decodeNullExpected(encoded);
+    }
+
+    @Test
+    public void decode_connect_with_trailing_data_and_will() {
+        final byte[] encoded = {
+                // fixed header
+                0b0001_0000,
+                // remaining length: 30 (with will) + 2 (trailing) = 32
+                32,
+                // variable header
+                // protocol name
+                0, 4, 'M', 'Q', 'T', 'T',
+                // protocol version 5
+                5,
+                // connect flags: Will Flag + Will QoS 1 + Clean Start
+                0b0000_1110,
+                // keep alive
+                0, 30,
+                // properties length
+                0,
+                // payload: client identifier
+                0, 4, 't', 'e', 's', 't',
+                // will properties length
+                0,
+                // will topic
+                0, 5, 'w', 'i', 'l', 'l', '/',
+                // will payload
+                0, 3, 'm', 's', 'g',
+                // trailing data
+                (byte) 0xFF, (byte) 0xFE,
+        };
+        decodeNullExpected(encoded);
+    }
 }
