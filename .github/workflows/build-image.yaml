@@ -1,0 +1,116 @@
+name: Build Container Image
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  release:
+    types: [published]
+
+  # 1. Enable manual triggers with an optional custom tag input
+  workflow_dispatch:
+    inputs:
+      custom_tag:
+        description: 'Custom Docker Tag (e.g., test-tag, v1.0.0-beta)'
+        required: false
+        type: string
+        default: ''
+
+env:
+  CONTAINER_REGISTRY: registry.prod.vocovo.com
+  IMAGE_NAME: library/cloud-mqtt-auth-service
+
+jobs:
+  build:
+    runs-on: azure-generic
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build HiveMQ CE Zip
+        run: ./gradlew hivemqZip -x test
+
+      - name: Generate Dockerfile
+        run: |
+          cat << 'EOF' > Dockerfile.local
+          FROM eclipse-temurin:21-jre
+
+          ENV HIVEMQ_HOME=/opt/hivemq
+          WORKDIR $HIVEMQ_HOME
+
+          # Install unzip
+          RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
+
+          COPY build/distributions/*.zip /tmp/hivemq.zip
+
+          # Extract archive, strip CRLF line endings, and set executable permissions
+          RUN mkdir -p /tmp/unzipped \
+              && unzip /tmp/hivemq.zip -d /tmp/unzipped \
+              && cp -R /tmp/unzipped/*/* $HIVEMQ_HOME/ \
+              && rm -rf /tmp/* \
+              && sed -i 's/\r$//' $HIVEMQ_HOME/bin/*.sh \
+              && chmod +x $HIVEMQ_HOME/bin/*.sh \
+              && groupadd -r hivemq && useradd -r -g hivemq hivemq \
+              && chown -R hivemq:hivemq $HIVEMQ_HOME
+
+          USER hivemq
+          EXPOSE 1883 8080
+
+          ENTRYPOINT ["/opt/hivemq/bin/run.sh"]
+          EOF
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.2.0
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_ACCESS_TOKEN }}
+
+      - name: Cache Docker layers
+        uses: actions/cache@v6.1.0
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # 2. Update metadata extraction to support raw custom tags when triggered manually
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v6.2.0
+        with:
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=pr
+            # This line appends your custom tag only if it was supplied via the UI:
+            type=raw,value=${{ github.event.inputs.custom_tag }},enable=${{ github.event.inputs.custom_tag != '' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7.3.0
+        with:
+          context: .
+          file: Dockerfile.local
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move new cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
