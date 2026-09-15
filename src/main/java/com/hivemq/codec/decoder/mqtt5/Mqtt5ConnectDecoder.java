@@ -181,6 +181,15 @@ public class Mqtt5ConnectDecoder extends AbstractMqttConnectDecoder {
         if (!decodeAndValidatePassword(clientConnectionContext, buf, connectBuilder, passwordRequired)) {
             return null;
         }
+        // [MQTT-3.1.2-16],[MQTT-3.1.2-18]: Reject CONNECT with unexpected trailing data
+        if (buf.isReadable()) {
+            mqttConnacker.connackError(clientConnectionContext.getChannel(),
+                    "A client (IP: {}) sent a CONNECT with unexpected trailing data.",
+                    "Sent CONNECT with unexpected trailing data",
+                    Mqtt5ConnAckReasonCode.MALFORMED_PACKET,
+                    ReasonStrings.CONNACK_MALFORMED_PACKET_FIXED_HEADER);
+            return null;
+        }
         clientConnectionContext.setCleanStart(cleanStart);
         return connectBuilder.withClientIdentifier(clientId)
                 .withCleanStart(cleanStart)
