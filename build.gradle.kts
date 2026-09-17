@@ -262,6 +262,18 @@ oci {
         dockerHub {
             optionalCredentials()
         }
+        // The eclipse-temurin base image is served from ECR Public (PLT-1261). Anonymous pulls need no
+        // credentials. exclusiveContent keeps this group from also being looked up on Docker Hub.
+        registry("ecrPublic") {
+            url = uri("https://public.ecr.aws")
+            optionalCredentials()
+            exclusiveContent { includeGroup("hivemq.library") }
+        }
+    }
+    imageMapping {
+        mapGroup("hivemq.library") {
+            toImage(nameSpec("hivemq/library/") + name)
+        }
     }
     imageDefinitions.register("main") {
         imageName = "hivemq/hivemq-ce"
