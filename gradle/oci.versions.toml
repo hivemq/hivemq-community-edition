@@ -2,4 +2,4 @@
 [[oci]]
 name = "eclipse-temurin"
 image = "public.ecr.aws/hivemq/library/eclipse-temurin"
-reference = "21-jre-noble@sha256:2499222652ccf06d47e2a9a51770f52ed3843e536c28b0ee592b313b915802a5"
+reference = "21-jre-noble@sha256:eca2f57a77041a6cab1a752c089f1af83057be131099f41d3ebc76d07a688c5d"
