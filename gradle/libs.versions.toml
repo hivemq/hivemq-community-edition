@@ -20,7 +20,7 @@ jaxb-api = "4.0.5"
 jaxb-impl = "4.0.9"
 jctools = "4.0.7"
 junit = "4.13.2"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 logback = "1.6.5"
 mockito = "5.24.0"
 netty = "4.1.139.Final"
@@ -90,4 +90,4 @@ metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.7.0" }
 mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.5.0" }
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.31.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
-spotless = { id = "com.diffplug.spotless", version = "8.10.3" }
+spotless = { id = "com.diffplug.spotless", version = "8.10.4" }
