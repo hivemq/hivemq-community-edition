@@ -169,8 +169,10 @@ public class LocalTopicTree {
             final boolean excludeRootLevelWildcard,
             final @NotNull SubscriptionsConsumer subscriberAndTopicConsumer) {
         checkNotNull(topic, "Topic must not be null");
-        // Root wildcard subscribers always match
-        if (!excludeRootLevelWildcard) {
+        // [MQTT-4.7.2-1]: Wildcard subscribers (# and +) MUST NOT match $ topics
+        final boolean isDollarTopic = !topic.isEmpty() && topic.charAt(0) == '$';
+        // Root wildcard subscribers always match (unless topic starts with $)
+        if (!excludeRootLevelWildcard && !isDollarTopic) {
             subscriberAndTopicConsumer.acceptRootState(rootWildcardSubscribers);
         }
         // This is a shortcut in case there are no nodes beside the root node
@@ -190,7 +192,8 @@ public class LocalTopicTree {
             lock.unlock();
         }
         // We now have to traverse the wildcard node if something matches here
-        if (!excludeRootLevelWildcard) {
+        // [MQTT-4.7.2-1]: + wildcard MUST NOT match $ topics
+        if (!excludeRootLevelWildcard && !isDollarTopic) {
             final Lock wildcardLock = segmentLocks.get("+").readLock();
             wildcardLock.lock();
             try {
@@ -509,8 +512,10 @@ public class LocalTopicTree {
             final boolean excludeRootLevelWildcard) {
         checkNotNull(topic, "Topic must not be null");
         final ImmutableSet.Builder<String> subscribers = ImmutableSet.builder();
-        // Root wildcard subscribers always match
-        if (!excludeRootLevelWildcard) {
+        // [MQTT-4.7.2-1]: Wildcard subscribers (# and +) MUST NOT match $ topics
+        final boolean isDollarTopic = !topic.isEmpty() && topic.charAt(0) == '$';
+        // Root wildcard subscribers always match (unless topic starts with $)
+        if (!excludeRootLevelWildcard && !isDollarTopic) {
             for (final SubscriberWithQoS rootWildcardSubscriber : rootWildcardSubscribers) {
                 addAfterItemCallback(itemFilter, subscribers, rootWildcardSubscriber);
             }
@@ -532,7 +537,8 @@ public class LocalTopicTree {
             lock.unlock();
         }
         // We now have to traverse the wildcard node if something matches here
-        if (!excludeRootLevelWildcard) {
+        // [MQTT-4.7.2-1]: + wildcard MUST NOT match $ topics
+        if (!excludeRootLevelWildcard && !isDollarTopic) {
             final Lock wildcardLock = segmentLocks.get("+").readLock();
             wildcardLock.lock();
             try {
