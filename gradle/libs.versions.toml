@@ -87,7 +87,7 @@ hivemq-license = { id = "com.hivemq.tools.license", version = "1.4.0" }
 hivemq-oci-version-catalog = { id = "com.hivemq.tools.oci-version-catalog", version = "0.4.1" }
 javadocLinks = { id = "io.github.sgtsilvio.gradle.javadoc-links", version = "0.10.0" }
 metadata = { id = "io.github.sgtsilvio.gradle.metadata", version = "0.7.0" }
-mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.5.0" }
+mavenCentralPublishing = { id = "io.github.sgtsilvio.gradle.maven-central-publishing", version = "0.6.0" }
 oci = { id = "io.github.sgtsilvio.gradle.oci", version = "0.32.0" }
 shadow = { id = "com.gradleup.shadow", version = "9.6.1" }
 spotless = { id = "com.diffplug.spotless", version = "8.10.4" }
