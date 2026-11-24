@@ -8,9 +8,14 @@ jobs:
   publish:
     environment: mavenCentralPublish
     runs-on: ubuntu-latest
+    permissions:
+      # githubRelease uploads the zip to the release with GITHUB_TOKEN.
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
 
       - name: Setup Java
         uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6
