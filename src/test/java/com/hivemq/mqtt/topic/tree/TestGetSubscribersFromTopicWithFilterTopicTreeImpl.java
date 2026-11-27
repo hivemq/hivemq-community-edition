@@ -327,4 +327,150 @@ public class TestGetSubscribersFromTopicWithFilterTopicTreeImpl {
     @NotNull public Predicate<SubscriberWithQoS> getIndividualSubFilter() {
         return subscriber -> !subscriber.isSharedSubscription();
     }
+
+    // --- [MQTT-4.7.2-1]: Wildcard subscribers MUST NOT match $ prefixed topics ---
+
+    @Test
+    public void test_hash_wildcard_does_not_match_dollar_topic() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("$SYS/topic", getMatchAllFilter(), false);
+        assertEquals(0, subscribers.size());
+    }
+
+    @Test
+    public void test_plus_wildcard_does_not_match_dollar_topic() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("+", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("$SYS", getMatchAllFilter(), false);
+        assertEquals(0, subscribers.size());
+    }
+
+    @Test
+    public void test_plus_wildcard_does_not_match_dollar_topic_multi_level() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("+/monitor/Clients", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("$SYS/monitor/Clients", getMatchAllFilter(), false);
+        assertEquals(0, subscribers.size());
+    }
+
+    @Test
+    public void test_hash_wildcard_does_not_match_dollar_topic_findTopicSubscribers() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("$SYS/topic").getSubscribers();
+        assertEquals(0, subscribers.size());
+    }
+
+    @Test
+    public void test_dollar_sys_hash_wildcard_matches_dollar_topic() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("$SYS/#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("$SYS/topic", getMatchAllFilter(), false);
+        assertEquals(1, subscribers.size());
+        assertThat(subscribers, hasItem("subscriber"));
+    }
+
+    @Test
+    public void test_dollar_sys_plus_wildcard_matches_dollar_topic() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("$SYS/+", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("$SYS/topic", getMatchAllFilter(), false);
+        assertEquals(1, subscribers.size());
+        assertThat(subscribers, hasItem("subscriber"));
+    }
+
+    @Test
+    public void test_hash_wildcard_still_matches_normal_topic() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("normal/topic", getMatchAllFilter(), false);
+        assertEquals(1, subscribers.size());
+        assertThat(subscribers, hasItem("subscriber"));
+    }
+
+    @Test
+    public void test_plus_wildcard_still_matches_normal_topic() throws Exception {
+        topicTree.addTopic("subscriber", new Topic("+", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<String> subscribers = topicTree.getSubscribersForTopic("normal", getMatchAllFilter(), false);
+        assertEquals(1, subscribers.size());
+        assertThat(subscribers, hasItem("subscriber"));
+    }
+
+    // --- findSubscribers coverage: multi-level tree traversal (L182-192) ---
+
+    @Test
+    public void test_findSubscribers_multi_level_exact_match() throws Exception {
+        topicTree.addTopic("sub1", new Topic("a/b/c", QoS.AT_LEAST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("a/b/c").getSubscribers();
+        assertEquals(1, subscribers.size());
+        assertEquals("sub1", subscribers.iterator().next().getSubscriber());
+    }
+
+    @Test
+    public void test_findSubscribers_multi_level_no_match() throws Exception {
+        topicTree.addTopic("sub1", new Topic("a/b/c", QoS.AT_LEAST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("a/b/d").getSubscribers();
+        assertEquals(0, subscribers.size());
+    }
+
+    // --- findSubscribers coverage: + wildcard traversal (L196-207) ---
+
+    @Test
+    public void test_findSubscribers_plus_wildcard_multi_level() throws Exception {
+        topicTree.addTopic("sub1", new Topic("+/b/c", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("a/b/c").getSubscribers();
+        assertEquals(1, subscribers.size());
+    }
+
+    @Test
+    public void test_findSubscribers_plus_wildcard_with_exact() throws Exception {
+        topicTree.addTopic("sub1", new Topic("+/b", QoS.AT_MOST_ONCE), (byte) 0, null);
+        topicTree.addTopic("sub2", new Topic("a/b", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("a/b").getSubscribers();
+        assertEquals(2, subscribers.size());
+    }
+
+    @Test
+    public void test_findSubscribers_plus_wildcard_does_not_match_dollar_topic() throws Exception {
+        topicTree.addTopic("sub1", new Topic("+/monitor", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("$SYS/monitor").getSubscribers();
+        assertEquals(0, subscribers.size());
+    }
+
+    // --- findSubscribers coverage: # wildcard with multi-level topic ---
+
+    @Test
+    public void test_findSubscribers_hash_wildcard_multi_level() throws Exception {
+        topicTree.addTopic("sub1", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("a/b/c/d").getSubscribers();
+        assertEquals(1, subscribers.size());
+    }
+
+    @Test
+    public void test_findSubscribers_hash_wildcard_does_not_match_dollar_multi_level() throws Exception {
+        topicTree.addTopic("sub1", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("$SYS/monitor/Clients").getSubscribers();
+        assertEquals(0, subscribers.size());
+    }
+
+    // --- findSubscribers coverage: $ topic with $SYS/# subscription ---
+
+    @Test
+    public void test_findSubscribers_dollar_sys_hash_matches_multi_level() throws Exception {
+        topicTree.addTopic("sub1", new Topic("$SYS/#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("$SYS/monitor/Clients").getSubscribers();
+        assertEquals(1, subscribers.size());
+    }
+
+    @Test
+    public void test_findSubscribers_dollar_sys_plus_matches() throws Exception {
+        topicTree.addTopic("sub1", new Topic("$SYS/+", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("$SYS/uptime").getSubscribers();
+        assertEquals(1, subscribers.size());
+    }
+
+    // --- findSubscribers coverage: mixed subscribers ---
+
+    @Test
+    public void test_findSubscribers_exact_plus_hash_all_match() throws Exception {
+        topicTree.addTopic("exact", new Topic("sensor/temp", QoS.AT_MOST_ONCE), (byte) 0, null);
+        topicTree.addTopic("plus", new Topic("sensor/+", QoS.AT_MOST_ONCE), (byte) 0, null);
+        topicTree.addTopic("hash", new Topic("#", QoS.AT_MOST_ONCE), (byte) 0, null);
+        final Set<SubscriberWithIdentifiers> subscribers = topicTree.findTopicSubscribers("sensor/temp").getSubscribers();
+        assertEquals(3, subscribers.size());
+    }
 }
